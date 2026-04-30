@@ -1,0 +1,15 @@
+name: peerdeal_network
+publish_to: none
+description: PeerDeal network routing, LAN discovery, relay fallback, and bootstrap abstractions.
+version: 0.1.0
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  peerdeal_protocol:
+    path: ../peerdeal_protocol
+
+dev_dependencies:
+  test: ^1.25.2
+  lints: ^4.0.0

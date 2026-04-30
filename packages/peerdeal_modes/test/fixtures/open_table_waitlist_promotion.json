@@ -1,0 +1,30 @@
+{
+  "modeId": "open_table",
+  "participants": [
+    {
+      "participantId": "host_1",
+      "role": "host",
+      "state": "seated",
+      "waitlistState": "notWaitlisted"
+    },
+    {
+      "participantId": "player_2",
+      "role": "player",
+      "state": "waitlisted",
+      "waitlistState": "waitlistActive"
+    }
+  ],
+  "seats": [
+    {
+      "seatIndex": 1,
+      "state": "empty",
+      "occupantId": null
+    }
+  ],
+  "waitlistOrdering": [
+    "player_2"
+  ],
+  "allowSpectators": true,
+  "allowCohosts": true,
+  "allowMidSessionSeatPromotion": true
+}

@@ -1,0 +1,4 @@
+enum ReceiptAccessMode {
+  restore,
+  view,
+}

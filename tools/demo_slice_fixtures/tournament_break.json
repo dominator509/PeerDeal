@@ -1,0 +1,9 @@
+{
+  "scenario_id": "tournament_break",
+  "mode": "tournament",
+  "variant": "holdem_nlhe",
+  "network_confidence": "high",
+  "status_banner": {"visible": true, "label": "Break · 08:00 remaining", "severity": "info"},
+  "chat": {"unread_count": 0, "disappearing_enabled": false},
+  "receipt": {"verification_state": "verified", "retention_mode": "standard", "binding_mode": "user_bound"}
+}

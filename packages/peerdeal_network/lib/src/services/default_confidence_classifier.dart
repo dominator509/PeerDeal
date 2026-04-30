@@ -1,0 +1,27 @@
+import '../models/network_confidence.dart';
+import '../models/peer_metric_snapshot.dart';
+import 'confidence_classifier.dart';
+
+class DefaultConfidenceClassifier implements ConfidenceClassifier {
+  const DefaultConfidenceClassifier();
+
+  @override
+  NetworkConfidence classify(Iterable<PeerMetricSnapshot> snapshots) {
+    final items = snapshots.toList(growable: false);
+    if (items.isEmpty) return NetworkConfidence.unsafe;
+
+    final anyAnchorMismatch = items.any((s) => !s.anchorAligned);
+    if (anyAnchorMismatch) return NetworkConfidence.recoveryRequired;
+
+    final highLag = items.any((s) => s.avgLatencyMs >= 800 || s.ackLagMs >= 1000);
+    if (highLag) return NetworkConfidence.degraded;
+
+    final anyDisconnectHeavy = items.any((s) => s.disconnectsInWindow >= 3);
+    if (anyDisconnectHeavy) return NetworkConfidence.degraded;
+
+    final allFast = items.every((s) => s.avgLatencyMs < 150 && s.ackLagMs < 250);
+    if (allFast) return NetworkConfidence.high;
+
+    return NetworkConfidence.stable;
+  }
+}

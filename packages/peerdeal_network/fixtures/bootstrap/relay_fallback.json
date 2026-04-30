@@ -1,0 +1,6 @@
+{
+  "current_path": "p2p_remote",
+  "fallback_path": "relay",
+  "live_hand_in_progress": true,
+  "expected_pause_recommended": true
+}

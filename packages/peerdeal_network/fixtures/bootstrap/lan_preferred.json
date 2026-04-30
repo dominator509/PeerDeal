@@ -1,0 +1,7 @@
+{
+  "session_id": "sess_lan_001",
+  "table_id": "table_lan_001",
+  "prefer_lan": true,
+  "relay_allowed": true,
+  "peer_ids": ["peer_a", "peer_b", "peer_c"]
+}

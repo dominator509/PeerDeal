@@ -1,0 +1,4 @@
+{
+  "channel": "peerdeal/native_bridges/local_network",
+  "methods": ["getCapability", "discoverPeers"]
+}

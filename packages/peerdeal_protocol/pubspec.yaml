@@ -1,0 +1,14 @@
+name: peerdeal_protocol
+description: Stable command, event, snapshot, and schema contract layer for PeerDeal.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  crypto: ^3.0.3
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^3.0.0

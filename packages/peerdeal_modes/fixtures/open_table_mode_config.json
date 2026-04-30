@@ -1,0 +1,8 @@
+{
+  "modeType": "open_table",
+  "allowSpectators": true,
+  "allowCohosts": true,
+  "lateRegistrationEnabled": false,
+  "reentryEnabled": false,
+  "reloadPolicy": "approval_required"
+}

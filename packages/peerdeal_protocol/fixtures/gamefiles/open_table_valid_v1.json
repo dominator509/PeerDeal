@@ -1,0 +1,68 @@
+{
+  "game_file_version": "1.0.0",
+  "protocol_version": "1.0.0",
+  "schema_id": "peerdeal.gamefile",
+  "config_id": "cfg_open_table_001",
+  "created_at": "2026-04-25T12:00:00Z",
+  "created_by": "host_alpha",
+  "mode": {
+    "mode_type": "open_table",
+    "display_name": "Open Table Mode",
+    "allow_live_join": true,
+    "allow_live_leave": true,
+    "session_close_behavior": "finish_current_hand",
+    "supports_personal_ledger": true,
+    "supports_receipts": true,
+    "supports_spectators": true,
+    "supports_cohosts": true
+  },
+  "variant": {
+    "variant_id": "holdem_nlhe",
+    "display_name": "Texas Hold'em",
+    "betting_structure": "no_limit",
+    "hole_card_count": 2,
+    "board_card_count": 5,
+    "seat_count_min": 2,
+    "seat_count_max": 9
+  },
+  "table": {
+    "table_name": "Friday Open Table",
+    "seat_count": 6
+  },
+  "session": {
+    "session_type": "table_owned",
+    "retention_mode": "standard"
+  },
+  "privacy": {
+    "export_minimal_identity": true
+  },
+  "capture": {
+    "table_capture_policy": "protected",
+    "sensitive_view_policy": "strict"
+  },
+  "network": {
+    "remote_play_enabled": true,
+    "lan_mode_enabled": true
+  },
+  "roles": {
+    "host_required": true,
+    "cohost_enabled": true,
+    "spectator_mode": "invite_only"
+  },
+  "wizard": {
+    "setup_mode": "simple",
+    "helper_enabled": false
+  },
+  "presets": {
+    "is_preset": false
+  },
+  "invite": {
+    "invite_mode": "private_code_only",
+    "invite_code_required": true
+  },
+  "validation": {
+    "is_valid": true,
+    "warnings": [],
+    "errors": []
+  }
+}

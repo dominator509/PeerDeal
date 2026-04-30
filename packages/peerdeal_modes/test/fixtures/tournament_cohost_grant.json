@@ -1,0 +1,22 @@
+{
+  "modeId": "tournament",
+  "participants": [
+    {
+      "participantId": "host_1",
+      "role": "host",
+      "state": "seated",
+      "waitlistState": "notWaitlisted"
+    },
+    {
+      "participantId": "staff_2",
+      "role": "player",
+      "state": "admittedUnseated",
+      "waitlistState": "notWaitlisted"
+    }
+  ],
+  "seats": [],
+  "waitlistOrdering": [],
+  "allowSpectators": true,
+  "allowCohosts": true,
+  "allowMidSessionSeatPromotion": false
+}

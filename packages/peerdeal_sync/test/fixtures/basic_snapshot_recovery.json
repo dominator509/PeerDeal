@@ -1,0 +1,32 @@
+{
+  "snapshot": {
+    "snapshot_id": "snap_1",
+    "protocol_version": "1.0.0",
+    "table_id": "table_1",
+    "session_id": "session_1",
+    "snapshot_base_event_seq": 8,
+    "snapshot_hash": "snap_hash_1",
+    "payload": {
+      "phase": "PAUSED_RECOVERY"
+    }
+  },
+  "suffix_events": [
+    {
+      "event_id": "evt_9",
+      "event_type": "RecoveryPauseEnded",
+      "event_version": "1.0",
+      "protocol_version": "1.0.0",
+      "event_seq": 9,
+      "table_id": "table_1",
+      "session_id": "session_1",
+      "hand_id": null,
+      "emitted_at": "2026-04-25T00:00:05Z",
+      "actor_ref": "system",
+      "payload": {
+        "resume_reason": "reconnect_restored"
+      },
+      "prev_event_hash": "hash_8",
+      "event_hash": "hash_9"
+    }
+  ]
+}

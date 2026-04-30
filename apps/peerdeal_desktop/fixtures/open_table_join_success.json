@@ -1,0 +1,9 @@
+{
+  "scenario": "open_table_join_success",
+  "mode_type": "open_table",
+  "requested_role": "player",
+  "requires_receipt_ack": true,
+  "requires_retention_ack": true,
+  "requires_capture_ack": true,
+  "expected_result_code": "OK_JOINED"
+}

@@ -1,0 +1,8 @@
+{
+  "mode": "timedSandbox",
+  "timed_wipe_seconds": 86400,
+  "durable_export_allowed": true,
+  "ephemeral_export_only": false,
+  "allow_session_restore": true,
+  "allow_user_restore": false
+}

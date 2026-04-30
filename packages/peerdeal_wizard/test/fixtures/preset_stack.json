@@ -1,0 +1,30 @@
+{
+  "layers": [
+    {
+      "preset_id": "builtin_open_table",
+      "priority": 1,
+      "is_locked_builtin": true,
+      "values": {
+        "mode_type": "open_table",
+        "variant_id": "holdem_nlhe",
+        "seat_count": 6
+      }
+    },
+    {
+      "preset_id": "capture_protected",
+      "priority": 2,
+      "is_locked_builtin": true,
+      "values": {
+        "table_capture_policy": "protected"
+      }
+    },
+    {
+      "preset_id": "host_fast_join",
+      "priority": 3,
+      "is_locked_builtin": false,
+      "values": {
+        "allow_mid_session_join": true
+      }
+    }
+  ]
+}

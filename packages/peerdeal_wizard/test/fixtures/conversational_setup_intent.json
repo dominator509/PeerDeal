@@ -1,0 +1,27 @@
+{
+  "intent_id": "intent_conv_001",
+  "source_type": "conversational",
+  "host_pseudonymous_id": "host_7a2f",
+  "prompt_text": "Create a private six-handed Open Table hold'em game with protected capture behavior.",
+  "mode_preference": "open_table",
+  "variant_preference": "holdem_nlhe",
+  "seat_count_preference": 6,
+  "partial_settings": {
+    "setup_mode": "conversational"
+  },
+  "helper_enabled": true,
+  "helper_suggestions": [
+    {
+      "key": "table_capture_policy",
+      "value": "protected",
+      "reason": "User asked for protected capture behavior.",
+      "confidence": 0.93
+    },
+    {
+      "key": "retention_profile",
+      "value": "retention.standard",
+      "reason": "No ephemeral retention was requested.",
+      "confidence": 0.61
+    }
+  ]
+}

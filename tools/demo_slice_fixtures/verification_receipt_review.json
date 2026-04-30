@@ -1,0 +1,9 @@
+{
+  "scenario_id": "verification_receipt_review",
+  "mode": "open_table",
+  "variant": "holdem_nlhe",
+  "network_confidence": "stable",
+  "status_banner": {"visible": false, "label": "", "severity": "none"},
+  "chat": {"unread_count": 0, "disappearing_enabled": false},
+  "receipt": {"verification_state": "verified", "retention_mode": "strict_ephemeral", "binding_mode": "user_bound"}
+}

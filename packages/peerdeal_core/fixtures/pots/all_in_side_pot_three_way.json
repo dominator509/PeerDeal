@@ -1,0 +1,12 @@
+{
+  "scenario_id": "all_in_side_pot_three_way",
+  "commitments": [
+    {"seat_id": "A", "committed": 100, "eligible": true},
+    {"seat_id": "B", "committed": 200, "eligible": true},
+    {"seat_id": "C", "committed": 200, "eligible": true}
+  ],
+  "expected_slices": [
+    {"slice_index": 0, "amount": 300, "contested_by": ["A", "B", "C"]},
+    {"slice_index": 1, "amount": 200, "contested_by": ["B", "C"]}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "receipt_id": "receipt_open_001",
+  "receipt_version": "1.0",
+  "protocol_version": "1.x",
+  "mode_type": "open_table",
+  "binding_mode": "mixed",
+  "session_id": "sess_open_001",
+  "table_id": "table_open_001",
+  "pseudonymous_user_id": "user_alpha",
+  "wipe_state": "live",
+  "payload_hash": "hash_open_001",
+  "opaque_payload": "opaque_open_001"
+}

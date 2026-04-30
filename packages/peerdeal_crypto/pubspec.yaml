@@ -1,0 +1,18 @@
+name: peerdeal_crypto
+description: PeerDeal fairness / verification starter scaffold.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  peerdeal_protocol:
+    path: ../peerdeal_protocol
+  peerdeal_replay:
+    path: ../peerdeal_replay
+  meta: ^1.12.0
+
+dev_dependencies:
+  test: ^1.25.2
+  lints: ^4.0.0

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "scenario_ids": [
+    "open_table_live_turn",
+    "tournament_break",
+    "recovery_pause_transfer",
+    "verification_receipt_review",
+    "chat_heavy_table"
+  ]
+}

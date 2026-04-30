@@ -1,0 +1,21 @@
+name: peerdeal_desktop
+description: PeerDeal desktop app shell starter.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  peerdeal_protocol:
+    path: ../../packages/peerdeal_protocol
+  peerdeal_core:
+    path: ../../packages/peerdeal_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  test: ^1.25.0

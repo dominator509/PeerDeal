@@ -1,0 +1,8 @@
+{
+  "mode": "strictEphemeral",
+  "timed_wipe_seconds": 0,
+  "durable_export_allowed": false,
+  "ephemeral_export_only": true,
+  "allow_session_restore": false,
+  "allow_user_restore": false
+}

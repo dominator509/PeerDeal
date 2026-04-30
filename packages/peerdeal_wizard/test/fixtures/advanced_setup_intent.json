@@ -1,0 +1,14 @@
+{
+  "intent_id": "intent_advanced_001",
+  "source_type": "advanced",
+  "host_pseudonymous_id": "host_7a2f",
+  "mode_preference": "tournament",
+  "variant_preference": "holdem_nlhe",
+  "seat_count_preference": 9,
+  "partial_settings": {
+    "setup_mode": "advanced",
+    "table_capture_policy": "protected",
+    "retention_profile": "retention.manual_wipe",
+    "late_registration_enabled": false
+  }
+}

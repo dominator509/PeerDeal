@@ -1,0 +1,20 @@
+name: peerdeal
+
+packages:
+  - apps/**
+  - packages/**
+  - tools/**
+
+scripts:
+  analyze:
+    run: melos exec -- dart analyze .
+  format:
+    run: melos exec -- dart format .
+  test:
+    run: melos run test:dart && melos run test:flutter
+  test:dart:
+    run: melos exec --fail-fast --dir-exists=test --no-flutter -- dart test
+  test:flutter:
+    run: melos exec --fail-fast --dir-exists=test --flutter -- flutter test
+  boundary-check:
+    run: python scripts/check_package_boundaries.py

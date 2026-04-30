@@ -1,0 +1,38 @@
+{
+  "events": [
+    {
+      "event_id": "evt_1",
+      "event_type": "OpenTableSessionOpened",
+      "event_version": "1.0",
+      "protocol_version": "1.0.0",
+      "event_seq": 1,
+      "table_id": "table_1",
+      "session_id": "session_1",
+      "hand_id": null,
+      "emitted_at": "2026-04-25T00:00:00Z",
+      "actor_ref": "host_1",
+      "payload": {
+        "phase": "OPEN_READY"
+      },
+      "prev_event_hash": "root",
+      "event_hash": "hash_1"
+    },
+    {
+      "event_id": "evt_2",
+      "event_type": "HandStarted",
+      "event_version": "1.0",
+      "protocol_version": "1.0.0",
+      "event_seq": 2,
+      "table_id": "table_1",
+      "session_id": "session_1",
+      "hand_id": "hand_1",
+      "emitted_at": "2026-04-25T00:00:05Z",
+      "actor_ref": "system",
+      "payload": {
+        "phase": "LIVE_ACTIVE"
+      },
+      "prev_event_hash": "hash_1",
+      "event_hash": "hash_2"
+    }
+  ]
+}

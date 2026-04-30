@@ -1,0 +1,9 @@
+{
+  "scenario_id": "open_table_live_turn",
+  "mode": "open_table",
+  "variant": "holdem_nlhe",
+  "network_confidence": "stable",
+  "status_banner": {"visible": false, "label": "", "severity": "none"},
+  "chat": {"unread_count": 3, "disappearing_enabled": true},
+  "receipt": {"verification_state": "verified", "retention_mode": "manual_wipe_allowed", "binding_mode": "session_bound"}
+}

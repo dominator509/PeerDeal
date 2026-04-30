@@ -1,0 +1,18 @@
+{
+  "initial_state": {
+    "table_id": "table_alpha",
+    "session_id": "session_alpha",
+    "protocol_version": "1.0"
+  },
+  "events": [
+    {"event_id": "evt_001", "event_type": "OpenTableSessionOpened", "actor_ref": "host_1", "payload": {}},
+    {"event_id": "evt_002", "event_type": "ParticipantConnected", "actor_ref": "user_1", "payload": {}},
+    {"event_id": "evt_003", "event_type": "ParticipantConnected", "actor_ref": "user_2", "payload": {}},
+    {"event_id": "evt_004", "event_type": "ParticipantSeated", "actor_ref": "user_1", "payload": {}},
+    {"event_id": "evt_005", "event_type": "ParticipantSeated", "actor_ref": "user_2", "payload": {}},
+    {"event_id": "evt_006", "event_type": "HandStarted", "actor_ref": "system", "payload": {"hand_id": "hand_001"}},
+    {"event_id": "evt_007", "event_type": "HandSettled", "actor_ref": "system", "payload": {}},
+    {"event_id": "evt_008", "event_type": "SessionCloseRequested", "actor_ref": "host_1", "payload": {}},
+    {"event_id": "evt_009", "event_type": "SessionClosed", "actor_ref": "system", "payload": {}}
+  ]
+}

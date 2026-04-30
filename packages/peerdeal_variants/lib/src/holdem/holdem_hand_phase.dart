@@ -1,0 +1,18 @@
+enum HoldemHandPhase {
+  handIdle,
+  handPreparing,
+  blindsPosting,
+  dealingHole,
+  bettingPreflop,
+  dealingFlop,
+  bettingFlop,
+  dealingTurn,
+  bettingTurn,
+  dealingRiver,
+  bettingRiver,
+  showdownPrep,
+  showdownReveal,
+  settling,
+  handComplete,
+  handAbortedSafe,
+}

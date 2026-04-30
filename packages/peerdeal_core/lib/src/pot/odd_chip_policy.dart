@@ -1,0 +1,4 @@
+enum OddChipPolicy {
+  firstWinnerByDeterministicOrder,
+  firstWinnerLeftOfButton,
+}

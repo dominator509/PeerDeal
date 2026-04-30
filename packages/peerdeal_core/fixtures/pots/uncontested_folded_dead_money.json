@@ -1,0 +1,10 @@
+{
+  "scenario_id": "uncontested_folded_dead_money",
+  "commitments": [
+    {"seat_id": "A", "committed": 80, "eligible": true},
+    {"seat_id": "B", "committed": 80, "eligible": false, "folded": true},
+    {"seat_id": "C", "committed": 80, "eligible": false, "folded": true}
+  ],
+  "expected_total_pot": 240,
+  "expected_winner": "A"
+}

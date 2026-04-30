@@ -1,0 +1,15 @@
+{
+  "tableId": "table_1",
+  "sessionId": "session_1",
+  "handId": "hand_1",
+  "scope": "hand",
+  "protocolVersion": "1.0",
+  "expectedReplayAnchor": "replay_anchor_1",
+  "expectedFairDealAnchor": "fair_anchor_1",
+  "expectedSettlementAnchor": "settle_anchor_1",
+  "dealProofBundle": {
+    "providerId": "mental_poker_toolkit",
+    "providerVersion": "1.0.0",
+    "proofReference": "proof_1"
+  }
+}

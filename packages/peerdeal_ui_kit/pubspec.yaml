@@ -1,0 +1,15 @@
+name: peerdeal_ui_kit
+description: Shared UI kit starter.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^3.0.0

@@ -1,0 +1,17 @@
+name: peerdeal_core
+description: Deterministic core state, reducer boundary, validation contracts, and invariant guards for PeerDeal.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  collection: ^1.18.0
+  meta: ^1.12.0
+  peerdeal_protocol:
+    path: ../peerdeal_protocol
+
+dev_dependencies:
+  lints: ^5.0.0
+  test: ^1.25.0

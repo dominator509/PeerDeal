@@ -1,0 +1,22 @@
+name: peerdeal_replay
+description: PeerDeal deterministic replay and anchor-validation starter scaffold.
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  peerdeal_protocol:
+    path: ../peerdeal_protocol
+  peerdeal_core:
+    path: ../peerdeal_core
+  peerdeal_variants:
+    path: ../peerdeal_variants
+  peerdeal_modes:
+    path: ../peerdeal_modes
+  meta: ^1.12.0
+
+dev_dependencies:
+  test: ^1.25.2
+  lints: ^4.0.0

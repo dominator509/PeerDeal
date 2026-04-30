@@ -1,0 +1,9 @@
+{
+  "scenario": "spectator_ack_required",
+  "mode_type": "tournament",
+  "requested_role": "spectator",
+  "requires_receipt_ack": true,
+  "requires_retention_ack": true,
+  "requires_capture_ack": true,
+  "expected_result_code": "ACK_REQUIRED"
+}

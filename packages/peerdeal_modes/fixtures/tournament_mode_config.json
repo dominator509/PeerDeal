@@ -1,0 +1,8 @@
+{
+  "modeType": "tournament",
+  "allowSpectators": true,
+  "allowCohosts": true,
+  "lateRegistrationEnabled": true,
+  "reentryEnabled": false,
+  "reloadPolicy": "disabled"
+}

@@ -1,0 +1,43 @@
+{
+  "baselineEventIndex": 218,
+  "expectedAnchorHash": "anchor_218",
+  "currentPrimaryPeerId": "peer_b",
+  "peers": [
+    {
+      "peerId": "peer_a",
+      "routeClass": "remoteDirect",
+      "avgLatencyMs": 110,
+      "ackLagMs": 150,
+      "disconnectsInWindow": 0,
+      "reachabilityCount": 4,
+      "eventIndexLag": 0,
+      "anchorAligned": true,
+      "backgroundRisk": false,
+      "snapshotServeMs": 20
+    },
+    {
+      "peerId": "peer_b",
+      "routeClass": "relayFallback",
+      "avgLatencyMs": 220,
+      "ackLagMs": 300,
+      "disconnectsInWindow": 1,
+      "reachabilityCount": 4,
+      "eventIndexLag": 0,
+      "anchorAligned": true,
+      "backgroundRisk": false,
+      "snapshotServeMs": 40
+    },
+    {
+      "peerId": "peer_c",
+      "routeClass": "remoteDirect",
+      "avgLatencyMs": 180,
+      "ackLagMs": 240,
+      "disconnectsInWindow": 1,
+      "reachabilityCount": 3,
+      "eventIndexLag": 1,
+      "anchorAligned": true,
+      "backgroundRisk": false,
+      "snapshotServeMs": 35
+    }
+  ]
+}
