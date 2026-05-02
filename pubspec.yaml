@@ -41,5 +41,5 @@ melos:
       run: melos exec --no-flutter --dir-exists=test -- "dart test"
       description: Run tests for non-Flutter Dart packages.
     test:flutter:
-      run: melos exec --flutter --dir-exists=test -- "flutter test"
-      description: Run tests for Flutter packages.
+      run: melos exec --flutter --dir-exists=test --concurrency=1 -- "flutter test"
+      description: Run tests for Flutter packages serially.

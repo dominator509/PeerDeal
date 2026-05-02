@@ -5,7 +5,7 @@ PR-02 duplicate-wrapper cleanup.
 
 ## Baseline status
 - The root workspace manifest and lockfile are tracked.
-- Baseline command logs are tracked in `logs/`.
+- Generated command logs are local diagnostics and are not tracked.
 - Local Dart tool state is ignored.
 - Package ownership follows `docs/PACKAGE_MAP.md`.
 - No package should import another package's `src/` internals.
@@ -19,12 +19,21 @@ melos run analyze
 melos run test
 ```
 
+To capture local logs while validating a migration patch:
+
+```powershell
+melos run analyze 2>&1 | Tee-Object logs\analyze_after_patch.txt
+melos run test 2>&1 | Tee-Object logs\test_after_patch.txt
+```
+
 ## Current green baseline
 - `melos run analyze` passes across all 17 packages.
 - `melos run test` passes across the Dart and Flutter test lanes.
 - Dart lane covers 13 non-Flutter packages.
 - Flutter lane covers `peerdeal_mobile`, `peerdeal_desktop`,
   `peerdeal_ui_kit`, and `peerdeal_native_bridges`.
+- The Flutter test lane runs serially to avoid Flutter startup lock contention
+  on Windows.
 
 ## Migration rule of thumb
 For scaffold hardening, prefer the smallest patch that restores package

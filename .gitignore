@@ -4,6 +4,7 @@
 .pub/
 build/
 coverage/
+logs/*.txt
 *.iml
 .idea/
 .vscode/
