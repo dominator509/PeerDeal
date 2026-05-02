@@ -21,7 +21,7 @@ class DefaultGameFileCompiler implements GameFileCompiler {
       },
       'variant': <String, Object?>{
         'variant_id': plan.variantId,
-        'display_name': 'Texas Hold'em',
+        'display_name': "Texas Hold'em",
       },
       'wizard': <String, Object?>{
         'setup_mode': plan.resolvedFields['setup_mode'] ?? 'simple',

@@ -1,0 +1,45 @@
+﻿name: peerdeal_workspace
+publish_to: none
+
+environment:
+  sdk: '^3.11.5'
+
+workspace:
+  - apps/peerdeal_mobile
+  - apps/peerdeal_desktop
+  - packages/peerdeal_protocol
+  - packages/peerdeal_core
+  - packages/peerdeal_variants
+  - packages/peerdeal_modes
+  - packages/peerdeal_crypto
+  - packages/peerdeal_network
+  - packages/peerdeal_sync
+  - packages/peerdeal_replay
+  - packages/peerdeal_receipts
+  - packages/peerdeal_capture
+  - packages/peerdeal_privacy
+  - packages/peerdeal_wizard
+  - packages/peerdeal_ui_kit
+  - packages/peerdeal_native_bridges
+  - packages/peerdeal_testkit
+
+dev_dependencies:
+  melos: ^7.5.1
+
+melos:
+  scripts:
+    boundary-check:
+      run: python scripts/check_package_boundaries.py
+      description: Run package-boundary checks.
+    analyze:
+      run: melos exec -- "dart analyze ."
+      description: Analyze Dart packages.
+    test:
+      run: melos run test:dart && melos run test:flutter
+      description: Run Dart and Flutter package tests.
+    test:dart:
+      run: melos exec --no-flutter --dir-exists=test -- "dart test"
+      description: Run tests for non-Flutter Dart packages.
+    test:flutter:
+      run: melos exec --flutter --dir-exists=test -- "flutter test"
+      description: Run tests for Flutter packages.

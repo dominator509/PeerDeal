@@ -1,5 +1,5 @@
-import '../contracts/variant_adapter.dart';
 import '../contracts/showdown_models.dart';
+import '../contracts/variant_adapter.dart';
 import 'holdem_showdown_stub.dart';
 
 class HoldemAdapter implements VariantAdapter {
@@ -8,6 +8,12 @@ class HoldemAdapter implements VariantAdapter {
   });
 
   final HoldemShowdownStub showdown;
+
+  String get variantId => getIdentity().variantId;
+
+  int get holeCardCount => getIdentity().holeCardCount;
+
+  int get boardCardCount => getIdentity().boardCardCount;
 
   @override
   VariantIdentity getIdentity() {

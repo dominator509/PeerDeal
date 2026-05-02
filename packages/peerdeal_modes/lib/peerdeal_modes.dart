@@ -1,12 +1,19 @@
 library peerdeal_modes;
 
+export 'src/adapters/mode_registry.dart';
+export 'src/adapters/open_table_mode_adapter.dart';
+export 'src/adapters/tournament_mode_adapter.dart';
+export 'src/contracts/mode_adapter.dart';
+export 'src/governance/default_governance_engine.dart';
 export 'src/governance/governance_action.dart';
+export 'src/governance/governance_context.dart';
 export 'src/governance/governance_decision.dart';
 export 'src/governance/governance_engine.dart';
-export 'src/governance/default_governance_engine.dart';
+export 'src/governance/governance_result.dart';
 export 'src/governance/participant_state.dart';
 export 'src/governance/role_kind.dart';
 export 'src/governance/seat_state.dart';
 export 'src/governance/waitlist_state.dart';
-export 'src/governance/governance_context.dart';
-export 'src/governance/governance_result.dart';
+export 'src/models/mode_capabilities.dart';
+export 'src/models/mode_identity.dart';
+export 'src/models/mode_policy_models.dart';

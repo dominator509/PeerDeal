@@ -32,9 +32,9 @@ void main() {
     });
   });
 
-  tearDown(() async {
+  tearDown(() {
     log.clear();
-    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
   });
 

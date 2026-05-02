@@ -6,6 +6,10 @@ import '../models/mode_policy_models.dart';
 class OpenTableModeAdapter implements ModeAdapter {
   const OpenTableModeAdapter();
 
+  bool get supportsLiveJoin => getCapabilities().supportsLiveJoin;
+
+  bool get supportsReceipts => getCapabilities().supportsReceipts;
+
   @override
   ModeIdentity getIdentity() => const ModeIdentity(
         modeId: 'open_table',

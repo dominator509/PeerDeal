@@ -87,9 +87,9 @@ class DefaultCoreReducer implements CoreReducer {
     for (final CoreEvent event in events) {
       state = applyEvent(state: state, event: event, context: context);
     }
-    final violations = <dynamic>[
+    final violations = [
       for (final guard in _invariantGuards) ...guard.evaluate(state),
-    ].cast();
+    ];
     return CommandApplicationResult(
       state: state,
       emittedEvents: events,

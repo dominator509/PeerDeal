@@ -6,6 +6,10 @@ import '../models/mode_policy_models.dart';
 class TournamentModeAdapter implements ModeAdapter {
   const TournamentModeAdapter();
 
+  bool get supportsLiveJoin => getCapabilities().supportsLiveJoin;
+
+  bool get supportsReceipts => getCapabilities().supportsReceipts;
+
   @override
   ModeIdentity getIdentity() => const ModeIdentity(
         modeId: 'tournament',

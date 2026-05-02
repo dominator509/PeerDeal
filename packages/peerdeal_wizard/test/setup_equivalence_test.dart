@@ -31,7 +31,7 @@ void main() {
         intentId: 'conv_1',
         sourceType: SetupSurface.conversational,
         hostPseudonymousId: 'host_x',
-        promptText: 'Set up a 6-max open table hold'em game.',
+        promptText: "Set up a 6-max open table hold'em game.",
         modePreference: 'open_table',
         variantPreference: 'holdem_nlhe',
         seatCountPreference: 6,

@@ -1,7 +1,7 @@
+import 'package:peerdeal_desktop/join_flow/fakes.dart';
+import 'package:peerdeal_desktop/join_flow/join_flow_models.dart';
+import 'package:peerdeal_desktop/join_flow/join_flow_orchestrator.dart';
 import 'package:test/test.dart';
-import '../../lib/join_flow/fakes.dart';
-import '../../lib/join_flow/join_flow_models.dart';
-import '../../lib/join_flow/join_flow_orchestrator.dart';
 
 void main() {
   test('returns ack required when disclosures are not accepted', () async {

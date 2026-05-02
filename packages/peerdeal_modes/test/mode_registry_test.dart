@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:peerdeal_modes/peerdeal_modes.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('ModeRegistry', () {

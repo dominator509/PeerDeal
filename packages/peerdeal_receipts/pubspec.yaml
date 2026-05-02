@@ -1,11 +1,11 @@
 name: peerdeal_receipts
+resolution: workspace
 description: PeerDeal receipt engine and binding-rules starter scaffold.
 publish_to: none
 version: 0.1.0
 
 environment:
-  sdk: ">=3.3.0 <4.0.0"
-
+  sdk: '^3.11.5'
 dependencies:
   peerdeal_protocol:
     path: ../peerdeal_protocol

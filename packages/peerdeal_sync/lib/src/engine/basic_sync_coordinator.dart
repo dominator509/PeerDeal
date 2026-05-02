@@ -4,6 +4,7 @@ import '../contracts/sync_coordinator.dart';
 import '../models/reconciliation_result.dart';
 import '../models/recovery_request.dart';
 import '../models/recovery_result.dart';
+import '../models/snapshot_apply_request.dart';
 
 class BasicSyncCoordinator<TState> implements SyncCoordinator<TState> {
   BasicSyncCoordinator({

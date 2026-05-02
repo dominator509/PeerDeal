@@ -1,14 +1,14 @@
 name: peerdeal_testkit
+resolution: workspace
 description: Shared fixture loading and scenario-builder helpers for PeerDeal package-local tests.
 publish_to: none
 version: 0.1.0
 
 environment:
-  sdk: '>=3.4.0 <4.0.0'
-
+  sdk: '^3.11.5'
 dependencies:
   meta: ^1.11.0
 
 dev_dependencies:
   test: ^1.25.0
-  lints: ^3.0.0
+  lints: ^4.0.0

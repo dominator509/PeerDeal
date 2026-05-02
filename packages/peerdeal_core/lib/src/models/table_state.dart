@@ -18,8 +18,8 @@ class TableState {
   });
 
   factory TableState.initial({
-    required String tableId,
-    required String sessionId,
+    String tableId = 'table_1',
+    String sessionId = 'session_1',
     String protocolVersion = '1.0',
   }) {
     return TableState(
@@ -48,6 +48,10 @@ class TableState {
   final Map<String, Object?> metadata;
 
   bool get hasActiveHand => activeHandId != null;
+
+  int get eventSeq => eventSequence;
+
+  int get participantCount => playersConnected;
 
   TableState copyWith({
     String? tableId,

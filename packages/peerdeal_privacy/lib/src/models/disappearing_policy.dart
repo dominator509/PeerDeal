@@ -1,3 +1,5 @@
+import 'message_retention_policy.dart';
+
 class DisappearingPolicy {
   const DisappearingPolicy({
     required this.disappearingChatEnabled,

@@ -7,9 +7,11 @@ class CoreReducer {
   const CoreReducer();
 
   TableState apply(TableState current, EventEnvelope event) {
-    if (event.eventSeq <= current.eventSeq) {
+    if (event.eventSeq <= current.eventSequence) {
       throw InvariantViolation(
-        'event_seq must be strictly monotonic: current=${current.eventSeq}, incoming=${event.eventSeq}',
+        code: 'ERR_EVENT_SEQUENCE_NOT_MONOTONIC',
+        message: 'event_seq must be strictly monotonic: '
+            'current=${current.eventSequence}, incoming=${event.eventSeq}',
       );
     }
 
@@ -19,20 +21,24 @@ class CoreReducer {
         return current.copyWith(
           tableId: event.tableId,
           sessionId: event.sessionId,
-          modeType: event.payload['mode_type'] as String?,
           protocolVersion: event.protocolVersion,
-          eventSeq: event.eventSeq,
-          isOpen: true,
+          phase: current.phase,
+          eventSequence: event.eventSeq,
+          metadata: <String, Object?>{
+            ...current.metadata,
+            if (event.payload['mode_type'] != null)
+              'mode_type': event.payload['mode_type'],
+          },
         );
 
       case 'ParticipantAdmitted':
         return current.copyWith(
-          eventSeq: event.eventSeq,
-          participantCount: current.participantCount + 1,
+          eventSequence: event.eventSeq,
+          playersConnected: current.playersConnected + 1,
         );
 
       default:
-        return current.copyWith(eventSeq: event.eventSeq);
+        return current.copyWith(eventSequence: event.eventSeq);
     }
   }
 }

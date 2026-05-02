@@ -6,7 +6,6 @@ import 'governance_result.dart';
 import 'participant_state.dart';
 import 'role_kind.dart';
 import 'seat_state.dart';
-import 'waitlist_state.dart';
 
 class DefaultGovernanceEngine implements GovernanceEngine {
   const DefaultGovernanceEngine();

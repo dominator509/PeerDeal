@@ -62,7 +62,7 @@ class HoldemStateMachine {
     return HoldemPhaseTransitionResult(
       isAllowed: false,
       nextPhase: from,
-      reason: 'Illegal Hold'em hand phase transition: $from -> $to',
+      reason: "Illegal Hold'em hand phase transition: $from -> $to",
     );
   }
 
