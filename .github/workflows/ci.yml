@@ -30,6 +30,9 @@ jobs:
       - name: Boundary checks
         run: dart run melos run boundary-check
 
+      - name: Boundary checker tests
+        run: dart run melos run boundary-check:test
+
       - name: Dependency audit
         run: dart run melos run dependency-audit
 
