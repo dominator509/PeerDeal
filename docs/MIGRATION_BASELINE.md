@@ -6,6 +6,8 @@ PR-02 duplicate-wrapper cleanup.
 ## Baseline status
 - The root workspace manifest and lockfile are tracked.
 - Generated command logs are local diagnostics and are not tracked.
+- Generated Python bytecode and cache folders are local diagnostics and are not
+  tracked.
 - Local Dart tool state is ignored.
 - Package ownership follows `docs/PACKAGE_MAP.md`.
 - No package should import another package's `src/` internals.

@@ -5,6 +5,8 @@
 build/
 coverage/
 logs/*.txt
+__pycache__/
+*.py[cod]
 *.iml
 .idea/
 .vscode/
