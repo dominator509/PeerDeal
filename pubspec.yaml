@@ -31,6 +31,9 @@ melos:
     boundary-check:
       run: python scripts/check_package_boundaries.py
       description: Run package-boundary checks.
+    dependency-audit:
+      run: python scripts/dependency_audit.py
+      description: Show dependency versions without changing constraints.
     analyze:
       run: melos exec -- "dart analyze ."
       description: Analyze Dart packages.
@@ -41,5 +44,5 @@ melos:
       run: melos exec --no-flutter --dir-exists=test -- "dart test"
       description: Run tests for non-Flutter Dart packages.
     test:flutter:
-      run: melos exec --flutter --dir-exists=test --concurrency=1 -- "flutter test"
-      description: Run tests for Flutter packages serially.
+      run: melos exec --flutter --dir-exists=test --concurrency=1 -- "flutter test --no-pub"
+      description: Run tests for bootstrapped Flutter packages serially.

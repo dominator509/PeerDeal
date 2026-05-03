@@ -15,6 +15,7 @@ Run these from the repository root before opening scaffold migration PRs:
 
 ```powershell
 melos run boundary-check
+melos run dependency-audit
 melos run analyze
 melos run test
 ```
@@ -34,6 +35,10 @@ melos run test 2>&1 | Tee-Object logs\test_after_patch.txt
   `peerdeal_ui_kit`, and `peerdeal_native_bridges`.
 - The Flutter test lane runs serially to avoid Flutter startup lock contention
   on Windows.
+- The Flutter test lane assumes the workspace has been bootstrapped and uses
+  `--no-pub` to avoid repeated dependency resolution during tests.
+- Dependency audit may report newer packages. Treat that as information unless
+  `docs/DEPENDENCY_POLICY.md` says an upgrade is required.
 
 ## Migration rule of thumb
 For scaffold hardening, prefer the smallest patch that restores package
