@@ -21,17 +21,20 @@ jobs:
         with:
           channel: stable
 
-      - name: Install melos
-        run: dart pub global activate melos
+      - name: Install workspace dependencies
+        run: dart pub get
 
       - name: Bootstrap workspace
-        run: melos bootstrap
+        run: dart run melos bootstrap
 
       - name: Boundary checks
-        run: python3 scripts/check_package_boundaries.py
+        run: dart run melos run boundary-check
+
+      - name: Dependency audit
+        run: dart run melos run dependency-audit
 
       - name: Analyze
-        run: melos run analyze
+        run: dart run melos run analyze
 
       - name: Test
-        run: melos run test
+        run: dart run melos run test
