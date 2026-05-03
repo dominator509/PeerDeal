@@ -27,3 +27,10 @@
 - peerdeal_variants -> peerdeal_protocol, peerdeal_core
 - peerdeal_modes -> peerdeal_protocol, peerdeal_core
 - no package may import another package's src/
+
+## Boundary check coverage
+`melos run boundary-check` verifies that:
+- PeerDeal package imports are declared in the importing package's pubspec
+- `peerdeal_core`, `peerdeal_variants`, and `peerdeal_modes` stay within the
+  dependency law above
+- package imports do not reach into another package's `src/` internals
