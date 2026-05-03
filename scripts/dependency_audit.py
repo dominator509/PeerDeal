@@ -8,6 +8,61 @@ import subprocess
 import sys
 
 
+def version(package: dict, key: str) -> str | None:
+    value = package.get(key, {})
+    if not isinstance(value, dict):
+        return None
+    package_version = value.get("version")
+    return package_version if isinstance(package_version, str) else None
+
+
+def summarize_packages(packages: list[dict]) -> tuple[int, int, list[str]]:
+    outdated = [
+        package
+        for package in packages
+        if version(package, "current") != version(package, "latest")
+    ]
+    constrained = [
+        package
+        for package in packages
+        if version(package, "resolvable") != version(package, "latest")
+    ]
+    direct_rows = [
+        package for package in packages if package.get("kind") in {"direct", "dev"}
+    ]
+    direct_summaries = [
+        (
+            f"- {package['package']}: current {version(package, 'current') or '-'}, "
+            f"resolvable {version(package, 'resolvable') or '-'}, "
+            f"latest {version(package, 'latest') or '-'}"
+        )
+        for package in direct_rows
+    ]
+    return len(outdated), len(constrained), direct_summaries
+
+
+def print_summary(payload: dict, advisory_warning: bool) -> None:
+    packages = payload.get("packages", [])
+    if not isinstance(packages, list):
+        packages = []
+
+    outdated_count, constrained_count, direct_summaries = summarize_packages(packages)
+
+    print("Dependency audit completed.")
+    print(f"Outdated packages reported: {outdated_count}")
+    print(f"Packages constrained below latest: {constrained_count}")
+
+    if direct_summaries:
+        print("")
+        print("Direct and dev dependency status:")
+        for summary in direct_summaries:
+            print(summary)
+
+    if advisory_warning:
+        print("")
+        print("Pub emitted advisory metadata warnings; version data was still parsed.")
+
+
 def main() -> int:
     if shutil.which("flutter") is None:
         print("Flutter is not available on PATH; cannot run dependency audit.")
@@ -28,41 +83,7 @@ def main() -> int:
         print(result.stderr, file=sys.stderr)
         return result.returncode or 1
 
-    packages = payload.get("packages", [])
-    outdated = [
-        package
-        for package in packages
-        if package.get("current", {}).get("version")
-        != package.get("latest", {}).get("version")
-    ]
-    constrained = [
-        package
-        for package in packages
-        if package.get("resolvable", {}).get("version")
-        != package.get("latest", {}).get("version")
-    ]
-
-    print("Dependency audit completed.")
-    print(f"Outdated packages reported: {len(outdated)}")
-    print(f"Packages constrained below latest: {len(constrained)}")
-
-    direct_rows = [
-        package for package in packages if package.get("kind") in {"direct", "dev"}
-    ]
-    if direct_rows:
-        print("")
-        print("Direct and dev dependency status:")
-        for package in direct_rows:
-            name = package["package"]
-            current = package.get("current", {}).get("version", "-")
-            resolvable = package.get("resolvable", {}).get("version", "-")
-            latest = package.get("latest", {}).get("version", "-")
-            print(f"- {name}: current {current}, resolvable {resolvable}, latest {latest}")
-
-    if result.stderr:
-        print("")
-        print("Pub emitted advisory metadata warnings; version data was still parsed.")
-
+    print_summary(payload, advisory_warning=bool(result.stderr))
     return result.returncode
 
 

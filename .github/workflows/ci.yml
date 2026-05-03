@@ -36,6 +36,9 @@ jobs:
       - name: Dependency audit
         run: dart run melos run dependency-audit
 
+      - name: Dependency audit tests
+        run: dart run melos run dependency-audit:test
+
       - name: Analyze
         run: dart run melos run analyze
 
