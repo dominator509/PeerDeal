@@ -7,6 +7,7 @@ core contracts, protocol envelopes, and app-layer shells.
 ## What this repo includes
 
 - monorepo workspace layout for apps and packages
+- root `pubspec.yaml` as the canonical workspace and Melos script definition
 - root repo-governing docs in `docs/`
 - package manifests and package-local agent files
 - starter `peerdeal_protocol` package with canonical envelopes, schema validators,

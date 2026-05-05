@@ -74,10 +74,12 @@ def main() -> int:
         capture_output=True,
         shell=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
     )
 
     try:
-        payload = json.loads(result.stdout)
+        payload = json.loads(result.stdout or "")
     except json.JSONDecodeError:
         print(result.stdout)
         print(result.stderr, file=sys.stderr)

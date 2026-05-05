@@ -5,6 +5,7 @@ PR-02 duplicate-wrapper cleanup.
 
 ## Baseline status
 - The root workspace manifest and lockfile are tracked.
+- Root `pubspec.yaml` is the canonical Melos workspace and script definition.
 - Generated command logs are local diagnostics and are not tracked.
 - Generated Python bytecode and cache folders are local diagnostics and are not
   tracked.
