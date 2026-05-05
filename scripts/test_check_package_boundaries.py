@@ -25,6 +25,8 @@ def write_package(root: pathlib.Path, name: str, dependencies: list[str] | None 
         "dependencies:\n"
         f"{dependency_lines}",
     )
+    write_file(package_root / "AGENTS.md", f"# {name} agent rules\n")
+    write_file(package_root / "README.md", f"# {name}\n")
     return package_root
 
 
@@ -161,6 +163,17 @@ class BoundaryCheckTest(unittest.TestCase):
             failures = check_boundaries(root)
 
             self.assertTrue(any("docs/PACKAGE_MAP.md: missing packages/peerdeal_core" in failure for failure in failures))
+
+    def test_rejects_missing_package_local_docs(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            package_root = write_package(root, "peerdeal_core")
+            write_workspace_metadata(root, ["packages/peerdeal_core"])
+            (package_root / "AGENTS.md").unlink()
+
+            failures = check_boundaries(root)
+
+            self.assertTrue(any("peerdeal_core: missing package-local AGENTS.md" in failure for failure in failures))
 
 
 if __name__ == "__main__":

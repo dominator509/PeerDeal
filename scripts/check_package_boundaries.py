@@ -120,6 +120,15 @@ def compare_path_sets(label: str, expected: set[str], actual: set[str]) -> list[
     return failures
 
 
+def package_documentation_failures(package_roots: dict[str, pathlib.Path]) -> list[str]:
+    failures: list[str] = []
+    for package_name, package_root in sorted(package_roots.items()):
+        for required_file in ["AGENTS.md", "README.md"]:
+            if not (package_root / required_file).exists():
+                failures.append(f"{package_name}: missing package-local {required_file}.")
+    return failures
+
+
 def check_boundaries(root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     package_roots = find_package_roots(root)
@@ -133,6 +142,7 @@ def check_boundaries(root: pathlib.Path) -> list[str]:
 
     failures.extend(compare_path_sets("workspace package list", actual_paths, workspace_paths))
     failures.extend(compare_path_sets("docs/PACKAGE_MAP.md", actual_paths, map_paths))
+    failures.extend(package_documentation_failures(package_roots))
 
     for dart_file in iter_dart_files(root):
         text = dart_file.read_text(encoding='utf-8')
