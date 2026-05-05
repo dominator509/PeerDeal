@@ -28,12 +28,47 @@ def write_package(root: pathlib.Path, name: str, dependencies: list[str] | None 
     return package_root
 
 
+def write_workspace_metadata(root: pathlib.Path, package_paths: list[str]) -> None:
+    workspace_entries = "\n".join(f"  - {package_path}" for package_path in package_paths)
+    app_entries = "\n".join(
+        f"  {pathlib.PurePosixPath(package_path).name}"
+        for package_path in package_paths
+        if package_path.startswith("apps/")
+    )
+    package_entries = "\n".join(
+        f"  {pathlib.PurePosixPath(package_path).name}"
+        for package_path in package_paths
+        if package_path.startswith("packages/")
+    )
+
+    write_file(
+        root / "pubspec.yaml",
+        "name: fixture_workspace\n\n"
+        "environment:\n"
+        "  sdk: '^3.11.5'\n\n"
+        "workspace:\n"
+        f"{workspace_entries}\n",
+    )
+    write_file(
+        root / "docs" / "PACKAGE_MAP.md",
+        "# PeerDeal Package Map\n\n"
+        "/apps\n"
+        f"{app_entries}\n\n"
+        "/packages\n"
+        f"{package_entries}\n",
+    )
+
+
 class BoundaryCheckTest(unittest.TestCase):
     def test_allows_declared_package_map_import(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = pathlib.Path(temp_dir)
             write_package(root, "peerdeal_protocol")
             core_root = write_package(root, "peerdeal_core", ["peerdeal_protocol"])
+            write_workspace_metadata(
+                root,
+                ["packages/peerdeal_protocol", "packages/peerdeal_core"],
+            )
             write_file(
                 core_root / "lib" / "peerdeal_core.dart",
                 "import 'package:peerdeal_protocol/peerdeal_protocol.dart';\n",
@@ -46,6 +81,10 @@ class BoundaryCheckTest(unittest.TestCase):
             root = pathlib.Path(temp_dir)
             write_package(root, "peerdeal_protocol")
             core_root = write_package(root, "peerdeal_core")
+            write_workspace_metadata(
+                root,
+                ["packages/peerdeal_protocol", "packages/peerdeal_core"],
+            )
             write_file(
                 core_root / "lib" / "peerdeal_core.dart",
                 "import 'package:peerdeal_protocol/peerdeal_protocol.dart';\n",
@@ -62,6 +101,14 @@ class BoundaryCheckTest(unittest.TestCase):
             write_package(root, "peerdeal_protocol")
             write_package(root, "peerdeal_network")
             core_root = write_package(root, "peerdeal_core", ["peerdeal_network"])
+            write_workspace_metadata(
+                root,
+                [
+                    "packages/peerdeal_protocol",
+                    "packages/peerdeal_network",
+                    "packages/peerdeal_core",
+                ],
+            )
             write_file(
                 core_root / "lib" / "peerdeal_core.dart",
                 "import 'package:peerdeal_network/peerdeal_network.dart';\n",
@@ -76,6 +123,10 @@ class BoundaryCheckTest(unittest.TestCase):
             root = pathlib.Path(temp_dir)
             write_package(root, "peerdeal_protocol")
             core_root = write_package(root, "peerdeal_core", ["peerdeal_protocol"])
+            write_workspace_metadata(
+                root,
+                ["packages/peerdeal_protocol", "packages/peerdeal_core"],
+            )
             write_file(
                 core_root / "lib" / "peerdeal_core.dart",
                 "import 'package:peerdeal_protocol/src/internal.dart';\n",
@@ -84,6 +135,32 @@ class BoundaryCheckTest(unittest.TestCase):
             failures = check_boundaries(root)
 
             self.assertTrue(any("imports another package's src" in failure for failure in failures))
+
+    def test_rejects_workspace_package_list_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_package(root, "peerdeal_core")
+            write_workspace_metadata(root, [])
+
+            failures = check_boundaries(root)
+
+            self.assertTrue(any("workspace package list: missing packages/peerdeal_core" in failure for failure in failures))
+
+    def test_rejects_package_map_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_package(root, "peerdeal_core")
+            write_file(
+                root / "pubspec.yaml",
+                "name: fixture_workspace\n\n"
+                "workspace:\n"
+                "  - packages/peerdeal_core\n",
+            )
+            write_file(root / "docs" / "PACKAGE_MAP.md", "# PeerDeal Package Map\n\n/packages\n")
+
+            failures = check_boundaries(root)
+
+            self.assertTrue(any("docs/PACKAGE_MAP.md: missing packages/peerdeal_core" in failure for failure in failures))
 
 
 if __name__ == "__main__":

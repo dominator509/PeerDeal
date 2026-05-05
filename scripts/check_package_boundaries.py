@@ -22,6 +22,11 @@ FORBIDDEN_IMPORT_PATTERNS = [
     ]),
 ]
 
+
+def normalize_path(path: pathlib.Path) -> str:
+    return path.as_posix()
+
+
 def iter_dart_files(base: pathlib.Path):
     if not base.exists():
         return []
@@ -57,6 +62,64 @@ def declared_peerdeal_dependencies(package_root: pathlib.Path) -> set[str]:
     return set(PEERDEAL_PACKAGE.findall(text))
 
 
+def workspace_package_paths(root: pathlib.Path) -> set[str]:
+    pubspec = root / "pubspec.yaml"
+    if not pubspec.exists():
+        return set()
+
+    paths: set[str] = set()
+    in_workspace = False
+    for line in pubspec.read_text(encoding="utf-8").splitlines():
+        if re.match(r"^workspace:\s*$", line):
+            in_workspace = True
+            continue
+        if in_workspace and line and not line.startswith(" "):
+            break
+        if in_workspace:
+            match = re.match(r"^\s+-\s+(.+?)\s*$", line)
+            if match:
+                paths.add(match.group(1).replace("\\", "/"))
+    return paths
+
+
+def package_map_paths(root: pathlib.Path) -> set[str]:
+    package_map = root / "docs" / "PACKAGE_MAP.md"
+    if not package_map.exists():
+        return set()
+
+    paths: set[str] = set()
+    current_parent: str | None = None
+    for line in package_map.read_text(encoding="utf-8").splitlines():
+        parent_match = re.match(r"^/(apps|packages)\s*$", line)
+        if parent_match:
+            current_parent = parent_match.group(1)
+            continue
+        if line.startswith("##"):
+            current_parent = None
+            continue
+        child_match = re.match(r"^\s{2}(peerdeal_[a-z_]+)\s*$", line)
+        if current_parent and child_match:
+            paths.add(f"{current_parent}/{child_match.group(1)}")
+    return paths
+
+
+def actual_package_paths(root: pathlib.Path) -> set[str]:
+    return {
+        normalize_path(path.relative_to(root))
+        for package_root in find_package_roots(root).values()
+        for path in [package_root]
+    }
+
+
+def compare_path_sets(label: str, expected: set[str], actual: set[str]) -> list[str]:
+    failures: list[str] = []
+    for missing in sorted(expected - actual):
+        failures.append(f"{label}: missing {missing}.")
+    for extra in sorted(actual - expected):
+        failures.append(f"{label}: unexpected {extra}.")
+    return failures
+
+
 def check_boundaries(root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     package_roots = find_package_roots(root)
@@ -64,6 +127,12 @@ def check_boundaries(root: pathlib.Path) -> list[str]:
         package_name: declared_peerdeal_dependencies(package_root)
         for package_name, package_root in package_roots.items()
     }
+    actual_paths = actual_package_paths(root)
+    workspace_paths = workspace_package_paths(root)
+    map_paths = package_map_paths(root)
+
+    failures.extend(compare_path_sets("workspace package list", actual_paths, workspace_paths))
+    failures.extend(compare_path_sets("docs/PACKAGE_MAP.md", actual_paths, map_paths))
 
     for dart_file in iter_dart_files(root):
         text = dart_file.read_text(encoding='utf-8')

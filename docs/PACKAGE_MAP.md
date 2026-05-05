@@ -30,6 +30,7 @@
 
 ## Boundary check coverage
 `melos run boundary-check` verifies that:
+- the root workspace list, actual package folders, and this package map match
 - PeerDeal package imports are declared in the importing package's pubspec
 - `peerdeal_core`, `peerdeal_variants`, and `peerdeal_modes` stay within the
   dependency law above
