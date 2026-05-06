@@ -8,6 +8,26 @@ import subprocess
 import sys
 
 
+def safe_print(text: str | None, *, stream=sys.stdout) -> None:
+    if not text:
+        return
+    encoded = text.encode(
+        getattr(stream, "encoding", None) or "utf-8",
+        errors="replace",
+    )
+    print(encoded.decode(getattr(stream, "encoding", None) or "utf-8"), file=stream)
+
+
+def extract_json_object(text: str | None) -> str:
+    if not text:
+        return ""
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end < start:
+        return text
+    return text[start : end + 1]
+
+
 def version(package: dict, key: str) -> str | None:
     value = package.get(key, {})
     if not isinstance(value, dict):
@@ -79,10 +99,10 @@ def main() -> int:
     )
 
     try:
-        payload = json.loads(result.stdout or "")
+        payload = json.loads(extract_json_object(result.stdout))
     except json.JSONDecodeError:
-        print(result.stdout)
-        print(result.stderr, file=sys.stderr)
+        safe_print(result.stdout)
+        safe_print(result.stderr, stream=sys.stderr)
         return result.returncode or 1
 
     print_summary(payload, advisory_warning=bool(result.stderr))

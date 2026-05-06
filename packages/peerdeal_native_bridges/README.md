@@ -1,5 +1,26 @@
-# peerdeal_native_bridges LAN + Relay Overlay
+# peerdeal_native_bridges
 
-This overlay adds the local-network bridge starter seams used by Sprint 10 LAN discovery and bootstrap work.
+Native bridge boundary for PeerDeal app shells.
 
-These files should layer onto the earlier `peerdeal_native_bridges` package starter.
+## Purpose
+This package owns platform-specific hooks that Dart packages and app shells need
+to observe local device capabilities.
+
+## Owns
+- local-network permission and capability bridge seams
+- platform channel wrappers
+- native hook result models
+- package-local bridge tests and fixtures
+
+## Must not own
+- poker rules
+- protocol schemas
+- reducer or table truth
+- session routing decisions
+- capture policy decisions
+- app lifecycle orchestration
+
+## Related ownership
+- `peerdeal_capture` owns capture policy.
+- `peerdeal_network` owns network confidence and routing.
+- app shells own when native hooks are called.

@@ -6,7 +6,11 @@ import sys
 import unittest
 from contextlib import redirect_stdout
 
-from dependency_audit import print_summary, summarize_packages
+from dependency_audit import extract_json_object, print_summary, safe_print, summarize_packages
+
+
+class EncodedOutput(io.StringIO):
+    encoding = "ascii"
 
 
 class DependencyAuditTest(unittest.TestCase):
@@ -55,6 +59,16 @@ class DependencyAuditTest(unittest.TestCase):
 
         self.assertIn("Dependency audit completed.", output.getvalue())
         self.assertIn("advisory metadata warnings", output.getvalue())
+
+    def test_extracts_json_object_from_wrapped_output(self) -> None:
+        self.assertEqual('{"packages":[]}', extract_json_object('noise\n{"packages":[]}\nmore'))
+
+    def test_safe_print_replaces_unencodable_characters(self) -> None:
+        output = EncodedOutput()
+
+        safe_print("ok \u2603", stream=output)
+
+        self.assertEqual("ok ?\n", output.getvalue())
 
 
 if __name__ == "__main__":
