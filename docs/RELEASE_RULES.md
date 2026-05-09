@@ -13,3 +13,8 @@ A phase is not done because code exists. It is done only when:
 - protocol spine present
 - package-local tests wired
 - boundary checks wired
+
+## Production release bar
+Use `docs/PRODUCTION_READINESS.md` as the production-readiness checklist. A
+production release must satisfy those gates in addition to the phase release
+bar above.

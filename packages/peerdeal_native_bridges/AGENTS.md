@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_native_bridges (LAN + Relay Overlay)
+# AGENTS.md — peerdeal_native_bridges
 
 ## Package purpose
 Own platform-specific local-network hooks, permission surfaces, and transport-adjacent bridge shims needed by higher-level packages.

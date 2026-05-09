@@ -49,3 +49,8 @@ Use this repo as the safe baseline for scaffold migration:
 3. make local package checks runnable
 4. land package-local fixes in small PRs
 5. avoid hidden runtime truth in UI, transport, or wizard layers
+
+## Production readiness
+
+The current repo is a green migration baseline, not a production release. Use
+`docs/PRODUCTION_READINESS.md` for the release gates and hardening order.

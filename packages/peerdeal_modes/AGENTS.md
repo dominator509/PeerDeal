@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_modes governance overlay
+# AGENTS.md — peerdeal_modes
 
 ## Scope
 This subtree owns mode-aware governance policy scaffolding:

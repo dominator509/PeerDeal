@@ -2,17 +2,27 @@
 
 Mode adapters and mode-scoped policy contracts for PeerDeal.
 
-## Governance overlay
+## Purpose
+This package owns session-mode policy that sits above core poker truth and below
+app orchestration.
 
-This overlay adds starter governance structures for:
+## Owns
+- open-table and tournament mode adapters
 - participant role state
 - seat state
 - waitlist state
 - governance actions and decisions
-- a starter governance engine
+- governance engine behavior
+- mode-scoped reload and ledger visibility policy
 
-The governance lane remains mode-aware and replay-safe, but it does not become:
-- a standalone package
-- transport logic
+## Must not own
+- transport or routing logic
 - hand/action truth
+- variant-specific poker rules
 - receipt or capture implementation
+- app UI or lifecycle orchestration
+
+## Related ownership
+- `peerdeal_core` owns deterministic table state truth.
+- `peerdeal_variants` owns poker variant rules.
+- app shells own user-facing flow orchestration.
