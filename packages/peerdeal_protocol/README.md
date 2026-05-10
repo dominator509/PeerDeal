@@ -8,6 +8,7 @@ Owns:
 - result codes
 - stable public protocol failure code constants
 - structured protocol diagnostics
+- replay/sync result diagnostic projection
 - protocol versions
 - supported artifact catalog
 - envelope-level compatibility checks

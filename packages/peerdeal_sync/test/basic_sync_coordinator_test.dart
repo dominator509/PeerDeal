@@ -35,55 +35,67 @@ void main() {
     expect(result.isSuccess, isFalse);
     expect(result.safeCloseRecommended, isTrue);
     expect(result.reconciliation.recommendedAction, 'safe_close');
+    expect(result.diagnostics.single.toJson(), {
+      'code': 'ERR_SNAPSHOT_PROTOCOL_INCOMPATIBLE',
+      'message': 'Recovery snapshot protocol version is not supported.',
+      'expected': '1.0.0',
+      'actual': '2.0.0',
+    });
   });
 
-  test('recovers by applying snapshot and suffix window when no fatal conflict exists', () {
-    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-      conflictDetector: const BasicConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
-        projector: FakeSnapshotProjector(),
-      ),
-    );
+  test(
+    'recovers by applying snapshot and suffix window when no fatal conflict exists',
+    () {
+      final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+        conflictDetector: const BasicConflictDetector(),
+        snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+          projector: FakeSnapshotProjector(),
+        ),
+      );
 
-    final result = coordinator.recover(
-      const RecoveryRequest(
-        tableId: 'table_1',
-        sessionId: 'session_1',
-        protocolVersion: '1.0.0',
-        mode: RecoveryMode.reconnect,
-        snapshot: SnapshotEnvelope(
-          snapshotId: 'snap_1',
-          protocolVersion: '1.0.0',
+      final result = coordinator.recover(
+        const RecoveryRequest(
           tableId: 'table_1',
           sessionId: 'session_1',
-          snapshotBaseEventSeq: 2,
-          snapshotHash: 'snap_hash',
-          payload: <String, Object?>{},
-        ),
-        events: <EventEnvelope>[
-          EventEnvelope(
-            eventId: 'evt_3',
-            eventType: 'RecoveryPauseEnded',
-            eventVersion: '1.0',
+          protocolVersion: '1.0.0',
+          mode: RecoveryMode.reconnect,
+          snapshot: SnapshotEnvelope(
+            snapshotId: 'snap_1',
             protocolVersion: '1.0.0',
-            eventSeq: 3,
             tableId: 'table_1',
             sessionId: 'session_1',
-            handId: null,
-            emittedAt: '2026-04-25T00:00:05Z',
-            actorRef: 'system',
+            snapshotBaseEventSeq: 2,
+            snapshotHash: 'snap_hash',
             payload: <String, Object?>{},
-            prevEventHash: 'hash_2',
-            eventHash: 'hash_3',
           ),
-        ],
-      ),
-    );
+          events: <EventEnvelope>[
+            EventEnvelope(
+              eventId: 'evt_3',
+              eventType: 'RecoveryPauseEnded',
+              eventVersion: '1.0',
+              protocolVersion: '1.0.0',
+              eventSeq: 3,
+              tableId: 'table_1',
+              sessionId: 'session_1',
+              handId: null,
+              emittedAt: '2026-04-25T00:00:05Z',
+              actorRef: 'system',
+              payload: <String, Object?>{},
+              prevEventHash: 'hash_2',
+              eventHash: 'hash_3',
+            ),
+          ],
+        ),
+      );
 
-    expect(result.isSuccess, isTrue);
-    expect(result.state, isNotNull);
-    expect(result.finalAppliedEventSeq, 3);
-    expect(result.reconciliation.canResume, isTrue);
-    expect(result.state!.appliedEventTypes, ['SnapshotApplied', 'RecoveryPauseEnded']);
-  });
+      expect(result.isSuccess, isTrue);
+      expect(result.state, isNotNull);
+      expect(result.finalAppliedEventSeq, 3);
+      expect(result.reconciliation.canResume, isTrue);
+      expect(result.state!.appliedEventTypes, [
+        'SnapshotApplied',
+        'RecoveryPauseEnded',
+      ]);
+    },
+  );
 }

@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'reconciliation_result.dart';
 import 'sync_conflict.dart';
@@ -22,4 +23,8 @@ class RecoveryResult<TState> {
   final bool safeCloseRecommended;
   final int? finalAppliedEventSeq;
   final List<String> warnings;
+
+  List<ProtocolDiagnostic> get diagnostics => conflicts
+      .map((conflict) => conflict.toProtocolDiagnostic())
+      .toList(growable: false);
 }

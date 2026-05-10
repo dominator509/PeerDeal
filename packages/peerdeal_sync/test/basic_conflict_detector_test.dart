@@ -59,6 +59,12 @@ void main() {
       'expected': '1.0.0',
       'actual': '2.0.0',
     });
+    expect(result.diagnostics.single.toJson(), {
+      'code': 'ERR_RECOVERY_PROTOCOL_INCOMPATIBLE',
+      'message': 'Recovery request protocol version is not supported.',
+      'expected': '1.0.0',
+      'actual': '2.0.0',
+    });
   });
 
   test('flags fatal event protocol mismatch', () {

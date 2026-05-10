@@ -16,6 +16,7 @@ One shared vocabulary for commands, events, snapshots, and version-safe replay a
 - result / error code family
 - stable public protocol failure code constants
 - structured protocol diagnostics
+- replay/sync result diagnostic projection
 - Game File public schema
 - invite payload public schema
 
