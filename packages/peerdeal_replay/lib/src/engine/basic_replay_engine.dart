@@ -15,21 +15,36 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     AnchorHashCalculator? anchorHashCalculator,
     EventWindowValidator? eventWindowValidator,
     SnapshotSuffixReplayer? snapshotSuffixReplayer,
-  })  : anchorHashCalculator = anchorHashCalculator ?? const AnchorHashCalculator(),
-        eventWindowValidator = eventWindowValidator ?? const EventWindowValidator(),
-        snapshotSuffixReplayer = snapshotSuffixReplayer ?? const SnapshotSuffixReplayer();
+    this.protocolCatalog = const ProtocolCatalog(),
+  }) : anchorHashCalculator =
+           anchorHashCalculator ?? const AnchorHashCalculator(),
+       eventWindowValidator =
+           eventWindowValidator ?? const EventWindowValidator(),
+       snapshotSuffixReplayer =
+           snapshotSuffixReplayer ?? const SnapshotSuffixReplayer();
 
   final ReplayStateProjector<TState> projector;
   final AnchorHashCalculator anchorHashCalculator;
   final EventWindowValidator eventWindowValidator;
   final SnapshotSuffixReplayer snapshotSuffixReplayer;
+  final ProtocolCatalog protocolCatalog;
 
   @override
   ReplayResult<TState> replay(ReplayRequest request) {
+    final mismatches = <ReplayMismatch>[..._validateProtocolVersions(request)];
+
+    if (mismatches.isNotEmpty) {
+      return ReplayResult<TState>(
+        isSuccess: false,
+        state: null,
+        finalAppliedEventSeq: null,
+        reconstructedAnchor: null,
+        mismatches: mismatches,
+      );
+    }
+
     final selectedEvents = _selectEvents(request);
-    final mismatches = <ReplayMismatch>[
-      ...eventWindowValidator.validate(selectedEvents),
-    ];
+    mismatches.addAll(eventWindowValidator.validate(selectedEvents));
 
     if (mismatches.isNotEmpty) {
       return ReplayResult<TState>(
@@ -71,8 +86,9 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     return ReplayResult<TState>(
       isSuccess: mismatches.isEmpty,
       state: state,
-      finalAppliedEventSeq:
-          selectedEvents.isEmpty ? request.snapshot?.snapshotBaseEventSeq : selectedEvents.last.eventSeq,
+      finalAppliedEventSeq: selectedEvents.isEmpty
+          ? request.snapshot?.snapshotBaseEventSeq
+          : selectedEvents.last.eventSeq,
       reconstructedAnchor: reconstructedAnchor,
       mismatches: mismatches,
       warnings: request.snapshot == null
@@ -82,23 +98,81 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
   }
 
   List<EventEnvelope> _selectEvents(ReplayRequest request) {
-    final scopedEvents = request.events.where((event) {
-      if (request.fromEventSeq != null && event.eventSeq < request.fromEventSeq!) {
-        return false;
-      }
-      if (request.toEventSeq != null && event.eventSeq > request.toEventSeq!) {
-        return false;
-      }
-      return true;
-    }).toList(growable: false);
+    final scopedEvents = request.events
+        .where((event) {
+          if (request.fromEventSeq != null &&
+              event.eventSeq < request.fromEventSeq!) {
+            return false;
+          }
+          if (request.toEventSeq != null &&
+              event.eventSeq > request.toEventSeq!) {
+            return false;
+          }
+          return true;
+        })
+        .toList(growable: false);
 
     if (request.snapshot == null) {
       return scopedEvents;
     }
 
-    return snapshotSuffixReplayer.plan(
-      snapshot: request.snapshot!,
-      events: scopedEvents,
-    ).eventsToApply;
+    return snapshotSuffixReplayer
+        .plan(snapshot: request.snapshot!, events: scopedEvents)
+        .eventsToApply;
+  }
+
+  List<ReplayMismatch> _validateProtocolVersions(ReplayRequest request) {
+    final mismatches = <ReplayMismatch>[];
+
+    if (!protocolCatalog.supportsProtocolVersion(request.protocolVersion)) {
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_PROTOCOL_INCOMPATIBLE',
+          message: 'Replay request protocol version is not supported.',
+          expected: currentProtocolVersion.toWire(),
+          actual: request.protocolVersion,
+        ),
+      );
+      return mismatches;
+    }
+
+    final snapshot = request.snapshot;
+    if (snapshot != null &&
+        snapshot.protocolVersion != request.protocolVersion) {
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_SNAPSHOT_PROTOCOL_MISMATCH',
+          message:
+              'Snapshot protocol version does not match the replay request.',
+          expected: request.protocolVersion,
+          actual: snapshot.protocolVersion,
+        ),
+      );
+    }
+
+    for (final event in request.events) {
+      if (!protocolCatalog.supportsProtocolVersion(event.protocolVersion)) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_EVENT_PROTOCOL_INCOMPATIBLE',
+            message: 'Replay event protocol version is not supported.',
+            expected: currentProtocolVersion.toWire(),
+            actual: event.protocolVersion,
+          ),
+        );
+      } else if (event.protocolVersion != request.protocolVersion) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_EVENT_PROTOCOL_MISMATCH',
+            message:
+                'Replay event protocol version does not match the request.',
+            expected: request.protocolVersion,
+            actual: event.protocolVersion,
+          ),
+        );
+      }
+    }
+
+    return mismatches;
   }
 }
