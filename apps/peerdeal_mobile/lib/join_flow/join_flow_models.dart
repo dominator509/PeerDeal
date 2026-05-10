@@ -1,3 +1,5 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 enum JoinFlowState {
   inviteUnresolved,
   inviteResolved,
@@ -92,10 +94,7 @@ class NegotiationResult {
 }
 
 class RoleGrant {
-  const RoleGrant({
-    required this.grantedRole,
-    required this.permissions,
-  });
+  const RoleGrant({required this.grantedRole, required this.permissions});
 
   final RequestedRole grantedRole;
   final List<String> permissions;
@@ -114,10 +113,7 @@ class BootstrapPlan {
 }
 
 class GovernanceCommitResult {
-  const GovernanceCommitResult({
-    required this.accepted,
-    this.reasonCode,
-  });
+  const GovernanceCommitResult({required this.accepted, this.reasonCode});
 
   final bool accepted;
   final String? reasonCode;
@@ -128,11 +124,13 @@ class JoinFlowOutcome {
     required this.state,
     required this.status,
     required this.resultCode,
+    this.diagnostics = const <ProtocolDiagnostic>[],
     this.message,
   });
 
   final JoinFlowState state;
   final JoinDecisionStatus status;
   final String resultCode;
+  final List<ProtocolDiagnostic> diagnostics;
   final String? message;
 }

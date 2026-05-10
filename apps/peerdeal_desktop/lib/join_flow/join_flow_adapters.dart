@@ -1,3 +1,5 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import 'join_flow_models.dart';
 
 abstract class InviteResolver {
@@ -49,6 +51,7 @@ abstract class JoinEventSink {
   Future<void> emitState({
     required JoinFlowState state,
     required String resultCode,
+    List<ProtocolDiagnostic> diagnostics = const <ProtocolDiagnostic>[],
     String? message,
   });
 }

@@ -46,14 +46,19 @@ class JoinFlowOrchestrator {
     if (!_protocolCatalog.supportsProtocolVersion(
       resolvedInvite.protocolVersion,
     )) {
+      final diagnostics = _protocolIncompatibleDiagnostics(
+        resolvedInvite.protocolVersion,
+      );
       await _eventSink.emitState(
         state: JoinFlowState.joinRejected,
         resultCode: ProtocolResultCodes.errProtocolIncompatible,
+        diagnostics: diagnostics,
       );
-      return const JoinFlowOutcome(
+      return JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.negotiationFailed,
         resultCode: ProtocolResultCodes.errProtocolIncompatible,
+        diagnostics: diagnostics,
       );
     }
 
@@ -188,14 +193,19 @@ class JoinFlowOrchestrator {
     if (!_protocolCatalog.supportsProtocolVersion(
       resolvedInvite.protocolVersion,
     )) {
+      final diagnostics = _protocolIncompatibleDiagnostics(
+        resolvedInvite.protocolVersion,
+      );
       await _eventSink.emitState(
         state: JoinFlowState.joinRejected,
         resultCode: ProtocolResultCodes.errProtocolIncompatible,
+        diagnostics: diagnostics,
       );
-      return const JoinFlowOutcome(
+      return JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.rejoinRejected,
         resultCode: ProtocolResultCodes.errProtocolIncompatible,
+        diagnostics: diagnostics,
       );
     }
 
@@ -226,5 +236,18 @@ class JoinFlowOrchestrator {
       status: JoinDecisionStatus.okRejoined,
       resultCode: 'OK_REJOINED',
     );
+  }
+
+  List<ProtocolDiagnostic> _protocolIncompatibleDiagnostics(
+    String actualProtocolVersion,
+  ) {
+    return <ProtocolDiagnostic>[
+      ProtocolDiagnostic(
+        code: ProtocolResultCodes.errProtocolIncompatible,
+        message: 'Invite protocol version is not supported.',
+        expected: currentProtocolVersion.toWire(),
+        actual: actualProtocolVersion,
+      ),
+    ];
   }
 }

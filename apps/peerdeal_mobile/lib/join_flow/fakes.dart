@@ -1,16 +1,24 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import 'join_flow_adapters.dart';
 import 'join_flow_models.dart';
 
 class RecordingJoinEventSink implements JoinEventSink {
   final List<String> log = <String>[];
+  final List<List<Map<String, Object?>>> diagnosticsLog =
+      <List<Map<String, Object?>>>[];
 
   @override
   Future<void> emitState({
     required JoinFlowState state,
     required String resultCode,
+    List<ProtocolDiagnostic> diagnostics = const <ProtocolDiagnostic>[],
     String? message,
   }) async {
     log.add('${state.name}:$resultCode');
+    diagnosticsLog.add(
+      diagnostics.map((diagnostic) => diagnostic.toJson()).toList(),
+    );
   }
 }
 

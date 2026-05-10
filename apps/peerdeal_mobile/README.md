@@ -8,6 +8,7 @@ Purpose:
 - keep governance truth out of UI code
 - connect invite/join/rejoin lifecycle to the governance engine cleanly
 - preserve replay-safe, explicit state transitions
+- preserve stable protocol diagnostics on rejected joins for UI/logging
 
 This overlay is meant to sit on top of:
 - packages/peerdeal_protocol

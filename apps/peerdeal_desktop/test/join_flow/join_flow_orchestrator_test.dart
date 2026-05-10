@@ -71,7 +71,19 @@ void main() {
 
     expect(result.resultCode, 'ERR_PROTOCOL_INCOMPATIBLE');
     expect(result.state, JoinFlowState.joinRejected);
+    expect(result.diagnostics.single.toJson(), {
+      'code': 'ERR_PROTOCOL_INCOMPATIBLE',
+      'message': 'Invite protocol version is not supported.',
+      'expected': '1.0.0',
+      'actual': '2.0.0',
+    });
     expect(sink.log, isNot(contains('preflightPending:PREFLIGHT_PENDING')));
+    expect(sink.diagnosticsLog.last.single, {
+      'code': 'ERR_PROTOCOL_INCOMPATIBLE',
+      'message': 'Invite protocol version is not supported.',
+      'expected': '1.0.0',
+      'actual': '2.0.0',
+    });
   });
 
   test(
@@ -98,6 +110,12 @@ void main() {
 
       expect(result.resultCode, 'ERR_PROTOCOL_INCOMPATIBLE');
       expect(result.state, JoinFlowState.joinRejected);
+      expect(result.diagnostics.single.toJson(), {
+        'code': 'ERR_PROTOCOL_INCOMPATIBLE',
+        'message': 'Invite protocol version is not supported.',
+        'expected': '1.0.0',
+        'actual': '2.0.0',
+      });
     },
   );
 
