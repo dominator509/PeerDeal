@@ -6,6 +6,7 @@ Owns:
 - snapshot envelopes
 - snapshot artifact identity
 - result codes
+- stable public protocol failure code constants
 - protocol versions
 - supported artifact catalog
 - envelope-level compatibility checks

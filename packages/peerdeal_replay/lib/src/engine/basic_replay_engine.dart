@@ -127,7 +127,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     if (!protocolCatalog.supportsProtocolVersion(request.protocolVersion)) {
       mismatches.add(
         ReplayMismatch(
-          code: 'ERR_REPLAY_PROTOCOL_INCOMPATIBLE',
+          code: ProtocolResultCodes.errReplayProtocolIncompatible,
           message: 'Replay request protocol version is not supported.',
           expected: currentProtocolVersion.toWire(),
           actual: request.protocolVersion,
@@ -145,7 +145,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
           ResultCode.errProtocolIncompatible) {
         mismatches.add(
           ReplayMismatch(
-            code: 'ERR_REPLAY_SNAPSHOT_PROTOCOL_INCOMPATIBLE',
+            code: ProtocolResultCodes.errReplaySnapshotProtocolIncompatible,
             message: 'Replay snapshot protocol version is not supported.',
             expected: currentProtocolVersion.toWire(),
             actual: snapshot.protocolVersion,
@@ -154,7 +154,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       } else if (snapshot.protocolVersion != request.protocolVersion) {
         mismatches.add(
           ReplayMismatch(
-            code: 'ERR_REPLAY_SNAPSHOT_PROTOCOL_MISMATCH',
+            code: ProtocolResultCodes.errReplaySnapshotProtocolMismatch,
             message:
                 'Snapshot protocol version does not match the replay request.',
             expected: request.protocolVersion,
@@ -164,7 +164,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       } else if (!snapshotCompatibility.isSupported) {
         mismatches.add(
           ReplayMismatch(
-            code: 'ERR_REPLAY_SNAPSHOT_SCHEMA_UNSUPPORTED',
+            code: ProtocolResultCodes.errReplaySnapshotSchemaUnsupported,
             message:
                 'Replay snapshot artifact is not supported by the protocol catalog.',
             expected: 'supported snapshot artifact',
@@ -179,7 +179,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       if (eventCompatibility.resultCode == ResultCode.errProtocolIncompatible) {
         mismatches.add(
           ReplayMismatch(
-            code: 'ERR_REPLAY_EVENT_PROTOCOL_INCOMPATIBLE',
+            code: ProtocolResultCodes.errReplayEventProtocolIncompatible,
             message: 'Replay event protocol version is not supported.',
             expected: currentProtocolVersion.toWire(),
             actual: event.protocolVersion,
@@ -188,7 +188,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       } else if (event.protocolVersion != request.protocolVersion) {
         mismatches.add(
           ReplayMismatch(
-            code: 'ERR_REPLAY_EVENT_PROTOCOL_MISMATCH',
+            code: ProtocolResultCodes.errReplayEventProtocolMismatch,
             message:
                 'Replay event protocol version does not match the request.',
             expected: request.protocolVersion,
@@ -198,7 +198,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       } else if (!eventCompatibility.isSupported) {
         mismatches.add(
           ReplayMismatch(
-            code: 'ERR_REPLAY_EVENT_SCHEMA_UNSUPPORTED',
+            code: ProtocolResultCodes.errReplayEventSchemaUnsupported,
             message:
                 'Replay event artifact is not supported by the protocol catalog.',
             expected: 'supported event artifact',

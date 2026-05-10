@@ -18,7 +18,7 @@ class BasicConflictDetector implements ConflictDetector {
     if (!protocolCatalog.supportsProtocolVersion(request.protocolVersion)) {
       conflicts.add(
         SyncConflict(
-          code: 'ERR_RECOVERY_PROTOCOL_INCOMPATIBLE',
+          code: ProtocolResultCodes.errRecoveryProtocolIncompatible,
           message: 'Recovery request protocol version is not supported.',
           severity: SyncConflictSeverity.fatal,
           expected: currentProtocolVersion.toWire(),
@@ -37,7 +37,7 @@ class BasicConflictDetector implements ConflictDetector {
           ResultCode.errProtocolIncompatible) {
         conflicts.add(
           SyncConflict(
-            code: 'ERR_SNAPSHOT_PROTOCOL_INCOMPATIBLE',
+            code: ProtocolResultCodes.errSnapshotProtocolIncompatible,
             message: 'Recovery snapshot protocol version is not supported.',
             severity: SyncConflictSeverity.fatal,
             expected: currentProtocolVersion.toWire(),
@@ -47,7 +47,7 @@ class BasicConflictDetector implements ConflictDetector {
       } else if (snapshot.protocolVersion != request.protocolVersion) {
         conflicts.add(
           SyncConflict(
-            code: 'ERR_SNAPSHOT_PROTOCOL_MISMATCH',
+            code: ProtocolResultCodes.errSnapshotProtocolMismatch,
             message:
                 'Snapshot protocol version does not match the recovery request.',
             severity: SyncConflictSeverity.fatal,
@@ -58,7 +58,7 @@ class BasicConflictDetector implements ConflictDetector {
       } else if (!snapshotCompatibility.isSupported) {
         conflicts.add(
           SyncConflict(
-            code: 'ERR_SNAPSHOT_SCHEMA_UNSUPPORTED',
+            code: ProtocolResultCodes.errSnapshotSchemaUnsupported,
             message:
                 'Recovery snapshot artifact is not supported by the protocol catalog.',
             severity: SyncConflictSeverity.fatal,
@@ -86,7 +86,7 @@ class BasicConflictDetector implements ConflictDetector {
       if (eventCompatibility.resultCode == ResultCode.errProtocolIncompatible) {
         conflicts.add(
           SyncConflict(
-            code: 'ERR_EVENT_PROTOCOL_INCOMPATIBLE',
+            code: ProtocolResultCodes.errEventProtocolIncompatible,
             message: 'Recovery event protocol version is not supported.',
             severity: SyncConflictSeverity.fatal,
             expected: currentProtocolVersion.toWire(),
@@ -96,7 +96,7 @@ class BasicConflictDetector implements ConflictDetector {
       } else if (event.protocolVersion != request.protocolVersion) {
         conflicts.add(
           SyncConflict(
-            code: 'ERR_EVENT_PROTOCOL_MISMATCH',
+            code: ProtocolResultCodes.errEventProtocolMismatch,
             message:
                 'Recovery event protocol version does not match the request.',
             severity: SyncConflictSeverity.fatal,
@@ -107,7 +107,7 @@ class BasicConflictDetector implements ConflictDetector {
       } else if (!eventCompatibility.isSupported) {
         conflicts.add(
           SyncConflict(
-            code: 'ERR_EVENT_SCHEMA_UNSUPPORTED',
+            code: ProtocolResultCodes.errEventSchemaUnsupported,
             message:
                 'Recovery event artifact is not supported by the protocol catalog.',
             severity: SyncConflictSeverity.fatal,

@@ -14,6 +14,7 @@ One shared vocabulary for commands, events, snapshots, and version-safe replay a
 - snapshot envelope
 - snapshot artifact identity
 - result / error code family
+- stable public protocol failure code constants
 - Game File public schema
 - invite payload public schema
 

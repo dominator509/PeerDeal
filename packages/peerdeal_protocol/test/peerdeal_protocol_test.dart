@@ -43,6 +43,21 @@ void main() {
     expect(hash.length, equals(64));
   });
 
+  test('protocol result code wire values are stable', () {
+    expect(
+      ProtocolResultCodes.errProtocolIncompatible,
+      'ERR_PROTOCOL_INCOMPATIBLE',
+    );
+    expect(
+      ProtocolResultCodes.errReplayEventSchemaUnsupported,
+      'ERR_REPLAY_EVENT_SCHEMA_UNSUPPORTED',
+    );
+    expect(
+      ProtocolResultCodes.errSnapshotSchemaUnsupported,
+      'ERR_SNAPSHOT_SCHEMA_UNSUPPORTED',
+    );
+  });
+
   test('protocol catalog accepts fixture-backed command', () {
     final catalog = ProtocolCatalog();
     final file = File('fixtures/commands/open_table_session_command_v1.json');

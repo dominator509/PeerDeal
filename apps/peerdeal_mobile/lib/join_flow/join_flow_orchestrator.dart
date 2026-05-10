@@ -48,12 +48,12 @@ class JoinFlowOrchestrator {
     )) {
       await _eventSink.emitState(
         state: JoinFlowState.joinRejected,
-        resultCode: 'ERR_PROTOCOL_INCOMPATIBLE',
+        resultCode: ProtocolResultCodes.errProtocolIncompatible,
       );
       return const JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.negotiationFailed,
-        resultCode: 'ERR_PROTOCOL_INCOMPATIBLE',
+        resultCode: ProtocolResultCodes.errProtocolIncompatible,
       );
     }
 
@@ -190,12 +190,12 @@ class JoinFlowOrchestrator {
     )) {
       await _eventSink.emitState(
         state: JoinFlowState.joinRejected,
-        resultCode: 'ERR_PROTOCOL_INCOMPATIBLE',
+        resultCode: ProtocolResultCodes.errProtocolIncompatible,
       );
       return const JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.rejoinRejected,
-        resultCode: 'ERR_PROTOCOL_INCOMPATIBLE',
+        resultCode: ProtocolResultCodes.errProtocolIncompatible,
       );
     }
 
