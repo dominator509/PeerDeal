@@ -7,15 +7,15 @@ import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 
 class BasicConflictDetector implements ConflictDetector {
-  const BasicConflictDetector();
+  const BasicConflictDetector({this.protocolCatalog = const ProtocolCatalog()});
+
+  final ProtocolCatalog protocolCatalog;
 
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
     final conflicts = <SyncConflict>[];
 
-    if (!const ProtocolCatalog().supportsProtocolVersion(
-      request.protocolVersion,
-    )) {
+    if (!protocolCatalog.supportsProtocolVersion(request.protocolVersion)) {
       conflicts.add(
         SyncConflict(
           code: 'ERR_RECOVERY_PROTOCOL_INCOMPATIBLE',
@@ -56,9 +56,8 @@ class BasicConflictDetector implements ConflictDetector {
     }
 
     for (final event in request.events) {
-      if (!const ProtocolCatalog().supportsProtocolVersion(
-        event.protocolVersion,
-      )) {
+      final eventCompatibility = protocolCatalog.checkEventEnvelope(event);
+      if (eventCompatibility.resultCode == ResultCode.errProtocolIncompatible) {
         conflicts.add(
           SyncConflict(
             code: 'ERR_EVENT_PROTOCOL_INCOMPATIBLE',
@@ -77,6 +76,17 @@ class BasicConflictDetector implements ConflictDetector {
             severity: SyncConflictSeverity.fatal,
             expected: request.protocolVersion,
             actual: event.protocolVersion,
+          ),
+        );
+      } else if (!eventCompatibility.isSupported) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_SCHEMA_UNSUPPORTED',
+            message:
+                'Recovery event artifact is not supported by the protocol catalog.',
+            severity: SyncConflictSeverity.fatal,
+            expected: 'supported event artifact',
+            actual: '${event.eventType}@${event.eventVersion}',
           ),
         );
       }

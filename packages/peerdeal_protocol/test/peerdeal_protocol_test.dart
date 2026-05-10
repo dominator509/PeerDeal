@@ -56,13 +56,37 @@ void main() {
 
   test('protocol catalog accepts fixture-backed event', () {
     final catalog = ProtocolCatalog();
-    final file = File('fixtures/events/open_table_session_opened_event_v1.json');
+    final file = File(
+      'fixtures/events/open_table_session_opened_event_v1.json',
+    );
     final decoded = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
 
     final result = catalog.checkEventEnvelopeJson(decoded);
 
     expect(result.isSupported, isTrue);
     expect(result.resultCode, ResultCode.okAccepted);
+  });
+
+  test('protocol catalog accepts scaffold replay and recovery events', () {
+    const supportedEventTypes = <String>[
+      'ParticipantAdmitted',
+      'HandStarted',
+      'PlayerCalled',
+      'IgnoredBecauseCoveredBySnapshot',
+      'RecoveryPauseEnded',
+    ];
+
+    for (final eventType in supportedEventTypes) {
+      final result = ProtocolCatalog().check(
+        kind: ProtocolArtifactKind.event,
+        type: eventType,
+        artifactVersion: '1.0',
+        protocolVersion: currentProtocolVersion.toWire(),
+      );
+
+      expect(result.isSupported, isTrue, reason: eventType);
+      expect(result.resultCode, ResultCode.okAccepted, reason: eventType);
+    }
   });
 
   test('protocol catalog rejects unsupported protocol version fail-safe', () {
@@ -105,6 +129,29 @@ void main() {
       'snapshot_version': '1.0',
       'protocol_version': currentProtocolVersion.toWire(),
     });
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errSchemaInvalid);
+  });
+
+  test('protocol catalog rejects typed unsupported event fail-safe', () {
+    final result = ProtocolCatalog().checkEventEnvelope(
+      const EventEnvelope(
+        eventId: 'evt_unknown',
+        eventType: 'UnknownEvent',
+        eventVersion: '1.0',
+        protocolVersion: '1.0.0',
+        eventSeq: 1,
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        handId: null,
+        emittedAt: '2026-04-25T00:00:00Z',
+        actorRef: 'system',
+        payload: <String, Object?>{},
+        prevEventHash: 'root',
+        eventHash: 'hash_1',
+      ),
+    );
 
     expect(result.isSupported, isFalse);
     expect(result.resultCode, ResultCode.errSchemaInvalid);

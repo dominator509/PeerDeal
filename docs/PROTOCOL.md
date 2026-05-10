@@ -37,7 +37,7 @@ This repo starter only locks the spine:
 - validation boundaries
 - canonical hash normalization
 - fixture examples
-- supported artifact catalog for currently fixture-backed command/event types
+- supported artifact catalog for fixture-backed and scaffold replay/recovery event types
 - fail-safe rejection for unsupported protocol versions and unknown artifacts
 - envelope-level catalog checks before downstream package processing
 

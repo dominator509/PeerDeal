@@ -1,11 +1,10 @@
+import 'command_envelope.dart';
+import 'event_envelope.dart';
 import 'protocol_version.dart';
 import 'result_code.dart';
+import 'snapshot_envelope.dart';
 
-enum ProtocolArtifactKind {
-  command,
-  event,
-  snapshot,
-}
+enum ProtocolArtifactKind { command, event, snapshot }
 
 class ProtocolCatalogEntry {
   const ProtocolCatalogEntry({
@@ -29,23 +28,20 @@ class ProtocolCompatibilityResult {
   });
 
   const ProtocolCompatibilityResult.supported(ProtocolCatalogEntry entry)
-      : this._(
-          resultCode: ResultCode.okAccepted,
-          isSupported: true,
-          entry: entry,
-        );
+    : this._(
+        resultCode: ResultCode.okAccepted,
+        isSupported: true,
+        entry: entry,
+      );
 
   const ProtocolCompatibilityResult.unsupportedVersion()
-      : this._(
-          resultCode: ResultCode.errProtocolIncompatible,
-          isSupported: false,
-        );
+    : this._(
+        resultCode: ResultCode.errProtocolIncompatible,
+        isSupported: false,
+      );
 
   const ProtocolCompatibilityResult.unsupportedArtifact()
-      : this._(
-          resultCode: ResultCode.errSchemaInvalid,
-          isSupported: false,
-        );
+    : this._(resultCode: ResultCode.errSchemaInvalid, isSupported: false);
 
   final ResultCode resultCode;
   final bool isSupported;
@@ -109,6 +105,15 @@ class ProtocolCatalog {
     );
   }
 
+  ProtocolCompatibilityResult checkCommandEnvelope(CommandEnvelope envelope) {
+    return check(
+      kind: ProtocolArtifactKind.command,
+      type: envelope.commandType,
+      artifactVersion: envelope.commandVersion,
+      protocolVersion: envelope.protocolVersion,
+    );
+  }
+
   ProtocolCompatibilityResult checkEventEnvelopeJson(
     Map<String, Object?> envelope,
   ) {
@@ -127,6 +132,15 @@ class ProtocolCatalog {
       type: eventType,
       artifactVersion: eventVersion,
       protocolVersion: protocolVersion,
+    );
+  }
+
+  ProtocolCompatibilityResult checkEventEnvelope(EventEnvelope envelope) {
+    return check(
+      kind: ProtocolArtifactKind.event,
+      type: envelope.eventType,
+      artifactVersion: envelope.eventVersion,
+      protocolVersion: envelope.protocolVersion,
     );
   }
 
@@ -151,6 +165,14 @@ class ProtocolCatalog {
     );
   }
 
+  ProtocolCompatibilityResult checkSnapshotEnvelope(SnapshotEnvelope envelope) {
+    if (!supportsProtocolVersion(envelope.protocolVersion)) {
+      return const ProtocolCompatibilityResult.unsupportedVersion();
+    }
+
+    return const ProtocolCompatibilityResult.unsupportedArtifact();
+  }
+
   ProtocolVersion? _tryParseProtocolVersion(String wireVersion) {
     try {
       return ProtocolVersion.parse(wireVersion);
@@ -172,6 +194,36 @@ const defaultProtocolCatalogEntries = [
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.event,
     type: 'OpenTableSessionOpened',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'ParticipantAdmitted',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'HandStarted',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'PlayerCalled',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'IgnoredBecauseCoveredBySnapshot',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'RecoveryPauseEnded',
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),

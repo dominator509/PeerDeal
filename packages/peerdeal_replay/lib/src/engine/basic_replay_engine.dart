@@ -151,7 +151,8 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     }
 
     for (final event in request.events) {
-      if (!protocolCatalog.supportsProtocolVersion(event.protocolVersion)) {
+      final eventCompatibility = protocolCatalog.checkEventEnvelope(event);
+      if (eventCompatibility.resultCode == ResultCode.errProtocolIncompatible) {
         mismatches.add(
           ReplayMismatch(
             code: 'ERR_REPLAY_EVENT_PROTOCOL_INCOMPATIBLE',
@@ -168,6 +169,16 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
                 'Replay event protocol version does not match the request.',
             expected: request.protocolVersion,
             actual: event.protocolVersion,
+          ),
+        );
+      } else if (!eventCompatibility.isSupported) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_EVENT_SCHEMA_UNSUPPORTED',
+            message:
+                'Replay event artifact is not supported by the protocol catalog.',
+            expected: 'supported event artifact',
+            actual: '${event.eventType}@${event.eventVersion}',
           ),
         );
       }
