@@ -42,4 +42,71 @@ void main() {
     });
     expect(hash.length, equals(64));
   });
+
+  test('protocol catalog accepts fixture-backed command', () {
+    final catalog = ProtocolCatalog();
+    final file = File('fixtures/commands/open_table_session_command_v1.json');
+    final decoded = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+
+    final result = catalog.checkCommandEnvelopeJson(decoded);
+
+    expect(result.isSupported, isTrue);
+    expect(result.resultCode, ResultCode.okAccepted);
+  });
+
+  test('protocol catalog accepts fixture-backed event', () {
+    final catalog = ProtocolCatalog();
+    final file = File('fixtures/events/open_table_session_opened_event_v1.json');
+    final decoded = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+
+    final result = catalog.checkEventEnvelopeJson(decoded);
+
+    expect(result.isSupported, isTrue);
+    expect(result.resultCode, ResultCode.okAccepted);
+  });
+
+  test('protocol catalog rejects unsupported protocol version fail-safe', () {
+    final result = ProtocolCatalog().check(
+      kind: ProtocolArtifactKind.command,
+      type: 'OpenTableSession',
+      artifactVersion: '1.0',
+      protocolVersion: '2.0.0',
+    );
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
+  test('protocol catalog rejects unknown artifact fail-safe', () {
+    final result = ProtocolCatalog().check(
+      kind: ProtocolArtifactKind.command,
+      type: 'UnknownCommand',
+      artifactVersion: '1.0',
+      protocolVersion: currentProtocolVersion.toWire(),
+    );
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errSchemaInvalid);
+  });
+
+  test('protocol catalog rejects malformed command envelope fail-safe', () {
+    final result = ProtocolCatalog().checkCommandEnvelopeJson({
+      'command_type': 'OpenTableSession',
+      'protocol_version': currentProtocolVersion.toWire(),
+    });
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errSchemaInvalid);
+  });
+
+  test('protocol catalog rejects unsupported snapshot envelope fail-safe', () {
+    final result = ProtocolCatalog().checkSnapshotEnvelopeJson({
+      'snapshot_type': 'TableSnapshot',
+      'snapshot_version': '1.0',
+      'protocol_version': currentProtocolVersion.toWire(),
+    });
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errSchemaInvalid);
+  });
 }

@@ -6,6 +6,8 @@ Owns:
 - snapshot envelopes
 - result codes
 - protocol versions
+- supported artifact catalog
+- envelope-level compatibility checks
 - Game File public schema contract
 - invite payload public schema contract
 
