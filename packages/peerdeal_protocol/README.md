@@ -7,6 +7,7 @@ Owns:
 - snapshot artifact identity
 - result codes
 - stable public protocol failure code constants
+- structured protocol diagnostics
 - protocol versions
 - supported artifact catalog
 - envelope-level compatibility checks

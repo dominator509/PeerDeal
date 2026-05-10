@@ -53,6 +53,12 @@ void main() {
 
     expect(result.hasFatalConflicts, isTrue);
     expect(result.conflicts.single.code, 'ERR_RECOVERY_PROTOCOL_INCOMPATIBLE');
+    expect(result.conflicts.single.toProtocolDiagnostic().toJson(), {
+      'code': 'ERR_RECOVERY_PROTOCOL_INCOMPATIBLE',
+      'message': 'Recovery request protocol version is not supported.',
+      'expected': '1.0.0',
+      'actual': '2.0.0',
+    });
   });
 
   test('flags fatal event protocol mismatch', () {

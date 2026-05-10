@@ -58,6 +58,22 @@ void main() {
     );
   });
 
+  test('protocol diagnostic serializes optional details consistently', () {
+    const diagnostic = ProtocolDiagnostic(
+      code: ProtocolResultCodes.errProtocolIncompatible,
+      message: 'Protocol version is not supported.',
+      expected: '1.0.0',
+      actual: '2.0.0',
+    );
+
+    expect(diagnostic.toJson(), {
+      'code': 'ERR_PROTOCOL_INCOMPATIBLE',
+      'message': 'Protocol version is not supported.',
+      'expected': '1.0.0',
+      'actual': '2.0.0',
+    });
+  });
+
   test('protocol catalog accepts fixture-backed command', () {
     final catalog = ProtocolCatalog();
     final file = File('fixtures/commands/open_table_session_command_v1.json');

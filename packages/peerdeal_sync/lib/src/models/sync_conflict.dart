@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'sync_conflict_severity.dart';
 
@@ -19,4 +20,13 @@ class SyncConflict {
   final String? actual;
 
   bool get isFatal => severity == SyncConflictSeverity.fatal;
+
+  ProtocolDiagnostic toProtocolDiagnostic() {
+    return ProtocolDiagnostic(
+      code: code,
+      message: message,
+      expected: expected,
+      actual: actual,
+    );
+  }
 }

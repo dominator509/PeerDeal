@@ -77,6 +77,12 @@ void main() {
     expect(result.isSuccess, isFalse);
     expect(result.state, isNull);
     expect(result.mismatches.single.code, 'ERR_REPLAY_PROTOCOL_INCOMPATIBLE');
+    expect(result.mismatches.single.toProtocolDiagnostic().toJson(), {
+      'code': 'ERR_REPLAY_PROTOCOL_INCOMPATIBLE',
+      'message': 'Replay request protocol version is not supported.',
+      'expected': '1.0.0',
+      'actual': '2.0.0',
+    });
   });
 
   test('rejects event protocol mismatch before projection', () {
