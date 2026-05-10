@@ -166,11 +166,12 @@ class ProtocolCatalog {
   }
 
   ProtocolCompatibilityResult checkSnapshotEnvelope(SnapshotEnvelope envelope) {
-    if (!supportsProtocolVersion(envelope.protocolVersion)) {
-      return const ProtocolCompatibilityResult.unsupportedVersion();
-    }
-
-    return const ProtocolCompatibilityResult.unsupportedArtifact();
+    return check(
+      kind: ProtocolArtifactKind.snapshot,
+      type: envelope.snapshotType,
+      artifactVersion: envelope.snapshotVersion,
+      protocolVersion: envelope.protocolVersion,
+    );
   }
 
   ProtocolVersion? _tryParseProtocolVersion(String wireVersion) {
@@ -224,6 +225,12 @@ const defaultProtocolCatalogEntries = [
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.event,
     type: 'RecoveryPauseEnded',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.snapshot,
+    type: 'TableSnapshot',
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),

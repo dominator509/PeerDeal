@@ -148,4 +148,34 @@ void main() {
       'ERR_REPLAY_EVENT_SCHEMA_UNSUPPORTED',
     );
   });
+
+  test('rejects unsupported snapshot artifact before projection', () {
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        snapshot: const SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          snapshotType: 'UnknownSnapshot',
+          snapshotVersion: '1.0',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 1,
+          snapshotHash: 'snap_hash',
+          payload: <String, Object?>{},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(
+      result.mismatches.single.code,
+      'ERR_REPLAY_SNAPSHOT_SCHEMA_UNSUPPORTED',
+    );
+  });
 }

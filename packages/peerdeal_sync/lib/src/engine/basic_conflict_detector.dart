@@ -29,7 +29,22 @@ class BasicConflictDetector implements ConflictDetector {
     }
 
     if (request.snapshot != null) {
-      if (request.snapshot!.protocolVersion != request.protocolVersion) {
+      final snapshot = request.snapshot!;
+      final snapshotCompatibility = protocolCatalog.checkSnapshotEnvelope(
+        snapshot,
+      );
+      if (snapshotCompatibility.resultCode ==
+          ResultCode.errProtocolIncompatible) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_SNAPSHOT_PROTOCOL_INCOMPATIBLE',
+            message: 'Recovery snapshot protocol version is not supported.',
+            severity: SyncConflictSeverity.fatal,
+            expected: currentProtocolVersion.toWire(),
+            actual: snapshot.protocolVersion,
+          ),
+        );
+      } else if (snapshot.protocolVersion != request.protocolVersion) {
         conflicts.add(
           SyncConflict(
             code: 'ERR_SNAPSHOT_PROTOCOL_MISMATCH',
@@ -37,13 +52,24 @@ class BasicConflictDetector implements ConflictDetector {
                 'Snapshot protocol version does not match the recovery request.',
             severity: SyncConflictSeverity.fatal,
             expected: request.protocolVersion,
-            actual: request.snapshot!.protocolVersion,
+            actual: snapshot.protocolVersion,
+          ),
+        );
+      } else if (!snapshotCompatibility.isSupported) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_SNAPSHOT_SCHEMA_UNSUPPORTED',
+            message:
+                'Recovery snapshot artifact is not supported by the protocol catalog.',
+            severity: SyncConflictSeverity.fatal,
+            expected: 'supported snapshot artifact',
+            actual: '${snapshot.snapshotType}@${snapshot.snapshotVersion}',
           ),
         );
       }
 
-      if (request.snapshot!.tableId != request.tableId ||
-          request.snapshot!.sessionId != request.sessionId) {
+      if (snapshot.tableId != request.tableId ||
+          snapshot.sessionId != request.sessionId) {
         conflicts.add(
           const SyncConflict(
             code: 'ERR_SNAPSHOT_SCOPE_MISMATCH',

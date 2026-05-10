@@ -4,6 +4,7 @@ Owns:
 - command envelopes
 - event envelopes
 - snapshot envelopes
+- snapshot artifact identity
 - result codes
 - protocol versions
 - supported artifact catalog

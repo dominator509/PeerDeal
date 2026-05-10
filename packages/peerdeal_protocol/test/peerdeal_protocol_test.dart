@@ -123,9 +123,35 @@ void main() {
     expect(result.resultCode, ResultCode.errSchemaInvalid);
   });
 
-  test('protocol catalog rejects unsupported snapshot envelope fail-safe', () {
+  test('snapshot envelope includes catalog identity fields', () {
+    const snapshot = SnapshotEnvelope(
+      snapshotId: 'snap_1',
+      protocolVersion: '1.0.0',
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      snapshotBaseEventSeq: 1,
+      snapshotHash: 'snap_hash',
+      payload: <String, Object?>{},
+    );
+
+    expect(snapshot.toJson()['snapshot_type'], 'TableSnapshot');
+    expect(snapshot.toJson()['snapshot_version'], '1.0');
+  });
+
+  test('protocol catalog accepts supported snapshot envelope', () {
     final result = ProtocolCatalog().checkSnapshotEnvelopeJson({
       'snapshot_type': 'TableSnapshot',
+      'snapshot_version': '1.0',
+      'protocol_version': currentProtocolVersion.toWire(),
+    });
+
+    expect(result.isSupported, isTrue);
+    expect(result.resultCode, ResultCode.okAccepted);
+  });
+
+  test('protocol catalog rejects unsupported snapshot envelope fail-safe', () {
+    final result = ProtocolCatalog().checkSnapshotEnvelopeJson({
+      'snapshot_type': 'UnknownSnapshot',
       'snapshot_version': '1.0',
       'protocol_version': currentProtocolVersion.toWire(),
     });

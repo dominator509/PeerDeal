@@ -116,4 +116,30 @@ void main() {
     expect(result.hasFatalConflicts, isTrue);
     expect(result.conflicts.single.code, 'ERR_EVENT_SCHEMA_UNSUPPORTED');
   });
+
+  test('flags fatal unsupported snapshot artifact', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          snapshotType: 'UnknownSnapshot',
+          snapshotVersion: '1.0',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 1,
+          snapshotHash: 'snap_hash',
+          payload: <String, Object?>{},
+        ),
+        events: <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_SCHEMA_UNSUPPORTED');
+  });
 }

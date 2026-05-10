@@ -137,17 +137,41 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     }
 
     final snapshot = request.snapshot;
-    if (snapshot != null &&
-        snapshot.protocolVersion != request.protocolVersion) {
-      mismatches.add(
-        ReplayMismatch(
-          code: 'ERR_REPLAY_SNAPSHOT_PROTOCOL_MISMATCH',
-          message:
-              'Snapshot protocol version does not match the replay request.',
-          expected: request.protocolVersion,
-          actual: snapshot.protocolVersion,
-        ),
+    if (snapshot != null) {
+      final snapshotCompatibility = protocolCatalog.checkSnapshotEnvelope(
+        snapshot,
       );
+      if (snapshotCompatibility.resultCode ==
+          ResultCode.errProtocolIncompatible) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_SNAPSHOT_PROTOCOL_INCOMPATIBLE',
+            message: 'Replay snapshot protocol version is not supported.',
+            expected: currentProtocolVersion.toWire(),
+            actual: snapshot.protocolVersion,
+          ),
+        );
+      } else if (snapshot.protocolVersion != request.protocolVersion) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_SNAPSHOT_PROTOCOL_MISMATCH',
+            message:
+                'Snapshot protocol version does not match the replay request.',
+            expected: request.protocolVersion,
+            actual: snapshot.protocolVersion,
+          ),
+        );
+      } else if (!snapshotCompatibility.isSupported) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_SNAPSHOT_SCHEMA_UNSUPPORTED',
+            message:
+                'Replay snapshot artifact is not supported by the protocol catalog.',
+            expected: 'supported snapshot artifact',
+            actual: '${snapshot.snapshotType}@${snapshot.snapshotVersion}',
+          ),
+        );
+      }
     }
 
     for (final event in request.events) {
