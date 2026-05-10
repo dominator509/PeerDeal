@@ -15,14 +15,18 @@ class RecordingJoinEventSink implements JoinEventSink {
 }
 
 class FakeInviteResolver implements InviteResolver {
+  FakeInviteResolver({this.protocolVersion = '1.0.0'});
+
+  final String protocolVersion;
+
   @override
   Future<ResolvedInvite> resolveInvite(InviteContext context) async {
-    return const ResolvedInvite(
+    return ResolvedInvite(
       inviteId: 'inv_001',
       tableId: 'tbl_001',
       sessionId: 'sess_001',
       modeType: 'open_table',
-      protocolVersion: '1.x',
+      protocolVersion: protocolVersion,
       requiresReceiptAck: true,
       requiresRetentionAck: true,
       requiresCaptureAck: true,

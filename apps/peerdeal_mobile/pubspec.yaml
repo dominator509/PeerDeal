@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  peerdeal_protocol: ^0.1.0
 
 dev_dependencies:
   test: ^1.25.0

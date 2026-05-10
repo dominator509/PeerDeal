@@ -50,6 +50,57 @@ void main() {
     expect(result.state, JoinFlowState.joined);
   });
 
+  test('rejects unsupported invite protocol before negotiation', () async {
+    final sink = RecordingJoinEventSink();
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: FakeInviteResolver(protocolVersion: '2.0.0'),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(allAccepted: true),
+      roleAuthorizer: FakeRoleAuthorizer(allow: true),
+      bootstrapCoordinator: FakeBootstrapCoordinator(),
+      governanceCommitter: FakeGovernanceCommitter(acceptJoin: true),
+      eventSink: sink,
+    );
+
+    final result = await orchestrator.runFirstJoin(
+      const InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+      ),
+    );
+
+    expect(result.resultCode, 'ERR_PROTOCOL_INCOMPATIBLE');
+    expect(result.state, JoinFlowState.joinRejected);
+    expect(sink.log, isNot(contains('preflightPending:PREFLIGHT_PENDING')));
+  });
+
+  test(
+    'rejects unsupported rejoin protocol before governance commit',
+    () async {
+      final sink = RecordingJoinEventSink();
+      final orchestrator = JoinFlowOrchestrator(
+        inviteResolver: FakeInviteResolver(protocolVersion: '2.0.0'),
+        joinNegotiator: FakeJoinNegotiator(),
+        disclosureCoordinator: FakeDisclosureCoordinator(),
+        roleAuthorizer: FakeRoleAuthorizer(),
+        bootstrapCoordinator: FakeBootstrapCoordinator(),
+        governanceCommitter: FakeGovernanceCommitter(acceptRejoin: true),
+        eventSink: sink,
+      );
+
+      final result = await orchestrator.runRejoin(
+        const InviteContext(
+          inviteCode: 'ABC123',
+          requestedRole: RequestedRole.player,
+          rejoinToken: 'rj_001',
+        ),
+      );
+
+      expect(result.resultCode, 'ERR_PROTOCOL_INCOMPATIBLE');
+      expect(result.state, JoinFlowState.joinRejected);
+    },
+  );
+
   test('returns rejoined when rejoin commit succeeds', () async {
     final sink = RecordingJoinEventSink();
     final orchestrator = JoinFlowOrchestrator(

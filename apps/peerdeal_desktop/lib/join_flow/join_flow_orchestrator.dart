@@ -1,3 +1,5 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import 'join_flow_adapters.dart';
 import 'join_flow_models.dart';
 
@@ -10,13 +12,15 @@ class JoinFlowOrchestrator {
     required BootstrapCoordinator bootstrapCoordinator,
     required GovernanceCommitter governanceCommitter,
     required JoinEventSink eventSink,
-  })  : _inviteResolver = inviteResolver,
-        _joinNegotiator = joinNegotiator,
-        _disclosureCoordinator = disclosureCoordinator,
-        _roleAuthorizer = roleAuthorizer,
-        _bootstrapCoordinator = bootstrapCoordinator,
-        _governanceCommitter = governanceCommitter,
-        _eventSink = eventSink;
+    ProtocolCatalog protocolCatalog = const ProtocolCatalog(),
+  }) : _inviteResolver = inviteResolver,
+       _joinNegotiator = joinNegotiator,
+       _disclosureCoordinator = disclosureCoordinator,
+       _roleAuthorizer = roleAuthorizer,
+       _bootstrapCoordinator = bootstrapCoordinator,
+       _governanceCommitter = governanceCommitter,
+       _eventSink = eventSink,
+       _protocolCatalog = protocolCatalog;
 
   final InviteResolver _inviteResolver;
   final JoinNegotiator _joinNegotiator;
@@ -25,6 +29,7 @@ class JoinFlowOrchestrator {
   final BootstrapCoordinator _bootstrapCoordinator;
   final GovernanceCommitter _governanceCommitter;
   final JoinEventSink _eventSink;
+  final ProtocolCatalog _protocolCatalog;
 
   Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
     await _eventSink.emitState(
@@ -37,6 +42,20 @@ class JoinFlowOrchestrator {
       state: JoinFlowState.inviteResolved,
       resultCode: 'INVITE_RESOLVED',
     );
+
+    if (!_protocolCatalog.supportsProtocolVersion(
+      resolvedInvite.protocolVersion,
+    )) {
+      await _eventSink.emitState(
+        state: JoinFlowState.joinRejected,
+        resultCode: 'ERR_PROTOCOL_INCOMPATIBLE',
+      );
+      return const JoinFlowOutcome(
+        state: JoinFlowState.joinRejected,
+        status: JoinDecisionStatus.negotiationFailed,
+        resultCode: 'ERR_PROTOCOL_INCOMPATIBLE',
+      );
+    }
 
     await _eventSink.emitState(
       state: JoinFlowState.preflightPending,
@@ -166,6 +185,20 @@ class JoinFlowOrchestrator {
     );
 
     final resolvedInvite = await _inviteResolver.resolveInvite(context);
+    if (!_protocolCatalog.supportsProtocolVersion(
+      resolvedInvite.protocolVersion,
+    )) {
+      await _eventSink.emitState(
+        state: JoinFlowState.joinRejected,
+        resultCode: 'ERR_PROTOCOL_INCOMPATIBLE',
+      );
+      return const JoinFlowOutcome(
+        state: JoinFlowState.joinRejected,
+        status: JoinDecisionStatus.rejoinRejected,
+        resultCode: 'ERR_PROTOCOL_INCOMPATIBLE',
+      );
+    }
+
     final commit = await _governanceCommitter.commitRejoin(
       resolvedInvite: resolvedInvite,
       rejoinToken: rejoinToken,
