@@ -74,15 +74,15 @@ void main() {
     expect(result.diagnostics.single.toJson(), {
       'code': 'ERR_PROTOCOL_INCOMPATIBLE',
       'message': 'Invite protocol version is not supported.',
-      'expected': '1.0.0',
-      'actual': '2.0.0',
+      'expected': '<redacted>',
+      'actual': '<redacted>',
     });
     expect(sink.log, isNot(contains('preflightPending:PREFLIGHT_PENDING')));
     expect(sink.diagnosticsLog.last.single, {
       'code': 'ERR_PROTOCOL_INCOMPATIBLE',
       'message': 'Invite protocol version is not supported.',
-      'expected': '1.0.0',
-      'actual': '2.0.0',
+      'expected': '<redacted>',
+      'actual': '<redacted>',
     });
   });
 
@@ -113,8 +113,8 @@ void main() {
       expect(result.diagnostics.single.toJson(), {
         'code': 'ERR_PROTOCOL_INCOMPATIBLE',
         'message': 'Invite protocol version is not supported.',
-        'expected': '1.0.0',
-        'actual': '2.0.0',
+        'expected': '<redacted>',
+        'actual': '<redacted>',
       });
     },
   );

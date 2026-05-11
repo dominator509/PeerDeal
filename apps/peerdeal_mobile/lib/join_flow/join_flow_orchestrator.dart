@@ -1,3 +1,4 @@
+import 'package:peerdeal_privacy/peerdeal_privacy.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'join_flow_adapters.dart';
@@ -12,6 +13,8 @@ class JoinFlowOrchestrator {
     required BootstrapCoordinator bootstrapCoordinator,
     required GovernanceCommitter governanceCommitter,
     required JoinEventSink eventSink,
+    DiagnosticsScrubber diagnosticsScrubber =
+        const DefaultDiagnosticsScrubber(),
     ProtocolCatalog protocolCatalog = const ProtocolCatalog(),
   }) : _inviteResolver = inviteResolver,
        _joinNegotiator = joinNegotiator,
@@ -20,6 +23,7 @@ class JoinFlowOrchestrator {
        _bootstrapCoordinator = bootstrapCoordinator,
        _governanceCommitter = governanceCommitter,
        _eventSink = eventSink,
+       _diagnosticsScrubber = diagnosticsScrubber,
        _protocolCatalog = protocolCatalog;
 
   final InviteResolver _inviteResolver;
@@ -29,6 +33,7 @@ class JoinFlowOrchestrator {
   final BootstrapCoordinator _bootstrapCoordinator;
   final GovernanceCommitter _governanceCommitter;
   final JoinEventSink _eventSink;
+  final DiagnosticsScrubber _diagnosticsScrubber;
   final ProtocolCatalog _protocolCatalog;
 
   Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
@@ -242,11 +247,13 @@ class JoinFlowOrchestrator {
     String actualProtocolVersion,
   ) {
     return <ProtocolDiagnostic>[
-      ProtocolDiagnostic(
-        code: ProtocolResultCodes.errProtocolIncompatible,
-        message: 'Invite protocol version is not supported.',
-        expected: currentProtocolVersion.toWire(),
-        actual: actualProtocolVersion,
+      _diagnosticsScrubber.scrubProtocolDiagnostic(
+        ProtocolDiagnostic(
+          code: ProtocolResultCodes.errProtocolIncompatible,
+          message: 'Invite protocol version is not supported.',
+          expected: currentProtocolVersion.toWire(),
+          actual: actualProtocolVersion,
+        ),
       ),
     ];
   }
