@@ -47,4 +47,11 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
       actual: diagnostic.actual == null ? null : '<redacted>',
     );
   }
+
+  @override
+  List<ProtocolDiagnostic> scrubProtocolDiagnostics(
+    Iterable<ProtocolDiagnostic> diagnostics,
+  ) {
+    return diagnostics.map(scrubProtocolDiagnostic).toList(growable: false);
+  }
 }

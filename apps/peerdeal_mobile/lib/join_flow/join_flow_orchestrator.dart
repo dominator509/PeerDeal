@@ -246,15 +246,13 @@ class JoinFlowOrchestrator {
   List<ProtocolDiagnostic> _protocolIncompatibleDiagnostics(
     String actualProtocolVersion,
   ) {
-    return <ProtocolDiagnostic>[
-      _diagnosticsScrubber.scrubProtocolDiagnostic(
-        ProtocolDiagnostic(
-          code: ProtocolResultCodes.errProtocolIncompatible,
-          message: 'Invite protocol version is not supported.',
-          expected: currentProtocolVersion.toWire(),
-          actual: actualProtocolVersion,
-        ),
+    return _diagnosticsScrubber.scrubProtocolDiagnostics(<ProtocolDiagnostic>[
+      ProtocolDiagnostic(
+        code: ProtocolResultCodes.errProtocolIncompatible,
+        message: 'Invite protocol version is not supported.',
+        expected: currentProtocolVersion.toWire(),
+        actual: actualProtocolVersion,
       ),
-    ];
+    ]);
   }
 }

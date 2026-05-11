@@ -6,4 +6,8 @@ abstract interface class DiagnosticsScrubber {
   ScrubbedDiagnostics scrub(Map<String, Object?> input);
 
   ProtocolDiagnostic scrubProtocolDiagnostic(ProtocolDiagnostic diagnostic);
+
+  List<ProtocolDiagnostic> scrubProtocolDiagnostics(
+    Iterable<ProtocolDiagnostic> diagnostics,
+  );
 }

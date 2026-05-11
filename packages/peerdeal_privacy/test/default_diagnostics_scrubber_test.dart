@@ -39,4 +39,33 @@ void main() {
       'actual': '<redacted>',
     });
   });
+
+  test('DefaultDiagnosticsScrubber redacts protocol diagnostic lists', () {
+    const scrubber = DefaultDiagnosticsScrubber();
+
+    final result = scrubber.scrubProtocolDiagnostics([
+      const ProtocolDiagnostic(
+        code: ProtocolResultCodes.errProtocolIncompatible,
+        message: 'Invite protocol version is not supported.',
+        expected: '1.0.0',
+        actual: '2.0.0',
+      ),
+      const ProtocolDiagnostic(
+        code: ProtocolResultCodes.errProtocolIncompatible,
+        message: 'No details are still safe.',
+      ),
+    ]);
+
+    expect(result, hasLength(2));
+    expect(result.first.toJson(), {
+      'code': 'ERR_PROTOCOL_INCOMPATIBLE',
+      'message': 'Invite protocol version is not supported.',
+      'expected': '<redacted>',
+      'actual': '<redacted>',
+    });
+    expect(result.last.toJson(), {
+      'code': 'ERR_PROTOCOL_INCOMPATIBLE',
+      'message': 'No details are still safe.',
+    });
+  });
 }
