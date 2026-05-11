@@ -6,6 +6,7 @@ Own privacy-focused runtime policy for PeerDeal:
 - wipe scheduling semantics
 - metadata minimization
 - diagnostics scrubbing
+- protocol diagnostic detail scrubbing
 - disappearing session/message policy models
 
 ## Hard boundaries

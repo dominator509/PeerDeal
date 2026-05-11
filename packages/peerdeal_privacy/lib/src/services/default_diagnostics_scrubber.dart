@@ -1,3 +1,5 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import '../contracts/diagnostics_scrubber.dart';
 import '../models/scrubbed_diagnostics.dart';
 
@@ -33,6 +35,16 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
       rawKeysRemoved: removed,
       redactedFields: redacted,
       payload: payload,
+    );
+  }
+
+  @override
+  ProtocolDiagnostic scrubProtocolDiagnostic(ProtocolDiagnostic diagnostic) {
+    return ProtocolDiagnostic(
+      code: diagnostic.code,
+      message: diagnostic.message,
+      expected: diagnostic.expected == null ? null : '<redacted>',
+      actual: diagnostic.actual == null ? null : '<redacted>',
     );
   }
 }

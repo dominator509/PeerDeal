@@ -8,6 +8,7 @@ Starter package for PeerDeal privacy policy, retention, wipe, metadata minimizat
 - disappearing session/message policy models
 - metadata minimization policy
 - diagnostics scrubbing policy
+- protocol diagnostic detail scrubbing
 - secure local storage policy seam
 
 ## Must not own
