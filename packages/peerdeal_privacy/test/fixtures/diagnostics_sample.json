@@ -1,7 +1,18 @@
 {
-  "error_code": "ERR_PROTOCOL_INCOMPATIBLE",
-  "receipt_token": "opaque-token",
-  "session_secret": "very-secret",
-  "ip_address": "192.168.1.20",
-  "device_identifier": "ios-device-01"
+  "error_code": "ERR_RECEIPT_RESTORE_DENIED",
+  "receipt": {
+    "receipt_token": "opaque-token",
+    "status": "wiped"
+  },
+  "peers": [
+    {
+      "device_identifier": "ios-device-01",
+      "route": "lan"
+    },
+    {
+      "session_secret": "very-secret",
+      "ip_address": "192.168.1.20",
+      "route": "relay"
+    }
+  ]
 }
