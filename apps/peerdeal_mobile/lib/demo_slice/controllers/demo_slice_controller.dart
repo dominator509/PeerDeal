@@ -11,4 +11,15 @@ class DemoSliceController {
   void selectScenario(String scenarioId) {
     _active = scenarios.firstWhere((s) => s.id == scenarioId);
   }
+
+  bool trySelectScenario(String scenarioId) {
+    for (final scenario in scenarios) {
+      if (scenario.id == scenarioId) {
+        _active = scenario;
+        return true;
+      }
+    }
+
+    return false;
+  }
 }
