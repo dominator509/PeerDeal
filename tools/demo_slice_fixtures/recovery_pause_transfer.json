@@ -3,7 +3,7 @@
   "mode": "open_table",
   "variant": "holdem_nlhe",
   "network_confidence": "recovery_required",
-  "status_banner": {"visible": true, "label": "Recovery pause · primary peer transfer", "severity": "warning"},
+  "status_banner": {"visible": true, "label": "Recovery pause - primary peer transfer", "severity": "warning"},
   "chat": {"unread_count": 1, "disappearing_enabled": true},
   "receipt": {"verification_state": "pending", "retention_mode": "timed_sandbox", "binding_mode": "session_bound"}
 }

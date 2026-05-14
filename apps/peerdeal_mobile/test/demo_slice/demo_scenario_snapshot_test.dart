@@ -26,8 +26,11 @@ void main() {
       );
 
       expect(snapshot.scenarioId, scenario.id);
+      expect(_isCleanDisplayText(scenario.title), isTrue);
+      expect(_isCleanDisplayText(scenario.description), isTrue);
       expect(snapshot.mode, isNotEmpty);
       expect(snapshot.variant, 'holdem_nlhe');
+      expect(_isCleanDisplayText(snapshot.statusBanner.label), isTrue);
       expect(snapshot.statusBanner.severity, isNotEmpty);
       expect(snapshot.chat.unreadCount, greaterThanOrEqualTo(0));
       expect(snapshot.receipt.verificationState, isNotEmpty);
@@ -63,4 +66,8 @@ Map<String, Object?> _fixtureJson(String fixtureName) {
 
 String _fixtureName(String fixturePath) {
   return fixturePath.split('/').last;
+}
+
+bool _isCleanDisplayText(String value) {
+  return !value.contains('Â') && !value.contains('�');
 }
