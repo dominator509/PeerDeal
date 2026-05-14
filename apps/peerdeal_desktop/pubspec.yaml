@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
   peerdeal_privacy: ^0.1.0
   peerdeal_protocol: ^0.1.0
+  peerdeal_receipts: ^0.1.0
+  peerdeal_sync: ^0.1.0
 
 dev_dependencies:
   test: ^1.25.0
