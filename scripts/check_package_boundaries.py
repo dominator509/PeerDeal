@@ -34,16 +34,26 @@ def iter_dart_files(base: pathlib.Path):
     return [p for p in base.rglob('*.dart') if p.is_file()]
 
 
+def iter_package_pubspecs(root: pathlib.Path):
+    pubspecs: list[pathlib.Path] = []
+    for package_parent in [root / "apps", root / "packages"]:
+        if package_parent.exists():
+            pubspecs.extend(package_parent.glob("*/pubspec.yaml"))
+    return pubspecs
+
+
+def pubspec_package_name(pubspec: pathlib.Path) -> str | None:
+    text = pubspec.read_text(encoding="utf-8")
+    match = re.search(r"^name:\s*([a-zA-Z0-9_]+)\s*$", text, re.MULTILINE)
+    return match.group(1) if match else None
+
+
 def find_package_roots(root: pathlib.Path) -> dict[str, pathlib.Path]:
     packages: dict[str, pathlib.Path] = {}
-    for package_parent in [root / "apps", root / "packages"]:
-        if not package_parent.exists():
-            continue
-        for pubspec in package_parent.glob("*/pubspec.yaml"):
-            text = pubspec.read_text(encoding="utf-8")
-            match = re.search(r"^name:\s*([a-zA-Z0-9_]+)\s*$", text, re.MULTILINE)
-            if match:
-                packages[match.group(1)] = pubspec.parent
+    for pubspec in iter_package_pubspecs(root):
+        package_name = pubspec_package_name(pubspec)
+        if package_name:
+            packages[package_name] = pubspec.parent
     return packages
 
 
@@ -130,6 +140,25 @@ def package_documentation_failures(package_roots: dict[str, pathlib.Path]) -> li
     return failures
 
 
+def package_identity_failures(root: pathlib.Path) -> list[str]:
+    failures: list[str] = []
+    seen: dict[str, pathlib.Path] = {}
+    for pubspec in iter_package_pubspecs(root):
+        package_name = pubspec_package_name(pubspec)
+        relative_path = normalize_path(pubspec.parent.relative_to(root))
+        if package_name is None:
+            failures.append(f"{relative_path}: pubspec.yaml is missing a package name.")
+            continue
+        if package_name in seen:
+            first_path = normalize_path(seen[package_name].relative_to(root))
+            failures.append(
+                f"{relative_path}: duplicate package name {package_name}; first seen at {first_path}."
+            )
+            continue
+        seen[package_name] = pubspec.parent
+    return failures
+
+
 def check_boundaries(root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     package_roots = find_package_roots(root)
@@ -143,6 +172,7 @@ def check_boundaries(root: pathlib.Path) -> list[str]:
 
     failures.extend(compare_path_sets("workspace package list", actual_paths, workspace_paths))
     failures.extend(compare_path_sets("docs/PACKAGE_MAP.md", actual_paths, map_paths))
+    failures.extend(package_identity_failures(root))
     failures.extend(package_documentation_failures(package_roots))
 
     for dart_file in iter_dart_files(root):

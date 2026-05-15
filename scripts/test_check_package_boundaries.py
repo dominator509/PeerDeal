@@ -182,6 +182,45 @@ class BoundaryCheckTest(unittest.TestCase):
 
             self.assertTrue(any("docs/PACKAGE_MAP.md: missing packages/peerdeal_core" in failure for failure in failures))
 
+    def test_rejects_duplicate_package_names(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_package(root, "peerdeal_core")
+            duplicate_root = root / "packages" / "peerdeal_core_copy"
+            write_file(
+                duplicate_root / "pubspec.yaml",
+                "name: peerdeal_core\n\n"
+                "environment:\n"
+                "  sdk: '^3.11.5'\n",
+            )
+            write_file(duplicate_root / "AGENTS.md", "# duplicate agent rules\n")
+            write_file(duplicate_root / "README.md", "# duplicate\n")
+            write_workspace_metadata(
+                root,
+                ["packages/peerdeal_core", "packages/peerdeal_core_copy"],
+            )
+
+            failures = check_boundaries(root)
+
+            self.assertTrue(any("duplicate package name peerdeal_core" in failure for failure in failures))
+
+    def test_rejects_pubspec_without_package_name(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            package_root = root / "packages" / "peerdeal_core"
+            write_file(
+                package_root / "pubspec.yaml",
+                "environment:\n"
+                "  sdk: '^3.11.5'\n",
+            )
+            write_file(package_root / "AGENTS.md", "# peerdeal_core agent rules\n")
+            write_file(package_root / "README.md", "# peerdeal_core\n")
+            write_workspace_metadata(root, ["packages/peerdeal_core"])
+
+            failures = check_boundaries(root)
+
+            self.assertTrue(any("pubspec.yaml is missing a package name" in failure for failure in failures))
+
     def test_rejects_missing_package_local_docs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = pathlib.Path(temp_dir)

@@ -31,6 +31,7 @@
 ## Boundary check coverage
 `melos run boundary-check` verifies that:
 - the root workspace list, actual package folders, and this package map match
+- each package pubspec declares one unique package name
 - every mapped app/package has package-local `AGENTS.md` and `README.md`
 - PeerDeal package imports are declared in the importing package's pubspec
 - reusable packages do not import app-layer packages
