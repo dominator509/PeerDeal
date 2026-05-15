@@ -4,6 +4,7 @@
 - protocol schema tests
 - reducer determinism tests
 - package-boundary checks
+- source-text hygiene checks for checked-in scaffold text
 
 ## Local baseline
 Use `docs/MIGRATION_BASELINE.md` for the current green scaffold commands and

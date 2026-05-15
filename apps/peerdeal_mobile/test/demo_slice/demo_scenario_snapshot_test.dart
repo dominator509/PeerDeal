@@ -69,5 +69,8 @@ String _fixtureName(String fixturePath) {
 }
 
 bool _isCleanDisplayText(String value) {
-  return !value.contains('Â') && !value.contains('�');
+  const invalidDisplayCodeUnits = <int>{0x00C2, 0xFFFD};
+  return value.runes.every(
+    (codeUnit) => !invalidDisplayCodeUnits.contains(codeUnit),
+  );
 }

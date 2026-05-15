@@ -21,6 +21,8 @@ melos run boundary-check
 melos run boundary-check:test
 melos run dependency-audit
 melos run dependency-audit:test
+melos run source-text
+melos run source-text:test
 melos run analyze
 melos run test
 ```
@@ -34,7 +36,8 @@ melos run test 2>&1 | Tee-Object logs\test_after_patch.txt
 
 ## Current green baseline
 - `melos run analyze` passes across all 17 packages.
-- `melos run test` passes across script, Dart, and Flutter test lanes.
+- `melos run test` passes across script, source-text, Dart, and Flutter test
+  lanes.
 - Dart lane covers 13 non-Flutter packages.
 - Flutter lane covers `peerdeal_mobile`, `peerdeal_desktop`,
   `peerdeal_ui_kit`, and `peerdeal_native_bridges`.

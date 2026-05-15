@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import pathlib
+import sys
+import tempfile
+import unittest
+
+from check_source_text import check_source_text
+
+
+def write_file(path: pathlib.Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+class SourceTextCheckTest(unittest.TestCase):
+    def test_allows_clean_source_text(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(root / "lib" / "sample.dart", "const label = 'Clean';\n")
+
+            self.assertEqual([], check_source_text(root))
+
+    def test_rejects_mojibake_marker(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(root / "lib" / "sample.dart", "const label = 'A\u00c2B';\n")
+
+            failures = check_source_text(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("likely mojibake marker", failures[0])
+
+    def test_rejects_replacement_character(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(root / "fixture.json", '{"label": "bad\ufffdtext"}\n')
+
+            failures = check_source_text(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("unicode replacement character", failures[0])
+
+    def test_ignores_generated_tooling_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(root / ".dart_tool" / "cache.dart", "bad\ufffdtext\n")
+            write_file(root / "build" / "cache.json", '{"label": "A\u00c2B"}\n')
+
+            self.assertEqual([], check_source_text(root))
+
+
+if __name__ == "__main__":
+    runner = unittest.TextTestRunner(stream=sys.stdout)
+    unittest.main(testRunner=runner)
