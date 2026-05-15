@@ -21,6 +21,7 @@ FORBIDDEN_IMPORT_PATTERNS = [
         'package:flutter/',
     ]),
 ]
+APP_PACKAGE_NAMES = {"peerdeal_desktop", "peerdeal_mobile"}
 
 
 def normalize_path(path: pathlib.Path) -> str:
@@ -162,6 +163,11 @@ def check_boundaries(root: pathlib.Path) -> list[str]:
             if imported_package not in package_roots:
                 failures.append(f'{dart_file}: imports unknown PeerDeal package {imported_package}.')
                 continue
+
+            if current_package not in APP_PACKAGE_NAMES and imported_package in APP_PACKAGE_NAMES:
+                failures.append(
+                    f'{dart_file}: reusable packages may not import app package {imported_package}.'
+                )
 
             if imported_package not in declared_dependencies[current_package]:
                 failures.append(

@@ -120,6 +120,24 @@ class BoundaryCheckTest(unittest.TestCase):
 
             self.assertTrue(any("per package map" in failure for failure in failures))
 
+    def test_rejects_package_importing_app_package(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_package(root, "peerdeal_mobile")
+            package_root = write_package(root, "peerdeal_network", ["peerdeal_mobile"])
+            write_workspace_metadata(
+                root,
+                ["apps/peerdeal_mobile", "packages/peerdeal_network"],
+            )
+            write_file(
+                package_root / "lib" / "peerdeal_network.dart",
+                "import 'package:peerdeal_mobile/main.dart';\n",
+            )
+
+            failures = check_boundaries(root)
+
+            self.assertTrue(any("may not import app package peerdeal_mobile" in failure for failure in failures))
+
     def test_rejects_src_import(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = pathlib.Path(temp_dir)
