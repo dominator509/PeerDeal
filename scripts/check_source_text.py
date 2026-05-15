@@ -35,8 +35,13 @@ def check_source_text(root: pathlib.Path) -> list[str]:
         if not path.is_file() or not should_check(path):
             continue
 
-        text = path.read_text(encoding="utf-8")
         relative_path = path.relative_to(root).as_posix()
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError as error:
+            failures.append(f"{relative_path}: invalid utf-8 text: {error}.")
+            continue
+
         for line_number, line in enumerate(text.splitlines(), start=1):
             for marker, label in FORBIDDEN_TEXT.items():
                 if marker in line:

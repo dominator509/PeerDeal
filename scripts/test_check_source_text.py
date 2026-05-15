@@ -14,6 +14,11 @@ def write_file(path: pathlib.Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def write_bytes(path: pathlib.Path, payload: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(payload)
+
+
 class SourceTextCheckTest(unittest.TestCase):
     def test_allows_clean_source_text(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -49,6 +54,16 @@ class SourceTextCheckTest(unittest.TestCase):
             write_file(root / "build" / "cache.json", '{"label": "A\u00c2B"}\n')
 
             self.assertEqual([], check_source_text(root))
+
+    def test_rejects_invalid_utf8_text_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_bytes(root / "lib" / "bad.dart", b"\xff\xfe")
+
+            failures = check_source_text(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("invalid utf-8 text", failures[0])
 
 
 if __name__ == "__main__":

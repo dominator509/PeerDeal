@@ -60,6 +60,7 @@ the gates below are satisfied.
 - `melos run boundary-check` passes.
 - `melos run dependency-audit` passes and dependency changes are reviewed under
   `docs/DEPENDENCY_POLICY.md`.
+- `melos run source-text` passes for checked-in source, docs, and fixtures.
 - `melos run analyze` passes.
 - `melos run test` passes.
 - CI runs the same baseline commands as local development.
