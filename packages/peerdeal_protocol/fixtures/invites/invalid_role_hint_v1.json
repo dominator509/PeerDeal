@@ -1,0 +1,13 @@
+{
+  "invite_version": "1.0",
+  "invite_id": "inv_rejected_001",
+  "config_id": "cfg_open_table_001",
+  "session_id": "sess_001",
+  "table_id": "tbl_001",
+  "mode_type": "open_table",
+  "variant_id": "holdem_nlhe",
+  "protocol_version": "1.0.0",
+  "invite_code": "ALPHA7",
+  "role_hint": "dealer",
+  "signature": "sig_placeholder"
+}

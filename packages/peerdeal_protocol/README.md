@@ -14,9 +14,15 @@ Owns:
 - envelope-level compatibility checks
 - Game File public schema contract
 - invite payload public schema contract
+- accepted and rejected protocol fixtures
 
 Must not own:
 - reducers
 - transport implementation
 - UI presentation
 - mode or variant business logic
+
+## Fixture convention
+Accepted fixtures use supported protocol/catalog identities and should validate
+cleanly. Rejected fixtures intentionally preserve valid JSON shape while
+triggering fail-safe schema or catalog rejection.

@@ -4,6 +4,10 @@ import 'dart:io';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:test/test.dart';
 
+Map<String, Object?> fixtureJson(String path) {
+  return jsonDecode(File(path).readAsStringSync()) as Map<String, Object?>;
+}
+
 void main() {
   test('canonical json encoding is stable for map key order', () {
     final a = canonicalJsonEncode({
@@ -22,15 +26,15 @@ void main() {
   });
 
   test('game file fixture validates', () {
-    final file = File('fixtures/gamefiles/open_table_valid_v1.json');
-    final decoded = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+    final decoded = fixtureJson('fixtures/gamefiles/open_table_valid_v1.json');
     final errors = GameFileSchema().validate(decoded);
     expect(errors, isEmpty);
   });
 
   test('invite payload fixture validates', () {
-    final file = File('fixtures/invites/open_table_player_invite_v1.json');
-    final decoded = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+    final decoded = fixtureJson(
+      'fixtures/invites/open_table_player_invite_v1.json',
+    );
     final errors = InvitePayloadSchema().validate(decoded);
     expect(errors, isEmpty);
   });
@@ -76,8 +80,9 @@ void main() {
 
   test('protocol catalog accepts fixture-backed command', () {
     final catalog = ProtocolCatalog();
-    final file = File('fixtures/commands/open_table_session_command_v1.json');
-    final decoded = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+    final decoded = fixtureJson(
+      'fixtures/commands/open_table_session_command_v1.json',
+    );
 
     final result = catalog.checkCommandEnvelopeJson(decoded);
 
@@ -87,10 +92,9 @@ void main() {
 
   test('protocol catalog accepts fixture-backed event', () {
     final catalog = ProtocolCatalog();
-    final file = File(
+    final decoded = fixtureJson(
       'fixtures/events/open_table_session_opened_event_v1.json',
     );
-    final decoded = jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
 
     final result = catalog.checkEventEnvelopeJson(decoded);
 
@@ -149,6 +153,46 @@ void main() {
       'command_type': 'OpenTableSession',
       'protocol_version': currentProtocolVersion.toWire(),
     });
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errSchemaInvalid);
+  });
+
+  test('rejected game file fixture fails schema validation', () {
+    final decoded = fixtureJson('fixtures/gamefiles/invalid_mode_type_v1.json');
+    final errors = GameFileSchema().validate(decoded);
+
+    expect(errors, contains('mode.mode_type must be tournament or open_table'));
+  });
+
+  test('rejected invite fixture fails schema validation', () {
+    final decoded = fixtureJson('fixtures/invites/invalid_role_hint_v1.json');
+    final errors = InvitePayloadSchema().validate(decoded);
+
+    expect(errors, contains('role_hint must be player, spectator, or cohost'));
+  });
+
+  test('protocol catalog rejects unsupported command fixture fail-safe', () {
+    final decoded = fixtureJson('fixtures/commands/unsupported_command_v1.json');
+    final result = ProtocolCatalog().checkCommandEnvelopeJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errSchemaInvalid);
+  });
+
+  test('protocol catalog rejects unsupported event fixture fail-safe', () {
+    final decoded = fixtureJson('fixtures/events/unsupported_event_v1.json');
+    final result = ProtocolCatalog().checkEventEnvelopeJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errSchemaInvalid);
+  });
+
+  test('protocol catalog rejects unsupported snapshot fixture fail-safe', () {
+    final decoded = fixtureJson(
+      'fixtures/snapshots/unsupported_snapshot_v1.json',
+    );
+    final result = ProtocolCatalog().checkSnapshotEnvelopeJson(decoded);
 
     expect(result.isSupported, isFalse);
     expect(result.resultCode, ResultCode.errSchemaInvalid);
