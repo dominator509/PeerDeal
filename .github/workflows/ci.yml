@@ -21,8 +21,13 @@ jobs:
         with:
           channel: stable
 
+      - name: Show tool versions
+        run: |
+          flutter --version
+          dart --version
+
       - name: Install workspace dependencies
-        run: dart pub get
+        run: flutter pub get
 
       - name: Bootstrap workspace
         run: dart run melos bootstrap
