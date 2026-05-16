@@ -26,6 +26,11 @@ jobs:
           flutter --version
           dart --version
 
+      - name: Install Melos CLI
+        run: |
+          dart pub global activate melos 7.5.1
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
       - name: Install workspace dependencies
         run: flutter pub get
 
