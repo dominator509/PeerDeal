@@ -159,6 +159,27 @@ def package_identity_failures(root: pathlib.Path) -> list[str]:
     return failures
 
 
+def expected_package_path(package_name: str) -> str:
+    parent = "apps" if package_name in APP_PACKAGE_NAMES else "packages"
+    return f"{parent}/{package_name}"
+
+
+def package_location_failures(root: pathlib.Path) -> list[str]:
+    failures: list[str] = []
+    for pubspec in iter_package_pubspecs(root):
+        package_name = pubspec_package_name(pubspec)
+        if package_name is None:
+            continue
+
+        actual_path = normalize_path(pubspec.parent.relative_to(root))
+        expected_path = expected_package_path(package_name)
+        if actual_path != expected_path:
+            failures.append(
+                f"{actual_path}: package {package_name} must live at {expected_path}."
+            )
+    return failures
+
+
 def check_boundaries(root: pathlib.Path) -> list[str]:
     failures: list[str] = []
     package_roots = find_package_roots(root)
@@ -173,6 +194,7 @@ def check_boundaries(root: pathlib.Path) -> list[str]:
     failures.extend(compare_path_sets("workspace package list", actual_paths, workspace_paths))
     failures.extend(compare_path_sets("docs/PACKAGE_MAP.md", actual_paths, map_paths))
     failures.extend(package_identity_failures(root))
+    failures.extend(package_location_failures(root))
     failures.extend(package_documentation_failures(package_roots))
 
     for dart_file in iter_dart_files(root):

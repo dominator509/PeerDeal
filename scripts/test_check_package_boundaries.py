@@ -30,6 +30,22 @@ def write_package(root: pathlib.Path, name: str, dependencies: list[str] | None 
     return package_root
 
 
+def write_app(root: pathlib.Path, name: str, dependencies: list[str] | None = None) -> pathlib.Path:
+    app_root = root / "apps" / name
+    dependency_lines = "".join(f"  {dependency}:\n    path: ../../packages/{dependency}\n" for dependency in dependencies or [])
+    write_file(
+        app_root / "pubspec.yaml",
+        f"name: {name}\n\n"
+        "environment:\n"
+        "  sdk: '^3.11.5'\n\n"
+        "dependencies:\n"
+        f"{dependency_lines}",
+    )
+    write_file(app_root / "AGENTS.md", f"# {name} agent rules\n")
+    write_file(app_root / "README.md", f"# {name}\n")
+    return app_root
+
+
 def write_workspace_metadata(root: pathlib.Path, package_paths: list[str]) -> None:
     workspace_entries = "\n".join(f"  - {package_path}" for package_path in package_paths)
     app_entries = "\n".join(
@@ -220,6 +236,42 @@ class BoundaryCheckTest(unittest.TestCase):
             failures = check_boundaries(root)
 
             self.assertTrue(any("pubspec.yaml is missing a package name" in failure for failure in failures))
+
+    def test_rejects_app_package_outside_apps_folder(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_package(root, "peerdeal_mobile")
+            write_workspace_metadata(root, ["packages/peerdeal_mobile"])
+
+            failures = check_boundaries(root)
+
+            self.assertTrue(any("package peerdeal_mobile must live at apps/peerdeal_mobile" in failure for failure in failures))
+
+    def test_rejects_package_folder_name_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            package_root = root / "packages" / "peerdeal_core_renamed"
+            write_file(
+                package_root / "pubspec.yaml",
+                "name: peerdeal_core\n\n"
+                "environment:\n"
+                "  sdk: '^3.11.5'\n",
+            )
+            write_file(package_root / "AGENTS.md", "# peerdeal_core agent rules\n")
+            write_file(package_root / "README.md", "# peerdeal_core\n")
+            write_workspace_metadata(root, ["packages/peerdeal_core_renamed"])
+
+            failures = check_boundaries(root)
+
+            self.assertTrue(any("package peerdeal_core must live at packages/peerdeal_core" in failure for failure in failures))
+
+    def test_allows_app_package_in_apps_folder(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_app(root, "peerdeal_mobile")
+            write_workspace_metadata(root, ["apps/peerdeal_mobile"])
+
+            self.assertEqual([], check_boundaries(root))
 
     def test_rejects_missing_package_local_docs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
