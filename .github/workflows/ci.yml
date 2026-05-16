@@ -3,7 +3,7 @@ name: peerdeal-ci
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   bootstrap-checks:
@@ -38,6 +38,12 @@ jobs:
 
       - name: Dependency audit tests
         run: dart run melos run dependency-audit:test
+
+      - name: Source text hygiene
+        run: dart run melos run source-text
+
+      - name: Source text checker tests
+        run: dart run melos run source-text:test
 
       - name: Analyze
         run: dart run melos run analyze
