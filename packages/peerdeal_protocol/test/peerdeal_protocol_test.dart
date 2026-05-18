@@ -214,11 +214,8 @@ void main() {
   });
 
   test('protocol catalog accepts supported snapshot envelope', () {
-    final result = ProtocolCatalog().checkSnapshotEnvelopeJson({
-      'snapshot_type': 'TableSnapshot',
-      'snapshot_version': '1.0',
-      'protocol_version': currentProtocolVersion.toWire(),
-    });
+    final decoded = fixtureJson('fixtures/snapshots/table_snapshot_v1.json');
+    final result = ProtocolCatalog().checkSnapshotEnvelopeJson(decoded);
 
     expect(result.isSupported, isTrue);
     expect(result.resultCode, ResultCode.okAccepted);
