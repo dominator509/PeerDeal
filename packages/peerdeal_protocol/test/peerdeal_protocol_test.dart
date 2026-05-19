@@ -8,6 +8,15 @@ Map<String, Object?> fixtureJson(String path) {
   return jsonDecode(File(path).readAsStringSync()) as Map<String, Object?>;
 }
 
+List<File> protocolFixtureFiles() {
+  return Directory('fixtures')
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((file) => file.path.endsWith('.json'))
+      .toList()
+    ..sort((a, b) => a.path.compareTo(b.path));
+}
+
 void main() {
   test('canonical json encoding is stable for map key order', () {
     final a = canonicalJsonEncode({
@@ -23,6 +32,17 @@ void main() {
     });
 
     expect(a, equals(b));
+  });
+
+  test('all protocol fixtures are JSON objects', () {
+    final fixtures = protocolFixtureFiles();
+
+    expect(fixtures, isNotEmpty);
+    for (final fixture in fixtures) {
+      final decoded = jsonDecode(fixture.readAsStringSync());
+
+      expect(decoded, isA<Map<String, Object?>>(), reason: fixture.path);
+    }
   });
 
   test('game file fixture validates', () {
