@@ -1,0 +1,14 @@
+{
+  "snapshot_id": "snap_rejected_protocol_001",
+  "snapshot_type": "TableSnapshot",
+  "snapshot_version": "1.0",
+  "protocol_version": "2.0.0",
+  "table_id": "tbl_001",
+  "session_id": "sess_001",
+  "snapshot_base_event_seq": 1,
+  "snapshot_hash": "snap_hash_placeholder",
+  "payload": {
+    "phase": "open",
+    "participants": []
+  }
+}

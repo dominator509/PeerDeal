@@ -1,0 +1,14 @@
+{
+  "command_id": "cmd_rejected_protocol_001",
+  "command_type": "OpenTableSession",
+  "command_version": "1.0",
+  "protocol_version": "2.0.0",
+  "table_id": "tbl_001",
+  "session_id": null,
+  "hand_id": null,
+  "issued_at": "2026-04-25T12:05:00Z",
+  "actor_ref": "host_alpha",
+  "payload": {
+    "config_id": "cfg_open_table_001"
+  }
+}

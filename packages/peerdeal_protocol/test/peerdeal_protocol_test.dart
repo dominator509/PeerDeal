@@ -156,6 +156,36 @@ void main() {
     expect(result.resultCode, ResultCode.errProtocolIncompatible);
   });
 
+  test('protocol catalog rejects unsupported protocol command fixture', () {
+    final decoded = fixtureJson(
+      'fixtures/commands/unsupported_protocol_open_table_session_command_v2.json',
+    );
+    final result = ProtocolCatalog().checkCommandEnvelopeJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
+  test('protocol catalog rejects unsupported protocol event fixture', () {
+    final decoded = fixtureJson(
+      'fixtures/events/unsupported_protocol_open_table_session_opened_event_v2.json',
+    );
+    final result = ProtocolCatalog().checkEventEnvelopeJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
+  test('protocol catalog rejects unsupported protocol snapshot fixture', () {
+    final decoded = fixtureJson(
+      'fixtures/snapshots/unsupported_protocol_table_snapshot_v2.json',
+    );
+    final result = ProtocolCatalog().checkSnapshotEnvelopeJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
   test('protocol catalog rejects unknown artifact fail-safe', () {
     final result = ProtocolCatalog().check(
       kind: ProtocolArtifactKind.command,
