@@ -17,6 +17,11 @@ List<File> protocolFixtureFiles() {
     ..sort((a, b) => a.path.compareTo(b.path));
 }
 
+bool isRejectedFixture(File fixture) {
+  final name = fixture.uri.pathSegments.last;
+  return name.startsWith('invalid_') || name.startsWith('unsupported_');
+}
+
 void main() {
   test('canonical json encoding is stable for map key order', () {
     final a = canonicalJsonEncode({
@@ -42,6 +47,39 @@ void main() {
       final decoded = jsonDecode(fixture.readAsStringSync());
 
       expect(decoded, isA<Map<String, Object?>>(), reason: fixture.path);
+    }
+  });
+
+  test('each protocol fixture category has accepted and rejected examples', () {
+    const categories = <String>[
+      'commands',
+      'events',
+      'gamefiles',
+      'invites',
+      'snapshots',
+    ];
+    final fixtures = protocolFixtureFiles();
+
+    for (final category in categories) {
+      final categoryFixtures = fixtures
+          .where(
+            (fixture) => fixture.path.contains(
+              '${Platform.pathSeparator}$category${Platform.pathSeparator}',
+            ),
+          )
+          .toList();
+
+      expect(categoryFixtures, isNotEmpty, reason: category);
+      expect(
+        categoryFixtures.any((fixture) => !isRejectedFixture(fixture)),
+        isTrue,
+        reason: '$category accepted fixture',
+      );
+      expect(
+        categoryFixtures.any(isRejectedFixture),
+        isTrue,
+        reason: '$category rejected fixture',
+      );
     }
   });
 
@@ -223,7 +261,9 @@ void main() {
   });
 
   test('protocol catalog rejects unsupported command fixture fail-safe', () {
-    final decoded = fixtureJson('fixtures/commands/unsupported_command_v1.json');
+    final decoded = fixtureJson(
+      'fixtures/commands/unsupported_command_v1.json',
+    );
     final result = ProtocolCatalog().checkCommandEnvelopeJson(decoded);
 
     expect(result.isSupported, isFalse);
