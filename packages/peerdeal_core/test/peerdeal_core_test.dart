@@ -83,6 +83,25 @@ void main() {
     expect(state.metadata['mode_type'], 'open_table');
   });
 
+  test('core rejects replaying fixture-backed protocol event out of order', () {
+    final event = eventEnvelopeFromJson(
+      loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
+    );
+    final reducer = const CoreReducer();
+    final projected = reducer.apply(TableState.initial(), event);
+
+    expect(
+      () => reducer.apply(projected, event),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_SEQUENCE_NOT_MONOTONIC',
+        ),
+      ),
+    );
+  });
+
   test('reducer is deterministic for same ordered events', () {
     const event1 = EventEnvelope(
       eventId: 'evt_001',
