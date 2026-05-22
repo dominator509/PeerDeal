@@ -45,6 +45,15 @@ EventEnvelope eventEnvelopeFromJson(Map<String, Object?> json) {
   );
 }
 
+TableState projectOrderedEvents(Iterable<EventEnvelope> events) {
+  final reducer = CoreReducer();
+  var state = TableState.initial();
+  for (final event in events) {
+    state = reducer.apply(state, event);
+  }
+  return state;
+}
+
 void main() {
   test('validator rejects open session command without table id', () {
     const command = CommandEnvelope(
@@ -97,6 +106,40 @@ void main() {
       expect(firstProjection.toJson(), secondProjection.toJson());
     },
   );
+
+  test('core reconstructs state from ordered protocol-backed events', () {
+    final opened = eventEnvelopeFromJson(
+      loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
+    );
+    final admitted = EventEnvelope(
+      eventId: 'evt_fixture_participant_admitted',
+      eventType: 'ParticipantAdmitted',
+      eventVersion: '1.0',
+      protocolVersion: opened.protocolVersion,
+      eventSeq: opened.eventSeq + 1,
+      tableId: opened.tableId,
+      sessionId: opened.sessionId,
+      handId: null,
+      emittedAt: '2026-04-25T12:05:02Z',
+      actorRef: 'system',
+      payload: const {'participant_id': 'player_001'},
+      prevEventHash: opened.eventHash,
+      eventHash: 'hash_fixture_participant_admitted',
+    );
+
+    final reconstructed = projectOrderedEvents([opened, admitted]);
+    final stepped = const CoreReducer().apply(
+      const CoreReducer().apply(TableState.initial(), opened),
+      admitted,
+    );
+
+    expect(reconstructed.toJson(), stepped.toJson());
+    expect(reconstructed.tableId, opened.tableId);
+    expect(reconstructed.sessionId, opened.sessionId);
+    expect(reconstructed.protocolVersion, opened.protocolVersion);
+    expect(reconstructed.eventSeq, admitted.eventSeq);
+    expect(reconstructed.participantCount, 1);
+  });
 
   test('core rejects replaying fixture-backed protocol event out of order', () {
     final event = eventEnvelopeFromJson(
