@@ -10,7 +10,16 @@ class CoreReducer {
     if (event.eventSeq <= current.eventSequence) {
       throw InvariantViolation(
         code: 'ERR_EVENT_SEQUENCE_NOT_MONOTONIC',
-        message: 'event_seq must be strictly monotonic: '
+        message:
+            'event_seq must be strictly monotonic: '
+            'current=${current.eventSequence}, incoming=${event.eventSeq}',
+      );
+    }
+    if (event.eventSeq != current.eventSequence + 1) {
+      throw InvariantViolation(
+        code: 'ERR_EVENT_SEQUENCE_GAP',
+        message:
+            'event_seq must be contiguous: '
             'current=${current.eventSequence}, incoming=${event.eventSeq}',
       );
     }

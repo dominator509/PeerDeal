@@ -160,6 +160,38 @@ void main() {
     );
   });
 
+  test('core rejects fixture-backed protocol event windows with gaps', () {
+    final opened = eventEnvelopeFromJson(
+      loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
+    );
+    final gapEvent = EventEnvelope(
+      eventId: 'evt_fixture_gap_participant_admitted',
+      eventType: 'ParticipantAdmitted',
+      eventVersion: '1.0',
+      protocolVersion: opened.protocolVersion,
+      eventSeq: opened.eventSeq + 2,
+      tableId: opened.tableId,
+      sessionId: opened.sessionId,
+      handId: null,
+      emittedAt: '2026-04-25T12:05:03Z',
+      actorRef: 'system',
+      payload: const {'participant_id': 'player_001'},
+      prevEventHash: opened.eventHash,
+      eventHash: 'hash_fixture_gap_participant_admitted',
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, gapEvent]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_SEQUENCE_GAP',
+        ),
+      ),
+    );
+  });
+
   test('reducer is deterministic for same ordered events', () {
     const event1 = EventEnvelope(
       eventId: 'evt_001',
