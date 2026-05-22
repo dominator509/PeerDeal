@@ -83,6 +83,21 @@ void main() {
     expect(state.metadata['mode_type'], 'open_table');
   });
 
+  test(
+    'core projection is deterministic for fixture-backed protocol event',
+    () {
+      final event = eventEnvelopeFromJson(
+        loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
+      );
+      final reducer = const CoreReducer();
+
+      final firstProjection = reducer.apply(TableState.initial(), event);
+      final secondProjection = reducer.apply(TableState.initial(), event);
+
+      expect(firstProjection.toJson(), secondProjection.toJson());
+    },
+  );
+
   test('core rejects replaying fixture-backed protocol event out of order', () {
     final event = eventEnvelopeFromJson(
       loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
