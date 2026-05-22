@@ -22,6 +22,15 @@ bool isRejectedFixture(File fixture) {
   return name.startsWith('invalid_') || name.startsWith('unsupported_');
 }
 
+String catalogEntryKey(ProtocolCatalogEntry entry) {
+  return [
+    entry.kind.name,
+    entry.type,
+    entry.artifactVersion,
+    entry.protocolVersion.toWire(),
+  ].join('|');
+}
+
 void main() {
   test('canonical json encoding is stable for map key order', () {
     final a = canonicalJsonEncode({
@@ -180,6 +189,12 @@ void main() {
       expect(result.isSupported, isTrue, reason: eventType);
       expect(result.resultCode, ResultCode.okAccepted, reason: eventType);
     }
+  });
+
+  test('default protocol catalog entries are unique', () {
+    final keys = defaultProtocolCatalogEntries.map(catalogEntryKey).toList();
+
+    expect(keys.toSet(), hasLength(keys.length));
   });
 
   test('protocol catalog rejects unsupported protocol version fail-safe', () {
