@@ -31,5 +31,37 @@ void main() {
       expect(result.isValid, isFalse);
       expect(result.errors, isNotEmpty);
     });
+
+    test('showdown stub ranks active seats deterministically', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', 'Th'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 3,
+              holeCards: <String>['2c', '2d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['As', 'Ad'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['7c', '8d'],
+              isFolded: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(result.results.map((entry) => entry.seat), <int>[1, 3]);
+      expect(result.results.map((entry) => entry.rankIndex), <int>[0, 1]);
+      expect(
+        result.warnings,
+        contains('Showdown evaluator is a starter stub only.'),
+      );
+    });
   });
 }
