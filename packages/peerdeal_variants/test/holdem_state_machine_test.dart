@@ -64,4 +64,92 @@ void main() {
     expect(next.seats.map((seat) => seat.committedThisRound), everyElement(0));
     expect(next.seats.map((seat) => seat.committedThisHand), <int>[100, 50]);
   });
+
+  test('opening turn resets round-local betting state', () {
+    const state = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.bettingFlop,
+      bettingRound: HoldemBettingRound.flop,
+      currentActorSeat: 1,
+      buttonSeat: 1,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 300,
+      minimumRaiseAmount: 200,
+      boardCards: <String>['F1', 'F2', 'F3'],
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 700,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 200,
+          committedThisHand: 300,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 650,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 300,
+          committedThisHand: 350,
+        ),
+      ],
+    );
+
+    final next = machine.openNextStreet(state: state);
+
+    expect(next.phase, HoldemHandPhase.dealingTurn);
+    expect(next.bettingRound, HoldemBettingRound.turn);
+    expect(next.currentBetToCall, 0);
+    expect(next.boardCards, <String>['F1', 'F2', 'F3', 'T1']);
+    expect(next.seats.map((seat) => seat.committedThisRound), everyElement(0));
+    expect(next.seats.map((seat) => seat.committedThisHand), <int>[300, 350]);
+  });
+
+  test('opening river resets round-local betting state', () {
+    const state = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.bettingTurn,
+      bettingRound: HoldemBettingRound.turn,
+      currentActorSeat: 2,
+      buttonSeat: 1,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 500,
+      minimumRaiseAmount: 200,
+      boardCards: <String>['F1', 'F2', 'F3', 'T1'],
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 500,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 500,
+          committedThisHand: 800,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 650,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 300,
+          committedThisHand: 650,
+        ),
+      ],
+    );
+
+    final next = machine.openNextStreet(state: state);
+
+    expect(next.phase, HoldemHandPhase.dealingRiver);
+    expect(next.bettingRound, HoldemBettingRound.river);
+    expect(next.currentBetToCall, 0);
+    expect(next.boardCards, <String>['F1', 'F2', 'F3', 'T1', 'R1']);
+    expect(next.seats.map((seat) => seat.committedThisRound), everyElement(0));
+    expect(next.seats.map((seat) => seat.committedThisHand), <int>[800, 650]);
+  });
 }
