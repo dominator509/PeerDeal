@@ -438,16 +438,13 @@ void main() {
           isFolded: true,
         ),
       ]);
-      final eligibleSeatsBySliceIndex = <int, Set<int>>{
-        for (final slice in slices)
-          slice.sliceIndex: slice.contestedBySeatIds
-              .map((seatId) => int.parse(seatId.split('-').last))
-              .toSet(),
-      };
 
-      final winnersBySlice = result.winningSeatIdsBySliceIndex(
-        eligibleSeatsBySliceIndex: eligibleSeatsBySliceIndex,
-        seatIdFor: (seat) => 'seat-$seat',
+      final winnersBySlice = result.winningContestedSeatIdsBySliceIndex(
+        contestedSeatIdsBySliceIndex: <int, List<String>>{
+          for (final slice in slices)
+            slice.sliceIndex: slice.contestedBySeatIds,
+        },
+        seatForId: _seatFromSeatId,
       );
       final settlement = engine.settle(
         commitments: const <PotCommitment>[
@@ -485,6 +482,38 @@ void main() {
       ]);
       expect(settlement.awards.map((award) => award.amount), <int>[300, 200]);
     });
+
+    test('showdown contested-seat projection ignores unparseable seat ids', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['Th', '9d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Ac', '3c'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      final winnersBySlice = result.winningContestedSeatIdsBySliceIndex(
+        contestedSeatIdsBySliceIndex: const <int, List<String>>{
+          0: <String>['seat-1', 'unknown'],
+          1: <String>['unknown'],
+        },
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(winnersBySlice, <int, List<String>>{
+        0: <String>['seat-1'],
+      });
+    });
   });
 }
 
@@ -502,4 +531,9 @@ class _ShowdownCase {
   final List<String> winnerHoleCards;
   final List<String> loserHoleCards;
   final String summaryPrefix;
+}
+
+int? _seatFromSeatId(String seatId) {
+  final marker = seatId.split('-').last;
+  return int.tryParse(marker);
 }

@@ -104,6 +104,46 @@ class ShowdownEvaluationResult {
 
     return winnersBySlice;
   }
+
+  Map<int, List<String>> winningContestedSeatIdsBySliceIndex({
+    required Map<int, List<String>> contestedSeatIdsBySliceIndex,
+    required int? Function(String seatId) seatForId,
+  }) {
+    if (warnings.isNotEmpty || results.isEmpty) {
+      return const <int, List<String>>{};
+    }
+
+    final winnersBySlice = <int, List<String>>{};
+    final sliceIndexes = contestedSeatIdsBySliceIndex.keys.toList()..sort();
+    for (final sliceIndex in sliceIndexes) {
+      final idsBySeat = <int, List<String>>{};
+      for (final seatId
+          in contestedSeatIdsBySliceIndex[sliceIndex] ?? const <String>[]) {
+        final seat = seatForId(seatId);
+        if (seat == null) {
+          continue;
+        }
+        idsBySeat.putIfAbsent(seat, () => <String>[]).add(seatId);
+      }
+
+      if (idsBySeat.isEmpty) {
+        continue;
+      }
+
+      for (final group in winnerGroups) {
+        final winners = <String>[
+          for (final seat in group.seats)
+            ...idsBySeat[seat] ?? const <String>[],
+        ]..sort();
+        if (winners.isNotEmpty) {
+          winnersBySlice[sliceIndex] = winners;
+          break;
+        }
+      }
+    }
+
+    return winnersBySlice;
+  }
 }
 
 String _defaultSeatIdFor(int seat) => seat.toString();
