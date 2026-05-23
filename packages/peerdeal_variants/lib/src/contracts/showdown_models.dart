@@ -38,6 +38,14 @@ class RankedShowdownResult {
 }
 
 @immutable
+class ShowdownWinnerGroup {
+  const ShowdownWinnerGroup({required this.rankIndex, required this.seats});
+
+  final int rankIndex;
+  final List<int> seats;
+}
+
+@immutable
 class ShowdownEvaluationResult {
   const ShowdownEvaluationResult({
     required this.results,
@@ -46,4 +54,24 @@ class ShowdownEvaluationResult {
 
   final List<RankedShowdownResult> results;
   final List<String> warnings;
+
+  List<ShowdownWinnerGroup> get winnerGroups {
+    if (warnings.isNotEmpty || results.isEmpty) {
+      return const <ShowdownWinnerGroup>[];
+    }
+
+    final seatsByRank = <int, List<int>>{};
+    for (final result in results) {
+      seatsByRank.putIfAbsent(result.rankIndex, () => <int>[]).add(result.seat);
+    }
+
+    final rankIndexes = seatsByRank.keys.toList()..sort();
+    return [
+      for (final rankIndex in rankIndexes)
+        ShowdownWinnerGroup(
+          rankIndex: rankIndex,
+          seats: seatsByRank[rankIndex]!..sort(),
+        ),
+    ];
+  }
 }

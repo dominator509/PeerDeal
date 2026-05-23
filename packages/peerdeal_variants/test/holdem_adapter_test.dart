@@ -276,6 +276,57 @@ void main() {
       expect(tieResult.results.map((entry) => entry.seat), <int>[1, 2]);
       expect(tieResult.results.map((entry) => entry.rankIndex), <int>[0, 0]);
     });
+
+    test(
+      'showdown exposes deterministic winner groups for settlement input',
+      () {
+        final result = adapter.evaluate(
+          const ShowdownEvaluationInput(
+            boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', 'Th'],
+            seats: <ShowdownSeatInput>[
+              ShowdownSeatInput(
+                seat: 4,
+                holeCards: <String>['2c', '3c'],
+                isFolded: false,
+              ),
+              ShowdownSeatInput(
+                seat: 2,
+                holeCards: <String>['4d', '5d'],
+                isFolded: false,
+              ),
+              ShowdownSeatInput(
+                seat: 1,
+                holeCards: <String>['9c', '9d'],
+                isFolded: false,
+              ),
+            ],
+          ),
+        );
+
+        expect(result.warnings, isEmpty);
+        expect(result.winnerGroups.length, 1);
+        expect(result.winnerGroups.single.rankIndex, 0);
+        expect(result.winnerGroups.single.seats, <int>[1, 2, 4]);
+      },
+    );
+
+    test('showdown winner groups are empty for invalid evaluation', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', 'bad'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['2c', '3c'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      expect(result.results, isEmpty);
+      expect(result.winnerGroups, isEmpty);
+    });
   });
 }
 
