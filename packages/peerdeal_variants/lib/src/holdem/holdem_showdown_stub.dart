@@ -18,7 +18,19 @@ class HoldemShowdownStub {
       warnings.add('ERR_HOLDEM_SHOWDOWN_HOLE_CARD_COUNT');
     }
 
-    if (warnings.length > 1) {
+    final activeCards = <String>[
+      ...input.boardCards,
+      for (final seat in ranked) ...seat.holeCards,
+    ];
+    if (activeCards.any((card) => !_isCardIdentity(card))) {
+      warnings.add('ERR_HOLDEM_SHOWDOWN_CARD_FORMAT');
+    }
+
+    if (activeCards.toSet().length != activeCards.length) {
+      warnings.add('ERR_HOLDEM_SHOWDOWN_DUPLICATE_CARD');
+    }
+
+    if (warnings.isNotEmpty) {
       return ShowdownEvaluationResult(
         results: const <RankedShowdownResult>[],
         warnings: warnings,
@@ -72,4 +84,28 @@ int _rankIndexAt(List<_EvaluatedShowdownSeat> seats, int index) {
     }
   }
   return rankIndex;
+}
+
+bool _isCardIdentity(String card) {
+  if (card.length != 2) {
+    return false;
+  }
+
+  const ranks = <String>{
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'T',
+    'J',
+    'Q',
+    'K',
+    'A',
+  };
+  const suits = <String>{'c', 'd', 'h', 's'};
+  return ranks.contains(card[0]) && suits.contains(card[1]);
 }

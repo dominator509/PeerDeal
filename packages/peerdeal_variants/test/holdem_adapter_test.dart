@@ -86,6 +86,57 @@ void main() {
       expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_HOLE_CARD_COUNT'));
     });
 
+    test('showdown fails safely on malformed card identities', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '1x'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['As', 'Ad'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['ZZ', '8d'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      expect(result.results, isEmpty);
+      expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'));
+    });
+
+    test('showdown fails safely on duplicate active card identities', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '2c'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['As', 'Ad'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Ah', '8d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 3,
+              holeCards: <String>['Kh', 'Kh'],
+              isFolded: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(result.results, isEmpty);
+      expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_DUPLICATE_CARD'));
+    });
+
     test('showdown evaluator orders all launch hand categories', () {
       final cases = <_ShowdownCase>[
         _ShowdownCase(
