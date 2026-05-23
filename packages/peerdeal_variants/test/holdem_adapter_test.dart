@@ -63,5 +63,29 @@ void main() {
         contains('Showdown evaluator is a starter stub only.'),
       );
     });
+
+    test('showdown stub fails safely on malformed active inputs', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['As'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['7c'],
+              isFolded: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(result.results, isEmpty);
+      expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_BOARD_CARD_COUNT'));
+      expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_HOLE_CARD_COUNT'));
+    });
   });
 }
