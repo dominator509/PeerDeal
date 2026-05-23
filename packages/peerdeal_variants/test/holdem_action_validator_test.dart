@@ -222,6 +222,36 @@ void main() {
     expect(result.reasonCode, 'ERR_RAISE_BELOW_MINIMUM');
   });
 
+  test('rejects zero opening bet amount', () {
+    final state = buildState().copyWith(currentBetToCall: 0);
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.bet,
+        amount: 0,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_BET_BELOW_MINIMUM');
+  });
+
+  test('rejects negative raise amount', () {
+    final result = validator.validate(
+      state: buildState(),
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.raise,
+        amount: -1,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_RAISE_BELOW_MINIMUM');
+  });
+
   test('accepts opening bet for exact remaining stack', () {
     final state = buildState().copyWith(
       currentBetToCall: 0,
