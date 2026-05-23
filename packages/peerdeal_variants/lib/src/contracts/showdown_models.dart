@@ -74,4 +74,36 @@ class ShowdownEvaluationResult {
         ),
     ];
   }
+
+  Map<int, List<String>> winningSeatIdsBySliceIndex({
+    required Map<int, Set<int>> eligibleSeatsBySliceIndex,
+    String Function(int seat) seatIdFor = _defaultSeatIdFor,
+  }) {
+    if (warnings.isNotEmpty || results.isEmpty) {
+      return const <int, List<String>>{};
+    }
+
+    final winnersBySlice = <int, List<String>>{};
+    final sliceIndexes = eligibleSeatsBySliceIndex.keys.toList()..sort();
+    for (final sliceIndex in sliceIndexes) {
+      final eligibleSeats = eligibleSeatsBySliceIndex[sliceIndex];
+      if (eligibleSeats == null || eligibleSeats.isEmpty) {
+        continue;
+      }
+
+      for (final group in winnerGroups) {
+        final winners =
+            group.seats.where(eligibleSeats.contains).map(seatIdFor).toList()
+              ..sort();
+        if (winners.isNotEmpty) {
+          winnersBySlice[sliceIndex] = winners;
+          break;
+        }
+      }
+    }
+
+    return winnersBySlice;
+  }
 }
+
+String _defaultSeatIdFor(int seat) => seat.toString();

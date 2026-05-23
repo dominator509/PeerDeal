@@ -1,4 +1,5 @@
 import 'package:peerdeal_variants/peerdeal_variants.dart';
+import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -326,6 +327,72 @@ void main() {
 
       expect(result.results, isEmpty);
       expect(result.winnerGroups, isEmpty);
+    });
+
+    test('showdown projects slice winners for core pot settlement', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['Ac', '3c'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Th', '9d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 4,
+              holeCards: <String>['Kh', 'Kc'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      final winnersBySlice = result.winningSeatIdsBySliceIndex(
+        eligibleSeatsBySliceIndex: const <int, Set<int>>{
+          0: <int>{1, 2, 4},
+          1: <int>{2, 4},
+        },
+        seatIdFor: (seat) => 'seat-$seat',
+      );
+
+      expect(winnersBySlice, <int, List<String>>{
+        0: <String>['seat-2'],
+        1: <String>['seat-2'],
+      });
+
+      const engine = PotEngine();
+      final settlement = engine.settle(
+        commitments: const <PotCommitment>[
+          PotCommitment(
+            seatId: 'seat-1',
+            committed: 100,
+            isEligibleForShowdown: true,
+          ),
+          PotCommitment(
+            seatId: 'seat-2',
+            committed: 200,
+            isEligibleForShowdown: true,
+          ),
+          PotCommitment(
+            seatId: 'seat-4',
+            committed: 200,
+            isEligibleForShowdown: true,
+          ),
+        ],
+        winningSeatIdsBySliceIndex: winnersBySlice,
+      );
+
+      expect(settlement.awards.length, 2);
+      expect(settlement.awards[0].seatId, 'seat-2');
+      expect(settlement.awards[0].amount, 300);
+      expect(settlement.awards[1].seatId, 'seat-2');
+      expect(settlement.awards[1].amount, 200);
     });
   });
 }
