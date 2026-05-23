@@ -23,6 +23,17 @@ class CoreReducer {
             'current=${current.eventSequence}, incoming=${event.eventSeq}',
       );
     }
+    if (current.eventSequence > 0 &&
+        (event.tableId != current.tableId ||
+            event.sessionId != current.sessionId)) {
+      throw InvariantViolation(
+        code: 'ERR_EVENT_STREAM_IDENTITY_MISMATCH',
+        message:
+            'event stream table_id and session_id must remain stable: '
+            'current=${current.tableId}/${current.sessionId}, '
+            'incoming=${event.tableId}/${event.sessionId}',
+      );
+    }
 
     switch (event.eventType) {
       case 'OpenTableSessionOpened':

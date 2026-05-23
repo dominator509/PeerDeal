@@ -192,6 +192,70 @@ void main() {
     );
   });
 
+  test('core rejects protocol event windows that switch table identity', () {
+    final opened = eventEnvelopeFromJson(
+      loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
+    );
+    final mismatched = EventEnvelope(
+      eventId: 'evt_fixture_wrong_table_participant_admitted',
+      eventType: 'ParticipantAdmitted',
+      eventVersion: '1.0',
+      protocolVersion: opened.protocolVersion,
+      eventSeq: opened.eventSeq + 1,
+      tableId: 'tbl_other',
+      sessionId: opened.sessionId,
+      handId: null,
+      emittedAt: '2026-04-25T12:05:02Z',
+      actorRef: 'system',
+      payload: const {'participant_id': 'player_001'},
+      prevEventHash: opened.eventHash,
+      eventHash: 'hash_fixture_wrong_table_participant_admitted',
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, mismatched]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_STREAM_IDENTITY_MISMATCH',
+        ),
+      ),
+    );
+  });
+
+  test('core rejects protocol event windows that switch session identity', () {
+    final opened = eventEnvelopeFromJson(
+      loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
+    );
+    final mismatched = EventEnvelope(
+      eventId: 'evt_fixture_wrong_session_participant_admitted',
+      eventType: 'ParticipantAdmitted',
+      eventVersion: '1.0',
+      protocolVersion: opened.protocolVersion,
+      eventSeq: opened.eventSeq + 1,
+      tableId: opened.tableId,
+      sessionId: 'sess_other',
+      handId: null,
+      emittedAt: '2026-04-25T12:05:02Z',
+      actorRef: 'system',
+      payload: const {'participant_id': 'player_001'},
+      prevEventHash: opened.eventHash,
+      eventHash: 'hash_fixture_wrong_session_participant_admitted',
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, mismatched]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_STREAM_IDENTITY_MISMATCH',
+        ),
+      ),
+    );
+  });
+
   test('reducer is deterministic for same ordered events', () {
     const event1 = EventEnvelope(
       eventId: 'evt_001',
