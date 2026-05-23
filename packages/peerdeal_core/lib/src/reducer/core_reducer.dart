@@ -44,6 +44,16 @@ class CoreReducer {
             'incoming=${event.protocolVersion}',
       );
     }
+    if (current.eventSequence > 0 &&
+        event.prevEventHash != current.metadata['last_event_hash']) {
+      throw InvariantViolation(
+        code: 'ERR_EVENT_HASH_CHAIN_BREAK',
+        message:
+            'event prev_event_hash must match the last projected event_hash: '
+            'expected=${current.metadata['last_event_hash']}, '
+            'actual=${event.prevEventHash}',
+      );
+    }
 
     switch (event.eventType) {
       case 'OpenTableSessionOpened':
@@ -58,6 +68,7 @@ class CoreReducer {
             ...current.metadata,
             if (event.payload['mode_type'] != null)
               'mode_type': event.payload['mode_type'],
+            'last_event_hash': event.eventHash,
           },
         );
 
@@ -65,10 +76,21 @@ class CoreReducer {
         return current.copyWith(
           eventSequence: event.eventSeq,
           playersConnected: current.playersConnected + 1,
+          metadata: _metadataAfter(current, event),
         );
 
       default:
-        return current.copyWith(eventSequence: event.eventSeq);
+        return current.copyWith(
+          eventSequence: event.eventSeq,
+          metadata: _metadataAfter(current, event),
+        );
     }
+  }
+
+  Map<String, Object?> _metadataAfter(TableState current, EventEnvelope event) {
+    return <String, Object?>{
+      ...current.metadata,
+      'last_event_hash': event.eventHash,
+    };
   }
 }

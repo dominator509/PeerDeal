@@ -90,6 +90,7 @@ void main() {
     expect(state.protocolVersion, event.protocolVersion);
     expect(state.eventSeq, event.eventSeq);
     expect(state.metadata['mode_type'], 'open_table');
+    expect(state.metadata['last_event_hash'], event.eventHash);
   });
 
   test(
@@ -187,6 +188,38 @@ void main() {
           (violation) => violation.code,
           'code',
           'ERR_EVENT_SEQUENCE_GAP',
+        ),
+      ),
+    );
+  });
+
+  test('core rejects protocol event windows with broken hash chains', () {
+    final opened = eventEnvelopeFromJson(
+      loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
+    );
+    final broken = EventEnvelope(
+      eventId: 'evt_fixture_broken_hash_participant_admitted',
+      eventType: 'ParticipantAdmitted',
+      eventVersion: '1.0',
+      protocolVersion: opened.protocolVersion,
+      eventSeq: opened.eventSeq + 1,
+      tableId: opened.tableId,
+      sessionId: opened.sessionId,
+      handId: null,
+      emittedAt: '2026-04-25T12:05:02Z',
+      actorRef: 'system',
+      payload: const {'participant_id': 'player_001'},
+      prevEventHash: 'hash_unrelated',
+      eventHash: 'hash_fixture_broken_hash_participant_admitted',
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, broken]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_HASH_CHAIN_BREAK',
         ),
       ),
     );
