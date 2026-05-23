@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 void main() {
   group('Holdem settlement projection', () {
     const adapter = HoldemAdapter();
-    const engine = PotEngine();
+    const projector = ShowdownSettlementProjector();
 
     test('settles from showdown through contested pot slices', () {
       final showdown = adapter.evaluate(
@@ -49,10 +49,10 @@ void main() {
         ),
       ];
 
-      final outcome = _projectAndSettle(
-        engine: engine,
+      final outcome = projector.projectAndSettle(
         showdown: showdown,
         commitments: commitments,
+        seatForId: _seatFromSeatId,
       );
 
       expect(outcome.projection.hasUnawardableSlices, isFalse);
@@ -88,55 +88,16 @@ void main() {
         ),
       ];
 
-      final outcome = _projectAndSettle(
-        engine: engine,
+      final outcome = projector.projectAndSettle(
         showdown: showdown,
         commitments: commitments,
+        seatForId: _seatFromSeatId,
       );
 
       expect(outcome.projection.unawardableSliceIndexes, <int>[0]);
       expect(outcome.settlement, isNull);
     });
   });
-}
-
-_SettlementProjectionOutcome _projectAndSettle({
-  required PotEngine engine,
-  required ShowdownEvaluationResult showdown,
-  required List<PotCommitment> commitments,
-}) {
-  final slices = engine.sidePotBuilder.build(commitments);
-  final projection = showdown.projectContestedSeatIdsBySliceIndex(
-    contestedSeatIdsBySliceIndex: <int, List<String>>{
-      for (final slice in slices) slice.sliceIndex: slice.contestedBySeatIds,
-    },
-    seatForId: _seatFromSeatId,
-  );
-
-  if (projection.hasUnawardableSlices) {
-    return _SettlementProjectionOutcome(
-      projection: projection,
-      settlement: null,
-    );
-  }
-
-  return _SettlementProjectionOutcome(
-    projection: projection,
-    settlement: engine.settle(
-      commitments: commitments,
-      winningSeatIdsBySliceIndex: projection.winningSeatIdsBySliceIndex,
-    ),
-  );
-}
-
-class _SettlementProjectionOutcome {
-  const _SettlementProjectionOutcome({
-    required this.projection,
-    required this.settlement,
-  });
-
-  final ShowdownSliceWinnerProjection projection;
-  final SettlementResult? settlement;
 }
 
 int? _seatFromSeatId(String seatId) {

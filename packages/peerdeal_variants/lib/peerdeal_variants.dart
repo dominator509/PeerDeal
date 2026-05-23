@@ -2,6 +2,7 @@ library peerdeal_variants;
 
 export 'src/contracts/variant_adapter.dart';
 export 'src/contracts/showdown_models.dart';
+export 'src/contracts/showdown_settlement_projector.dart';
 
 export 'src/holdem/holdem_adapter.dart';
 export 'src/holdem/holdem_action_validator.dart';
