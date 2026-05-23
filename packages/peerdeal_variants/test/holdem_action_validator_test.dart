@@ -82,6 +82,132 @@ void main() {
     expect(result.isValid, isTrue);
   });
 
+  test('accepts call for exact remaining stack', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 50,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects non-all-in call below amount owed', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 49,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_CALL_EXCEEDS_STACK');
+  });
+
+  test('rejects call when there is nothing to call', () {
+    final state = buildState().copyWith(
+      currentBetToCall: 50,
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_NOTHING_TO_CALL');
+  });
+
   test('rejects raise below minimum total', () {
     final result = validator.validate(
       state: buildState(),
