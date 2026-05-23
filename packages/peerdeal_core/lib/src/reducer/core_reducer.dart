@@ -34,6 +34,16 @@ class CoreReducer {
             'incoming=${event.tableId}/${event.sessionId}',
       );
     }
+    if (current.eventSequence > 0 &&
+        event.protocolVersion != current.protocolVersion) {
+      throw InvariantViolation(
+        code: 'ERR_EVENT_STREAM_PROTOCOL_MISMATCH',
+        message:
+            'event stream protocol_version must remain stable: '
+            'current=${current.protocolVersion}, '
+            'incoming=${event.protocolVersion}',
+      );
+    }
 
     switch (event.eventType) {
       case 'OpenTableSessionOpened':
