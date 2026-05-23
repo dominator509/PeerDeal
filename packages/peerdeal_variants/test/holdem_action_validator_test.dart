@@ -95,4 +95,129 @@ void main() {
     expect(result.isValid, isFalse);
     expect(result.reasonCode, 'ERR_RAISE_BELOW_MINIMUM');
   });
+
+  test('accepts short all-in while facing a bet', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 25,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.allIn,
+      ),
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects all-in with zero stack', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.allIn,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_STACK_EMPTY');
+  });
+
+  test('rejects voluntary action from already all-in actor', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+          committedThisRound: 100,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.check,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_ACTOR_ALL_IN');
+  });
 }
