@@ -66,30 +66,40 @@ class HoldemStateMachine {
     );
   }
 
-  HoldemHandState openNextStreet({
-    required HoldemHandState state,
-  }) {
+  HoldemHandState openNextStreet({required HoldemHandState state}) {
     switch (state.phase) {
       case HoldemHandPhase.bettingPreflop:
         return state.copyWith(
           phase: HoldemHandPhase.dealingFlop,
           bettingRound: HoldemBettingRound.flop,
+          seats: _resetStreetCommitments(state.seats),
+          currentBetToCall: 0,
           boardCards: <String>[...state.boardCards, 'F1', 'F2', 'F3'],
         );
       case HoldemHandPhase.bettingFlop:
         return state.copyWith(
           phase: HoldemHandPhase.dealingTurn,
           bettingRound: HoldemBettingRound.turn,
+          seats: _resetStreetCommitments(state.seats),
+          currentBetToCall: 0,
           boardCards: <String>[...state.boardCards, 'T1'],
         );
       case HoldemHandPhase.bettingTurn:
         return state.copyWith(
           phase: HoldemHandPhase.dealingRiver,
           bettingRound: HoldemBettingRound.river,
+          seats: _resetStreetCommitments(state.seats),
+          currentBetToCall: 0,
           boardCards: <String>[...state.boardCards, 'R1'],
         );
       default:
         return state;
     }
+  }
+
+  List<HoldemSeatState> _resetStreetCommitments(List<HoldemSeatState> seats) {
+    return <HoldemSeatState>[
+      for (final seat in seats) seat.copyWith(committedThisRound: 0),
+    ];
   }
 }
