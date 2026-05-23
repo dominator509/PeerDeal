@@ -394,6 +394,97 @@ void main() {
       expect(settlement.awards[1].seatId, 'seat-2');
       expect(settlement.awards[1].amount, 200);
     });
+
+    test('showdown projection respects side-pot eligibility', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['Th', '9d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Ac', '3c'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 3,
+              holeCards: <String>['Kh', 'Kc'],
+              isFolded: true,
+            ),
+          ],
+        ),
+      );
+
+      const engine = PotEngine();
+      final slices = engine.sidePotBuilder.build(const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-1',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+        PotCommitment(
+          seatId: 'seat-2',
+          committed: 200,
+          isEligibleForShowdown: true,
+        ),
+        PotCommitment(
+          seatId: 'seat-3',
+          committed: 200,
+          isEligibleForShowdown: false,
+          isFolded: true,
+        ),
+      ]);
+      final eligibleSeatsBySliceIndex = <int, Set<int>>{
+        for (final slice in slices)
+          slice.sliceIndex: slice.contestedBySeatIds
+              .map((seatId) => int.parse(seatId.split('-').last))
+              .toSet(),
+      };
+
+      final winnersBySlice = result.winningSeatIdsBySliceIndex(
+        eligibleSeatsBySliceIndex: eligibleSeatsBySliceIndex,
+        seatIdFor: (seat) => 'seat-$seat',
+      );
+      final settlement = engine.settle(
+        commitments: const <PotCommitment>[
+          PotCommitment(
+            seatId: 'seat-1',
+            committed: 100,
+            isEligibleForShowdown: true,
+          ),
+          PotCommitment(
+            seatId: 'seat-2',
+            committed: 200,
+            isEligibleForShowdown: true,
+          ),
+          PotCommitment(
+            seatId: 'seat-3',
+            committed: 200,
+            isEligibleForShowdown: false,
+            isFolded: true,
+          ),
+        ],
+        winningSeatIdsBySliceIndex: winnersBySlice,
+      );
+
+      expect(result.results.map((entry) => entry.seat), <int>[1, 2]);
+      expect(slices.map((slice) => slice.amount), <int>[300, 200]);
+      expect(slices[0].contestedBySeatIds, <String>['seat-1', 'seat-2']);
+      expect(slices[1].contestedBySeatIds, <String>['seat-2']);
+      expect(winnersBySlice, <int, List<String>>{
+        0: <String>['seat-1'],
+        1: <String>['seat-2'],
+      });
+      expect(settlement.awards.map((award) => award.seatId), <String>[
+        'seat-1',
+        'seat-2',
+      ]);
+      expect(settlement.awards.map((award) => award.amount), <int>[300, 200]);
+    });
   });
 }
 
