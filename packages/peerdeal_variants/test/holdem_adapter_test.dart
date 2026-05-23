@@ -32,19 +32,19 @@ void main() {
       expect(result.errors, isNotEmpty);
     });
 
-    test('showdown stub ranks active seats deterministically', () {
+    test('showdown ranks active seats by best five-card hand', () {
       final result = adapter.evaluate(
         const ShowdownEvaluationInput(
-          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', 'Th'],
+          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '2c'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
               seat: 3,
-              holeCards: <String>['2c', '2d'],
+              holeCards: <String>['Tc', '9d'],
               isFolded: false,
             ),
             ShowdownSeatInput(
               seat: 1,
-              holeCards: <String>['As', 'Ad'],
+              holeCards: <String>['Th', '9c'],
               isFolded: false,
             ),
             ShowdownSeatInput(
@@ -58,10 +58,8 @@ void main() {
 
       expect(result.results.map((entry) => entry.seat), <int>[1, 3]);
       expect(result.results.map((entry) => entry.rankIndex), <int>[0, 1]);
-      expect(
-        result.warnings,
-        contains('Showdown evaluator is a starter stub only.'),
-      );
+      expect(result.results.first.summary, startsWith('Straight flush'));
+      expect(result.warnings, isEmpty);
     });
 
     test('showdown stub fails safely on malformed active inputs', () {
@@ -87,5 +85,161 @@ void main() {
       expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_BOARD_CARD_COUNT'));
       expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_HOLE_CARD_COUNT'));
     });
+
+    test('showdown evaluator orders all launch hand categories', () {
+      final cases = <_ShowdownCase>[
+        _ShowdownCase(
+          name: 'high card',
+          boardCards: <String>['Ah', 'Kd', '8s', '5c', '2d'],
+          winnerHoleCards: <String>['Qh', '9c'],
+          loserHoleCards: <String>['Jh', '9d'],
+          summaryPrefix: 'High card',
+        ),
+        _ShowdownCase(
+          name: 'pair',
+          boardCards: <String>['Ah', 'Kd', '8s', '5c', '2d'],
+          winnerHoleCards: <String>['Qh', 'Qs'],
+          loserHoleCards: <String>['Jh', '9d'],
+          summaryPrefix: 'Pair',
+        ),
+        _ShowdownCase(
+          name: 'two pair',
+          boardCards: <String>['Ah', 'Kd', '8s', '5c', '2d'],
+          winnerHoleCards: <String>['As', 'Ks'],
+          loserHoleCards: <String>['Qh', 'Qd'],
+          summaryPrefix: 'Two pair',
+        ),
+        _ShowdownCase(
+          name: 'three of a kind',
+          boardCards: <String>['Ah', 'Ad', '8s', '5c', '2d'],
+          winnerHoleCards: <String>['As', 'Ks'],
+          loserHoleCards: <String>['Qh', 'Qd'],
+          summaryPrefix: 'Three of a kind',
+        ),
+        _ShowdownCase(
+          name: 'straight',
+          boardCards: <String>['9h', '8d', '7s', '5c', '2d'],
+          winnerHoleCards: <String>['6s', 'Ks'],
+          loserHoleCards: <String>['Ah', 'Ad'],
+          summaryPrefix: 'Straight',
+        ),
+        _ShowdownCase(
+          name: 'flush',
+          boardCards: <String>['Ah', 'Jh', '8h', '5h', '2d'],
+          winnerHoleCards: <String>['3h', 'Ks'],
+          loserHoleCards: <String>['9s', '7d'],
+          summaryPrefix: 'Flush',
+        ),
+        _ShowdownCase(
+          name: 'full house',
+          boardCards: <String>['Ah', 'Ad', '8s', '8c', '2d'],
+          winnerHoleCards: <String>['As', 'Ks'],
+          loserHoleCards: <String>['Qh', 'Qd'],
+          summaryPrefix: 'Full house',
+        ),
+        _ShowdownCase(
+          name: 'four of a kind',
+          boardCards: <String>['Ah', 'Ad', 'As', '8c', '2d'],
+          winnerHoleCards: <String>['Ac', 'Ks'],
+          loserHoleCards: <String>['Qh', 'Qd'],
+          summaryPrefix: 'Four of a kind',
+        ),
+        _ShowdownCase(
+          name: 'straight flush',
+          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '2d'],
+          winnerHoleCards: <String>['Th', 'Ks'],
+          loserHoleCards: <String>['Ac', 'Ad'],
+          summaryPrefix: 'Straight flush',
+        ),
+      ];
+
+      for (final showdownCase in cases) {
+        final result = adapter.evaluate(
+          ShowdownEvaluationInput(
+            boardCards: showdownCase.boardCards,
+            seats: <ShowdownSeatInput>[
+              ShowdownSeatInput(
+                seat: 1,
+                holeCards: showdownCase.loserHoleCards,
+                isFolded: false,
+              ),
+              ShowdownSeatInput(
+                seat: 2,
+                holeCards: showdownCase.winnerHoleCards,
+                isFolded: false,
+              ),
+            ],
+          ),
+        );
+
+        expect(result.warnings, isEmpty, reason: showdownCase.name);
+        expect(result.results.first.seat, 2, reason: showdownCase.name);
+        expect(
+          result.results.first.summary,
+          startsWith(showdownCase.summaryPrefix),
+          reason: showdownCase.name,
+        );
+      }
+    });
+
+    test('showdown evaluator applies kicker and tie ordering', () {
+      final kickerResult = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Ad', '8s', '5c', '2d'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['Kc', '7s'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Qc', '7d'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      expect(kickerResult.results.map((entry) => entry.seat), <int>[1, 2]);
+      expect(kickerResult.results.map((entry) => entry.rankIndex), <int>[0, 1]);
+
+      final tieResult = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', 'Th'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['2c', '3c'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['4d', '5d'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      expect(tieResult.results.map((entry) => entry.seat), <int>[1, 2]);
+      expect(tieResult.results.map((entry) => entry.rankIndex), <int>[0, 0]);
+    });
   });
+}
+
+class _ShowdownCase {
+  const _ShowdownCase({
+    required this.name,
+    required this.boardCards,
+    required this.winnerHoleCards,
+    required this.loserHoleCards,
+    required this.summaryPrefix,
+  });
+
+  final String name;
+  final List<String> boardCards;
+  final List<String> winnerHoleCards;
+  final List<String> loserHoleCards;
+  final String summaryPrefix;
 }
