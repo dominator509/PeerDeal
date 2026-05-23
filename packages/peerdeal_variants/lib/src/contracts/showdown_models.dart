@@ -46,6 +46,19 @@ class ShowdownWinnerGroup {
 }
 
 @immutable
+class ShowdownSliceWinnerProjection {
+  const ShowdownSliceWinnerProjection({
+    required this.winningSeatIdsBySliceIndex,
+    required this.unawardableSliceIndexes,
+  });
+
+  final Map<int, List<String>> winningSeatIdsBySliceIndex;
+  final List<int> unawardableSliceIndexes;
+
+  bool get hasUnawardableSlices => unawardableSliceIndexes.isNotEmpty;
+}
+
+@immutable
 class ShowdownEvaluationResult {
   const ShowdownEvaluationResult({
     required this.results,
@@ -109,16 +122,33 @@ class ShowdownEvaluationResult {
     required Map<int, List<String>> contestedSeatIdsBySliceIndex,
     required int? Function(String seatId) seatForId,
   }) {
-    if (warnings.isNotEmpty || results.isEmpty) {
-      return const <int, List<String>>{};
-    }
+    return projectContestedSeatIdsBySliceIndex(
+      contestedSeatIdsBySliceIndex: contestedSeatIdsBySliceIndex,
+      seatForId: seatForId,
+    ).winningSeatIdsBySliceIndex;
+  }
 
+  ShowdownSliceWinnerProjection projectContestedSeatIdsBySliceIndex({
+    required Map<int, List<String>> contestedSeatIdsBySliceIndex,
+    required int? Function(String seatId) seatForId,
+  }) {
     final winnersBySlice = <int, List<String>>{};
+    final unawardableSliceIndexes = <int>[];
     final sliceIndexes = contestedSeatIdsBySliceIndex.keys.toList()..sort();
     for (final sliceIndex in sliceIndexes) {
+      final contestedSeatIds =
+          contestedSeatIdsBySliceIndex[sliceIndex] ?? const <String>[];
+      if (contestedSeatIds.isEmpty) {
+        continue;
+      }
+
+      if (warnings.isNotEmpty || results.isEmpty) {
+        unawardableSliceIndexes.add(sliceIndex);
+        continue;
+      }
+
       final idsBySeat = <int, List<String>>{};
-      for (final seatId
-          in contestedSeatIdsBySliceIndex[sliceIndex] ?? const <String>[]) {
+      for (final seatId in contestedSeatIds) {
         final seat = seatForId(seatId);
         if (seat == null) {
           continue;
@@ -127,9 +157,11 @@ class ShowdownEvaluationResult {
       }
 
       if (idsBySeat.isEmpty) {
+        unawardableSliceIndexes.add(sliceIndex);
         continue;
       }
 
+      var isAwardable = false;
       for (final group in winnerGroups) {
         final winners = <String>[
           for (final seat in group.seats)
@@ -137,12 +169,20 @@ class ShowdownEvaluationResult {
         ]..sort();
         if (winners.isNotEmpty) {
           winnersBySlice[sliceIndex] = winners;
+          isAwardable = true;
           break;
         }
       }
+
+      if (!isAwardable) {
+        unawardableSliceIndexes.add(sliceIndex);
+      }
     }
 
-    return winnersBySlice;
+    return ShowdownSliceWinnerProjection(
+      winningSeatIdsBySliceIndex: winnersBySlice,
+      unawardableSliceIndexes: unawardableSliceIndexes,
+    );
   }
 }
 

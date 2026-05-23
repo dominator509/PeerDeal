@@ -514,6 +514,69 @@ void main() {
         0: <String>['seat-1'],
       });
     });
+
+    test('showdown projection reports unawardable contested slices', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['Th', '9d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Ac', '3c'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      final projection = result.projectContestedSeatIdsBySliceIndex(
+        contestedSeatIdsBySliceIndex: const <int, List<String>>{
+          0: <String>['seat-1', 'seat-2'],
+          1: <String>['seat-9'],
+          2: <String>['unknown'],
+        },
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(projection.winningSeatIdsBySliceIndex, <int, List<String>>{
+        0: <String>['seat-1'],
+      });
+      expect(projection.unawardableSliceIndexes, <int>[1, 2]);
+      expect(projection.hasUnawardableSlices, isTrue);
+    });
+
+    test(
+      'showdown projection reports invalid evaluation slices unawardable',
+      () {
+        final result = adapter.evaluate(
+          const ShowdownEvaluationInput(
+            boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', 'bad'],
+            seats: <ShowdownSeatInput>[
+              ShowdownSeatInput(
+                seat: 1,
+                holeCards: <String>['Th', '9d'],
+                isFolded: false,
+              ),
+            ],
+          ),
+        );
+
+        final projection = result.projectContestedSeatIdsBySliceIndex(
+          contestedSeatIdsBySliceIndex: const <int, List<String>>{
+            0: <String>['seat-1'],
+          },
+          seatForId: _seatFromSeatId,
+        );
+
+        expect(projection.winningSeatIdsBySliceIndex, isEmpty);
+        expect(projection.unawardableSliceIndexes, <int>[0]);
+      },
+    );
   });
 }
 
