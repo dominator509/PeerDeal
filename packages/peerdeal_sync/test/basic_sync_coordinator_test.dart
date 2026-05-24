@@ -98,4 +98,63 @@ void main() {
       ]);
     },
   );
+
+  test('safe-closes when snapshot applier rejects the recovery window', () {
+    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+      conflictDetector: const _NoConflictDetector(),
+      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      ),
+    );
+
+    final result = coordinator.recover(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 2,
+          snapshotHash: 'snap_hash',
+          payload: <String, Object?>{},
+        ),
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_4',
+            eventType: 'RecoveryPauseEnded',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 4,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:05Z',
+            actorRef: 'system',
+            payload: <String, Object?>{},
+            prevEventHash: 'hash_3',
+            eventHash: 'hash_4',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.safeCloseRecommended, isTrue);
+    expect(result.reconciliation.recommendedAction, 'safe_close');
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_APPLY_SUFFIX_GAP');
+  });
+}
+
+class _NoConflictDetector implements ConflictDetector {
+  const _NoConflictDetector();
+
+  @override
+  ConflictDetectionResult detect(RecoveryRequest request) {
+    return const ConflictDetectionResult(conflicts: <SyncConflict>[]);
+  }
 }
