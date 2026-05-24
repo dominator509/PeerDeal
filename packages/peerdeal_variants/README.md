@@ -75,3 +75,12 @@ Street advancement is fail-closed. Wrong board-card counts, malformed card
 identities, duplicate public cards, or invalid source phases return
 `isAdvanced: false`, preserve the input state, and report warning codes instead
 of generating placeholder cards or throwing parser exceptions.
+
+`HoldemActionStreetCoordinator.applyAndAdvanceIfComplete(...)` composes action
+application with this street advancement contract. It first applies the
+validated table action. If that action does not complete the betting round, the
+coordinator returns the post-action state without touching board cards. If the
+action completes the round, it attempts the supplied street advance and returns
+either the advanced state or the post-action state plus street warning codes.
+The coordinator does not emit protocol events, choose session policy, or perform
+settlement.
