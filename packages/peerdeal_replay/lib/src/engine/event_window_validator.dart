@@ -12,7 +12,16 @@ class EventWindowValidator {
       final event = events[i];
       if (i > 0) {
         final previous = events[i - 1];
-        if (event.eventSeq != previous.eventSeq + 1) {
+        if (event.eventSeq <= previous.eventSeq) {
+          mismatches.add(
+            ReplayMismatch(
+              code: 'ERR_REPLAY_EVENT_SEQUENCE_NOT_INCREASING',
+              message: 'Event sequence must increase monotonically.',
+              expected: previous.eventSeq + 1,
+              actual: event.eventSeq,
+            ),
+          );
+        } else if (event.eventSeq != previous.eventSeq + 1) {
           mismatches.add(
             ReplayMismatch(
               code: 'ERR_REPLAY_EVENT_GAP',

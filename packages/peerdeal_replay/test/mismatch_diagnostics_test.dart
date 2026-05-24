@@ -56,4 +56,57 @@ void main() {
     expect(result.isSuccess, isFalse);
     expect(result.mismatches.first.code, 'ERR_REPLAY_EVENT_GAP');
   });
+
+  test('fails safely on duplicate event sequence', () {
+    final events = [
+      EventEnvelope(
+        eventId: 'evt_1',
+        eventType: 'OpenTableSessionOpened',
+        eventVersion: '1.0',
+        protocolVersion: '1.0.0',
+        eventSeq: 1,
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        handId: null,
+        emittedAt: '2026-04-25T00:00:00Z',
+        actorRef: 'host_1',
+        payload: const {},
+        prevEventHash: 'root',
+        eventHash: 'hash_1',
+      ),
+      EventEnvelope(
+        eventId: 'evt_duplicate',
+        eventType: 'HandStarted',
+        eventVersion: '1.0',
+        protocolVersion: '1.0.0',
+        eventSeq: 1,
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        handId: 'hand_1',
+        emittedAt: '2026-04-25T00:00:05Z',
+        actorRef: 'system',
+        payload: const {},
+        prevEventHash: 'hash_1',
+        eventHash: 'hash_duplicate',
+      ),
+    ];
+
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        events: events,
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches, hasLength(1));
+    expect(
+      result.mismatches.first.code,
+      'ERR_REPLAY_EVENT_SEQUENCE_NOT_INCREASING',
+    );
+  });
 }
