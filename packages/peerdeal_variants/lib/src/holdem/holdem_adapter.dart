@@ -1,13 +1,11 @@
 import '../contracts/showdown_models.dart';
 import '../contracts/variant_adapter.dart';
-import 'holdem_showdown_stub.dart';
+import 'holdem_showdown_evaluator.dart';
 
 class HoldemAdapter implements VariantAdapter {
-  const HoldemAdapter({
-    this.showdown = const HoldemShowdownStub(),
-  });
+  const HoldemAdapter({this.showdown = const HoldemShowdownEvaluator()});
 
-  final HoldemShowdownStub showdown;
+  final HoldemShowdownEvaluator showdown;
 
   String get variantId => getIdentity().variantId;
 
@@ -71,10 +69,7 @@ class HoldemAdapter implements VariantAdapter {
 
   @override
   HandPlan buildHandPlan() {
-    return const HandPlan(
-      privateCardsPerSeat: 2,
-      boardStages: <int>[3, 1, 1],
-    );
+    return const HandPlan(privateCardsPerSeat: 2, boardStages: <int>[3, 1, 1]);
   }
 
   ShowdownEvaluationResult evaluate(ShowdownEvaluationInput input) {

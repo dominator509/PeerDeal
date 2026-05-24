@@ -25,7 +25,7 @@ This starter scaffold provides only enough structure to begin Sprint 4:
 - legal action boundary
 - adapter identity/capabilities
 - starter validator and state machine hooks
-- starter showdown/evaluation contracts
+- showdown/evaluation and settlement projection contracts
 
 It does **not** yet implement a full production poker engine.
 

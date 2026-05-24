@@ -63,7 +63,7 @@ void main() {
       expect(result.warnings, isEmpty);
     });
 
-    test('showdown stub fails safely on malformed active inputs', () {
+    test('showdown evaluator fails safely on malformed active inputs', () {
       final result = adapter.evaluate(
         const ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh'],
