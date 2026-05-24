@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_capture/peerdeal_capture.dart';
@@ -8,8 +5,8 @@ import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_surface_pres
 import 'package:peerdeal_mobile/demo_slice/models/demo_scenario_snapshot.dart';
 import 'package:peerdeal_mobile/demo_slice/screens/demo_receipt_screen.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
-import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
-import 'package:peerdeal_sync/peerdeal_sync.dart';
+
+import '../../../../tools/test_helpers/demo_receipt_route_test_support.dart';
 
 void main() {
   testWidgets('renders receipt details when surface is not obscured', (
@@ -44,7 +41,7 @@ void main() {
   testWidgets('routes receipt fixture through presenter into safe screen', (
     tester,
   ) async {
-    final bridge = _RecordingCaptureProtectionBridge();
+    final bridge = RecordingCaptureProtectionBridge();
     final presenter = DemoReceiptSurfacePresenter(
       captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
     );
@@ -70,7 +67,7 @@ void main() {
   testWidgets('routes recovery fixture through presenter into safe screen', (
     tester,
   ) async {
-    final bridge = _RecordingCaptureProtectionBridge();
+    final bridge = RecordingCaptureProtectionBridge();
     final presenter = DemoReceiptSurfacePresenter(
       captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
     );
@@ -81,7 +78,7 @@ void main() {
         child: DemoReceiptRoute(
           snapshot: _fixtureSnapshot('recovery_pause_transfer.json'),
           presenter: presenter,
-          recovery: _recoveryResult(),
+          recovery: demoRecoveryResult(),
         ),
       ),
     );
@@ -123,46 +120,5 @@ DemoReceiptSurfaceVm _surface({required bool shouldObscure}) {
 }
 
 DemoScenarioSnapshot _fixtureSnapshot(String fixtureName) {
-  final workspaceLocal = File('tools/demo_slice_fixtures/$fixtureName');
-  final appLocal = File('../../tools/demo_slice_fixtures/$fixtureName');
-  final file = workspaceLocal.existsSync() ? workspaceLocal : appLocal;
-  return DemoScenarioSnapshot.fromJson(
-    jsonDecode(file.readAsStringSync()) as Map<String, Object?>,
-  );
-}
-
-RecoveryResult<Object?> _recoveryResult() {
-  return const RecoveryResult<Object?>(
-    isSuccess: false,
-    reconciliation: ReconciliationResult(
-      canResume: false,
-      requiresRecovery: true,
-      recommendedAction: 'safe_close',
-    ),
-    conflicts: [
-      SyncConflict(
-        code: 'ERR_FINAL_EVENT_HASH_MISMATCH',
-        message: 'Final event hash does not match expected recovery baseline.',
-        severity: SyncConflictSeverity.fatal,
-        expected: 'expected_hash',
-        actual: 'actual_hash',
-      ),
-    ],
-    safeCloseRecommended: true,
-  );
-}
-
-class _RecordingCaptureProtectionBridge implements CaptureProtectionBridge {
-  int requestCount = 0;
-
-  @override
-  Future<CaptureProtectionCapability> getCapability() async {
-    requestCount += 1;
-    return const CaptureProtectionCapability(
-      blockingSupported: true,
-      obscuringSupported: true,
-      notes: 'screen-protection-supported',
-      warning: 'best-effort',
-    );
-  }
+  return DemoScenarioSnapshot.fromJson(demoFixtureJson(fixtureName));
 }
