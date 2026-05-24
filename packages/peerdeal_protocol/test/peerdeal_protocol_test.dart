@@ -171,9 +171,15 @@ void main() {
 
   test('protocol catalog accepts scaffold replay and recovery events', () {
     const supportedEventTypes = <String>[
+      'OpenTableSessionOpened',
       'ParticipantAdmitted',
+      'ParticipantConnected',
+      'ParticipantSeated',
       'HandStarted',
       'PlayerCalled',
+      'HandSettled',
+      'SessionCloseRequested',
+      'SessionClosed',
       'IgnoredBecauseCoveredBySnapshot',
       'RecoveryPauseEnded',
     ];
@@ -195,6 +201,38 @@ void main() {
     final keys = defaultProtocolCatalogEntries.map(catalogEntryKey).toList();
 
     expect(keys.toSet(), hasLength(keys.length));
+  });
+
+  test('protocol catalog exposes complete scaffold artifact families', () {
+    const catalog = ProtocolCatalog();
+
+    expect(catalog.supportedTypesFor(ProtocolArtifactKind.command), [
+      'OpenTableSession',
+    ]);
+    expect(catalog.supportedTypesFor(ProtocolArtifactKind.event), [
+      'OpenTableSessionOpened',
+      'ParticipantAdmitted',
+      'ParticipantConnected',
+      'ParticipantSeated',
+      'HandStarted',
+      'PlayerCalled',
+      'HandSettled',
+      'SessionCloseRequested',
+      'SessionClosed',
+      'IgnoredBecauseCoveredBySnapshot',
+      'RecoveryPauseEnded',
+    ]);
+    expect(catalog.supportedTypesFor(ProtocolArtifactKind.snapshot), [
+      'TableSnapshot',
+    ]);
+  });
+
+  test('default protocol catalog groups compose the public catalog', () {
+    expect(defaultProtocolCatalogEntries, [
+      ...supportedCommandCatalogEntries,
+      ...supportedEventCatalogEntries,
+      ...supportedSnapshotCatalogEntries,
+    ]);
   });
 
   test('protocol catalog rejects unsupported protocol version fail-safe', () {

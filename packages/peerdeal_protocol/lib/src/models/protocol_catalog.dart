@@ -57,6 +57,14 @@ class ProtocolCatalog {
   final ProtocolVersion supportedProtocolVersion;
   final List<ProtocolCatalogEntry> entries;
 
+  Iterable<ProtocolCatalogEntry> entriesFor(ProtocolArtifactKind kind) {
+    return entries.where((entry) => entry.kind == kind);
+  }
+
+  List<String> supportedTypesFor(ProtocolArtifactKind kind) {
+    return [for (final entry in entriesFor(kind)) entry.type];
+  }
+
   bool supportsProtocolVersion(String wireVersion) {
     final parsed = _tryParseProtocolVersion(wireVersion);
     return parsed != null && parsed == supportedProtocolVersion;
@@ -185,13 +193,16 @@ class ProtocolCatalog {
 
 const currentProtocolVersion = ProtocolVersion(1, 0, 0);
 
-const defaultProtocolCatalogEntries = [
+const supportedCommandCatalogEntries = [
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.command,
     type: 'OpenTableSession',
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),
+];
+
+const supportedEventCatalogEntries = [
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.event,
     type: 'OpenTableSessionOpened',
@@ -201,6 +212,18 @@ const defaultProtocolCatalogEntries = [
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.event,
     type: 'ParticipantAdmitted',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'ParticipantConnected',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'ParticipantSeated',
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),
@@ -218,6 +241,24 @@ const defaultProtocolCatalogEntries = [
   ),
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.event,
+    type: 'HandSettled',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'SessionCloseRequested',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'SessionClosed',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
     type: 'IgnoredBecauseCoveredBySnapshot',
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
@@ -228,10 +269,19 @@ const defaultProtocolCatalogEntries = [
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),
+];
+
+const supportedSnapshotCatalogEntries = [
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.snapshot,
     type: 'TableSnapshot',
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),
+];
+
+const defaultProtocolCatalogEntries = [
+  ...supportedCommandCatalogEntries,
+  ...supportedEventCatalogEntries,
+  ...supportedSnapshotCatalogEntries,
 ];
