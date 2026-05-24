@@ -1,4 +1,4 @@
-# Mobile Demo Slice Overlay
+# Desktop Demo Slice Overlay
 
 Mount these placeholders behind a dev-only route.
 
@@ -8,3 +8,19 @@ Recommended order:
 3. table screen
 4. chat route
 5. receipt route
+
+## Safe-Surface Route Flow
+
+Sensitive demo routes should follow the same app-layer path:
+
+1. Parse the scenario fixture into a demo snapshot.
+2. Convert the snapshot into package-level inputs such as receipt scan or
+   recovery results.
+3. Pass those inputs through the route presenter.
+4. Render only the presenter view model in the screen.
+5. Wrap sensitive content with `SafeSurface` using the presenter's
+   `SafeSurfaceRenderModel`.
+
+Do not let screens decide capture policy directly. Future private ledger,
+receipt detail, verification drill-down, restore, or stats-history demo screens
+should reuse this fixture -> presenter -> safe screen shape.
