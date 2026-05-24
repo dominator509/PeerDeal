@@ -49,4 +49,25 @@ void main() {
     final result = service.scanReceipt(wipedReceipt);
     expect(result.status, 'wiped');
   });
+
+  test('scan rejects malformed receipt envelope', () {
+    const malformedReceipt = PeerDealReceipt(
+      receiptId: 'r_bad',
+      receiptVersion: '1.0',
+      protocolVersion: '1.x',
+      modeType: 'open_table',
+      sessionId: 'sess_99',
+      tableId: 'table_9',
+      pseudonymousUserId: 'user_9',
+      bindingMode: ReceiptBindingMode.userBound,
+      wipeState: ReceiptWipeState.live,
+      payloadHash: '',
+      opaquePayload: 'opaque_99',
+    );
+
+    final result = service.scanReceipt(malformedReceipt);
+    expect(result.status, 'rejected');
+    expect(result.message, 'Receipt envelope is malformed.');
+    expect(result.shareableFields, isEmpty);
+  });
 }

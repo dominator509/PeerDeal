@@ -33,4 +33,15 @@ class PeerDealReceipt {
   final String? signature;
 
   bool get isWiped => wipeState == ReceiptWipeState.wiped;
+
+  bool get hasRequiredEnvelopeFields =>
+      receiptId.trim().isNotEmpty &&
+      receiptVersion.trim().isNotEmpty &&
+      protocolVersion.trim().isNotEmpty &&
+      modeType.trim().isNotEmpty &&
+      sessionId.trim().isNotEmpty &&
+      tableId.trim().isNotEmpty &&
+      pseudonymousUserId.trim().isNotEmpty &&
+      payloadHash.trim().isNotEmpty &&
+      opaquePayload.trim().isNotEmpty;
 }

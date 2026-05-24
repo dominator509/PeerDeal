@@ -67,4 +67,30 @@ void main() {
     expect(result.allowed, isFalse);
     expect(result.normalizedResultCode, 'ERR_RECEIPT_WIPED');
   });
+
+  test('rejects malformed receipt restore', () {
+    const malformedReceipt = PeerDealReceipt(
+      receiptId: 'r_bad',
+      receiptVersion: '1.0',
+      protocolVersion: '1.x',
+      modeType: 'open_table',
+      sessionId: 'sess_1',
+      tableId: 'table_1',
+      pseudonymousUserId: 'user_1',
+      bindingMode: ReceiptBindingMode.userBound,
+      wipeState: ReceiptWipeState.live,
+      payloadHash: 'hash_bad',
+      opaquePayload: '',
+    );
+
+    const request = ReceiptAuthorizationRequest(
+      requestedByUserId: 'user_1',
+      requestedSessionId: 'sess_1',
+      accessMode: ReceiptAccessMode.restore,
+    );
+
+    final result = authorizer.authorize(malformedReceipt, request);
+    expect(result.allowed, isFalse);
+    expect(result.normalizedResultCode, 'ERR_RECEIPT_MALFORMED');
+  });
 }

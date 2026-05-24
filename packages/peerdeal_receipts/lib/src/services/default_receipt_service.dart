@@ -12,8 +12,8 @@ class DefaultReceiptService implements ReceiptService {
   const DefaultReceiptService({
     required ReceiptAuthorizer authorizer,
     OpaqueExportEncoder exportEncoder = const OpaqueExportEncoder(),
-  })  : _authorizer = authorizer,
-        _exportEncoder = exportEncoder;
+  }) : _authorizer = authorizer,
+       _exportEncoder = exportEncoder;
 
   final ReceiptAuthorizer _authorizer;
   final OpaqueExportEncoder _exportEncoder;
@@ -30,6 +30,13 @@ class DefaultReceiptService implements ReceiptService {
 
   @override
   ReceiptScanResult scanReceipt(PeerDealReceipt receipt) {
+    if (!receipt.hasRequiredEnvelopeFields) {
+      return const ReceiptScanResult(
+        status: 'rejected',
+        message: 'Receipt envelope is malformed.',
+      );
+    }
+
     if (receipt.wipeState == ReceiptWipeState.wiped) {
       return const ReceiptScanResult(
         status: 'wiped',
