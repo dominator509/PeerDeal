@@ -36,3 +36,7 @@ The default protocol catalog is grouped by artifact family:
 Envelope compatibility checks must reject unknown artifact identities before
 downstream packages process them. New scaffold command, event, or snapshot
 identities should be added to the matching catalog group with focused tests.
+
+The catalog may name future reducer or variant paths before they are fully
+wired, but only as versioned protocol identities. Acceptance in the catalog does
+not imply that a reducer, settlement projector, or app route is implemented.

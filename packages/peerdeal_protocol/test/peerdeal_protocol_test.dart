@@ -176,10 +176,20 @@ void main() {
       'ParticipantConnected',
       'ParticipantSeated',
       'HandStarted',
+      'PlayerFolded',
+      'PlayerChecked',
       'PlayerCalled',
+      'PlayerBet',
+      'PlayerRaised',
+      'PlayerAllIn',
+      'ShowdownStarted',
+      'ShowdownRevealed',
+      'SettlementProjected',
+      'SettlementBlocked',
       'HandSettled',
       'SessionCloseRequested',
       'SessionClosed',
+      'SessionWiped',
       'IgnoredBecauseCoveredBySnapshot',
       'RecoveryPauseEnded',
     ];
@@ -208,6 +218,14 @@ void main() {
 
     expect(catalog.supportedTypesFor(ProtocolArtifactKind.command), [
       'OpenTableSession',
+      'StartHand',
+      'PlayerFold',
+      'PlayerCheck',
+      'PlayerCall',
+      'PlayerBet',
+      'PlayerRaise',
+      'PlayerAllIn',
+      'RequestSessionClose',
     ]);
     expect(catalog.supportedTypesFor(ProtocolArtifactKind.event), [
       'OpenTableSessionOpened',
@@ -215,10 +233,20 @@ void main() {
       'ParticipantConnected',
       'ParticipantSeated',
       'HandStarted',
+      'PlayerFolded',
+      'PlayerChecked',
       'PlayerCalled',
+      'PlayerBet',
+      'PlayerRaised',
+      'PlayerAllIn',
+      'ShowdownStarted',
+      'ShowdownRevealed',
+      'SettlementProjected',
+      'SettlementBlocked',
       'HandSettled',
       'SessionCloseRequested',
       'SessionClosed',
+      'SessionWiped',
       'IgnoredBecauseCoveredBySnapshot',
       'RecoveryPauseEnded',
     ]);
@@ -233,6 +261,54 @@ void main() {
       ...supportedEventCatalogEntries,
       ...supportedSnapshotCatalogEntries,
     ]);
+  });
+
+  test('protocol catalog accepts scaffold command and action identities', () {
+    const commandTypes = <String>[
+      'OpenTableSession',
+      'StartHand',
+      'PlayerFold',
+      'PlayerCheck',
+      'PlayerCall',
+      'PlayerBet',
+      'PlayerRaise',
+      'PlayerAllIn',
+      'RequestSessionClose',
+    ];
+
+    for (final commandType in commandTypes) {
+      final result = ProtocolCatalog().check(
+        kind: ProtocolArtifactKind.command,
+        type: commandType,
+        artifactVersion: '1.0',
+        protocolVersion: currentProtocolVersion.toWire(),
+      );
+
+      expect(result.isSupported, isTrue, reason: commandType);
+      expect(result.resultCode, ResultCode.okAccepted, reason: commandType);
+    }
+  });
+
+  test('protocol catalog accepts settlement path event identities', () {
+    const eventTypes = <String>[
+      'ShowdownStarted',
+      'ShowdownRevealed',
+      'SettlementProjected',
+      'SettlementBlocked',
+      'HandSettled',
+    ];
+
+    for (final eventType in eventTypes) {
+      final result = ProtocolCatalog().check(
+        kind: ProtocolArtifactKind.event,
+        type: eventType,
+        artifactVersion: '1.0',
+        protocolVersion: currentProtocolVersion.toWire(),
+      );
+
+      expect(result.isSupported, isTrue, reason: eventType);
+      expect(result.resultCode, ResultCode.okAccepted, reason: eventType);
+    }
   });
 
   test('protocol catalog rejects unsupported protocol version fail-safe', () {

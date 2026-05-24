@@ -200,6 +200,54 @@ const supportedCommandCatalogEntries = [
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.command,
+    type: 'StartHand',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.command,
+    type: 'PlayerFold',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.command,
+    type: 'PlayerCheck',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.command,
+    type: 'PlayerCall',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.command,
+    type: 'PlayerBet',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.command,
+    type: 'PlayerRaise',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.command,
+    type: 'PlayerAllIn',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.command,
+    type: 'RequestSessionClose',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
 ];
 
 const supportedEventCatalogEntries = [
@@ -235,7 +283,61 @@ const supportedEventCatalogEntries = [
   ),
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.event,
+    type: 'PlayerFolded',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'PlayerChecked',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
     type: 'PlayerCalled',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'PlayerBet',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'PlayerRaised',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'PlayerAllIn',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'ShowdownStarted',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'ShowdownRevealed',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'SettlementProjected',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'SettlementBlocked',
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),
@@ -254,6 +356,12 @@ const supportedEventCatalogEntries = [
   ProtocolCatalogEntry(
     kind: ProtocolArtifactKind.event,
     type: 'SessionClosed',
+    artifactVersion: '1.0',
+    protocolVersion: currentProtocolVersion,
+  ),
+  ProtocolCatalogEntry(
+    kind: ProtocolArtifactKind.event,
+    type: 'SessionWiped',
     artifactVersion: '1.0',
     protocolVersion: currentProtocolVersion,
   ),
