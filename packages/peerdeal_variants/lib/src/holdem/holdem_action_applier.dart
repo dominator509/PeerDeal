@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import 'holdem_action_flow.dart';
 import 'holdem_action_validator.dart';
 import 'holdem_hand_state.dart';
 import 'holdem_table_action.dart';
@@ -10,19 +11,25 @@ class HoldemActionApplicationResult {
     required this.isApplied,
     required this.state,
     required this.validation,
+    this.isBettingRoundComplete = false,
+    this.nextActorSeat,
   });
 
   final bool isApplied;
   final HoldemHandState state;
   final HoldemActionValidationResult validation;
+  final bool isBettingRoundComplete;
+  final int? nextActorSeat;
 }
 
 class HoldemActionApplier {
   const HoldemActionApplier({
     this.validator = const BasicHoldemActionValidator(),
+    this.flow = const HoldemActionFlow(),
   });
 
   final HoldemActionValidator validator;
+  final HoldemActionFlow flow;
 
   HoldemActionApplicationResult apply({
     required HoldemHandState state,
@@ -54,24 +61,34 @@ class HoldemActionApplier {
       committedThisRound: newCommittedThisRound,
       committedThisHand: actor.committedThisHand + contribution,
     );
+    final updatedSeats = <HoldemSeatState>[
+      for (final seat in state.seats)
+        seat.seat == action.actorSeat ? updatedActor : seat,
+    ];
+    final updatedState = state.copyWith(
+      seats: updatedSeats,
+      pot: state.pot + contribution,
+      currentBetToCall: opensOrRaisesBet
+          ? newCommittedThisRound
+          : state.currentBetToCall,
+      lastAggressorSeat: opensOrRaisesBet
+          ? action.actorSeat
+          : state.lastAggressorSeat,
+      lastActionSummary: _summaryFor(action, contribution),
+    );
+    final flowResult = flow.afterAction(
+      state: updatedState,
+      actedSeat: action.actorSeat,
+    );
 
     return HoldemActionApplicationResult(
       isApplied: true,
-      state: state.copyWith(
-        seats: <HoldemSeatState>[
-          for (final seat in state.seats)
-            seat.seat == action.actorSeat ? updatedActor : seat,
-        ],
-        pot: state.pot + contribution,
-        currentBetToCall: opensOrRaisesBet
-            ? newCommittedThisRound
-            : state.currentBetToCall,
-        lastAggressorSeat: opensOrRaisesBet
-            ? action.actorSeat
-            : state.lastAggressorSeat,
-        lastActionSummary: _summaryFor(action, contribution),
-      ),
+      state: flowResult.nextActorSeat == null
+          ? updatedState
+          : updatedState.copyWith(currentActorSeat: flowResult.nextActorSeat),
       validation: validation,
+      isBettingRoundComplete: flowResult.isBettingRoundComplete,
+      nextActorSeat: flowResult.nextActorSeat,
     );
   }
 

@@ -74,6 +74,9 @@ void main() {
     expect(result.state.currentBetToCall, 100);
     expect(result.state.lastAggressorSeat, isNull);
     expect(result.state.lastActionSummary, 'seat_2_call_50');
+    expect(result.isBettingRoundComplete, isFalse);
+    expect(result.nextActorSeat, 1);
+    expect(result.state.currentActorSeat, 1);
   });
 
   test('applies legal raise as total committed amount', () {
@@ -96,6 +99,9 @@ void main() {
     expect(result.state.currentBetToCall, 250);
     expect(result.state.lastAggressorSeat, 2);
     expect(result.state.lastActionSummary, 'seat_2_raise_200');
+    expect(result.isBettingRoundComplete, isFalse);
+    expect(result.nextActorSeat, 3);
+    expect(result.state.currentActorSeat, 3);
   });
 
   test('applies fold without changing pot or commitments', () {
@@ -165,6 +171,51 @@ void main() {
     expect(result.state.pot, 175);
     expect(result.state.currentBetToCall, 100);
     expect(result.state.lastAggressorSeat, isNull);
+    expect(result.isBettingRoundComplete, isFalse);
+    expect(result.nextActorSeat, 1);
+  });
+
+  test('marks betting round complete after the final call', () {
+    final result = applier.apply(
+      state: buildState(
+        currentActorSeat: 1,
+        seats: const <HoldemSeatState>[
+          HoldemSeatState(
+            seat: 1,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 0,
+          ),
+          HoldemSeatState(
+            seat: 2,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+          ),
+          HoldemSeatState(
+            seat: 3,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+          ),
+        ],
+      ),
+      action: const HoldemTableAction(
+        actorSeat: 1,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isApplied, isTrue);
+    expect(result.isBettingRoundComplete, isTrue);
+    expect(result.nextActorSeat, isNull);
+    expect(result.state.currentActorSeat, 1);
   });
 
   test('rejects invalid action without mutating state', () {

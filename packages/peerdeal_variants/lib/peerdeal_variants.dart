@@ -6,6 +6,7 @@ export 'src/contracts/showdown_settlement_projector.dart';
 
 export 'src/holdem/holdem_adapter.dart';
 export 'src/holdem/holdem_action_applier.dart';
+export 'src/holdem/holdem_action_flow.dart';
 export 'src/holdem/holdem_action_validator.dart';
 export 'src/holdem/holdem_betting_round.dart';
 export 'src/holdem/holdem_hand_evaluator.dart';

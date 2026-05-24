@@ -56,8 +56,10 @@ a safe failure path instead of silently awarding partial pots.
 `HoldemActionApplier` is a deterministic variant-local helper for applying a
 validated table action to `HoldemHandState`. It updates stack, street
 commitment, hand commitment, pot, folded/all-in flags, last aggressor, and last
-action summary. Invalid actions return `isApplied: false` and preserve the input
-state.
+action summary. It also reports the next actionable seat and obvious betting
+round completion cases through `HoldemActionFlow`. Invalid actions return
+`isApplied: false` and preserve the input state.
 
-The applier does not choose the next actor or emit canonical core events. Those
-remain session/core orchestration responsibilities.
+The applier only chooses the next actor within the current betting round. It
+does not open streets or emit canonical core events; those remain session/core
+orchestration responsibilities.
