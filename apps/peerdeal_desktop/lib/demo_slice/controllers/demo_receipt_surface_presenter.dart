@@ -8,19 +8,19 @@ class DemoReceiptSurfaceVm {
   const DemoReceiptSurfaceVm({
     required this.receipt,
     required this.receiptCapturePlan,
+    required this.safeSurface,
     this.recovery,
     this.recoveryCapturePlan,
   });
 
   final SafeReceiptScanVm receipt;
   final CaptureSurfacePlan receiptCapturePlan;
+  final SafeSurfaceRenderModel safeSurface;
   final SafeRecoveryVm? recovery;
   final CaptureSurfacePlan? recoveryCapturePlan;
 
   bool get showsRecovery => recovery != null;
-  bool get shouldObscure =>
-      receiptCapturePlan.shouldObscure ||
-      (recoveryCapturePlan?.shouldObscure ?? false);
+  bool get shouldObscure => safeSurface.shouldObscure;
 }
 
 class DemoReceiptSurfacePresenter {
@@ -51,6 +51,10 @@ class DemoReceiptSurfacePresenter {
     return DemoReceiptSurfaceVm(
       receipt: _projection.projectReceiptScan(receipt),
       receiptCapturePlan: receiptCapturePlan,
+      safeSurface: SafeSurfaceRenderModel.fromCapturePlans([
+        receiptCapturePlan,
+        recoveryCapturePlan,
+      ]),
       recovery: recovery == null ? null : _projection.projectRecovery(recovery),
       recoveryCapturePlan: recoveryCapturePlan,
     );
