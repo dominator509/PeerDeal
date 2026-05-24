@@ -9,6 +9,7 @@ import 'package:peerdeal_mobile/demo_slice/models/demo_scenario_snapshot.dart';
 import 'package:peerdeal_mobile/demo_slice/screens/demo_receipt_screen.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 void main() {
   testWidgets('renders receipt details when surface is not obscured', (
@@ -65,6 +66,36 @@ void main() {
     expect(find.text('Receipt content hidden'), findsOneWidget);
     expect(find.text('retention_mode: strict_ephemeral'), findsNothing);
   });
+
+  testWidgets('routes recovery fixture through presenter into safe screen', (
+    tester,
+  ) async {
+    final bridge = _RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DemoReceiptRoute(
+          snapshot: _fixtureSnapshot('recovery_pause_transfer.json'),
+          presenter: presenter,
+          recovery: _recoveryResult(),
+        ),
+      ),
+    );
+    expect(find.text('Loading receipt'), findsOneWidget);
+
+    await tester.pump();
+
+    expect(bridge.requestCount, 2);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+    expect(find.textContaining('ERR_FINAL_EVENT_HASH_MISMATCH'), findsNothing);
+    expect(find.textContaining('expected_hash'), findsNothing);
+    expect(find.textContaining('actual_hash'), findsNothing);
+    expect(find.textContaining('<redacted>'), findsNothing);
+  });
 }
 
 DemoReceiptSurfaceVm _surface({required bool shouldObscure}) {
@@ -97,6 +128,27 @@ DemoScenarioSnapshot _fixtureSnapshot(String fixtureName) {
   final file = workspaceLocal.existsSync() ? workspaceLocal : appLocal;
   return DemoScenarioSnapshot.fromJson(
     jsonDecode(file.readAsStringSync()) as Map<String, Object?>,
+  );
+}
+
+RecoveryResult<Object?> _recoveryResult() {
+  return const RecoveryResult<Object?>(
+    isSuccess: false,
+    reconciliation: ReconciliationResult(
+      canResume: false,
+      requiresRecovery: true,
+      recommendedAction: 'safe_close',
+    ),
+    conflicts: [
+      SyncConflict(
+        code: 'ERR_FINAL_EVENT_HASH_MISMATCH',
+        message: 'Final event hash does not match expected recovery baseline.',
+        severity: SyncConflictSeverity.fatal,
+        expected: 'expected_hash',
+        actual: 'actual_hash',
+      ),
+    ],
+    safeCloseRecommended: true,
   );
 }
 
