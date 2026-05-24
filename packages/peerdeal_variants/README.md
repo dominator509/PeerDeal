@@ -51,3 +51,13 @@ ranked showdown winner, `ShowdownSettlementProjectionResult.settlement` is
 `null`, `isBlocked` is `true`, and `projection.unawardableSliceIndexes` names
 the blocked slices. App/session orchestration should stop settlement and surface
 a safe failure path instead of silently awarding partial pots.
+
+## Hold'em action application
+`HoldemActionApplier` is a deterministic variant-local helper for applying a
+validated table action to `HoldemHandState`. It updates stack, street
+commitment, hand commitment, pot, folded/all-in flags, last aggressor, and last
+action summary. Invalid actions return `isApplied: false` and preserve the input
+state.
+
+The applier does not choose the next actor or emit canonical core events. Those
+remain session/core orchestration responsibilities.
