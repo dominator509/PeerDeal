@@ -17,4 +17,6 @@ dependencies:
   peerdeal_sync: ^0.1.0
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   test: ^1.25.0
