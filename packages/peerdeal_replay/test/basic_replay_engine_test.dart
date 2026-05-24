@@ -190,4 +190,47 @@ void main() {
       'ERR_REPLAY_SNAPSHOT_SCHEMA_UNSUPPORTED',
     );
   });
+
+  test('rejects snapshot suffix gap before projection', () {
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        snapshot: const SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 2,
+          snapshotHash: 'snap_hash',
+          payload: <String, Object?>{},
+        ),
+        events: const <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_4',
+            eventType: 'PlayerCalled',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 4,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: 'hand_1',
+            emittedAt: '2026-04-25T00:00:10Z',
+            actorRef: 'player_1',
+            payload: <String, Object?>{},
+            prevEventHash: 'hash_3',
+            eventHash: 'hash_4',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_SNAPSHOT_SUFFIX_GAP');
+    expect(result.mismatches.single.expected, 3);
+    expect(result.mismatches.single.actual, 4);
+  });
 }

@@ -5,8 +5,26 @@ import '../models/replay_mismatch.dart';
 class EventWindowValidator {
   const EventWindowValidator();
 
-  List<ReplayMismatch> validate(List<EventEnvelope> events) {
+  List<ReplayMismatch> validate(
+    List<EventEnvelope> events, {
+    int? expectedPreviousEventSeq,
+  }) {
     final mismatches = <ReplayMismatch>[];
+
+    if (expectedPreviousEventSeq != null && events.isNotEmpty) {
+      final expectedFirstSeq = expectedPreviousEventSeq + 1;
+      if (events.first.eventSeq != expectedFirstSeq) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_SNAPSHOT_SUFFIX_GAP',
+            message:
+                'Snapshot replay suffix does not continue from the snapshot base sequence.',
+            expected: expectedFirstSeq,
+            actual: events.first.eventSeq,
+          ),
+        );
+      }
+    }
 
     for (var i = 0; i < events.length; i++) {
       final event = events[i];
