@@ -54,6 +54,36 @@ TableState projectOrderedEvents(Iterable<EventEnvelope> events) {
   return state;
 }
 
+EventEnvelope protocolEvent({
+  required String eventId,
+  required String eventType,
+  required int eventSeq,
+  String tableId = 'tbl_001',
+  String sessionId = 'sess_001',
+  String? handId,
+  String actorRef = 'system',
+  Map<String, Object?> payload = const <String, Object?>{},
+  String? prevEventHash,
+  String? eventHash,
+}) {
+  return EventEnvelope(
+    eventId: eventId,
+    eventType: eventType,
+    eventVersion: '1.0',
+    protocolVersion: currentProtocolVersion.toWire(),
+    eventSeq: eventSeq,
+    tableId: tableId,
+    sessionId: sessionId,
+    handId: handId,
+    emittedAt: '2026-04-25T12:05:${eventSeq.toString().padLeft(2, '0')}Z',
+    actorRef: actorRef,
+    payload: payload,
+    prevEventHash:
+        prevEventHash ?? (eventSeq == 1 ? 'GENESIS' : 'hash_${eventSeq - 1}'),
+    eventHash: eventHash ?? 'hash_$eventSeq',
+  );
+}
+
 void main() {
   test('validator rejects open session command without table id', () {
     const command = CommandEnvelope(
@@ -88,6 +118,7 @@ void main() {
     expect(state.tableId, event.tableId);
     expect(state.sessionId, event.sessionId);
     expect(state.protocolVersion, event.protocolVersion);
+    expect(state.phase, TablePhase.openReady);
     expect(state.eventSeq, event.eventSeq);
     expect(state.metadata['mode_type'], 'open_table');
     expect(state.metadata['last_event_hash'], event.eventHash);
@@ -140,6 +171,135 @@ void main() {
     expect(reconstructed.protocolVersion, opened.protocolVersion);
     expect(reconstructed.eventSeq, admitted.eventSeq);
     expect(reconstructed.participantCount, 1);
+  });
+
+  test('core projects cataloged open-to-close protocol lifecycle events', () {
+    final events = <EventEnvelope>[
+      protocolEvent(
+        eventId: 'evt_001',
+        eventType: 'OpenTableSessionOpened',
+        eventSeq: 1,
+        payload: const {'mode_type': 'open_table'},
+      ),
+      protocolEvent(
+        eventId: 'evt_002',
+        eventType: 'ParticipantConnected',
+        eventSeq: 2,
+      ),
+      protocolEvent(
+        eventId: 'evt_003',
+        eventType: 'ParticipantConnected',
+        eventSeq: 3,
+      ),
+      protocolEvent(
+        eventId: 'evt_004',
+        eventType: 'ParticipantSeated',
+        eventSeq: 4,
+      ),
+      protocolEvent(
+        eventId: 'evt_005',
+        eventType: 'ParticipantSeated',
+        eventSeq: 5,
+      ),
+      protocolEvent(
+        eventId: 'evt_006',
+        eventType: 'HandStarted',
+        eventSeq: 6,
+        handId: 'hand_001',
+        payload: const {'hand_id': 'hand_001'},
+      ),
+      protocolEvent(
+        eventId: 'evt_007',
+        eventType: 'PlayerCalled',
+        eventSeq: 7,
+        handId: 'hand_001',
+        actorRef: 'player_001',
+      ),
+      protocolEvent(
+        eventId: 'evt_008',
+        eventType: 'ShowdownStarted',
+        eventSeq: 8,
+        handId: 'hand_001',
+      ),
+      protocolEvent(
+        eventId: 'evt_009',
+        eventType: 'SettlementProjected',
+        eventSeq: 9,
+        handId: 'hand_001',
+      ),
+      protocolEvent(
+        eventId: 'evt_010',
+        eventType: 'HandSettled',
+        eventSeq: 10,
+        handId: 'hand_001',
+      ),
+      protocolEvent(
+        eventId: 'evt_011',
+        eventType: 'SessionCloseRequested',
+        eventSeq: 11,
+      ),
+      protocolEvent(
+        eventId: 'evt_012',
+        eventType: 'SessionClosed',
+        eventSeq: 12,
+      ),
+    ];
+
+    final state = projectOrderedEvents(events);
+
+    expect(state.phase, TablePhase.closed);
+    expect(state.playersConnected, 0);
+    expect(state.playersSeated, 0);
+    expect(state.activeHandId, isNull);
+    expect(state.closeRequested, isTrue);
+    expect(state.eventSeq, 12);
+    expect(state.metadata['last_event_hash'], 'hash_12');
+  });
+
+  test(
+    'core rejects unsupported protocol event artifacts before projection',
+    () {
+      final event = protocolEvent(
+        eventId: 'evt_unknown',
+        eventType: 'UnknownEvent',
+        eventSeq: 1,
+      );
+
+      expect(
+        () => const CoreReducer().apply(TableState.initial(), event),
+        throwsA(
+          isA<InvariantViolation>().having(
+            (violation) => violation.code,
+            'code',
+            ProtocolResultCodes.errEventSchemaUnsupported,
+          ),
+        ),
+      );
+    },
+  );
+
+  test('core rejects seated protocol state that exceeds connected count', () {
+    final opened = protocolEvent(
+      eventId: 'evt_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+    );
+    final seatedWithoutConnected = protocolEvent(
+      eventId: 'evt_002',
+      eventType: 'ParticipantSeated',
+      eventSeq: 2,
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, seatedWithoutConnected]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_SEATED_EXCEEDS_CONNECTED',
+        ),
+      ),
+    );
   });
 
   test('core rejects replaying fixture-backed protocol event out of order', () {
@@ -315,7 +475,7 @@ void main() {
         isA<InvariantViolation>().having(
           (violation) => violation.code,
           'code',
-          'ERR_EVENT_STREAM_PROTOCOL_MISMATCH',
+          ProtocolResultCodes.errEventProtocolIncompatible,
         ),
       ),
     );
