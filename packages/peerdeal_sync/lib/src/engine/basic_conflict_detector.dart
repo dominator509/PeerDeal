@@ -136,14 +136,26 @@ class BasicConflictDetector implements ConflictDetector {
 
     if (request.snapshot != null && request.events.isNotEmpty) {
       final firstEventSeq = request.events.first.eventSeq;
-      if (firstEventSeq <= request.snapshot!.snapshotBaseEventSeq) {
+      final snapshotBaseEventSeq = request.snapshot!.snapshotBaseEventSeq;
+      if (firstEventSeq <= snapshotBaseEventSeq) {
         conflicts.add(
           SyncConflict(
             code: 'WARN_EVENT_WINDOW_OVERLAPS_SNAPSHOT',
             message:
                 'Recovery event window overlaps the snapshot base sequence and will be filtered.',
             severity: SyncConflictSeverity.recoverable,
-            expected: '>${request.snapshot!.snapshotBaseEventSeq}',
+            expected: '>$snapshotBaseEventSeq',
+            actual: '$firstEventSeq',
+          ),
+        );
+      } else if (firstEventSeq != snapshotBaseEventSeq + 1) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_SNAPSHOT_SUFFIX_GAP',
+            message:
+                'Recovery event window does not continue from the snapshot base sequence.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '${snapshotBaseEventSeq + 1}',
             actual: '$firstEventSeq',
           ),
         );

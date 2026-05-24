@@ -154,4 +154,46 @@ void main() {
     expect(result.hasFatalConflicts, isTrue);
     expect(result.conflicts.single.code, 'ERR_SNAPSHOT_SCHEMA_UNSUPPORTED');
   });
+
+  test('flags fatal snapshot suffix gap', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 2,
+          snapshotHash: 'snap_hash',
+          payload: <String, Object?>{},
+        ),
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_4',
+            eventType: 'RecoveryPauseEnded',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 4,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:05Z',
+            actorRef: 'system',
+            payload: <String, Object?>{},
+            prevEventHash: 'hash_3',
+            eventHash: 'hash_4',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_SUFFIX_GAP');
+    expect(result.conflicts.single.expected, '3');
+    expect(result.conflicts.single.actual, '4');
+  });
 }
