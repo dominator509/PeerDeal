@@ -132,6 +132,17 @@ class BasicConflictDetector implements ConflictDetector {
           ),
         );
       }
+      if (current.prevEventHash != previous.eventHash) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_HASH_CHAIN_BREAK',
+            message: 'Recovery event hash chain continuity failed.',
+            severity: SyncConflictSeverity.fatal,
+            expected: previous.eventHash,
+            actual: current.prevEventHash,
+          ),
+        );
+      }
     }
 
     if (request.snapshot != null && request.events.isNotEmpty) {
