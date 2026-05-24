@@ -245,6 +245,54 @@ void main() {
     expect(result.conflicts.single.actual, 'hash_unrelated');
   });
 
+  test('flags fatal event sequence gap', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'OpenTableSessionOpened',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:00Z',
+            actorRef: 'host_1',
+            payload: <String, Object?>{},
+            prevEventHash: 'root',
+            eventHash: 'hash_1',
+          ),
+          EventEnvelope(
+            eventId: 'evt_3',
+            eventType: 'HandStarted',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 3,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: 'hand_1',
+            emittedAt: '2026-04-25T00:00:05Z',
+            actorRef: 'system',
+            payload: <String, Object?>{},
+            prevEventHash: 'hash_1',
+            eventHash: 'hash_3',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EVENT_SEQUENCE_GAP');
+    expect(result.conflicts.single.expected, '2');
+    expect(result.conflicts.single.actual, '3');
+  });
+
   test('flags fatal event scope mismatch', () {
     final result = detector.detect(
       const RecoveryRequest(

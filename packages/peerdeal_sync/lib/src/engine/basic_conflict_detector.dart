@@ -145,6 +145,16 @@ class BasicConflictDetector implements ConflictDetector {
             actual: '${current.eventSeq}',
           ),
         );
+      } else if (current.eventSeq != previous.eventSeq + 1) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_SEQUENCE_GAP',
+            message: 'Recovery event sequence gap detected.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '${previous.eventSeq + 1}',
+            actual: '${current.eventSeq}',
+          ),
+        );
       }
       if (current.prevEventHash != previous.eventHash) {
         conflicts.add(
