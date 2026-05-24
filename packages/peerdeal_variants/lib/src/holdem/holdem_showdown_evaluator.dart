@@ -1,4 +1,5 @@
 import '../contracts/showdown_models.dart';
+import 'holdem_card_identity.dart';
 import 'holdem_hand_evaluator.dart';
 
 class HoldemShowdownEvaluator {
@@ -22,7 +23,7 @@ class HoldemShowdownEvaluator {
       ...input.boardCards,
       for (final seat in ranked) ...seat.holeCards,
     ];
-    if (activeCards.any((card) => !_isCardIdentity(card))) {
+    if (activeCards.any((card) => !isHoldemCardIdentity(card))) {
       warnings.add('ERR_HOLDEM_SHOWDOWN_CARD_FORMAT');
     }
 
@@ -84,28 +85,4 @@ int _rankIndexAt(List<_EvaluatedShowdownSeat> seats, int index) {
     }
   }
   return rankIndex;
-}
-
-bool _isCardIdentity(String card) {
-  if (card.length != 2) {
-    return false;
-  }
-
-  const ranks = <String>{
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    'T',
-    'J',
-    'Q',
-    'K',
-    'A',
-  };
-  const suits = <String>{'c', 'd', 'h', 's'};
-  return ranks.contains(card[0]) && suits.contains(card[1]);
 }

@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'holdem_betting_round.dart';
+import 'holdem_card_identity.dart';
 import 'holdem_hand_phase.dart';
 import 'holdem_hand_state.dart';
 
@@ -15,6 +16,19 @@ class HoldemPhaseTransitionResult {
   final bool isAllowed;
   final HoldemHandPhase nextPhase;
   final String? reason;
+}
+
+@immutable
+class HoldemStreetAdvanceResult {
+  const HoldemStreetAdvanceResult({
+    required this.isAdvanced,
+    required this.state,
+    this.warnings = const <String>[],
+  });
+
+  final bool isAdvanced;
+  final HoldemHandState state;
+  final List<String> warnings;
 }
 
 class HoldemStateMachine {
@@ -66,35 +80,51 @@ class HoldemStateMachine {
     );
   }
 
-  HoldemHandState openNextStreet({required HoldemHandState state}) {
-    switch (state.phase) {
-      case HoldemHandPhase.bettingPreflop:
-        return state.copyWith(
-          phase: HoldemHandPhase.dealingFlop,
-          bettingRound: HoldemBettingRound.flop,
-          seats: _resetStreetCommitments(state.seats),
-          currentBetToCall: 0,
-          boardCards: <String>[...state.boardCards, 'F1', 'F2', 'F3'],
-        );
-      case HoldemHandPhase.bettingFlop:
-        return state.copyWith(
-          phase: HoldemHandPhase.dealingTurn,
-          bettingRound: HoldemBettingRound.turn,
-          seats: _resetStreetCommitments(state.seats),
-          currentBetToCall: 0,
-          boardCards: <String>[...state.boardCards, 'T1'],
-        );
-      case HoldemHandPhase.bettingTurn:
-        return state.copyWith(
-          phase: HoldemHandPhase.dealingRiver,
-          bettingRound: HoldemBettingRound.river,
-          seats: _resetStreetCommitments(state.seats),
-          currentBetToCall: 0,
-          boardCards: <String>[...state.boardCards, 'R1'],
-        );
-      default:
-        return state;
+  HoldemStreetAdvanceResult advanceAfterBettingRound({
+    required HoldemHandState state,
+    required List<String> dealtBoardCards,
+  }) {
+    final target = _streetTargetFor(state.phase);
+    if (target == null) {
+      return HoldemStreetAdvanceResult(
+        isAdvanced: false,
+        state: state,
+        warnings: const <String>['ERR_HOLDEM_STREET_ADVANCE_PHASE'],
+      );
     }
+
+    final transition = canTransition(from: state.phase, to: target.phase);
+    if (!transition.isAllowed) {
+      return HoldemStreetAdvanceResult(
+        isAdvanced: false,
+        state: state,
+        warnings: const <String>['ERR_HOLDEM_STREET_TRANSITION'],
+      );
+    }
+
+    final warnings = _validateBoardCards(
+      state: state,
+      dealtBoardCards: dealtBoardCards,
+      expectedCount: target.boardCardCount,
+    );
+    if (warnings.isNotEmpty) {
+      return HoldemStreetAdvanceResult(
+        isAdvanced: false,
+        state: state,
+        warnings: warnings,
+      );
+    }
+
+    return HoldemStreetAdvanceResult(
+      isAdvanced: true,
+      state: state.copyWith(
+        phase: target.phase,
+        bettingRound: target.bettingRound,
+        seats: _resetStreetCommitments(state.seats),
+        currentBetToCall: 0,
+        boardCards: <String>[...state.boardCards, ...dealtBoardCards],
+      ),
+    );
   }
 
   List<HoldemSeatState> _resetStreetCommitments(List<HoldemSeatState> seats) {
@@ -102,4 +132,64 @@ class HoldemStateMachine {
       for (final seat in seats) seat.copyWith(committedThisRound: 0),
     ];
   }
+
+  _StreetAdvanceTarget? _streetTargetFor(HoldemHandPhase phase) {
+    return switch (phase) {
+      HoldemHandPhase.bettingPreflop => const _StreetAdvanceTarget(
+        phase: HoldemHandPhase.dealingFlop,
+        bettingRound: HoldemBettingRound.flop,
+        boardCardCount: 3,
+      ),
+      HoldemHandPhase.bettingFlop => const _StreetAdvanceTarget(
+        phase: HoldemHandPhase.dealingTurn,
+        bettingRound: HoldemBettingRound.turn,
+        boardCardCount: 1,
+      ),
+      HoldemHandPhase.bettingTurn => const _StreetAdvanceTarget(
+        phase: HoldemHandPhase.dealingRiver,
+        bettingRound: HoldemBettingRound.river,
+        boardCardCount: 1,
+      ),
+      HoldemHandPhase.bettingRiver => const _StreetAdvanceTarget(
+        phase: HoldemHandPhase.showdownPrep,
+        bettingRound: HoldemBettingRound.river,
+        boardCardCount: 0,
+      ),
+      _ => null,
+    };
+  }
+
+  List<String> _validateBoardCards({
+    required HoldemHandState state,
+    required List<String> dealtBoardCards,
+    required int expectedCount,
+  }) {
+    final warnings = <String>[];
+    if (dealtBoardCards.length != expectedCount) {
+      warnings.add('ERR_HOLDEM_STREET_CARD_COUNT');
+    }
+
+    if (dealtBoardCards.any((card) => !isHoldemCardIdentity(card))) {
+      warnings.add('ERR_HOLDEM_STREET_CARD_FORMAT');
+    }
+
+    final allBoardCards = <String>[...state.boardCards, ...dealtBoardCards];
+    if (allBoardCards.toSet().length != allBoardCards.length) {
+      warnings.add('ERR_HOLDEM_STREET_DUPLICATE_CARD');
+    }
+
+    return warnings;
+  }
+}
+
+class _StreetAdvanceTarget {
+  const _StreetAdvanceTarget({
+    required this.phase,
+    required this.bettingRound,
+    required this.boardCardCount,
+  });
+
+  final HoldemHandPhase phase;
+  final HoldemBettingRound bettingRound;
+  final int boardCardCount;
 }

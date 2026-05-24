@@ -63,3 +63,15 @@ round completion cases through `HoldemActionFlow`. Invalid actions return
 The applier only chooses the next actor within the current betting round. It
 does not open streets or emit canonical core events; those remain session/core
 orchestration responsibilities.
+
+## Hold'em street advancement
+`HoldemStateMachine.advanceAfterBettingRound(...)` advances from a completed
+betting round to the next deal/showdown phase. Callers must provide the exact
+new public board cards for that transition: three cards for the flop, one card
+for the turn, one card for the river, and no cards when moving from river
+betting to showdown prep.
+
+Street advancement is fail-closed. Wrong board-card counts, malformed card
+identities, duplicate public cards, or invalid source phases return
+`isAdvanced: false`, preserve the input state, and report warning codes instead
+of generating placeholder cards or throwing parser exceptions.
