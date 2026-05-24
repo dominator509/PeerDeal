@@ -1,14 +1,15 @@
 import 'package:peerdeal_capture/peerdeal_capture.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
-import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
 
+import '../../../../tools/test_helpers/demo_receipt_route_test_support.dart';
+
 void main() {
   test('presents receipt scan with a sensitive capture plan', () async {
-    final bridge = _RecordingCaptureProtectionBridge();
+    final bridge = RecordingCaptureProtectionBridge();
     final presenter = DemoReceiptSurfacePresenter(
       captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
     );
@@ -36,7 +37,7 @@ void main() {
   test(
     'presents recovery with scrubbed diagnostics and restore plan',
     () async {
-      final bridge = _RecordingCaptureProtectionBridge();
+      final bridge = RecordingCaptureProtectionBridge();
       final presenter = DemoReceiptSurfacePresenter(
         captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
       );
@@ -82,19 +83,4 @@ void main() {
       });
     },
   );
-}
-
-class _RecordingCaptureProtectionBridge implements CaptureProtectionBridge {
-  int requestCount = 0;
-
-  @override
-  Future<CaptureProtectionCapability> getCapability() async {
-    requestCount += 1;
-    return const CaptureProtectionCapability(
-      blockingSupported: true,
-      obscuringSupported: true,
-      notes: 'screen-protection-supported',
-      warning: 'best-effort',
-    );
-  }
 }
