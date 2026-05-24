@@ -82,6 +82,20 @@ class BasicConflictDetector implements ConflictDetector {
     }
 
     for (final event in request.events) {
+      if (event.tableId != request.tableId ||
+          event.sessionId != request.sessionId) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_SCOPE_MISMATCH',
+            message:
+                'Recovery event table/session scope does not match the recovery request.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '${request.tableId}/${request.sessionId}',
+            actual: '${event.tableId}/${event.sessionId}',
+          ),
+        );
+      }
+
       final eventCompatibility = protocolCatalog.checkEventEnvelope(event);
       if (eventCompatibility.resultCode == ResultCode.errProtocolIncompatible) {
         conflicts.add(

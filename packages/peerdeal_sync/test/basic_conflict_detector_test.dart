@@ -244,4 +244,37 @@ void main() {
     expect(result.conflicts.single.expected, 'hash_1');
     expect(result.conflicts.single.actual, 'hash_unrelated');
   });
+
+  test('flags fatal event scope mismatch', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'OpenTableSessionOpened',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'other_table',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:00Z',
+            actorRef: 'host_1',
+            payload: <String, Object?>{},
+            prevEventHash: 'root',
+            eventHash: 'hash_1',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EVENT_SCOPE_MISMATCH');
+    expect(result.conflicts.single.expected, 'table_1/session_1');
+    expect(result.conflicts.single.actual, 'other_table/session_1');
+  });
 }
