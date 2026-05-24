@@ -25,8 +25,21 @@ class DefaultReceiptService implements ReceiptService {
   ) => _authorizer.authorize(receipt, request);
 
   @override
-  ReceiptExportArtifact exportReceipt(PeerDealReceipt receipt) =>
-      _exportEncoder.encode(receipt);
+  ReceiptExportArtifact exportReceipt(PeerDealReceipt receipt) {
+    if (!receipt.hasRequiredEnvelopeFields) {
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt envelope is malformed.',
+      );
+    }
+
+    if (receipt.wipeState == ReceiptWipeState.wiped) {
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt unavailable.',
+      );
+    }
+
+    return _exportEncoder.encode(receipt);
+  }
 
   @override
   ReceiptScanResult scanReceipt(PeerDealReceipt receipt) {
