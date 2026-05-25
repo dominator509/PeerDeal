@@ -294,6 +294,116 @@ void main() {
       contains('ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE'),
     );
   });
+
+  test('completes hand after successful settlement projection', () {
+    final reveal = coordinator.reveal(state: buildState(), input: validInput);
+    final prep = coordinator.prepareSettlement(
+      state: reveal.state,
+      evaluation: reveal.evaluation,
+    );
+    final projection = coordinator.projectSettlement(
+      state: prep.state,
+      evaluation: prep.evaluation,
+      commitments: const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-1',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+        PotCommitment(
+          seatId: 'seat-2',
+          committed: 200,
+          isEligibleForShowdown: true,
+        ),
+      ],
+      seatForId: _seatFromSeatId,
+    );
+
+    final result = coordinator.completeHand(
+      state: prep.state,
+      settlement: projection,
+    );
+
+    expect(projection.isProjected, isTrue);
+    expect(result.isCompleted, isTrue);
+    expect(result.warnings, isEmpty);
+    expect(result.projection, same(projection.projection));
+    expect(result.state.phase, HoldemHandPhase.handComplete);
+  });
+
+  test('hand completion fails closed before settling phase', () {
+    final reveal = coordinator.reveal(state: buildState(), input: validInput);
+    final prep = coordinator.prepareSettlement(
+      state: reveal.state,
+      evaluation: reveal.evaluation,
+    );
+    final projection = coordinator.projectSettlement(
+      state: prep.state,
+      evaluation: prep.evaluation,
+      commitments: const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-1',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+        PotCommitment(
+          seatId: 'seat-2',
+          committed: 200,
+          isEligibleForShowdown: true,
+        ),
+      ],
+      seatForId: _seatFromSeatId,
+    );
+    final wrongPhaseState = prep.state.copyWith(
+      phase: HoldemHandPhase.showdownReveal,
+    );
+
+    final result = coordinator.completeHand(
+      state: wrongPhaseState,
+      settlement: projection,
+    );
+
+    expect(result.isCompleted, isFalse);
+    expect(result.state, same(wrongPhaseState));
+    expect(result.warnings, contains('ERR_HOLDEM_HAND_COMPLETE_PHASE'));
+  });
+
+  test('hand completion fails closed on blocked settlement projection', () {
+    final reveal = coordinator.reveal(state: buildState(), input: validInput);
+    final prep = coordinator.prepareSettlement(
+      state: reveal.state,
+      evaluation: reveal.evaluation,
+    );
+    final projection = coordinator.projectSettlement(
+      state: prep.state,
+      evaluation: prep.evaluation,
+      commitments: const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-9',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+      ],
+      seatForId: _seatFromSeatId,
+    );
+
+    final result = coordinator.completeHand(
+      state: prep.state,
+      settlement: projection,
+    );
+
+    expect(projection.isProjected, isFalse);
+    expect(result.isCompleted, isFalse);
+    expect(result.state, same(prep.state));
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_HAND_COMPLETE_UNPROJECTED_SETTLEMENT'),
+    );
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_HAND_COMPLETE_BLOCKED_SETTLEMENT'),
+    );
+  });
 }
 
 int? _seatFromSeatId(String seatId) {

@@ -103,3 +103,7 @@ actual pot settlement remains in the settlement projector/core pot engine path.
 it only runs from `settling` with clean showdown data and non-empty commitments.
 Blocked projections return warning codes and preserve state for the caller to
 safe-close or recover.
+
+`HoldemShowdownCoordinator.completeHand(...)` is the final lifecycle gate. It
+only advances `settling` to `handComplete` after the settlement projection
+succeeds, and otherwise returns warning codes without mutating state.

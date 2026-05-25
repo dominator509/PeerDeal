@@ -55,6 +55,21 @@ class HoldemSettlementProjectionGateResult {
   final List<String> warnings;
 }
 
+@immutable
+class HoldemHandCompletionGateResult {
+  const HoldemHandCompletionGateResult({
+    required this.isCompleted,
+    required this.state,
+    required this.projection,
+    this.warnings = const <String>[],
+  });
+
+  final bool isCompleted;
+  final HoldemHandState state;
+  final ShowdownSettlementProjectionResult? projection;
+  final List<String> warnings;
+}
+
 class HoldemShowdownCoordinator {
   const HoldemShowdownCoordinator({
     this.evaluator = const HoldemShowdownEvaluator(),
@@ -221,6 +236,56 @@ class HoldemShowdownCoordinator {
       state: state,
       evaluation: evaluation,
       projection: projection,
+    );
+  }
+
+  HoldemHandCompletionGateResult completeHand({
+    required HoldemHandState state,
+    required HoldemSettlementProjectionGateResult settlement,
+  }) {
+    final warnings = <String>[];
+    if (state.phase != HoldemHandPhase.settling) {
+      warnings.add('ERR_HOLDEM_HAND_COMPLETE_PHASE');
+    }
+
+    if (!settlement.isProjected) {
+      warnings.add('ERR_HOLDEM_HAND_COMPLETE_UNPROJECTED_SETTLEMENT');
+    }
+
+    if (settlement.warnings.isNotEmpty) {
+      warnings.addAll(settlement.warnings);
+    }
+
+    if (settlement.projection == null || settlement.projection!.isBlocked) {
+      warnings.add('ERR_HOLDEM_HAND_COMPLETE_BLOCKED_SETTLEMENT');
+    }
+
+    if (warnings.isNotEmpty) {
+      return HoldemHandCompletionGateResult(
+        isCompleted: false,
+        state: state,
+        projection: settlement.projection,
+        warnings: warnings,
+      );
+    }
+
+    final transition = stateMachine.canTransition(
+      from: state.phase,
+      to: HoldemHandPhase.handComplete,
+    );
+    if (!transition.isAllowed) {
+      return HoldemHandCompletionGateResult(
+        isCompleted: false,
+        state: state,
+        projection: settlement.projection,
+        warnings: const <String>['ERR_HOLDEM_HAND_COMPLETE_TRANSITION'],
+      );
+    }
+
+    return HoldemHandCompletionGateResult(
+      isCompleted: true,
+      state: state.copyWith(phase: HoldemHandPhase.handComplete),
+      projection: settlement.projection,
     );
   }
 
