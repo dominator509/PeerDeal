@@ -1,6 +1,8 @@
 import 'package:meta/meta.dart';
+import 'package:peerdeal_core/peerdeal_core.dart';
 
 import '../contracts/showdown_models.dart';
+import '../contracts/showdown_settlement_projector.dart';
 import 'holdem_hand_phase.dart';
 import 'holdem_hand_state.dart';
 import 'holdem_showdown_evaluator.dart';
@@ -36,14 +38,33 @@ class HoldemSettlementPrepResult {
   final List<String> warnings;
 }
 
+@immutable
+class HoldemSettlementProjectionGateResult {
+  const HoldemSettlementProjectionGateResult({
+    required this.isProjected,
+    required this.state,
+    required this.evaluation,
+    required this.projection,
+    this.warnings = const <String>[],
+  });
+
+  final bool isProjected;
+  final HoldemHandState state;
+  final ShowdownEvaluationResult evaluation;
+  final ShowdownSettlementProjectionResult? projection;
+  final List<String> warnings;
+}
+
 class HoldemShowdownCoordinator {
   const HoldemShowdownCoordinator({
     this.evaluator = const HoldemShowdownEvaluator(),
     this.stateMachine = const HoldemStateMachine(),
+    this.settlementProjector = const ShowdownSettlementProjector(),
   });
 
   final HoldemShowdownEvaluator evaluator;
   final HoldemStateMachine stateMachine;
+  final ShowdownSettlementProjector settlementProjector;
 
   HoldemShowdownRevealResult reveal({
     required HoldemHandState state,
@@ -142,6 +163,64 @@ class HoldemShowdownCoordinator {
       isPrepared: true,
       state: state.copyWith(phase: HoldemHandPhase.settling),
       evaluation: evaluation,
+    );
+  }
+
+  HoldemSettlementProjectionGateResult projectSettlement({
+    required HoldemHandState state,
+    required ShowdownEvaluationResult evaluation,
+    required List<PotCommitment> commitments,
+    required int? Function(String seatId) seatForId,
+    SettlementPolicy policy = const SettlementPolicy(),
+  }) {
+    final warnings = <String>[];
+    if (state.phase != HoldemHandPhase.settling) {
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_PHASE');
+    }
+
+    if (evaluation.warnings.isNotEmpty) {
+      warnings.addAll(evaluation.warnings);
+    }
+
+    if (evaluation.results.isEmpty) {
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_EVALUATION');
+    }
+
+    if (commitments.isEmpty) {
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_COMMITMENTS');
+    }
+
+    if (warnings.isNotEmpty) {
+      return HoldemSettlementProjectionGateResult(
+        isProjected: false,
+        state: state,
+        evaluation: evaluation,
+        projection: null,
+        warnings: warnings,
+      );
+    }
+
+    final projection = settlementProjector.projectAndSettle(
+      showdown: evaluation,
+      commitments: commitments,
+      seatForId: seatForId,
+      policy: policy,
+    );
+    if (projection.isBlocked) {
+      return HoldemSettlementProjectionGateResult(
+        isProjected: false,
+        state: state,
+        evaluation: evaluation,
+        projection: projection,
+        warnings: const <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE'],
+      );
+    }
+
+    return HoldemSettlementProjectionGateResult(
+      isProjected: true,
+      state: state,
+      evaluation: evaluation,
+      projection: projection,
     );
   }
 

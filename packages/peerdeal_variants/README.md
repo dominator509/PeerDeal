@@ -99,3 +99,7 @@ returns no warnings. It does not project settlement or mutate ledger state.
 `HoldemShowdownCoordinator.prepareSettlement(...)` then gates
 `showdownReveal` to `settling` only for a clean, non-empty showdown evaluation;
 actual pot settlement remains in the settlement projector/core pot engine path.
+`HoldemShowdownCoordinator.projectSettlement(...)` gates that projector call so
+it only runs from `settling` with clean showdown data and non-empty commitments.
+Blocked projections return warning codes and preserve state for the caller to
+safe-close or recover.

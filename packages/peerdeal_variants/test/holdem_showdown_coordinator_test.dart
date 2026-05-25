@@ -1,3 +1,4 @@
+import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'package:test/test.dart';
 
@@ -187,4 +188,115 @@ void main() {
       contains('ERR_HOLDEM_SETTLEMENT_PREP_EMPTY_EVALUATION'),
     );
   });
+
+  test('projects settlement from settling phase and clean evaluation', () {
+    final reveal = coordinator.reveal(state: buildState(), input: validInput);
+    final prep = coordinator.prepareSettlement(
+      state: reveal.state,
+      evaluation: reveal.evaluation,
+    );
+
+    final result = coordinator.projectSettlement(
+      state: prep.state,
+      evaluation: prep.evaluation,
+      commitments: const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-1',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+        PotCommitment(
+          seatId: 'seat-2',
+          committed: 200,
+          isEligibleForShowdown: true,
+        ),
+      ],
+      seatForId: _seatFromSeatId,
+    );
+
+    expect(prep.isPrepared, isTrue);
+    expect(result.isProjected, isTrue);
+    expect(result.warnings, isEmpty);
+    expect(result.state, same(prep.state));
+    expect(result.projection, isNotNull);
+    expect(result.projection!.settlement, isNotNull);
+  });
+
+  test('settlement projection fails closed before settling phase', () {
+    final reveal = coordinator.reveal(state: buildState(), input: validInput);
+
+    final result = coordinator.projectSettlement(
+      state: reveal.state,
+      evaluation: reveal.evaluation,
+      commitments: const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-1',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+      ],
+      seatForId: _seatFromSeatId,
+    );
+
+    expect(result.isProjected, isFalse);
+    expect(result.projection, isNull);
+    expect(result.state, same(reveal.state));
+    expect(result.warnings, contains('ERR_HOLDEM_SETTLEMENT_PROJECT_PHASE'));
+  });
+
+  test('settlement projection fails closed with empty commitments', () {
+    final reveal = coordinator.reveal(state: buildState(), input: validInput);
+    final prep = coordinator.prepareSettlement(
+      state: reveal.state,
+      evaluation: reveal.evaluation,
+    );
+
+    final result = coordinator.projectSettlement(
+      state: prep.state,
+      evaluation: prep.evaluation,
+      commitments: const <PotCommitment>[],
+      seatForId: _seatFromSeatId,
+    );
+
+    expect(result.isProjected, isFalse);
+    expect(result.projection, isNull);
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_COMMITMENTS'),
+    );
+  });
+
+  test('settlement projection reports unawardable slices fail closed', () {
+    final reveal = coordinator.reveal(state: buildState(), input: validInput);
+    final prep = coordinator.prepareSettlement(
+      state: reveal.state,
+      evaluation: reveal.evaluation,
+    );
+
+    final result = coordinator.projectSettlement(
+      state: prep.state,
+      evaluation: prep.evaluation,
+      commitments: const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-9',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+      ],
+      seatForId: _seatFromSeatId,
+    );
+
+    expect(result.isProjected, isFalse);
+    expect(result.projection, isNotNull);
+    expect(result.projection!.isBlocked, isTrue);
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE'),
+    );
+  });
+}
+
+int? _seatFromSeatId(String seatId) {
+  final marker = seatId.split('-').last;
+  return int.tryParse(marker);
 }
