@@ -107,3 +107,7 @@ safe-close or recover.
 `HoldemShowdownCoordinator.completeHand(...)` is the final lifecycle gate. It
 only advances `settling` to `handComplete` after the settlement projection
 succeeds, and otherwise returns warning codes without mutating state.
+
+Uncontested hands skip showdown. `HoldemActionStreetCoordinator` routes a
+completed action that leaves one active seat directly to `settling`, preserving
+the post-action state and reporting the winning seat for later settlement.

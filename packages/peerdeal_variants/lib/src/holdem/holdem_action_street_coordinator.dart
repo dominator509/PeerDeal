@@ -13,11 +13,13 @@ class HoldemActionStreetResult {
     required this.state,
     this.street,
     this.bettingRound,
+    this.uncontestedSettlement,
   });
 
   final HoldemActionApplicationResult action;
   final HoldemStreetAdvanceResult? street;
   final HoldemBettingRoundOpenResult? bettingRound;
+  final HoldemUncontestedSettlementResult? uncontestedSettlement;
   final HoldemHandState state;
 
   bool get isActionApplied => action.isApplied;
@@ -28,9 +30,32 @@ class HoldemActionStreetResult {
 
   bool get isBettingRoundOpened => bettingRound?.isOpened ?? false;
 
-  List<String> get warnings {
-    return <String>[...?street?.warnings, ...?bettingRound?.warnings];
+  bool get isUncontestedSettlementReady {
+    return uncontestedSettlement?.isReady ?? false;
   }
+
+  List<String> get warnings {
+    return <String>[
+      ...?street?.warnings,
+      ...?bettingRound?.warnings,
+      ...?uncontestedSettlement?.warnings,
+    ];
+  }
+}
+
+@immutable
+class HoldemUncontestedSettlementResult {
+  const HoldemUncontestedSettlementResult({
+    required this.isReady,
+    required this.state,
+    required this.winningSeat,
+    this.warnings = const <String>[],
+  });
+
+  final bool isReady;
+  final HoldemHandState state;
+  final int? winningSeat;
+  final List<String> warnings;
 }
 
 class HoldemActionStreetCoordinator {
@@ -53,6 +78,15 @@ class HoldemActionStreetCoordinator {
       return HoldemActionStreetResult(
         action: actionResult,
         state: actionResult.state,
+      );
+    }
+
+    final uncontestedSettlement = _settleIfUncontested(actionResult.state);
+    if (uncontestedSettlement != null) {
+      return HoldemActionStreetResult(
+        action: actionResult,
+        uncontestedSettlement: uncontestedSettlement,
+        state: uncontestedSettlement.state,
       );
     }
 
@@ -88,5 +122,50 @@ class HoldemActionStreetCoordinator {
       HoldemHandPhase.dealingRiver => true,
       _ => false,
     };
+  }
+
+  HoldemUncontestedSettlementResult? _settleIfUncontested(
+    HoldemHandState state,
+  ) {
+    final activeSeats = state.seats
+        .where((seat) => seat.inHand && !seat.folded)
+        .toList(growable: false);
+    if (activeSeats.length > 1) {
+      return null;
+    }
+
+    if (activeSeats.isEmpty) {
+      return HoldemUncontestedSettlementResult(
+        isReady: false,
+        state: state,
+        winningSeat: null,
+        warnings: const <String>['ERR_HOLDEM_UNCONTESTED_SETTLEMENT_NO_WINNER'],
+      );
+    }
+
+    final transition = stateMachine.canTransition(
+      from: state.phase,
+      to: HoldemHandPhase.settling,
+    );
+    if (!transition.isAllowed) {
+      return HoldemUncontestedSettlementResult(
+        isReady: false,
+        state: state,
+        winningSeat: _winningSeatFor(activeSeats),
+        warnings: const <String>[
+          'ERR_HOLDEM_UNCONTESTED_SETTLEMENT_TRANSITION',
+        ],
+      );
+    }
+
+    return HoldemUncontestedSettlementResult(
+      isReady: true,
+      state: state.copyWith(phase: HoldemHandPhase.settling),
+      winningSeat: _winningSeatFor(activeSeats),
+    );
+  }
+
+  int? _winningSeatFor(List<HoldemSeatState> activeSeats) {
+    return activeSeats.length == 1 ? activeSeats.single.seat : null;
   }
 }

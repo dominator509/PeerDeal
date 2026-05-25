@@ -272,4 +272,110 @@ void main() {
       expect(result.state.boardCards, <String>['Ah', 'Kd', '2c', 'Jc', '7s']);
     },
   );
+
+  test('routes last fold directly to uncontested settlement', () {
+    final result = coordinator.applyAndAdvanceIfComplete(
+      state: buildState(
+        currentActorSeat: 2,
+        seats: const <HoldemSeatState>[
+          HoldemSeatState(
+            seat: 1,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+          HoldemSeatState(
+            seat: 2,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+          HoldemSeatState(
+            seat: 3,
+            stack: 900,
+            inHand: false,
+            folded: true,
+            allIn: false,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+        ],
+      ),
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.fold,
+      ),
+      dealtBoardCards: const <String>['Ah', 'Kd', '2c'],
+      openNextBettingRound: true,
+    );
+
+    expect(result.isActionApplied, isTrue);
+    expect(result.isBettingRoundComplete, isTrue);
+    expect(result.isUncontestedSettlementReady, isTrue);
+    expect(result.isStreetAdvanced, isFalse);
+    expect(result.isBettingRoundOpened, isFalse);
+    expect(result.uncontestedSettlement!.winningSeat, 1);
+    expect(result.warnings, isEmpty);
+    expect(result.state.phase, HoldemHandPhase.settling);
+    expect(result.state.boardCards, isEmpty);
+    expect(result.state.findSeat(2)!.folded, isTrue);
+  });
+
+  test('uncontested settlement fails closed with no active winner', () {
+    final result = coordinator.applyAndAdvanceIfComplete(
+      state: buildState(
+        currentActorSeat: 1,
+        seats: const <HoldemSeatState>[
+          HoldemSeatState(
+            seat: 1,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+          HoldemSeatState(
+            seat: 2,
+            stack: 900,
+            inHand: false,
+            folded: true,
+            allIn: false,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+          HoldemSeatState(
+            seat: 3,
+            stack: 900,
+            inHand: false,
+            folded: true,
+            allIn: false,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+        ],
+      ),
+      action: const HoldemTableAction(
+        actorSeat: 1,
+        type: HoldemTableActionType.fold,
+      ),
+      dealtBoardCards: const <String>['Ah', 'Kd', '2c'],
+    );
+
+    expect(result.isActionApplied, isTrue);
+    expect(result.isUncontestedSettlementReady, isFalse);
+    expect(result.isStreetAdvanced, isFalse);
+    expect(result.uncontestedSettlement!.winningSeat, isNull);
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_UNCONTESTED_SETTLEMENT_NO_WINNER'),
+    );
+    expect(result.state.phase, HoldemHandPhase.bettingPreflop);
+  });
 }
