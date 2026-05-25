@@ -116,4 +116,75 @@ void main() {
     expect(result.evaluation.results, isEmpty);
     expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'));
   });
+
+  test('prepares settlement from revealed clean showdown evaluation', () {
+    final reveal = coordinator.reveal(state: buildState(), input: validInput);
+
+    final result = coordinator.prepareSettlement(
+      state: reveal.state,
+      evaluation: reveal.evaluation,
+    );
+
+    expect(reveal.isRevealed, isTrue);
+    expect(result.isPrepared, isTrue);
+    expect(result.warnings, isEmpty);
+    expect(result.evaluation, same(reveal.evaluation));
+    expect(result.state.phase, HoldemHandPhase.settling);
+  });
+
+  test('settlement prep fails closed before showdown reveal', () {
+    final evaluation = coordinator
+        .reveal(state: buildState(), input: validInput)
+        .evaluation;
+    final state = buildState();
+
+    final result = coordinator.prepareSettlement(
+      state: state,
+      evaluation: evaluation,
+    );
+
+    expect(result.isPrepared, isFalse);
+    expect(result.state, same(state));
+    expect(result.warnings, contains('ERR_HOLDEM_SETTLEMENT_PREP_PHASE'));
+  });
+
+  test('settlement prep fails closed on empty evaluation', () {
+    final state = buildState(phase: HoldemHandPhase.showdownReveal);
+    const evaluation = ShowdownEvaluationResult(
+      results: <RankedShowdownResult>[],
+    );
+
+    final result = coordinator.prepareSettlement(
+      state: state,
+      evaluation: evaluation,
+    );
+
+    expect(result.isPrepared, isFalse);
+    expect(result.state, same(state));
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_SETTLEMENT_PREP_EMPTY_EVALUATION'),
+    );
+  });
+
+  test('settlement prep carries evaluation warnings fail closed', () {
+    final state = buildState(phase: HoldemHandPhase.showdownReveal);
+    const evaluation = ShowdownEvaluationResult(
+      results: <RankedShowdownResult>[],
+      warnings: <String>['ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'],
+    );
+
+    final result = coordinator.prepareSettlement(
+      state: state,
+      evaluation: evaluation,
+    );
+
+    expect(result.isPrepared, isFalse);
+    expect(result.state, same(state));
+    expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'));
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_SETTLEMENT_PREP_EMPTY_EVALUATION'),
+    );
+  });
 }

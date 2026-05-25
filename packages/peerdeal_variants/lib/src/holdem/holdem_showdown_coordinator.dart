@@ -21,6 +21,21 @@ class HoldemShowdownRevealResult {
   final List<String> warnings;
 }
 
+@immutable
+class HoldemSettlementPrepResult {
+  const HoldemSettlementPrepResult({
+    required this.isPrepared,
+    required this.state,
+    required this.evaluation,
+    this.warnings = const <String>[],
+  });
+
+  final bool isPrepared;
+  final HoldemHandState state;
+  final ShowdownEvaluationResult evaluation;
+  final List<String> warnings;
+}
+
 class HoldemShowdownCoordinator {
   const HoldemShowdownCoordinator({
     this.evaluator = const HoldemShowdownEvaluator(),
@@ -80,6 +95,52 @@ class HoldemShowdownCoordinator {
     return HoldemShowdownRevealResult(
       isRevealed: true,
       state: state.copyWith(phase: HoldemHandPhase.showdownReveal),
+      evaluation: evaluation,
+    );
+  }
+
+  HoldemSettlementPrepResult prepareSettlement({
+    required HoldemHandState state,
+    required ShowdownEvaluationResult evaluation,
+  }) {
+    final warnings = <String>[];
+    if (state.phase != HoldemHandPhase.showdownReveal) {
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PREP_PHASE');
+    }
+
+    if (evaluation.warnings.isNotEmpty) {
+      warnings.addAll(evaluation.warnings);
+    }
+
+    if (evaluation.results.isEmpty) {
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PREP_EMPTY_EVALUATION');
+    }
+
+    if (warnings.isNotEmpty) {
+      return HoldemSettlementPrepResult(
+        isPrepared: false,
+        state: state,
+        evaluation: evaluation,
+        warnings: warnings,
+      );
+    }
+
+    final transition = stateMachine.canTransition(
+      from: state.phase,
+      to: HoldemHandPhase.settling,
+    );
+    if (!transition.isAllowed) {
+      return HoldemSettlementPrepResult(
+        isPrepared: false,
+        state: state,
+        evaluation: evaluation,
+        warnings: const <String>['ERR_HOLDEM_SETTLEMENT_PREP_TRANSITION'],
+      );
+    }
+
+    return HoldemSettlementPrepResult(
+      isPrepared: true,
+      state: state.copyWith(phase: HoldemHandPhase.settling),
       evaluation: evaluation,
     );
   }
