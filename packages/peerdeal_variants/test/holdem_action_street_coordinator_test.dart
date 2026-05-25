@@ -99,7 +99,9 @@ void main() {
       expect(result.isActionApplied, isTrue);
       expect(result.isBettingRoundComplete, isFalse);
       expect(result.isStreetAdvanced, isFalse);
+      expect(result.isBettingRoundOpened, isFalse);
       expect(result.street, isNull);
+      expect(result.bettingRound, isNull);
       expect(result.state.phase, HoldemHandPhase.bettingPreflop);
       expect(result.state.currentActorSeat, 1);
       expect(result.state.boardCards, isEmpty);
@@ -119,6 +121,7 @@ void main() {
     expect(result.isActionApplied, isTrue);
     expect(result.isBettingRoundComplete, isTrue);
     expect(result.isStreetAdvanced, isTrue);
+    expect(result.isBettingRoundOpened, isFalse);
     expect(result.warnings, isEmpty);
     expect(result.state.phase, HoldemHandPhase.dealingFlop);
     expect(result.state.bettingRound, HoldemBettingRound.flop);
@@ -146,6 +149,7 @@ void main() {
       expect(result.isActionApplied, isTrue);
       expect(result.isBettingRoundComplete, isTrue);
       expect(result.isStreetAdvanced, isFalse);
+      expect(result.isBettingRoundOpened, isFalse);
       expect(result.warnings, contains('ERR_HOLDEM_STREET_CARD_FORMAT'));
       expect(result.state.phase, HoldemHandPhase.bettingPreflop);
       expect(result.state.boardCards, isEmpty);
@@ -168,8 +172,82 @@ void main() {
     expect(result.isActionApplied, isFalse);
     expect(result.isBettingRoundComplete, isFalse);
     expect(result.isStreetAdvanced, isFalse);
+    expect(result.isBettingRoundOpened, isFalse);
     expect(result.street, isNull);
+    expect(result.bettingRound, isNull);
     expect(result.state, same(state));
+  });
+
+  test('opens next betting round when requested after street advance', () {
+    final result = coordinator.applyAndAdvanceIfComplete(
+      state: buildState(),
+      action: const HoldemTableAction(
+        actorSeat: 1,
+        type: HoldemTableActionType.call,
+      ),
+      dealtBoardCards: const <String>['Ah', 'Kd', '2c'],
+      openNextBettingRound: true,
+    );
+
+    expect(result.isActionApplied, isTrue);
+    expect(result.isBettingRoundComplete, isTrue);
+    expect(result.isStreetAdvanced, isTrue);
+    expect(result.isBettingRoundOpened, isTrue);
+    expect(result.warnings, isEmpty);
+    expect(result.state.phase, HoldemHandPhase.bettingFlop);
+    expect(result.state.bettingRound, HoldemBettingRound.flop);
+    expect(result.state.currentActorSeat, 2);
+    expect(result.state.currentBetToCall, 0);
+    expect(result.state.boardCards, <String>['Ah', 'Kd', '2c']);
+  });
+
+  test('keeps dealt street state when requested betting open fails closed', () {
+    final result = coordinator.applyAndAdvanceIfComplete(
+      state: buildState(
+        seats: const <HoldemSeatState>[
+          HoldemSeatState(
+            seat: 1,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 0,
+            committedThisHand: 0,
+          ),
+          HoldemSeatState(
+            seat: 2,
+            stack: 0,
+            inHand: true,
+            folded: false,
+            allIn: true,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+          HoldemSeatState(
+            seat: 3,
+            stack: 0,
+            inHand: true,
+            folded: false,
+            allIn: true,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+        ],
+      ),
+      action: const HoldemTableAction(
+        actorSeat: 1,
+        type: HoldemTableActionType.allIn,
+      ),
+      dealtBoardCards: const <String>['Ah', 'Kd', '2c'],
+      openNextBettingRound: true,
+    );
+
+    expect(result.isActionApplied, isTrue);
+    expect(result.isStreetAdvanced, isTrue);
+    expect(result.isBettingRoundOpened, isFalse);
+    expect(result.warnings, contains('ERR_HOLDEM_BETTING_ROUND_NO_ACTOR'));
+    expect(result.state.phase, HoldemHandPhase.dealingFlop);
+    expect(result.state.boardCards, <String>['Ah', 'Kd', '2c']);
   });
 
   test(
@@ -189,6 +267,7 @@ void main() {
 
       expect(result.isActionApplied, isTrue);
       expect(result.isStreetAdvanced, isTrue);
+      expect(result.isBettingRoundOpened, isFalse);
       expect(result.state.phase, HoldemHandPhase.showdownPrep);
       expect(result.state.boardCards, <String>['Ah', 'Kd', '2c', 'Jc', '7s']);
     },

@@ -82,8 +82,9 @@ validated table action. If that action does not complete the betting round, the
 coordinator returns the post-action state without touching board cards. If the
 action completes the round, it attempts the supplied street advance and returns
 either the advanced state or the post-action state plus street warning codes.
-The coordinator does not emit protocol events, choose session policy, or perform
-settlement.
+When `openNextBettingRound` is true and the street advances into a deal phase,
+the coordinator also attempts to open the next betting round. The coordinator
+does not emit protocol events, choose session policy, or perform settlement.
 
 `HoldemStateMachine.openBettingRoundAfterDeal(...)` completes the next half of
 the street transition by moving a dealt flop, turn, or river into its betting

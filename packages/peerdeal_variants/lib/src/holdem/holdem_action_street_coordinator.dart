@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart';
 
 import 'holdem_action_applier.dart';
+import 'holdem_hand_phase.dart';
 import 'holdem_hand_state.dart';
 import 'holdem_state_machine.dart';
 import 'holdem_table_action.dart';
@@ -11,10 +12,12 @@ class HoldemActionStreetResult {
     required this.action,
     required this.state,
     this.street,
+    this.bettingRound,
   });
 
   final HoldemActionApplicationResult action;
   final HoldemStreetAdvanceResult? street;
+  final HoldemBettingRoundOpenResult? bettingRound;
   final HoldemHandState state;
 
   bool get isActionApplied => action.isApplied;
@@ -23,7 +26,11 @@ class HoldemActionStreetResult {
 
   bool get isStreetAdvanced => street?.isAdvanced ?? false;
 
-  List<String> get warnings => street?.warnings ?? const <String>[];
+  bool get isBettingRoundOpened => bettingRound?.isOpened ?? false;
+
+  List<String> get warnings {
+    return <String>[...?street?.warnings, ...?bettingRound?.warnings];
+  }
 }
 
 class HoldemActionStreetCoordinator {
@@ -39,6 +46,7 @@ class HoldemActionStreetCoordinator {
     required HoldemHandState state,
     required HoldemTableAction action,
     List<String> dealtBoardCards = const <String>[],
+    bool openNextBettingRound = false,
   }) {
     final actionResult = applier.apply(state: state, action: action);
     if (!actionResult.isApplied || !actionResult.isBettingRoundComplete) {
@@ -52,10 +60,33 @@ class HoldemActionStreetCoordinator {
       state: actionResult.state,
       dealtBoardCards: dealtBoardCards,
     );
+    if (!openNextBettingRound ||
+        !streetResult.isAdvanced ||
+        !_canOpenBettingRound(streetResult.state.phase)) {
+      return HoldemActionStreetResult(
+        action: actionResult,
+        street: streetResult,
+        state: streetResult.state,
+      );
+    }
+
+    final bettingRoundResult = stateMachine.openBettingRoundAfterDeal(
+      state: streetResult.state,
+    );
     return HoldemActionStreetResult(
       action: actionResult,
       street: streetResult,
-      state: streetResult.state,
+      bettingRound: bettingRoundResult,
+      state: bettingRoundResult.state,
     );
+  }
+
+  bool _canOpenBettingRound(HoldemHandPhase phase) {
+    return switch (phase) {
+      HoldemHandPhase.dealingFlop ||
+      HoldemHandPhase.dealingTurn ||
+      HoldemHandPhase.dealingRiver => true,
+      _ => false,
+    };
   }
 }
