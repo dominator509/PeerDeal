@@ -91,3 +91,8 @@ the street transition by moving a dealt flop, turn, or river into its betting
 phase. It checks the public board-card count, chooses the first actionable seat
 after the button, and fails closed with warning codes if the phase, board shape,
 or actor state is not ready.
+
+`HoldemShowdownCoordinator.reveal(...)` gates the transition from
+`showdownPrep` to `showdownReveal`. It requires the showdown input board to
+match the hand state board and only reveals when `HoldemShowdownEvaluator`
+returns no warnings. It does not project settlement or mutate ledger state.
