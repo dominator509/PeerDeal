@@ -219,6 +219,276 @@ void main() {
     );
   });
 
+  test('opens flop betting round from dealt flop', () {
+    const state = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.dealingFlop,
+      bettingRound: HoldemBettingRound.flop,
+      currentActorSeat: 3,
+      buttonSeat: 1,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 0,
+      minimumRaiseAmount: 100,
+      boardCards: <String>['Ah', 'Kd', '2c'],
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 950,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 900,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+      ],
+    );
+
+    final result = machine.openBettingRoundAfterDeal(state: state);
+
+    expect(result.isOpened, isTrue);
+    expect(result.warnings, isEmpty);
+    expect(result.state.phase, HoldemHandPhase.bettingFlop);
+    expect(result.state.bettingRound, HoldemBettingRound.flop);
+    expect(result.state.currentActorSeat, 2);
+    expect(result.state.currentBetToCall, 0);
+    expect(result.state.boardCards, state.boardCards);
+  });
+
+  test('opens turn and river betting rounds from dealt board state', () {
+    const turnState = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.dealingTurn,
+      bettingRound: HoldemBettingRound.turn,
+      currentActorSeat: 3,
+      buttonSeat: 2,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 0,
+      minimumRaiseAmount: 100,
+      boardCards: <String>['Ah', 'Kd', '2c', 'Jc'],
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 950,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 900,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+      ],
+    );
+    final turn = machine.openBettingRoundAfterDeal(state: turnState);
+
+    expect(turn.isOpened, isTrue);
+    expect(turn.state.phase, HoldemHandPhase.bettingTurn);
+    expect(turn.state.currentActorSeat, 3);
+
+    const riverState = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.dealingRiver,
+      bettingRound: HoldemBettingRound.river,
+      currentActorSeat: 3,
+      buttonSeat: 2,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 0,
+      minimumRaiseAmount: 100,
+      boardCards: <String>['Ah', 'Kd', '2c', 'Jc', '7s'],
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 950,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 900,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+      ],
+    );
+    final river = machine.openBettingRoundAfterDeal(state: riverState);
+
+    expect(river.isOpened, isTrue);
+    expect(river.state.phase, HoldemHandPhase.bettingRiver);
+    expect(river.state.currentActorSeat, 3);
+  });
+
+  test('opening betting round skips folded and all-in seats', () {
+    const state = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.dealingFlop,
+      bettingRound: HoldemBettingRound.flop,
+      currentActorSeat: 3,
+      buttonSeat: 1,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 0,
+      minimumRaiseAmount: 100,
+      boardCards: <String>['Ah', 'Kd', '2c'],
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 950,
+          inHand: false,
+          folded: true,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+        ),
+        HoldemSeatState(
+          seat: 4,
+          stack: 900,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+      ],
+    );
+
+    final result = machine.openBettingRoundAfterDeal(state: state);
+
+    expect(result.isOpened, isTrue);
+    expect(result.state.currentActorSeat, 4);
+  });
+
+  test('opening betting round fails closed on wrong phase', () {
+    const state = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.bettingPreflop,
+      bettingRound: HoldemBettingRound.preflop,
+      currentActorSeat: 1,
+      buttonSeat: 1,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 0,
+      minimumRaiseAmount: 100,
+      seats: <HoldemSeatState>[],
+    );
+
+    final result = machine.openBettingRoundAfterDeal(state: state);
+
+    expect(result.isOpened, isFalse);
+    expect(result.state, same(state));
+    expect(result.warnings, contains('ERR_HOLDEM_BETTING_ROUND_OPEN_PHASE'));
+  });
+
+  test('opening betting round fails closed on board count mismatch', () {
+    const state = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.dealingFlop,
+      bettingRound: HoldemBettingRound.flop,
+      currentActorSeat: 1,
+      buttonSeat: 1,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 0,
+      minimumRaiseAmount: 100,
+      boardCards: <String>['Ah', 'Kd'],
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+      ],
+    );
+
+    final result = machine.openBettingRoundAfterDeal(state: state);
+
+    expect(result.isOpened, isFalse);
+    expect(result.state, same(state));
+    expect(result.warnings, contains('ERR_HOLDEM_BETTING_ROUND_BOARD_COUNT'));
+  });
+
+  test('opening betting round fails closed when no seat can act', () {
+    const state = HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.dealingFlop,
+      bettingRound: HoldemBettingRound.flop,
+      currentActorSeat: 1,
+      buttonSeat: 1,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 0,
+      minimumRaiseAmount: 100,
+      boardCards: <String>['Ah', 'Kd', '2c'],
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+        ),
+      ],
+    );
+
+    final result = machine.openBettingRoundAfterDeal(state: state);
+
+    expect(result.isOpened, isFalse);
+    expect(result.state, same(state));
+    expect(result.warnings, contains('ERR_HOLDEM_BETTING_ROUND_NO_ACTOR'));
+  });
+
   test('street advance fails closed on wrong board-card count', () {
     const state = HoldemHandState(
       handId: 'hand_001',

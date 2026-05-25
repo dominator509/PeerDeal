@@ -31,6 +31,19 @@ class HoldemStreetAdvanceResult {
   final List<String> warnings;
 }
 
+@immutable
+class HoldemBettingRoundOpenResult {
+  const HoldemBettingRoundOpenResult({
+    required this.isOpened,
+    required this.state,
+    this.warnings = const <String>[],
+  });
+
+  final bool isOpened;
+  final HoldemHandState state;
+  final List<String> warnings;
+}
+
 class HoldemStateMachine {
   const HoldemStateMachine();
 
@@ -127,6 +140,55 @@ class HoldemStateMachine {
     );
   }
 
+  HoldemBettingRoundOpenResult openBettingRoundAfterDeal({
+    required HoldemHandState state,
+  }) {
+    final target = _bettingRoundTargetFor(state.phase);
+    if (target == null) {
+      return HoldemBettingRoundOpenResult(
+        isOpened: false,
+        state: state,
+        warnings: const <String>['ERR_HOLDEM_BETTING_ROUND_OPEN_PHASE'],
+      );
+    }
+
+    final transition = canTransition(from: state.phase, to: target.phase);
+    if (!transition.isAllowed) {
+      return HoldemBettingRoundOpenResult(
+        isOpened: false,
+        state: state,
+        warnings: const <String>['ERR_HOLDEM_BETTING_ROUND_TRANSITION'],
+      );
+    }
+
+    if (state.boardCards.length != target.boardCardCount) {
+      return HoldemBettingRoundOpenResult(
+        isOpened: false,
+        state: state,
+        warnings: const <String>['ERR_HOLDEM_BETTING_ROUND_BOARD_COUNT'],
+      );
+    }
+
+    final actorSeat = _firstActionableSeatAfterButton(state);
+    if (actorSeat == null) {
+      return HoldemBettingRoundOpenResult(
+        isOpened: false,
+        state: state,
+        warnings: const <String>['ERR_HOLDEM_BETTING_ROUND_NO_ACTOR'],
+      );
+    }
+
+    return HoldemBettingRoundOpenResult(
+      isOpened: true,
+      state: state.copyWith(
+        phase: target.phase,
+        bettingRound: target.bettingRound,
+        currentActorSeat: actorSeat,
+        currentBetToCall: 0,
+      ),
+    );
+  }
+
   List<HoldemSeatState> _resetStreetCommitments(List<HoldemSeatState> seats) {
     return <HoldemSeatState>[
       for (final seat in seats) seat.copyWith(committedThisRound: 0),
@@ -159,6 +221,54 @@ class HoldemStateMachine {
     };
   }
 
+  _BettingRoundOpenTarget? _bettingRoundTargetFor(HoldemHandPhase phase) {
+    return switch (phase) {
+      HoldemHandPhase.dealingFlop => const _BettingRoundOpenTarget(
+        phase: HoldemHandPhase.bettingFlop,
+        bettingRound: HoldemBettingRound.flop,
+        boardCardCount: 3,
+      ),
+      HoldemHandPhase.dealingTurn => const _BettingRoundOpenTarget(
+        phase: HoldemHandPhase.bettingTurn,
+        bettingRound: HoldemBettingRound.turn,
+        boardCardCount: 4,
+      ),
+      HoldemHandPhase.dealingRiver => const _BettingRoundOpenTarget(
+        phase: HoldemHandPhase.bettingRiver,
+        bettingRound: HoldemBettingRound.river,
+        boardCardCount: 5,
+      ),
+      _ => null,
+    };
+  }
+
+  int? _firstActionableSeatAfterButton(HoldemHandState state) {
+    final orderedSeats = [...state.seats]
+      ..sort((a, b) => a.seat.compareTo(b.seat));
+    if (orderedSeats.isEmpty) {
+      return null;
+    }
+
+    final buttonIndex = orderedSeats.indexWhere(
+      (seat) => seat.seat == state.buttonSeat,
+    );
+    final startIndex = buttonIndex == -1 ? 0 : buttonIndex + 1;
+
+    for (var offset = 0; offset < orderedSeats.length; offset += 1) {
+      final candidate =
+          orderedSeats[(startIndex + offset) % orderedSeats.length];
+      if (_canTakeVoluntaryAction(candidate)) {
+        return candidate.seat;
+      }
+    }
+
+    return null;
+  }
+
+  bool _canTakeVoluntaryAction(HoldemSeatState seat) {
+    return seat.inHand && !seat.folded && !seat.allIn && seat.stack > 0;
+  }
+
   List<String> _validateBoardCards({
     required HoldemHandState state,
     required List<String> dealtBoardCards,
@@ -184,6 +294,18 @@ class HoldemStateMachine {
 
 class _StreetAdvanceTarget {
   const _StreetAdvanceTarget({
+    required this.phase,
+    required this.bettingRound,
+    required this.boardCardCount,
+  });
+
+  final HoldemHandPhase phase;
+  final HoldemBettingRound bettingRound;
+  final int boardCardCount;
+}
+
+class _BettingRoundOpenTarget {
+  const _BettingRoundOpenTarget({
     required this.phase,
     required this.bettingRound,
     required this.boardCardCount,

@@ -84,3 +84,9 @@ action completes the round, it attempts the supplied street advance and returns
 either the advanced state or the post-action state plus street warning codes.
 The coordinator does not emit protocol events, choose session policy, or perform
 settlement.
+
+`HoldemStateMachine.openBettingRoundAfterDeal(...)` completes the next half of
+the street transition by moving a dealt flop, turn, or river into its betting
+phase. It checks the public board-card count, chooses the first actionable seat
+after the button, and fails closed with warning codes if the phase, board shape,
+or actor state is not ready.
