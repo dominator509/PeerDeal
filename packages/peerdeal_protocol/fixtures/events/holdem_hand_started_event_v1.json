@@ -1,0 +1,21 @@
+{
+  "event_id": "evt_holdem_001",
+  "event_type": "HandStarted",
+  "event_version": "1.0",
+  "protocol_version": "1.0.0",
+  "event_seq": 1,
+  "table_id": "tbl_holdem_001",
+  "session_id": "sess_holdem_001",
+  "hand_id": "hand_holdem_001",
+  "emitted_at": "2026-04-25T12:10:01Z",
+  "actor_ref": "system",
+  "payload": {
+    "hand_id": "hand_holdem_001",
+    "variant_id": "holdem_nlhe",
+    "button_seat": 1,
+    "small_blind_seat": 2,
+    "big_blind_seat": 3
+  },
+  "prev_event_hash": "GENESIS",
+  "event_hash": "hash_holdem_001"
+}

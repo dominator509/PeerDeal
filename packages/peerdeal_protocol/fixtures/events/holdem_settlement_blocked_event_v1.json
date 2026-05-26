@@ -1,0 +1,19 @@
+{
+  "event_id": "evt_holdem_blocked_004",
+  "event_type": "SettlementBlocked",
+  "event_version": "1.0",
+  "protocol_version": "1.0.0",
+  "event_seq": 4,
+  "table_id": "tbl_holdem_001",
+  "session_id": "sess_holdem_001",
+  "hand_id": "hand_holdem_001",
+  "emitted_at": "2026-04-25T12:12:04Z",
+  "actor_ref": "system",
+  "payload": {
+    "variant_id": "holdem_nlhe",
+    "projection_id": "settlement_projection_holdem_blocked_001",
+    "warnings": ["ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE"]
+  },
+  "prev_event_hash": "hash_holdem_003",
+  "event_hash": "hash_holdem_blocked_004"
+}

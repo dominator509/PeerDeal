@@ -54,6 +54,18 @@ TableState projectOrderedEvents(Iterable<EventEnvelope> events) {
   return state;
 }
 
+TableState projectOrderedEventsFrom({
+  required TableState initial,
+  required Iterable<EventEnvelope> events,
+}) {
+  final reducer = CoreReducer();
+  var state = initial;
+  for (final event in events) {
+    state = reducer.apply(state, event);
+  }
+  return state;
+}
+
 EventEnvelope protocolEvent({
   required String eventId,
   required String eventType,
@@ -254,6 +266,122 @@ void main() {
     expect(state.closeRequested, isTrue);
     expect(state.eventSeq, 12);
     expect(state.metadata['last_event_hash'], 'hash_12');
+  });
+
+  test('core projects fixture-backed Holdem showdown settlement lifecycle', () {
+    final events = <EventEnvelope>[
+      eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_hand_started_event_v1.json'),
+      ),
+      eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_showdown_started_event_v1.json'),
+      ),
+      eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_showdown_revealed_event_v1.json'),
+      ),
+      eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_settlement_projected_event_v1.json'),
+      ),
+      eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_hand_settled_event_v1.json'),
+      ),
+    ];
+    final first = events.first;
+
+    final state = projectOrderedEventsFrom(
+      initial: TableState.initial(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+      ),
+      events: events,
+    );
+
+    expect(state.phase, TablePhase.liveActive);
+    expect(state.activeHandId, isNull);
+    expect(state.eventSeq, 5);
+    expect(state.metadata['last_event_hash'], 'hash_holdem_005');
+  });
+
+  test(
+    'core accepts fixture-backed Holdem uncontested settlement projection',
+    () {
+      final started = eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_hand_started_event_v1.json'),
+      );
+      final projected = eventEnvelopeFromJson(
+        loadProtocolFixture(
+          'events/holdem_uncontested_settlement_projected_event_v1.json',
+        ),
+      );
+      final adjustedProjection = EventEnvelope(
+        eventId: projected.eventId,
+        eventType: projected.eventType,
+        eventVersion: projected.eventVersion,
+        protocolVersion: projected.protocolVersion,
+        eventSeq: started.eventSeq + 1,
+        tableId: projected.tableId,
+        sessionId: projected.sessionId,
+        handId: projected.handId,
+        emittedAt: projected.emittedAt,
+        actorRef: projected.actorRef,
+        payload: projected.payload,
+        prevEventHash: started.eventHash,
+        eventHash: projected.eventHash,
+      );
+
+      final state = projectOrderedEventsFrom(
+        initial: TableState.initial(
+          tableId: started.tableId,
+          sessionId: started.sessionId,
+          protocolVersion: started.protocolVersion,
+        ),
+        events: <EventEnvelope>[started, adjustedProjection],
+      );
+
+      expect(state.phase, TablePhase.liveActive);
+      expect(state.activeHandId, started.handId);
+      expect(state.eventSeq, 2);
+      expect(state.metadata['last_event_hash'], adjustedProjection.eventHash);
+    },
+  );
+
+  test('core accepts fixture-backed Holdem blocked settlement event', () {
+    final started = eventEnvelopeFromJson(
+      loadProtocolFixture('events/holdem_hand_started_event_v1.json'),
+    );
+    final blocked = eventEnvelopeFromJson(
+      loadProtocolFixture('events/holdem_settlement_blocked_event_v1.json'),
+    );
+    final adjustedBlocked = EventEnvelope(
+      eventId: blocked.eventId,
+      eventType: blocked.eventType,
+      eventVersion: blocked.eventVersion,
+      protocolVersion: blocked.protocolVersion,
+      eventSeq: started.eventSeq + 1,
+      tableId: blocked.tableId,
+      sessionId: blocked.sessionId,
+      handId: blocked.handId,
+      emittedAt: blocked.emittedAt,
+      actorRef: blocked.actorRef,
+      payload: blocked.payload,
+      prevEventHash: started.eventHash,
+      eventHash: blocked.eventHash,
+    );
+
+    final state = projectOrderedEventsFrom(
+      initial: TableState.initial(
+        tableId: started.tableId,
+        sessionId: started.sessionId,
+        protocolVersion: started.protocolVersion,
+      ),
+      events: <EventEnvelope>[started, adjustedBlocked],
+    );
+
+    expect(state.phase, TablePhase.liveActive);
+    expect(state.activeHandId, started.handId);
+    expect(state.eventSeq, 2);
+    expect(state.metadata['last_event_hash'], adjustedBlocked.eventHash);
   });
 
   test(

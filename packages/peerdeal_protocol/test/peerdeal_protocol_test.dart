@@ -169,6 +169,26 @@ void main() {
     expect(result.resultCode, ResultCode.okAccepted);
   });
 
+  test('protocol catalog accepts Holdem lifecycle event fixtures', () {
+    const fixturePaths = <String>[
+      'fixtures/events/holdem_hand_started_event_v1.json',
+      'fixtures/events/holdem_showdown_started_event_v1.json',
+      'fixtures/events/holdem_showdown_revealed_event_v1.json',
+      'fixtures/events/holdem_settlement_projected_event_v1.json',
+      'fixtures/events/holdem_uncontested_settlement_projected_event_v1.json',
+      'fixtures/events/holdem_settlement_blocked_event_v1.json',
+      'fixtures/events/holdem_hand_settled_event_v1.json',
+    ];
+    const catalog = ProtocolCatalog();
+
+    for (final fixturePath in fixturePaths) {
+      final result = catalog.checkEventEnvelopeJson(fixtureJson(fixturePath));
+
+      expect(result.isSupported, isTrue, reason: fixturePath);
+      expect(result.resultCode, ResultCode.okAccepted, reason: fixturePath);
+    }
+  });
+
   test('protocol catalog accepts scaffold replay and recovery events', () {
     const supportedEventTypes = <String>[
       'OpenTableSessionOpened',
