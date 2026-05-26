@@ -119,7 +119,33 @@ class CoreReducer {
           phase: current.closeRequested
               ? TablePhase.closing
               : TablePhase.liveActive,
-          metadata: _metadataAfter(current, event),
+          metadata: _settlementMetadataAfter(
+            current,
+            event,
+            settlementStatus: 'settled',
+          ),
+        );
+        break;
+
+      case 'SettlementProjected':
+        nextState = current.copyWith(
+          eventSequence: event.eventSeq,
+          metadata: _settlementMetadataAfter(
+            current,
+            event,
+            settlementStatus: 'projected',
+          ),
+        );
+        break;
+
+      case 'SettlementBlocked':
+        nextState = current.copyWith(
+          eventSequence: event.eventSeq,
+          metadata: _settlementMetadataAfter(
+            current,
+            event,
+            settlementStatus: 'blocked',
+          ),
         );
         break;
 
@@ -174,6 +200,25 @@ class CoreReducer {
     return <String, Object?>{
       ...current.metadata,
       'last_event_hash': event.eventHash,
+    };
+  }
+
+  Map<String, Object?> _settlementMetadataAfter(
+    TableState current,
+    EventEnvelope event, {
+    required String settlementStatus,
+  }) {
+    return <String, Object?>{
+      ..._metadataAfter(current, event),
+      'last_settlement_status': settlementStatus,
+      'last_settlement_event_type': event.eventType,
+      if (event.handId != null) 'last_settlement_hand_id': event.handId,
+      if (event.payload['variant_id'] != null)
+        'last_settlement_variant_id': event.payload['variant_id'],
+      if (event.payload['projection_id'] != null)
+        'last_settlement_projection_id': event.payload['projection_id'],
+      if (event.payload['settlement_id'] != null)
+        'last_settlement_id': event.payload['settlement_id'],
     };
   }
 

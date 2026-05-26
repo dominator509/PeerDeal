@@ -327,6 +327,15 @@ void main() {
     expect(state.activeHandId, isNull);
     expect(state.eventSeq, 5);
     expect(state.metadata['last_event_hash'], 'hash_holdem_005');
+    expect(state.metadata['last_settlement_status'], 'settled');
+    expect(state.metadata['last_settlement_event_type'], 'HandSettled');
+    expect(state.metadata['last_settlement_hand_id'], 'hand_holdem_001');
+    expect(
+      state.metadata['last_settlement_projection_id'],
+      'settlement_projection_holdem_001',
+    );
+    expect(state.metadata['last_settlement_id'], 'settlement_holdem_001');
+    expect(state.metadata['last_settlement_variant_id'], 'holdem_nlhe');
   });
 
   test(
@@ -369,6 +378,16 @@ void main() {
       expect(state.activeHandId, started.handId);
       expect(state.eventSeq, 2);
       expect(state.metadata['last_event_hash'], adjustedProjection.eventHash);
+      expect(state.metadata['last_settlement_status'], 'projected');
+      expect(
+        state.metadata['last_settlement_event_type'],
+        'SettlementProjected',
+      );
+      expect(
+        state.metadata['last_settlement_projection_id'],
+        'settlement_projection_holdem_uncontested_001',
+      );
+      expect(state.metadata['last_settlement_hand_id'], started.handId);
     },
   );
 
@@ -408,6 +427,13 @@ void main() {
     expect(state.activeHandId, started.handId);
     expect(state.eventSeq, 2);
     expect(state.metadata['last_event_hash'], adjustedBlocked.eventHash);
+    expect(state.metadata['last_settlement_status'], 'blocked');
+    expect(state.metadata['last_settlement_event_type'], 'SettlementBlocked');
+    expect(
+      state.metadata['last_settlement_projection_id'],
+      'settlement_projection_holdem_blocked_001',
+    );
+    expect(state.metadata['last_settlement_hand_id'], started.handId);
   });
 
   test('core rejects fixture-backed Holdem lifecycle with a sequence gap', () {
