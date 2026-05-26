@@ -155,6 +155,93 @@ void main() {
     ]);
   });
 
+  test('rejects Holdem lifecycle fixture stream with missing reveal event', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final gappedEvents = <EventEnvelope>[
+      events[0],
+      events[1],
+      events[3],
+      events[4],
+    ];
+    final first = gappedEvents.first;
+
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        scope: ReplayScope.hand,
+        events: gappedEvents,
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(
+      result.mismatches.map((mismatch) => mismatch.code),
+      contains('ERR_REPLAY_EVENT_GAP'),
+    );
+  });
+
+  test('rejects Holdem lifecycle fixture stream with divergent hash chain', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final divergentEvents = <EventEnvelope>[
+      ...events.take(3),
+      _copyEvent(events[3], prevEventHash: 'hash_holdem_diverged'),
+      events[4],
+    ];
+    final first = divergentEvents.first;
+
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        scope: ReplayScope.hand,
+        events: divergentEvents,
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_HASH_CHAIN_BREAK');
+    expect(result.mismatches.single.expected, 'hash_holdem_003');
+    expect(result.mismatches.single.actual, 'hash_holdem_diverged');
+  });
+
+  test('rejects Holdem settlement suffix with missing projected event', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final first = events.first;
+
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        scope: ReplayScope.hand,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_holdem_showdown_revealed',
+          protocolVersion: first.protocolVersion,
+          tableId: first.tableId,
+          sessionId: first.sessionId,
+          snapshotBaseEventSeq: 3,
+          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          payload: const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          },
+        ),
+        events: <EventEnvelope>[events[0], events[1], events[2], events[4]],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_SNAPSHOT_SUFFIX_GAP');
+    expect(result.mismatches.single.expected, 4);
+    expect(result.mismatches.single.actual, 5);
+  });
+
   test('rejects unsupported replay protocol before projection', () {
     final result = engine.replay(
       ReplayRequest(
@@ -346,4 +433,22 @@ List<EventEnvelope> _loadHoldemBlockedSettlementEvents() {
     loadProtocolEventFixture('events/holdem_showdown_revealed_event_v1.json'),
     loadProtocolEventFixture('events/holdem_settlement_blocked_event_v1.json'),
   ];
+}
+
+EventEnvelope _copyEvent(EventEnvelope event, {String? prevEventHash}) {
+  return EventEnvelope(
+    eventId: event.eventId,
+    eventType: event.eventType,
+    eventVersion: event.eventVersion,
+    protocolVersion: event.protocolVersion,
+    eventSeq: event.eventSeq,
+    tableId: event.tableId,
+    sessionId: event.sessionId,
+    handId: event.handId,
+    emittedAt: event.emittedAt,
+    actorRef: event.actorRef,
+    payload: event.payload,
+    prevEventHash: prevEventHash ?? event.prevEventHash,
+    eventHash: event.eventHash,
+  );
 }

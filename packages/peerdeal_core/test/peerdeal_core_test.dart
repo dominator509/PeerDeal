@@ -96,6 +96,32 @@ EventEnvelope protocolEvent({
   );
 }
 
+EventEnvelope copyEvent(
+  EventEnvelope event, {
+  String? eventId,
+  int? eventSeq,
+  String? tableId,
+  String? sessionId,
+  String? prevEventHash,
+  String? eventHash,
+}) {
+  return EventEnvelope(
+    eventId: eventId ?? event.eventId,
+    eventType: event.eventType,
+    eventVersion: event.eventVersion,
+    protocolVersion: event.protocolVersion,
+    eventSeq: eventSeq ?? event.eventSeq,
+    tableId: tableId ?? event.tableId,
+    sessionId: sessionId ?? event.sessionId,
+    handId: event.handId,
+    emittedAt: event.emittedAt,
+    actorRef: event.actorRef,
+    payload: event.payload,
+    prevEventHash: prevEventHash ?? event.prevEventHash,
+    eventHash: eventHash ?? event.eventHash,
+  );
+}
+
 void main() {
   test('validator rejects open session command without table id', () {
     const command = CommandEnvelope(
@@ -382,6 +408,106 @@ void main() {
     expect(state.activeHandId, started.handId);
     expect(state.eventSeq, 2);
     expect(state.metadata['last_event_hash'], adjustedBlocked.eventHash);
+  });
+
+  test('core rejects fixture-backed Holdem lifecycle with a sequence gap', () {
+    final events = <EventEnvelope>[
+      eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_hand_started_event_v1.json'),
+      ),
+      eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_showdown_started_event_v1.json'),
+      ),
+      eventEnvelopeFromJson(
+        loadProtocolFixture('events/holdem_settlement_projected_event_v1.json'),
+      ),
+    ];
+
+    expect(
+      () => projectOrderedEventsFrom(
+        initial: TableState.initial(
+          tableId: events.first.tableId,
+          sessionId: events.first.sessionId,
+          protocolVersion: events.first.protocolVersion,
+        ),
+        events: events,
+      ),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_SEQUENCE_GAP',
+        ),
+      ),
+    );
+  });
+
+  test('core rejects fixture-backed Holdem lifecycle with a broken hash', () {
+    final started = eventEnvelopeFromJson(
+      loadProtocolFixture('events/holdem_hand_started_event_v1.json'),
+    );
+    final showdownStarted = eventEnvelopeFromJson(
+      loadProtocolFixture('events/holdem_showdown_started_event_v1.json'),
+    );
+    final showdownRevealed = eventEnvelopeFromJson(
+      loadProtocolFixture('events/holdem_showdown_revealed_event_v1.json'),
+    );
+    final projected = eventEnvelopeFromJson(
+      loadProtocolFixture('events/holdem_settlement_projected_event_v1.json'),
+    );
+
+    expect(
+      () => projectOrderedEventsFrom(
+        initial: TableState.initial(
+          tableId: started.tableId,
+          sessionId: started.sessionId,
+          protocolVersion: started.protocolVersion,
+        ),
+        events: <EventEnvelope>[
+          started,
+          showdownStarted,
+          showdownRevealed,
+          copyEvent(projected, prevEventHash: 'hash_holdem_diverged'),
+        ],
+      ),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_HASH_CHAIN_BREAK',
+        ),
+      ),
+    );
+  });
+
+  test('core rejects fixture-backed Holdem lifecycle that switches table', () {
+    final started = eventEnvelopeFromJson(
+      loadProtocolFixture('events/holdem_hand_started_event_v1.json'),
+    );
+    final showdownStarted = eventEnvelopeFromJson(
+      loadProtocolFixture('events/holdem_showdown_started_event_v1.json'),
+    );
+
+    expect(
+      () => projectOrderedEventsFrom(
+        initial: TableState.initial(
+          tableId: started.tableId,
+          sessionId: started.sessionId,
+          protocolVersion: started.protocolVersion,
+        ),
+        events: <EventEnvelope>[
+          started,
+          copyEvent(showdownStarted, tableId: 'tbl_holdem_diverged'),
+        ],
+      ),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_STREAM_IDENTITY_MISMATCH',
+        ),
+      ),
+    );
   });
 
   test(

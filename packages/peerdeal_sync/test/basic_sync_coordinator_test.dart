@@ -198,6 +198,122 @@ void main() {
     ]);
   });
 
+  test(
+    'safe-closes Holdem recovery when lifecycle fixture stream has a gap',
+    () {
+      final events = _loadHoldemShowdownSettlementEvents();
+      final gappedEvents = <EventEnvelope>[
+        events[0],
+        events[1],
+        events[3],
+        events[4],
+      ];
+      final first = gappedEvents.first;
+      final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+        conflictDetector: const BasicConflictDetector(),
+        snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+          projector: FakeSnapshotProjector(),
+        ),
+      );
+
+      final result = coordinator.recover(
+        RecoveryRequest(
+          tableId: first.tableId,
+          sessionId: first.sessionId,
+          protocolVersion: first.protocolVersion,
+          mode: RecoveryMode.reconnect,
+          events: gappedEvents,
+          expectedFinalEventSeq: 5,
+          expectedFinalEventHash: 'hash_holdem_005',
+        ),
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.safeCloseRecommended, isTrue);
+      expect(result.reconciliation.recommendedAction, 'safe_close');
+      expect(
+        result.conflicts.map((conflict) => conflict.code),
+        contains('ERR_EVENT_SEQUENCE_GAP'),
+      );
+    },
+  );
+
+  test('safe-closes Holdem recovery when lifecycle hash diverges', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final divergentEvents = <EventEnvelope>[
+      ...events.take(3),
+      _copyEvent(events[3], prevEventHash: 'hash_holdem_diverged'),
+      events[4],
+    ];
+    final first = divergentEvents.first;
+    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+      conflictDetector: const BasicConflictDetector(),
+      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      ),
+    );
+
+    final result = coordinator.recover(
+      RecoveryRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        mode: RecoveryMode.reconnect,
+        events: divergentEvents,
+        expectedFinalEventSeq: 5,
+        expectedFinalEventHash: 'hash_holdem_005',
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.safeCloseRecommended, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EVENT_HASH_CHAIN_BREAK');
+    expect(result.conflicts.single.expected, 'hash_holdem_003');
+    expect(result.conflicts.single.actual, 'hash_holdem_diverged');
+  });
+
+  test('safe-closes Holdem recovery when expected final hash diverges', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final first = events.first;
+    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+      conflictDetector: const BasicConflictDetector(),
+      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      ),
+    );
+
+    final result = coordinator.recover(
+      RecoveryRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_holdem_showdown_revealed',
+          protocolVersion: first.protocolVersion,
+          tableId: first.tableId,
+          sessionId: first.sessionId,
+          snapshotBaseEventSeq: 3,
+          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          payload: const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          },
+        ),
+        events: events,
+        expectedFinalEventSeq: 5,
+        expectedFinalEventHash: 'hash_holdem_diverged_final',
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.safeCloseRecommended, isTrue);
+    expect(
+      result.conflicts.map((conflict) => conflict.code),
+      contains('ERR_FINAL_EVENT_HASH_MISMATCH'),
+    );
+  });
+
   test('safe-closes when snapshot applier rejects the recovery window', () {
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
       conflictDetector: const _NoConflictDetector(),
@@ -268,6 +384,24 @@ List<EventEnvelope> _loadHoldemBlockedSettlementEvents() {
     loadProtocolEventFixture('events/holdem_showdown_revealed_event_v1.json'),
     loadProtocolEventFixture('events/holdem_settlement_blocked_event_v1.json'),
   ];
+}
+
+EventEnvelope _copyEvent(EventEnvelope event, {String? prevEventHash}) {
+  return EventEnvelope(
+    eventId: event.eventId,
+    eventType: event.eventType,
+    eventVersion: event.eventVersion,
+    protocolVersion: event.protocolVersion,
+    eventSeq: event.eventSeq,
+    tableId: event.tableId,
+    sessionId: event.sessionId,
+    handId: event.handId,
+    emittedAt: event.emittedAt,
+    actorRef: event.actorRef,
+    payload: event.payload,
+    prevEventHash: prevEventHash ?? event.prevEventHash,
+    eventHash: event.eventHash,
+  );
 }
 
 class _NoConflictDetector implements ConflictDetector {
