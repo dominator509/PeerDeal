@@ -2,6 +2,7 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_replay/peerdeal_replay.dart';
 import 'package:test/test.dart';
 
+import 'fixture_loader.dart';
 import 'fakes/fake_table_projector.dart';
 
 void main() {
@@ -61,6 +62,97 @@ void main() {
     ]);
     expect(result.finalAppliedEventSeq, 2);
     expect(result.reconstructedAnchor, isNotNull);
+  });
+
+  test('replays fixture-backed Holdem showdown settlement lifecycle', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final first = events.first;
+
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        scope: ReplayScope.hand,
+        events: events,
+      ),
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(result.mismatches, isEmpty);
+    expect(result.finalAppliedEventSeq, 5);
+    expect(result.reconstructedAnchor, isNotNull);
+    expect(result.state!.appliedEventTypes, <String>[
+      'HandStarted',
+      'ShowdownStarted',
+      'ShowdownRevealed',
+      'SettlementProjected',
+      'HandSettled',
+    ]);
+  });
+
+  test('replays Holdem settlement suffix after snapshot base', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final first = events.first;
+
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        scope: ReplayScope.hand,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_holdem_showdown_revealed',
+          protocolVersion: first.protocolVersion,
+          tableId: first.tableId,
+          sessionId: first.sessionId,
+          snapshotBaseEventSeq: 3,
+          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          payload: const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          },
+        ),
+        events: events,
+      ),
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(result.mismatches, isEmpty);
+    expect(result.finalAppliedEventSeq, 5);
+    expect(
+      result.warnings,
+      contains('Replay used snapshot + suffix planning path.'),
+    );
+    expect(result.state!.appliedEventTypes, <String>[
+      'SettlementProjected',
+      'HandSettled',
+    ]);
+  });
+
+  test('replays fixture-backed Holdem blocked settlement path', () {
+    final events = _loadHoldemBlockedSettlementEvents();
+    final first = events.first;
+
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        scope: ReplayScope.hand,
+        events: events,
+      ),
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(result.mismatches, isEmpty);
+    expect(result.finalAppliedEventSeq, 4);
+    expect(result.state!.appliedEventTypes, <String>[
+      'HandStarted',
+      'ShowdownStarted',
+      'ShowdownRevealed',
+      'SettlementBlocked',
+    ]);
   });
 
   test('rejects unsupported replay protocol before projection', () {
@@ -233,4 +325,25 @@ void main() {
     expect(result.mismatches.single.expected, 3);
     expect(result.mismatches.single.actual, 4);
   });
+}
+
+List<EventEnvelope> _loadHoldemShowdownSettlementEvents() {
+  return <EventEnvelope>[
+    loadProtocolEventFixture('events/holdem_hand_started_event_v1.json'),
+    loadProtocolEventFixture('events/holdem_showdown_started_event_v1.json'),
+    loadProtocolEventFixture('events/holdem_showdown_revealed_event_v1.json'),
+    loadProtocolEventFixture(
+      'events/holdem_settlement_projected_event_v1.json',
+    ),
+    loadProtocolEventFixture('events/holdem_hand_settled_event_v1.json'),
+  ];
+}
+
+List<EventEnvelope> _loadHoldemBlockedSettlementEvents() {
+  return <EventEnvelope>[
+    loadProtocolEventFixture('events/holdem_hand_started_event_v1.json'),
+    loadProtocolEventFixture('events/holdem_showdown_started_event_v1.json'),
+    loadProtocolEventFixture('events/holdem_showdown_revealed_event_v1.json'),
+    loadProtocolEventFixture('events/holdem_settlement_blocked_event_v1.json'),
+  ];
 }
