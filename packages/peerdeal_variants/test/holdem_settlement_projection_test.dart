@@ -95,6 +95,9 @@ void main() {
       );
 
       expect(outcome.projection.unawardableSliceIndexes, <int>[0]);
+      expect(outcome.warnings, <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ]);
       expect(outcome.settlement, isNull);
     });
 
@@ -118,6 +121,14 @@ void main() {
       expect(outcome.isBlocked, isTrue);
       expect(outcome.slices, isEmpty);
       expect(outcome.projection.winningSeatIdsBySliceIndex, isEmpty);
+      expect(
+        outcome.warnings,
+        contains('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_COMMITMENTS'),
+      );
+      expect(
+        outcome.warnings,
+        contains('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT'),
+      );
       expect(outcome.settlement, isNull);
     });
 
@@ -152,6 +163,36 @@ void main() {
       expect(outcome.isBlocked, isTrue);
       expect(outcome.slices, isEmpty);
       expect(outcome.projection.winningSeatIdsBySliceIndex, isEmpty);
+      expect(outcome.warnings, <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT',
+      ]);
+      expect(outcome.settlement, isNull);
+    });
+
+    test('blocks settlement with invalid showdown reason code', () {
+      const showdown = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[],
+        warnings: <String>['ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'],
+      );
+
+      final outcome = projector.projectAndSettle(
+        showdown: showdown,
+        commitments: const <PotCommitment>[
+          PotCommitment(
+            seatId: 'seat-1',
+            committed: 100,
+            isEligibleForShowdown: true,
+          ),
+        ],
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(outcome.isBlocked, isTrue);
+      expect(outcome.projection.unawardableSliceIndexes, isEmpty);
+      expect(outcome.warnings, <String>[
+        'ERR_HOLDEM_SHOWDOWN_CARD_FORMAT',
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN',
+      ]);
       expect(outcome.settlement, isNull);
     });
 
@@ -203,6 +244,9 @@ void main() {
         'seat-1',
       ]);
       expect(outcome.projection.unawardableSliceIndexes, <int>[1]);
+      expect(outcome.warnings, <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ]);
     });
 
     test('settles odd-chip main pot and side pot deterministically', () {
@@ -255,6 +299,7 @@ void main() {
       );
 
       expect(first.isBlocked, isFalse);
+      expect(first.warnings, isEmpty);
       expect(first.settlement, isNotNull);
       expect(_awardTriples(first.settlement!), <String>[
         '0:seat-1:152',
