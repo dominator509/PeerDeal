@@ -13,7 +13,10 @@
     "variant_id": "holdem_nlhe",
     "projection_id": "settlement_projection_holdem_blocked_empty_pot_001",
     "reason_codes": ["ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT"],
-    "warnings": ["ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT"]
+    "warnings": [
+      "ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_COMMITMENTS",
+      "ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT"
+    ]
   },
   "prev_event_hash": "hash_holdem_003",
   "event_hash": "hash_holdem_blocked_empty_pot_004"

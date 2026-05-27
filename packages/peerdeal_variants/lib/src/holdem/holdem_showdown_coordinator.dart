@@ -195,14 +195,21 @@ class HoldemShowdownCoordinator {
 
     if (evaluation.warnings.isNotEmpty) {
       warnings.addAll(evaluation.warnings);
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN');
     }
 
     if (evaluation.results.isEmpty) {
       warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_EVALUATION');
+      if (!warnings.contains(
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN',
+      )) {
+        warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN');
+      }
     }
 
     if (commitments.isEmpty) {
       warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_COMMITMENTS');
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT');
     }
 
     if (warnings.isNotEmpty) {
