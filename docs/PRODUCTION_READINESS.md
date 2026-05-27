@@ -72,10 +72,17 @@ the gates below are satisfied.
   implementation remain scaffold-level.
 - App UI is not production-polished.
 
+## Covered hardening slices
+- Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
+  core metadata projection, replay through the core projector, and sync
+  snapshot + suffix recovery.
+
 ## Next production hardening order
 1. Lock the full protocol catalog and failure semantics.
 2. Expand core reducer invariants against protocol fixtures.
-3. Complete Hold'em action, street, showdown, and settlement coverage.
-4. Harden replay/sync recovery against malformed and divergent event windows.
+3. Complete Hold'em action, street, showdown, and settlement coverage, with the
+   next focus on variant settlement projection and core pot/ledger boundaries.
+4. Harden replay/sync recovery against additional malformed and divergent event
+   windows.
 5. Harden privacy, receipt, capture, and native bridge behavior.
 6. Build app flows on top of the stable public package APIs.

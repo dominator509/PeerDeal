@@ -27,6 +27,19 @@ PeerDeal is a deterministic, event-sourced, privacy-first poker engine. The app 
 - replay / snapshot recovery
 - capture policy and native bridge hooks
 
+## Settlement breadcrumb chain
+The canonical Hold'em settlement breadcrumb path is covered across:
+- `peerdeal_protocol`: owns the fixture event identities.
+- `peerdeal_core`: projects settlement metadata from accepted events.
+- `peerdeal_replay`: verifies core settlement metadata survives ordered replay.
+- `peerdeal_sync`: verifies core settlement metadata survives snapshot + suffix
+  recovery.
+
+This chain is metadata-only. It does not move Hold'em ranking, settlement
+projection, pot math, odd-chip handling, or ledger policy into replay or sync.
+Next settlement hardening belongs in `peerdeal_variants` for Hold'em-specific
+projection rules and in `peerdeal_core` for universal pot/ledger boundaries.
+
 ## Forbidden patterns
 - UI mutating core state directly
 - wizard-only hidden runtime flags
