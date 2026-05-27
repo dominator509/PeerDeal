@@ -1,3 +1,4 @@
+import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
@@ -151,6 +152,61 @@ void main() {
       'SettlementProjected',
       'HandSettled',
     ]);
+  });
+
+  test('recovers Holdem settlement metadata through core projector', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final first = events.first;
+    final coordinator = BasicSyncCoordinator<TableState>(
+      conflictDetector: const BasicConflictDetector(),
+      snapshotApplier: BasicSnapshotApplier<TableState>(
+        projector: const _CoreSnapshotProjector(),
+      ),
+    );
+
+    final result = coordinator.recover(
+      RecoveryRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_holdem_showdown_revealed',
+          protocolVersion: first.protocolVersion,
+          tableId: first.tableId,
+          sessionId: first.sessionId,
+          snapshotBaseEventSeq: 3,
+          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          payload: const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+            'last_event_hash': 'hash_holdem_003',
+          },
+        ),
+        events: events,
+        expectedFinalEventSeq: 5,
+        expectedFinalEventHash: 'hash_holdem_005',
+      ),
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(result.state, isNotNull);
+    expect(result.state!.activeHandId, isNull);
+    expect(result.state!.metadata['last_settlement_status'], 'settled');
+    expect(result.state!.metadata['last_settlement_event_type'], 'HandSettled');
+    expect(
+      result.state!.metadata['last_settlement_hand_id'],
+      'hand_holdem_001',
+    );
+    expect(
+      result.state!.metadata['last_settlement_projection_id'],
+      'settlement_projection_holdem_001',
+    );
+    expect(
+      result.state!.metadata['last_settlement_id'],
+      'settlement_holdem_001',
+    );
+    expect(result.state!.metadata['last_settlement_variant_id'], 'holdem_nlhe');
   });
 
   test('recovers Holdem blocked settlement suffix from protocol fixtures', () {
@@ -410,5 +466,54 @@ class _NoConflictDetector implements ConflictDetector {
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
     return const ConflictDetectionResult(conflicts: <SyncConflict>[]);
+  }
+}
+
+class _CoreSnapshotProjector implements SnapshotStateProjector<TableState> {
+  const _CoreSnapshotProjector();
+
+  @override
+  TableState createBaseState({
+    required String tableId,
+    required String sessionId,
+    required String protocolVersion,
+  }) {
+    return TableState.initial(
+      tableId: tableId,
+      sessionId: sessionId,
+      protocolVersion: protocolVersion,
+    );
+  }
+
+  @override
+  TableState applySnapshot({
+    required TableState state,
+    required SnapshotEnvelope snapshot,
+  }) {
+    return TableState(
+      tableId: snapshot.tableId,
+      sessionId: snapshot.sessionId,
+      phase: TablePhase.liveActive,
+      protocolVersion: snapshot.protocolVersion,
+      eventSequence: snapshot.snapshotBaseEventSeq,
+      closeRequested: false,
+      playersConnected: 0,
+      playersSeated: 0,
+      activeHandId: snapshot.payload['hand_id'] as String?,
+      metadata: <String, Object?>{
+        'last_event_hash':
+            snapshot.payload['last_event_hash'] ?? snapshot.snapshotHash,
+        if (snapshot.payload['variant_id'] != null)
+          'variant_id': snapshot.payload['variant_id'],
+      },
+    );
+  }
+
+  @override
+  TableState applyEvent({
+    required TableState state,
+    required EventEnvelope event,
+  }) {
+    return const CoreReducer().apply(state, event);
   }
 }
