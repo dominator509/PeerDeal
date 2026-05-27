@@ -219,6 +219,14 @@ class CoreReducer {
         'last_settlement_projection_id': event.payload['projection_id'],
       if (event.payload['settlement_id'] != null)
         'last_settlement_id': event.payload['settlement_id'],
+      if (event.payload['reason_codes'] is List<Object?>)
+        'last_settlement_reason_codes': List<Object?>.unmodifiable(
+          event.payload['reason_codes']! as List<Object?>,
+        ),
+      if (event.payload['warnings'] is List<Object?>)
+        'last_settlement_warnings': List<Object?>.unmodifiable(
+          event.payload['warnings']! as List<Object?>,
+        ),
     };
   }
 

@@ -255,6 +255,59 @@ void main() {
   });
 
   test(
+    'recovers Holdem blocked settlement reason codes through core projector',
+    () {
+      final events = _loadHoldemBlockedSettlementEvents();
+      final first = events.first;
+      final coordinator = BasicSyncCoordinator<TableState>(
+        conflictDetector: const BasicConflictDetector(),
+        snapshotApplier: BasicSnapshotApplier<TableState>(
+          projector: const _CoreSnapshotProjector(),
+        ),
+      );
+
+      final result = coordinator.recover(
+        RecoveryRequest(
+          tableId: first.tableId,
+          sessionId: first.sessionId,
+          protocolVersion: first.protocolVersion,
+          mode: RecoveryMode.reconnect,
+          snapshot: SnapshotEnvelope(
+            snapshotId: 'snap_holdem_showdown_revealed',
+            protocolVersion: first.protocolVersion,
+            tableId: first.tableId,
+            sessionId: first.sessionId,
+            snapshotBaseEventSeq: 3,
+            snapshotHash: 'snap_hash_holdem_showdown_revealed',
+            payload: const <String, Object?>{
+              'hand_id': 'hand_holdem_001',
+              'variant_id': 'holdem_nlhe',
+              'last_event_hash': 'hash_holdem_003',
+            },
+          ),
+          events: events,
+          expectedFinalEventSeq: 4,
+          expectedFinalEventHash: 'hash_holdem_blocked_004',
+        ),
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.state, isNotNull);
+      expect(result.state!.metadata['last_settlement_status'], 'blocked');
+      expect(
+        result.state!.metadata['last_settlement_event_type'],
+        'SettlementBlocked',
+      );
+      expect(result.state!.metadata['last_settlement_reason_codes'], <Object?>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ]);
+      expect(result.state!.metadata['last_settlement_warnings'], <Object?>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ]);
+    },
+  );
+
+  test(
     'safe-closes Holdem recovery when lifecycle fixture stream has a gap',
     () {
       final events = _loadHoldemShowdownSettlementEvents();

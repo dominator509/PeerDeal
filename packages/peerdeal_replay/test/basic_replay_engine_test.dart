@@ -193,6 +193,41 @@ void main() {
     ]);
   });
 
+  test(
+    'replays Holdem blocked settlement reason codes through core projector',
+    () {
+      final events = _loadHoldemBlockedSettlementEvents();
+      final first = events.first;
+      final coreReplayEngine = BasicReplayEngine<TableState>(
+        projector: const _CoreReplayProjector(),
+      );
+
+      final result = coreReplayEngine.replay(
+        ReplayRequest(
+          tableId: first.tableId,
+          sessionId: first.sessionId,
+          protocolVersion: first.protocolVersion,
+          scope: ReplayScope.hand,
+          events: events,
+        ),
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.state, isNotNull);
+      expect(result.state!.metadata['last_settlement_status'], 'blocked');
+      expect(
+        result.state!.metadata['last_settlement_event_type'],
+        'SettlementBlocked',
+      );
+      expect(result.state!.metadata['last_settlement_reason_codes'], <Object?>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ]);
+      expect(result.state!.metadata['last_settlement_warnings'], <Object?>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ]);
+    },
+  );
+
   test('rejects Holdem lifecycle fixture stream with missing reveal event', () {
     final events = _loadHoldemShowdownSettlementEvents();
     final gappedEvents = <EventEnvelope>[

@@ -189,6 +189,20 @@ void main() {
     }
   });
 
+  test('Holdem blocked settlement fixture carries stable reason codes', () {
+    final decoded = fixtureJson(
+      'fixtures/events/holdem_settlement_blocked_event_v1.json',
+    );
+    final payload = decoded['payload']! as Map<String, Object?>;
+
+    expect(payload['reason_codes'], <Object?>[
+      'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+    ]);
+    expect(payload['warnings'], <Object?>[
+      'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+    ]);
+  });
+
   test('protocol catalog accepts scaffold replay and recovery events', () {
     const supportedEventTypes = <String>[
       'OpenTableSessionOpened',

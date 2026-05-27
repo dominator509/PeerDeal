@@ -433,6 +433,12 @@ void main() {
       state.metadata['last_settlement_projection_id'],
       'settlement_projection_holdem_blocked_001',
     );
+    expect(state.metadata['last_settlement_reason_codes'], <Object?>[
+      'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+    ]);
+    expect(state.metadata['last_settlement_warnings'], <Object?>[
+      'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+    ]);
     expect(state.metadata['last_settlement_hand_id'], started.handId);
   });
 

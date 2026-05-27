@@ -12,6 +12,7 @@
   "payload": {
     "variant_id": "holdem_nlhe",
     "projection_id": "settlement_projection_holdem_blocked_001",
+    "reason_codes": ["ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE"],
     "warnings": ["ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE"]
   },
   "prev_event_hash": "hash_holdem_003",
