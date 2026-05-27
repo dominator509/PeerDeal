@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_variants
+# AGENTS.md - peerdeal_variants
 
 ## Package role
 Own the variant adapter boundary for PeerDeal.

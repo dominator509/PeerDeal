@@ -14,3 +14,11 @@ desktop apps to share.
 
 ## Public entrypoint
 Use `lib/peerdeal_ui_kit.dart`.
+
+## Current components
+- `SafeSurface`
+- `SafeSurfaceRenderModel`
+- `SafeSurfaceCapturePlan`
+
+`SafeSurface` owns only shared rendering behavior. App packages still own
+capture-policy coordination, receipt/recovery projection, and navigation.

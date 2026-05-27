@@ -25,3 +25,14 @@ It exists for:
 ## Exit strategy
 
 This demo slice should be progressively replaced by real bindings, not expanded into a hidden runtime truth layer.
+
+## Current wiring status
+
+- Receipt and recovery demo surfaces run through fixture -> presenter -> safe
+  screen tests in both app shells.
+- The reusable safe-surface widget/model contract lives in `peerdeal_ui_kit`.
+- Capture-policy coordination and receipt/recovery projection remain app-layer
+  orchestration.
+- `apps/peerdeal_mobile/lib/main.dart` and
+  `apps/peerdeal_desktop/lib/main.dart` still launch placeholder shells. Runtime
+  route mounting is a separate app-flow hardening PR, not engine truth.

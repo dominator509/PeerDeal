@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_wizard
+# AGENTS.md - peerdeal_wizard
 
 ## Mission
 Implement host setup capture and resolution into a strict, validated, replay-safe Game File without letting setup UX become runtime truth.

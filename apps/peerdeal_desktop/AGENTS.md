@@ -1,4 +1,4 @@
-# AGENTS.md — join_flow overlay
+# AGENTS.md - join_flow overlay
 
 Scope:
 - App/service-layer orchestration for invite resolution, disclosure ACKs, role authorization,

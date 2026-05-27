@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 void main() {
   testWidgets('renders child when surface does not need obscuring', (

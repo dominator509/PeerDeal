@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_privacy
+# AGENTS.md - peerdeal_privacy
 
 ## Package mission
 Own privacy-focused runtime policy for PeerDeal:

@@ -1,4 +1,4 @@
-import 'capture_surface_coordinator.dart';
+import 'safe_surface_capture_plan.dart';
 
 class SafeSurfaceRenderModel {
   const SafeSurfaceRenderModel({
@@ -14,7 +14,7 @@ class SafeSurfaceRenderModel {
   final List<String> nativeNotes;
 
   factory SafeSurfaceRenderModel.fromCapturePlans(
-    Iterable<CaptureSurfacePlan?> plans,
+    Iterable<SafeSurfaceCapturePlan?> plans,
   ) {
     final activePlans = plans.nonNulls.toList(growable: false);
     return SafeSurfaceRenderModel(

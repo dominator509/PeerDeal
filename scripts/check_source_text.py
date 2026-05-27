@@ -19,6 +19,8 @@ SKIPPED_PARTS = {
 }
 FORBIDDEN_TEXT = {
     "\u00c2": "likely mojibake marker",
+    "\ufeff": "byte order mark",
+    "\u2014": "em dash; use ASCII hyphen",
     "\ufffd": "unicode replacement character",
 }
 

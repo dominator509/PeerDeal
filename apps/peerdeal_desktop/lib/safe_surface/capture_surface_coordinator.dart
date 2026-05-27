@@ -1,7 +1,8 @@
 import 'package:peerdeal_capture/peerdeal_capture.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
-class CaptureSurfacePlan {
+class CaptureSurfacePlan implements SafeSurfaceCapturePlan {
   const CaptureSurfacePlan({
     required this.surface,
     required this.decision,
@@ -10,10 +11,14 @@ class CaptureSurfacePlan {
 
   final CaptureSurface surface;
   final CapturePolicyDecision decision;
+  @override
   final String nativeNotes;
 
+  @override
   bool get shouldRequestNativeBlocking => decision.asksNativeBridgeToBlock;
+  @override
   bool get shouldObscure => decision.requiresVisualObscuring;
+  @override
   String? get warning => decision.warning;
 }
 

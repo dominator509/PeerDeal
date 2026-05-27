@@ -70,12 +70,17 @@ the gates below are satisfied.
 - Full Hold'em showdown and settlement behavior is not production complete.
 - Production networking, sync recovery, receipt cryptography, and native capture
   implementation remain scaffold-level.
+- App shells still launch placeholder roots. Demo/join/safe-surface flows are
+  tested, but not mounted as runtime navigation.
 - App UI is not production-polished.
 
 ## Covered hardening slices
 - Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
   core metadata projection, replay through the core projector, and sync
   snapshot + suffix recovery.
+- The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
+  app packages own only capture coordination, receipt/recovery projection, and
+  route orchestration.
 
 ## Next production hardening order
 1. Lock the full protocol catalog and failure semantics.
