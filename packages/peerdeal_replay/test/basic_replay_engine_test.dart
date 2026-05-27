@@ -1,3 +1,4 @@
+import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_replay/peerdeal_replay.dart';
 import 'package:test/test.dart';
@@ -89,6 +90,43 @@ void main() {
       'SettlementProjected',
       'HandSettled',
     ]);
+  });
+
+  test('replays Holdem settlement metadata through core projector', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final first = events.first;
+    final coreReplayEngine = BasicReplayEngine<TableState>(
+      projector: const _CoreReplayProjector(),
+    );
+
+    final result = coreReplayEngine.replay(
+      ReplayRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        scope: ReplayScope.hand,
+        events: events,
+      ),
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(result.state, isNotNull);
+    expect(result.state!.activeHandId, isNull);
+    expect(result.state!.metadata['last_settlement_status'], 'settled');
+    expect(result.state!.metadata['last_settlement_event_type'], 'HandSettled');
+    expect(
+      result.state!.metadata['last_settlement_hand_id'],
+      'hand_holdem_001',
+    );
+    expect(
+      result.state!.metadata['last_settlement_projection_id'],
+      'settlement_projection_holdem_001',
+    );
+    expect(
+      result.state!.metadata['last_settlement_id'],
+      'settlement_holdem_001',
+    );
+    expect(result.state!.metadata['last_settlement_variant_id'], 'holdem_nlhe');
   });
 
   test('replays Holdem settlement suffix after snapshot base', () {
@@ -451,4 +489,29 @@ EventEnvelope _copyEvent(EventEnvelope event, {String? prevEventHash}) {
     prevEventHash: prevEventHash ?? event.prevEventHash,
     eventHash: event.eventHash,
   );
+}
+
+class _CoreReplayProjector implements ReplayStateProjector<TableState> {
+  const _CoreReplayProjector();
+
+  @override
+  TableState createBaseState({
+    required String tableId,
+    required String sessionId,
+    required String protocolVersion,
+  }) {
+    return TableState.initial(
+      tableId: tableId,
+      sessionId: sessionId,
+      protocolVersion: protocolVersion,
+    );
+  }
+
+  @override
+  TableState applyEvent({
+    required TableState state,
+    required EventEnvelope event,
+  }) {
+    return const CoreReducer().apply(state, event);
+  }
 }
