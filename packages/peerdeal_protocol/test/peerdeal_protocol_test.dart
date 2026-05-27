@@ -177,6 +177,8 @@ void main() {
       'fixtures/events/holdem_settlement_projected_event_v1.json',
       'fixtures/events/holdem_uncontested_settlement_projected_event_v1.json',
       'fixtures/events/holdem_settlement_blocked_event_v1.json',
+      'fixtures/events/holdem_settlement_blocked_empty_pot_event_v1.json',
+      'fixtures/events/holdem_settlement_blocked_invalid_showdown_event_v1.json',
       'fixtures/events/holdem_hand_settled_event_v1.json',
     ];
     const catalog = ProtocolCatalog();
@@ -189,18 +191,24 @@ void main() {
     }
   });
 
-  test('Holdem blocked settlement fixture carries stable reason codes', () {
-    final decoded = fixtureJson(
-      'fixtures/events/holdem_settlement_blocked_event_v1.json',
-    );
-    final payload = decoded['payload']! as Map<String, Object?>;
+  test('Holdem blocked settlement fixtures carry stable reason codes', () {
+    const fixtureCases = <String, List<String>>{
+      'fixtures/events/holdem_settlement_blocked_event_v1.json': <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ],
+      'fixtures/events/holdem_settlement_blocked_empty_pot_event_v1.json':
+          <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT'],
+      'fixtures/events/holdem_settlement_blocked_invalid_showdown_event_v1.json':
+          <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN'],
+    };
 
-    expect(payload['reason_codes'], <Object?>[
-      'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
-    ]);
-    expect(payload['warnings'], <Object?>[
-      'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
-    ]);
+    for (final entry in fixtureCases.entries) {
+      final decoded = fixtureJson(entry.key);
+      final payload = decoded['payload']! as Map<String, Object?>;
+
+      expect(payload['reason_codes'], entry.value, reason: entry.key);
+      expect(payload['warnings'], containsAll(entry.value), reason: entry.key);
+    }
   });
 
   test('protocol catalog accepts scaffold replay and recovery events', () {

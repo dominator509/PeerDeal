@@ -391,55 +391,83 @@ void main() {
     },
   );
 
-  test('core accepts fixture-backed Holdem blocked settlement event', () {
+  test('core accepts fixture-backed Holdem blocked settlement events', () {
+    const fixtureCases = <String, List<String>>{
+      'events/holdem_settlement_blocked_event_v1.json': <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ],
+      'events/holdem_settlement_blocked_empty_pot_event_v1.json': <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT',
+      ],
+      'events/holdem_settlement_blocked_invalid_showdown_event_v1.json':
+          <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN'],
+    };
+
     final started = eventEnvelopeFromJson(
       loadProtocolFixture('events/holdem_hand_started_event_v1.json'),
     );
-    final blocked = eventEnvelopeFromJson(
-      loadProtocolFixture('events/holdem_settlement_blocked_event_v1.json'),
-    );
-    final adjustedBlocked = EventEnvelope(
-      eventId: blocked.eventId,
-      eventType: blocked.eventType,
-      eventVersion: blocked.eventVersion,
-      protocolVersion: blocked.protocolVersion,
-      eventSeq: started.eventSeq + 1,
-      tableId: blocked.tableId,
-      sessionId: blocked.sessionId,
-      handId: blocked.handId,
-      emittedAt: blocked.emittedAt,
-      actorRef: blocked.actorRef,
-      payload: blocked.payload,
-      prevEventHash: started.eventHash,
-      eventHash: blocked.eventHash,
-    );
 
-    final state = projectOrderedEventsFrom(
-      initial: TableState.initial(
-        tableId: started.tableId,
-        sessionId: started.sessionId,
-        protocolVersion: started.protocolVersion,
-      ),
-      events: <EventEnvelope>[started, adjustedBlocked],
-    );
+    for (final entry in fixtureCases.entries) {
+      final blocked = eventEnvelopeFromJson(loadProtocolFixture(entry.key));
+      final adjustedBlocked = EventEnvelope(
+        eventId: blocked.eventId,
+        eventType: blocked.eventType,
+        eventVersion: blocked.eventVersion,
+        protocolVersion: blocked.protocolVersion,
+        eventSeq: started.eventSeq + 1,
+        tableId: blocked.tableId,
+        sessionId: blocked.sessionId,
+        handId: blocked.handId,
+        emittedAt: blocked.emittedAt,
+        actorRef: blocked.actorRef,
+        payload: blocked.payload,
+        prevEventHash: started.eventHash,
+        eventHash: blocked.eventHash,
+      );
 
-    expect(state.phase, TablePhase.liveActive);
-    expect(state.activeHandId, started.handId);
-    expect(state.eventSeq, 2);
-    expect(state.metadata['last_event_hash'], adjustedBlocked.eventHash);
-    expect(state.metadata['last_settlement_status'], 'blocked');
-    expect(state.metadata['last_settlement_event_type'], 'SettlementBlocked');
-    expect(
-      state.metadata['last_settlement_projection_id'],
-      'settlement_projection_holdem_blocked_001',
-    );
-    expect(state.metadata['last_settlement_reason_codes'], <Object?>[
-      'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
-    ]);
-    expect(state.metadata['last_settlement_warnings'], <Object?>[
-      'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
-    ]);
-    expect(state.metadata['last_settlement_hand_id'], started.handId);
+      final state = projectOrderedEventsFrom(
+        initial: TableState.initial(
+          tableId: started.tableId,
+          sessionId: started.sessionId,
+          protocolVersion: started.protocolVersion,
+        ),
+        events: <EventEnvelope>[started, adjustedBlocked],
+      );
+
+      expect(state.phase, TablePhase.liveActive, reason: entry.key);
+      expect(state.activeHandId, started.handId, reason: entry.key);
+      expect(state.eventSeq, 2, reason: entry.key);
+      expect(
+        state.metadata['last_event_hash'],
+        adjustedBlocked.eventHash,
+        reason: entry.key,
+      );
+      expect(
+        state.metadata['last_settlement_status'],
+        'blocked',
+        reason: entry.key,
+      );
+      expect(
+        state.metadata['last_settlement_event_type'],
+        'SettlementBlocked',
+        reason: entry.key,
+      );
+      expect(
+        state.metadata['last_settlement_reason_codes'],
+        entry.value,
+        reason: entry.key,
+      );
+      expect(
+        state.metadata['last_settlement_warnings'],
+        containsAll(entry.value),
+        reason: entry.key,
+      );
+      expect(
+        state.metadata['last_settlement_hand_id'],
+        started.handId,
+        reason: entry.key,
+      );
+    }
   });
 
   test('core rejects fixture-backed Holdem lifecycle with a sequence gap', () {

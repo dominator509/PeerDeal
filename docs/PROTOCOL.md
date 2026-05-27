@@ -62,6 +62,8 @@ protocol-owned. The canonical starter stream is:
 
 The fail-closed settlement branch is:
 - `holdem_settlement_blocked_event_v1.json`
+- `holdem_settlement_blocked_empty_pot_event_v1.json`
+- `holdem_settlement_blocked_invalid_showdown_event_v1.json`
 
 `SettlementBlocked` payloads carry explicit `reason_codes` and `warnings` so
 app/session/replay paths can distinguish blocked settlement causes without

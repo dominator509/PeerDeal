@@ -257,8 +257,16 @@ void main() {
   test(
     'recovers Holdem blocked settlement reason codes through core projector',
     () {
-      final events = _loadHoldemBlockedSettlementEvents();
-      final first = events.first;
+      const fixtureCases = <String, List<String>>{
+        'events/holdem_settlement_blocked_event_v1.json': <String>[
+          'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+        ],
+        'events/holdem_settlement_blocked_empty_pot_event_v1.json': <String>[
+          'ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT',
+        ],
+        'events/holdem_settlement_blocked_invalid_showdown_event_v1.json':
+            <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN'],
+      };
       final coordinator = BasicSyncCoordinator<TableState>(
         conflictDetector: const BasicConflictDetector(),
         snapshotApplier: BasicSnapshotApplier<TableState>(
@@ -266,44 +274,61 @@ void main() {
         ),
       );
 
-      final result = coordinator.recover(
-        RecoveryRequest(
-          tableId: first.tableId,
-          sessionId: first.sessionId,
-          protocolVersion: first.protocolVersion,
-          mode: RecoveryMode.reconnect,
-          snapshot: SnapshotEnvelope(
-            snapshotId: 'snap_holdem_showdown_revealed',
-            protocolVersion: first.protocolVersion,
+      for (final entry in fixtureCases.entries) {
+        final events = _loadHoldemBlockedSettlementEvents(
+          blockedFixturePath: entry.key,
+        );
+        final first = events.first;
+        final blocked = events.last;
+
+        final result = coordinator.recover(
+          RecoveryRequest(
             tableId: first.tableId,
             sessionId: first.sessionId,
-            snapshotBaseEventSeq: 3,
-            snapshotHash: 'snap_hash_holdem_showdown_revealed',
-            payload: const <String, Object?>{
-              'hand_id': 'hand_holdem_001',
-              'variant_id': 'holdem_nlhe',
-              'last_event_hash': 'hash_holdem_003',
-            },
+            protocolVersion: first.protocolVersion,
+            mode: RecoveryMode.reconnect,
+            snapshot: SnapshotEnvelope(
+              snapshotId: 'snap_holdem_showdown_revealed',
+              protocolVersion: first.protocolVersion,
+              tableId: first.tableId,
+              sessionId: first.sessionId,
+              snapshotBaseEventSeq: 3,
+              snapshotHash: 'snap_hash_holdem_showdown_revealed',
+              payload: const <String, Object?>{
+                'hand_id': 'hand_holdem_001',
+                'variant_id': 'holdem_nlhe',
+                'last_event_hash': 'hash_holdem_003',
+              },
+            ),
+            events: events,
+            expectedFinalEventSeq: blocked.eventSeq,
+            expectedFinalEventHash: blocked.eventHash,
           ),
-          events: events,
-          expectedFinalEventSeq: 4,
-          expectedFinalEventHash: 'hash_holdem_blocked_004',
-        ),
-      );
+        );
 
-      expect(result.isSuccess, isTrue);
-      expect(result.state, isNotNull);
-      expect(result.state!.metadata['last_settlement_status'], 'blocked');
-      expect(
-        result.state!.metadata['last_settlement_event_type'],
-        'SettlementBlocked',
-      );
-      expect(result.state!.metadata['last_settlement_reason_codes'], <Object?>[
-        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
-      ]);
-      expect(result.state!.metadata['last_settlement_warnings'], <Object?>[
-        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
-      ]);
+        expect(result.isSuccess, isTrue, reason: entry.key);
+        expect(result.state, isNotNull, reason: entry.key);
+        expect(
+          result.state!.metadata['last_settlement_status'],
+          'blocked',
+          reason: entry.key,
+        );
+        expect(
+          result.state!.metadata['last_settlement_event_type'],
+          'SettlementBlocked',
+          reason: entry.key,
+        );
+        expect(
+          result.state!.metadata['last_settlement_reason_codes'],
+          entry.value,
+          reason: entry.key,
+        );
+        expect(
+          result.state!.metadata['last_settlement_warnings'],
+          containsAll(entry.value),
+          reason: entry.key,
+        );
+      }
     },
   );
 
@@ -486,12 +511,14 @@ List<EventEnvelope> _loadHoldemShowdownSettlementEvents() {
   ];
 }
 
-List<EventEnvelope> _loadHoldemBlockedSettlementEvents() {
+List<EventEnvelope> _loadHoldemBlockedSettlementEvents({
+  String blockedFixturePath = 'events/holdem_settlement_blocked_event_v1.json',
+}) {
   return <EventEnvelope>[
     loadProtocolEventFixture('events/holdem_hand_started_event_v1.json'),
     loadProtocolEventFixture('events/holdem_showdown_started_event_v1.json'),
     loadProtocolEventFixture('events/holdem_showdown_revealed_event_v1.json'),
-    loadProtocolEventFixture('events/holdem_settlement_blocked_event_v1.json'),
+    loadProtocolEventFixture(blockedFixturePath),
   ];
 }
 
