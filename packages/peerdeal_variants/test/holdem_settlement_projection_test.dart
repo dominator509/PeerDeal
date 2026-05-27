@@ -98,6 +98,63 @@ void main() {
       expect(outcome.settlement, isNull);
     });
 
+    test('blocks settlement when commitments are empty', () {
+      const showdown = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[
+          RankedShowdownResult(
+            seat: 1,
+            rankIndex: 0,
+            summary: 'winner without pot',
+          ),
+        ],
+      );
+
+      final outcome = projector.projectAndSettle(
+        showdown: showdown,
+        commitments: const <PotCommitment>[],
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(outcome.isBlocked, isTrue);
+      expect(outcome.slices, isEmpty);
+      expect(outcome.projection.winningSeatIdsBySliceIndex, isEmpty);
+      expect(outcome.settlement, isNull);
+    });
+
+    test('blocks settlement when commitments produce no pot slices', () {
+      const showdown = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[
+          RankedShowdownResult(
+            seat: 1,
+            rankIndex: 0,
+            summary: 'winner without committed chips',
+          ),
+        ],
+      );
+
+      final outcome = projector.projectAndSettle(
+        showdown: showdown,
+        commitments: const <PotCommitment>[
+          PotCommitment(
+            seatId: 'seat-1',
+            committed: 0,
+            isEligibleForShowdown: true,
+          ),
+          PotCommitment(
+            seatId: 'seat-2',
+            committed: 0,
+            isEligibleForShowdown: true,
+          ),
+        ],
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(outcome.isBlocked, isTrue);
+      expect(outcome.slices, isEmpty);
+      expect(outcome.projection.winningSeatIdsBySliceIndex, isEmpty);
+      expect(outcome.settlement, isNull);
+    });
+
     test('blocks entire side-pot settlement when any slice is unawardable', () {
       final showdown = adapter.evaluate(
         const ShowdownEvaluationInput(

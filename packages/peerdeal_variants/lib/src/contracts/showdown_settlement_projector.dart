@@ -15,6 +15,16 @@ class ShowdownSettlementProjector {
     SettlementPolicy policy = const SettlementPolicy(),
   }) {
     final slices = engine.sidePotBuilder.build(commitments);
+    if (commitments.isEmpty || slices.isEmpty) {
+      return ShowdownSettlementProjectionResult.blocked(
+        slices: slices,
+        projection: const ShowdownSliceWinnerProjection(
+          winningSeatIdsBySliceIndex: <int, List<String>>{},
+          unawardableSliceIndexes: <int>[],
+        ),
+      );
+    }
+
     final projection = showdown.projectContestedSeatIdsBySliceIndex(
       contestedSeatIdsBySliceIndex: <int, List<String>>{
         for (final slice in slices) slice.sliceIndex: slice.contestedBySeatIds,
