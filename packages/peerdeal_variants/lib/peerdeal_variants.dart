@@ -16,6 +16,7 @@ export 'src/holdem/holdem_hand_settled_event_builder.dart';
 export 'src/holdem/holdem_hand_state.dart';
 export 'src/holdem/holdem_showdown_coordinator.dart';
 export 'src/holdem/holdem_showdown_evaluator.dart';
+export 'src/holdem/holdem_settlement_event_emitter.dart';
 export 'src/holdem/holdem_settlement_blocked_event_builder.dart';
 export 'src/holdem/holdem_settlement_projected_event_builder.dart';
 export 'src/holdem/holdem_state_machine.dart';
