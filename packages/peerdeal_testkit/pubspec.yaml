@@ -7,6 +7,10 @@ version: 0.1.0
 environment:
   sdk: '^3.11.5'
 dependencies:
+  peerdeal_core:
+    path: ../peerdeal_core
+  peerdeal_variants:
+    path: ../peerdeal_variants
   meta: ^1.11.0
 
 dev_dependencies:
