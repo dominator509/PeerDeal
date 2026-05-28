@@ -67,6 +67,64 @@ void main() {
     expect(_awardTriples(second), _awardTriples(first));
     expect(_ledgerDeltas(second), _ledgerDeltas(first));
   });
+
+  test('blocks settlement when a slice has no winners', () {
+    const engine = PotEngine();
+    final result = engine.settle(
+      commitments: const [
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+        PotCommitment(seatId: 'B', committed: 100, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: const {},
+    );
+
+    expect(result.isBlocked, isTrue);
+    expect(result.isBalanced, isFalse);
+    expect(result.totalPotAmount, 200);
+    expect(result.totalAwardedAmount, 0);
+    expect(result.awards, isEmpty);
+    expect(result.ledgerDeltas, isEmpty);
+    expect(result.warnings, <String>['ERR_CORE_SETTLEMENT_EMPTY_WINNERS']);
+  });
+
+  test('blocks settlement when a winner is not a slice contestant', () {
+    const engine = PotEngine();
+    final result = engine.settle(
+      commitments: const [
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+        PotCommitment(seatId: 'B', committed: 100, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: const {
+        0: ['C'],
+      },
+    );
+
+    expect(result.isBlocked, isTrue);
+    expect(result.awards, isEmpty);
+    expect(result.ledgerDeltas, isEmpty);
+    expect(result.warnings, <String>[
+      'ERR_CORE_SETTLEMENT_WINNER_NOT_CONTESTANT',
+    ]);
+  });
+
+  test('blocks settlement when winners reference an unknown slice', () {
+    const engine = PotEngine();
+    final result = engine.settle(
+      commitments: const [
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+        PotCommitment(seatId: 'B', committed: 100, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: const {
+        0: ['A'],
+        1: ['B'],
+      },
+    );
+
+    expect(result.isBlocked, isTrue);
+    expect(result.awards, isEmpty);
+    expect(result.ledgerDeltas, isEmpty);
+    expect(result.warnings, <String>['ERR_CORE_SETTLEMENT_UNKNOWN_SLICE']);
+  });
 }
 
 List<String> _awardTriples(SettlementResult settlement) {
