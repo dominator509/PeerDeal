@@ -15,9 +15,11 @@ class ReceiptKeyRingLoadResult {
 }
 
 class NativeReceiptKeyRingLoader {
+  static const defaultNamespace = 'peerdeal.receipts';
+
   const NativeReceiptKeyRingLoader({
     required SecureKeyStorageBridge bridge,
-    this.namespace = 'peerdeal.receipts',
+    this.namespace = defaultNamespace,
   }) : _bridge = bridge;
 
   final SecureKeyStorageBridge _bridge;

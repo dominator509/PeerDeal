@@ -24,3 +24,10 @@ Sensitive demo routes should follow the same app-layer path:
 Do not let screens decide capture policy directly. Future private ledger,
 receipt detail, verification drill-down, restore, or stats-history demo screens
 should reuse this fixture -> presenter -> safe screen shape.
+
+## Receipt Verification Flow
+
+Demo receipt artifact verification should use
+`DemoReceiptArtifactVerifierFactory.methodChannel()` at the app boundary. The
+call order is native secure-key bridge -> app key-ring loader -> artifact
+verifier -> presenter -> safe surface.
