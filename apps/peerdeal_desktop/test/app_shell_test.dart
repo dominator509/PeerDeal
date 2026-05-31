@@ -63,6 +63,31 @@ void main() {
     expect(find.text('Receipt content hidden'), findsOneWidget);
   });
 
+  testWidgets('routes recovery scenario through mounted receipt recovery', (
+    tester,
+  ) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+
+    await tester.pumpWidget(PeerDealDesktopApp(presenter: presenter));
+
+    await tester.tap(
+      find.text('Scenario: Recovery Pause - Primary-Peer Transfer'),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Receipt'));
+    await tester.pumpAndSettle();
+
+    expect(captureBridge.requestCount, 2);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+    expect(find.textContaining('ERR_FINAL_EVENT_HASH_MISMATCH'), findsNothing);
+    expect(find.textContaining('expected_hash'), findsNothing);
+    expect(find.textContaining('actual_hash'), findsNothing);
+  });
+
   testWidgets('routes from demo home through table and chat surfaces', (
     tester,
   ) async {

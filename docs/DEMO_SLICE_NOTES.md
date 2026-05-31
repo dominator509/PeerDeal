@@ -34,5 +34,5 @@ This demo slice should be progressively replaced by real bindings, not expanded 
 - Capture-policy coordination and receipt/recovery projection remain app-layer
   orchestration.
 - `apps/peerdeal_mobile/lib/main.dart` and
-  `apps/peerdeal_desktop/lib/main.dart` still launch placeholder shells. Runtime
-  route mounting is a separate app-flow hardening PR, not engine truth.
+  `apps/peerdeal_desktop/lib/main.dart` mount the demo, receipt, join, and
+  recovery-safe-surface routes through app-layer orchestration.

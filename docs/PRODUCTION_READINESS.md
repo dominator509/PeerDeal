@@ -118,6 +118,8 @@ the gates below are satisfied.
 - App artifact verifiers now use native-loaded signing and encryption keys for
   signed/encrypted receipt export inspection, failing closed when encryption
   material is unavailable.
+- Mounted app receipt routes now pass recovery scenarios through the safe
+  recovery projection path, including restore-surface capture coordination.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

@@ -3,6 +3,7 @@ import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
 import 'demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'demo_slice/controllers/demo_receipt_surface_presenter.dart';
+import 'demo_slice/controllers/demo_recovery_result_factory.dart';
 import 'demo_slice/controllers/demo_slice_controller.dart';
 import 'demo_slice/demo_slice_routes.dart';
 import 'demo_slice/models/demo_scenario_snapshot.dart';
@@ -37,6 +38,8 @@ class PeerDealMobileApp extends StatefulWidget {
 
 class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   final DemoSliceController _controller = DemoSliceController();
+  final DemoRecoveryResultFactory _recoveryResultFactory =
+      const DemoRecoveryResultFactory();
 
   DemoReceiptSurfacePresenter? get _receiptPresenter =>
       widget._receiptPresenter;
@@ -81,6 +84,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
           artifactVerifier: widget._receiptExportArtifact == null
               ? null
               : _receiptArtifactVerifierFactory.create(),
+          recovery: _recoveryResultFactory.createFor(_activeSnapshot),
         ),
         DemoSliceRoutes.join: (_) => const JoinFlowRoute(),
       },
