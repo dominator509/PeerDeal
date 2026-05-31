@@ -3,6 +3,8 @@ import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 import '../../safe_surface/safe_surface.dart';
+import '../controllers/demo_receipt_artifact_verifier.dart';
+import '../controllers/demo_receipt_artifact_verifier_factory.dart';
 import '../controllers/demo_receipt_surface_presenter.dart';
 import '../models/demo_scenario_snapshot.dart';
 
@@ -11,11 +13,15 @@ class DemoReceiptRoute extends StatefulWidget {
     super.key,
     required this.snapshot,
     required this.presenter,
+    this.exportArtifact,
+    this.artifactVerifier,
     this.recovery,
   });
 
   final DemoScenarioSnapshot snapshot;
   final DemoReceiptSurfacePresenter presenter;
+  final ReceiptExportArtifact? exportArtifact;
+  final DemoReceiptArtifactVerifier? artifactVerifier;
   final RecoveryResult<Object?>? recovery;
 
   @override
@@ -36,6 +42,8 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.snapshot != widget.snapshot ||
         oldWidget.presenter != widget.presenter ||
+        oldWidget.exportArtifact != widget.exportArtifact ||
+        oldWidget.artifactVerifier != widget.artifactVerifier ||
         oldWidget.recovery != widget.recovery) {
       _surface = _present();
     }
@@ -56,6 +64,17 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
   }
 
   Future<DemoReceiptSurfaceVm> _present() {
+    final artifact = widget.exportArtifact;
+    if (artifact != null) {
+      return widget.presenter.presentVerifiedExportArtifact(
+        artifact: artifact,
+        verifier:
+            widget.artifactVerifier ??
+            DemoReceiptArtifactVerifierFactory.methodChannel().create(),
+        recovery: widget.recovery,
+      );
+    }
+
     return widget.presenter.present(
       receipt: _receiptScanResult(widget.snapshot),
       recovery: widget.recovery,
