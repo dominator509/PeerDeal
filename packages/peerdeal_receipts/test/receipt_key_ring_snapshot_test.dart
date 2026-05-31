@@ -1,0 +1,84 @@
+import 'package:peerdeal_receipts/peerdeal_receipts.dart';
+import 'package:test/test.dart';
+
+void main() {
+  test('feeds active and rotated signing keys into signer contract', () {
+    const activeSigning = ReceiptSigningKey(
+      keyId: 'receipt_signing_1',
+      secret: 'signing_secret_1',
+    );
+    const rotatedSigning = ReceiptSigningKey(
+      keyId: 'receipt_signing_0',
+      secret: 'signing_secret_0',
+    );
+    const keyRing = ReceiptKeyRingSnapshot(
+      activeSigning: activeSigning,
+      verificationSigningKeys: <ReceiptSigningKey>[rotatedSigning],
+    );
+    const signer = HmacSha256ReceiptSigner(keyProvider: keyRing);
+
+    final signature = signer.sign('payload');
+
+    expect(signature, startsWith('hmac-sha256:receipt_signing_1:'));
+    expect(signer.verify(payload: 'payload', signature: signature), isTrue);
+
+    const rotatedSigner = HmacSha256ReceiptSigner(
+      keyProvider: StaticReceiptSigningKeyProvider(activeKey: rotatedSigning),
+    );
+    final rotatedSignature = rotatedSigner.sign('payload');
+
+    expect(
+      signer.verify(payload: 'payload', signature: rotatedSignature),
+      isTrue,
+    );
+  });
+
+  test('exposes active and retained encryption keys for cipher adapters', () {
+    const activeEncryption = ReceiptEncryptionKey(
+      keyId: 'receipt_encryption_1',
+      secret: 'encryption_secret_1',
+    );
+    const retainedEncryption = ReceiptEncryptionKey(
+      keyId: 'receipt_encryption_0',
+      secret: 'encryption_secret_0',
+    );
+    const keyRing = ReceiptKeyRingSnapshot(
+      activeEncryption: activeEncryption,
+      decryptionKeys: <ReceiptEncryptionKey>[retainedEncryption],
+    );
+
+    expect(keyRing.activeEncryptionKey(), activeEncryption);
+    expect(
+      keyRing.findEncryptionKey('receipt_encryption_0'),
+      retainedEncryption,
+    );
+    expect(keyRing.findEncryptionKey('missing'), isNull);
+  });
+
+  test('fails closed for malformed key material', () {
+    const keyRing = ReceiptKeyRingSnapshot(
+      activeSigning: ReceiptSigningKey(
+        keyId: 'bad:signing',
+        secret: 'signing_secret',
+      ),
+      activeEncryption: ReceiptEncryptionKey(
+        keyId: 'receipt_encryption_1',
+        secret: '',
+      ),
+      verificationSigningKeys: <ReceiptSigningKey>[
+        ReceiptSigningKey(keyId: 'rotated', secret: ''),
+      ],
+      decryptionKeys: <ReceiptEncryptionKey>[
+        ReceiptEncryptionKey(
+          keyId: 'bad:encryption',
+          secret: 'encryption_secret',
+        ),
+      ],
+    );
+
+    expect(keyRing.activeSigningKey(), isNull);
+    expect(keyRing.findSigningKey('rotated'), isNull);
+    expect(keyRing.activeEncryptionKey(), isNull);
+    expect(keyRing.findEncryptionKey('bad:encryption'), isNull);
+  });
+}
