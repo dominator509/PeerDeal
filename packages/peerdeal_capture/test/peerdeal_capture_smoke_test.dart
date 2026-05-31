@@ -53,4 +53,17 @@ void main() {
       expect(decision.warning, contains('platform capability'));
     },
   );
+
+  test('preserves native capability warning for sensitive surfaces', () {
+    final decision = resolver.resolve(
+      surface: CaptureSurface.receiptDetail,
+      capability: const CapturePlatformCapability.none(
+        warning: 'native hook unavailable',
+      ),
+    );
+
+    expect(decision.action, CapturePolicyAction.obscureOnly);
+    expect(decision.requiresVisualObscuring, isTrue);
+    expect(decision.warning, 'native hook unavailable');
+  });
 }

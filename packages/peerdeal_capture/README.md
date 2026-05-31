@@ -17,3 +17,9 @@ surfaces.
 - `peerdeal_native_bridges` owns platform hooks.
 - app shells own when lifecycle events call into capture policy.
 - `peerdeal_privacy` owns retention and minimization policy.
+
+## Hardened scaffold coverage
+- Sensitive surfaces remain visually obscured even when native blocking is
+  unavailable.
+- Native capability warnings are preserved in policy decisions so apps can show
+  honest best-effort messaging.

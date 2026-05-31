@@ -13,9 +13,18 @@ class MethodChannelCaptureProtectionBridge implements CaptureProtectionBridge {
 
   @override
   Future<CaptureProtectionCapability> getCapability() async {
-    final result = await _channel.invokeMapMethod<String, Object?>(
-      'getCapability',
-    );
+    final Map<String, Object?>? result;
+    try {
+      result = await _channel.invokeMapMethod<String, Object?>('getCapability');
+    } on MissingPluginException catch (error) {
+      return CaptureProtectionCapability.unavailable(
+        warning: _warning('Capture protection plugin is unavailable', error),
+      );
+    } on PlatformException catch (error) {
+      return CaptureProtectionCapability.unavailable(
+        warning: _warning('Capture protection capability lookup failed', error),
+      );
+    }
 
     if (result == null) {
       return const CaptureProtectionCapability.unavailable(
@@ -29,5 +38,15 @@ class MethodChannelCaptureProtectionBridge implements CaptureProtectionBridge {
       notes: (result['notes'] as String?) ?? 'unavailable',
       warning: result['warning'] as String?,
     );
+  }
+
+  String _warning(String prefix, Object error) {
+    if (error is PlatformException) {
+      final message = error.message;
+      return message == null || message.isEmpty
+          ? '$prefix: ${error.code}.'
+          : '$prefix: ${error.code} - $message';
+    }
+    return '$prefix: $error';
   }
 }

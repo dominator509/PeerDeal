@@ -197,6 +197,22 @@ class BasicConflictDetector implements ConflictDetector {
       }
     }
 
+    if (request.snapshot == null && request.events.isNotEmpty) {
+      final firstEventSeq = request.events.first.eventSeq;
+      if (firstEventSeq != 1) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_WINDOW_MISSING_PREFIX',
+            message:
+                'Recovery event window without a snapshot must start at the first event.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '1',
+            actual: '$firstEventSeq',
+          ),
+        );
+      }
+    }
+
     if (request.expectedFinalEventSeq != null && request.events.isNotEmpty) {
       final actualFinalSeq = request.events.last.eventSeq;
       if (actualFinalSeq != request.expectedFinalEventSeq) {
@@ -232,9 +248,9 @@ class BasicConflictDetector implements ConflictDetector {
     if (request.snapshot == null && request.events.isEmpty) {
       conflicts.add(
         const SyncConflict(
-          code: 'WARN_EMPTY_RECOVERY_WINDOW',
+          code: 'ERR_EMPTY_RECOVERY_WINDOW',
           message: 'Recovery request has no snapshot and no events to apply.',
-          severity: SyncConflictSeverity.warning,
+          severity: SyncConflictSeverity.fatal,
         ),
       );
     }

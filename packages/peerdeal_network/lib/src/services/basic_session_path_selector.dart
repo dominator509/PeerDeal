@@ -14,11 +14,11 @@ class BasicSessionPathSelector implements SessionPathSelector {
     String? electedPrimaryPeerId,
   }) {
     final reachable = candidates.where((c) => c.reachable).toList()
-      ..sort((a, b) => b.priority.compareTo(a.priority));
+      ..sort(_compareCandidates);
 
-    final lanCandidate = reachable.where((c) => c.routeClass == NetworkRouteClass.lanDirect).cast<BootstrapCandidate?>().firstWhere(
-      (c) => c != null,
-      orElse: () => null,
+    final lanCandidate = _firstWhere(
+      reachable,
+      (candidate) => candidate.routeClass.isLanDirect,
     );
 
     if (preferLan && lanCandidate != null) {
@@ -31,14 +31,14 @@ class BasicSessionPathSelector implements SessionPathSelector {
       );
     }
 
-    final remoteCandidate = reachable.where((c) => c.routeClass == NetworkRouteClass.p2pRemote).cast<BootstrapCandidate?>().firstWhere(
-      (c) => c != null,
-      orElse: () => null,
+    final remoteCandidate = _firstWhere(
+      reachable,
+      (candidate) => candidate.routeClass.isRemoteDirect,
     );
 
     if (remoteCandidate != null) {
       return SessionPathDescriptor(
-        routeClass: NetworkRouteClass.p2pRemote,
+        routeClass: remoteCandidate.routeClass,
         primaryPeerId: electedPrimaryPeerId ?? remoteCandidate.peerId,
         usesRelay: false,
         transportAgnostic: true,
@@ -46,10 +46,25 @@ class BasicSessionPathSelector implements SessionPathSelector {
       );
     }
 
-    if (relayAllowed && reachable.isNotEmpty) {
+    if (lanCandidate != null) {
       return SessionPathDescriptor(
-        routeClass: NetworkRouteClass.relay,
-        primaryPeerId: electedPrimaryPeerId ?? reachable.first.peerId,
+        routeClass: NetworkRouteClass.lanDirect,
+        primaryPeerId: electedPrimaryPeerId ?? lanCandidate.peerId,
+        usesRelay: false,
+        transportAgnostic: true,
+        reason: 'selected_lan_direct_path',
+      );
+    }
+
+    final relayCandidate = _firstWhere(
+      reachable,
+      (candidate) => candidate.routeClass.isRelay,
+    );
+
+    if (relayAllowed && relayCandidate != null) {
+      return SessionPathDescriptor(
+        routeClass: relayCandidate.routeClass,
+        primaryPeerId: electedPrimaryPeerId ?? relayCandidate.peerId,
         usesRelay: true,
         transportAgnostic: true,
         reason: 'selected_relay_fallback_path',
@@ -59,9 +74,31 @@ class BasicSessionPathSelector implements SessionPathSelector {
     return SessionPathDescriptor(
       routeClass: NetworkRouteClass.relay,
       primaryPeerId: electedPrimaryPeerId ?? 'unresolved',
-      usesRelay: relayAllowed,
+      usesRelay: false,
       transportAgnostic: true,
       reason: 'no_direct_candidate_available',
     );
+  }
+
+  static int _compareCandidates(BootstrapCandidate a, BootstrapCandidate b) {
+    final priorityCmp = b.priority.compareTo(a.priority);
+    if (priorityCmp != 0) return priorityCmp;
+
+    final routeCmp = a.routeClass.selectionRank.compareTo(
+      b.routeClass.selectionRank,
+    );
+    if (routeCmp != 0) return routeCmp;
+
+    return a.peerId.compareTo(b.peerId);
+  }
+
+  static BootstrapCandidate? _firstWhere(
+    List<BootstrapCandidate> candidates,
+    bool Function(BootstrapCandidate candidate) test,
+  ) {
+    for (final candidate in candidates) {
+      if (test(candidate)) return candidate;
+    }
+    return null;
   }
 }

@@ -68,6 +68,17 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     final conflicts = <SyncConflict>[];
     final snapshot = request.snapshot;
 
+    if (snapshot == null && request.events.isEmpty) {
+      conflicts.add(
+        const SyncConflict(
+          code: 'ERR_SNAPSHOT_APPLY_EMPTY_WINDOW',
+          message:
+              'Snapshot apply request has no snapshot and no events to apply.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      );
+    }
+
     if (snapshot != null) {
       if (snapshot.tableId != request.tableId ||
           snapshot.sessionId != request.sessionId) {
@@ -117,6 +128,22 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
             severity: SyncConflictSeverity.fatal,
             expected: request.protocolVersion,
             actual: event.protocolVersion,
+          ),
+        );
+      }
+    }
+
+    if (snapshot == null && request.events.isNotEmpty) {
+      final firstEventSeq = request.events.first.eventSeq;
+      if (firstEventSeq != 1) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_SNAPSHOT_APPLY_EVENT_WINDOW_MISSING_PREFIX',
+            message:
+                'Snapshot apply event window without a snapshot must start at the first event.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '1',
+            actual: '$firstEventSeq',
           ),
         );
       }

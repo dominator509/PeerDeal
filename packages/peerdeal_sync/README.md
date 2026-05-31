@@ -20,3 +20,10 @@ This package owns:
 
 ## Expected next integration
 This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, and later connect to the replay and network lanes without letting transport or UI own truth.
+
+## Hardened scaffold coverage
+- Recovery requests fail closed when they have no snapshot and no events.
+- Event windows without a snapshot must start at event sequence 1.
+- Snapshot suffix windows must continue directly after the snapshot base event.
+- The coordinator returns safe-close recommendations for fatal planning or
+  apply-stage conflicts.

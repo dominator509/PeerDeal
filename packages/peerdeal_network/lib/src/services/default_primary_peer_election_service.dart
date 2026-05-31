@@ -7,9 +7,7 @@ import 'confidence_classifier.dart';
 import 'primary_peer_election_service.dart';
 
 class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
-  const DefaultPrimaryPeerElectionService({
-    required this.confidenceClassifier,
-  });
+  const DefaultPrimaryPeerElectionService({required this.confidenceClassifier});
 
   final ConfidenceClassifier confidenceClassifier;
 
@@ -41,15 +39,25 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
         return a.peerId.compareTo(b.peerId);
       });
 
-    final winner = rankings.firstWhere(
-      (r) => !r.isExcluded,
-      orElse: () => rankings.first,
-    );
-
     final confidence = confidenceClassifier.classify(items);
+    final winner = _firstEligibleRanking(rankings);
+    if (winner == null) {
+      return PrimaryPeerDecision(
+        primaryPeerId: currentPrimaryPeerId ?? 'none',
+        confidence: confidence,
+        reason: 'No anchor-aligned peers',
+        baselineEventIndex: baselineEventIndex,
+        expectedAnchorHash: expectedAnchorHash,
+        requiresTransfer: false,
+        requiresPause: true,
+        rankings: rankings,
+      );
+    }
+
     final requiresTransfer =
         currentPrimaryPeerId != null && winner.peerId != currentPrimaryPeerId;
-    final requiresPause = confidence == NetworkConfidence.recoveryRequired ||
+    final requiresPause =
+        confidence == NetworkConfidence.recoveryRequired ||
         confidence == NetworkConfidence.unsafe;
 
     return PrimaryPeerDecision(
@@ -89,10 +97,11 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
     int penalty = 0;
 
     if (s.backgroundRisk) penalty -= 40;
-    if (s.routeClass == NetworkRouteClass.relayFallback) penalty -= 20;
+    if (s.routeClass.isRelay) penalty -= 20;
     if (s.ackLagMs > 500) penalty -= 30;
 
-    final total = reachability + latency + stability + anchor + serving + penalty;
+    final total =
+        reachability + latency + stability + anchor + serving + penalty;
     return ScoreBreakdown(
       peerId: s.peerId,
       total: total,
@@ -103,5 +112,12 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
       servingScore: serving,
       penaltyScore: penalty,
     );
+  }
+
+  ScoreBreakdown? _firstEligibleRanking(List<ScoreBreakdown> rankings) {
+    for (final ranking in rankings) {
+      if (!ranking.isExcluded) return ranking;
+    }
+    return null;
   }
 }

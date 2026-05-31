@@ -77,4 +77,47 @@ void main() {
 
     expect(decision.primaryPeerId, 'peer_b');
   });
+
+  test('fails closed when all candidate anchors mismatch', () {
+    const service = DefaultPrimaryPeerElectionService(
+      confidenceClassifier: DefaultConfidenceClassifier(),
+    );
+
+    final decision = service.elect(
+      snapshots: const [
+        PeerMetricSnapshot(
+          peerId: 'peer_a',
+          routeClass: NetworkRouteClass.remoteDirect,
+          avgLatencyMs: 20,
+          ackLagMs: 30,
+          disconnectsInWindow: 0,
+          reachabilityCount: 4,
+          eventIndexLag: 0,
+          anchorAligned: false,
+          snapshotServeMs: 10,
+        ),
+        PeerMetricSnapshot(
+          peerId: 'peer_b',
+          routeClass: NetworkRouteClass.lanDirect,
+          avgLatencyMs: 10,
+          ackLagMs: 20,
+          disconnectsInWindow: 0,
+          reachabilityCount: 4,
+          eventIndexLag: 0,
+          anchorAligned: false,
+          snapshotServeMs: 8,
+        ),
+      ],
+      baselineEventIndex: 12,
+      expectedAnchorHash: 'anchor_12',
+      currentPrimaryPeerId: 'peer_a',
+    );
+
+    expect(decision.primaryPeerId, 'peer_a');
+    expect(decision.confidence, NetworkConfidence.recoveryRequired);
+    expect(decision.requiresTransfer, isFalse);
+    expect(decision.requiresPause, isTrue);
+    expect(decision.reason, 'No anchor-aligned peers');
+    expect(decision.rankings.every((ranking) => ranking.isExcluded), isTrue);
+  });
 }

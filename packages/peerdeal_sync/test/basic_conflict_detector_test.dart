@@ -325,4 +325,60 @@ void main() {
     expect(result.conflicts.single.expected, 'table_1/session_1');
     expect(result.conflicts.single.actual, 'other_table/session_1');
   });
+
+  test('flags fatal empty recovery window', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EMPTY_RECOVERY_WINDOW');
+  });
+
+  test('flags fatal suffix window without snapshot prefix', () {
+    final result = detector.detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          _event(3, prevEventHash: 'hash_2', eventHash: 'hash_3'),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EVENT_WINDOW_MISSING_PREFIX');
+    expect(result.conflicts.single.expected, '1');
+    expect(result.conflicts.single.actual, '3');
+  });
+}
+
+EventEnvelope _event(
+  int eventSeq, {
+  required String prevEventHash,
+  required String eventHash,
+}) {
+  return EventEnvelope(
+    eventId: 'evt_$eventSeq',
+    eventType: eventSeq == 1 ? 'OpenTableSessionOpened' : 'RecoveryPauseEnded',
+    eventVersion: '1.0',
+    protocolVersion: '1.0.0',
+    eventSeq: eventSeq,
+    tableId: 'table_1',
+    sessionId: 'session_1',
+    handId: null,
+    emittedAt: '2026-04-25T00:00:00Z',
+    actorRef: 'system',
+    payload: const <String, Object?>{},
+    prevEventHash: prevEventHash,
+    eventHash: eventHash,
+  );
 }

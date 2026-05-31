@@ -24,3 +24,11 @@ to observe local device capabilities.
 - `peerdeal_capture` owns capture policy.
 - `peerdeal_network` owns network confidence and routing.
 - app shells own when native hooks are called.
+
+## Hardened scaffold coverage
+- Method-channel capture capability lookup returns unavailable capability facts
+  when the platform payload is missing or throws.
+- Method-channel local-network capability and discovery lookup return
+  unavailable capability facts when the platform payload is missing or throws.
+- Native bridge warnings are normalized for app-layer safe-surface and network
+  routing policy.

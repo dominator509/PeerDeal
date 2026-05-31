@@ -55,4 +55,25 @@ void main() {
     expect(capability.warning, contains('unavailable'));
     expect(log.single.method, 'getCapability');
   });
+
+  test('returns unavailable capability when platform lookup throws', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          throw PlatformException(
+            code: 'capture_failed',
+            message: 'screen API failed',
+          );
+        });
+
+    final bridge = MethodChannelCaptureProtectionBridge(channel: channel);
+    final capability = await bridge.getCapability();
+
+    expect(capability.blockingSupported, isFalse);
+    expect(capability.obscuringSupported, isFalse);
+    expect(capability.notes, 'unavailable');
+    expect(capability.warning, contains('capture_failed'));
+    expect(capability.warning, contains('screen API failed'));
+    expect(log.single.method, 'getCapability');
+  });
 }

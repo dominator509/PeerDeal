@@ -49,4 +49,42 @@ void main() {
 
     expect(result, NetworkConfidence.recoveryRequired);
   });
+
+  test('returns degraded for shallow event-index lag', () {
+    const classifier = DefaultConfidenceClassifier();
+
+    final result = classifier.classify(const [
+      PeerMetricSnapshot(
+        peerId: 'a',
+        routeClass: NetworkRouteClass.remoteDirect,
+        avgLatencyMs: 90,
+        ackLagMs: 140,
+        disconnectsInWindow: 0,
+        reachabilityCount: 3,
+        eventIndexLag: 1,
+        anchorAligned: true,
+      ),
+    ]);
+
+    expect(result, NetworkConfidence.degraded);
+  });
+
+  test('returns recoveryRequired for severe event-index lag', () {
+    const classifier = DefaultConfidenceClassifier();
+
+    final result = classifier.classify(const [
+      PeerMetricSnapshot(
+        peerId: 'a',
+        routeClass: NetworkRouteClass.remoteDirect,
+        avgLatencyMs: 90,
+        ackLagMs: 140,
+        disconnectsInWindow: 0,
+        reachabilityCount: 3,
+        eventIndexLag: 3,
+        anchorAligned: true,
+      ),
+    ]);
+
+    expect(result, NetworkConfidence.recoveryRequired);
+  });
 }

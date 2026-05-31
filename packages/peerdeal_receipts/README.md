@@ -18,6 +18,13 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
 - UI rendering
 - money/value semantics
 
+## Hardened scaffold coverage
+- Receipt exports reject malformed or wiped receipts.
+- Export artifacts minimize metadata and do not expose table identity.
+- `ReceiptCipher` and `ReceiptSigner` contracts can wrap opaque export payloads
+  without moving cryptography into app shells.
+
 ## Starter status
 This scaffold is aligned to the locked PeerDeal receipt, retention, and privacy direction and is intended
-as the first package drop for Sprint 11. It is not yet a production cryptographic implementation.
+as the first package drop for Sprint 11. It has deterministic cipher/signer seams, but production key
+management and concrete cryptographic adapters still need implementation.

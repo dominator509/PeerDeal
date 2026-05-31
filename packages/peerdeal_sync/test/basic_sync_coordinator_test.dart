@@ -45,6 +45,30 @@ void main() {
     });
   });
 
+  test('safe-closes empty recovery requests', () {
+    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+      conflictDetector: const BasicConflictDetector(),
+      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      ),
+    );
+
+    final result = coordinator.recover(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.safeCloseRecommended, isTrue);
+    expect(result.reconciliation.recommendedAction, 'safe_close');
+    expect(result.conflicts.single.code, 'ERR_EMPTY_RECOVERY_WINDOW');
+  });
+
   test(
     'recovers by applying snapshot and suffix window when no fatal conflict exists',
     () {

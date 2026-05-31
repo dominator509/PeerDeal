@@ -66,8 +66,8 @@ the gates below are satisfied.
 - CI runs the same baseline commands as local development.
 
 ## Current highest-risk blockers
-- Production networking, sync recovery, receipt cryptography, and native capture
-  implementation remain scaffold-level.
+- Live transport, native OS implementations, production cryptographic key
+  management, and persistence remain scaffold-level.
 - App shells still launch placeholder roots. Demo/join/safe-surface flows are
   tested, but not mounted as runtime navigation.
 - App UI is not production-polished.
@@ -85,12 +85,18 @@ the gates below are satisfied.
 - Hold'em variant coverage now spans betting-round completion through checked
   streets, showdown reveal, settlement preparation/projection, uncontested
   settlement, hand completion, and settlement event emission.
+- Network/sync/receipt/capture/native hardening now covers deterministic route
+  class semantics, event-lag confidence gating, fail-closed primary election,
+  fail-closed empty or suffix-only recovery windows, optional signed/encrypted
+  opaque receipt exports, minimized receipt export metadata, capture-warning
+  propagation, and native bridge failure normalization.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
 
 ## Next production hardening order
-1. Harden replay/sync recovery against additional malformed and divergent event
-   windows.
-2. Harden privacy, receipt, capture, and native bridge behavior.
+1. Replace native bridge stubs with platform implementations that return the
+   normalized capability facts already covered by package tests.
+2. Add production receipt key-management adapters behind the existing cipher and
+   signer contracts.
 3. Build app flows on top of the stable public package APIs.
