@@ -4,7 +4,13 @@ import 'fakes.dart';
 import 'join_flow_models.dart';
 import 'join_flow_orchestrator.dart';
 
-enum JoinFlowDemoMode { firstJoin, ackRequired, rejoin }
+enum JoinFlowDemoMode {
+  firstJoin,
+  ackRequired,
+  unsupportedProtocol,
+  roleDenied,
+  rejoin,
+}
 
 class JoinFlowRoute extends StatefulWidget {
   const JoinFlowRoute({
@@ -57,6 +63,14 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
                 onTap: () => _selectMode(JoinFlowDemoMode.ackRequired),
               ),
               _JoinModeAction(
+                label: 'Run unsupported protocol',
+                onTap: () => _selectMode(JoinFlowDemoMode.unsupportedProtocol),
+              ),
+              _JoinModeAction(
+                label: 'Run role denied',
+                onTap: () => _selectMode(JoinFlowDemoMode.roleDenied),
+              ),
+              _JoinModeAction(
                 label: 'Run rejoin',
                 onTap: () => _selectMode(JoinFlowDemoMode.rejoin),
               ),
@@ -89,12 +103,18 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
 
   JoinFlowOrchestrator _demoOrchestrator(JoinFlowDemoMode mode) {
     return JoinFlowOrchestrator(
-      inviteResolver: FakeInviteResolver(),
+      inviteResolver: FakeInviteResolver(
+        protocolVersion: mode == JoinFlowDemoMode.unsupportedProtocol
+            ? '2.0.0'
+            : '1.0.0',
+      ),
       joinNegotiator: FakeJoinNegotiator(),
       disclosureCoordinator: FakeDisclosureCoordinator(
         allAccepted: mode != JoinFlowDemoMode.ackRequired,
       ),
-      roleAuthorizer: FakeRoleAuthorizer(allow: true),
+      roleAuthorizer: FakeRoleAuthorizer(
+        allow: mode != JoinFlowDemoMode.roleDenied,
+      ),
       bootstrapCoordinator: FakeBootstrapCoordinator(),
       governanceCommitter: FakeGovernanceCommitter(
         acceptJoin: true,

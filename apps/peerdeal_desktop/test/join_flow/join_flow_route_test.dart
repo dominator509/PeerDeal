@@ -40,4 +40,32 @@ void main() {
     expect(find.text('State: rejoined'), findsOneWidget);
     expect(find.text('Result: OK_REJOINED'), findsOneWidget);
   });
+
+  testWidgets('can switch to mounted rejection outcomes', (tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Run unsupported protocol'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_PROTOCOL_INCOMPATIBLE'), findsOneWidget);
+    expect(
+      find.text(
+        'ERR_PROTOCOL_INCOMPATIBLE: Invite protocol version is not supported.',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Run role denied'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_ROLE_DENIED'), findsOneWidget);
+  });
 }
