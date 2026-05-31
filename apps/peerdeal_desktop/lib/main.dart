@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
+import 'demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'demo_slice/controllers/demo_slice_controller.dart';
 import 'demo_slice/demo_slice_routes.dart';
@@ -16,10 +18,18 @@ void main() {
 }
 
 class PeerDealDesktopApp extends StatefulWidget {
-  const PeerDealDesktopApp({super.key, DemoReceiptSurfacePresenter? presenter})
-    : _receiptPresenter = presenter;
+  const PeerDealDesktopApp({
+    super.key,
+    DemoReceiptSurfacePresenter? presenter,
+    DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
+    ReceiptExportArtifact? receiptExportArtifact,
+  }) : _receiptPresenter = presenter,
+       _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
+       _receiptExportArtifact = receiptExportArtifact;
 
   final DemoReceiptSurfacePresenter? _receiptPresenter;
+  final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
+  final ReceiptExportArtifact? _receiptExportArtifact;
 
   @override
   State<PeerDealDesktopApp> createState() => _PeerDealDesktopAppState();
@@ -67,6 +77,10 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
         DemoSliceRoutes.receipt: (_) => DemoReceiptRoute(
           snapshot: _activeSnapshot,
           presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
+          exportArtifact: widget._receiptExportArtifact,
+          artifactVerifier: widget._receiptExportArtifact == null
+              ? null
+              : _receiptArtifactVerifierFactory.create(),
         ),
         DemoSliceRoutes.join: (_) => const JoinFlowRoute(),
       },
@@ -88,5 +102,10 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   void _selectScenario(String scenarioId) {
     if (!_controller.trySelectScenario(scenarioId)) return;
     setState(() {});
+  }
+
+  DemoReceiptArtifactVerifierFactory get _receiptArtifactVerifierFactory {
+    return widget._receiptArtifactVerifierFactory ??
+        DemoReceiptArtifactVerifierFactory.methodChannel();
   }
 }

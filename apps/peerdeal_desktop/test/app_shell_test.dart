@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'package:peerdeal_desktop/main.dart';
 import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
@@ -32,6 +33,33 @@ void main() {
     expect(find.text('Loading receipt'), findsOneWidget);
 
     await tester.pumpAndSettle();
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
+  testWidgets('routes receipt artifacts through app-owned verifier factory', (
+    tester,
+  ) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final keyBridge = RecordingReceiptKeyStorageBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        presenter: presenter,
+        receiptExportArtifact: signedDemoReceiptArtifact(),
+        receiptArtifactVerifierFactory: DemoReceiptArtifactVerifierFactory(
+          bridge: keyBridge,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Receipt'));
+    await tester.pumpAndSettle();
+
+    expect(keyBridge.namespaces, <String>['peerdeal.receipts']);
+    expect(captureBridge.requestCount, 1);
     expect(find.text('Receipt content hidden'), findsOneWidget);
   });
 

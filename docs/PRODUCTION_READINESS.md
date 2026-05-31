@@ -68,8 +68,8 @@ the gates below are satisfied.
 ## Current highest-risk blockers
 - Live transport, native OS implementations, production cryptographic key
   management, and persistence remain scaffold-level.
-- App shells still launch placeholder roots. Demo/join/safe-surface flows are
-  tested, but not mounted as runtime navigation.
+- App shells now mount demo, receipt, safe-surface, and join-flow routes, but
+  runtime navigation still needs production UI and non-demo orchestration.
 - App UI is not production-polished.
 
 ## Covered hardening slices
@@ -110,6 +110,8 @@ the gates below are satisfied.
 - Demo receipt presenters in both app shells can route signed receipt export
   artifacts through fail-closed verification before projecting safe receipt
   fields.
+- Mounted app receipt routes receive artifact verifier factories from the app
+  shell boundary, keeping method-channel construction out of receipt screens.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

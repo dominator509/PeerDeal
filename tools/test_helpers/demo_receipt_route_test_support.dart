@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 Map<String, Object?> demoFixtureJson(String fixtureName) {
@@ -46,3 +47,53 @@ class RecordingCaptureProtectionBridge implements CaptureProtectionBridge {
     );
   }
 }
+
+class RecordingReceiptKeyStorageBridge implements SecureKeyStorageBridge {
+  final List<String> namespaces = <String>[];
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    namespaces.add(namespace);
+    return const SecureKeyStorageSnapshot(
+      available: true,
+      keys: <SecureKeyRecord>[
+        SecureKeyRecord(
+          keyId: 'receipt_key_1',
+          purpose: 'receipt_signing',
+          algorithm: 'hmac-sha256',
+          secret: 'test_secret_1',
+          active: true,
+        ),
+      ],
+    );
+  }
+}
+
+ReceiptExportArtifact signedDemoReceiptArtifact() {
+  return OpaqueExportEncoder(
+    signer: const HmacSha256ReceiptSigner(keyProvider: _receiptKeyRing),
+  ).encode(_receipt);
+}
+
+const _receiptKeyRing = ReceiptKeyRingSnapshot(
+  activeSigning: ReceiptSigningKey(
+    keyId: 'receipt_key_1',
+    secret: 'test_secret_1',
+  ),
+);
+
+const _receipt = PeerDealReceipt(
+  receiptId: 'r_1',
+  receiptVersion: '1.0',
+  protocolVersion: '1.x',
+  modeType: 'tournament',
+  sessionId: 'sess_77',
+  tableId: 'table_7',
+  pseudonymousUserId: 'user_7',
+  bindingMode: ReceiptBindingMode.sessionBound,
+  wipeState: ReceiptWipeState.live,
+  payloadHash: 'hash_77',
+  opaquePayload: 'opaque_77',
+);

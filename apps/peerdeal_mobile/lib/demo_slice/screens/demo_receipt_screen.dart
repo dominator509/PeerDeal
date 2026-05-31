@@ -4,7 +4,6 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 import '../../safe_surface/safe_surface.dart';
 import '../controllers/demo_receipt_artifact_verifier.dart';
-import '../controllers/demo_receipt_artifact_verifier_factory.dart';
 import '../controllers/demo_receipt_surface_presenter.dart';
 import '../models/demo_scenario_snapshot.dart';
 
@@ -66,11 +65,20 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
   Future<DemoReceiptSurfaceVm> _present() {
     final artifact = widget.exportArtifact;
     if (artifact != null) {
+      final verifier = widget.artifactVerifier;
+      if (verifier == null) {
+        return widget.presenter.present(
+          receipt: const ReceiptScanResult(
+            status: 'rejected',
+            message: 'Receipt artifact verifier is unavailable.',
+          ),
+          recovery: widget.recovery,
+        );
+      }
+
       return widget.presenter.presentVerifiedExportArtifact(
         artifact: artifact,
-        verifier:
-            widget.artifactVerifier ??
-            DemoReceiptArtifactVerifierFactory.methodChannel().create(),
+        verifier: verifier,
         recovery: widget.recovery,
       );
     }
