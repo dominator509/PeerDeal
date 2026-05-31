@@ -42,11 +42,20 @@ void main() {
   });
 
   test('exports encrypted and signed artifacts when configured', () {
-    const encryptedService = DefaultReceiptService(
-      authorizer: DefaultReceiptAuthorizer(),
+    final cipher = HmacSha256ReceiptCipher(
+      keyProvider: const ReceiptKeyRingSnapshot(
+        activeEncryption: ReceiptEncryptionKey(
+          keyId: 'receipt_encryption_1',
+          secret: 'encryption_secret_1',
+        ),
+      ),
+      nonceFactory: () => List<int>.filled(32, 5),
+    );
+    final encryptedService = DefaultReceiptService(
+      authorizer: const DefaultReceiptAuthorizer(),
       exportEncoder: OpaqueExportEncoder(
-        cipher: _FakeReceiptCipher(),
-        signer: _FakeReceiptSigner(),
+        cipher: cipher,
+        signer: const _FakeReceiptSigner(),
       ),
     );
 
@@ -59,12 +68,16 @@ void main() {
 
     final body = _decodeBody(artifact.encodedBody);
     expect(body['cipher'], 'external');
-    expect(body['payload'], startsWith('enc:'));
+    expect(
+      body['payload'],
+      startsWith(
+        '${HmacSha256ReceiptCipher.formatVersion}:'
+        '${HmacSha256ReceiptCipher.algorithm}:receipt_encryption_1:',
+      ),
+    );
     expect(body['signature'], 'sig:${body['payload']}');
 
-    final innerBody = const _FakeReceiptCipher().decrypt(
-      body['payload'] as String,
-    );
+    final innerBody = cipher.decrypt(body['payload'] as String);
     final payload = jsonDecode(innerBody) as Map<String, Object?>;
     expect(payload['receipt_id'], 'r_1');
     expect(payload['protocol_version'], '1.x');
@@ -195,16 +208,6 @@ void main() {
 Map<String, Object?> _decodeBody(String encodedBody) {
   return jsonDecode(utf8.decode(base64Decode(encodedBody)))
       as Map<String, Object?>;
-}
-
-class _FakeReceiptCipher implements ReceiptCipher {
-  const _FakeReceiptCipher();
-
-  @override
-  String encrypt(String plaintext) => 'enc:$plaintext';
-
-  @override
-  String decrypt(String ciphertext) => ciphertext.substring('enc:'.length);
 }
 
 class _FakeReceiptSigner implements ReceiptSigner {

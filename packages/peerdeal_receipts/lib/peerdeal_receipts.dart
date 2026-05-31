@@ -17,6 +17,7 @@ export 'src/contracts/receipt_signer.dart';
 export 'src/contracts/receipt_signing_key_provider.dart';
 export 'src/services/default_receipt_service.dart';
 export 'src/services/default_receipt_authorizer.dart';
+export 'src/services/hmac_sha256_receipt_cipher.dart';
 export 'src/services/hmac_sha256_receipt_signer.dart';
 export 'src/services/opaque_export_decoder.dart';
 export 'src/services/opaque_export_encoder.dart';

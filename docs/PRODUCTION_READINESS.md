@@ -94,6 +94,9 @@ the gates below are satisfied.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.
+- Receipt encryption now includes an HMAC-SHA256 authenticated cipher adapter
+  with active and retained key lookup, deterministic test seams, and
+  fail-closed tamper rejection.
 - Receipt key-ring lookup now covers loaded signing and encryption key material
   behind receipt-owned provider contracts, keeping app shells out of key
   rotation interpretation.
@@ -117,6 +120,6 @@ the gates below are satisfied.
 1. Replace native bridge stubs with platform implementations that satisfy the
    locked method-channel contracts and return the normalized capability facts
    already covered by package tests.
-2. Add platform-secure receipt key storage and production encryption adapters
-   behind the existing key-ring, cipher, and signer contracts.
+2. Add platform-secure receipt key storage behind the existing key-ring,
+   cipher, and signer contracts.
 3. Build app flows on top of the stable public package APIs.

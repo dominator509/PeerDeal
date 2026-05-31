@@ -92,8 +92,16 @@ void main() {
   });
 
   test('rejects encrypted artifact when cipher is unavailable', () {
-    const encryptedEncoder = OpaqueExportEncoder(
-      cipher: _FakeReceiptCipher(),
+    final encryptedEncoder = OpaqueExportEncoder(
+      cipher: HmacSha256ReceiptCipher(
+        keyProvider: const ReceiptKeyRingSnapshot(
+          activeEncryption: ReceiptEncryptionKey(
+            keyId: 'receipt_encryption_1',
+            secret: 'encryption_secret_1',
+          ),
+        ),
+        nonceFactory: () => List<int>.filled(32, 2),
+      ),
       signer: signer,
     );
     final artifact = encryptedEncoder.encode(receipt);
@@ -105,12 +113,20 @@ void main() {
   });
 
   test('verifies and decrypts encrypted signed export artifact', () {
-    const cipher = _FakeReceiptCipher();
-    const encryptedEncoder = OpaqueExportEncoder(
+    final cipher = HmacSha256ReceiptCipher(
+      keyProvider: const ReceiptKeyRingSnapshot(
+        activeEncryption: ReceiptEncryptionKey(
+          keyId: 'receipt_encryption_1',
+          secret: 'encryption_secret_1',
+        ),
+      ),
+      nonceFactory: () => List<int>.filled(32, 3),
+    );
+    final encryptedEncoder = OpaqueExportEncoder(
       cipher: cipher,
       signer: signer,
     );
-    const encryptedDecoder = OpaqueExportDecoder(
+    final encryptedDecoder = OpaqueExportDecoder(
       cipher: cipher,
       signer: signer,
     );
@@ -159,19 +175,4 @@ Map<String, Object?> _decodeBody(String encodedBody) {
 
 String _encodeBody(Map<String, Object?> body) {
   return base64Encode(utf8.encode(jsonEncode(body)));
-}
-
-class _FakeReceiptCipher implements ReceiptCipher {
-  const _FakeReceiptCipher();
-
-  @override
-  String encrypt(String plaintext) => 'enc:$plaintext';
-
-  @override
-  String decrypt(String ciphertext) {
-    if (!ciphertext.startsWith('enc:')) {
-      throw const FormatException('Unsupported test ciphertext.');
-    }
-    return ciphertext.substring('enc:'.length);
-  }
 }

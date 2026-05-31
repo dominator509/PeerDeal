@@ -25,6 +25,9 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
   without moving cryptography into app shells.
 - `HmacSha256ReceiptSigner` and `StaticReceiptSigningKeyProvider` provide a
   deterministic signing adapter with explicit active and rotated key lookup.
+- `HmacSha256ReceiptCipher` provides an authenticated receipt-owned encryption
+  adapter backed by loaded encryption keys, with retained-key decryption and
+  tamper rejection.
 - `ReceiptKeyRingSnapshot` exposes loaded signing and encryption keys through
   receipt-owned provider contracts, so app shells do not interpret key rotation
   rules directly.
@@ -34,6 +37,6 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
 
 ## Starter status
 This scaffold is aligned to the locked PeerDeal receipt, retention, and privacy direction and is intended
-as the first package drop for Sprint 11. It has deterministic cipher/signer seams, a concrete HMAC
-signing adapter, signed artifact inspection, and receipt-owned key-ring lookup contracts. Platform-secure
-storage and production encryption adapters still need implementation behind these seams.
+as the first package drop for Sprint 11. It has deterministic cipher/signer seams, concrete HMAC-backed
+signing and authenticated encryption adapters, signed artifact inspection, and receipt-owned key-ring
+lookup contracts. Platform-secure storage still needs implementation behind these seams.
