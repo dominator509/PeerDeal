@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:peerdeal_mobile/demo_slice/models/demo_scenario_snapshot.dart';
 import 'package:peerdeal_mobile/demo_slice/scenarios/demo_scenario_catalog.dart';
+import 'package:peerdeal_mobile/demo_slice/scenarios/demo_scenario_snapshots.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -34,6 +35,40 @@ void main() {
       expect(snapshot.statusBanner.severity, isNotEmpty);
       expect(snapshot.chat.unreadCount, greaterThanOrEqualTo(0));
       expect(snapshot.receipt.verificationState, isNotEmpty);
+    }
+  });
+
+  test('runtime demo snapshot catalog matches fixture snapshots', () {
+    final catalogIds = DemoScenarioCatalog.scenarios
+        .map((scenario) => scenario.id)
+        .toList(growable: false);
+
+    expect(DemoScenarioSnapshots.snapshots.keys, catalogIds);
+
+    for (final scenario in DemoScenarioCatalog.scenarios) {
+      final fixture = DemoScenarioSnapshot.fromJson(
+        _fixtureJson(_fixtureName(scenario.fixturePath)),
+      );
+      final runtime = DemoScenarioSnapshots.byId(scenario.id);
+
+      expect(runtime.scenarioId, fixture.scenarioId);
+      expect(runtime.mode, fixture.mode);
+      expect(runtime.variant, fixture.variant);
+      expect(runtime.networkConfidence, fixture.networkConfidence);
+      expect(runtime.statusBanner.label, fixture.statusBanner.label);
+      expect(runtime.statusBanner.severity, fixture.statusBanner.severity);
+      expect(runtime.statusBanner.visible, fixture.statusBanner.visible);
+      expect(runtime.chat.unreadCount, fixture.chat.unreadCount);
+      expect(
+        runtime.chat.disappearingEnabled,
+        fixture.chat.disappearingEnabled,
+      );
+      expect(
+        runtime.receipt.verificationState,
+        fixture.receipt.verificationState,
+      );
+      expect(runtime.receipt.retentionMode, fixture.receipt.retentionMode);
+      expect(runtime.receipt.bindingMode, fixture.receipt.bindingMode);
     }
   });
 

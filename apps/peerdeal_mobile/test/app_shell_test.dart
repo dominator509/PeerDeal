@@ -12,7 +12,10 @@ void main() {
 
     expect(find.byType(Placeholder), findsNothing);
     expect(find.text('PeerDeal demo'), findsOneWidget);
-    expect(find.text('Verification / Receipt Review'), findsOneWidget);
+    expect(
+      find.textContaining('Verification / Receipt Review'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('routes from demo home to receipt surface', (tester) async {
@@ -47,6 +50,26 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Demo chat'), findsOneWidget);
+    expect(find.text('Scenario: open_table_live_turn'), findsOneWidget);
+    expect(find.text('Unread: 3'), findsOneWidget);
+  });
+
+  testWidgets('selected scenario drives mounted demo routes', (tester) async {
+    await tester.pumpWidget(const PeerDealMobileApp());
+
+    await tester.tap(find.text('Scenario: Chat-Heavy Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Active scenario: Chat-Heavy Table'), findsOneWidget);
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Scenario: chat_heavy_table'), findsOneWidget);
+
+    await tester.tap(find.text('Chat'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Scenario: chat_heavy_table'), findsOneWidget);
     expect(find.text('Unread: 19'), findsOneWidget);
   });

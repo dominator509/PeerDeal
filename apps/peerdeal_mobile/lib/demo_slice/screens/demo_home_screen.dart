@@ -10,12 +10,14 @@ class DemoHomeScreen extends StatelessWidget {
     required this.onOpenTable,
     required this.onOpenChat,
     required this.onOpenReceipt,
+    required this.onSelectScenario,
   });
 
   final DemoSliceController controller;
   final VoidCallback onOpenTable;
   final VoidCallback onOpenChat;
   final VoidCallback onOpenReceipt;
+  final ValueChanged<String> onSelectScenario;
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,11 @@ class DemoHomeScreen extends StatelessWidget {
           const SizedBox(height: 16),
           Text('Active scenario: ${controller.activeScenario.title}'),
           for (final scenario in controller.scenarios)
-            _ScenarioSummary(scenario: scenario),
+            _ScenarioSummary(
+              scenario: scenario,
+              selected: scenario.id == controller.activeScenario.id,
+              onTap: () => onSelectScenario(scenario.id),
+            ),
           _DemoRouteAction(label: 'Table', onTap: onOpenTable),
           _DemoRouteAction(label: 'Chat', onTap: onOpenChat),
           _DemoRouteAction(label: 'Receipt', onTap: onOpenReceipt),
@@ -39,17 +45,29 @@ class DemoHomeScreen extends StatelessWidget {
 }
 
 class _ScenarioSummary extends StatelessWidget {
-  const _ScenarioSummary({required this.scenario});
+  const _ScenarioSummary({
+    required this.scenario,
+    required this.selected,
+    required this.onTap,
+  });
 
   final DemoScenario scenario;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[Text(scenario.title), Text(scenario.description)],
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text('${selected ? 'Selected' : 'Scenario'}: ${scenario.title}'),
+            Text(scenario.description),
+          ],
+        ),
       ),
     );
   }
