@@ -23,8 +23,10 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
 - Export artifacts minimize metadata and do not expose table identity.
 - `ReceiptCipher` and `ReceiptSigner` contracts can wrap opaque export payloads
   without moving cryptography into app shells.
+- `HmacSha256ReceiptSigner` and `StaticReceiptSigningKeyProvider` provide a
+  deterministic signing adapter with explicit active and rotated key lookup.
 
 ## Starter status
 This scaffold is aligned to the locked PeerDeal receipt, retention, and privacy direction and is intended
-as the first package drop for Sprint 11. It has deterministic cipher/signer seams, but production key
-management and concrete cryptographic adapters still need implementation.
+as the first package drop for Sprint 11. It has deterministic cipher/signer seams and a concrete HMAC
+signing adapter; production encryption and secure key storage adapters still need implementation.

@@ -7,6 +7,7 @@ version: 0.1.0
 environment:
   sdk: '^3.11.5'
 dependencies:
+  crypto: ^3.0.3
   peerdeal_protocol:
     path: ../peerdeal_protocol
   peerdeal_privacy:

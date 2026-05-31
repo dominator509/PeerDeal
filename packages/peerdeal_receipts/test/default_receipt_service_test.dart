@@ -72,6 +72,35 @@ void main() {
     expect(payload.containsKey('table_id'), isFalse);
   });
 
+  test('exports artifacts signed by HMAC receipt signer', () {
+    const keyProvider = StaticReceiptSigningKeyProvider(
+      activeKey: ReceiptSigningKey(
+        keyId: 'receipt_key_1',
+        secret: 'test_secret_1',
+      ),
+    );
+    const signer = HmacSha256ReceiptSigner(keyProvider: keyProvider);
+    const signedService = DefaultReceiptService(
+      authorizer: DefaultReceiptAuthorizer(),
+      exportEncoder: OpaqueExportEncoder(signer: signer),
+    );
+
+    final artifact = signedService.exportReceipt(receipt);
+    final body = _decodeBody(artifact.encodedBody);
+    final signature = body['signature'] as String;
+    final payload = body['payload'] as String;
+
+    expect(artifact.artifactType, 'file');
+    expect(artifact.minimalMetadata['encrypted'], isFalse);
+    expect(artifact.minimalMetadata['signed'], isTrue);
+    expect(signature, startsWith('hmac-sha256:receipt_key_1:'));
+    expect(signer.verify(payload: payload, signature: signature), isTrue);
+    expect(
+      signer.verify(payload: '$payload-tampered', signature: signature),
+      isFalse,
+    );
+  });
+
   test('export rejects malformed receipt envelope', () {
     const malformedReceipt = PeerDealReceipt(
       receiptId: 'r_bad',

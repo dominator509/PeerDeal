@@ -91,6 +91,8 @@ the gates below are satisfied.
   opaque receipt exports, minimized receipt export metadata, capture-warning
   propagation, native bridge failure normalization, and locked method-channel
   contracts for future platform implementations.
+- Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
+  rotated key lookup, deterministic verification, and export-service coverage.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
@@ -99,6 +101,6 @@ the gates below are satisfied.
 1. Replace native bridge stubs with platform implementations that satisfy the
    locked method-channel contracts and return the normalized capability facts
    already covered by package tests.
-2. Add production receipt key-management adapters behind the existing cipher and
-   signer contracts.
+2. Add production receipt encryption and secure key-storage adapters behind the
+   existing cipher and signer contracts.
 3. Build app flows on top of the stable public package APIs.
