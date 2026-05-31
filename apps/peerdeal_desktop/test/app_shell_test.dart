@@ -31,4 +31,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Receipt content hidden'), findsOneWidget);
   });
+
+  testWidgets('routes from demo home through table and chat surfaces', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const PeerDealDesktopApp());
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Demo table'), findsOneWidget);
+    expect(find.text('Scenario: open_table_live_turn'), findsOneWidget);
+
+    await tester.tap(find.text('Chat'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Demo chat'), findsOneWidget);
+    expect(find.text('Scenario: chat_heavy_table'), findsOneWidget);
+    expect(find.text('Unread: 19'), findsOneWidget);
+  });
 }
