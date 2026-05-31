@@ -5,7 +5,7 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('peerdeal/native_bridges/capture_protection');
+  const channel = MethodChannel(CaptureProtectionChannelContract.channelName);
   final log = <MethodCall>[];
 
   tearDown(() {
@@ -18,7 +18,8 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
           log.add(call);
-          if (call.method == 'getCapability') {
+          if (call.method ==
+              CaptureProtectionChannelContract.getCapabilityMethod) {
             return {
               'blockingSupported': true,
               'obscuringSupported': true,

@@ -32,3 +32,14 @@ to observe local device capabilities.
   unavailable capability facts when the platform payload is missing or throws.
 - Native bridge warnings are normalized for app-layer safe-surface and network
   routing policy.
+- Channel names, method names, fixture payloads, and decode behavior are locked
+  in package tests so future platform implementations can target a stable
+  contract.
+
+## Method-channel contracts
+- Capture protection channel: `peerdeal/native_bridges/capture_protection`
+  with `getCapability`.
+- Local network channel: `peerdeal/native_bridges/local_network` with
+  `getCapability` and `discoverPeers`.
+- Missing payloads or platform errors must return unavailable facts with a
+  warning, not throw through to policy or app code.

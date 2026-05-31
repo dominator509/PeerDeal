@@ -1,0 +1,11 @@
+{
+  "channel": "peerdeal/native_bridges/capture_protection",
+  "methods": {
+    "getCapability": {
+      "blockingSupported": true,
+      "obscuringSupported": true,
+      "notes": "screen-protection-supported",
+      "warning": "best-effort"
+    }
+  }
+}

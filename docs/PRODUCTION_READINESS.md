@@ -89,14 +89,16 @@ the gates below are satisfied.
   class semantics, event-lag confidence gating, fail-closed primary election,
   fail-closed empty or suffix-only recovery windows, optional signed/encrypted
   opaque receipt exports, minimized receipt export metadata, capture-warning
-  propagation, and native bridge failure normalization.
+  propagation, native bridge failure normalization, and locked method-channel
+  contracts for future platform implementations.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
 
 ## Next production hardening order
-1. Replace native bridge stubs with platform implementations that return the
-   normalized capability facts already covered by package tests.
+1. Replace native bridge stubs with platform implementations that satisfy the
+   locked method-channel contracts and return the normalized capability facts
+   already covered by package tests.
 2. Add production receipt key-management adapters behind the existing cipher and
    signer contracts.
 3. Build app flows on top of the stable public package APIs.

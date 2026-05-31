@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+import 'capture_protection_channel_contract.dart';
 import 'capture_protection_bridge.dart';
 import 'capture_protection_bridge_models.dart';
 
@@ -7,7 +8,7 @@ class MethodChannelCaptureProtectionBridge implements CaptureProtectionBridge {
   MethodChannelCaptureProtectionBridge({MethodChannel? channel})
     : _channel = channel ?? const MethodChannel(_channelName);
 
-  static const _channelName = 'peerdeal/native_bridges/capture_protection';
+  static const _channelName = CaptureProtectionChannelContract.channelName;
 
   final MethodChannel _channel;
 
@@ -26,18 +27,7 @@ class MethodChannelCaptureProtectionBridge implements CaptureProtectionBridge {
       );
     }
 
-    if (result == null) {
-      return const CaptureProtectionCapability.unavailable(
-        warning: 'Capture protection capability is unavailable.',
-      );
-    }
-
-    return CaptureProtectionCapability(
-      blockingSupported: (result['blockingSupported'] as bool?) ?? false,
-      obscuringSupported: (result['obscuringSupported'] as bool?) ?? false,
-      notes: (result['notes'] as String?) ?? 'unavailable',
-      warning: result['warning'] as String?,
-    );
+    return CaptureProtectionChannelContract.decodeCapability(result);
   }
 
   String _warning(String prefix, Object error) {

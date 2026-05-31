@@ -1,0 +1,87 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:test/test.dart';
+
+void main() {
+  test('capture protection channel contract decodes fixture payload', () {
+    final fixture = _loadFixture('capture_protection_bridge_contract.json');
+    final methods = fixture['methods'] as Map<String, Object?>;
+    final payload =
+        methods[CaptureProtectionChannelContract.getCapabilityMethod]
+            as Map<String, Object?>;
+
+    expect(fixture['channel'], CaptureProtectionChannelContract.channelName);
+
+    final capability = CaptureProtectionChannelContract.decodeCapability(
+      payload,
+    );
+
+    expect(capability.blockingSupported, isTrue);
+    expect(capability.obscuringSupported, isTrue);
+    expect(capability.notes, 'screen-protection-supported');
+    expect(capability.warning, 'best-effort');
+  });
+
+  test('capture protection channel contract fails closed on null payload', () {
+    final capability = CaptureProtectionChannelContract.decodeCapability(null);
+
+    expect(capability.blockingSupported, isFalse);
+    expect(capability.obscuringSupported, isFalse);
+    expect(capability.notes, 'unavailable');
+    expect(capability.warning, contains('unavailable'));
+  });
+
+  test('local network channel contract decodes fixture payloads', () {
+    final fixture = _loadFixture('local_network_bridge_requests.json');
+    final methods = fixture['methods'] as Map<String, Object?>;
+    final capabilityPayload =
+        methods[LocalNetworkChannelContract.getCapabilityMethod]
+            as Map<String, Object?>;
+    final discoveryPayload =
+        methods[LocalNetworkChannelContract.discoverPeersMethod]
+            as Map<String, Object?>;
+
+    expect(fixture['channel'], LocalNetworkChannelContract.channelName);
+
+    final capability = LocalNetworkChannelContract.decodeCapability(
+      capabilityPayload,
+    );
+    final snapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(
+      discoveryPayload,
+    );
+
+    expect(capability.discoverySupported, isTrue);
+    expect(capability.permissionPromptSupported, isTrue);
+    expect(capability.broadcastSupported, isTrue);
+    expect(capability.notes, 'starter-capability');
+    expect(capability.warning, isNull);
+
+    expect(snapshot.permissionGranted, isTrue);
+    expect(snapshot.foundEndpoints, ['peer_a@192.168.1.10']);
+    expect(snapshot.interfaceHints, ['wifi']);
+    expect(snapshot.warning, isNull);
+  });
+
+  test('local network channel contract fails closed on null payloads', () {
+    final capability = LocalNetworkChannelContract.decodeCapability(null);
+    final snapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(null);
+
+    expect(capability.discoverySupported, isFalse);
+    expect(capability.permissionPromptSupported, isFalse);
+    expect(capability.broadcastSupported, isFalse);
+    expect(capability.notes, 'unavailable');
+    expect(capability.warning, contains('unavailable'));
+
+    expect(snapshot.permissionGranted, isFalse);
+    expect(snapshot.foundEndpoints, isEmpty);
+    expect(snapshot.interfaceHints, isEmpty);
+    expect(snapshot.warning, contains('unavailable'));
+  });
+}
+
+Map<String, Object?> _loadFixture(String name) {
+  final file = File('fixtures/$name');
+  return jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+}

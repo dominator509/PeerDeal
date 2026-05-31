@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 
+import 'local_network_channel_contract.dart';
 import 'local_network_bridge.dart';
 import 'local_network_bridge_models.dart';
 
@@ -7,7 +8,7 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
   MethodChannelLocalNetworkBridge({MethodChannel? channel})
     : _channel = channel ?? const MethodChannel(_channelName);
 
-  static const _channelName = 'peerdeal/native_bridges/local_network';
+  static const _channelName = LocalNetworkChannelContract.channelName;
 
   final MethodChannel _channel;
 
@@ -26,20 +27,7 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
       );
     }
 
-    if (result == null) {
-      return const LocalNetworkCapability.unavailable(
-        warning: 'Local network capability is unavailable.',
-      );
-    }
-
-    return LocalNetworkCapability(
-      discoverySupported: (result['discoverySupported'] as bool?) ?? false,
-      permissionPromptSupported:
-          (result['permissionPromptSupported'] as bool?) ?? false,
-      broadcastSupported: (result['broadcastSupported'] as bool?) ?? false,
-      notes: (result['notes'] as String?) ?? 'unavailable',
-      warning: result['warning'] as String?,
-    );
+    return LocalNetworkChannelContract.decodeCapability(result);
   }
 
   @override
@@ -57,22 +45,7 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
       );
     }
 
-    if (result == null) {
-      return const LocalNetworkDiscoverySnapshot.unavailable(
-        warning: 'Local network discovery is unavailable.',
-      );
-    }
-
-    return LocalNetworkDiscoverySnapshot(
-      permissionGranted: (result['permissionGranted'] as bool?) ?? false,
-      foundEndpoints: (result['foundEndpoints'] as List<dynamic>? ?? const [])
-          .map((e) => e.toString())
-          .toList(growable: false),
-      interfaceHints: (result['interfaceHints'] as List<dynamic>? ?? const [])
-          .map((e) => e.toString())
-          .toList(growable: false),
-      warning: result['warning'] as String?,
-    );
+    return LocalNetworkChannelContract.decodeDiscoverySnapshot(result);
   }
 
   String _warning(String prefix, Object error) {

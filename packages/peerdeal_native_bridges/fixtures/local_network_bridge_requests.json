@@ -1,4 +1,18 @@
 {
   "channel": "peerdeal/native_bridges/local_network",
-  "methods": ["getCapability", "discoverPeers"]
+  "methods": {
+    "getCapability": {
+      "discoverySupported": true,
+      "permissionPromptSupported": true,
+      "broadcastSupported": true,
+      "notes": "starter-capability",
+      "warning": null
+    },
+    "discoverPeers": {
+      "permissionGranted": true,
+      "foundEndpoints": ["peer_a@192.168.1.10"],
+      "interfaceHints": ["wifi"],
+      "warning": null
+    }
+  }
 }

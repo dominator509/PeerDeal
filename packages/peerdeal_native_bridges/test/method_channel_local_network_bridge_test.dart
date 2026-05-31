@@ -5,14 +5,14 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('peerdeal/native_bridges/local_network');
+  const channel = MethodChannel(LocalNetworkChannelContract.channelName);
   final log = <MethodCall>[];
 
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
           log.add(call);
-          if (call.method == 'getCapability') {
+          if (call.method == LocalNetworkChannelContract.getCapabilityMethod) {
             return {
               'discoverySupported': true,
               'permissionPromptSupported': true,
@@ -20,7 +20,7 @@ void main() {
               'notes': 'starter-capability',
             };
           }
-          if (call.method == 'discoverPeers') {
+          if (call.method == LocalNetworkChannelContract.discoverPeersMethod) {
             return {
               'permissionGranted': true,
               'foundEndpoints': ['peer_a@192.168.1.10'],
