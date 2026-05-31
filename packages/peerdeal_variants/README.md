@@ -111,3 +111,11 @@ succeeds, and otherwise returns warning codes without mutating state.
 Uncontested hands skip showdown. `HoldemActionStreetCoordinator` routes a
 completed action that leaves one active seat directly to `settling`, preserving
 the post-action state and reporting the winning seat for later settlement.
+`HoldemShowdownCoordinator.projectUncontestedSettlement(...)` then projects the
+single winner through the same core pot engine path used by showdown
+settlement, and fails closed if any pot slice cannot be contested by that
+winner.
+
+Zero-bet streets track `actedSeatsThisRound`, so checked flop/turn/river rounds
+complete deterministically once every actionable seat has acted. Street
+transitions reset that marker before the next betting round opens.

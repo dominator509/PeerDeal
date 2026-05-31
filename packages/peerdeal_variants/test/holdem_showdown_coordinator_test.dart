@@ -295,6 +295,65 @@ void main() {
     );
   });
 
+  test('projects uncontested settlement from settling phase', () {
+    final state = buildState(phase: HoldemHandPhase.settling);
+
+    final result = coordinator.projectUncontestedSettlement(
+      state: state,
+      winningSeat: 1,
+      commitments: const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-1',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+        PotCommitment(
+          seatId: 'seat-2',
+          committed: 100,
+          isEligibleForShowdown: false,
+          isFolded: true,
+        ),
+      ],
+      seatForId: _seatFromSeatId,
+    );
+
+    expect(result.isProjected, isTrue);
+    expect(result.warnings, isEmpty);
+    expect(result.evaluation.results.single.seat, 1);
+    expect(result.evaluation.results.single.summary, 'Uncontested pot');
+    expect(result.projection, isNotNull);
+    expect(result.projection!.settlement, isNotNull);
+    expect(result.projection!.settlement!.totalAwardedAmount, 200);
+  });
+
+  test('uncontested settlement projection fails closed without winner', () {
+    final state = buildState(phase: HoldemHandPhase.settling);
+
+    final result = coordinator.projectUncontestedSettlement(
+      state: state,
+      winningSeat: null,
+      commitments: const <PotCommitment>[
+        PotCommitment(
+          seatId: 'seat-1',
+          committed: 100,
+          isEligibleForShowdown: true,
+        ),
+      ],
+      seatForId: _seatFromSeatId,
+    );
+
+    expect(result.isProjected, isFalse);
+    expect(result.projection, isNull);
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_UNCONTESTED_SETTLEMENT_NO_WINNER'),
+    );
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN'),
+    );
+  });
+
   test('completes hand after successful settlement projection', () {
     final reveal = coordinator.reveal(state: buildState(), input: validInput);
     final prep = coordinator.prepareSettlement(

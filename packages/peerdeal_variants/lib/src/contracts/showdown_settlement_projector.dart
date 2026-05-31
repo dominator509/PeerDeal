@@ -59,15 +59,119 @@ class ShowdownSettlementProjector {
       );
     }
 
+    final settlement = engine.settle(
+      commitments: commitments,
+      winningSeatIdsBySliceIndex: projection.winningSeatIdsBySliceIndex,
+      policy: policy,
+    );
+    final settlementWarnings = _settlementWarnings(settlement);
+    if (settlementWarnings.isNotEmpty) {
+      return ShowdownSettlementProjectionResult.blocked(
+        slices: slices,
+        projection: projection,
+        warnings: settlementWarnings,
+      );
+    }
+
     return ShowdownSettlementProjectionResult.settled(
       slices: slices,
       projection: projection,
-      settlement: engine.settle(
-        commitments: commitments,
-        winningSeatIdsBySliceIndex: projection.winningSeatIdsBySliceIndex,
-        policy: policy,
-      ),
+      settlement: settlement,
     );
+  }
+
+  ShowdownSettlementProjectionResult projectUncontestedAndSettle({
+    required int winningSeat,
+    required List<PotCommitment> commitments,
+    required int? Function(String seatId) seatForId,
+    SettlementPolicy policy = const SettlementPolicy(),
+  }) {
+    final slices = engine.sidePotBuilder.build(commitments);
+    if (commitments.isEmpty || slices.isEmpty) {
+      return ShowdownSettlementProjectionResult.blocked(
+        slices: slices,
+        projection: const ShowdownSliceWinnerProjection(
+          winningSeatIdsBySliceIndex: <int, List<String>>{},
+          unawardableSliceIndexes: <int>[],
+        ),
+        warnings: <String>[
+          if (commitments.isEmpty)
+            'ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_COMMITMENTS',
+          'ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT',
+        ],
+      );
+    }
+
+    final winnersBySlice = <int, List<String>>{};
+    final unawardableSliceIndexes = <int>[];
+    for (final slice in slices) {
+      final winnerIds =
+          slice.contestedBySeatIds
+              .where((seatId) => seatForId(seatId) == winningSeat)
+              .toList()
+            ..sort();
+      if (winnerIds.isEmpty) {
+        unawardableSliceIndexes.add(slice.sliceIndex);
+      } else {
+        winnersBySlice[slice.sliceIndex] = winnerIds;
+      }
+    }
+
+    final projection = ShowdownSliceWinnerProjection(
+      winningSeatIdsBySliceIndex: winnersBySlice,
+      unawardableSliceIndexes: List<int>.unmodifiable(unawardableSliceIndexes),
+    );
+    if (projection.hasUnawardableSlices) {
+      return ShowdownSettlementProjectionResult.blocked(
+        slices: slices,
+        projection: projection,
+        warnings: const <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE'],
+      );
+    }
+
+    final settlement = engine.settle(
+      commitments: commitments,
+      winningSeatIdsBySliceIndex: projection.winningSeatIdsBySliceIndex,
+      policy: policy,
+    );
+    final settlementWarnings = _settlementWarnings(settlement);
+    if (settlementWarnings.isNotEmpty) {
+      return ShowdownSettlementProjectionResult.blocked(
+        slices: slices,
+        projection: projection,
+        warnings: settlementWarnings,
+      );
+    }
+
+    return ShowdownSettlementProjectionResult.settled(
+      slices: slices,
+      projection: projection,
+      settlement: settlement,
+    );
+  }
+
+  List<String> _settlementWarnings(SettlementResult settlement) {
+    if (settlement.warnings.isEmpty &&
+        settlement.isBalanced &&
+        settlement.awards.isNotEmpty) {
+      return const <String>[];
+    }
+
+    final warnings = <String>[];
+    void addWarning(String warning) {
+      if (!warnings.contains(warning)) {
+        warnings.add(warning);
+      }
+    }
+
+    for (final warning in settlement.warnings) {
+      addWarning(warning);
+    }
+    if (settlement.awards.isEmpty || !settlement.isBalanced) {
+      addWarning('ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE');
+    }
+
+    return List<String>.unmodifiable(warnings);
   }
 }
 

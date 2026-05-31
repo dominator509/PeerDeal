@@ -248,6 +248,79 @@ class HoldemShowdownCoordinator {
     );
   }
 
+  HoldemSettlementProjectionGateResult projectUncontestedSettlement({
+    required HoldemHandState state,
+    required int? winningSeat,
+    required List<PotCommitment> commitments,
+    required int? Function(String seatId) seatForId,
+    SettlementPolicy policy = const SettlementPolicy(),
+  }) {
+    final warnings = <String>[];
+    if (state.phase != HoldemHandPhase.settling) {
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_PHASE');
+    }
+
+    if (winningSeat == null) {
+      warnings.add('ERR_HOLDEM_UNCONTESTED_SETTLEMENT_NO_WINNER');
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN');
+    }
+
+    if (commitments.isEmpty) {
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_COMMITMENTS');
+      warnings.add('ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT');
+    }
+
+    final evaluation = ShowdownEvaluationResult(
+      results: winningSeat == null
+          ? const <RankedShowdownResult>[]
+          : <RankedShowdownResult>[
+              RankedShowdownResult(
+                seat: winningSeat,
+                rankIndex: 0,
+                summary: 'Uncontested pot',
+              ),
+            ],
+      warnings: winningSeat == null
+          ? const <String>['ERR_HOLDEM_UNCONTESTED_SETTLEMENT_NO_WINNER']
+          : const <String>[],
+    );
+
+    if (warnings.isNotEmpty) {
+      return HoldemSettlementProjectionGateResult(
+        isProjected: false,
+        state: state,
+        evaluation: evaluation,
+        projection: null,
+        warnings: warnings,
+      );
+    }
+
+    final projection = settlementProjector.projectUncontestedAndSettle(
+      winningSeat: winningSeat!,
+      commitments: commitments,
+      seatForId: seatForId,
+      policy: policy,
+    );
+    if (projection.isBlocked) {
+      return HoldemSettlementProjectionGateResult(
+        isProjected: false,
+        state: state,
+        evaluation: evaluation,
+        projection: projection,
+        warnings: projection.warnings.isEmpty
+            ? const <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE']
+            : projection.warnings,
+      );
+    }
+
+    return HoldemSettlementProjectionGateResult(
+      isProjected: true,
+      state: state,
+      evaluation: evaluation,
+      projection: projection,
+    );
+  }
+
   HoldemHandCompletionGateResult completeHand({
     required HoldemHandState state,
     required HoldemSettlementProjectionGateResult settlement,

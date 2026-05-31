@@ -218,6 +218,47 @@ void main() {
     expect(result.state.currentActorSeat, 1);
   });
 
+  test('marks checked seats and completes a zero-bet round', () {
+    final result = applier.apply(
+      state: buildState(
+        currentBetToCall: 0,
+        currentActorSeat: 3,
+        seats: const <HoldemSeatState>[
+          HoldemSeatState(
+            seat: 1,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+          ),
+          HoldemSeatState(
+            seat: 2,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+          ),
+          HoldemSeatState(
+            seat: 3,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+          ),
+        ],
+      ).copyWith(actedSeatsThisRound: const <int>[1, 2]),
+      action: const HoldemTableAction(
+        actorSeat: 3,
+        type: HoldemTableActionType.check,
+      ),
+    );
+
+    expect(result.isApplied, isTrue);
+    expect(result.state.actedSeatsThisRound, <int>[1, 2, 3]);
+    expect(result.isBettingRoundComplete, isTrue);
+    expect(result.nextActorSeat, isNull);
+  });
+
   test('rejects invalid action without mutating state', () {
     final state = buildState();
     final result = applier.apply(

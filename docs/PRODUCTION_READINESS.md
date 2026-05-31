@@ -66,7 +66,6 @@ the gates below are satisfied.
 - CI runs the same baseline commands as local development.
 
 ## Current highest-risk blockers
-- Full Hold'em showdown and settlement behavior is not production complete.
 - Production networking, sync recovery, receipt cryptography, and native capture
   implementation remain scaffold-level.
 - App shells still launch placeholder roots. Demo/join/safe-surface flows are
@@ -83,14 +82,15 @@ the gates below are satisfied.
 - Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
   core metadata projection, replay through the core projector, and sync
   snapshot + suffix recovery.
+- Hold'em variant coverage now spans betting-round completion through checked
+  streets, showdown reveal, settlement preparation/projection, uncontested
+  settlement, hand completion, and settlement event emission.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
 
 ## Next production hardening order
-1. Complete Hold'em action, street, showdown, and settlement coverage, with the
-   next focus on variant settlement projection and core pot/ledger boundaries.
-2. Harden replay/sync recovery against additional malformed and divergent event
+1. Harden replay/sync recovery against additional malformed and divergent event
    windows.
-3. Harden privacy, receipt, capture, and native bridge behavior.
-4. Build app flows on top of the stable public package APIs.
+2. Harden privacy, receipt, capture, and native bridge behavior.
+3. Build app flows on top of the stable public package APIs.

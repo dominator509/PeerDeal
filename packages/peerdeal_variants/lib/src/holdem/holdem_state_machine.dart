@@ -135,6 +135,7 @@ class HoldemStateMachine {
         bettingRound: target.bettingRound,
         seats: _resetStreetCommitments(state.seats),
         currentBetToCall: 0,
+        actedSeatsThisRound: const <int>[],
         boardCards: <String>[...state.boardCards, ...dealtBoardCards],
       ),
     );
@@ -185,6 +186,7 @@ class HoldemStateMachine {
         bettingRound: target.bettingRound,
         currentActorSeat: actorSeat,
         currentBetToCall: 0,
+        actedSeatsThisRound: const <int>[],
       ),
     );
   }

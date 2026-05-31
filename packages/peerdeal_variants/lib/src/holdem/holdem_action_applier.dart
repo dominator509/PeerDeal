@@ -71,6 +71,11 @@ class HoldemActionApplier {
       currentBetToCall: opensOrRaisesBet
           ? newCommittedThisRound
           : state.currentBetToCall,
+      actedSeatsThisRound: _actedSeatsAfter(
+        state: state,
+        actedSeat: action.actorSeat,
+        opensOrRaisesBet: opensOrRaisesBet,
+      ),
       lastAggressorSeat: opensOrRaisesBet
           ? action.actorSeat
           : state.lastAggressorSeat,
@@ -113,5 +118,22 @@ class HoldemActionApplier {
     return contribution == 0
         ? 'seat_${action.actorSeat}_$type'
         : 'seat_${action.actorSeat}_${type}_$contribution';
+  }
+
+  List<int> _actedSeatsAfter({
+    required HoldemHandState state,
+    required int actedSeat,
+    required bool opensOrRaisesBet,
+  }) {
+    if (opensOrRaisesBet) {
+      return <int>[actedSeat];
+    }
+
+    final actedSeats = <int>[...state.actedSeatsThisRound];
+    if (!actedSeats.contains(actedSeat)) {
+      actedSeats.add(actedSeat);
+    }
+    actedSeats.sort();
+    return List<int>.unmodifiable(actedSeats);
   }
 }

@@ -139,6 +139,7 @@ class ShowdownEvaluationResult {
       final contestedSeatIds =
           contestedSeatIdsBySliceIndex[sliceIndex] ?? const <String>[];
       if (contestedSeatIds.isEmpty) {
+        unawardableSliceIndexes.add(sliceIndex);
         continue;
       }
 

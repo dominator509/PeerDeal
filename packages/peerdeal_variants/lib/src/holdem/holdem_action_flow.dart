@@ -86,7 +86,7 @@ class HoldemActionFlow {
     required HoldemSeatState seat,
   }) {
     if (state.currentBetToCall == 0) {
-      return true;
+      return !state.actedSeatsThisRound.contains(seat.seat);
     }
     return seat.committedThisRound < state.currentBetToCall;
   }

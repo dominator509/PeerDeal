@@ -101,6 +101,112 @@ void main() {
       expect(outcome.settlement, isNull);
     });
 
+    test('blocks settlement when a pot slice has no eligible contestant', () {
+      const showdown = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[
+          RankedShowdownResult(
+            seat: 1,
+            rankIndex: 0,
+            summary: 'winner cannot contest folded-only slice',
+          ),
+        ],
+      );
+
+      final outcome = projector.projectAndSettle(
+        showdown: showdown,
+        commitments: const <PotCommitment>[
+          PotCommitment(
+            seatId: 'seat-2',
+            committed: 100,
+            isEligibleForShowdown: false,
+            isFolded: true,
+          ),
+          PotCommitment(
+            seatId: 'seat-3',
+            committed: 100,
+            isEligibleForShowdown: false,
+            isFolded: true,
+          ),
+        ],
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(outcome.isBlocked, isTrue);
+      expect(outcome.projection.unawardableSliceIndexes, <int>[0]);
+      expect(outcome.warnings, <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ]);
+      expect(outcome.settlement, isNull);
+    });
+
+    test('settles uncontested winner without showdown ranking', () {
+      final outcome = projector.projectUncontestedAndSettle(
+        winningSeat: 1,
+        commitments: const <PotCommitment>[
+          PotCommitment(
+            seatId: 'seat-1',
+            committed: 100,
+            isEligibleForShowdown: true,
+          ),
+          PotCommitment(
+            seatId: 'seat-2',
+            committed: 100,
+            isEligibleForShowdown: false,
+            isFolded: true,
+          ),
+          PotCommitment(
+            seatId: 'seat-3',
+            committed: 100,
+            isEligibleForShowdown: false,
+            isFolded: true,
+          ),
+        ],
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(outcome.isBlocked, isFalse);
+      expect(outcome.settlement, isNotNull);
+      expect(_awardTriples(outcome.settlement!), <String>['0:seat-1:300']);
+      expect(_ledgerDeltas(outcome.settlement!), <String>[
+        'seat-1:200',
+        'seat-2:-100',
+        'seat-3:-100',
+      ]);
+    });
+
+    test(
+      'blocks uncontested settlement when winner cannot contest a slice',
+      () {
+        final outcome = projector.projectUncontestedAndSettle(
+          winningSeat: 1,
+          commitments: const <PotCommitment>[
+            PotCommitment(
+              seatId: 'seat-1',
+              committed: 100,
+              isEligibleForShowdown: true,
+            ),
+            PotCommitment(
+              seatId: 'seat-2',
+              committed: 200,
+              isEligibleForShowdown: false,
+              isFolded: true,
+            ),
+          ],
+          seatForId: _seatFromSeatId,
+        );
+
+        expect(outcome.isBlocked, isTrue);
+        expect(outcome.projection.winningSeatIdsBySliceIndex[0], <String>[
+          'seat-1',
+        ]);
+        expect(outcome.projection.unawardableSliceIndexes, <int>[1]);
+        expect(outcome.warnings, <String>[
+          'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+        ]);
+        expect(outcome.settlement, isNull);
+      },
+    );
+
     test('blocks settlement when commitments are empty', () {
       const showdown = ShowdownEvaluationResult(
         results: <RankedShowdownResult>[
