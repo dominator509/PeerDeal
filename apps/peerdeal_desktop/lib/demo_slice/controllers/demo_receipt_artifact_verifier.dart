@@ -21,6 +21,20 @@ class DemoReceiptArtifactVerifier {
     }
 
     final signer = HmacSha256ReceiptSigner(keyProvider: loadResult.keyRing);
-    return OpaqueExportDecoder(signer: signer).inspect(artifact);
+    final encrypted = artifact.minimalMetadata['encrypted'] == true;
+    if (encrypted && !loadResult.hasEncryptionKey) {
+      return ReceiptExportInspectionResult.rejected(
+        message: 'Receipt encryption key is unavailable.',
+        diagnostics: loadResult.warnings,
+      );
+    }
+
+    final cipher = loadResult.hasEncryptionKey
+        ? HmacSha256ReceiptCipher(keyProvider: loadResult.keyRing)
+        : null;
+    return OpaqueExportDecoder(
+      cipher: cipher,
+      signer: signer,
+    ).inspect(artifact);
   }
 }

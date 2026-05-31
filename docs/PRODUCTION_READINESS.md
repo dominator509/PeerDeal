@@ -115,6 +115,9 @@ the gates below are satisfied.
   fields.
 - Mounted app receipt routes receive artifact verifier factories from the app
   shell boundary, keeping method-channel construction out of receipt screens.
+- App artifact verifiers now use native-loaded signing and encryption keys for
+  signed/encrypted receipt export inspection, failing closed when encryption
+  material is unavailable.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
