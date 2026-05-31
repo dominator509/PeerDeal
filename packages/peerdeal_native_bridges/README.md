@@ -30,6 +30,8 @@ to observe local device capabilities.
   when the platform payload is missing or throws.
 - Method-channel local-network capability and discovery lookup return
   unavailable capability facts when the platform payload is missing or throws.
+- Method-channel secure key storage lookup returns normalized key-ring snapshots
+  and unavailable facts when the platform payload is missing or throws.
 - Native bridge warnings are normalized for app-layer safe-surface and network
   routing policy.
 - Channel names, method names, fixture payloads, and decode behavior are locked
@@ -41,5 +43,7 @@ to observe local device capabilities.
   with `getCapability`.
 - Local network channel: `peerdeal/native_bridges/local_network` with
   `getCapability` and `discoverPeers`.
+- Secure key storage channel: `peerdeal/native_bridges/secure_key_storage` with
+  `loadKeyRing`.
 - Missing payloads or platform errors must return unavailable facts with a
   warning, not throw through to policy or app code.

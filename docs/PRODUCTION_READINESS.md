@@ -97,6 +97,9 @@ the gates below are satisfied.
 - Receipt key-ring lookup now covers loaded signing and encryption key material
   behind receipt-owned provider contracts, keeping app shells out of key
   rotation interpretation.
+- Native bridge contracts now include a secure key storage method-channel seam
+  for normalized key-ring snapshots, without putting receipt semantics in the
+  native bridge package.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.

@@ -6,3 +6,7 @@ export 'src/local_network/local_network_bridge.dart';
 export 'src/local_network/local_network_bridge_models.dart';
 export 'src/local_network/local_network_channel_contract.dart';
 export 'src/local_network/method_channel_local_network_bridge.dart';
+export 'src/secure_storage/method_channel_secure_key_storage_bridge.dart';
+export 'src/secure_storage/secure_key_storage_bridge.dart';
+export 'src/secure_storage/secure_key_storage_bridge_models.dart';
+export 'src/secure_storage/secure_key_storage_channel_contract.dart';

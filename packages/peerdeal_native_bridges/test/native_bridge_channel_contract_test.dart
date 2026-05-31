@@ -79,6 +79,34 @@ void main() {
     expect(snapshot.interfaceHints, isEmpty);
     expect(snapshot.warning, contains('unavailable'));
   });
+
+  test('secure key storage channel contract decodes fixture payload', () {
+    final fixture = _loadFixture('secure_key_storage_bridge_contract.json');
+    final methods = fixture['methods'] as Map<String, Object?>;
+    final payload =
+        methods[SecureKeyStorageChannelContract.loadKeyRingMethod]
+            as Map<String, Object?>;
+
+    expect(fixture['channel'], SecureKeyStorageChannelContract.channelName);
+
+    final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(payload);
+
+    expect(snapshot.available, isTrue);
+    expect(snapshot.keys.map((key) => key.keyId), [
+      'receipt_signing_1',
+      'receipt_encryption_1',
+    ]);
+    expect(snapshot.keys.first.active, isTrue);
+    expect(snapshot.warning, isNull);
+  });
+
+  test('secure key storage channel contract fails closed on null payload', () {
+    final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(null);
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.keys, isEmpty);
+    expect(snapshot.warning, contains('unavailable'));
+  });
 }
 
 Map<String, Object?> _loadFixture(String name) {
