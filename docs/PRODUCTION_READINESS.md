@@ -97,6 +97,9 @@ the gates below are satisfied.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
+- Demo receipt presenters in both app shells can route signed receipt export
+  artifacts through fail-closed verification before projecting safe receipt
+  fields.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

@@ -83,4 +83,68 @@ void main() {
       });
     },
   );
+
+  test('verifies signed receipt export artifacts before presenting', () async {
+    final bridge = RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
+    );
+    const signer = HmacSha256ReceiptSigner(
+      keyProvider: StaticReceiptSigningKeyProvider(
+        activeKey: ReceiptSigningKey(
+          keyId: 'receipt_key_1',
+          secret: 'test_secret_1',
+        ),
+      ),
+    );
+    const decoder = OpaqueExportDecoder(signer: signer);
+
+    final result = await presenter.presentExportArtifact(
+      artifact: const OpaqueExportEncoder(signer: signer).encode(_receipt),
+      decoder: decoder,
+    );
+
+    expect(result.receipt.status, 'ok');
+    expect(result.receipt.message, 'Receipt artifact verified.');
+    expect(result.receipt.shareableFields, {
+      'receipt_id': 'r_1',
+      'receipt_version': '1.0',
+      'protocol_version': '1.x',
+      'mode_type': 'tournament',
+    });
+    expect(result.shouldObscure, isTrue);
+    expect(bridge.requestCount, 1);
+  });
+
+  test('rejects unsigned receipt export artifacts before presenting', () async {
+    final bridge = RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
+    );
+
+    final result = await presenter.presentExportArtifact(
+      artifact: const OpaqueExportEncoder().encode(_receipt),
+      decoder: const OpaqueExportDecoder(),
+    );
+
+    expect(result.receipt.status, 'rejected');
+    expect(result.receipt.message, 'Receipt artifact is unsigned.');
+    expect(result.receipt.shareableFields, isEmpty);
+    expect(result.shouldObscure, isTrue);
+    expect(bridge.requestCount, 1);
+  });
 }
+
+const _receipt = PeerDealReceipt(
+  receiptId: 'r_1',
+  receiptVersion: '1.0',
+  protocolVersion: '1.x',
+  modeType: 'tournament',
+  sessionId: 'sess_77',
+  tableId: 'table_7',
+  pseudonymousUserId: 'user_7',
+  bindingMode: ReceiptBindingMode.sessionBound,
+  wipeState: ReceiptWipeState.live,
+  payloadHash: 'hash_77',
+  opaquePayload: 'opaque_77',
+);

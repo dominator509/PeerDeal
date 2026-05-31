@@ -41,6 +41,24 @@ class DemoReceiptSurfacePresenter {
     required ReceiptScanResult receipt,
     RecoveryResult<Object?>? recovery,
   }) async {
+    return _presentReceiptScan(receipt: receipt, recovery: recovery);
+  }
+
+  Future<DemoReceiptSurfaceVm> presentExportArtifact({
+    required ReceiptExportArtifact artifact,
+    required OpaqueExportDecoder decoder,
+    RecoveryResult<Object?>? recovery,
+  }) {
+    return _presentReceiptScan(
+      receipt: _scanFromInspection(decoder.inspect(artifact)),
+      recovery: recovery,
+    );
+  }
+
+  Future<DemoReceiptSurfaceVm> _presentReceiptScan({
+    required ReceiptScanResult receipt,
+    RecoveryResult<Object?>? recovery,
+  }) async {
     final receiptCapturePlan = await _captureCoordinator.resolve(
       CaptureSurface.receiptDetail,
     );
@@ -57,6 +75,29 @@ class DemoReceiptSurfacePresenter {
       ]),
       recovery: recovery == null ? null : _projection.projectRecovery(recovery),
       recoveryCapturePlan: recoveryCapturePlan,
+    );
+  }
+
+  ReceiptScanResult _scanFromInspection(ReceiptExportInspectionResult result) {
+    if (!result.isAccepted) {
+      return ReceiptScanResult(
+        status: result.status,
+        message: result.message,
+        shareableFields: <String, Object?>{
+          if (result.diagnostics.isNotEmpty) 'diagnostics': result.diagnostics,
+        },
+      );
+    }
+
+    return ReceiptScanResult(
+      status: result.status,
+      message: result.message,
+      shareableFields: <String, Object?>{
+        'receipt_id': result.payload['receipt_id'],
+        'receipt_version': result.payload['receipt_version'],
+        'protocol_version': result.payload['protocol_version'],
+        'mode_type': result.payload['mode_type'],
+      },
     );
   }
 }
