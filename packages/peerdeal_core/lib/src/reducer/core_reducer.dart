@@ -1,13 +1,20 @@
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
+import '../contracts/invariant_guard.dart';
+import '../invariants/baseline_invariant_guards.dart';
+import '../models/core_invariant_codes.dart';
 import '../models/invariant_violation.dart';
 import '../models/table_phase.dart';
 import '../models/table_state.dart';
 
 class CoreReducer {
-  const CoreReducer({this.protocolCatalog = const ProtocolCatalog()});
+  const CoreReducer({
+    this.protocolCatalog = const ProtocolCatalog(),
+    this.invariantGuards = baselineInvariantGuards,
+  });
 
   final ProtocolCatalog protocolCatalog;
+  final List<InvariantGuard> invariantGuards;
 
   TableState apply(TableState current, EventEnvelope event) {
     final compatibility = protocolCatalog.checkEventEnvelope(event);
@@ -67,6 +74,8 @@ class CoreReducer {
             'actual=${event.prevEventHash}',
       );
     }
+
+    _ensureEventCanAdvanceState(current, event);
 
     final TableState nextState;
     switch (event.eventType) {
@@ -196,6 +205,91 @@ class CoreReducer {
     return nextState;
   }
 
+  void _ensureEventCanAdvanceState(TableState current, EventEnvelope event) {
+    if (current.phase == TablePhase.wiped ||
+        (current.phase == TablePhase.closed &&
+            event.eventType != 'SessionWiped')) {
+      throw InvariantViolation(
+        code: CoreInvariantCodes.terminalStateCannotAdvance,
+        message:
+            'Terminal table states cannot accept additional events except '
+            'a final wipe marker.',
+      );
+    }
+
+    if (event.eventType == 'OpenTableSessionOpened' &&
+        current.eventSequence > 0) {
+      throw InvariantViolation(
+        code: CoreInvariantCodes.openEventAfterStreamStarted,
+        message: 'OpenTableSessionOpened must be the first event in a stream.',
+      );
+    }
+
+    if (event.eventType == 'ParticipantSeated' &&
+        current.playersSeated >= current.playersConnected) {
+      throw InvariantViolation(
+        code: CoreInvariantCodes.participantSeatedWithoutConnected,
+        message: 'ParticipantSeated requires an available connected player.',
+      );
+    }
+
+    if (event.eventType == 'HandStarted') {
+      final handId = _eventHandId(event);
+      if (handId == null || handId.trim().isEmpty) {
+        throw InvariantViolation(
+          code: CoreInvariantCodes.handStartedWithoutHandId,
+          message: 'HandStarted requires a non-empty hand_id.',
+        );
+      }
+      if (current.hasActiveHand) {
+        throw InvariantViolation(
+          code: CoreInvariantCodes.handStartedWhileActive,
+          message: 'HandStarted cannot occur while another hand is active.',
+        );
+      }
+      return;
+    }
+
+    if (_handScopedEventTypes.contains(event.eventType)) {
+      final handId = _eventHandId(event);
+      if (handId == null || handId.trim().isEmpty) {
+        throw InvariantViolation(
+          code: CoreInvariantCodes.handEventWithoutHandId,
+          message: '${event.eventType} requires a non-empty hand_id.',
+        );
+      }
+      if (!current.hasActiveHand) {
+        throw InvariantViolation(
+          code: CoreInvariantCodes.handEventWithoutActiveHand,
+          message: '${event.eventType} requires an active hand.',
+        );
+      }
+      if (handId != current.activeHandId) {
+        throw InvariantViolation(
+          code: CoreInvariantCodes.handEventIdMismatch,
+          message:
+              '${event.eventType} hand_id must match the active hand: '
+              'current=${current.activeHandId}, incoming=$handId',
+        );
+      }
+    }
+
+    if (event.eventType == 'SessionClosed') {
+      if (!current.closeRequested) {
+        throw InvariantViolation(
+          code: CoreInvariantCodes.sessionClosedWithoutCloseRequest,
+          message: 'SessionClosed requires a prior SessionCloseRequested.',
+        );
+      }
+      if (current.hasActiveHand) {
+        throw InvariantViolation(
+          code: CoreInvariantCodes.sessionClosedWithActiveHand,
+          message: 'SessionClosed cannot close over an active hand.',
+        );
+      }
+    }
+  }
+
   Map<String, Object?> _metadataAfter(TableState current, EventEnvelope event) {
     return <String, Object?>{
       ...current.metadata,
@@ -231,28 +325,29 @@ class CoreReducer {
   }
 
   void _ensureProjectedStateIsPossible(TableState state) {
-    if (state.hasActiveHand && state.phase != TablePhase.liveActive) {
-      throw const InvariantViolation(
-        code: 'ERR_ACTIVE_HAND_OUTSIDE_LIVE_PHASE',
-        message: 'A hand cannot remain active outside liveActive phase.',
-      );
-    }
-
-    if (state.playersSeated > state.playersConnected) {
-      throw const InvariantViolation(
-        code: 'ERR_SEATED_EXCEEDS_CONNECTED',
-        message: 'Seated players cannot exceed connected players.',
-      );
-    }
-
-    if (state.phase == TablePhase.wiped &&
-        (state.hasActiveHand ||
-            state.playersConnected > 0 ||
-            state.playersSeated > 0)) {
-      throw const InvariantViolation(
-        code: 'ERR_WIPED_STATE_NOT_TERMINAL',
-        message: 'Wiped phase must not retain active hand or participants.',
-      );
+    for (final guard in invariantGuards) {
+      for (final violation in guard.evaluate(state)) {
+        throw violation;
+      }
     }
   }
+
+  String? _eventHandId(EventEnvelope event) {
+    final payloadHandId = event.payload['hand_id'];
+    return event.handId ?? (payloadHandId is String ? payloadHandId : null);
+  }
+
+  static const _handScopedEventTypes = <String>{
+    'PlayerFolded',
+    'PlayerChecked',
+    'PlayerCalled',
+    'PlayerBet',
+    'PlayerRaised',
+    'PlayerAllIn',
+    'ShowdownStarted',
+    'ShowdownRevealed',
+    'SettlementProjected',
+    'SettlementBlocked',
+    'HandSettled',
+  };
 }

@@ -25,13 +25,14 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
 - starter table state model
 - command and event envelopes for local core application
 - reducer interface + default reducer
-- invariant guard interface + baseline guards
+- invariant guard interface + baseline guards for identity, counters,
+  participant counts, hand-scoped events, and terminal closed/wiped states
 - action validator and table orchestrator contracts
 - deterministic fixture loader for starter tests
 
 ## Intended next implementation moves
-1. expand command/event shapes to align with `peerdeal_protocol`
-2. replace starter local envelopes with shared protocol models
-3. wire real Hold'em hand lifecycle state machine
-4. wire pot engine and settlement boundary
-5. add replay-safe reducer coverage from canonical fixtures
+1. replace starter local envelopes with shared protocol models where legacy
+   reducer seams remain
+2. wire real Hold'em hand lifecycle state machine output into core projection
+3. wire pot engine and settlement boundary into ledger-safe core events
+4. add broader replay-safe reducer coverage from canonical fixtures

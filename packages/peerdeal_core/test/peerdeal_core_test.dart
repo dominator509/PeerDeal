@@ -610,7 +610,162 @@ void main() {
         isA<InvariantViolation>().having(
           (violation) => violation.code,
           'code',
-          'ERR_SEATED_EXCEEDS_CONNECTED',
+          CoreInvariantCodes.participantSeatedWithoutConnected,
+        ),
+      ),
+    );
+  });
+
+  test('core rejects hand-scoped protocol events without an active hand', () {
+    final opened = protocolEvent(
+      eventId: 'evt_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+    );
+    final settlement = protocolEvent(
+      eventId: 'evt_002',
+      eventType: 'SettlementProjected',
+      eventSeq: 2,
+      handId: 'hand_001',
+      payload: const {'hand_id': 'hand_001'},
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, settlement]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          CoreInvariantCodes.handEventWithoutActiveHand,
+        ),
+      ),
+    );
+  });
+
+  test(
+    'core rejects hand-scoped protocol events for the wrong active hand',
+    () {
+      final opened = protocolEvent(
+        eventId: 'evt_001',
+        eventType: 'OpenTableSessionOpened',
+        eventSeq: 1,
+      );
+      final started = protocolEvent(
+        eventId: 'evt_002',
+        eventType: 'HandStarted',
+        eventSeq: 2,
+        handId: 'hand_001',
+        payload: const {'hand_id': 'hand_001'},
+      );
+      final showdown = protocolEvent(
+        eventId: 'evt_003',
+        eventType: 'ShowdownStarted',
+        eventSeq: 3,
+        handId: 'hand_002',
+        payload: const {'hand_id': 'hand_002'},
+      );
+
+      expect(
+        () => projectOrderedEvents([opened, started, showdown]),
+        throwsA(
+          isA<InvariantViolation>().having(
+            (violation) => violation.code,
+            'code',
+            CoreInvariantCodes.handEventIdMismatch,
+          ),
+        ),
+      );
+    },
+  );
+
+  test('core rejects starting another hand before settlement', () {
+    final opened = protocolEvent(
+      eventId: 'evt_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+    );
+    final firstStarted = protocolEvent(
+      eventId: 'evt_002',
+      eventType: 'HandStarted',
+      eventSeq: 2,
+      handId: 'hand_001',
+      payload: const {'hand_id': 'hand_001'},
+    );
+    final secondStarted = protocolEvent(
+      eventId: 'evt_003',
+      eventType: 'HandStarted',
+      eventSeq: 3,
+      handId: 'hand_002',
+      payload: const {'hand_id': 'hand_002'},
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, firstStarted, secondStarted]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          CoreInvariantCodes.handStartedWhileActive,
+        ),
+      ),
+    );
+  });
+
+  test('core rejects closing a session before close is requested', () {
+    final opened = protocolEvent(
+      eventId: 'evt_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+    );
+    final closed = protocolEvent(
+      eventId: 'evt_002',
+      eventType: 'SessionClosed',
+      eventSeq: 2,
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, closed]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          CoreInvariantCodes.sessionClosedWithoutCloseRequest,
+        ),
+      ),
+    );
+  });
+
+  test('core rejects events after a terminal closed state', () {
+    final events = <EventEnvelope>[
+      protocolEvent(
+        eventId: 'evt_001',
+        eventType: 'OpenTableSessionOpened',
+        eventSeq: 1,
+      ),
+      protocolEvent(
+        eventId: 'evt_002',
+        eventType: 'SessionCloseRequested',
+        eventSeq: 2,
+      ),
+      protocolEvent(
+        eventId: 'evt_003',
+        eventType: 'SessionClosed',
+        eventSeq: 3,
+      ),
+      protocolEvent(
+        eventId: 'evt_004',
+        eventType: 'ParticipantConnected',
+        eventSeq: 4,
+      ),
+    ];
+
+    expect(
+      () => projectOrderedEvents(events),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          CoreInvariantCodes.terminalStateCannotAdvance,
         ),
       ),
     );

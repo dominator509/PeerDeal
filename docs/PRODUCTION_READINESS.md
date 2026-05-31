@@ -77,6 +77,9 @@ the gates below are satisfied.
 - The v1 scaffold protocol catalog is locked across command, event, snapshot,
   Game File, invite payload, and public result-code identities, with accepted
   fixture parity and fail-closed unsupported-version checks.
+- Core invariant hardening now covers table identity, non-negative counters,
+  participant count coherence, hand-scoped event ordering, active-hand identity,
+  close-before-closed ordering, and terminal closed/wiped state projection.
 - Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
   core metadata projection, replay through the core projector, and sync
   snapshot + suffix recovery.
@@ -85,11 +88,9 @@ the gates below are satisfied.
   route orchestration.
 
 ## Next production hardening order
-1. Lock the full protocol catalog and failure semantics.
-2. Expand core reducer invariants against protocol fixtures.
-3. Complete Hold'em action, street, showdown, and settlement coverage, with the
+1. Complete Hold'em action, street, showdown, and settlement coverage, with the
    next focus on variant settlement projection and core pot/ledger boundaries.
-4. Harden replay/sync recovery against additional malformed and divergent event
+2. Harden replay/sync recovery against additional malformed and divergent event
    windows.
-5. Harden privacy, receipt, capture, and native bridge behavior.
-6. Build app flows on top of the stable public package APIs.
+3. Harden privacy, receipt, capture, and native bridge behavior.
+4. Build app flows on top of the stable public package APIs.

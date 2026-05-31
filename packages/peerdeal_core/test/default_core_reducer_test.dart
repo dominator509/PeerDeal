@@ -9,14 +9,11 @@ void main() {
     late ReducerContext context;
 
     setUp(() {
-      reducer = DefaultCoreReducer(
-        invariantGuards: const <InvariantGuard>[
-          ActiveHandRequiresLivePhaseGuard(),
-          SeatCountCannotExceedConnectedGuard(),
-          WipedPhaseMustNotHaveActiveStateGuard(),
-        ],
+      reducer = DefaultCoreReducer();
+      context = const ReducerContext(
+        protocolVersion: '1.0',
+        strictInvariantMode: true,
       );
-      context = const ReducerContext(protocolVersion: '1.0', strictInvariantMode: true);
     });
 
     test('applies a basic open-to-close sequence deterministically', () {
@@ -49,6 +46,44 @@ void main() {
       expect(result.state.playersConnected, 0);
       expect(result.state.playersSeated, 0);
       expect(result.state.eventSequence, events.length);
+    });
+
+    test('stops projection when an intermediate state violates invariants', () {
+      final result = reducer.applyEvents(
+        initialState: TableState.initial(),
+        events: const <CoreEvent>[
+          CoreEvent(
+            eventId: 'evt_001',
+            eventType: 'OpenTableSessionOpened',
+            actorRef: 'host_1',
+            payload: <String, Object?>{},
+          ),
+          CoreEvent(
+            eventId: 'evt_002',
+            eventType: 'ParticipantSeated',
+            actorRef: 'user_1',
+            payload: <String, Object?>{},
+          ),
+          CoreEvent(
+            eventId: 'evt_003',
+            eventType: 'ParticipantConnected',
+            actorRef: 'user_1',
+            payload: <String, Object?>{},
+          ),
+        ],
+        context: context,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.emittedEvents.map((event) => event.eventId), <String>[
+        'evt_001',
+        'evt_002',
+      ]);
+      expect(result.state.eventSequence, 2);
+      expect(
+        result.violations.map((violation) => violation.code),
+        contains(CoreInvariantCodes.seatedExceedsConnected),
+      );
     });
   });
 }

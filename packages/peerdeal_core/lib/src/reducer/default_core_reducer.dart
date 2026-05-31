@@ -1,14 +1,16 @@
 import '../contracts/core_reducer.dart';
 import '../contracts/invariant_guard.dart';
+import '../invariants/baseline_invariant_guards.dart';
 import '../models/command_application_result.dart';
 import '../models/core_event.dart';
+import '../models/invariant_violation.dart';
 import '../models/reducer_context.dart';
 import '../models/table_phase.dart';
 import '../models/table_state.dart';
 
 class DefaultCoreReducer implements CoreReducer {
   DefaultCoreReducer({
-    required List<InvariantGuard> invariantGuards,
+    List<InvariantGuard> invariantGuards = baselineInvariantGuards,
   }) : _invariantGuards = List<InvariantGuard>.unmodifiable(invariantGuards);
 
   final List<InvariantGuard> _invariantGuards;
@@ -45,13 +47,17 @@ class DefaultCoreReducer implements CoreReducer {
       case 'HandSettled':
         return state.copyWith(
           activeHandId: null,
-          phase: state.closeRequested ? TablePhase.closing : TablePhase.liveActive,
+          phase: state.closeRequested
+              ? TablePhase.closing
+              : TablePhase.liveActive,
           eventSequence: nextSequence,
         );
       case 'SessionCloseRequested':
         return state.copyWith(
           closeRequested: true,
-          phase: state.hasActiveHand ? TablePhase.liveActive : TablePhase.closing,
+          phase: state.hasActiveHand
+              ? TablePhase.liveActive
+              : TablePhase.closing,
           eventSequence: nextSequence,
         );
       case 'SessionClosed':
@@ -84,16 +90,30 @@ class DefaultCoreReducer implements CoreReducer {
     required ReducerContext context,
   }) {
     TableState state = initialState;
+    final emittedEvents = <CoreEvent>[];
     for (final CoreEvent event in events) {
       state = applyEvent(state: state, event: event, context: context);
+      emittedEvents.add(event);
+      final violations = _evaluateInvariants(state);
+      if (context.strictInvariantMode && violations.isNotEmpty) {
+        return CommandApplicationResult(
+          state: state,
+          emittedEvents: List<CoreEvent>.unmodifiable(emittedEvents),
+          violations: violations,
+        );
+      }
     }
-    final violations = [
-      for (final guard in _invariantGuards) ...guard.evaluate(state),
-    ];
+    final violations = _evaluateInvariants(state);
     return CommandApplicationResult(
       state: state,
-      emittedEvents: events,
-      violations: List.unmodifiable(violations),
+      emittedEvents: List<CoreEvent>.unmodifiable(emittedEvents),
+      violations: violations,
     );
+  }
+
+  List<InvariantViolation> _evaluateInvariants(TableState state) {
+    return List<InvariantViolation>.unmodifiable(<InvariantViolation>[
+      for (final guard in _invariantGuards) ...guard.evaluate(state),
+    ]);
   }
 }
