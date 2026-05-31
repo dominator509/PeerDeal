@@ -30,7 +30,7 @@ class OpaqueExportEncoder {
       'format_version': '1.0',
       'cipher': encrypted ? 'external' : 'none',
       'payload': payload,
-      if (signature != null) 'signature': signature,
+      'signature': ?signature,
     });
 
     return ReceiptExportArtifact(

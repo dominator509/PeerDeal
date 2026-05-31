@@ -1,5 +1,3 @@
-library peerdeal_receipts;
-
 export 'src/models/receipt_binding_mode.dart';
 export 'src/models/receipt_access_mode.dart';
 export 'src/models/receipt_wipe_state.dart';

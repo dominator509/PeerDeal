@@ -36,19 +36,28 @@ def version(package: dict, key: str) -> str | None:
     return package_version if isinstance(package_version, str) else None
 
 
-def summarize_packages(packages: list[dict]) -> tuple[int, int, list[str]]:
+def summarize_packages(packages: list[dict]) -> tuple[int, int, int, list[str]]:
     outdated = [
         package
         for package in packages
         if version(package, "current") != version(package, "latest")
     ]
-    constrained = [
+    actionable = [
         package
         for package in packages
-        if version(package, "resolvable") != version(package, "latest")
+        if version(package, "current") != version(package, "resolvable")
+    ]
+    blocked_by_toolchain = [
+        package
+        for package in packages
+        if version(package, "current") == version(package, "resolvable")
+        and version(package, "resolvable") != version(package, "latest")
     ]
     direct_rows = [
-        package for package in packages if package.get("kind") in {"direct", "dev"}
+        package
+        for package in packages
+        if package.get("kind") in {"direct", "dev"}
+        and version(package, "current") != version(package, "latest")
     ]
     direct_summaries = [
         (
@@ -58,7 +67,7 @@ def summarize_packages(packages: list[dict]) -> tuple[int, int, list[str]]:
         )
         for package in direct_rows
     ]
-    return len(outdated), len(constrained), direct_summaries
+    return len(outdated), len(actionable), len(blocked_by_toolchain), direct_summaries
 
 
 def print_summary(payload: dict, advisory_warning: bool) -> None:
@@ -66,11 +75,17 @@ def print_summary(payload: dict, advisory_warning: bool) -> None:
     if not isinstance(packages, list):
         packages = []
 
-    outdated_count, constrained_count, direct_summaries = summarize_packages(packages)
+    (
+        outdated_count,
+        actionable_count,
+        blocked_count,
+        direct_summaries,
+    ) = summarize_packages(packages)
 
     print("Dependency audit completed.")
     print(f"Outdated packages reported: {outdated_count}")
-    print(f"Packages constrained below latest: {constrained_count}")
+    print(f"Actionable package upgrades: {actionable_count}")
+    print(f"Newest-resolvable packages below latest: {blocked_count}")
 
     if direct_summaries:
         print("")

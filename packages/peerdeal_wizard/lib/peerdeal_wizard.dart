@@ -1,5 +1,3 @@
-library peerdeal_wizard;
-
 export 'src/contracts/preset_resolver.dart';
 export 'src/contracts/game_file_compiler.dart';
 export 'src/contracts/tooltip_registry.dart';

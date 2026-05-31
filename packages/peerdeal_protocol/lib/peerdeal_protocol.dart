@@ -1,5 +1,3 @@
-library peerdeal_protocol;
-
 export 'src/hashing/hash_chain.dart';
 export 'src/models/command_envelope.dart';
 export 'src/models/event_envelope.dart';

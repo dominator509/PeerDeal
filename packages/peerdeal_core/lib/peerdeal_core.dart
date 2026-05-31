@@ -1,5 +1,3 @@
-library peerdeal_core;
-
 export 'src/contracts/action_validator.dart';
 export 'src/contracts/invariant_guard.dart';
 export 'src/contracts/table_orchestrator.dart';

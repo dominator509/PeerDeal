@@ -1,5 +1,3 @@
-library peerdeal_sync;
-
 export 'src/contracts/conflict_detector.dart';
 export 'src/contracts/snapshot_applier.dart';
 export 'src/contracts/snapshot_state_projector.dart';

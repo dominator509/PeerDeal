@@ -35,9 +35,10 @@ A dependency PR must include:
 - rollback notes when the upgrade affects shared tooling
 
 ## Current baseline note
-As of the migration baseline, `flutter pub outdated` reports newer versions for
-some test and lint tooling. These warnings are non-blocking while analyze and
-test remain green.
+As of the dependency cleanup baseline, the workspace uses the newest resolvable
+lint and Melos tooling. `flutter pub outdated` may still report newer `meta`,
+`test`, and transitive versions when they are not mutually compatible with the
+current Flutter/Dart toolchain.
 
 If the audit command reports advisory metadata warnings from pub.dev while
 still exiting successfully, treat the version table as useful and rerun the

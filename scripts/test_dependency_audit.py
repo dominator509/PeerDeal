@@ -39,10 +39,16 @@ class DependencyAuditTest(unittest.TestCase):
             },
         ]
 
-        outdated_count, constrained_count, direct_summaries = summarize_packages(packages)
+        (
+            outdated_count,
+            actionable_count,
+            blocked_count,
+            direct_summaries,
+        ) = summarize_packages(packages)
 
         self.assertEqual(2, outdated_count)
-        self.assertEqual(1, constrained_count)
+        self.assertEqual(1, actionable_count)
+        self.assertEqual(1, blocked_count)
         self.assertEqual(
             [
                 "- meta: current 1.17.0, resolvable 1.17.0, latest 1.18.2",
@@ -59,6 +65,36 @@ class DependencyAuditTest(unittest.TestCase):
 
         self.assertIn("Dependency audit completed.", output.getvalue())
         self.assertIn("advisory metadata warnings", output.getvalue())
+
+    def test_prints_actionable_and_toolchain_blocked_counts(self) -> None:
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            print_summary(
+                {
+                    "packages": [
+                        {
+                            "package": "lints",
+                            "kind": "dev",
+                            "current": {"version": "4.0.0"},
+                            "resolvable": {"version": "6.1.0"},
+                            "latest": {"version": "6.1.0"},
+                        },
+                        {
+                            "package": "test",
+                            "kind": "dev",
+                            "current": {"version": "1.30.0"},
+                            "resolvable": {"version": "1.30.0"},
+                            "latest": {"version": "1.31.1"},
+                        },
+                    ]
+                },
+                advisory_warning=False,
+            )
+
+        summary = output.getvalue()
+        self.assertIn("Actionable package upgrades: 1", summary)
+        self.assertIn("Newest-resolvable packages below latest: 1", summary)
 
     def test_extracts_json_object_from_wrapped_output(self) -> None:
         self.assertEqual('{"packages":[]}', extract_json_object('noise\n{"packages":[]}\nmore'))
