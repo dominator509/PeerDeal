@@ -92,7 +92,8 @@ the gates below are satisfied.
   propagation, native bridge failure normalization, and locked method-channel
   contracts for future platform implementations.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
-  rotated key lookup, deterministic verification, and export-service coverage.
+  rotated key lookup, deterministic verification, export-service coverage, and
+  fail-closed signed artifact inspection.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
