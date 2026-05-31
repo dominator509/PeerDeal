@@ -1,6 +1,8 @@
 import 'package:peerdeal_capture/peerdeal_capture.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_surface_presenter.dart';
+import 'package:peerdeal_desktop/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
@@ -89,18 +91,27 @@ void main() {
     final presenter = DemoReceiptSurfacePresenter(
       captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
     );
-    const signer = HmacSha256ReceiptSigner(
-      keyProvider: StaticReceiptSigningKeyProvider(
-        activeKey: ReceiptSigningKey(
-          keyId: 'receipt_key_1',
-          secret: 'test_secret_1',
+    final keyRing = await NativeReceiptKeyRingLoader(
+      bridge: _FakeSecureKeyStorageBridge(
+        snapshot: const SecureKeyStorageSnapshot(
+          available: true,
+          keys: <SecureKeyRecord>[
+            SecureKeyRecord(
+              keyId: 'receipt_key_1',
+              purpose: 'receipt_signing',
+              algorithm: 'hmac-sha256',
+              secret: 'test_secret_1',
+              active: true,
+            ),
+          ],
         ),
       ),
-    );
-    const decoder = OpaqueExportDecoder(signer: signer);
+    ).load();
+    final signer = HmacSha256ReceiptSigner(keyProvider: keyRing.keyRing);
+    final decoder = OpaqueExportDecoder(signer: signer);
 
     final result = await presenter.presentExportArtifact(
-      artifact: const OpaqueExportEncoder(signer: signer).encode(_receipt),
+      artifact: OpaqueExportEncoder(signer: signer).encode(_receipt),
       decoder: decoder,
     );
 
@@ -148,3 +159,16 @@ const _receipt = PeerDealReceipt(
   payloadHash: 'hash_77',
   opaquePayload: 'opaque_77',
 );
+
+class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
+  const _FakeSecureKeyStorageBridge({required this.snapshot});
+
+  final SecureKeyStorageSnapshot snapshot;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    return snapshot;
+  }
+}
