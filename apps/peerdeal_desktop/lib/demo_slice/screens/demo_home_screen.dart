@@ -10,6 +10,7 @@ class DemoHomeScreen extends StatelessWidget {
     required this.onOpenTable,
     required this.onOpenChat,
     required this.onOpenReceipt,
+    required this.onOpenJoin,
     required this.onSelectScenario,
   });
 
@@ -17,6 +18,7 @@ class DemoHomeScreen extends StatelessWidget {
   final VoidCallback onOpenTable;
   final VoidCallback onOpenChat;
   final VoidCallback onOpenReceipt;
+  final VoidCallback onOpenJoin;
   final ValueChanged<String> onSelectScenario;
 
   @override
@@ -38,6 +40,7 @@ class DemoHomeScreen extends StatelessWidget {
           _DemoRouteAction(label: 'Table', onTap: onOpenTable),
           _DemoRouteAction(label: 'Chat', onTap: onOpenChat),
           _DemoRouteAction(label: 'Receipt', onTap: onOpenReceipt),
+          _DemoRouteAction(label: 'Join', onTap: onOpenJoin),
         ],
       ),
     );

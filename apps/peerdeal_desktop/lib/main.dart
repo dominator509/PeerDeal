@@ -9,6 +9,7 @@ import 'demo_slice/screens/demo_chat_screen.dart';
 import 'demo_slice/screens/demo_home_screen.dart';
 import 'demo_slice/screens/demo_receipt_screen.dart';
 import 'demo_slice/screens/demo_table_screen.dart';
+import 'join_flow/join_flow_route.dart';
 
 void main() {
   runApp(const PeerDealDesktopApp());
@@ -67,6 +68,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           snapshot: _activeSnapshot,
           presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
         ),
+        DemoSliceRoutes.join: (_) => const JoinFlowRoute(),
       },
     );
   }
@@ -78,6 +80,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       onOpenChat: () => Navigator.of(context).pushNamed(DemoSliceRoutes.chat),
       onOpenReceipt: () =>
           Navigator.of(context).pushNamed(DemoSliceRoutes.receipt),
+      onOpenJoin: () => Navigator.of(context).pushNamed(DemoSliceRoutes.join),
       onSelectScenario: _selectScenario,
     );
   }

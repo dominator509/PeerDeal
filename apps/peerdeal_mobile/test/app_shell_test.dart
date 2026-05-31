@@ -54,6 +54,21 @@ void main() {
     expect(find.text('Unread: 3'), findsOneWidget);
   });
 
+  testWidgets('routes from demo home to join flow', (tester) async {
+    await tester.pumpWidget(const PeerDealMobileApp());
+
+    await tester.tap(find.text('Join'));
+    await tester.pump();
+
+    expect(find.text('Loading join'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Join flow'), findsOneWidget);
+    expect(find.text('State: joined'), findsOneWidget);
+    expect(find.text('Result: OK_JOINED'), findsOneWidget);
+  });
+
   testWidgets('selected scenario drives mounted demo routes', (tester) async {
     await tester.pumpWidget(const PeerDealMobileApp());
 
