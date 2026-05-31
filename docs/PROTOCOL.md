@@ -41,15 +41,29 @@ This repo starter only locks the spine:
 - validation boundaries
 - canonical hash normalization
 - fixture examples
-- supported artifact catalog for fixture-backed and scaffold replay/recovery event types
+- supported artifact catalog for all current v1 scaffold artifact families
 - fail-safe rejection for unsupported protocol versions and unknown artifacts
 - envelope-level catalog checks before downstream package processing
 
 Later phases expand:
-- full command catalog
 - full replay windows
 - recovery / snapshot semantics
 - fairness anchors
+
+## Catalog lock
+The v1 protocol catalog is the production-facing identity registry for the
+current scaffold. It includes:
+- command identities
+- event identities
+- snapshot identities
+- Game File schema identity
+- invite payload identity
+- public protocol result-code identities
+
+The catalog lock must stay complete and duplicate-free. Accepted fixtures in
+`peerdeal_protocol/fixtures` must be represented by the public catalog before
+downstream packages process them. Unsupported protocol versions and unknown
+artifact identities must fail closed through catalog checks.
 
 ## Hold'em lifecycle fixture chain
 Hold'em lifecycle fixtures live in `peerdeal_protocol` because event identity is

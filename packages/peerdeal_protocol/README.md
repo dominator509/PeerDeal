@@ -32,10 +32,17 @@ The default protocol catalog is grouped by artifact family:
 - `supportedCommandCatalogEntries`
 - `supportedEventCatalogEntries`
 - `supportedSnapshotCatalogEntries`
+- `supportedGameFileCatalogEntries`
+- `supportedInvitePayloadCatalogEntries`
+- `supportedResultCodeCatalogEntries`
 
 Envelope compatibility checks must reject unknown artifact identities before
 downstream packages process them. New scaffold command, event, or snapshot
 identities should be added to the matching catalog group with focused tests.
+
+The catalog lock also validates Game File, invite payload, and public
+result-code identities. Accepted fixtures must remain catalog-backed, and the
+default catalog must pass `ProtocolCatalog.validateLock()`.
 
 The catalog may name future reducer or variant paths before they are fully
 wired, but only as versioned protocol identities. Acceptance in the catalog does

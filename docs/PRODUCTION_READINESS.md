@@ -66,7 +66,6 @@ the gates below are satisfied.
 - CI runs the same baseline commands as local development.
 
 ## Current highest-risk blockers
-- Full protocol catalog is not complete.
 - Full Hold'em showdown and settlement behavior is not production complete.
 - Production networking, sync recovery, receipt cryptography, and native capture
   implementation remain scaffold-level.
@@ -75,6 +74,9 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The v1 scaffold protocol catalog is locked across command, event, snapshot,
+  Game File, invite payload, and public result-code identities, with accepted
+  fixture parity and fail-closed unsupported-version checks.
 - Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
   core metadata projection, replay through the core projector, and sync
   snapshot + suffix recovery.
