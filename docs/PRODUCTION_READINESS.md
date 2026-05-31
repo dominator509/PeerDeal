@@ -102,6 +102,8 @@ the gates below are satisfied.
   native bridge package.
 - App demo receipt paths now map native secure key storage snapshots into
   receipt-owned key-ring providers before signed artifact verification.
+- App demo receipt presenters can consume a verifier boundary that loads native
+  key material and fails closed before projecting receipt UI.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.

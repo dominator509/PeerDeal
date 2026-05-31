@@ -1,4 +1,5 @@
 import 'package:peerdeal_capture/peerdeal_capture.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_verifier.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
@@ -91,28 +92,16 @@ void main() {
     final presenter = DemoReceiptSurfacePresenter(
       captureCoordinator: CaptureSurfaceCoordinator(bridge: bridge),
     );
-    final keyRing = await NativeReceiptKeyRingLoader(
-      bridge: _FakeSecureKeyStorageBridge(
-        snapshot: const SecureKeyStorageSnapshot(
-          available: true,
-          keys: <SecureKeyRecord>[
-            SecureKeyRecord(
-              keyId: 'receipt_key_1',
-              purpose: 'receipt_signing',
-              algorithm: 'hmac-sha256',
-              secret: 'test_secret_1',
-              active: true,
-            ),
-          ],
-        ),
-      ),
-    ).load();
-    final signer = HmacSha256ReceiptSigner(keyProvider: keyRing.keyRing);
-    final decoder = OpaqueExportDecoder(signer: signer);
+    final keyRingLoader = NativeReceiptKeyRingLoader(
+      bridge: _FakeSecureKeyStorageBridge(snapshot: _availableKeySnapshot),
+    );
+    final signer = HmacSha256ReceiptSigner(
+      keyProvider: (await keyRingLoader.load()).keyRing,
+    );
 
-    final result = await presenter.presentExportArtifact(
+    final result = await presenter.presentVerifiedExportArtifact(
       artifact: OpaqueExportEncoder(signer: signer).encode(_receipt),
-      decoder: decoder,
+      verifier: DemoReceiptArtifactVerifier(keyRingLoader: keyRingLoader),
     );
 
     expect(result.receipt.status, 'ok');
@@ -158,6 +147,19 @@ const _receipt = PeerDealReceipt(
   wipeState: ReceiptWipeState.live,
   payloadHash: 'hash_77',
   opaquePayload: 'opaque_77',
+);
+
+const _availableKeySnapshot = SecureKeyStorageSnapshot(
+  available: true,
+  keys: <SecureKeyRecord>[
+    SecureKeyRecord(
+      keyId: 'receipt_key_1',
+      purpose: 'receipt_signing',
+      algorithm: 'hmac-sha256',
+      secret: 'test_secret_1',
+      active: true,
+    ),
+  ],
 );
 
 class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {

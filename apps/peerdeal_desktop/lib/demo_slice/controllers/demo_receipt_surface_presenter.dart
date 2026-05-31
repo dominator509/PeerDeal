@@ -4,6 +4,8 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
+import 'demo_receipt_artifact_verifier.dart';
+
 class DemoReceiptSurfaceVm {
   const DemoReceiptSurfaceVm({
     required this.receipt,
@@ -51,6 +53,17 @@ class DemoReceiptSurfacePresenter {
   }) {
     return _presentReceiptScan(
       receipt: _scanFromInspection(decoder.inspect(artifact)),
+      recovery: recovery,
+    );
+  }
+
+  Future<DemoReceiptSurfaceVm> presentVerifiedExportArtifact({
+    required ReceiptExportArtifact artifact,
+    required DemoReceiptArtifactVerifier verifier,
+    RecoveryResult<Object?>? recovery,
+  }) async {
+    return _presentReceiptScan(
+      receipt: _scanFromInspection(await verifier.inspect(artifact)),
       recovery: recovery,
     );
   }
