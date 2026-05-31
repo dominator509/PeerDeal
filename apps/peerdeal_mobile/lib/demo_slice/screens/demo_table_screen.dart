@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../controllers/demo_network_confidence_presenter.dart';
 import '../models/demo_scenario_snapshot.dart';
 import '../widgets/demo_status_banner.dart';
 
@@ -7,11 +8,13 @@ class DemoTableScreen extends StatelessWidget {
   const DemoTableScreen({
     super.key,
     required this.snapshot,
+    required this.networkConfidence,
     required this.onOpenChat,
     required this.onOpenReceipt,
   });
 
   final DemoScenarioSnapshot snapshot;
+  final DemoNetworkConfidenceVm networkConfidence;
   final VoidCallback onOpenChat;
   final VoidCallback onOpenReceipt;
 
@@ -27,7 +30,9 @@ class DemoTableScreen extends StatelessWidget {
           Text('Scenario: ${snapshot.scenarioId}'),
           Text('Mode: ${snapshot.mode}'),
           Text('Variant: ${snapshot.variant}'),
-          Text('Network: ${snapshot.networkConfidence}'),
+          Text('Network: ${networkConfidence.confidence.name}'),
+          if (networkConfidence.recoveryRecommended)
+            const Text('Network action: recovery_required'),
           Text('Receipt: ${snapshot.receipt.verificationState}'),
           _DemoRouteAction(label: 'Chat', onTap: onOpenChat),
           _DemoRouteAction(label: 'Receipt', onTap: onOpenReceipt),

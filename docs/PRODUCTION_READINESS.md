@@ -120,6 +120,8 @@ the gates below are satisfied.
   material is unavailable.
 - Mounted app receipt routes now pass recovery scenarios through the safe
   recovery projection path, including restore-surface capture coordination.
+- Mounted app table routes now classify fixture-derived peer metrics through
+  `peerdeal_network` before rendering network confidence.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   peerdeal_capture: ^0.1.0
   peerdeal_native_bridges: ^0.1.0
+  peerdeal_network: ^0.1.0
   peerdeal_privacy: ^0.1.0
   peerdeal_protocol: ^0.1.0
   peerdeal_receipts: ^0.1.0

@@ -98,6 +98,7 @@ void main() {
 
     expect(find.text('Demo table'), findsOneWidget);
     expect(find.text('Scenario: open_table_live_turn'), findsOneWidget);
+    expect(find.text('Network: stable'), findsOneWidget);
 
     await tester.tap(find.text('Chat'));
     await tester.pumpAndSettle();
@@ -134,11 +135,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Scenario: chat_heavy_table'), findsOneWidget);
+    expect(find.text('Network: stable'), findsOneWidget);
 
     await tester.tap(find.text('Chat'));
     await tester.pumpAndSettle();
 
     expect(find.text('Scenario: chat_heavy_table'), findsOneWidget);
     expect(find.text('Unread: 19'), findsOneWidget);
+  });
+
+  testWidgets('mounted table classifies recovery network confidence', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const PeerDealMobileApp());
+
+    await tester.tap(
+      find.text('Scenario: Recovery Pause - Primary-Peer Transfer'),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Network: recoveryRequired'), findsOneWidget);
+    expect(find.text('Network action: recovery_required'), findsOneWidget);
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
+import 'demo_slice/controllers/demo_network_confidence_presenter.dart';
 import 'demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'demo_slice/controllers/demo_recovery_result_factory.dart';
@@ -38,6 +39,8 @@ class PeerDealMobileApp extends StatefulWidget {
 
 class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   final DemoSliceController _controller = DemoSliceController();
+  final DemoNetworkConfidencePresenter _networkConfidencePresenter =
+      const DemoNetworkConfidencePresenter();
   final DemoRecoveryResultFactory _recoveryResultFactory =
       const DemoRecoveryResultFactory();
 
@@ -67,6 +70,9 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
         DemoSliceRoutes.home: _buildHome,
         DemoSliceRoutes.table: (context) => DemoTableScreen(
           snapshot: _activeSnapshot,
+          networkConfidence: _networkConfidencePresenter.present(
+            _activeSnapshot,
+          ),
           onOpenChat: () =>
               Navigator.of(context).pushNamed(DemoSliceRoutes.chat),
           onOpenReceipt: () =>
