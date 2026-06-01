@@ -99,4 +99,8 @@ class DemoScenarioSnapshots {
     }
     return snapshot;
   }
+
+  static DemoScenarioSnapshot? tryById(String scenarioId) {
+    return snapshots[scenarioId];
+  }
 }

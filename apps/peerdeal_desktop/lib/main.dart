@@ -48,7 +48,8 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       widget._receiptPresenter;
 
   DemoScenarioSnapshot get _activeSnapshot {
-    return DemoScenarioSnapshots.byId(_controller.activeScenario.id);
+    return DemoScenarioSnapshots.tryById(_controller.activeScenario.id) ??
+        DemoScenarioSnapshots.snapshots.values.first;
   }
 
   @override

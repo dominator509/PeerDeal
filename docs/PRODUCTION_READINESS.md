@@ -129,6 +129,8 @@ the gates below are satisfied.
 - App join-flow orchestrators now convert invite, negotiation, disclosure,
   role, bootstrap, and governance adapter exceptions into explicit rejected
   outcomes with scrubbed diagnostics.
+- Mounted app demo routes now use a non-throwing scenario snapshot lookup seam
+  so catalog drift falls back to a known snapshot instead of crashing routes.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

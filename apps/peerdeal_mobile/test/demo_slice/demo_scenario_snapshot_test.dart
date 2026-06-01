@@ -72,6 +72,14 @@ void main() {
     }
   });
 
+  test('runtime demo snapshot lookup has non-throwing fallback seam', () {
+    expect(
+      DemoScenarioSnapshots.tryById('open_table_live_turn')?.scenarioId,
+      'open_table_live_turn',
+    );
+    expect(DemoScenarioSnapshots.tryById('missing_scenario'), isNull);
+  });
+
   test('demo fixture parser fails fast on malformed shape', () {
     expect(
       () => DemoScenarioSnapshot.fromJson({
