@@ -60,7 +60,12 @@ class OpaqueExportDecoder {
           message: 'Receipt artifact signature cannot be verified.',
         );
       }
-      if (!signer.verify(payload: payload, signature: signature)) {
+      final isVerified = _verifySignature(
+        signer: signer,
+        payload: payload,
+        signature: signature,
+      );
+      if (!isVerified) {
         return const ReceiptExportInspectionResult.rejected(
           message: 'Receipt artifact signature verification failed.',
         );
@@ -115,6 +120,18 @@ class OpaqueExportDecoder {
       }
     }
     return null;
+  }
+
+  bool _verifySignature({
+    required ReceiptSigner signer,
+    required String payload,
+    required String signature,
+  }) {
+    try {
+      return signer.verify(payload: payload, signature: signature);
+    } on Object {
+      return false;
+    }
   }
 
   Map<String, Object?>? _decodePayloadShape(String payload) {

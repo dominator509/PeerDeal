@@ -145,6 +145,8 @@ the gates below are satisfied.
   secure key storage throws.
 - Receipt export now fails closed to an unavailable artifact when signing or
   encryption adapters throw.
+- Receipt import inspection now rejects signed artifacts when verifier adapters
+  throw during signature verification.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all

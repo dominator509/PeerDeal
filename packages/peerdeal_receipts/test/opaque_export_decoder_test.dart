@@ -78,6 +78,18 @@ void main() {
     expect(result.message, 'Receipt artifact signature verification failed.');
   });
 
+  test('rejects signed artifact when verifier throws', () {
+    final artifact = encoder.encode(receipt);
+    const throwingDecoder = OpaqueExportDecoder(
+      signer: _ThrowingReceiptSigner(),
+    );
+
+    final result = throwingDecoder.inspect(artifact);
+
+    expect(result.isAccepted, isFalse);
+    expect(result.message, 'Receipt artifact signature verification failed.');
+  });
+
   test('rejects malformed artifact body', () {
     final result = decoder.inspect(
       const ReceiptExportArtifact(
@@ -175,4 +187,18 @@ Map<String, Object?> _decodeBody(String encodedBody) {
 
 String _encodeBody(Map<String, Object?> body) {
   return base64Encode(utf8.encode(jsonEncode(body)));
+}
+
+class _ThrowingReceiptSigner implements ReceiptSigner {
+  const _ThrowingReceiptSigner();
+
+  @override
+  String sign(String payload) {
+    throw StateError('signing unavailable');
+  }
+
+  @override
+  bool verify({required String payload, required String signature}) {
+    throw StateError('verification unavailable');
+  }
 }
