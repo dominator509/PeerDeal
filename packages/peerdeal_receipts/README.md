@@ -38,6 +38,8 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
   when export signing or encryption adapters throw.
 - `OpaqueExportEncoder` also fails closed for direct callers when signer or
   cipher adapters throw.
+- `HmacSha256ReceiptSigner.verify` fails closed when verification key lookup
+  throws.
 
 ## Starter status
 This scaffold is aligned to the locked PeerDeal receipt, retention, and privacy direction and is intended

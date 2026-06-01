@@ -67,4 +67,32 @@ void main() {
       isFalse,
     );
   });
+
+  test('fails closed when verification key lookup throws', () {
+    const signer = HmacSha256ReceiptSigner(
+      keyProvider: _ThrowingSigningKeyProvider(),
+    );
+
+    expect(
+      signer.verify(
+        payload: 'payload',
+        signature: 'hmac-sha256:receipt_key_1:digest',
+      ),
+      isFalse,
+    );
+  });
+}
+
+class _ThrowingSigningKeyProvider implements ReceiptSigningKeyProvider {
+  const _ThrowingSigningKeyProvider();
+
+  @override
+  ReceiptSigningKey? activeSigningKey() {
+    throw StateError('signing key unavailable');
+  }
+
+  @override
+  ReceiptSigningKey? findSigningKey(String keyId) {
+    throw StateError('verification key unavailable');
+  }
 }

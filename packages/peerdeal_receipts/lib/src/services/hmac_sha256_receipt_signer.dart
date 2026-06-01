@@ -27,6 +27,14 @@ class HmacSha256ReceiptSigner implements ReceiptSigner {
 
   @override
   bool verify({required String payload, required String signature}) {
+    try {
+      return _verify(payload: payload, signature: signature);
+    } on Object {
+      return false;
+    }
+  }
+
+  bool _verify({required String payload, required String signature}) {
     final parts = signature.split(':');
     if (parts.length != 3 || parts[0] != algorithm) {
       return false;

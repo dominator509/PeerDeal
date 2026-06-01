@@ -149,6 +149,8 @@ the gates below are satisfied.
   throw during signature verification.
 - Opaque receipt export encoding now fails closed for direct callers when signer
   or cipher adapters throw.
+- Receipt HMAC signature verification now fails closed when verification key
+  lookup throws.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
