@@ -26,7 +26,16 @@ class NativeReceiptKeyRingLoader {
   final String namespace;
 
   Future<ReceiptKeyRingLoadResult> load() async {
-    final snapshot = await _bridge.loadKeyRing(namespace: namespace);
+    final SecureKeyStorageSnapshot snapshot;
+    try {
+      snapshot = await _bridge.loadKeyRing(namespace: namespace);
+    } on Object {
+      return const ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key storage could not be loaded.'],
+      );
+    }
+
     if (!snapshot.available) {
       return ReceiptKeyRingLoadResult(
         keyRing: const ReceiptKeyRingSnapshot(),

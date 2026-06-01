@@ -141,6 +141,8 @@ the gates below are satisfied.
   orchestrator setup fails before adapter guards can run.
 - Join orchestration now treats event-sink failures as non-decision side-effect
   failures, preserving join/rejection outcomes instead of throwing.
+- App receipt key-ring loaders now fail closed to an empty key ring when native
+  secure key storage throws.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

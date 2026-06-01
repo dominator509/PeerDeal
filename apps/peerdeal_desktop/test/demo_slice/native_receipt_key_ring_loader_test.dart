@@ -68,6 +68,18 @@ void main() {
     expect(result.hasEncryptionKey, isFalse);
     expect(result.warnings, ['secure storage locked']);
   });
+
+  test('fails closed when native secure key storage throws', () async {
+    final result = await NativeReceiptKeyRingLoader(
+      bridge: _ThrowingSecureKeyStorageBridge(),
+    ).load();
+
+    expect(result.hasSigningKey, isFalse);
+    expect(result.hasEncryptionKey, isFalse);
+    expect(result.warnings, [
+      'Secure receipt key storage could not be loaded.',
+    ]);
+  });
 }
 
 class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
@@ -82,5 +94,14 @@ class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
   }) async {
     this.namespace = namespace;
     return snapshot;
+  }
+}
+
+class _ThrowingSecureKeyStorageBridge implements SecureKeyStorageBridge {
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    throw StateError('secure storage unavailable');
   }
 }
