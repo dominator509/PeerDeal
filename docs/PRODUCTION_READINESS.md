@@ -135,6 +135,8 @@ the gates below are satisfied.
   mounted navigation on the current scenario when selection input drifts.
 - Mounted app receipt routes now fail closed when artifact verifier
   construction fails, falling back to the rejected verifier-unavailable surface.
+- Receipt routes now fail closed to an obscured rejected surface when async
+  receipt presentation fails.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

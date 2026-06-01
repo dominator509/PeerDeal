@@ -9,6 +9,7 @@ import 'package:peerdeal_mobile/demo_slice/screens/demo_receipt_screen.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 import '../../../../tools/test_helpers/demo_receipt_route_test_support.dart';
 
@@ -129,6 +130,24 @@ void main() {
     expect(find.text('Receipt content hidden'), findsOneWidget);
     expect(find.text('receipt_id: r_1'), findsNothing);
   });
+
+  testWidgets('fails closed when receipt presentation throws', (tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DemoReceiptRoute(
+          snapshot: _fixtureSnapshot('verification_receipt_review.json'),
+          presenter: _ThrowingReceiptPresenter(),
+        ),
+      ),
+    );
+    expect(find.text('Loading receipt'), findsOneWidget);
+
+    await tester.pump();
+
+    expect(find.text('Loading receipt'), findsNothing);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
 }
 
 DemoReceiptSurfaceVm _surface({required bool shouldObscure}) {
@@ -204,5 +223,15 @@ class RecordingSecureKeyStorageBridge implements SecureKeyStorageBridge {
         ),
       ],
     );
+  }
+}
+
+class _ThrowingReceiptPresenter extends DemoReceiptSurfacePresenter {
+  @override
+  Future<DemoReceiptSurfaceVm> present({
+    required ReceiptScanResult receipt,
+    RecoveryResult<Object?>? recovery,
+  }) async {
+    throw StateError('receipt presentation unavailable');
   }
 }

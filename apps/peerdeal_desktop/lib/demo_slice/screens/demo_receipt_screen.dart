@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_capture/peerdeal_capture.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
@@ -62,7 +63,15 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     );
   }
 
-  Future<DemoReceiptSurfaceVm> _present() {
+  Future<DemoReceiptSurfaceVm> _present() async {
+    try {
+      return await _presentUnsafe();
+    } on Object {
+      return _failedClosedSurface();
+    }
+  }
+
+  Future<DemoReceiptSurfaceVm> _presentUnsafe() {
     final artifact = widget.exportArtifact;
     if (artifact != null) {
       final verifier = widget.artifactVerifier;
@@ -86,6 +95,29 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     return widget.presenter.present(
       receipt: _receiptScanResult(widget.snapshot),
       recovery: widget.recovery,
+    );
+  }
+
+  DemoReceiptSurfaceVm _failedClosedSurface() {
+    const plan = CaptureSurfacePlan(
+      surface: CaptureSurface.receiptDetail,
+      decision: CapturePolicyDecision(
+        action: CapturePolicyAction.obscureOnly,
+        isSensitive: true,
+        reason: 'receipt_presentation_failed',
+        warning: 'Receipt presentation failed closed.',
+      ),
+      nativeNotes: 'unavailable',
+    );
+
+    return DemoReceiptSurfaceVm(
+      receipt: const SafeReceiptScanVm(
+        status: 'rejected',
+        message: 'Receipt presentation failed closed.',
+        shareableFields: <String, Object?>{},
+      ),
+      receiptCapturePlan: plan,
+      safeSurface: SafeSurfaceRenderModel.fromCapturePlans([plan]),
     );
   }
 }
