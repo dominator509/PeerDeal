@@ -158,6 +158,34 @@ void main() {
     expect(artifact.reason, 'Receipt unavailable.');
   });
 
+  test('export fails closed when signing throws', () {
+    const signedService = DefaultReceiptService(
+      authorizer: DefaultReceiptAuthorizer(),
+      exportEncoder: OpaqueExportEncoder(signer: _ThrowingReceiptSigner()),
+    );
+
+    final artifact = signedService.exportReceipt(receipt);
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.encodedBody, isEmpty);
+    expect(artifact.minimalMetadata, isEmpty);
+    expect(artifact.reason, 'Receipt export failed.');
+  });
+
+  test('export fails closed when encryption throws', () {
+    const encryptedService = DefaultReceiptService(
+      authorizer: DefaultReceiptAuthorizer(),
+      exportEncoder: OpaqueExportEncoder(cipher: _ThrowingReceiptCipher()),
+    );
+
+    final artifact = encryptedService.exportReceipt(receipt);
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.encodedBody, isEmpty);
+    expect(artifact.minimalMetadata, isEmpty);
+    expect(artifact.reason, 'Receipt export failed.');
+  });
+
   test('scan returns ok for non-wiped receipt', () {
     final result = service.scanReceipt(receipt);
     expect(result.status, 'ok');
@@ -219,5 +247,31 @@ class _FakeReceiptSigner implements ReceiptSigner {
   @override
   bool verify({required String payload, required String signature}) {
     return signature == sign(payload);
+  }
+}
+
+class _ThrowingReceiptSigner implements ReceiptSigner {
+  const _ThrowingReceiptSigner();
+
+  @override
+  String sign(String payload) {
+    throw StateError('signing unavailable');
+  }
+
+  @override
+  bool verify({required String payload, required String signature}) => false;
+}
+
+class _ThrowingReceiptCipher implements ReceiptCipher {
+  const _ThrowingReceiptCipher();
+
+  @override
+  String encrypt(String plaintext) {
+    throw StateError('encryption unavailable');
+  }
+
+  @override
+  String decrypt(String ciphertext) {
+    throw StateError('decryption unavailable');
   }
 }

@@ -38,7 +38,13 @@ class DefaultReceiptService implements ReceiptService {
       );
     }
 
-    return _exportEncoder.encode(receipt);
+    try {
+      return _exportEncoder.encode(receipt);
+    } on Object {
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt export failed.',
+      );
+    }
   }
 
   @override

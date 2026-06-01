@@ -34,9 +34,17 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
 - `OpaqueExportDecoder` verifies signed export artifacts before import-side
   inspection and fails closed on malformed, unsigned, tampered, undecryptable,
   or privacy-leaking payloads.
+- `DefaultReceiptService.exportReceipt` fails closed to an unavailable artifact
+  when export signing or encryption adapters throw.
 
 ## Starter status
 This scaffold is aligned to the locked PeerDeal receipt, retention, and privacy direction and is intended
 as the first package drop for Sprint 11. It has deterministic cipher/signer seams, concrete HMAC-backed
 signing and authenticated encryption adapters, signed artifact inspection, and receipt-owned key-ring
 lookup contracts. Platform-secure storage still needs implementation behind these seams.
+
+## Remaining environment gaps
+The current ChatGPT project environment can harden Dart contracts and tests, but
+cannot complete platform-secure storage or native OS keychain/keystore
+implementations. Those must be implemented in platform code behind the locked
+`peerdeal_native_bridges` method-channel contracts.

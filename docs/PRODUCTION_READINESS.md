@@ -143,6 +143,17 @@ the gates below are satisfied.
   failures, preserving join/rejection outcomes instead of throwing.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
+- Receipt export now fails closed to an unavailable artifact when signing or
+  encryption adapters throw.
+
+## Current environment handoff gaps
+- No `.zip` project archive is present in this repository snapshot; all
+  checked-in markdown files were reviewed directly from source.
+- Platform-native secure storage, capture blocking, local-network discovery,
+  production transport, persistence, and polished app UI cannot be completed
+  inside the current ChatGPT project environment because they require native
+  platform implementations and device/OS integration. The Dart contracts and
+  method-channel payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
