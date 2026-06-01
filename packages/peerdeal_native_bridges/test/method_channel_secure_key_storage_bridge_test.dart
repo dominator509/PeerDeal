@@ -61,4 +61,20 @@ void main() {
     expect(snapshot.keys, isEmpty);
     expect(snapshot.warning, contains('locked'));
   });
+
+  test('returns unavailable snapshot for malformed platform payload', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          return <Object?>['not-a-map'];
+        });
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final snapshot = await bridge.loadKeyRing(namespace: 'peerdeal.receipts');
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.keys, isEmpty);
+    expect(snapshot.warning, contains('decode failed'));
+    expect(log.single.method, 'loadKeyRing');
+  });
 }

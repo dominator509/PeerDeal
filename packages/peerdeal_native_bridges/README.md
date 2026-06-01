@@ -39,6 +39,8 @@ to observe local device capabilities.
   contract.
 - Malformed platform payload fields are ignored and normalized to fail-closed
   capability facts instead of throwing through bridge consumers.
+- Malformed top-level method-channel payloads are caught at the bridge wrapper
+  and returned as unavailable facts with decode warnings.
 
 ## Method-channel contracts
 - Capture protection channel: `peerdeal/native_bridges/capture_protection`

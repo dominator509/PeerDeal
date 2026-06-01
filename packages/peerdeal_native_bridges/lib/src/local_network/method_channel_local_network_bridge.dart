@@ -25,6 +25,13 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
       return LocalNetworkCapability.unavailable(
         warning: _warning('Local network capability lookup failed', error),
       );
+    } on Object catch (error) {
+      return LocalNetworkCapability.unavailable(
+        warning: _warning(
+          'Local network capability payload decode failed',
+          error,
+        ),
+      );
     }
 
     return LocalNetworkChannelContract.decodeCapability(result);
@@ -42,6 +49,13 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
     } on PlatformException catch (error) {
       return LocalNetworkDiscoverySnapshot.unavailable(
         warning: _warning('Local network discovery failed', error),
+      );
+    } on Object catch (error) {
+      return LocalNetworkDiscoverySnapshot.unavailable(
+        warning: _warning(
+          'Local network discovery payload decode failed',
+          error,
+        ),
       );
     }
 

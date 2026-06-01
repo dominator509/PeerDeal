@@ -25,6 +25,10 @@ class MethodChannelCaptureProtectionBridge implements CaptureProtectionBridge {
       return CaptureProtectionCapability.unavailable(
         warning: _warning('Capture protection capability lookup failed', error),
       );
+    } on Object catch (error) {
+      return CaptureProtectionCapability.unavailable(
+        warning: _warning('Capture protection payload decode failed', error),
+      );
     }
 
     return CaptureProtectionChannelContract.decodeCapability(result);

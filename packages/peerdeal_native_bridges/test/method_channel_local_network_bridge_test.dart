@@ -103,4 +103,45 @@ void main() {
       expect(log.single.method, 'discoverPeers');
     },
   );
+
+  test(
+    'returns unavailable capability for malformed platform payload',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            log.add(call);
+            return <Object?>['not-a-map'];
+          });
+
+      final bridge = MethodChannelLocalNetworkBridge(channel: channel);
+      final capability = await bridge.getCapability();
+
+      expect(capability.discoverySupported, isFalse);
+      expect(capability.permissionPromptSupported, isFalse);
+      expect(capability.broadcastSupported, isFalse);
+      expect(capability.notes, 'unavailable');
+      expect(capability.warning, contains('decode failed'));
+      expect(log.single.method, 'getCapability');
+    },
+  );
+
+  test(
+    'returns unavailable discovery for malformed platform payload',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            log.add(call);
+            return <Object?>['not-a-map'];
+          });
+
+      final bridge = MethodChannelLocalNetworkBridge(channel: channel);
+      final snapshot = await bridge.discoverPeers();
+
+      expect(snapshot.permissionGranted, isFalse);
+      expect(snapshot.foundEndpoints, isEmpty);
+      expect(snapshot.interfaceHints, isEmpty);
+      expect(snapshot.warning, contains('decode failed'));
+      expect(log.single.method, 'discoverPeers');
+    },
+  );
 }

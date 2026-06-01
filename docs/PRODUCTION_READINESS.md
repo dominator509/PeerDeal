@@ -124,6 +124,8 @@ the gates below are satisfied.
   `peerdeal_network` before rendering network confidence.
 - Native bridge contract decoders now tolerate malformed platform payload
   fields and normalize them to fail-closed facts before app policy sees them.
+- Native bridge method-channel wrappers now fail closed on malformed top-level
+  platform payloads instead of letting decode errors escape app policy.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

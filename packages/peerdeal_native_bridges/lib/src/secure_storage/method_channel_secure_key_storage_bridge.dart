@@ -30,6 +30,10 @@ class MethodChannelSecureKeyStorageBridge implements SecureKeyStorageBridge {
       return SecureKeyStorageSnapshot.unavailable(
         warning: _warning('Secure key storage lookup failed', error),
       );
+    } on Object catch (error) {
+      return SecureKeyStorageSnapshot.unavailable(
+        warning: _warning('Secure key storage payload decode failed', error),
+      );
     }
 
     return SecureKeyStorageChannelContract.decodeSnapshot(result);
