@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
 import 'demo_slice/controllers/demo_network_confidence_presenter.dart';
+import 'demo_slice/controllers/demo_receipt_artifact_verifier.dart';
 import 'demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'demo_slice/controllers/demo_recovery_result_factory.dart';
@@ -90,7 +91,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           exportArtifact: widget._receiptExportArtifact,
           artifactVerifier: widget._receiptExportArtifact == null
               ? null
-              : _receiptArtifactVerifierFactory.create(),
+              : _createReceiptArtifactVerifier(),
           recovery: _recoveryResultFactory.createFor(_activeSnapshot),
         ),
         DemoSliceRoutes.join: (_) => const JoinFlowRoute(),
@@ -118,5 +119,13 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   DemoReceiptArtifactVerifierFactory get _receiptArtifactVerifierFactory {
     return widget._receiptArtifactVerifierFactory ??
         DemoReceiptArtifactVerifierFactory.methodChannel();
+  }
+
+  DemoReceiptArtifactVerifier? _createReceiptArtifactVerifier() {
+    try {
+      return _receiptArtifactVerifierFactory.create();
+    } on Object {
+      return null;
+    }
   }
 }

@@ -133,6 +133,8 @@ the gates below are satisfied.
   so catalog drift falls back to a known snapshot instead of crashing routes.
 - App demo scenario selection now ignores unknown ids without throwing, keeping
   mounted navigation on the current scenario when selection input drifts.
+- Mounted app receipt routes now fail closed when artifact verifier
+  construction fails, falling back to the rejected verifier-unavailable surface.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

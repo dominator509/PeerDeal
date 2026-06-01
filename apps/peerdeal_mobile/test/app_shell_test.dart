@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_verifier.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'package:peerdeal_mobile/main.dart';
@@ -59,6 +60,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(keyBridge.namespaces, <String>['peerdeal.receipts']);
+    expect(captureBridge.requestCount, 1);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
+  testWidgets('fails closed when receipt verifier factory throws', (
+    tester,
+  ) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        presenter: presenter,
+        receiptExportArtifact: signedDemoReceiptArtifact(),
+        receiptArtifactVerifierFactory: _ThrowingVerifierFactory(),
+      ),
+    );
+
+    await tester.tap(find.text('Receipt'));
+    await tester.pumpAndSettle();
+
     expect(captureBridge.requestCount, 1);
     expect(find.text('Receipt content hidden'), findsOneWidget);
   });
@@ -160,4 +184,14 @@ void main() {
     expect(find.text('Network: recoveryRequired'), findsOneWidget);
     expect(find.text('Network action: recovery_required'), findsOneWidget);
   });
+}
+
+class _ThrowingVerifierFactory extends DemoReceiptArtifactVerifierFactory {
+  _ThrowingVerifierFactory()
+    : super(bridge: RecordingReceiptKeyStorageBridge());
+
+  @override
+  DemoReceiptArtifactVerifier create() {
+    throw StateError('verifier factory unavailable');
+  }
 }
