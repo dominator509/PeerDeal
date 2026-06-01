@@ -131,6 +131,8 @@ the gates below are satisfied.
   outcomes with scrubbed diagnostics.
 - Mounted app demo routes now use a non-throwing scenario snapshot lookup seam
   so catalog drift falls back to a known snapshot instead of crashing routes.
+- App demo scenario selection now ignores unknown ids without throwing, keeping
+  mounted navigation on the current scenario when selection input drifts.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
