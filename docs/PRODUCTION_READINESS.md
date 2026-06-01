@@ -139,6 +139,8 @@ the gates below are satisfied.
   receipt presentation fails.
 - Mounted join routes now fail closed to a rejected outcome when route-level
   orchestrator setup fails before adapter guards can run.
+- Join orchestration now treats event-sink failures as non-decision side-effect
+  failures, preserving join/rejection outcomes instead of throwing.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

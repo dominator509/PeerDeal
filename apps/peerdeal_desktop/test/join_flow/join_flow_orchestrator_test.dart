@@ -2,6 +2,7 @@ import 'package:peerdeal_desktop/join_flow/fakes.dart';
 import 'package:peerdeal_desktop/join_flow/join_flow_adapters.dart';
 import 'package:peerdeal_desktop/join_flow/join_flow_models.dart';
 import 'package:peerdeal_desktop/join_flow/join_flow_orchestrator.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -38,6 +39,28 @@ void main() {
       bootstrapCoordinator: FakeBootstrapCoordinator(),
       governanceCommitter: FakeGovernanceCommitter(acceptJoin: true),
       eventSink: sink,
+    );
+
+    final result = await orchestrator.runFirstJoin(
+      const InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+      ),
+    );
+
+    expect(result.resultCode, 'OK_JOINED');
+    expect(result.state, JoinFlowState.joined);
+  });
+
+  test('returns joined when event sink throws', () async {
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: FakeInviteResolver(),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(allAccepted: true),
+      roleAuthorizer: FakeRoleAuthorizer(allow: true),
+      bootstrapCoordinator: FakeBootstrapCoordinator(),
+      governanceCommitter: FakeGovernanceCommitter(acceptJoin: true),
+      eventSink: _ThrowingJoinEventSink(),
     );
 
     final result = await orchestrator.runFirstJoin(
@@ -173,6 +196,33 @@ void main() {
     expect(sink.log.last, 'joinRejected:ERR_INVITE_RESOLUTION_FAILED');
   });
 
+  test('preserves adapter failure outcome when event sink throws', () async {
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: _ThrowingInviteResolver(),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(),
+      roleAuthorizer: FakeRoleAuthorizer(),
+      bootstrapCoordinator: FakeBootstrapCoordinator(),
+      governanceCommitter: FakeGovernanceCommitter(),
+      eventSink: _ThrowingJoinEventSink(),
+    );
+
+    final result = await orchestrator.runFirstJoin(
+      const InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+      ),
+    );
+
+    expect(result.state, JoinFlowState.joinRejected);
+    expect(result.status, JoinDecisionStatus.negotiationFailed);
+    expect(result.resultCode, 'ERR_INVITE_RESOLUTION_FAILED');
+    expect(result.diagnostics.single.toJson(), {
+      'code': 'ERR_INVITE_RESOLUTION_FAILED',
+      'message': 'Invite resolution failed.',
+    });
+  });
+
   test('rejects rejoin when governance commit throws', () async {
     final sink = RecordingJoinEventSink();
     final orchestrator = JoinFlowOrchestrator(
@@ -218,5 +268,17 @@ class _ThrowingRejoinCommitter extends FakeGovernanceCommitter {
     required String rejoinToken,
   }) {
     throw StateError('governance unavailable');
+  }
+}
+
+class _ThrowingJoinEventSink implements JoinEventSink {
+  @override
+  Future<void> emitState({
+    required JoinFlowState state,
+    required String resultCode,
+    List<ProtocolDiagnostic> diagnostics = const <ProtocolDiagnostic>[],
+    String? message,
+  }) {
+    throw StateError('event sink unavailable');
   }
 }

@@ -37,7 +37,7 @@ class JoinFlowOrchestrator {
   final ProtocolCatalog _protocolCatalog;
 
   Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.inviteUnresolved,
       resultCode: 'JOIN_STARTED',
     );
@@ -52,7 +52,7 @@ class JoinFlowOrchestrator {
         message: 'Invite resolution failed.',
       );
     }
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.inviteResolved,
       resultCode: 'INVITE_RESOLVED',
     );
@@ -63,7 +63,7 @@ class JoinFlowOrchestrator {
       final diagnostics = _protocolIncompatibleDiagnostics(
         resolvedInvite.protocolVersion,
       );
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: ProtocolResultCodes.errProtocolIncompatible,
         diagnostics: diagnostics,
@@ -76,7 +76,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.preflightPending,
       resultCode: 'PREFLIGHT_PENDING',
     );
@@ -96,7 +96,7 @@ class JoinFlowOrchestrator {
     }
 
     if (!negotiation.compatible) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: negotiation.reasonCode ?? 'ERR_NEGOTIATION_FAILED',
       );
@@ -107,7 +107,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.negotiating,
       resultCode: 'NEGOTIATION_OK',
     );
@@ -127,7 +127,7 @@ class JoinFlowOrchestrator {
     }
 
     if (!acks.allRequiredAccepted) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.ackRequired,
         resultCode: 'ACK_REQUIRED',
       );
@@ -138,7 +138,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.rolePending,
       resultCode: 'DISCLOSURES_ACCEPTED',
     );
@@ -158,7 +158,7 @@ class JoinFlowOrchestrator {
     }
 
     if (roleGrant == null) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: 'ERR_ROLE_DENIED',
       );
@@ -183,7 +183,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.bootstrapPending,
       resultCode: bootstrapPlan.requiresBootstrap
           ? 'BOOTSTRAP_REQUIRED'
@@ -206,7 +206,7 @@ class JoinFlowOrchestrator {
     }
 
     if (!commit.accepted) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: commit.reasonCode ?? 'ERR_GOVERNANCE_DENIED',
       );
@@ -217,10 +217,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
-      state: JoinFlowState.joined,
-      resultCode: 'OK_JOINED',
-    );
+    await _safeEmitState(state: JoinFlowState.joined, resultCode: 'OK_JOINED');
 
     return const JoinFlowOutcome(
       state: JoinFlowState.joined,
@@ -232,7 +229,7 @@ class JoinFlowOrchestrator {
   Future<JoinFlowOutcome> runRejoin(InviteContext context) async {
     final rejoinToken = context.rejoinToken;
     if (rejoinToken == null || rejoinToken.isEmpty) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: 'ERR_REJOIN_TOKEN_REQUIRED',
       );
@@ -243,7 +240,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.rejoinPending,
       resultCode: 'REJOIN_STARTED',
     );
@@ -264,7 +261,7 @@ class JoinFlowOrchestrator {
       final diagnostics = _protocolIncompatibleDiagnostics(
         resolvedInvite.protocolVersion,
       );
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: ProtocolResultCodes.errProtocolIncompatible,
         diagnostics: diagnostics,
@@ -292,7 +289,7 @@ class JoinFlowOrchestrator {
     }
 
     if (!commit.accepted) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: commit.reasonCode ?? 'ERR_REJOIN_REJECTED',
       );
@@ -303,7 +300,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.rejoined,
       resultCode: 'OK_REJOINED',
     );
@@ -338,7 +335,7 @@ class JoinFlowOrchestrator {
         ProtocolDiagnostic(code: resultCode, message: message),
       ],
     );
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.joinRejected,
       resultCode: resultCode,
       diagnostics: diagnostics,
@@ -351,5 +348,23 @@ class JoinFlowOrchestrator {
       diagnostics: diagnostics,
       message: message,
     );
+  }
+
+  Future<void> _safeEmitState({
+    required JoinFlowState state,
+    required String resultCode,
+    List<ProtocolDiagnostic> diagnostics = const <ProtocolDiagnostic>[],
+    String? message,
+  }) async {
+    try {
+      await _eventSink.emitState(
+        state: state,
+        resultCode: resultCode,
+        diagnostics: diagnostics,
+        message: message,
+      );
+    } on Object {
+      return;
+    }
   }
 }
