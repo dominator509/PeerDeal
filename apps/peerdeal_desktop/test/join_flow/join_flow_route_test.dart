@@ -68,4 +68,30 @@ void main() {
     expect(find.text('State: joinRejected'), findsOneWidget);
     expect(find.text('Result: ERR_ROLE_DENIED'), findsOneWidget);
   });
+
+  testWidgets('fails closed when route orchestrator setup throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: (_) {
+            throw StateError('join flow unavailable');
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Loading join'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_JOIN_FLOW_UNAVAILABLE'), findsOneWidget);
+    expect(
+      find.text('ERR_JOIN_FLOW_UNAVAILABLE: Join flow is unavailable.'),
+      findsOneWidget,
+    );
+  });
 }

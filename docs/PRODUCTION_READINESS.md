@@ -137,6 +137,8 @@ the gates below are satisfied.
   construction fails, falling back to the rejected verifier-unavailable surface.
 - Receipt routes now fail closed to an obscured rejected surface when async
   receipt presentation fails.
+- Mounted join routes now fail closed to a rejected outcome when route-level
+  orchestrator setup fails before adapter guards can run.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

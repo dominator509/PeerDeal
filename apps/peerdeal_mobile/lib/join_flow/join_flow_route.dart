@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'fakes.dart';
 import 'join_flow_models.dart';
@@ -81,17 +82,32 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
     );
   }
 
-  Future<JoinFlowOutcome> _run(JoinFlowDemoMode mode) {
-    final orchestrator =
-        widget._orchestratorFactory?.call(mode) ?? _demoOrchestrator(mode);
-    final context = InviteContext(
-      inviteCode: 'ABC123',
-      requestedRole: RequestedRole.player,
-      rejoinToken: mode == JoinFlowDemoMode.rejoin ? 'rj_001' : null,
-    );
-    return mode == JoinFlowDemoMode.rejoin
-        ? orchestrator.runRejoin(context)
-        : orchestrator.runFirstJoin(context);
+  Future<JoinFlowOutcome> _run(JoinFlowDemoMode mode) async {
+    try {
+      final orchestrator =
+          widget._orchestratorFactory?.call(mode) ?? _demoOrchestrator(mode);
+      final context = InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+        rejoinToken: mode == JoinFlowDemoMode.rejoin ? 'rj_001' : null,
+      );
+      return mode == JoinFlowDemoMode.rejoin
+          ? await orchestrator.runRejoin(context)
+          : await orchestrator.runFirstJoin(context);
+    } on Object {
+      return const JoinFlowOutcome(
+        state: JoinFlowState.joinRejected,
+        status: JoinDecisionStatus.rejected,
+        resultCode: 'ERR_JOIN_FLOW_UNAVAILABLE',
+        diagnostics: <ProtocolDiagnostic>[
+          ProtocolDiagnostic(
+            code: 'ERR_JOIN_FLOW_UNAVAILABLE',
+            message: 'Join flow is unavailable.',
+          ),
+        ],
+        message: 'Join flow is unavailable.',
+      );
+    }
   }
 
   void _selectMode(JoinFlowDemoMode mode) {
