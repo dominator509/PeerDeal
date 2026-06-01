@@ -33,6 +33,22 @@ void main() {
     expect(capability.warning, contains('unavailable'));
   });
 
+  test('capture protection channel contract tolerates malformed fields', () {
+    final capability = CaptureProtectionChannelContract.decodeCapability(
+      const <String, Object?>{
+        'blockingSupported': 'true',
+        'obscuringSupported': 1,
+        'notes': false,
+        'warning': <String>['bad'],
+      },
+    );
+
+    expect(capability.blockingSupported, isFalse);
+    expect(capability.obscuringSupported, isFalse);
+    expect(capability.notes, 'unavailable');
+    expect(capability.warning, isNull);
+  });
+
   test('local network channel contract decodes fixture payloads', () {
     final fixture = _loadFixture('local_network_bridge_requests.json');
     final methods = fixture['methods'] as Map<String, Object?>;
@@ -80,6 +96,37 @@ void main() {
     expect(snapshot.warning, contains('unavailable'));
   });
 
+  test('local network channel contract tolerates malformed fields', () {
+    final capability = LocalNetworkChannelContract.decodeCapability(
+      const <String, Object?>{
+        'discoverySupported': 'true',
+        'permissionPromptSupported': 1,
+        'broadcastSupported': 'false',
+        'notes': false,
+        'warning': <String>['bad'],
+      },
+    );
+    final snapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(
+      const <String, Object?>{
+        'permissionGranted': 'true',
+        'foundEndpoints': 'peer_a',
+        'interfaceHints': false,
+        'warning': <String>['bad'],
+      },
+    );
+
+    expect(capability.discoverySupported, isFalse);
+    expect(capability.permissionPromptSupported, isFalse);
+    expect(capability.broadcastSupported, isFalse);
+    expect(capability.notes, 'unavailable');
+    expect(capability.warning, isNull);
+
+    expect(snapshot.permissionGranted, isFalse);
+    expect(snapshot.foundEndpoints, isEmpty);
+    expect(snapshot.interfaceHints, isEmpty);
+    expect(snapshot.warning, isNull);
+  });
+
   test('secure key storage channel contract decodes fixture payload', () {
     final fixture = _loadFixture('secure_key_storage_bridge_contract.json');
     final methods = fixture['methods'] as Map<String, Object?>;
@@ -106,6 +153,37 @@ void main() {
     expect(snapshot.available, isFalse);
     expect(snapshot.keys, isEmpty);
     expect(snapshot.warning, contains('unavailable'));
+  });
+
+  test('secure key storage channel contract tolerates malformed fields', () {
+    final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(
+      const <String, Object?>{
+        'available': true,
+        'warning': <String>['bad'],
+        'keys': <Object?>[
+          <String, Object?>{
+            'keyId': 'receipt_signing_1',
+            'purpose': 'receipt_signing',
+            'algorithm': 'hmac-sha256',
+            'secret': 'signing_secret_1',
+            'active': 'true',
+          },
+          <String, Object?>{
+            'keyId': 2,
+            'purpose': 'receipt_signing',
+            'algorithm': 'hmac-sha256',
+            'secret': 'signing_secret_2',
+            'active': true,
+          },
+        ],
+      },
+    );
+
+    expect(snapshot.available, isTrue);
+    expect(snapshot.warning, isNull);
+    expect(snapshot.keys, hasLength(1));
+    expect(snapshot.keys.single.keyId, 'receipt_signing_1');
+    expect(snapshot.keys.single.active, isFalse);
   });
 }
 

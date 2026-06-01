@@ -17,12 +17,13 @@ class LocalNetworkChannelContract {
     }
 
     return LocalNetworkCapability(
-      discoverySupported: (payload['discoverySupported'] as bool?) ?? false,
-      permissionPromptSupported:
-          (payload['permissionPromptSupported'] as bool?) ?? false,
-      broadcastSupported: (payload['broadcastSupported'] as bool?) ?? false,
-      notes: (payload['notes'] as String?) ?? 'unavailable',
-      warning: payload['warning'] as String?,
+      discoverySupported: _boolValue(payload['discoverySupported']),
+      permissionPromptSupported: _boolValue(
+        payload['permissionPromptSupported'],
+      ),
+      broadcastSupported: _boolValue(payload['broadcastSupported']),
+      notes: _stringValue(payload['notes']) ?? 'unavailable',
+      warning: _stringValue(payload['warning']),
     );
   }
 
@@ -36,14 +37,21 @@ class LocalNetworkChannelContract {
     }
 
     return LocalNetworkDiscoverySnapshot(
-      permissionGranted: (payload['permissionGranted'] as bool?) ?? false,
-      foundEndpoints: (payload['foundEndpoints'] as List<dynamic>? ?? const [])
-          .map((endpoint) => endpoint.toString())
-          .toList(growable: false),
-      interfaceHints: (payload['interfaceHints'] as List<dynamic>? ?? const [])
-          .map((hint) => hint.toString())
-          .toList(growable: false),
-      warning: payload['warning'] as String?,
+      permissionGranted: _boolValue(payload['permissionGranted']),
+      foundEndpoints: _listValue(
+        payload['foundEndpoints'],
+      ).map((endpoint) => endpoint.toString()).toList(growable: false),
+      interfaceHints: _listValue(
+        payload['interfaceHints'],
+      ).map((hint) => hint.toString()).toList(growable: false),
+      warning: _stringValue(payload['warning']),
     );
   }
+
+  static bool _boolValue(Object? value) => value is bool ? value : false;
+
+  static String? _stringValue(Object? value) => value is String ? value : null;
+
+  static List<dynamic> _listValue(Object? value) =>
+      value is List<dynamic> ? value : const <dynamic>[];
 }

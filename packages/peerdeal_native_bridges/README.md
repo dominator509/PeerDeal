@@ -37,6 +37,8 @@ to observe local device capabilities.
 - Channel names, method names, fixture payloads, and decode behavior are locked
   in package tests so future platform implementations can target a stable
   contract.
+- Malformed platform payload fields are ignored and normalized to fail-closed
+  capability facts instead of throwing through bridge consumers.
 
 ## Method-channel contracts
 - Capture protection channel: `peerdeal/native_bridges/capture_protection`

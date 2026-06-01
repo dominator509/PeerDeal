@@ -15,12 +15,12 @@ class SecureKeyStorageChannelContract {
       );
     }
 
-    final available = (payload['available'] as bool?) ?? false;
+    final available = _boolValue(payload['available']);
     final keyPayloads = payload['keys'];
     if (!available || keyPayloads is! List<dynamic>) {
       return SecureKeyStorageSnapshot.unavailable(
         warning:
-            payload['warning'] as String? ??
+            _stringValue(payload['warning']) ??
             'Secure key storage snapshot is unavailable.',
       );
     }
@@ -36,7 +36,7 @@ class SecureKeyStorageChannelContract {
     return SecureKeyStorageSnapshot(
       available: true,
       keys: List<SecureKeyRecord>.unmodifiable(keys),
-      warning: payload['warning'] as String?,
+      warning: _stringValue(payload['warning']),
     );
   }
 
@@ -61,7 +61,11 @@ class SecureKeyStorageChannelContract {
       purpose: purpose,
       algorithm: algorithm,
       secret: secret,
-      active: (active as bool?) ?? false,
+      active: _boolValue(active),
     );
   }
+
+  static bool _boolValue(Object? value) => value is bool ? value : false;
+
+  static String? _stringValue(Object? value) => value is String ? value : null;
 }

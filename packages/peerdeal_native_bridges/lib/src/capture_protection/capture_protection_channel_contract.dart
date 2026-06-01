@@ -16,10 +16,14 @@ class CaptureProtectionChannelContract {
     }
 
     return CaptureProtectionCapability(
-      blockingSupported: (payload['blockingSupported'] as bool?) ?? false,
-      obscuringSupported: (payload['obscuringSupported'] as bool?) ?? false,
-      notes: (payload['notes'] as String?) ?? 'unavailable',
-      warning: payload['warning'] as String?,
+      blockingSupported: _boolValue(payload['blockingSupported']),
+      obscuringSupported: _boolValue(payload['obscuringSupported']),
+      notes: _stringValue(payload['notes']) ?? 'unavailable',
+      warning: _stringValue(payload['warning']),
     );
   }
+
+  static bool _boolValue(Object? value) => value is bool ? value : false;
+
+  static String? _stringValue(Object? value) => value is String ? value : null;
 }

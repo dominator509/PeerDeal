@@ -122,6 +122,8 @@ the gates below are satisfied.
   recovery projection path, including restore-surface capture coordination.
 - Mounted app table routes now classify fixture-derived peer metrics through
   `peerdeal_network` before rendering network confidence.
+- Native bridge contract decoders now tolerate malformed platform payload
+  fields and normalize them to fail-closed facts before app policy sees them.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
