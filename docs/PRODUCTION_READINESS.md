@@ -147,6 +147,8 @@ the gates below are satisfied.
   encryption adapters throw.
 - Receipt import inspection now rejects signed artifacts when verifier adapters
   throw during signature verification.
+- Opaque receipt export encoding now fails closed for direct callers when signer
+  or cipher adapters throw.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all

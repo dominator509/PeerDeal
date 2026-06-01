@@ -36,6 +36,8 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
   privacy-leaking payloads, or verifier adapter failures.
 - `DefaultReceiptService.exportReceipt` fails closed to an unavailable artifact
   when export signing or encryption adapters throw.
+- `OpaqueExportEncoder` also fails closed for direct callers when signer or
+  cipher adapters throw.
 
 ## Starter status
 This scaffold is aligned to the locked PeerDeal receipt, retention, and privacy direction and is intended

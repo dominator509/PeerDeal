@@ -14,6 +14,16 @@ class OpaqueExportEncoder {
   final ReceiptSigner? _signer;
 
   ReceiptExportArtifact encode(PeerDealReceipt receipt) {
+    try {
+      return _encode(receipt);
+    } on Object {
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt export failed.',
+      );
+    }
+  }
+
+  ReceiptExportArtifact _encode(PeerDealReceipt receipt) {
     final innerBody = jsonEncode(<String, Object?>{
       'receipt_id': receipt.receiptId,
       'receipt_version': receipt.receiptVersion,
