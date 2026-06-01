@@ -126,6 +126,9 @@ the gates below are satisfied.
   fields and normalize them to fail-closed facts before app policy sees them.
 - Native bridge method-channel wrappers now fail closed on malformed top-level
   platform payloads instead of letting decode errors escape app policy.
+- App join-flow orchestrators now convert invite, negotiation, disclosure,
+  role, bootstrap, and governance adapter exceptions into explicit rejected
+  outcomes with scrubbed diagnostics.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

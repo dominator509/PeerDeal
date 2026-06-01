@@ -1,4 +1,5 @@
 import 'package:peerdeal_desktop/join_flow/fakes.dart';
+import 'package:peerdeal_desktop/join_flow/join_flow_adapters.dart';
 import 'package:peerdeal_desktop/join_flow/join_flow_models.dart';
 import 'package:peerdeal_desktop/join_flow/join_flow_orchestrator.dart';
 import 'package:test/test.dart';
@@ -142,4 +143,80 @@ void main() {
     expect(result.resultCode, 'OK_REJOINED');
     expect(result.state, JoinFlowState.rejoined);
   });
+
+  test('rejects first join when invite resolution throws', () async {
+    final sink = RecordingJoinEventSink();
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: _ThrowingInviteResolver(),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(),
+      roleAuthorizer: FakeRoleAuthorizer(),
+      bootstrapCoordinator: FakeBootstrapCoordinator(),
+      governanceCommitter: FakeGovernanceCommitter(),
+      eventSink: sink,
+    );
+
+    final result = await orchestrator.runFirstJoin(
+      const InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+      ),
+    );
+
+    expect(result.state, JoinFlowState.joinRejected);
+    expect(result.status, JoinDecisionStatus.negotiationFailed);
+    expect(result.resultCode, 'ERR_INVITE_RESOLUTION_FAILED');
+    expect(result.diagnostics.single.toJson(), {
+      'code': 'ERR_INVITE_RESOLUTION_FAILED',
+      'message': 'Invite resolution failed.',
+    });
+    expect(sink.log.last, 'joinRejected:ERR_INVITE_RESOLUTION_FAILED');
+  });
+
+  test('rejects rejoin when governance commit throws', () async {
+    final sink = RecordingJoinEventSink();
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: FakeInviteResolver(),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(),
+      roleAuthorizer: FakeRoleAuthorizer(),
+      bootstrapCoordinator: FakeBootstrapCoordinator(),
+      governanceCommitter: _ThrowingRejoinCommitter(),
+      eventSink: sink,
+    );
+
+    final result = await orchestrator.runRejoin(
+      const InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+        rejoinToken: 'rj_001',
+      ),
+    );
+
+    expect(result.state, JoinFlowState.joinRejected);
+    expect(result.status, JoinDecisionStatus.rejoinRejected);
+    expect(result.resultCode, 'ERR_REJOIN_COMMIT_FAILED');
+    expect(result.diagnostics.single.toJson(), {
+      'code': 'ERR_REJOIN_COMMIT_FAILED',
+      'message': 'Rejoin commit failed.',
+    });
+    expect(sink.log.last, 'joinRejected:ERR_REJOIN_COMMIT_FAILED');
+  });
+}
+
+class _ThrowingInviteResolver implements InviteResolver {
+  @override
+  Future<ResolvedInvite> resolveInvite(InviteContext context) {
+    throw StateError('transport unavailable');
+  }
+}
+
+class _ThrowingRejoinCommitter extends FakeGovernanceCommitter {
+  @override
+  Future<GovernanceCommitResult> commitRejoin({
+    required ResolvedInvite resolvedInvite,
+    required String rejoinToken,
+  }) {
+    throw StateError('governance unavailable');
+  }
 }
