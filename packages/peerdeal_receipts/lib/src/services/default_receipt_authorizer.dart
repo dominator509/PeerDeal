@@ -14,6 +14,14 @@ class DefaultReceiptAuthorizer implements ReceiptAuthorizer {
     PeerDealReceipt receipt,
     ReceiptAuthorizationRequest request,
   ) {
+    if (!receipt.hasRequiredEnvelopeFields) {
+      return const ReceiptAuthorizationResult(
+        allowed: false,
+        normalizedResultCode: 'ERR_RECEIPT_MALFORMED',
+        message: 'Receipt envelope is malformed.',
+      );
+    }
+
     if (receipt.wipeState == ReceiptWipeState.wiped) {
       return const ReceiptAuthorizationResult(
         allowed: false,

@@ -1,0 +1,18 @@
+{
+  "event_id": "evt_rejected_protocol_001",
+  "event_type": "OpenTableSessionOpened",
+  "event_version": "1.0",
+  "protocol_version": "2.0.0",
+  "event_seq": 1,
+  "table_id": "tbl_001",
+  "session_id": "sess_001",
+  "hand_id": null,
+  "emitted_at": "2026-04-25T12:05:01Z",
+  "actor_ref": "system",
+  "payload": {
+    "config_id": "cfg_open_table_001",
+    "mode_type": "open_table"
+  },
+  "prev_event_hash": "GENESIS",
+  "event_hash": "hash_placeholder"
+}

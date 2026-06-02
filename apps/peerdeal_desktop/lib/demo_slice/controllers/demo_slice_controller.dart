@@ -9,7 +9,7 @@ class DemoSliceController {
   List<DemoScenario> get scenarios => DemoScenarioCatalog.scenarios;
 
   void selectScenario(String scenarioId) {
-    _active = scenarios.firstWhere((s) => s.id == scenarioId);
+    trySelectScenario(scenarioId);
   }
 
   bool trySelectScenario(String scenarioId) {

@@ -1,4 +1,4 @@
-﻿name: peerdeal_workspace
+name: peerdeal_workspace
 publish_to: none
 
 environment:
@@ -24,7 +24,7 @@ workspace:
   - packages/peerdeal_testkit
 
 dev_dependencies:
-  melos: ^7.5.1
+  melos: ^7.8.0
 
 melos:
   scripts:

@@ -25,4 +25,13 @@ void main() {
       expect(controller.activeScenario, same(initial));
     },
   );
+
+  test('selectScenario ignores unknown scenario without throwing', () {
+    final controller = DemoSliceController();
+    final initial = controller.activeScenario;
+
+    controller.selectScenario('missing_scenario');
+
+    expect(controller.activeScenario, same(initial));
+  });
 }

@@ -154,4 +154,231 @@ void main() {
     expect(result.hasFatalConflicts, isTrue);
     expect(result.conflicts.single.code, 'ERR_SNAPSHOT_SCHEMA_UNSUPPORTED');
   });
+
+  test('flags fatal snapshot suffix gap', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 2,
+          snapshotHash: 'snap_hash',
+          payload: <String, Object?>{},
+        ),
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_4',
+            eventType: 'RecoveryPauseEnded',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 4,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:05Z',
+            actorRef: 'system',
+            payload: <String, Object?>{},
+            prevEventHash: 'hash_3',
+            eventHash: 'hash_4',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_SUFFIX_GAP');
+    expect(result.conflicts.single.expected, '3');
+    expect(result.conflicts.single.actual, '4');
+  });
+
+  test('flags fatal event hash chain break', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'OpenTableSessionOpened',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:00Z',
+            actorRef: 'host_1',
+            payload: <String, Object?>{},
+            prevEventHash: 'root',
+            eventHash: 'hash_1',
+          ),
+          EventEnvelope(
+            eventId: 'evt_2',
+            eventType: 'HandStarted',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 2,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: 'hand_1',
+            emittedAt: '2026-04-25T00:00:05Z',
+            actorRef: 'system',
+            payload: <String, Object?>{},
+            prevEventHash: 'hash_unrelated',
+            eventHash: 'hash_2',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EVENT_HASH_CHAIN_BREAK');
+    expect(result.conflicts.single.expected, 'hash_1');
+    expect(result.conflicts.single.actual, 'hash_unrelated');
+  });
+
+  test('flags fatal event sequence gap', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'OpenTableSessionOpened',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:00Z',
+            actorRef: 'host_1',
+            payload: <String, Object?>{},
+            prevEventHash: 'root',
+            eventHash: 'hash_1',
+          ),
+          EventEnvelope(
+            eventId: 'evt_3',
+            eventType: 'HandStarted',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 3,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: 'hand_1',
+            emittedAt: '2026-04-25T00:00:05Z',
+            actorRef: 'system',
+            payload: <String, Object?>{},
+            prevEventHash: 'hash_1',
+            eventHash: 'hash_3',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EVENT_SEQUENCE_GAP');
+    expect(result.conflicts.single.expected, '2');
+    expect(result.conflicts.single.actual, '3');
+  });
+
+  test('flags fatal event scope mismatch', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'OpenTableSessionOpened',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'other_table',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:00Z',
+            actorRef: 'host_1',
+            payload: <String, Object?>{},
+            prevEventHash: 'root',
+            eventHash: 'hash_1',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EVENT_SCOPE_MISMATCH');
+    expect(result.conflicts.single.expected, 'table_1/session_1');
+    expect(result.conflicts.single.actual, 'other_table/session_1');
+  });
+
+  test('flags fatal empty recovery window', () {
+    final result = detector.detect(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EMPTY_RECOVERY_WINDOW');
+  });
+
+  test('flags fatal suffix window without snapshot prefix', () {
+    final result = detector.detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          _event(3, prevEventHash: 'hash_2', eventHash: 'hash_3'),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(result.conflicts.single.code, 'ERR_EVENT_WINDOW_MISSING_PREFIX');
+    expect(result.conflicts.single.expected, '1');
+    expect(result.conflicts.single.actual, '3');
+  });
+}
+
+EventEnvelope _event(
+  int eventSeq, {
+  required String prevEventHash,
+  required String eventHash,
+}) {
+  return EventEnvelope(
+    eventId: 'evt_$eventSeq',
+    eventType: eventSeq == 1 ? 'OpenTableSessionOpened' : 'RecoveryPauseEnded',
+    eventVersion: '1.0',
+    protocolVersion: '1.0.0',
+    eventSeq: eventSeq,
+    tableId: 'table_1',
+    sessionId: 'session_1',
+    handId: null,
+    emittedAt: '2026-04-25T00:00:00Z',
+    actorRef: 'system',
+    payload: const <String, Object?>{},
+    prevEventHash: prevEventHash,
+    eventHash: eventHash,
+  );
 }

@@ -1,0 +1,24 @@
+{
+  "channel": "peerdeal/native_bridges/secure_key_storage",
+  "methods": {
+    "loadKeyRing": {
+      "available": true,
+      "keys": [
+        {
+          "keyId": "receipt_signing_1",
+          "purpose": "receipt_signing",
+          "algorithm": "hmac-sha256",
+          "secret": "signing_secret_1",
+          "active": true
+        },
+        {
+          "keyId": "receipt_encryption_1",
+          "purpose": "receipt_encryption",
+          "algorithm": "external",
+          "secret": "encryption_secret_1",
+          "active": true
+        }
+      ]
+    }
+  }
+}

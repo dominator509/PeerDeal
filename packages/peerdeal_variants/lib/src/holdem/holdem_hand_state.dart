@@ -57,6 +57,7 @@ class HoldemHandState {
     required this.currentBetToCall,
     required this.minimumRaiseAmount,
     this.boardCards = const <String>[],
+    this.actedSeatsThisRound = const <int>[],
     this.pot = 0,
     this.lastAggressorSeat,
     this.lastActionSummary,
@@ -73,6 +74,7 @@ class HoldemHandState {
   final int currentBetToCall;
   final int minimumRaiseAmount;
   final List<String> boardCards;
+  final List<int> actedSeatsThisRound;
   final int pot;
   final int? lastAggressorSeat;
   final String? lastActionSummary;
@@ -94,6 +96,7 @@ class HoldemHandState {
     int? currentBetToCall,
     int? minimumRaiseAmount,
     List<String>? boardCards,
+    List<int>? actedSeatsThisRound,
     int? pot,
     int? lastAggressorSeat,
     String? lastActionSummary,
@@ -110,6 +113,7 @@ class HoldemHandState {
       currentBetToCall: currentBetToCall ?? this.currentBetToCall,
       minimumRaiseAmount: minimumRaiseAmount ?? this.minimumRaiseAmount,
       boardCards: boardCards ?? this.boardCards,
+      actedSeatsThisRound: actedSeatsThisRound ?? this.actedSeatsThisRound,
       pot: pot ?? this.pot,
       lastAggressorSeat: lastAggressorSeat ?? this.lastAggressorSeat,
       lastActionSummary: lastActionSummary ?? this.lastActionSummary,

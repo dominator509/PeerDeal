@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_sync
+# AGENTS.md - peerdeal_sync
 
 ## Purpose
 Keep sync, snapshot recovery, and reconciliation logic isolated from poker-rule truth, UI rendering, and platform-specific transport details.

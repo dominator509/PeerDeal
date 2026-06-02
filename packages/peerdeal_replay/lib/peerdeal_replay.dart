@@ -1,5 +1,3 @@
-library peerdeal_replay;
-
 export 'src/contracts/replay_engine.dart';
 export 'src/contracts/replay_state_projector.dart';
 export 'src/models/anchor_hash.dart';

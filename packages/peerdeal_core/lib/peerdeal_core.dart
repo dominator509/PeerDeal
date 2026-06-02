@@ -1,11 +1,10 @@
-library peerdeal_core;
-
 export 'src/contracts/action_validator.dart';
 export 'src/contracts/invariant_guard.dart';
 export 'src/contracts/table_orchestrator.dart';
 export 'src/invariants/baseline_invariant_guards.dart';
 export 'src/models/command_application_result.dart';
 export 'src/models/command_validation_result.dart';
+export 'src/models/core_invariant_codes.dart';
 export 'src/models/core_command.dart';
 export 'src/models/core_event.dart';
 export 'src/models/invariant_violation.dart';

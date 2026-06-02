@@ -13,13 +13,23 @@ class DefaultConfidenceClassifier implements ConfidenceClassifier {
     final anyAnchorMismatch = items.any((s) => !s.anchorAligned);
     if (anyAnchorMismatch) return NetworkConfidence.recoveryRequired;
 
-    final highLag = items.any((s) => s.avgLatencyMs >= 800 || s.ackLagMs >= 1000);
+    final anySevereEventLag = items.any((s) => s.eventIndexLag >= 3);
+    if (anySevereEventLag) return NetworkConfidence.recoveryRequired;
+
+    final anyEventLag = items.any((s) => s.eventIndexLag > 0);
+    if (anyEventLag) return NetworkConfidence.degraded;
+
+    final highLag = items.any(
+      (s) => s.avgLatencyMs >= 800 || s.ackLagMs >= 1000,
+    );
     if (highLag) return NetworkConfidence.degraded;
 
     final anyDisconnectHeavy = items.any((s) => s.disconnectsInWindow >= 3);
     if (anyDisconnectHeavy) return NetworkConfidence.degraded;
 
-    final allFast = items.every((s) => s.avgLatencyMs < 150 && s.ackLagMs < 250);
+    final allFast = items.every(
+      (s) => s.avgLatencyMs < 150 && s.ackLagMs < 250,
+    );
     if (allFast) return NetworkConfidence.high;
 
     return NetworkConfidence.stable;

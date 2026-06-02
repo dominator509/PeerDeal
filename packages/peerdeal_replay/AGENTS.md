@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_replay
+# AGENTS.md - peerdeal_replay
 
 ## Mission
 Implement deterministic reconstruction and replay-safe diagnostics without creating alternate truth.

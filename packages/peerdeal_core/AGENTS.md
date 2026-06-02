@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_core
+# AGENTS.md - peerdeal_core
 
 ## Package mission
 Own the deterministic universal poker-core boundary for PeerDeal.

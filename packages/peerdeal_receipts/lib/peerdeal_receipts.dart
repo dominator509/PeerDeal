@@ -1,17 +1,25 @@
-library peerdeal_receipts;
-
 export 'src/models/receipt_binding_mode.dart';
 export 'src/models/receipt_access_mode.dart';
 export 'src/models/receipt_wipe_state.dart';
 export 'src/models/peer_deal_receipt.dart';
 export 'src/models/receipt_scan_result.dart';
 export 'src/models/receipt_export_artifact.dart';
+export 'src/models/receipt_export_inspection_result.dart';
 export 'src/models/receipt_authorization_request.dart';
 export 'src/models/receipt_authorization_result.dart';
+export 'src/models/receipt_encryption_key.dart';
+export 'src/models/receipt_signing_key.dart';
 export 'src/contracts/receipt_service.dart';
 export 'src/contracts/receipt_authorizer.dart';
 export 'src/contracts/receipt_cipher.dart';
+export 'src/contracts/receipt_encryption_key_provider.dart';
 export 'src/contracts/receipt_signer.dart';
+export 'src/contracts/receipt_signing_key_provider.dart';
 export 'src/services/default_receipt_service.dart';
 export 'src/services/default_receipt_authorizer.dart';
+export 'src/services/hmac_sha256_receipt_cipher.dart';
+export 'src/services/hmac_sha256_receipt_signer.dart';
+export 'src/services/opaque_export_decoder.dart';
 export 'src/services/opaque_export_encoder.dart';
+export 'src/services/receipt_key_ring_snapshot.dart';
+export 'src/services/static_receipt_signing_key_provider.dart';

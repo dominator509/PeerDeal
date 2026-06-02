@@ -25,4 +25,22 @@ abstract final class ProtocolResultCodes {
   static const errEventProtocolIncompatible = 'ERR_EVENT_PROTOCOL_INCOMPATIBLE';
   static const errEventProtocolMismatch = 'ERR_EVENT_PROTOCOL_MISMATCH';
   static const errEventSchemaUnsupported = 'ERR_EVENT_SCHEMA_UNSUPPORTED';
+
+  static const all = <String>[
+    errProtocolIncompatible,
+    errReplayProtocolIncompatible,
+    errReplaySnapshotProtocolIncompatible,
+    errReplaySnapshotProtocolMismatch,
+    errReplaySnapshotSchemaUnsupported,
+    errReplayEventProtocolIncompatible,
+    errReplayEventProtocolMismatch,
+    errReplayEventSchemaUnsupported,
+    errRecoveryProtocolIncompatible,
+    errSnapshotProtocolIncompatible,
+    errSnapshotProtocolMismatch,
+    errSnapshotSchemaUnsupported,
+    errEventProtocolIncompatible,
+    errEventProtocolMismatch,
+    errEventSchemaUnsupported,
+  ];
 }

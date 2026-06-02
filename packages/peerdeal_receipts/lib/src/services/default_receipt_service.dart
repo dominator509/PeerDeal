@@ -12,8 +12,8 @@ class DefaultReceiptService implements ReceiptService {
   const DefaultReceiptService({
     required ReceiptAuthorizer authorizer,
     OpaqueExportEncoder exportEncoder = const OpaqueExportEncoder(),
-  })  : _authorizer = authorizer,
-        _exportEncoder = exportEncoder;
+  }) : _authorizer = authorizer,
+       _exportEncoder = exportEncoder;
 
   final ReceiptAuthorizer _authorizer;
   final OpaqueExportEncoder _exportEncoder;
@@ -25,11 +25,37 @@ class DefaultReceiptService implements ReceiptService {
   ) => _authorizer.authorize(receipt, request);
 
   @override
-  ReceiptExportArtifact exportReceipt(PeerDealReceipt receipt) =>
-      _exportEncoder.encode(receipt);
+  ReceiptExportArtifact exportReceipt(PeerDealReceipt receipt) {
+    if (!receipt.hasRequiredEnvelopeFields) {
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt envelope is malformed.',
+      );
+    }
+
+    if (receipt.wipeState == ReceiptWipeState.wiped) {
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt unavailable.',
+      );
+    }
+
+    try {
+      return _exportEncoder.encode(receipt);
+    } on Object {
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt export failed.',
+      );
+    }
+  }
 
   @override
   ReceiptScanResult scanReceipt(PeerDealReceipt receipt) {
+    if (!receipt.hasRequiredEnvelopeFields) {
+      return const ReceiptScanResult(
+        status: 'rejected',
+        message: 'Receipt envelope is malformed.',
+      );
+    }
+
     if (receipt.wipeState == ReceiptWipeState.wiped) {
       return const ReceiptScanResult(
         status: 'wiped',

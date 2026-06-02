@@ -82,6 +82,132 @@ void main() {
     expect(result.isValid, isTrue);
   });
 
+  test('accepts call for exact remaining stack', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 50,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects non-all-in call below amount owed', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 49,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_CALL_EXCEEDS_STACK');
+  });
+
+  test('rejects call when there is nothing to call', () {
+    final state = buildState().copyWith(
+      currentBetToCall: 50,
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_NOTHING_TO_CALL');
+  });
+
   test('rejects raise below minimum total', () {
     final result = validator.validate(
       state: buildState(),
@@ -94,5 +220,328 @@ void main() {
 
     expect(result.isValid, isFalse);
     expect(result.reasonCode, 'ERR_RAISE_BELOW_MINIMUM');
+  });
+
+  test('rejects zero opening bet amount', () {
+    final state = buildState().copyWith(currentBetToCall: 0);
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.bet,
+        amount: 0,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_BET_BELOW_MINIMUM');
+  });
+
+  test('rejects negative raise amount', () {
+    final result = validator.validate(
+      state: buildState(),
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.raise,
+        amount: -1,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_RAISE_BELOW_MINIMUM');
+  });
+
+  test('accepts opening bet for exact remaining stack', () {
+    final state = buildState().copyWith(
+      currentBetToCall: 0,
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 100,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.bet,
+        amount: 100,
+      ),
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects opening bet above remaining stack', () {
+    final state = buildState().copyWith(
+      currentBetToCall: 0,
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 100,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.bet,
+        amount: 101,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_BET_EXCEEDS_STACK');
+  });
+
+  test('accepts raise for exact remaining stack contribution', () {
+    final state = buildState().copyWith(
+      currentBetToCall: 100,
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 150,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.raise,
+        amount: 200,
+      ),
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects raise above remaining stack contribution', () {
+    final state = buildState().copyWith(
+      currentBetToCall: 100,
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 149,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.raise,
+        amount: 200,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_RAISE_EXCEEDS_STACK');
+  });
+
+  test('accepts short all-in while facing a bet', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 25,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.allIn,
+      ),
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects all-in with zero stack', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 50,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.allIn,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_STACK_EMPTY');
+  });
+
+  test('rejects voluntary action from already all-in actor', () {
+    final state = buildState().copyWith(
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+          committedThisRound: 100,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.check,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_ACTOR_ALL_IN');
   });
 }

@@ -82,6 +82,20 @@ class BasicConflictDetector implements ConflictDetector {
     }
 
     for (final event in request.events) {
+      if (event.tableId != request.tableId ||
+          event.sessionId != request.sessionId) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_SCOPE_MISMATCH',
+            message:
+                'Recovery event table/session scope does not match the recovery request.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '${request.tableId}/${request.sessionId}',
+            actual: '${event.tableId}/${event.sessionId}',
+          ),
+        );
+      }
+
       final eventCompatibility = protocolCatalog.checkEventEnvelope(event);
       if (eventCompatibility.resultCode == ResultCode.errProtocolIncompatible) {
         conflicts.add(
@@ -131,19 +145,68 @@ class BasicConflictDetector implements ConflictDetector {
             actual: '${current.eventSeq}',
           ),
         );
+      } else if (current.eventSeq != previous.eventSeq + 1) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_SEQUENCE_GAP',
+            message: 'Recovery event sequence gap detected.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '${previous.eventSeq + 1}',
+            actual: '${current.eventSeq}',
+          ),
+        );
+      }
+      if (current.prevEventHash != previous.eventHash) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_HASH_CHAIN_BREAK',
+            message: 'Recovery event hash chain continuity failed.',
+            severity: SyncConflictSeverity.fatal,
+            expected: previous.eventHash,
+            actual: current.prevEventHash,
+          ),
+        );
       }
     }
 
     if (request.snapshot != null && request.events.isNotEmpty) {
       final firstEventSeq = request.events.first.eventSeq;
-      if (firstEventSeq <= request.snapshot!.snapshotBaseEventSeq) {
+      final snapshotBaseEventSeq = request.snapshot!.snapshotBaseEventSeq;
+      if (firstEventSeq <= snapshotBaseEventSeq) {
         conflicts.add(
           SyncConflict(
             code: 'WARN_EVENT_WINDOW_OVERLAPS_SNAPSHOT',
             message:
                 'Recovery event window overlaps the snapshot base sequence and will be filtered.',
             severity: SyncConflictSeverity.recoverable,
-            expected: '>${request.snapshot!.snapshotBaseEventSeq}',
+            expected: '>$snapshotBaseEventSeq',
+            actual: '$firstEventSeq',
+          ),
+        );
+      } else if (firstEventSeq != snapshotBaseEventSeq + 1) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_SNAPSHOT_SUFFIX_GAP',
+            message:
+                'Recovery event window does not continue from the snapshot base sequence.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '${snapshotBaseEventSeq + 1}',
+            actual: '$firstEventSeq',
+          ),
+        );
+      }
+    }
+
+    if (request.snapshot == null && request.events.isNotEmpty) {
+      final firstEventSeq = request.events.first.eventSeq;
+      if (firstEventSeq != 1) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_WINDOW_MISSING_PREFIX',
+            message:
+                'Recovery event window without a snapshot must start at the first event.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '1',
             actual: '$firstEventSeq',
           ),
         );
@@ -185,9 +248,9 @@ class BasicConflictDetector implements ConflictDetector {
     if (request.snapshot == null && request.events.isEmpty) {
       conflicts.add(
         const SyncConflict(
-          code: 'WARN_EMPTY_RECOVERY_WINDOW',
+          code: 'ERR_EMPTY_RECOVERY_WINDOW',
           message: 'Recovery request has no snapshot and no events to apply.',
-          severity: SyncConflictSeverity.warning,
+          severity: SyncConflictSeverity.fatal,
         ),
       );
     }

@@ -1,5 +1,3 @@
-library peerdeal_modes;
-
 export 'src/adapters/mode_registry.dart';
 export 'src/adapters/open_table_mode_adapter.dart';
 export 'src/adapters/tournament_mode_adapter.dart';

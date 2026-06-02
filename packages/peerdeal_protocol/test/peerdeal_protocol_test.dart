@@ -17,6 +17,52 @@ List<File> protocolFixtureFiles() {
     ..sort((a, b) => a.path.compareTo(b.path));
 }
 
+bool isRejectedFixture(File fixture) {
+  final name = fixture.uri.pathSegments.last;
+  return name.startsWith('invalid_') || name.startsWith('unsupported_');
+}
+
+String catalogEntryKey(ProtocolCatalogEntry entry) {
+  return entry.key;
+}
+
+ProtocolCompatibilityResult catalogResultForFixture(
+  ProtocolCatalog catalog,
+  File fixture,
+) {
+  final decoded =
+      jsonDecode(fixture.readAsStringSync()) as Map<String, Object?>;
+  final path = fixture.path;
+
+  if (path.contains(
+    '${Platform.pathSeparator}commands${Platform.pathSeparator}',
+  )) {
+    return catalog.checkCommandEnvelopeJson(decoded);
+  }
+  if (path.contains(
+    '${Platform.pathSeparator}events${Platform.pathSeparator}',
+  )) {
+    return catalog.checkEventEnvelopeJson(decoded);
+  }
+  if (path.contains(
+    '${Platform.pathSeparator}snapshots${Platform.pathSeparator}',
+  )) {
+    return catalog.checkSnapshotEnvelopeJson(decoded);
+  }
+  if (path.contains(
+    '${Platform.pathSeparator}gamefiles${Platform.pathSeparator}',
+  )) {
+    return catalog.checkGameFileJson(decoded);
+  }
+  if (path.contains(
+    '${Platform.pathSeparator}invites${Platform.pathSeparator}',
+  )) {
+    return catalog.checkInvitePayloadJson(decoded);
+  }
+
+  throw ArgumentError.value(path, 'fixture.path', 'Unsupported fixture family');
+}
+
 void main() {
   test('canonical json encoding is stable for map key order', () {
     final a = canonicalJsonEncode({
@@ -42,6 +88,39 @@ void main() {
       final decoded = jsonDecode(fixture.readAsStringSync());
 
       expect(decoded, isA<Map<String, Object?>>(), reason: fixture.path);
+    }
+  });
+
+  test('each protocol fixture category has accepted and rejected examples', () {
+    const categories = <String>[
+      'commands',
+      'events',
+      'gamefiles',
+      'invites',
+      'snapshots',
+    ];
+    final fixtures = protocolFixtureFiles();
+
+    for (final category in categories) {
+      final categoryFixtures = fixtures
+          .where(
+            (fixture) => fixture.path.contains(
+              '${Platform.pathSeparator}$category${Platform.pathSeparator}',
+            ),
+          )
+          .toList();
+
+      expect(categoryFixtures, isNotEmpty, reason: category);
+      expect(
+        categoryFixtures.any((fixture) => !isRejectedFixture(fixture)),
+        isTrue,
+        reason: '$category accepted fixture',
+      );
+      expect(
+        categoryFixtures.any(isRejectedFixture),
+        isTrue,
+        reason: '$category rejected fixture',
+      );
     }
   });
 
@@ -80,6 +159,10 @@ void main() {
       ProtocolResultCodes.errSnapshotSchemaUnsupported,
       'ERR_SNAPSHOT_SCHEMA_UNSUPPORTED',
     );
+    expect(
+      ProtocolResultCodes.all.toSet(),
+      hasLength(ProtocolResultCodes.all.length),
+    );
   });
 
   test('protocol diagnostic serializes optional details consistently', () {
@@ -110,6 +193,22 @@ void main() {
     expect(result.resultCode, ResultCode.okAccepted);
   });
 
+  test('accepted protocol fixtures are locked by the catalog', () {
+    const catalog = ProtocolCatalog();
+    final fixtures = protocolFixtureFiles()
+        .where((fixture) => !isRejectedFixture(fixture))
+        .toList();
+
+    expect(fixtures, isNotEmpty);
+    for (final fixture in fixtures) {
+      final result = catalogResultForFixture(catalog, fixture);
+
+      expect(result.isSupported, isTrue, reason: fixture.path);
+      expect(result.resultCode, ResultCode.okAccepted, reason: fixture.path);
+      expect(result.entry, isNotNull, reason: fixture.path);
+    }
+  });
+
   test('protocol catalog accepts fixture-backed event', () {
     final catalog = ProtocolCatalog();
     final decoded = fixtureJson(
@@ -122,16 +221,274 @@ void main() {
     expect(result.resultCode, ResultCode.okAccepted);
   });
 
+  test('protocol catalog accepts Holdem lifecycle event fixtures', () {
+    const fixturePaths = <String>[
+      'fixtures/events/holdem_hand_started_event_v1.json',
+      'fixtures/events/holdem_showdown_started_event_v1.json',
+      'fixtures/events/holdem_showdown_revealed_event_v1.json',
+      'fixtures/events/holdem_settlement_projected_event_v1.json',
+      'fixtures/events/holdem_uncontested_settlement_projected_event_v1.json',
+      'fixtures/events/holdem_settlement_blocked_event_v1.json',
+      'fixtures/events/holdem_settlement_blocked_empty_pot_event_v1.json',
+      'fixtures/events/holdem_settlement_blocked_invalid_showdown_event_v1.json',
+      'fixtures/events/holdem_hand_settled_event_v1.json',
+    ];
+    const catalog = ProtocolCatalog();
+
+    for (final fixturePath in fixturePaths) {
+      final result = catalog.checkEventEnvelopeJson(fixtureJson(fixturePath));
+
+      expect(result.isSupported, isTrue, reason: fixturePath);
+      expect(result.resultCode, ResultCode.okAccepted, reason: fixturePath);
+    }
+  });
+
+  test('Holdem blocked settlement fixtures carry stable reason codes', () {
+    const fixtureCases = <String, List<String>>{
+      'fixtures/events/holdem_settlement_blocked_event_v1.json': <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE',
+      ],
+      'fixtures/events/holdem_settlement_blocked_empty_pot_event_v1.json':
+          <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_EMPTY_POT'],
+      'fixtures/events/holdem_settlement_blocked_invalid_showdown_event_v1.json':
+          <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN'],
+    };
+
+    for (final entry in fixtureCases.entries) {
+      final decoded = fixtureJson(entry.key);
+      final payload = decoded['payload']! as Map<String, Object?>;
+
+      expect(payload['reason_codes'], entry.value, reason: entry.key);
+      expect(payload['warnings'], containsAll(entry.value), reason: entry.key);
+    }
+  });
+
   test('protocol catalog accepts scaffold replay and recovery events', () {
     const supportedEventTypes = <String>[
+      'OpenTableSessionOpened',
       'ParticipantAdmitted',
+      'ParticipantConnected',
+      'ParticipantSeated',
       'HandStarted',
+      'PlayerFolded',
+      'PlayerChecked',
       'PlayerCalled',
+      'PlayerBet',
+      'PlayerRaised',
+      'PlayerAllIn',
+      'ShowdownStarted',
+      'ShowdownRevealed',
+      'SettlementProjected',
+      'SettlementBlocked',
+      'HandSettled',
+      'SessionCloseRequested',
+      'SessionClosed',
+      'SessionWiped',
       'IgnoredBecauseCoveredBySnapshot',
       'RecoveryPauseEnded',
     ];
 
     for (final eventType in supportedEventTypes) {
+      final result = ProtocolCatalog().check(
+        kind: ProtocolArtifactKind.event,
+        type: eventType,
+        artifactVersion: '1.0',
+        protocolVersion: currentProtocolVersion.toWire(),
+      );
+
+      expect(result.isSupported, isTrue, reason: eventType);
+      expect(result.resultCode, ResultCode.okAccepted, reason: eventType);
+    }
+  });
+
+  test('default protocol catalog entries are unique', () {
+    final keys = defaultProtocolCatalogEntries.map(catalogEntryKey).toList();
+
+    expect(keys.toSet(), hasLength(keys.length));
+  });
+
+  test('default protocol catalog lock is complete', () {
+    final report = const ProtocolCatalog().validateLock();
+
+    expect(report.isLocked, isTrue);
+    expect(report.errors, isEmpty);
+  });
+
+  test('protocol catalog lock detects duplicate entries', () {
+    const entry = ProtocolCatalogEntry(
+      kind: ProtocolArtifactKind.command,
+      type: 'OpenTableSession',
+      artifactVersion: '1.0',
+      protocolVersion: currentProtocolVersion,
+    );
+    final report =
+        const ProtocolCatalog(
+          entries: <ProtocolCatalogEntry>[entry, entry],
+        ).validateLock(
+          requiredKinds: <ProtocolArtifactKind>[ProtocolArtifactKind.command],
+        );
+
+    expect(report.isLocked, isFalse);
+    expect(
+      report.errors,
+      contains(startsWith('ERR_PROTOCOL_CATALOG_DUPLICATE_ENTRY:')),
+    );
+  });
+
+  test('protocol catalog lock detects missing artifact families', () {
+    final report = const ProtocolCatalog(
+      entries: <ProtocolCatalogEntry>[],
+    ).validateLock();
+
+    expect(report.isLocked, isFalse);
+    expect(
+      report.errors,
+      contains(
+        'ERR_PROTOCOL_CATALOG_MISSING_KIND:${ProtocolArtifactKind.command.name}',
+      ),
+    );
+    expect(
+      report.errors,
+      contains(
+        'ERR_PROTOCOL_CATALOG_MISSING_KIND:${ProtocolArtifactKind.resultCode.name}',
+      ),
+    );
+  });
+
+  test('protocol catalog exposes complete scaffold artifact families', () {
+    const catalog = ProtocolCatalog();
+
+    expect(catalog.supportedTypesFor(ProtocolArtifactKind.command), [
+      'OpenTableSession',
+      'StartHand',
+      'PlayerFold',
+      'PlayerCheck',
+      'PlayerCall',
+      'PlayerBet',
+      'PlayerRaise',
+      'PlayerAllIn',
+      'RequestSessionClose',
+    ]);
+    expect(catalog.supportedTypesFor(ProtocolArtifactKind.event), [
+      'OpenTableSessionOpened',
+      'ParticipantAdmitted',
+      'ParticipantConnected',
+      'ParticipantSeated',
+      'HandStarted',
+      'PlayerFolded',
+      'PlayerChecked',
+      'PlayerCalled',
+      'PlayerBet',
+      'PlayerRaised',
+      'PlayerAllIn',
+      'ShowdownStarted',
+      'ShowdownRevealed',
+      'SettlementProjected',
+      'SettlementBlocked',
+      'HandSettled',
+      'SessionCloseRequested',
+      'SessionClosed',
+      'SessionWiped',
+      'IgnoredBecauseCoveredBySnapshot',
+      'RecoveryPauseEnded',
+    ]);
+    expect(catalog.supportedTypesFor(ProtocolArtifactKind.snapshot), [
+      'TableSnapshot',
+    ]);
+    expect(catalog.supportedTypesFor(ProtocolArtifactKind.gameFile), [
+      'peerdeal.gamefile',
+    ]);
+    expect(catalog.supportedTypesFor(ProtocolArtifactKind.invitePayload), [
+      'InvitePayload',
+    ]);
+    expect(
+      catalog.supportedTypesFor(ProtocolArtifactKind.resultCode),
+      ProtocolResultCodes.all,
+    );
+  });
+
+  test('default protocol catalog groups compose the public catalog', () {
+    expect(defaultProtocolCatalogEntries, [
+      ...supportedCommandCatalogEntries,
+      ...supportedEventCatalogEntries,
+      ...supportedSnapshotCatalogEntries,
+      ...supportedGameFileCatalogEntries,
+      ...supportedInvitePayloadCatalogEntries,
+      ...supportedResultCodeCatalogEntries,
+    ]);
+  });
+
+  test('protocol catalog accepts Game File identities', () {
+    const fixturePaths = <String>[
+      'fixtures/gamefiles/open_table_valid_v1.json',
+      'fixtures/gamefiles/tournament_valid_v1.json',
+    ];
+    const catalog = ProtocolCatalog();
+
+    for (final fixturePath in fixturePaths) {
+      final result = catalog.checkGameFileJson(fixtureJson(fixturePath));
+
+      expect(result.isSupported, isTrue, reason: fixturePath);
+      expect(result.resultCode, ResultCode.okAccepted, reason: fixturePath);
+    }
+  });
+
+  test('protocol catalog accepts invite payload identities', () {
+    final result = const ProtocolCatalog().checkInvitePayloadJson(
+      fixtureJson('fixtures/invites/open_table_player_invite_v1.json'),
+    );
+
+    expect(result.isSupported, isTrue);
+    expect(result.resultCode, ResultCode.okAccepted);
+  });
+
+  test('protocol catalog accepts public protocol result code identities', () {
+    const catalog = ProtocolCatalog();
+
+    for (final code in ProtocolResultCodes.all) {
+      final result = catalog.checkResultCode(code);
+
+      expect(result.isSupported, isTrue, reason: code);
+      expect(result.resultCode, ResultCode.okAccepted, reason: code);
+    }
+  });
+
+  test('protocol catalog accepts scaffold command and action identities', () {
+    const commandTypes = <String>[
+      'OpenTableSession',
+      'StartHand',
+      'PlayerFold',
+      'PlayerCheck',
+      'PlayerCall',
+      'PlayerBet',
+      'PlayerRaise',
+      'PlayerAllIn',
+      'RequestSessionClose',
+    ];
+
+    for (final commandType in commandTypes) {
+      final result = ProtocolCatalog().check(
+        kind: ProtocolArtifactKind.command,
+        type: commandType,
+        artifactVersion: '1.0',
+        protocolVersion: currentProtocolVersion.toWire(),
+      );
+
+      expect(result.isSupported, isTrue, reason: commandType);
+      expect(result.resultCode, ResultCode.okAccepted, reason: commandType);
+    }
+  });
+
+  test('protocol catalog accepts settlement path event identities', () {
+    const eventTypes = <String>[
+      'ShowdownStarted',
+      'ShowdownRevealed',
+      'SettlementProjected',
+      'SettlementBlocked',
+      'HandSettled',
+    ];
+
+    for (final eventType in eventTypes) {
       final result = ProtocolCatalog().check(
         kind: ProtocolArtifactKind.event,
         type: eventType,
@@ -151,6 +508,58 @@ void main() {
       artifactVersion: '1.0',
       protocolVersion: '2.0.0',
     );
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
+  test('protocol catalog rejects unsupported protocol command fixture', () {
+    final decoded = fixtureJson(
+      'fixtures/commands/unsupported_protocol_open_table_session_command_v2.json',
+    );
+    final result = ProtocolCatalog().checkCommandEnvelopeJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
+  test('protocol catalog rejects unsupported protocol event fixture', () {
+    final decoded = fixtureJson(
+      'fixtures/events/unsupported_protocol_open_table_session_opened_event_v2.json',
+    );
+    final result = ProtocolCatalog().checkEventEnvelopeJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
+  test('protocol catalog rejects unsupported protocol snapshot fixture', () {
+    final decoded = fixtureJson(
+      'fixtures/snapshots/unsupported_protocol_table_snapshot_v2.json',
+    );
+    final result = ProtocolCatalog().checkSnapshotEnvelopeJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
+  test('protocol catalog rejects unsupported protocol Game File fail-safe', () {
+    final decoded = fixtureJson('fixtures/gamefiles/open_table_valid_v1.json');
+    decoded['protocol_version'] = '2.0.0';
+
+    final result = const ProtocolCatalog().checkGameFileJson(decoded);
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errProtocolIncompatible);
+  });
+
+  test('protocol catalog rejects unsupported protocol invite fail-safe', () {
+    final decoded = fixtureJson(
+      'fixtures/invites/open_table_player_invite_v1.json',
+    );
+    decoded['protocol_version'] = '2.0.0';
+
+    final result = const ProtocolCatalog().checkInvitePayloadJson(decoded);
 
     expect(result.isSupported, isFalse);
     expect(result.resultCode, ResultCode.errProtocolIncompatible);
@@ -193,7 +602,9 @@ void main() {
   });
 
   test('protocol catalog rejects unsupported command fixture fail-safe', () {
-    final decoded = fixtureJson('fixtures/commands/unsupported_command_v1.json');
+    final decoded = fixtureJson(
+      'fixtures/commands/unsupported_command_v1.json',
+    );
     final result = ProtocolCatalog().checkCommandEnvelopeJson(decoded);
 
     expect(result.isSupported, isFalse);
@@ -247,6 +658,13 @@ void main() {
       'snapshot_version': '1.0',
       'protocol_version': currentProtocolVersion.toWire(),
     });
+
+    expect(result.isSupported, isFalse);
+    expect(result.resultCode, ResultCode.errSchemaInvalid);
+  });
+
+  test('protocol catalog rejects unsupported result code fail-safe', () {
+    final result = const ProtocolCatalog().checkResultCode('ERR_UNKNOWN');
 
     expect(result.isSupported, isFalse);
     expect(result.resultCode, ResultCode.errSchemaInvalid);

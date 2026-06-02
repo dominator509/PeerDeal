@@ -37,13 +37,22 @@ class JoinFlowOrchestrator {
   final ProtocolCatalog _protocolCatalog;
 
   Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.inviteUnresolved,
       resultCode: 'JOIN_STARTED',
     );
 
-    final resolvedInvite = await _inviteResolver.resolveInvite(context);
-    await _eventSink.emitState(
+    final ResolvedInvite resolvedInvite;
+    try {
+      resolvedInvite = await _inviteResolver.resolveInvite(context);
+    } on Object {
+      return _adapterFailureOutcome(
+        resultCode: 'ERR_INVITE_RESOLUTION_FAILED',
+        status: JoinDecisionStatus.negotiationFailed,
+        message: 'Invite resolution failed.',
+      );
+    }
+    await _safeEmitState(
       state: JoinFlowState.inviteResolved,
       resultCode: 'INVITE_RESOLVED',
     );
@@ -54,7 +63,7 @@ class JoinFlowOrchestrator {
       final diagnostics = _protocolIncompatibleDiagnostics(
         resolvedInvite.protocolVersion,
       );
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: ProtocolResultCodes.errProtocolIncompatible,
         diagnostics: diagnostics,
@@ -67,18 +76,27 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.preflightPending,
       resultCode: 'PREFLIGHT_PENDING',
     );
 
-    final negotiation = await _joinNegotiator.negotiate(
-      context: context,
-      resolvedInvite: resolvedInvite,
-    );
+    final NegotiationResult negotiation;
+    try {
+      negotiation = await _joinNegotiator.negotiate(
+        context: context,
+        resolvedInvite: resolvedInvite,
+      );
+    } on Object {
+      return _adapterFailureOutcome(
+        resultCode: 'ERR_NEGOTIATION_FAILED',
+        status: JoinDecisionStatus.negotiationFailed,
+        message: 'Join negotiation failed.',
+      );
+    }
 
     if (!negotiation.compatible) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: negotiation.reasonCode ?? 'ERR_NEGOTIATION_FAILED',
       );
@@ -89,18 +107,27 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.negotiating,
       resultCode: 'NEGOTIATION_OK',
     );
 
-    final acks = await _disclosureCoordinator.collectAcks(
-      resolvedInvite: resolvedInvite,
-      requestedRole: context.requestedRole,
-    );
+    final DisclosureAcks acks;
+    try {
+      acks = await _disclosureCoordinator.collectAcks(
+        resolvedInvite: resolvedInvite,
+        requestedRole: context.requestedRole,
+      );
+    } on Object {
+      return _adapterFailureOutcome(
+        resultCode: 'ERR_DISCLOSURE_ACK_FAILED',
+        status: JoinDecisionStatus.rejected,
+        message: 'Disclosure acknowledgement failed.',
+      );
+    }
 
     if (!acks.allRequiredAccepted) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.ackRequired,
         resultCode: 'ACK_REQUIRED',
       );
@@ -111,18 +138,27 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.rolePending,
       resultCode: 'DISCLOSURES_ACCEPTED',
     );
 
-    final roleGrant = await _roleAuthorizer.authorize(
-      resolvedInvite: resolvedInvite,
-      requestedRole: context.requestedRole,
-    );
+    final RoleGrant? roleGrant;
+    try {
+      roleGrant = await _roleAuthorizer.authorize(
+        resolvedInvite: resolvedInvite,
+        requestedRole: context.requestedRole,
+      );
+    } on Object {
+      return _adapterFailureOutcome(
+        resultCode: 'ERR_ROLE_AUTHORIZATION_FAILED',
+        status: JoinDecisionStatus.roleDenied,
+        message: 'Role authorization failed.',
+      );
+    }
 
     if (roleGrant == null) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: 'ERR_ROLE_DENIED',
       );
@@ -133,26 +169,44 @@ class JoinFlowOrchestrator {
       );
     }
 
-    final bootstrapPlan = await _bootstrapCoordinator.buildPlan(
-      resolvedInvite: resolvedInvite,
-      roleGrant: roleGrant,
-    );
+    final BootstrapPlan bootstrapPlan;
+    try {
+      bootstrapPlan = await _bootstrapCoordinator.buildPlan(
+        resolvedInvite: resolvedInvite,
+        roleGrant: roleGrant,
+      );
+    } on Object {
+      return _adapterFailureOutcome(
+        resultCode: 'ERR_BOOTSTRAP_FAILED',
+        status: JoinDecisionStatus.bootstrapRequired,
+        message: 'Bootstrap planning failed.',
+      );
+    }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.bootstrapPending,
       resultCode: bootstrapPlan.requiresBootstrap
           ? 'BOOTSTRAP_REQUIRED'
           : 'BOOTSTRAP_SKIPPED',
     );
 
-    final commit = await _governanceCommitter.commitJoin(
-      resolvedInvite: resolvedInvite,
-      roleGrant: roleGrant,
-      bootstrapPlan: bootstrapPlan,
-    );
+    final GovernanceCommitResult commit;
+    try {
+      commit = await _governanceCommitter.commitJoin(
+        resolvedInvite: resolvedInvite,
+        roleGrant: roleGrant,
+        bootstrapPlan: bootstrapPlan,
+      );
+    } on Object {
+      return _adapterFailureOutcome(
+        resultCode: 'ERR_GOVERNANCE_COMMIT_FAILED',
+        status: JoinDecisionStatus.governanceDenied,
+        message: 'Governance commit failed.',
+      );
+    }
 
     if (!commit.accepted) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: commit.reasonCode ?? 'ERR_GOVERNANCE_DENIED',
       );
@@ -163,10 +217,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
-      state: JoinFlowState.joined,
-      resultCode: 'OK_JOINED',
-    );
+    await _safeEmitState(state: JoinFlowState.joined, resultCode: 'OK_JOINED');
 
     return const JoinFlowOutcome(
       state: JoinFlowState.joined,
@@ -178,7 +229,7 @@ class JoinFlowOrchestrator {
   Future<JoinFlowOutcome> runRejoin(InviteContext context) async {
     final rejoinToken = context.rejoinToken;
     if (rejoinToken == null || rejoinToken.isEmpty) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: 'ERR_REJOIN_TOKEN_REQUIRED',
       );
@@ -189,19 +240,28 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.rejoinPending,
       resultCode: 'REJOIN_STARTED',
     );
 
-    final resolvedInvite = await _inviteResolver.resolveInvite(context);
+    final ResolvedInvite resolvedInvite;
+    try {
+      resolvedInvite = await _inviteResolver.resolveInvite(context);
+    } on Object {
+      return _adapterFailureOutcome(
+        resultCode: 'ERR_INVITE_RESOLUTION_FAILED',
+        status: JoinDecisionStatus.rejoinRejected,
+        message: 'Invite resolution failed.',
+      );
+    }
     if (!_protocolCatalog.supportsProtocolVersion(
       resolvedInvite.protocolVersion,
     )) {
       final diagnostics = _protocolIncompatibleDiagnostics(
         resolvedInvite.protocolVersion,
       );
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: ProtocolResultCodes.errProtocolIncompatible,
         diagnostics: diagnostics,
@@ -214,13 +274,22 @@ class JoinFlowOrchestrator {
       );
     }
 
-    final commit = await _governanceCommitter.commitRejoin(
-      resolvedInvite: resolvedInvite,
-      rejoinToken: rejoinToken,
-    );
+    final GovernanceCommitResult commit;
+    try {
+      commit = await _governanceCommitter.commitRejoin(
+        resolvedInvite: resolvedInvite,
+        rejoinToken: rejoinToken,
+      );
+    } on Object {
+      return _adapterFailureOutcome(
+        resultCode: 'ERR_REJOIN_COMMIT_FAILED',
+        status: JoinDecisionStatus.rejoinRejected,
+        message: 'Rejoin commit failed.',
+      );
+    }
 
     if (!commit.accepted) {
-      await _eventSink.emitState(
+      await _safeEmitState(
         state: JoinFlowState.joinRejected,
         resultCode: commit.reasonCode ?? 'ERR_REJOIN_REJECTED',
       );
@@ -231,7 +300,7 @@ class JoinFlowOrchestrator {
       );
     }
 
-    await _eventSink.emitState(
+    await _safeEmitState(
       state: JoinFlowState.rejoined,
       resultCode: 'OK_REJOINED',
     );
@@ -254,5 +323,48 @@ class JoinFlowOrchestrator {
         actual: actualProtocolVersion,
       ),
     ]);
+  }
+
+  Future<JoinFlowOutcome> _adapterFailureOutcome({
+    required String resultCode,
+    required JoinDecisionStatus status,
+    required String message,
+  }) async {
+    final diagnostics = _diagnosticsScrubber.scrubProtocolDiagnostics(
+      <ProtocolDiagnostic>[
+        ProtocolDiagnostic(code: resultCode, message: message),
+      ],
+    );
+    await _safeEmitState(
+      state: JoinFlowState.joinRejected,
+      resultCode: resultCode,
+      diagnostics: diagnostics,
+      message: message,
+    );
+    return JoinFlowOutcome(
+      state: JoinFlowState.joinRejected,
+      status: status,
+      resultCode: resultCode,
+      diagnostics: diagnostics,
+      message: message,
+    );
+  }
+
+  Future<void> _safeEmitState({
+    required JoinFlowState state,
+    required String resultCode,
+    List<ProtocolDiagnostic> diagnostics = const <ProtocolDiagnostic>[],
+    String? message,
+  }) async {
+    try {
+      await _eventSink.emitState(
+        state: state,
+        resultCode: resultCode,
+        diagnostics: diagnostics,
+        message: message,
+      );
+    } on Object {
+      return;
+    }
   }
 }

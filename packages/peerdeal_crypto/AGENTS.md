@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_crypto
+# AGENTS.md - peerdeal_crypto
 
 ## Mission
 Provide fair-deal provider normalization and verification logic without owning UI, transport, or canonical reducer truth.

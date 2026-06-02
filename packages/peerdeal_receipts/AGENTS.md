@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_receipts
+# AGENTS.md - peerdeal_receipts
 
 ## Mission
 Implement PeerDeal receipts as privacy-centric, minimally identifying, signed/encrypted artifacts

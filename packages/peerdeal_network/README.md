@@ -27,3 +27,12 @@ score, and recover network paths without owning game truth.
 - `peerdeal_native_bridges` owns platform hooks and permission facts.
 - `peerdeal_sync` owns sync and recovery behavior.
 - app shells own user-facing connection flow orchestration.
+
+## Hardened scaffold coverage
+- Route-class semantics normalize `remoteDirect`/`p2pRemote` and
+  `relayFallback`/`relay` compatibility names.
+- Session path selection is deterministic across priority, route class, and
+  peer id.
+- Primary peer election fails closed when every peer is anchor-mismatched.
+- Confidence classification degrades or requires recovery when peers lag the
+  event index.

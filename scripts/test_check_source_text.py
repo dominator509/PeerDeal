@@ -37,6 +37,26 @@ class SourceTextCheckTest(unittest.TestCase):
             self.assertEqual(1, len(failures))
             self.assertIn("likely mojibake marker", failures[0])
 
+    def test_rejects_bom(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(root / "pubspec.yaml", "\ufeffname: sample\n")
+
+            failures = check_source_text(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("byte order mark", failures[0])
+
+    def test_rejects_em_dash(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(root / "README.md", "Title \u2014 Overview\n")
+
+            failures = check_source_text(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("em dash", failures[0])
+
     def test_rejects_replacement_character(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = pathlib.Path(temp_dir)

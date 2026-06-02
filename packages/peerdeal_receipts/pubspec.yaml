@@ -7,12 +7,13 @@ version: 0.1.0
 environment:
   sdk: '^3.11.5'
 dependencies:
+  crypto: ^3.0.3
   peerdeal_protocol:
     path: ../peerdeal_protocol
   peerdeal_privacy:
     path: ../peerdeal_privacy
-  meta: ^1.12.0
+  meta: ^1.17.0
 
 dev_dependencies:
-  test: ^1.25.2
-  lints: ^4.0.0
+  test: ^1.30.0
+  lints: ^6.1.0

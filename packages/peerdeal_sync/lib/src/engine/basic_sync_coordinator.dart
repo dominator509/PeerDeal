@@ -45,7 +45,28 @@ class BasicSyncCoordinator<TState> implements SyncCoordinator<TState> {
       ),
     );
 
-    final recommendedAction = detection.hasConflicts ? 'resume_with_warning' : 'resume';
+    final recommendedAction = detection.hasConflicts
+        ? 'resume_with_warning'
+        : 'resume';
+
+    if (!applyResult.isSuccess) {
+      return RecoveryResult<TState>(
+        isSuccess: false,
+        state: null,
+        finalAppliedEventSeq: null,
+        safeCloseRecommended: true,
+        conflicts: applyResult.conflicts,
+        warnings: applyResult.warnings,
+        reconciliation: const ReconciliationResult(
+          canResume: false,
+          requiresRecovery: true,
+          recommendedAction: 'safe_close',
+          notes: <String>[
+            'Fatal conflict detected during snapshot recovery application.',
+          ],
+        ),
+      );
+    }
 
     return RecoveryResult<TState>(
       isSuccess: true,
@@ -59,7 +80,9 @@ class BasicSyncCoordinator<TState> implements SyncCoordinator<TState> {
         requiresRecovery: detection.hasConflicts || request.snapshot != null,
         recommendedAction: recommendedAction,
         notes: detection.hasConflicts
-            ? const <String>['Recovery completed with non-fatal conflicts that should be surfaced.']
+            ? const <String>[
+                'Recovery completed with non-fatal conflicts that should be surfaced.',
+              ]
             : const <String>['Recovery completed without detected conflicts.'],
       ),
     );

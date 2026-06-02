@@ -44,7 +44,12 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     }
 
     final selectedEvents = _selectEvents(request);
-    mismatches.addAll(eventWindowValidator.validate(selectedEvents));
+    mismatches.addAll(
+      eventWindowValidator.validate(
+        selectedEvents,
+        expectedPreviousEventSeq: request.snapshot?.snapshotBaseEventSeq,
+      ),
+    );
 
     if (mismatches.isNotEmpty) {
       return ReplayResult<TState>(

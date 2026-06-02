@@ -24,3 +24,30 @@ to observe local device capabilities.
 - `peerdeal_capture` owns capture policy.
 - `peerdeal_network` owns network confidence and routing.
 - app shells own when native hooks are called.
+
+## Hardened scaffold coverage
+- Method-channel capture capability lookup returns unavailable capability facts
+  when the platform payload is missing or throws.
+- Method-channel local-network capability and discovery lookup return
+  unavailable capability facts when the platform payload is missing or throws.
+- Method-channel secure key storage lookup returns normalized key-ring snapshots
+  and unavailable facts when the platform payload is missing or throws.
+- Native bridge warnings are normalized for app-layer safe-surface and network
+  routing policy.
+- Channel names, method names, fixture payloads, and decode behavior are locked
+  in package tests so future platform implementations can target a stable
+  contract.
+- Malformed platform payload fields are ignored and normalized to fail-closed
+  capability facts instead of throwing through bridge consumers.
+- Malformed top-level method-channel payloads are caught at the bridge wrapper
+  and returned as unavailable facts with decode warnings.
+
+## Method-channel contracts
+- Capture protection channel: `peerdeal/native_bridges/capture_protection`
+  with `getCapability`.
+- Local network channel: `peerdeal/native_bridges/local_network` with
+  `getCapability` and `discoverPeers`.
+- Secure key storage channel: `peerdeal/native_bridges/secure_key_storage` with
+  `loadKeyRing`.
+- Missing payloads or platform errors must return unavailable facts with a
+  warning, not throw through to policy or app code.

@@ -1,4 +1,4 @@
-# PeerDeal Invite / Join / Rejoin Flow Integration Overlay v1 — Overview
+# PeerDeal Invite / Join / Rejoin Flow Integration Overlay v1 - Overview
 
 ## Purpose
 This overlay gives the repo a concrete app/service-layer seam for:

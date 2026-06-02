@@ -1,4 +1,4 @@
-# AGENTS.md — peerdeal_network
+# AGENTS.md - peerdeal_network
 
 ## Package purpose
 Own peer-session transport abstractions, LAN/remote path orchestration, relay fallback hooks, bootstrap candidate handling, and session path selection.
