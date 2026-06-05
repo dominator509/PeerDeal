@@ -87,6 +87,9 @@ the gates below are satisfied.
 - Hold'em variant coverage now spans betting-round completion through checked
   streets, showdown reveal, settlement preparation/projection, uncontested
   settlement, hand completion, and settlement event emission.
+- Mode governance now locks deterministic waitlist promotion ordering and
+  rejects promotion when mode policy, manager permission, or waitlist head
+  state does not allow it.
 - Network/sync/receipt/capture/native hardening now covers deterministic route
   class semantics, event-lag confidence gating, fail-closed primary election,
   fail-closed empty or suffix-only recovery windows, optional signed/encrypted

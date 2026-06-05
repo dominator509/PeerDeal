@@ -6,6 +6,7 @@ import 'governance_result.dart';
 import 'participant_state.dart';
 import 'role_kind.dart';
 import 'seat_state.dart';
+import 'waitlist_state.dart';
 
 class DefaultGovernanceEngine implements GovernanceEngine {
   const DefaultGovernanceEngine();
@@ -19,7 +20,9 @@ class DefaultGovernanceEngine implements GovernanceEngine {
     final subject = context.participantById(action.subjectId);
 
     if (subject == null) {
-      return GovernanceDecision.deny(GovernanceResultCodes.errParticipantMissing);
+      return GovernanceDecision.deny(
+        GovernanceResultCodes.errParticipantMissing,
+      );
     }
 
     switch (action.type) {
@@ -27,28 +30,39 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         return GovernanceDecision(
           allowed: true,
           resultCode: GovernanceResultCodes.okAdmit,
-          nextParticipantState: ParticipantGovernanceState.admittedUnseated.name,
+          nextParticipantState:
+              ParticipantGovernanceState.admittedUnseated.name,
           notes: const ['Invite-only participant admitted.'],
         );
 
       case GovernanceActionType.grantCohost:
-        if (actor == null || actor.role != RoleKind.host || !context.allowCohosts) {
+        if (actor == null ||
+            actor.role != RoleKind.host ||
+            !context.allowCohosts) {
           return GovernanceDecision.deny(
             GovernanceResultCodes.errPermissionDenied,
-            notes: const ['Only the host may grant co-host in the default engine.'],
+            notes: const [
+              'Only the host may grant co-host in the default engine.',
+            ],
           );
         }
         return GovernanceDecision(
           allowed: true,
           resultCode: GovernanceResultCodes.okCohostGranted,
           nextParticipantState: subject.state.name,
-          notes: const ['Subject role should be updated to cohost by event application.'],
+          notes: const [
+            'Subject role should be updated to cohost by event application.',
+          ],
         );
 
       case GovernanceActionType.offerSeat:
-        final seat = context.seats.where((s) => s.seatIndex == action.seatIndex).firstOrNull;
+        final seat = context.seats
+            .where((s) => s.seatIndex == action.seatIndex)
+            .firstOrNull;
         if (seat == null || seat.state != SeatState.empty) {
-          return GovernanceDecision.deny(GovernanceResultCodes.errSeatUnavailable);
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatUnavailable,
+          );
         }
         return GovernanceDecision(
           allowed: true,
@@ -60,14 +74,18 @@ class DefaultGovernanceEngine implements GovernanceEngine {
 
       case GovernanceActionType.acceptSeatOffer:
         if (subject.state != ParticipantGovernanceState.seatOffered) {
-          return GovernanceDecision.deny(GovernanceResultCodes.errSeatOfferMissing);
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatOfferMissing,
+          );
         }
         return GovernanceDecision(
           allowed: true,
           resultCode: GovernanceResultCodes.okSeatClaimed,
           nextParticipantState: ParticipantGovernanceState.seated.name,
           nextSeatState: SeatState.claimed.name,
-          notes: const ['Seat offer accepted. Final active occupancy is a later transition.'],
+          notes: const [
+            'Seat offer accepted. Final active occupancy is a later transition.',
+          ],
         );
 
       case GovernanceActionType.addToWaitlist:
@@ -85,12 +103,30 @@ class DefaultGovernanceEngine implements GovernanceEngine {
 
       case GovernanceActionType.promoteFromWaitlist:
         if (!context.allowMidSessionSeatPromotion) {
-          return GovernanceDecision.deny(GovernanceResultCodes.errPermissionDenied);
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
         }
+        if (!_canManageWaitlist(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
+        if (subject.state != ParticipantGovernanceState.waitlisted ||
+            subject.waitlistState != WaitlistState.waitlistActive ||
+            context.waitlistOrdering.isEmpty ||
+            context.waitlistOrdering.first != subject.participantId) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errWaitlistPromotionUnavailable,
+          );
+        }
+        final nextOrdering = List<String>.from(context.waitlistOrdering)
+          ..remove(subject.participantId);
         return GovernanceDecision(
           allowed: true,
           resultCode: GovernanceResultCodes.okSeatOffer,
           nextParticipantState: ParticipantGovernanceState.seatOffered.name,
+          nextWaitlistOrdering: nextOrdering,
           notes: const ['Promotion emits a seat-offer style result.'],
         );
 
@@ -105,7 +141,8 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         return GovernanceDecision(
           allowed: true,
           resultCode: 'OK_PARTICIPANT_RETURNED',
-          nextParticipantState: ParticipantGovernanceState.admittedUnseated.name,
+          nextParticipantState:
+              ParticipantGovernanceState.admittedUnseated.name,
         );
 
       case GovernanceActionType.rejectParticipant:
@@ -120,6 +157,13 @@ class DefaultGovernanceEngine implements GovernanceEngine {
           nextParticipantState: subject.state.name,
         );
     }
+  }
+
+  bool _canManageWaitlist(ParticipantSnapshot? actor) {
+    return actor != null &&
+        (actor.canManageWaitlist ||
+            actor.role == RoleKind.host ||
+            actor.role == RoleKind.cohost);
   }
 }
 

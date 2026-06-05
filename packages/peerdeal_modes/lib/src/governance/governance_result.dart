@@ -10,6 +10,8 @@ class GovernanceResultCodes {
   static const errSeatUnavailable = 'ERR_SEAT_UNAVAILABLE';
   static const errSeatOfferMissing = 'ERR_SEAT_OFFER_MISSING';
   static const errWaitlistDisabled = 'ERR_WAITLIST_DISABLED';
+  static const errWaitlistPromotionUnavailable =
+      'ERR_WAITLIST_PROMOTION_UNAVAILABLE';
   static const errPermissionDenied = 'ERR_PERMISSION_DENIED';
   static const errParticipantMissing = 'ERR_PARTICIPANT_MISSING';
 }

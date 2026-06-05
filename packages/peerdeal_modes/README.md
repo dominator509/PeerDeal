@@ -26,3 +26,9 @@ app orchestration.
 - `peerdeal_core` owns deterministic table state truth.
 - `peerdeal_variants` owns poker variant rules.
 - app shells own user-facing flow orchestration.
+
+## Hardened coverage
+- Waitlist promotion is deterministic: only a waitlisted participant at the head
+  of the mode waitlist can be promoted, and promotion returns the next ordering
+  without that participant.
+- Mid-session waitlist promotion obeys mode policy and manager permissions.
