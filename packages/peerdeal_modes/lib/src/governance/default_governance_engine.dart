@@ -95,6 +95,33 @@ class DefaultGovernanceEngine implements GovernanceEngine {
           notes: const ['Seat offer issued at a deterministic seat index.'],
         );
 
+      case GovernanceActionType.assignSeat:
+        if (!_canManageSeats(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
+        final seat = context.seats
+            .where((s) => s.seatIndex == action.seatIndex)
+            .firstOrNull;
+        if (seat == null || seat.state != SeatState.claimed) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatUnavailable,
+          );
+        }
+        if (subject.state != ParticipantGovernanceState.seated) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatOfferMissing,
+          );
+        }
+        return GovernanceDecision(
+          allowed: true,
+          resultCode: GovernanceResultCodes.okSeatAssigned,
+          nextParticipantState: ParticipantGovernanceState.seated.name,
+          nextSeatState: SeatState.activeOccupied.name,
+          notes: const ['Claimed seat assigned to active occupancy.'],
+        );
+
       case GovernanceActionType.acceptSeatOffer:
         if (subject.state != ParticipantGovernanceState.seatOffered) {
           return GovernanceDecision.deny(
@@ -109,6 +136,31 @@ class DefaultGovernanceEngine implements GovernanceEngine {
           notes: const [
             'Seat offer accepted. Final active occupancy is a later transition.',
           ],
+        );
+
+      case GovernanceActionType.expireSeatOffer:
+        if (!_canManageSeats(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
+        final seat = context.seats
+            .where((s) => s.seatIndex == action.seatIndex)
+            .firstOrNull;
+        if (subject.state != ParticipantGovernanceState.seatOffered ||
+            seat == null ||
+            seat.state != SeatState.reservedPending) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatOfferMissing,
+          );
+        }
+        return GovernanceDecision(
+          allowed: true,
+          resultCode: GovernanceResultCodes.okSeatOfferExpired,
+          nextParticipantState:
+              ParticipantGovernanceState.admittedUnseated.name,
+          nextSeatState: SeatState.empty.name,
+          notes: const ['Seat offer expired and seat returned to empty.'],
         );
 
       case GovernanceActionType.addToWaitlist:
@@ -169,8 +221,6 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.rejectParticipant:
-      case GovernanceActionType.assignSeat:
-      case GovernanceActionType.expireSeatOffer:
       case GovernanceActionType.removeParticipant:
       case GovernanceActionType.banParticipantForSession:
         return GovernanceDecision(
@@ -186,6 +236,11 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         (actor.canManageWaitlist ||
             actor.role == RoleKind.host ||
             actor.role == RoleKind.cohost);
+  }
+
+  bool _canManageSeats(ParticipantSnapshot? actor) {
+    return actor != null &&
+        (actor.role == RoleKind.host || actor.role == RoleKind.cohost);
   }
 }
 

@@ -92,6 +92,8 @@ the gates below are satisfied.
   state does not allow it.
 - Mode governance now returns explicit co-host role transitions and rejects
   unauthorized grants or invalid revocations.
+- Mode governance now hardens seat assignment and offer expiry with explicit
+  manager authority checks and deterministic next seat/participant states.
 - Network/sync/receipt/capture/native hardening now covers deterministic route
   class semantics, event-lag confidence gating, fail-closed primary election,
   fail-closed empty or suffix-only recovery windows, optional signed/encrypted

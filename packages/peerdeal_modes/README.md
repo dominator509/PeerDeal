@@ -28,6 +28,8 @@ app orchestration.
 - app shells own user-facing flow orchestration.
 
 ## Hardened coverage
+- Seat assignment and offer expiry now require manager authority and explicit
+  lifecycle states before returning deterministic next participant/seat states.
 - Co-host grant and revoke decisions now return explicit next role values and
   reject unauthorized or invalid role transitions.
 - Waitlist promotion is deterministic: only a waitlisted participant at the head

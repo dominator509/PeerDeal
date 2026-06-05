@@ -130,6 +130,164 @@ void main() {
       expect(decision.resultCode, GovernanceResultCodes.errSeatOfferMissing);
     });
 
+    test('assigns a claimed seat to active occupancy deterministically', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+            seatIndex: 0,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+            seatIndex: 1,
+          ),
+        ],
+        seats: const [
+          SeatSnapshot(
+            seatIndex: 1,
+            state: SeatState.claimed,
+            occupantId: 'player_2',
+          ),
+        ],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.assignSeat,
+          actorId: 'host_1',
+          subjectId: 'player_2',
+          seatIndex: 1,
+        ),
+      );
+
+      expect(decision.allowed, isTrue);
+      expect(decision.resultCode, GovernanceResultCodes.okSeatAssigned);
+      expect(
+        decision.nextParticipantState,
+        ParticipantGovernanceState.seated.name,
+      );
+      expect(decision.nextSeatState, SeatState.activeOccupied.name);
+    });
+
+    test('denies seat assignment before a claim exists', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.seatOffered,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [
+          SeatSnapshot(seatIndex: 1, state: SeatState.reservedPending),
+        ],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.assignSeat,
+          actorId: 'host_1',
+          subjectId: 'player_2',
+          seatIndex: 1,
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errSeatUnavailable);
+    });
+
+    test('expires a pending seat offer back to an empty seat', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.seatOffered,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [
+          SeatSnapshot(seatIndex: 1, state: SeatState.reservedPending),
+        ],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.expireSeatOffer,
+          actorId: 'host_1',
+          subjectId: 'player_2',
+          seatIndex: 1,
+        ),
+      );
+
+      expect(decision.allowed, isTrue);
+      expect(decision.resultCode, GovernanceResultCodes.okSeatOfferExpired);
+      expect(
+        decision.nextParticipantState,
+        ParticipantGovernanceState.admittedUnseated.name,
+      );
+      expect(decision.nextSeatState, SeatState.empty.name);
+    });
+
+    test('denies seat offer expiry when subject has no active offer', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [SeatSnapshot(seatIndex: 1, state: SeatState.empty)],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.expireSeatOffer,
+          actorId: 'host_1',
+          subjectId: 'player_2',
+          seatIndex: 1,
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errSeatOfferMissing);
+    });
+
     test('grants cohost role from fixture-backed tournament context', () {
       final context = governanceContextFixture('tournament_cohost_grant.json');
 
