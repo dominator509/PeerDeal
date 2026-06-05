@@ -28,6 +28,8 @@ app orchestration.
 - app shells own user-facing flow orchestration.
 
 ## Hardened coverage
+- Co-host grant and revoke decisions now return explicit next role values and
+  reject unauthorized or invalid role transitions.
 - Waitlist promotion is deterministic: only a waitlisted participant at the head
   of the mode waitlist can be promoted, and promotion returns the next ordering
   without that participant.

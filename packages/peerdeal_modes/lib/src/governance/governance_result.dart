@@ -4,6 +4,7 @@ class GovernanceResultCodes {
   static const okSeatClaimed = 'OK_SEAT_CLAIMED';
   static const okWaitlisted = 'OK_WAITLISTED';
   static const okCohostGranted = 'OK_COHOST_GRANTED';
+  static const okCohostRevoked = 'OK_COHOST_REVOKED';
 
   static const errInviteOnly = 'ERR_INVITE_ONLY_REQUIRED';
   static const errRoleNotAllowed = 'ERR_ROLE_NOT_ALLOWED';

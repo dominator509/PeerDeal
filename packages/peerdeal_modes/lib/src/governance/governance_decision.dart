@@ -3,6 +3,7 @@ class GovernanceDecision {
     required this.allowed,
     required this.resultCode,
     this.nextParticipantState,
+    this.nextParticipantRole,
     this.nextSeatState,
     this.nextWaitlistOrdering = const <String>[],
     this.notes = const <String>[],
@@ -11,11 +12,15 @@ class GovernanceDecision {
   final bool allowed;
   final String resultCode;
   final String? nextParticipantState;
+  final String? nextParticipantRole;
   final String? nextSeatState;
   final List<String> nextWaitlistOrdering;
   final List<String> notes;
 
-  static GovernanceDecision deny(String resultCode, {List<String> notes = const <String>[]}) {
+  static GovernanceDecision deny(
+    String resultCode, {
+    List<String> notes = const <String>[],
+  }) {
     return GovernanceDecision(
       allowed: false,
       resultCode: resultCode,

@@ -130,6 +130,131 @@ void main() {
       expect(decision.resultCode, GovernanceResultCodes.errSeatOfferMissing);
     });
 
+    test('grants cohost role from fixture-backed tournament context', () {
+      final context = governanceContextFixture('tournament_cohost_grant.json');
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.grantCohost,
+          actorId: 'host_1',
+          subjectId: 'staff_2',
+        ),
+      );
+
+      expect(decision.allowed, isTrue);
+      expect(decision.resultCode, GovernanceResultCodes.okCohostGranted);
+      expect(decision.nextParticipantRole, RoleKind.cohost.wireValue);
+      expect(
+        decision.nextParticipantState,
+        ParticipantGovernanceState.admittedUnseated.name,
+      );
+    });
+
+    test('denies cohost grant from non-host actor', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'player_1',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.grantCohost,
+          actorId: 'player_1',
+          subjectId: 'player_2',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errPermissionDenied);
+    });
+
+    test('revokes cohost role back to player deterministically', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'staff_2',
+            role: RoleKind.cohost,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.revokeCohost,
+          actorId: 'host_1',
+          subjectId: 'staff_2',
+        ),
+      );
+
+      expect(decision.allowed, isTrue);
+      expect(decision.resultCode, GovernanceResultCodes.okCohostRevoked);
+      expect(decision.nextParticipantRole, RoleKind.player.wireValue);
+      expect(
+        decision.nextParticipantState,
+        ParticipantGovernanceState.admittedUnseated.name,
+      );
+    });
+
+    test('denies cohost revoke for a non-cohost subject', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.revokeCohost,
+          actorId: 'host_1',
+          subjectId: 'player_2',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errRoleNotAllowed);
+    });
+
     test(
       'promotes the first active waitlist participant deterministically',
       () {

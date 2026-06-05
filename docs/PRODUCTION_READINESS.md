@@ -90,6 +90,8 @@ the gates below are satisfied.
 - Mode governance now locks deterministic waitlist promotion ordering and
   rejects promotion when mode policy, manager permission, or waitlist head
   state does not allow it.
+- Mode governance now returns explicit co-host role transitions and rejects
+  unauthorized grants or invalid revocations.
 - Network/sync/receipt/capture/native hardening now covers deterministic route
   class semantics, event-lag confidence gating, fail-closed primary election,
   fail-closed empty or suffix-only recovery windows, optional signed/encrypted

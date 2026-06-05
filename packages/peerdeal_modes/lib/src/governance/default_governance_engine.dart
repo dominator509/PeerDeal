@@ -50,9 +50,32 @@ class DefaultGovernanceEngine implements GovernanceEngine {
           allowed: true,
           resultCode: GovernanceResultCodes.okCohostGranted,
           nextParticipantState: subject.state.name,
-          notes: const [
-            'Subject role should be updated to cohost by event application.',
-          ],
+          nextParticipantRole: RoleKind.cohost.wireValue,
+          notes: const ['Subject role should be updated to cohost.'],
+        );
+
+      case GovernanceActionType.revokeCohost:
+        if (actor == null ||
+            actor.role != RoleKind.host ||
+            !context.allowCohosts) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+            notes: const [
+              'Only the host may revoke co-host in the default engine.',
+            ],
+          );
+        }
+        if (subject.role != RoleKind.cohost) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errRoleNotAllowed,
+          );
+        }
+        return GovernanceDecision(
+          allowed: true,
+          resultCode: GovernanceResultCodes.okCohostRevoked,
+          nextParticipantState: subject.state.name,
+          nextParticipantRole: RoleKind.player.wireValue,
+          notes: const ['Subject role should be updated to player.'],
         );
 
       case GovernanceActionType.offerSeat:
@@ -146,7 +169,6 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.rejectParticipant:
-      case GovernanceActionType.revokeCohost:
       case GovernanceActionType.assignSeat:
       case GovernanceActionType.expireSeatOffer:
       case GovernanceActionType.removeParticipant:
