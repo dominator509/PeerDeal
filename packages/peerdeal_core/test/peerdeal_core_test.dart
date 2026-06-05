@@ -122,6 +122,96 @@ EventEnvelope copyEvent(
   );
 }
 
+List<String> acceptedProtocolEventFixturePaths() {
+  return Directory('../peerdeal_protocol/fixtures/events')
+      .listSync()
+      .whereType<File>()
+      .map((file) => file.path.replaceAll(r'\', '/').split('/events/').last)
+      .where((path) => !path.startsWith('unsupported_'))
+      .toList()
+    ..sort();
+}
+
+TableState projectAcceptedProtocolEventFixture(String fixturePath) {
+  final event = eventEnvelopeFromJson(
+    loadProtocolFixture('events/$fixturePath'),
+  );
+  final started = eventEnvelopeFromJson(
+    loadProtocolFixture('events/holdem_hand_started_event_v1.json'),
+  );
+  final showdownStarted = eventEnvelopeFromJson(
+    loadProtocolFixture('events/holdem_showdown_started_event_v1.json'),
+  );
+  final showdownRevealed = eventEnvelopeFromJson(
+    loadProtocolFixture('events/holdem_showdown_revealed_event_v1.json'),
+  );
+  final settlementProjected = eventEnvelopeFromJson(
+    loadProtocolFixture('events/holdem_settlement_projected_event_v1.json'),
+  );
+
+  final initial = event.eventType == 'OpenTableSessionOpened'
+      ? TableState.initial()
+      : TableState.initial(
+          tableId: event.tableId,
+          sessionId: event.sessionId,
+          protocolVersion: event.protocolVersion,
+        );
+
+  switch (fixturePath) {
+    case 'open_table_session_opened_event_v1.json':
+      return projectOrderedEventsFrom(
+        initial: initial,
+        events: <EventEnvelope>[event],
+      );
+    case 'holdem_hand_started_event_v1.json':
+      return projectOrderedEventsFrom(
+        initial: initial,
+        events: <EventEnvelope>[event],
+      );
+    case 'holdem_showdown_started_event_v1.json':
+      return projectOrderedEventsFrom(
+        initial: initial,
+        events: <EventEnvelope>[started, event],
+      );
+    case 'holdem_showdown_revealed_event_v1.json':
+      return projectOrderedEventsFrom(
+        initial: initial,
+        events: <EventEnvelope>[started, showdownStarted, event],
+      );
+    case 'holdem_settlement_projected_event_v1.json':
+    case 'holdem_uncontested_settlement_projected_event_v1.json':
+    case 'holdem_settlement_blocked_event_v1.json':
+    case 'holdem_settlement_blocked_empty_pot_event_v1.json':
+    case 'holdem_settlement_blocked_invalid_showdown_event_v1.json':
+      return projectOrderedEventsFrom(
+        initial: initial,
+        events: <EventEnvelope>[
+          started,
+          showdownStarted,
+          showdownRevealed,
+          event,
+        ],
+      );
+    case 'holdem_hand_settled_event_v1.json':
+      return projectOrderedEventsFrom(
+        initial: initial,
+        events: <EventEnvelope>[
+          started,
+          showdownStarted,
+          showdownRevealed,
+          settlementProjected,
+          event,
+        ],
+      );
+    default:
+      throw ArgumentError.value(
+        fixturePath,
+        'fixturePath',
+        'Accepted protocol event fixture is not covered by core projection.',
+      );
+  }
+}
+
 void main() {
   test('validator rejects open session command without table id', () {
     const command = CommandEnvelope(
@@ -467,6 +557,31 @@ void main() {
         started.handId,
         reason: entry.key,
       );
+    }
+  });
+
+  test('core projection covers every accepted protocol event fixture', () {
+    const coveredFixturePaths = <String>{
+      'holdem_hand_settled_event_v1.json',
+      'holdem_hand_started_event_v1.json',
+      'holdem_settlement_blocked_empty_pot_event_v1.json',
+      'holdem_settlement_blocked_event_v1.json',
+      'holdem_settlement_blocked_invalid_showdown_event_v1.json',
+      'holdem_settlement_projected_event_v1.json',
+      'holdem_showdown_revealed_event_v1.json',
+      'holdem_showdown_started_event_v1.json',
+      'holdem_uncontested_settlement_projected_event_v1.json',
+      'open_table_session_opened_event_v1.json',
+    };
+    final acceptedFixturePaths = acceptedProtocolEventFixturePaths();
+
+    expect(coveredFixturePaths, acceptedFixturePaths.toSet());
+
+    for (final fixturePath in acceptedFixturePaths) {
+      final state = projectAcceptedProtocolEventFixture(fixturePath);
+
+      expect(state.eventSeq, greaterThan(0), reason: fixturePath);
+      expect(state.metadata['last_event_hash'], isNotNull, reason: fixturePath);
     }
   });
 

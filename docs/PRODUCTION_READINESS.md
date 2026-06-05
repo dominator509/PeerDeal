@@ -79,6 +79,8 @@ the gates below are satisfied.
 - Core invariant hardening now covers table identity, non-negative counters,
   participant count coherence, hand-scoped event ordering, active-hand identity,
   close-before-closed ordering, and terminal closed/wiped state projection.
+- Core projection coverage now locks every accepted protocol event fixture to a
+  replay-safe reducer path, so fixture additions cannot bypass core tests.
 - Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
   core metadata projection, replay through the core projector, and sync
   snapshot + suffix recovery.

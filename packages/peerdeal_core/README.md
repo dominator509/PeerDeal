@@ -29,6 +29,7 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
   participant counts, hand-scoped events, and terminal closed/wiped states
 - action validator and table orchestrator contracts
 - deterministic fixture loader for starter tests
+- replay-safe projection coverage for every accepted protocol event fixture
 
 ## Intended next implementation moves
 1. replace starter local envelopes with shared protocol models where legacy
