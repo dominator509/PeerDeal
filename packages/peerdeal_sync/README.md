@@ -27,3 +27,5 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
 - Snapshot suffix windows must continue directly after the snapshot base event.
 - The coordinator returns safe-close recommendations for fatal planning or
   apply-stage conflicts.
+- Conflict-detector, snapshot-applier, and projector exceptions are normalized
+  into fatal safe-close conflicts instead of escaping recovery callers.

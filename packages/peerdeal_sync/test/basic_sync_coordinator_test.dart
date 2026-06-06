@@ -521,6 +521,88 @@ void main() {
     expect(result.reconciliation.recommendedAction, 'safe_close');
     expect(result.conflicts.single.code, 'ERR_SNAPSHOT_APPLY_SUFFIX_GAP');
   });
+
+  test('safe-closes when conflict detector throws', () {
+    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+      conflictDetector: const _ThrowingConflictDetector(),
+      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      ),
+    );
+
+    final result = coordinator.recover(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'RecoveryPauseEnded',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:05Z',
+            actorRef: 'system',
+            payload: <String, Object?>{},
+            prevEventHash: 'genesis',
+            eventHash: 'hash_1',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.safeCloseRecommended, isTrue);
+    expect(result.reconciliation.recommendedAction, 'safe_close');
+    expect(result.conflicts.single.code, 'ERR_SYNC_CONFLICT_DETECTOR_FAILURE');
+    expect(result.conflicts.single.actual, 'StateError');
+  });
+
+  test('safe-closes when snapshot applier throws', () {
+    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+      conflictDetector: const _NoConflictDetector(),
+      snapshotApplier: const _ThrowingSnapshotApplier(),
+    );
+
+    final result = coordinator.recover(
+      const RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'RecoveryPauseEnded',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:05Z',
+            actorRef: 'system',
+            payload: <String, Object?>{},
+            prevEventHash: 'genesis',
+            eventHash: 'hash_1',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.safeCloseRecommended, isTrue);
+    expect(result.reconciliation.recommendedAction, 'safe_close');
+    expect(result.conflicts.single.code, 'ERR_SYNC_SNAPSHOT_APPLIER_FAILURE');
+    expect(result.conflicts.single.actual, 'StateError');
+  });
 }
 
 List<EventEnvelope> _loadHoldemShowdownSettlementEvents() {
@@ -570,6 +652,27 @@ class _NoConflictDetector implements ConflictDetector {
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
     return const ConflictDetectionResult(conflicts: <SyncConflict>[]);
+  }
+}
+
+class _ThrowingConflictDetector implements ConflictDetector {
+  const _ThrowingConflictDetector();
+
+  @override
+  ConflictDetectionResult detect(RecoveryRequest request) {
+    throw StateError('detector failed');
+  }
+}
+
+class _ThrowingSnapshotApplier
+    implements SnapshotApplier<FakeSnapshotProjection> {
+  const _ThrowingSnapshotApplier();
+
+  @override
+  SnapshotApplyResult<FakeSnapshotProjection> apply(
+    SnapshotApplyRequest request,
+  ) {
+    throw StateError('applier failed');
   }
 }
 

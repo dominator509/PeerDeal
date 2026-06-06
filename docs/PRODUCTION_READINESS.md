@@ -162,6 +162,9 @@ the gates below are satisfied.
   or cipher adapters throw.
 - Receipt HMAC signature verification now fails closed when verification key
   lookup throws.
+- Sync recovery now converts conflict-detector, snapshot-applier, and
+  projector exceptions into fatal safe-close conflicts instead of allowing
+  recovery dependency failures to escape.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all

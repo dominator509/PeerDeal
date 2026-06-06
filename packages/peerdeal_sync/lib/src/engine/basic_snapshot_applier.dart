@@ -32,10 +32,25 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     final warnings = <String>[];
 
     if (request.snapshot != null) {
-      state = projector.applySnapshot(
-        state: state,
-        snapshot: request.snapshot!,
-      );
+      try {
+        state = projector.applySnapshot(
+          state: state,
+          snapshot: request.snapshot!,
+        );
+      } on Object catch (error) {
+        return SnapshotApplyResult<TState>(
+          state: state,
+          isSuccess: false,
+          appliedEventCount: 0,
+          finalAppliedEventSeq: null,
+          conflicts: <SyncConflict>[
+            _projectorFailureConflict(
+              message: 'Snapshot projector failed while applying snapshot.',
+              error: error,
+            ),
+          ],
+        );
+      }
       warnings.add(
         'Recovery used snapshot checkpoint as a reconstruction accelerator.',
       );
@@ -50,8 +65,29 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
               )
               .toList(growable: false);
 
+    var appliedEventCount = 0;
     for (final event in suffixEvents) {
-      state = projector.applyEvent(state: state, event: event);
+      try {
+        state = projector.applyEvent(state: state, event: event);
+      } on Object catch (error) {
+        return SnapshotApplyResult<TState>(
+          state: state,
+          isSuccess: false,
+          appliedEventCount: appliedEventCount,
+          finalAppliedEventSeq: appliedEventCount == 0
+              ? request.snapshot?.snapshotBaseEventSeq
+              : suffixEvents[appliedEventCount - 1].eventSeq,
+          conflicts: <SyncConflict>[
+            _projectorFailureConflict(
+              message:
+                  'Snapshot projector failed while applying recovery event.',
+              error: error,
+            ),
+          ],
+          warnings: warnings,
+        );
+      }
+      appliedEventCount++;
     }
 
     return SnapshotApplyResult<TState>(
@@ -208,5 +244,17 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     }
 
     return conflicts;
+  }
+
+  SyncConflict _projectorFailureConflict({
+    required String message,
+    required Object error,
+  }) {
+    return SyncConflict(
+      code: 'ERR_SNAPSHOT_APPLY_PROJECTOR_FAILURE',
+      message: message,
+      severity: SyncConflictSeverity.fatal,
+      actual: error.runtimeType.toString(),
+    );
   }
 }
