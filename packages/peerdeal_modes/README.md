@@ -36,3 +36,5 @@ app orchestration.
   of the mode waitlist can be promoted, and promotion returns the next ordering
   without that participant.
 - Mid-session waitlist promotion obeys mode policy and manager permissions.
+- Reload and ledger policy tests now lock Open Table private-ledger reloads and
+  Tournament reentry behavior while rejecting unsupported reload policy strings.

@@ -94,6 +94,8 @@ the gates below are satisfied.
   unauthorized grants or invalid revocations.
 - Mode governance now hardens seat assignment and offer expiry with explicit
   manager authority checks and deterministic next seat/participant states.
+- Mode adapters now lock reload and ledger visibility policy for Open Table and
+  Tournament modes, rejecting unsupported reload policy strings.
 - Network/sync/receipt/capture/native hardening now covers deterministic route
   class semantics, event-lag confidence gating, fail-closed primary election,
   fail-closed empty or suffix-only recovery windows, optional signed/encrypted
