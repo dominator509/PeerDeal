@@ -94,6 +94,10 @@ the gates below are satisfied.
 - Hold'em showdown evaluation now fails closed when fewer than two active
   non-folded seats are present, keeping single-winner hands on the uncontested
   settlement path instead of allowing accidental showdown settlement.
+- Hold'em blind posting now has a variant-local deterministic coordinator that
+  validates blind phase, amounts, seat eligibility, and duplicate commitments
+  before posting blinds, including short all-in blinds, and then advances to
+  hole-card dealing without leaking session policy into variants.
 - Mode governance now locks deterministic waitlist promotion ordering and
   rejects promotion when mode policy, manager permission, or waitlist head
   state does not allow it.

@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Holdem Blind Posting Gate
+
+Summary:
+Added a variant-local Hold'em blind-posting coordinator. It validates the
+`blindsPosting` phase, blind sizes, blind-seat eligibility, and duplicate
+commitments before mutating state; successful posting updates stacks,
+commitments, pot, current bet/min raise, marks short blinds all-in, and advances
+to `dealingHole`.
+
+Files changed:
+- `packages/peerdeal_variants/lib/peerdeal_variants.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_blind_posting_coordinator.dart`
+- `packages/peerdeal_variants/test/holdem_blind_posting_coordinator_test.dart`
+- `packages/peerdeal_variants/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test\holdem_blind_posting_coordinator_test.dart` in
+  `packages/peerdeal_variants`
+- `dart test` in `packages/peerdeal_variants`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This locks deterministic blind posting only. Session-owned hand setup,
+  hole-card dealing, event emission, and production app orchestration remain
+  separate integration work.
+
+Next reviewer:
+Wire session-owned hand setup to call the blind-posting gate before hole-card
+dealing when production hand orchestration is introduced.
+
+---
+
 ### 2026-06-08 - Codex - Holdem Showdown Active Seat Gate
 
 Summary:

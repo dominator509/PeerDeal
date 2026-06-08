@@ -8,6 +8,7 @@ export 'src/holdem/holdem_action_flow.dart';
 export 'src/holdem/holdem_action_street_coordinator.dart';
 export 'src/holdem/holdem_action_validator.dart';
 export 'src/holdem/holdem_betting_round.dart';
+export 'src/holdem/holdem_blind_posting_coordinator.dart';
 export 'src/holdem/holdem_hand_evaluator.dart';
 export 'src/holdem/holdem_hand_phase.dart';
 export 'src/holdem/holdem_hand_settled_event_builder.dart';

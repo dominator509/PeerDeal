@@ -53,6 +53,13 @@ the blocked slices. App/session orchestration should stop settlement and surface
 a safe failure path instead of silently awarding partial pots.
 
 ## Hold'em action application
+`HoldemBlindPostingCoordinator.postBlinds(...)` is the deterministic
+variant-local blind-posting gate. It runs only from `blindsPosting`, validates
+positive blind amounts and eligible blind seats, posts partial all-in blinds
+without exceeding stacks, updates pot/commitments/current bet, and advances to
+`dealingHole`. Invalid or already-posted blind state fails closed without
+mutation.
+
 `HoldemActionApplier` is a deterministic variant-local helper for applying a
 validated table action to `HoldemHandState`. It updates stack, street
 commitment, hand commitment, pot, folded/all-in flags, last aggressor, and last
