@@ -83,6 +83,14 @@ session handlers only through the validating receiver boundary. Malformed frames
 are rejected before adapter/handler code runs, and adapter/handler failures
 become explicit failed transport results.
 
+## Recovery Persistence Boundary
+
+`peerdeal_sync` owns recovery-window validation and JSON file store contracts.
+App shells own durable root selection. `AppRecoveryPersistenceStoreFactory`
+accepts an injected root directory factory, and the mobile/desktop shells may
+default it from `PEERDEAL_RECOVERY_ROOT`. Blank, missing, or throwing roots fail
+closed before mounted table routes load recovery windows.
+
 ## Error Shape
 
 - Protocol failures use `ProtocolDiagnostic`.

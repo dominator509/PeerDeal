@@ -43,6 +43,57 @@ void main() {
     expect(window.events.single.eventHash, 'hash_1');
   });
 
+  test(
+    'creates durable JSON recovery store from configured environment root',
+    () {
+      final directory = Directory.systemTemp.createTempSync(
+        'peerdeal_desktop_env_recovery_store_',
+      );
+      addTearDown(() {
+        if (directory.existsSync()) {
+          directory.deleteSync(recursive: true);
+        }
+      });
+
+      final factory = AppRecoveryPersistenceStoreFactory.fromEnvironment(
+        environment: <String, String>{
+          peerDealRecoveryRootEnvironmentVariable: ' ${directory.path} ',
+        },
+      );
+      final result = factory!.create();
+      final append = result.store!.appendEvents(
+        scope: scope,
+        events: <EventEnvelope>[
+          _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        ],
+      );
+
+      expect(result.isAvailable, isTrue);
+      expect(result.warnings, isEmpty);
+      expect(append.isSuccess, isTrue);
+    },
+  );
+
+  test(
+    'returns no default factory when configured environment root is absent',
+    () {
+      expect(
+        AppRecoveryPersistenceStoreFactory.fromEnvironment(
+          environment: const <String, String>{},
+        ),
+        isNull,
+      );
+      expect(
+        AppRecoveryPersistenceStoreFactory.fromEnvironment(
+          environment: const <String, String>{
+            peerDealRecoveryRootEnvironmentVariable: ' ',
+          },
+        ),
+        isNull,
+      );
+    },
+  );
+
   test('fails closed when app cannot provide recovery root', () {
     final factory = AppRecoveryPersistenceStoreFactory(
       rootDirectoryFactory: () => throw StateError('root unavailable'),

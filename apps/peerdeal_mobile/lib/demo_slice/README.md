@@ -65,3 +65,12 @@ Join-flow bootstrap planning follows the same boundary rule through the
 app-owned `NativeJoinBootstrapCoordinator`: native local-network bridge ->
 normalized discovery -> `peerdeal_network` bootstrap candidates -> join
 `BootstrapPlan`.
+
+## Recovery Persistence Flow
+
+Mounted table routes should receive recovery persistence through
+`AppRecoveryPersistenceStoreFactory`. The app shell may inject the factory
+directly or default it from `PEERDEAL_RECOVERY_ROOT`: configured root ->
+app-owned factory -> `peerdeal_sync` JSON recovery store -> mounted table route.
+Missing, blank, or throwing roots must fail closed before recovery windows are
+loaded.

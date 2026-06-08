@@ -260,6 +260,10 @@ the gates below are satisfied.
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is
   unavailable.
+- App shells can now build their default recovery persistence store factory
+  from the `PEERDEAL_RECOVERY_ROOT` environment variable, preserving explicit
+  constructor injection while giving deployed shells a durable root
+  configuration path without adding package-level platform policy.
 - Mounted app table routes now consume the app-owned recovery persistence
   factory when one is supplied, load the active scenario recovery window, and
   fail closed with an explicit warning when no platform persistence root is
@@ -275,9 +279,10 @@ the gates below are satisfied.
   device/OS integration, and product design validation. The Dart contracts,
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
-  app-owned recovery store construction and mounted recovery-window loading,
-  app-owned table/join bootstrap mapping, and method-channel payload gates are
-  locked for those follow-up implementations.
+  app-owned recovery store construction, environment-configured recovery root
+  loading, mounted recovery-window loading, app-owned table/join bootstrap
+  mapping, and method-channel payload gates are locked for those follow-up
+  implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

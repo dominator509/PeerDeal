@@ -4,6 +4,8 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 typedef RecoveryPersistenceRootDirectoryFactory = Directory Function();
 
+const peerDealRecoveryRootEnvironmentVariable = 'PEERDEAL_RECOVERY_ROOT';
+
 class AppRecoveryPersistenceStoreLoadResult {
   const AppRecoveryPersistenceStoreLoadResult.available({
     required this.store,
@@ -24,6 +26,22 @@ class AppRecoveryPersistenceStoreFactory {
   const AppRecoveryPersistenceStoreFactory({
     required RecoveryPersistenceRootDirectoryFactory rootDirectoryFactory,
   }) : _rootDirectoryFactory = rootDirectoryFactory;
+
+  static AppRecoveryPersistenceStoreFactory? fromEnvironment({
+    Map<String, String>? environment,
+  }) {
+    final rootPath =
+        (environment ??
+                Platform.environment)[peerDealRecoveryRootEnvironmentVariable]
+            ?.trim();
+    if (rootPath == null || rootPath.isEmpty) {
+      return null;
+    }
+
+    return AppRecoveryPersistenceStoreFactory(
+      rootDirectoryFactory: () => Directory(rootPath),
+    );
+  }
 
   final RecoveryPersistenceRootDirectoryFactory _rootDirectoryFactory;
 

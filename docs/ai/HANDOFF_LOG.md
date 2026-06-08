@@ -947,6 +947,44 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Environment Recovery Root
+
+Summary:
+Mobile and desktop app shells can now create their default
+`AppRecoveryPersistenceStoreFactory` from `PEERDEAL_RECOVERY_ROOT`, while still
+preferring explicit constructor injection. The factory trims configured paths,
+returns no default factory for missing/blank configuration, and continues to
+fail closed when root creation is unavailable or invalid. Mounted table routes
+therefore have a deployable durable recovery-root configuration path without
+moving platform/database policy into `peerdeal_sync`.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/README.md`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart test\app_shell_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- This is a configurable file-store root, not a production database or native
+  platform path-provider implementation.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App Route Map Registry Validation
 
 Summary:

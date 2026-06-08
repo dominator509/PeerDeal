@@ -99,8 +99,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
               _activeSnapshot,
             ),
             bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
-            recoveryPersistenceStoreFactory:
-                widget._recoveryPersistenceStoreFactory,
+            recoveryPersistenceStoreFactory: _recoveryPersistenceStoreFactory,
             onOpenChat: () =>
                 Navigator.of(context).pushNamed(DemoSliceRoutes.chatRoute.path),
             onOpenReceipt: () => Navigator.of(
@@ -195,6 +194,11 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   NativeBootstrapCandidateLoaderFactory get _bootstrapCandidateLoaderFactory {
     return widget._bootstrapCandidateLoaderFactory ??
         NativeBootstrapCandidateLoader.methodChannel;
+  }
+
+  AppRecoveryPersistenceStoreFactory? get _recoveryPersistenceStoreFactory {
+    return widget._recoveryPersistenceStoreFactory ??
+        AppRecoveryPersistenceStoreFactory.fromEnvironment();
   }
 
   PeerDealReceipt _receiptFor(DemoScenarioSnapshot snapshot) {
