@@ -25,6 +25,7 @@ import 'setup_flow/setup_flow_route.dart';
 
 typedef DemoReceiptFactory =
     PeerDealReceipt Function(DemoScenarioSnapshot snapshot);
+typedef PeerDealAppRouteMap = Map<String, WidgetBuilder>;
 
 void main() {
   runApp(const PeerDealDesktopApp());
@@ -47,6 +48,7 @@ class PeerDealDesktopRuntime {
     this.recoveryPersistenceStoreFactory,
     this.tableRuntimeScopeFactory,
     this.enabledDemoRoutePaths,
+    this.productionRoutes,
   });
 
   final DemoReceiptSurfacePresenter? receiptPresenter;
@@ -64,6 +66,7 @@ class PeerDealDesktopRuntime {
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
   final Set<String>? enabledDemoRoutePaths;
+  final PeerDealAppRouteMap? productionRoutes;
 
   PeerDealDesktopRuntime withOverrides({
     DemoReceiptSurfacePresenter? receiptPresenter,
@@ -81,6 +84,7 @@ class PeerDealDesktopRuntime {
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     Set<String>? enabledDemoRoutePaths,
+    PeerDealAppRouteMap? productionRoutes,
   }) {
     return PeerDealDesktopRuntime(
       receiptPresenter: receiptPresenter ?? this.receiptPresenter,
@@ -112,6 +116,7 @@ class PeerDealDesktopRuntime {
           tableRuntimeScopeFactory ?? this.tableRuntimeScopeFactory,
       enabledDemoRoutePaths:
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
+      productionRoutes: productionRoutes ?? this.productionRoutes,
     );
   }
 }
@@ -135,6 +140,7 @@ class PeerDealDesktopApp extends StatefulWidget {
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     Set<String>? enabledDemoRoutePaths,
+    PeerDealAppRouteMap? productionRoutes,
   }) : _runtime = runtime,
        _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
@@ -150,7 +156,8 @@ class PeerDealDesktopApp extends StatefulWidget {
        _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory,
        _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory,
        _tableRuntimeScopeFactory = tableRuntimeScopeFactory,
-       _enabledDemoRoutePaths = enabledDemoRoutePaths;
+       _enabledDemoRoutePaths = enabledDemoRoutePaths,
+       _productionRoutes = productionRoutes;
 
   final PeerDealDesktopRuntime? _runtime;
   final DemoReceiptSurfacePresenter? _receiptPresenter;
@@ -168,6 +175,7 @@ class PeerDealDesktopApp extends StatefulWidget {
   final AppRecoveryPersistenceStoreFactory? _recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
   final Set<String>? _enabledDemoRoutePaths;
+  final PeerDealAppRouteMap? _productionRoutes;
 
   @override
   State<PeerDealDesktopApp> createState() => _PeerDealDesktopAppState();
@@ -197,6 +205,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       recoveryPersistenceStoreFactory: widget._recoveryPersistenceStoreFactory,
       tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
+      productionRoutes: widget._productionRoutes,
     );
   }
 
@@ -216,6 +225,9 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     final enabledRoutePaths = enabledMountedRoutes
         .map((route) => route.path)
         .toSet();
+    final productionRoutes = _validatedProductionRoutes(
+      _runtime.productionRoutes,
+    );
     return WidgetsApp(
       title: 'PeerDeal Desktop',
       color: const Color(0xFF1B5E20),
@@ -290,9 +302,13 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
               setupIntentFactory: _runtime.setupFlowIntentFactory,
               enabledModes: _runtime.setupFlowEnabledModes,
             ),
+          ...productionRoutes,
         },
         expectedRoutes: enabledMountedRoutes,
-        allowedExtraPaths: const <String>{Navigator.defaultRouteName},
+        allowedExtraPaths: <String>{
+          Navigator.defaultRouteName,
+          ...productionRoutes.keys,
+        },
       ),
       onUnknownRoute: _unknownRoute,
     );
@@ -328,6 +344,39 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   void _selectScenario(String scenarioId) {
     if (!_controller.trySelectScenario(scenarioId)) return;
     setState(() {});
+  }
+
+  PeerDealAppRouteMap _validatedProductionRoutes(PeerDealAppRouteMap? routes) {
+    if (routes == null || routes.isEmpty) {
+      return const <String, WidgetBuilder>{};
+    }
+
+    final mountedDemoPaths = DemoSliceRoutes.mountedRoutes
+        .map((route) => route.path)
+        .toSet();
+    final validated = <String, WidgetBuilder>{};
+
+    for (final entry in routes.entries) {
+      final path = entry.key.trim();
+      if (path != entry.key ||
+          path.isEmpty ||
+          !path.startsWith('/') ||
+          path == Navigator.defaultRouteName ||
+          path.startsWith('/demo') ||
+          path.endsWith('/') ||
+          path.contains('?') ||
+          path.contains('#') ||
+          path.contains('//') ||
+          mountedDemoPaths.contains(path)) {
+        throw StateError('Production route map contains an invalid path.');
+      }
+      if (validated.containsKey(path)) {
+        throw StateError('Production route map contains duplicate paths.');
+      }
+      validated[path] = entry.value;
+    }
+
+    return Map<String, WidgetBuilder>.unmodifiable(validated);
   }
 
   DemoReceiptArtifactVerifierFactory get _receiptArtifactVerifierFactory {

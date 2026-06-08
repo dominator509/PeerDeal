@@ -71,8 +71,10 @@ Verified mounted route categories include:
 Concrete mounted demo route paths are app-shell details owned by each app's
 `DemoSliceRoutes` registry. App `MaterialApp` route maps validate against that
 registry at construction time, with `/` allowed only as an explicit framework
-default-route alias. Production navigation remains app-shell work and should
-replace or extend the registry without moving route policy into shared packages.
+default-route alias. App runtime objects may also provide validated non-demo
+production route maps; `/demo/*` stays reserved for the demo registry.
+Production navigation remains app-shell work and should replace or extend app
+routes without moving route policy into shared packages.
 
 ## Network Transport Boundary
 

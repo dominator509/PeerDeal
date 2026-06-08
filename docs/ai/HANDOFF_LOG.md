@@ -14,6 +14,46 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - App Production Route Extension
+
+Summary:
+Added validated app-owned production route maps to both app runtime objects.
+Mobile and desktop shells can now mount non-demo `WidgetBuilder` routes without
+editing `DemoSliceRoutes`, while `/demo/*`, `/`, query/fragment paths, trailing
+slash paths, and malformed route keys are rejected before `WidgetsApp` receives
+the route map.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Runtime callers that previously expected to mount ad hoc `/demo/*` paths
+  through app extras must instead use the demo registry or choose a non-demo
+  production route path.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - App Demo Route Gates
 
 Summary:

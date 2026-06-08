@@ -402,6 +402,10 @@ the gates below are satisfied.
   mobile and desktop runtime objects, so production callers can expose only
   explicitly allowed dev/demo paths while disabled route requests fall through
   the scrubbed route-unavailable surface.
+- App shells now accept validated app-owned production route maps through the
+  mobile and desktop runtime objects, reserving `/demo/*` for the demo registry
+  while allowing non-demo flows to mount without editing shared package or demo
+  route policy.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -416,10 +420,10 @@ the gates below are satisfied.
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, app-owned route runtime dependency
   grouping, app-owned table runtime-scope injection, canonical app-route
-  registry validation, app-owned join invite-context injection, app-owned
-  receipt envelope injection, app-owned setup intent injection, app-owned
-  transport payload-limit enforcement, bounded app-owned table/join bootstrap
-  mapping, app-owned
+  registry validation, app-owned production route-map extension, app-owned
+  join invite-context injection, app-owned receipt envelope injection,
+  app-owned setup intent injection, app-owned transport payload-limit
+  enforcement, bounded app-owned table/join bootstrap mapping, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are

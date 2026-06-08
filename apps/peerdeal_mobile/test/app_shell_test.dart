@@ -810,6 +810,44 @@ void main() {
     expect(find.text('Route: ${DemoSliceRoutes.receipt}'), findsOneWidget);
   });
 
+  testWidgets('mounts app-owned production routes outside demo registry', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+        ),
+      ),
+    );
+
+    Navigator.of(
+      tester.element(find.text('PeerDeal demo')),
+    ).pushNamed('/table-live');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Production table route'), findsOneWidget);
+  });
+
+  testWidgets('rejects production routes that collide with demo namespace', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          productionRoutes: <String, WidgetBuilder>{
+            '/demo/production': (_) => const Text('bad route'),
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
   testWidgets('mounted table classifies recovery network confidence', (
     tester,
   ) async {
