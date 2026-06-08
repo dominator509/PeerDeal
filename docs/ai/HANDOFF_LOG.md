@@ -305,6 +305,39 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - App Recovery Persistence Store Factory
+
+Summary:
+Added app-owned recovery persistence store factories in both app shells. The
+factory creates the sync package's JSON file-backed recovery store only when
+the app/platform layer supplies a usable root directory, and returns an
+explicit unavailable result when the root cannot be resolved. This gives app
+orchestration a stable durable recovery-store boundary without inventing
+platform path-provider behavior or a production database.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- Real platform directory selection and production database/platform
+  persistence remain pending; this locks app construction of the existing file
+  store only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Mounted Receipt Export Flow
 
 Summary:

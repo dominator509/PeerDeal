@@ -246,6 +246,10 @@ the gates below are satisfied.
 - Sync recovery file persistence now writes canonical protocol JSON through a
   temporary file before replacing the durable recovery window, locking stable
   on-disk bytes for diagnostics and reducing direct-write corruption risk.
+- App shells now expose app-owned recovery persistence store factories that
+  construct durable JSON recovery stores only when the platform/app layer
+  supplies a usable root directory and fail closed when that root is
+  unavailable.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -256,8 +260,9 @@ the gates below are satisfied.
   environment because they require native platform implementations and
   device/OS integration. The Dart contracts, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
-  app-owned table/join bootstrap mapping, and method-channel payload gates are
-  locked for those follow-up implementations.
+  app-owned recovery store construction, app-owned table/join bootstrap
+  mapping, and method-channel payload gates are locked for those follow-up
+  implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
