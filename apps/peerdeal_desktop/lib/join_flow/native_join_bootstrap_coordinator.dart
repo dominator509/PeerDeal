@@ -109,12 +109,27 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     final seen = <String>{};
     final result = <String>[];
     for (final value in values) {
-      final normalized = value.trim();
+      final normalized = _safeNativeText(value);
       if (normalized.isEmpty || !seen.add(normalized)) {
         continue;
       }
       result.add(normalized);
     }
     return result;
+  }
+
+  static String _safeNativeText(String value) {
+    final normalized = value
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (normalized.isEmpty) {
+      return '';
+    }
+    const maxLength = 96;
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return normalized.substring(0, maxLength);
   }
 }

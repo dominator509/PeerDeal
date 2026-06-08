@@ -61,12 +61,13 @@ class NativeBootstrapCandidateLoader {
     }
 
     final warnings = <String>[
-      if (_hasText(capability.warning)) capability.warning!,
+      if (_hasText(capability.warning))
+        'Local network reported a platform warning.',
     ];
 
     if (!capability.discoverySupported) {
       return NativeBootstrapCandidateLoadResult.unavailable(
-        nativeNotes: capability.notes,
+        nativeNotes: _safeNativeText(capability.notes),
         warnings: warnings,
       );
     }
@@ -86,7 +87,8 @@ class NativeBootstrapCandidateLoader {
 
     final discoveryWarnings = <String>[
       ...warnings,
-      if (_hasText(discovery.warning)) discovery.warning!,
+      if (_hasText(discovery.warning))
+        'Local network reported a platform warning.',
     ];
     if (_maxPeerCandidates < 1) {
       return NativeBootstrapCandidateLoadResult.unavailable(
@@ -155,22 +157,52 @@ class NativeBootstrapCandidateLoader {
     LocalNetworkDiscoverySnapshot discovery,
   ) {
     final hints = _normalizedUnique(discovery.interfaceHints);
-    if (hints.isEmpty) {
-      return capability.notes;
+    final notes = hints.isEmpty
+        ? capability.notes
+        : '${capability.notes}; interfaces=${hints.join(",")}';
+    return _safeNativeText(notes);
+  }
+
+  static String _safeNativeText(String value) {
+    final normalized = value
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (normalized.isEmpty) {
+      return 'unavailable';
     }
-    return '${capability.notes}; interfaces=${hints.join(",")}';
+    const maxLength = 96;
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return normalized.substring(0, maxLength);
   }
 
   static List<String> _normalizedUnique(List<String> values) {
     final seen = <String>{};
     final result = <String>[];
     for (final value in values) {
-      final normalized = value.trim();
+      final normalized = _safePeerId(value);
       if (normalized.isEmpty || !seen.add(normalized)) {
         continue;
       }
       result.add(normalized);
     }
     return result;
+  }
+
+  static String _safePeerId(String value) {
+    final normalized = value
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (normalized.isEmpty) {
+      return '';
+    }
+    const maxLength = 96;
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return normalized.substring(0, maxLength);
   }
 }

@@ -76,6 +76,37 @@ void main() {
   );
 
   test(
+    'scrubs native discovery endpoints before candidate resolution',
+    () async {
+      final provider = _RecordingBootstrapCandidateProvider();
+      final result = await NativeBootstrapCandidateLoader(
+        bridge: _FakeLocalNetworkBridge(
+          capability: const LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: true,
+            notes: 'local-network-ready',
+          ),
+          discovery: LocalNetworkDiscoverySnapshot(
+            permissionGranted: true,
+            foundEndpoints: <String>[
+              '${'peer'.padRight(120, 'x')}\nsecret',
+              '',
+            ],
+            interfaceHints: const <String>[],
+          ),
+        ),
+        provider: provider,
+      ).load(sessionId: 'session-1', tableId: 'table-1');
+
+      expect(result.discoveryAvailable, isTrue);
+      expect(provider.request!.peerIds.single, isNot(contains('\n')));
+      expect(provider.request!.peerIds.single.length, lessThanOrEqualTo(96));
+      expect(result.candidates.single.peerId, provider.request!.peerIds.single);
+    },
+  );
+
+  test(
     'fails closed when local network peer candidate limit is invalid',
     () async {
       final result = await NativeBootstrapCandidateLoader(
@@ -120,7 +151,37 @@ void main() {
     expect(result.discoveryAvailable, isFalse);
     expect(result.candidates, isEmpty);
     expect(result.nativeNotes, 'unavailable');
-    expect(result.warnings, ['permission unavailable']);
+    expect(result.warnings, ['Local network reported a platform warning.']);
+  });
+
+  test('scrubs native local-network warning and notes', () async {
+    final result = await NativeBootstrapCandidateLoader(
+      bridge: _FakeLocalNetworkBridge(
+        capability: LocalNetworkCapability(
+          discoverySupported: true,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: '${'local '.padRight(120, 'x')}\nsecret',
+          warning: 'permission_failed: C:\\secret\\network.log',
+        ),
+        discovery: const LocalNetworkDiscoverySnapshot(
+          permissionGranted: true,
+          foundEndpoints: <String>[],
+          interfaceHints: <String>['wifi\nsecret'],
+          warning: 'discovery_failed: C:\\secret\\peers.log',
+        ),
+      ),
+    ).load(sessionId: 'session-1', tableId: 'table-1');
+
+    expect(result.discoveryAvailable, isTrue);
+    expect(result.warnings, <String>[
+      'Local network reported a platform warning.',
+      'Local network reported a platform warning.',
+    ]);
+    expect(result.warnings.join(' '), isNot(contains('network.log')));
+    expect(result.warnings.join(' '), isNot(contains('peers.log')));
+    expect(result.nativeNotes, isNot(contains('\n')));
+    expect(result.nativeNotes.length, lessThanOrEqualTo(96));
   });
 
   test('fails closed when local network bridge throws', () async {

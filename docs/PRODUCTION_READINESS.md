@@ -147,6 +147,10 @@ the gates below are satisfied.
   normalized native peer discovery before candidate resolution, warning or
   falling back safely when platform discovery is invalid or exceeds the app
   candidate limit.
+- App-owned local-network bootstrap loaders now scrub native capability and
+  discovery warnings, bound native notes/interface hints, and normalize
+  native-discovered endpoint ids before mounted table and join bootstrap paths
+  pass candidates into `peerdeal_network`.
 - App safe-surface capture coordinators now scrub native warning detail and
   bound native notes before projecting capture plans into UI render models,
   preserving fail-closed obscuring without exposing platform exception text.
@@ -299,8 +303,8 @@ the gates below are satisfied.
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, app-owned transport payload-limit
   enforcement, bounded app-owned table/join bootstrap mapping, app-owned
-  transport/capture diagnostic scrubbing, scrubbed route-failure diagnostics,
-  and method-channel payload gates are locked for those follow-up
+  local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
+  diagnostics, and method-channel payload gates are locked for those follow-up
   implementations.
 
 ## Next production hardening order

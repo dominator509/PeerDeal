@@ -75,6 +75,35 @@ void main() {
     },
   );
 
+  test('scrubs native discovery endpoints before join bootstrap', () async {
+    final provider = _RecordingBootstrapCandidateProvider();
+    final coordinator = NativeJoinBootstrapCoordinator(
+      bridge: _StaticLocalNetworkBridge(
+        capability: const LocalNetworkCapability(
+          discoverySupported: true,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: 'local-network-ready',
+        ),
+        discovery: LocalNetworkDiscoverySnapshot(
+          permissionGranted: true,
+          foundEndpoints: <String>['${'peer'.padRight(120, 'x')}\nsecret', ''],
+          interfaceHints: const <String>[],
+        ),
+      ),
+      provider: provider,
+    );
+
+    final plan = await coordinator.buildPlan(
+      resolvedInvite: _resolvedInvite,
+      roleGrant: _roleGrant,
+    );
+
+    expect(provider.request!.peerIds.single, isNot(contains('\n')));
+    expect(provider.request!.peerIds.single.length, lessThanOrEqualTo(96));
+    expect(plan.peerCandidates.single, provider.request!.peerIds.single);
+  });
+
   test('keeps relay fallback when peer candidate limit is invalid', () async {
     final provider = _RecordingBootstrapCandidateProvider();
     final coordinator = NativeJoinBootstrapCoordinator(
