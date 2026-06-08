@@ -158,6 +158,9 @@ the gates below are satisfied.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
+- Shared app-shell UI primitives now cover a reusable scaffold, action button,
+  status pill, and info row in `peerdeal_ui_kit`, and mounted home/table routes
+  in both app shells use them instead of raw placeholder columns.
 - Demo receipt presenters in both app shells can route signed receipt export
   artifacts through fail-closed verification before projecting safe receipt
   fields.
@@ -260,9 +263,10 @@ the gates below are satisfied.
   checked-in markdown files were reviewed directly from source.
 - Platform-native secure storage, capture blocking, real local-network
   discovery, production transport, production database/platform persistence,
-  and polished app UI cannot be completed inside the current ChatGPT project
-  environment because they require native platform implementations and
-  device/OS integration. The Dart contracts, app-owned receipt key
+  and final production app UI cannot be completed inside the current ChatGPT
+  project environment because they require native platform implementations,
+  device/OS integration, and product design validation. The Dart contracts,
+  shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction and mounted recovery-window loading,
   app-owned table/join bootstrap mapping, and method-channel payload gates are

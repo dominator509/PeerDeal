@@ -106,7 +106,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Platform key storage | Method-channel read/write seams plus app-owned receipt key provisioning, export, and verification mapping exist; native implementation pending |
 | Persistence | Canonical recovery-window file store, app-owned store factories, and mounted recovery-window loading exist; production database/platform persistence not implemented |
 | App flows | Demo routes plus mounted setup/join orchestration seams, mounted table/join native bootstrap mapping, mounted receipt export/verify wiring, and unknown-route fallback exist; production navigation polish remains |
-| UI polish | Demo UI, not production-polished |
+| UI polish | Shared app-shell scaffold/action/status/info primitives exist and home/table routes consume them; final production UI validation remains |
 | Capture blocking | Best-effort policy only; platform limits must be stated honestly |
 
 ## Do Not Cross

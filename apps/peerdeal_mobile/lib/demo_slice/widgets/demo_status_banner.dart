@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 import '../models/demo_view_models.dart';
 
@@ -13,6 +14,9 @@ class DemoStatusBanner extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Text('${vm.severity}: ${vm.label}');
+    return PeerDealStatusPill(
+      label: '${vm.severity}: ${vm.label}',
+      severity: vm.severity,
+    );
   }
 }

@@ -908,6 +908,45 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Shared App Shell UI Primitives
+
+Summary:
+Added shared Widgets-only app-shell primitives to `peerdeal_ui_kit` and moved
+mobile/desktop mounted home and table routes onto the shared scaffold, action
+button, status pill, and info row components. This reduces raw placeholder UI
+without moving game truth or route orchestration into the UI kit.
+
+Files changed:
+- `packages/peerdeal_ui_kit/lib/peerdeal_ui_kit.dart`
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_action_button.dart`
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_app_scaffold.dart`
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_info_row.dart`
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_status_pill.dart`
+- `packages/peerdeal_ui_kit/test/app_shell_widgets_test.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/widgets/demo_status_banner.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/widgets/demo_status_banner.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub` in `packages/peerdeal_ui_kit`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- Final production UI polish still needs product/device validation; this locks
+  reusable app-shell primitives and removes the raw placeholder route layout.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Secure Key Storage Mutation Contract
 
 Summary:

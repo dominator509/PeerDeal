@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 import '../../recovery/app_recovery_persistence_store_factory.dart';
 import '../controllers/demo_network_confidence_presenter.dart';
@@ -156,16 +157,28 @@ class DemoTableScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
+    return PeerDealAppScaffold(
+      title: 'Demo table',
+      subtitle: 'Mounted table orchestration',
+      actions: <Widget>[
+        PeerDealActionButton(label: 'Chat', onPressed: onOpenChat),
+        PeerDealActionButton(label: 'Receipt', onPressed: onOpenReceipt),
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text('Demo table'),
           DemoStatusBanner(vm: snapshot.statusBanner),
+          const SizedBox(height: 12),
+          PeerDealInfoRow(label: 'Scenario', value: snapshot.scenarioId),
           Text('Scenario: ${snapshot.scenarioId}'),
+          PeerDealInfoRow(label: 'Mode', value: snapshot.mode),
           Text('Mode: ${snapshot.mode}'),
+          PeerDealInfoRow(label: 'Variant', value: snapshot.variant),
           Text('Variant: ${snapshot.variant}'),
+          PeerDealInfoRow(
+            label: 'Network',
+            value: networkConfidence.confidence.name,
+          ),
           Text('Network: ${networkConfidence.confidence.name}'),
           if (networkConfidence.recoveryRecommended)
             const Text('Network action: recovery_required'),
@@ -197,9 +210,11 @@ class DemoTableScreen extends StatelessWidget {
               'Recovery persistence warning: '
               '${recoveryPersistence!.warnings.first}',
             ),
+          PeerDealInfoRow(
+            label: 'Receipt',
+            value: snapshot.receipt.verificationState,
+          ),
           Text('Receipt: ${snapshot.receipt.verificationState}'),
-          _DemoRouteAction(label: 'Chat', onTap: onOpenChat),
-          _DemoRouteAction(label: 'Receipt', onTap: onOpenReceipt),
         ],
       ),
     );
@@ -222,22 +237,4 @@ class DemoRecoveryPersistenceLoadResult {
   final int persistedEventCount;
   final bool hasSnapshot;
   final List<String> warnings;
-}
-
-class _DemoRouteAction extends StatelessWidget {
-  const _DemoRouteAction({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(label),
-      ),
-    );
-  }
 }
