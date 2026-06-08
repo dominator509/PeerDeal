@@ -61,13 +61,21 @@ class SetupFlowOrchestrator {
 
   List<String> _setupIntentErrors(SetupIntent intent) {
     final errors = <String>[];
-    if (intent.intentId.trim().isEmpty) {
+    if (!_hasText(intent.intentId)) {
       errors.add('setup_intent_id_missing');
+    } else if (!_isExact(intent.intentId)) {
+      errors.add('setup_intent_id_malformed');
     }
-    if (intent.hostPseudonymousId.trim().isEmpty) {
+    if (!_hasText(intent.hostPseudonymousId)) {
       errors.add('setup_host_missing');
+    } else if (!_isExact(intent.hostPseudonymousId)) {
+      errors.add('setup_host_malformed');
     }
 
     return List<String>.unmodifiable(errors);
   }
+
+  static bool _hasText(String value) => value.trim().isNotEmpty;
+
+  static bool _isExact(String value) => value.trim() == value;
 }

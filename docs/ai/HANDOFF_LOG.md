@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Setup Identity Padding Gate
+
+Summary:
+Hardened mobile and desktop setup-flow orchestrators so app-owned setup intent
+and host identities reject leading or trailing whitespace before wizard
+dependencies run. Focused tests prove padded IDs fail closed before throwing
+wizard fakes are reached.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_orchestrator.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_orchestrator_test.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_orchestrator.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_orchestrator_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\setup_flow\setup_flow_orchestrator_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\setup_flow\setup_flow_orchestrator_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks app-owned setup identity validation only; final production setup
+  UX and product flow validation remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Local Network Bootstrap Padding Gate
 
 Summary:

@@ -318,6 +318,9 @@ the gates below are satisfied.
 - App setup-flow orchestrators now reject blank setup intent and host
   pseudonymous identities before wizard resolution, so malformed production
   setup sources cannot emit blank plan ids or reach compiler dependencies.
+- App setup-flow orchestrators now reject padded setup intent and host
+  pseudonymous identities before wizard resolution, so ambiguous production
+  setup IDs cannot reach compiler dependencies.
 - App shell runtime dependency injection now has mounted-route coverage for
   blank setup identities, locking the production runtime object path to the
   same fail-closed setup intent gate as direct route injection.
@@ -459,10 +462,11 @@ the gates below are satisfied.
   registry validation, app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
   app-owned join invite-context injection, app-owned receipt envelope
-  injection, app-owned setup intent injection, app-owned transport
-  payload-limit enforcement, app-owned transport sink validation, app-owned
-  transport receive-scope validation, bounded app-owned table/join bootstrap
-  mapping, app-owned local-network bootstrap scope validation, app-owned
+  injection, app-owned setup intent injection, app-owned setup identity
+  validation, app-owned transport payload-limit enforcement, app-owned
+  transport sink validation, app-owned transport receive-scope validation,
+  bounded app-owned table/join bootstrap mapping, app-owned local-network
+  bootstrap scope validation, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are

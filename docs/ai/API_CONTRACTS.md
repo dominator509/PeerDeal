@@ -81,6 +81,8 @@ receives validated home navigation entries and may replace the default demo
 home surface; builder failures render the existing route-unavailable fallback.
 Production navigation and home composition remain app-shell work and should
 replace or extend app routes without moving route policy into shared packages.
+Setup flow orchestration rejects blank or padded app-owned setup intent and
+host identities before wizard dependencies run.
 
 ## Network Transport Boundary
 

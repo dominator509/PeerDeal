@@ -55,6 +55,31 @@ void main() {
     expect(result.errors, ['setup_intent_id_missing', 'setup_host_missing']);
   });
 
+  test('rejects padded setup identity before wizard dependencies', () {
+    const orchestrator = SetupFlowOrchestrator(
+      presetResolver: _ThrowingPresetResolver(),
+    );
+
+    final result = orchestrator.compileSetup(
+      intent: const SetupIntent(
+        intentId: ' intent_open_table',
+        sourceType: SetupSurface.simple,
+        hostPseudonymousId: 'host_1 ',
+        modePreference: 'open_table',
+        variantPreference: 'holdem_nlhe',
+        seatCountPreference: 6,
+      ),
+    );
+
+    expect(result.status, SetupFlowStatus.rejected);
+    expect(result.resultCode, 'ERR_SETUP_INTENT_INVALID');
+    expect(result.gameFile, isNull);
+    expect(result.errors, [
+      'setup_intent_id_malformed',
+      'setup_host_malformed',
+    ]);
+  });
+
   test('fails closed when setup dependencies throw', () {
     const orchestrator = SetupFlowOrchestrator(
       presetResolver: _ThrowingPresetResolver(),
