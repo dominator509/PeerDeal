@@ -169,8 +169,8 @@ void main() {
     expect(result.isSuccess, isFalse);
     expect(result.appliedEventCount, 0);
     expect(
-      result.conflicts.single.code,
-      'ERR_SNAPSHOT_APPLY_EVENT_WINDOW_MISSING_PREFIX',
+      result.conflicts.map((conflict) => conflict.code),
+      contains('ERR_SNAPSHOT_APPLY_EVENT_WINDOW_MISSING_PREFIX'),
     );
   });
 
@@ -197,7 +197,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:05Z',
             actorRef: 'system',
             payload: <String, Object?>{},
-            prevEventHash: 'genesis',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
         ],
@@ -214,6 +214,49 @@ void main() {
     );
     expect(result.conflicts.single.actual, 'StateError');
   });
+
+  test(
+    'fails safely when no-snapshot event window has non-genesis first hash',
+    () {
+      final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      );
+
+      final result = applier.apply(
+        const SnapshotApplyRequest(
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          protocolVersion: '1.0.0',
+          events: <EventEnvelope>[
+            EventEnvelope(
+              eventId: 'evt_1',
+              eventType: 'OpenTableSessionOpened',
+              eventVersion: '1.0',
+              protocolVersion: '1.0.0',
+              eventSeq: 1,
+              tableId: 'table_1',
+              sessionId: 'session_1',
+              handId: null,
+              emittedAt: '2026-04-25T00:00:00Z',
+              actorRef: 'host_1',
+              payload: <String, Object?>{},
+              prevEventHash: 'root',
+              eventHash: 'hash_1',
+            ),
+          ],
+        ),
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.appliedEventCount, 0);
+      expect(
+        result.conflicts.single.code,
+        'ERR_SNAPSHOT_APPLY_EVENT_WINDOW_GENESIS_HASH_MISMATCH',
+      );
+      expect(result.conflicts.single.expected, genesisEventHash);
+      expect(result.conflicts.single.actual, 'root');
+    },
+  );
 }
 
 class _ThrowingEventProjector extends FakeSnapshotProjector {

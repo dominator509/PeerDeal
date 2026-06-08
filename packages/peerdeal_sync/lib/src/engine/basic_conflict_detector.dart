@@ -211,6 +211,19 @@ class BasicConflictDetector implements ConflictDetector {
           ),
         );
       }
+      final firstPrevEventHash = request.events.first.prevEventHash;
+      if (firstPrevEventHash != genesisEventHash) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_EVENT_WINDOW_GENESIS_HASH_MISMATCH',
+            message:
+                'Recovery event window without a snapshot must chain from the genesis event hash.',
+            severity: SyncConflictSeverity.fatal,
+            expected: genesisEventHash,
+            actual: firstPrevEventHash,
+          ),
+        );
+      }
     }
 
     if (request.expectedFinalEventSeq != null && request.events.isNotEmpty) {

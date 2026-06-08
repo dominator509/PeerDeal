@@ -14,6 +14,52 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Sync Genesis Recovery Gate
+
+Summary:
+Hardened sync recovery boundaries so no-snapshot recovery windows and first
+persisted recovery events must chain from the protocol-owned `genesisEventHash`
+before conflict resolution, snapshot apply, or persistence append can proceed.
+Normalized sync and app recovery test fixtures to the same genesis marker.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/engine/basic_conflict_detector.dart`
+- `packages/peerdeal_sync/lib/src/engine/basic_snapshot_applier.dart`
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/basic_conflict_detector_test.dart`
+- `packages/peerdeal_sync/test/basic_snapshot_applier_test.dart`
+- `packages/peerdeal_sync/test/basic_sync_coordinator_test.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_sync`
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart` in `apps/peerdeal_desktop`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Recovery callers that append or apply first events with lowercase or alternate
+  genesis markers now fail closed.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Replay Genesis Window Gate
 
 Summary:

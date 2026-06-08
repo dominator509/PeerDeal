@@ -28,7 +28,7 @@ void main() {
               emittedAt: '2026-04-25T00:00:00Z',
               actorRef: 'host_1',
               payload: <String, Object?>{},
-              prevEventHash: 'root',
+              prevEventHash: genesisEventHash,
               eventHash: 'actual_hash',
             ),
           ],
@@ -87,7 +87,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
         ],
@@ -118,7 +118,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
         ],
@@ -217,7 +217,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
           EventEnvelope(
@@ -265,7 +265,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
           EventEnvelope(
@@ -313,7 +313,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
         ],
@@ -355,9 +355,32 @@ void main() {
     );
 
     expect(result.hasFatalConflicts, isTrue);
-    expect(result.conflicts.single.code, 'ERR_EVENT_WINDOW_MISSING_PREFIX');
-    expect(result.conflicts.single.expected, '1');
-    expect(result.conflicts.single.actual, '3');
+    expect(
+      result.conflicts.map((conflict) => conflict.code),
+      contains('ERR_EVENT_WINDOW_MISSING_PREFIX'),
+    );
+  });
+
+  test('flags fatal full recovery window with non-genesis first hash', () {
+    final result = detector.detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          _event(1, prevEventHash: 'root', eventHash: 'hash_1'),
+        ],
+      ),
+    );
+
+    expect(result.hasFatalConflicts, isTrue);
+    expect(
+      result.conflicts.single.code,
+      'ERR_EVENT_WINDOW_GENESIS_HASH_MISMATCH',
+    );
+    expect(result.conflicts.single.expected, genesisEventHash);
+    expect(result.conflicts.single.actual, 'root');
   });
 }
 

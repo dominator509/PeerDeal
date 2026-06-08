@@ -1,3 +1,5 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import '../contracts/snapshot_applier.dart';
 import '../contracts/snapshot_state_projector.dart';
 import '../models/snapshot_apply_request.dart';
@@ -180,6 +182,19 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
             severity: SyncConflictSeverity.fatal,
             expected: '1',
             actual: '$firstEventSeq',
+          ),
+        );
+      }
+      final firstPrevEventHash = request.events.first.prevEventHash;
+      if (firstPrevEventHash != genesisEventHash) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_SNAPSHOT_APPLY_EVENT_WINDOW_GENESIS_HASH_MISMATCH',
+            message:
+                'Snapshot apply event window without a snapshot must chain from the genesis event hash.',
+            severity: SyncConflictSeverity.fatal,
+            expected: genesisEventHash,
+            actual: firstPrevEventHash,
           ),
         );
       }

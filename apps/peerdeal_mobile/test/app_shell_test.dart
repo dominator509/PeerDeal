@@ -429,7 +429,7 @@ void main() {
         protocolVersion: '1.x',
       ),
       events: <EventEnvelope>[
-        _recoveryEvent(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _recoveryEvent(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
       ],
     );
     expect(append.isSuccess, isTrue);
@@ -469,7 +469,7 @@ void main() {
       events: <EventEnvelope>[
         _recoveryEvent(
           seq: 1,
-          prevHash: 'genesis',
+          prevHash: genesisEventHash,
           hash: 'hash_1',
           tableId: scope.tableId,
           sessionId: scope.sessionId,

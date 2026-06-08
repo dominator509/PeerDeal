@@ -202,6 +202,18 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
           ),
         );
       }
+      if (previous == null && event.prevEventHash != genesisEventHash) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_RECOVERY_PERSISTENCE_GENESIS_HASH_MISMATCH',
+            message:
+                'Persisted first event must chain from the genesis event hash.',
+            severity: SyncConflictSeverity.fatal,
+            expected: genesisEventHash,
+            actual: event.prevEventHash,
+          ),
+        );
+      }
       if (previous != null && event.prevEventHash != previous.eventHash) {
         conflicts.add(
           SyncConflict(

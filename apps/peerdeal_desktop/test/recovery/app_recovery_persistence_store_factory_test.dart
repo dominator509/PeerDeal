@@ -29,7 +29,7 @@ void main() {
     final append = first.store!.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
       ],
     );
 
@@ -64,7 +64,7 @@ void main() {
       final append = result.store!.appendEvents(
         scope: scope,
         events: <EventEnvelope>[
-          _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+          _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
         ],
       );
 

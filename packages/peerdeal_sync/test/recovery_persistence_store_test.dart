@@ -17,7 +17,7 @@ void main() {
     final result = store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
         _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
       ],
     );
@@ -37,7 +37,7 @@ void main() {
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
       ],
     );
 
@@ -61,7 +61,7 @@ void main() {
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
       ],
     );
 
@@ -81,6 +81,24 @@ void main() {
     expect(result.conflicts.single.actual, 'hash_diverged');
   });
 
+  test('rejects first event append that does not chain from genesis', () {
+    final store = InMemoryRecoveryPersistenceStore();
+
+    final result = store.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[_event(seq: 1, prevHash: 'root', hash: 'hash_1')],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_GENESIS_HASH_MISMATCH',
+    );
+    expect(result.conflicts.single.expected, genesisEventHash);
+    expect(result.conflicts.single.actual, 'root');
+    expect(store.loadWindow(scope).events, isEmpty);
+  });
+
   test('rejects mismatched event scope without mutating stored stream', () {
     final store = InMemoryRecoveryPersistenceStore();
 
@@ -89,7 +107,7 @@ void main() {
       events: <EventEnvelope>[
         _event(
           seq: 1,
-          prevHash: 'genesis',
+          prevHash: genesisEventHash,
           hash: 'hash_1',
           tableId: 'other_table',
         ),
@@ -109,7 +127,7 @@ void main() {
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
         _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
       ],
     );
@@ -136,7 +154,7 @@ void main() {
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
       ],
     );
 
@@ -166,7 +184,7 @@ void main() {
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
         _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
       ],
     );
@@ -193,7 +211,7 @@ void main() {
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
       ],
     );
     store.saveSnapshot(
@@ -230,7 +248,7 @@ void main() {
     final append = writer.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
         _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
       ],
     );
@@ -262,7 +280,7 @@ void main() {
     final result = writer.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
       ],
     );
 
@@ -276,7 +294,7 @@ void main() {
       canonicalJsonEncode(<String, Object?>{
         'snapshot': null,
         'events': <Object?>[
-          _event(seq: 1, prevHash: 'genesis', hash: 'hash_1').toJson(),
+          _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1').toJson(),
         ],
       }),
     );
@@ -298,7 +316,7 @@ void main() {
           .appendEvents(
             scope: scope,
             events: <EventEnvelope>[
-              _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+              _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
             ],
           )
           .isSuccess,
