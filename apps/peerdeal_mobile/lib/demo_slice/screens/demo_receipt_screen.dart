@@ -6,6 +6,7 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 import '../../safe_surface/safe_surface.dart';
 import '../controllers/demo_receipt_artifact_verifier.dart';
 import '../controllers/demo_receipt_surface_presenter.dart';
+import '../controllers/native_receipt_export_artifact_factory.dart';
 import '../models/demo_scenario_snapshot.dart';
 
 class DemoReceiptRoute extends StatefulWidget {
@@ -14,6 +15,8 @@ class DemoReceiptRoute extends StatefulWidget {
     required this.snapshot,
     required this.presenter,
     this.exportArtifact,
+    this.receipt,
+    this.exportArtifactFactory,
     this.artifactVerifier,
     this.recovery,
   });
@@ -21,6 +24,8 @@ class DemoReceiptRoute extends StatefulWidget {
   final DemoScenarioSnapshot snapshot;
   final DemoReceiptSurfacePresenter presenter;
   final ReceiptExportArtifact? exportArtifact;
+  final PeerDealReceipt? receipt;
+  final ReceiptExportArtifactBuilder? exportArtifactFactory;
   final DemoReceiptArtifactVerifier? artifactVerifier;
   final RecoveryResult<Object?>? recovery;
 
@@ -43,6 +48,8 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     if (oldWidget.snapshot != widget.snapshot ||
         oldWidget.presenter != widget.presenter ||
         oldWidget.exportArtifact != widget.exportArtifact ||
+        oldWidget.receipt != widget.receipt ||
+        oldWidget.exportArtifactFactory != widget.exportArtifactFactory ||
         oldWidget.artifactVerifier != widget.artifactVerifier ||
         oldWidget.recovery != widget.recovery) {
       _surface = _present();
@@ -71,29 +78,41 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     }
   }
 
-  Future<DemoReceiptSurfaceVm> _presentUnsafe() {
+  Future<DemoReceiptSurfaceVm> _presentUnsafe() async {
     final artifact = widget.exportArtifact;
     if (artifact != null) {
-      final verifier = widget.artifactVerifier;
-      if (verifier == null) {
-        return widget.presenter.present(
-          receipt: const ReceiptScanResult(
-            status: 'rejected',
-            message: 'Receipt artifact verifier is unavailable.',
-          ),
-          recovery: widget.recovery,
-        );
-      }
+      return _presentArtifact(artifact);
+    }
 
-      return widget.presenter.presentVerifiedExportArtifact(
-        artifact: artifact,
-        verifier: verifier,
-        recovery: widget.recovery,
-      );
+    final exportFactory = widget.exportArtifactFactory;
+    final receipt = widget.receipt;
+    if (exportFactory != null && receipt != null) {
+      return _presentArtifact(await exportFactory(receipt));
     }
 
     return widget.presenter.present(
       receipt: _receiptScanResult(widget.snapshot),
+      recovery: widget.recovery,
+    );
+  }
+
+  Future<DemoReceiptSurfaceVm> _presentArtifact(
+    ReceiptExportArtifact artifact,
+  ) {
+    final verifier = widget.artifactVerifier;
+    if (verifier == null) {
+      return widget.presenter.present(
+        receipt: const ReceiptScanResult(
+          status: 'rejected',
+          message: 'Receipt artifact verifier is unavailable.',
+        ),
+        recovery: widget.recovery,
+      );
+    }
+
+    return widget.presenter.presentVerifiedExportArtifact(
+      artifact: artifact,
+      verifier: verifier,
       recovery: widget.recovery,
     );
   }

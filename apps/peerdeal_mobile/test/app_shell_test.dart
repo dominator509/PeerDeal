@@ -4,6 +4,10 @@ import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_ver
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_bootstrap_candidate_loader.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_export_artifact_factory.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_loader.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_provisioner.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_writer.dart';
 import 'package:peerdeal_mobile/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_mobile/join_flow/fakes.dart';
 import 'package:peerdeal_mobile/main.dart';
@@ -70,6 +74,42 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(keyBridge.namespaces, <String>['peerdeal.receipts']);
+    expect(captureBridge.requestCount, 1);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
+  testWidgets('exports receipt artifacts through app-owned export factory', (
+    tester,
+  ) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final keyBridge = _RecordingReceiptKeyStorageMutationBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        presenter: presenter,
+        receiptExportArtifactFactory: NativeReceiptExportArtifactFactory(
+          keyRingProvisioner: NativeReceiptKeyRingProvisioner(
+            loader: NativeReceiptKeyRingLoader(bridge: keyBridge),
+            writer: NativeReceiptKeyRingWriter(bridge: keyBridge),
+          ),
+          nonceFactory: () => List<int>.filled(32, 9),
+        ).exportSignedEncrypted,
+        receiptArtifactVerifierFactory: DemoReceiptArtifactVerifierFactory(
+          bridge: keyBridge,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Receipt'));
+    await tester.pumpAndSettle();
+
+    expect(keyBridge.savedKeys.map((saved) => saved.key.purpose), <String>[
+      'receipt_signing',
+      'receipt_encryption',
+    ]);
     expect(captureBridge.requestCount, 1);
     expect(find.text('Receipt content hidden'), findsOneWidget);
   });
@@ -339,4 +379,48 @@ class _StaticLocalNetworkBridge implements LocalNetworkBridge {
       interfaceHints: <String>['wifi'],
     );
   }
+}
+
+class _RecordingReceiptKeyStorageMutationBridge
+    implements SecureKeyStorageMutationBridge {
+  final List<_SavedSecureKey> savedKeys = <_SavedSecureKey>[];
+  final List<String> namespaces = <String>[];
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    namespaces.add(namespace);
+    return SecureKeyStorageSnapshot(
+      available: true,
+      keys: savedKeys.map((saved) => saved.key).toList(growable: false),
+    );
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKey({
+    required String namespace,
+    required SecureKeyRecord key,
+  }) async {
+    savedKeys.add(_SavedSecureKey(namespace: namespace, key: key));
+    return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKey({
+    required String namespace,
+    required String keyId,
+  }) async {
+    savedKeys.removeWhere(
+      (saved) => saved.namespace == namespace && saved.key.keyId == keyId,
+    );
+    return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+}
+
+class _SavedSecureKey {
+  const _SavedSecureKey({required this.namespace, required this.key});
+
+  final String namespace;
+  final SecureKeyRecord key;
 }

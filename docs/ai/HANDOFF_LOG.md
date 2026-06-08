@@ -305,6 +305,44 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Mounted Receipt Export Flow
+
+Summary:
+Wired app-owned receipt export artifact factories into mounted receipt routes
+in both app shells. Routes can now build deterministic receipt inputs from the
+active snapshot, export signed/encrypted artifacts through the native-backed
+key provisioner boundary, then verify the artifact before projecting the safe
+receipt surface. Existing fixture-only receipt presentation remains unchanged
+unless an export factory is injected.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_export_artifact_factory.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/README.md`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_export_artifact_factory.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart test\demo_slice\demo_receipt_screen_test.dart test\demo_slice\native_receipt_export_artifact_factory_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart test\demo_slice\demo_receipt_screen_test.dart test\demo_slice\native_receipt_export_artifact_factory_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- The native key storage implementation remains pending; this slice wires the
+  route-level app boundary that will consume it.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App Receipt Export Artifact Factory
 
 Summary:

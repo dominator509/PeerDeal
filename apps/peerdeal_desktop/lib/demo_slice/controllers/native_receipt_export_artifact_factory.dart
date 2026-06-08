@@ -5,6 +5,9 @@ import 'native_receipt_key_ring_loader.dart';
 import 'native_receipt_key_ring_provisioner.dart';
 import 'native_receipt_key_ring_writer.dart';
 
+typedef ReceiptExportArtifactBuilder =
+    Future<ReceiptExportArtifact> Function(PeerDealReceipt receipt);
+
 class NativeReceiptExportArtifactFactory {
   const NativeReceiptExportArtifactFactory({
     required NativeReceiptKeyRingProvisioner keyRingProvisioner,

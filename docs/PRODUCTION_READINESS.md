@@ -218,6 +218,9 @@ the gates below are satisfied.
 - App receipt export artifact factories now provision native-backed receipt
   keys before signed/encrypted export, build signer/cipher adapters from the
   provisioned key ring, and fail closed when key provisioning is unavailable.
+- Mounted app receipt routes can now receive app-owned receipt export artifact
+  factories, generate signed/encrypted artifacts from deterministic route
+  receipt inputs, and verify them through the same native-backed key boundary.
 - Receipt export now fails closed to an unavailable artifact when signing or
   encryption adapters throw.
 - Receipt import inspection now rejects signed artifacts when verifier adapters

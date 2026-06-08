@@ -47,6 +47,11 @@ provisioner -> receipt signer/cipher adapters -> receipt service export. Do
 not export signed/encrypted artifacts from app code that bypasses native-backed
 key provisioning.
 
+Mounted receipt routes may receive an app-owned export factory. The route must
+turn the active snapshot into a deterministic receipt input, export through the
+factory, then verify through `DemoReceiptArtifactVerifierFactory` before
+projecting the safe surface.
+
 ## Local Bootstrap Flow
 
 Demo bootstrap candidate loading should use

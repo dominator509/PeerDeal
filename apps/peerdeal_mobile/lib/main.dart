@@ -8,6 +8,7 @@ import 'demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'demo_slice/controllers/demo_recovery_result_factory.dart';
 import 'demo_slice/controllers/demo_slice_controller.dart';
 import 'demo_slice/controllers/native_bootstrap_candidate_loader.dart';
+import 'demo_slice/controllers/native_receipt_export_artifact_factory.dart';
 import 'demo_slice/demo_slice_routes.dart';
 import 'demo_slice/models/demo_scenario_snapshot.dart';
 import 'demo_slice/scenarios/demo_scenario_snapshots.dart';
@@ -31,12 +32,14 @@ class PeerDealMobileApp extends StatefulWidget {
     DemoReceiptSurfacePresenter? presenter,
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
+    ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
   }) : _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
+       _receiptExportArtifactFactory = receiptExportArtifactFactory,
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
        _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory;
@@ -44,6 +47,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final DemoReceiptSurfacePresenter? _receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? _receiptExportArtifact;
+  final ReceiptExportArtifactBuilder? _receiptExportArtifactFactory;
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
   final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
@@ -104,7 +108,13 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
           snapshot: _activeSnapshot,
           presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
           exportArtifact: widget._receiptExportArtifact,
-          artifactVerifier: widget._receiptExportArtifact == null
+          receipt: _receiptFor(_activeSnapshot),
+          exportArtifactFactory: widget._receiptExportArtifact == null
+              ? widget._receiptExportArtifactFactory
+              : null,
+          artifactVerifier:
+              widget._receiptExportArtifact == null &&
+                  widget._receiptExportArtifactFactory == null
               ? null
               : _createReceiptArtifactVerifier(),
           recovery: _recoveryResultFactory.createFor(_activeSnapshot),
@@ -171,5 +181,30 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   NativeBootstrapCandidateLoaderFactory get _bootstrapCandidateLoaderFactory {
     return widget._bootstrapCandidateLoaderFactory ??
         NativeBootstrapCandidateLoader.methodChannel;
+  }
+
+  PeerDealReceipt _receiptFor(DemoScenarioSnapshot snapshot) {
+    return PeerDealReceipt(
+      receiptId: 'receipt_${snapshot.scenarioId}',
+      receiptVersion: '1.0',
+      protocolVersion: '1.x',
+      modeType: snapshot.mode,
+      sessionId: 'session_${snapshot.scenarioId}',
+      tableId: 'table_${snapshot.scenarioId}',
+      pseudonymousUserId: 'user_demo',
+      bindingMode: _bindingModeFor(snapshot.receipt.bindingMode),
+      wipeState: ReceiptWipeState.live,
+      payloadHash: 'hash_${snapshot.scenarioId}',
+      opaquePayload: 'opaque_${snapshot.scenarioId}',
+    );
+  }
+
+  ReceiptBindingMode _bindingModeFor(String value) {
+    return switch (value) {
+      'session_bound' => ReceiptBindingMode.sessionBound,
+      'user_bound' => ReceiptBindingMode.userBound,
+      'mixed' => ReceiptBindingMode.mixed,
+      _ => ReceiptBindingMode.sessionBound,
+    };
   }
 }
