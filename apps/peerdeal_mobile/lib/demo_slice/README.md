@@ -32,6 +32,11 @@ Demo receipt artifact verification should use
 call order is native secure-key bridge -> app key-ring loader -> artifact
 verifier -> presenter -> safe surface.
 
+Receipt key writes should use the app-owned `NativeReceiptKeyRingWriter`:
+receipt signing/encryption key material -> generic native secure-key mutation
+bridge. The native bridge stays generic and does not own receipt key purpose,
+algorithm, rotation, or verification policy.
+
 ## Local Bootstrap Flow
 
 Demo bootstrap candidate loading should use

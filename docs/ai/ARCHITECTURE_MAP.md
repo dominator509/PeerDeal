@@ -85,8 +85,9 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 - Receipts are export/restore artifacts, not general persistence.
 - Sync recovery has in-memory and canonical JSON file-backed recovery-window
   stores; platform/database persistence remains a production gap.
-- Secure key storage has Dart/method-channel seams; platform implementations
-  remain a production-readiness gap.
+- Secure key storage has Dart/method-channel read/write seams plus app-owned
+  receipt key-ring mapping; platform implementations remain a
+  production-readiness gap.
 
 ## Auth / Authorization
 
@@ -100,7 +101,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Risk | Status |
 | --- | --- |
 | Production transport | Native transport method-channel seam, app-owned capability-gated transport adapters/factories, and network frame gates exist; no live peer transport implementation yet |
-| Platform key storage | Method-channel seam exists; native implementation pending |
+| Platform key storage | Method-channel read/write seams and app-owned receipt key mapping exist; native implementation pending |
 | Persistence | Canonical recovery-window file store exists; production database/platform persistence not implemented |
 | App flows | Demo routes plus mounted setup/join orchestration seams, mounted table/join native bootstrap mapping, and unknown-route fallback exist; production navigation polish remains |
 | UI polish | Demo UI, not production-polished |

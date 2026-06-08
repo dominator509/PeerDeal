@@ -207,6 +207,10 @@ the gates below are satisfied.
   errors.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
+- App receipt key-ring writers now map receipt signing/encryption keys into
+  generic native secure-key mutation records, fail closed before invalid
+  save/delete requests, and keep receipt semantics out of
+  `peerdeal_native_bridges`.
 - Receipt export now fails closed to an unavailable artifact when signing or
   encryption adapters throw.
 - Receipt import inspection now rejects signed artifacts when verifier adapters
@@ -240,9 +244,10 @@ the gates below are satisfied.
   discovery, production transport, production database/platform persistence,
   and polished app UI cannot be completed inside the current ChatGPT project
   environment because they require native platform implementations and
-  device/OS integration. The Dart contracts, file-backed recovery persistence
-  seam, app-owned table/join bootstrap mapping, and method-channel payload
-  gates are locked for those follow-up implementations.
+  device/OS integration. The Dart contracts, app-owned receipt key read/write
+  mapping, file-backed recovery persistence seam, app-owned table/join
+  bootstrap mapping, and method-channel payload gates are locked for those
+  follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

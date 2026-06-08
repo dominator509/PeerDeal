@@ -305,6 +305,39 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - App Receipt Key-Ring Writer Boundary
+
+Summary:
+Added app-owned receipt key-ring writers in both app shells. They map receipt
+signing/encryption keys into generic native secure-key mutation records,
+reject invalid save/delete requests before crossing the native bridge, and
+return fail-closed write results when native mutation fails. Receipt semantics
+remain in the app/receipt boundary, not in `peerdeal_native_bridges`.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_writer.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_receipt_key_ring_writer_test.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/README.md`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_writer.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_receipt_key_ring_writer_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\native_receipt_key_ring_loader_test.dart test\demo_slice\native_receipt_key_ring_writer_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\native_receipt_key_ring_loader_test.dart test\demo_slice\native_receipt_key_ring_writer_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- Real keychain/keystore implementations remain pending; this locks the
+  app-owned mapping and fail-closed mutation boundary only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Capability-Gated Native Transport Sessions
 
 Summary:
