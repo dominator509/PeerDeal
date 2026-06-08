@@ -71,6 +71,13 @@ Known route categories include:
 TODO: Treat concrete route paths and production navigation as app-shell details
 unless verified from the app route source in the current branch.
 
+## Network Transport Boundary
+
+`peerdeal_network` exposes transport frame validation and validating send
+contracts. Platform transport adapters should receive frames only through the
+validating sender boundary so malformed frames are rejected before adapter code
+runs and adapter failures become explicit failed send results.
+
 ## Error Shape
 
 - Protocol failures use `ProtocolDiagnostic`.

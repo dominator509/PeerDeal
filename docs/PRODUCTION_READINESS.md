@@ -106,6 +106,9 @@ the gates below are satisfied.
   that fails closed on malformed session/peer identities, self-send frames,
   invalid sequence numbers, empty payloads, and oversized payloads before
   platform transport adapters send data.
+- Network transport send contracts now include a validating sender boundary
+  that rejects invalid frames before platform sinks see them and converts sink
+  failures into explicit failed send results.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.

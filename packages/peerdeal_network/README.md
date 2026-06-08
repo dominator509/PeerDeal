@@ -15,6 +15,7 @@ score, and recover network paths without owning game truth.
 - network confidence scoring
 - primary peer election and transfer policy
 - transport frame validation before platform transport send/receive code
+- validating transport send boundary before platform transport adapters
 
 ## Must not own
 - poker rules
@@ -40,3 +41,5 @@ score, and recover network paths without owning game truth.
 - Transport frame validation fails closed on missing session/peer identities,
   self-send frames, invalid sequence numbers, empty payloads, and oversized
   payloads before live transport implementations see the frame.
+- The validating transport sender rejects invalid frames before calling a sink
+  and converts sink exceptions into explicit failed send results.

@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Network Validating Send Boundary
+
+Summary:
+Added a network-owned validating transport send boundary. Platform transport
+sinks now have a public `TransportFrameSink` contract, and
+`ValidatingTransportFrameSender` validates frames before calling the sink,
+rejects malformed frames without invoking transport code, and converts sink
+exceptions into explicit failed send results.
+
+Files changed:
+- `packages/peerdeal_network/lib/peerdeal_network.dart`
+- `packages/peerdeal_network/lib/src/contracts/transport_frame_sender.dart`
+- `packages/peerdeal_network/lib/src/contracts/transport_frame_sink.dart`
+- `packages/peerdeal_network/lib/src/models/transport_frame_send_result.dart`
+- `packages/peerdeal_network/lib/src/services/validating_transport_frame_sender.dart`
+- `packages/peerdeal_network/test/validating_transport_frame_sender_test.dart`
+- `packages/peerdeal_network/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_network`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- This locks the Dart send boundary only; live platform transport
+  implementations remain a production-readiness gap.
+
+Next reviewer:
+Wire production transport adapters through `ValidatingTransportFrameSender`
+when platform transport code is added.
+
+---
+
 ### 2026-06-08 - Codex - App Unknown Route Fallback
 
 Summary:
