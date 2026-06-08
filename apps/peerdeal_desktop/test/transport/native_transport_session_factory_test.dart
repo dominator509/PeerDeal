@@ -135,6 +135,25 @@ void main() {
     ]);
   });
 
+  test(
+    'loadSession rejects invalid app payload limits before native lookup',
+    () async {
+      final bridge = _FakeNativeTransportBridge();
+
+      final result = await NativeTransportSessionFactory(
+        bridge: bridge,
+        maxPayloadBytes: 0,
+      ).loadSession(handler: _RecordingTransportFrameHandler());
+
+      expect(result.available, isFalse);
+      expect(result.session, isNull);
+      expect(result.warnings, <String>[
+        'App transport payload limit is invalid.',
+      ]);
+      expect(bridge.capabilityLookups, 0);
+    },
+  );
+
   test('creates validated sender backed by native transport', () async {
     final bridge = _FakeNativeTransportBridge();
     final sender = NativeTransportSessionFactory(bridge: bridge).createSender();
@@ -258,9 +277,11 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   final NativeTransportCapability capability;
   final List<NativeTransportFrame> _receiveFrames;
   final List<NativeTransportFrame> sentFrames = <NativeTransportFrame>[];
+  int capabilityLookups = 0;
 
   @override
   Future<NativeTransportCapability> getCapability() async {
+    capabilityLookups += 1;
     return capability;
   }
 

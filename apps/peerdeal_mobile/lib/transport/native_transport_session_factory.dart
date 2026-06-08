@@ -21,6 +21,12 @@ class NativeTransportSessionFactory {
   Future<NativeTransportSessionLoadResult> loadSession({
     required TransportFrameHandler handler,
   }) async {
+    if (_maxPayloadBytes < 1) {
+      return const NativeTransportSessionLoadResult.unavailable(
+        warnings: <String>['App transport payload limit is invalid.'],
+      );
+    }
+
     final bridge = _resolvedBridge;
     final NativeTransportCapability capability;
     try {

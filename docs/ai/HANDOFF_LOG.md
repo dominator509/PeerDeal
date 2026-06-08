@@ -305,6 +305,42 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Native Transport App Payload Limit Gate
+
+Summary:
+Hardened mobile and desktop `NativeTransportSessionFactory.loadSession(...)`
+so an invalid app-owned payload limit fails closed before native capability
+lookup. This prevents bad app transport configuration from crossing into the
+platform bridge while preserving existing native capability validation.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_session_factory_test.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_session_factory_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\transport\native_transport_session_factory_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\transport\native_transport_session_factory_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This locks app configuration validation only; real platform-native transport
+  implementations remain a tracked readiness gap.
+
+Next reviewer:
+- Verify deployed app shells provide a positive app payload limit where
+  transport is enabled.
+
 ### 2026-06-08 - Codex - Replay Projector Failure Gate
 
 Summary:
