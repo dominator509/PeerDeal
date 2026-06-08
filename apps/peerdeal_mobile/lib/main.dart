@@ -225,9 +225,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
             presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
             exportArtifact: _runtime.receiptExportArtifact,
             receipt: _receiptInputFor(_activeSnapshot),
-            exportArtifactFactory: _runtime.receiptExportArtifact == null
-                ? _runtime.receiptExportArtifactFactory
-                : null,
+            exportArtifactFactory: _runtime.receiptExportArtifactFactory,
             artifactVerifier:
                 _runtime.receiptExportArtifact == null &&
                     _runtime.receiptExportArtifactFactory == null

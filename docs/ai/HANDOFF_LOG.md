@@ -14,6 +14,44 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - App Receipt Source Conflict Preservation
+
+Summary:
+Stopped both app shells from masking conflicting receipt export sources before
+mounted receipt route construction. If a production runtime supplies both a
+prebuilt receipt artifact and an export factory, the route now receives both
+and triggers its existing fail-closed conflict gate instead of silently choosing
+one source.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- This changes app-shell conflict handling only. Normal artifact-only and
+  export-factory-only receipt flows should remain unchanged.
+
+Next reviewer:
+Continue with the next production-readiness app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - App Runtime Setup Identity Coverage
 
 Summary:

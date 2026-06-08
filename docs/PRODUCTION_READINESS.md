@@ -227,6 +227,10 @@ the gates below are satisfied.
 - Mounted app receipt routes now reject conflicting receipt export sources
   before using either a prebuilt artifact or an export factory, preventing
   production injection drift from silently choosing one receipt path.
+- App shells now preserve conflicting prebuilt receipt artifacts and export
+  factories when constructing mounted receipt routes, so the route-level
+  fail-closed source-conflict gate cannot be bypassed by runtime dependency
+  merging.
 - Mounted app receipt routes now reject direct receipt inputs when no export
   factory is available, and app shells no longer pass default demo receipt
   envelopes unless export or injected receipt orchestration needs them.

@@ -87,6 +87,41 @@ void main() {
     expect(find.text('Receipt content hidden'), findsOneWidget);
   });
 
+  testWidgets('fails closed for conflicting receipt export sources', (
+    tester,
+  ) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final keyBridge = RecordingReceiptKeyStorageBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+    var exportFactoryCalled = false;
+
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        presenter: presenter,
+        receiptExportArtifact: signedDemoReceiptArtifact(),
+        receiptExportArtifactFactory: (_) async {
+          exportFactoryCalled = true;
+          return const ReceiptExportArtifact.unavailable(
+            reason: 'conflicting export source used',
+          );
+        },
+        receiptArtifactVerifierFactory: DemoReceiptArtifactVerifierFactory(
+          bridge: keyBridge,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Receipt'));
+    await tester.pumpAndSettle();
+
+    expect(exportFactoryCalled, isFalse);
+    expect(keyBridge.namespaces, isEmpty);
+    expect(captureBridge.requestCount, 1);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
   testWidgets('exports receipt artifacts through app-owned export factory', (
     tester,
   ) async {
