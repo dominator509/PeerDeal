@@ -127,6 +127,9 @@ the gates below are satisfied.
   unless native capability reports send and receive support, so app
   orchestration can reject unavailable platform transport before exposing
   validated send/drain handles.
+- Native transport session factories now enforce app-owned payload limits
+  against native capability claims, rejecting invalid or oversized native
+  payload limits before exposing validated send/drain handles.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
@@ -280,9 +283,9 @@ the gates below are satisfied.
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
-  loading, mounted recovery-window loading, app-owned table/join bootstrap
-  mapping, and method-channel payload gates are locked for those follow-up
-  implementations.
+  loading, mounted recovery-window loading, app-owned transport payload-limit
+  enforcement, app-owned table/join bootstrap mapping, and method-channel
+  payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

@@ -947,6 +947,39 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Native Transport Payload Limit Guard
+
+Summary:
+Mobile and desktop `NativeTransportSessionFactory` now own an app payload
+limit, feed it into the default `BasicTransportFrameValidator`, and fail closed
+when native capability reports either a non-positive payload limit or a limit
+larger than the app validator accepts. This prevents native capability facts
+from advertising sends that the app/network validation boundary would later
+reject.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_session_factory_test.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_session_factory_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\transport\native_transport_session_factory_test.dart test\transport\native_transport_frame_adapter_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\transport\native_transport_session_factory_test.dart test\transport\native_transport_frame_adapter_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- This hardens app/native transport capability agreement; it is not a live peer
+  transport implementation.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Environment Recovery Root
 
 Summary:

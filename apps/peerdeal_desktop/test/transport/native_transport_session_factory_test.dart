@@ -68,6 +68,50 @@ void main() {
     ]);
   });
 
+  test(
+    'loadSession rejects native payload limits above app validator',
+    () async {
+      final result = await NativeTransportSessionFactory(
+        bridge: _FakeNativeTransportBridge(
+          capability: const NativeTransportCapability(
+            available: true,
+            sendSupported: true,
+            receiveSupported: true,
+            maxPayloadBytes: 4096,
+            notes: 'native-too-large',
+          ),
+        ),
+        maxPayloadBytes: 1024,
+      ).loadSession(handler: _RecordingTransportFrameHandler());
+
+      expect(result.available, isFalse);
+      expect(result.session, isNull);
+      expect(result.warnings, <String>[
+        'Native transport payload limit exceeds app validator limit.',
+      ]);
+    },
+  );
+
+  test('loadSession rejects invalid native payload limits', () async {
+    final result = await NativeTransportSessionFactory(
+      bridge: _FakeNativeTransportBridge(
+        capability: const NativeTransportCapability(
+          available: true,
+          sendSupported: true,
+          receiveSupported: true,
+          maxPayloadBytes: 0,
+          notes: 'native-invalid',
+        ),
+      ),
+    ).loadSession(handler: _RecordingTransportFrameHandler());
+
+    expect(result.available, isFalse);
+    expect(result.session, isNull);
+    expect(result.warnings, <String>[
+      'Native transport payload limit is invalid.',
+    ]);
+  });
+
   test('creates validated sender backed by native transport', () async {
     final bridge = _FakeNativeTransportBridge();
     final sender = NativeTransportSessionFactory(bridge: bridge).createSender();
@@ -77,6 +121,21 @@ void main() {
     expect(result.sent, isTrue);
     expect(bridge.sentFrames, hasLength(1));
     expect(bridge.sentFrames.single.senderPeerId, 'peer_a');
+  });
+
+  test('factory sender applies configured app payload limit', () async {
+    final bridge = _FakeNativeTransportBridge();
+    final sender = NativeTransportSessionFactory(
+      bridge: bridge,
+      maxPayloadBytes: 2,
+    ).createSender();
+
+    final result = await sender.send(_frame());
+
+    expect(result.sent, isFalse);
+    expect(result.reasonCode, 'ERR_TRANSPORT_FRAME_REJECTED');
+    expect(result.warnings, contains('ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE'));
+    expect(bridge.sentFrames, isEmpty);
   });
 
   test(

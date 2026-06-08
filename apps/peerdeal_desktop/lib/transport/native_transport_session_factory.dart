@@ -4,13 +4,18 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'native_transport_frame_adapter.dart';
 
 class NativeTransportSessionFactory {
-  const NativeTransportSessionFactory({
+  NativeTransportSessionFactory({
     NativeTransportBridge? bridge,
-    TransportFrameValidator validator = const BasicTransportFrameValidator(),
+    int maxPayloadBytes = 64 * 1024,
+    TransportFrameValidator? validator,
   }) : _bridge = bridge,
-       _validator = validator;
+       _maxPayloadBytes = maxPayloadBytes,
+       _validator =
+           validator ??
+           BasicTransportFrameValidator(maxPayloadBytes: maxPayloadBytes);
 
   final NativeTransportBridge? _bridge;
+  final int _maxPayloadBytes;
   final TransportFrameValidator _validator;
 
   Future<NativeTransportSessionLoadResult> loadSession({
@@ -32,6 +37,18 @@ class NativeTransportSessionFactory {
       return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>[
           capability.warning ?? 'Native transport session unavailable.',
+        ],
+      );
+    }
+    if (capability.maxPayloadBytes < 1) {
+      return const NativeTransportSessionLoadResult.unavailable(
+        warnings: <String>['Native transport payload limit is invalid.'],
+      );
+    }
+    if (capability.maxPayloadBytes > _maxPayloadBytes) {
+      return const NativeTransportSessionLoadResult.unavailable(
+        warnings: <String>[
+          'Native transport payload limit exceeds app validator limit.',
         ],
       );
     }

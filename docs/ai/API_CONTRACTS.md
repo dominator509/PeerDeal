@@ -83,6 +83,11 @@ session handlers only through the validating receiver boundary. Malformed frames
 are rejected before adapter/handler code runs, and adapter/handler failures
 become explicit failed transport results.
 
+Mobile and desktop `NativeTransportSessionFactory` instances own the app
+payload limit used by the default `BasicTransportFrameValidator`. Session
+loading fails closed when native capability reports a non-positive
+`maxPayloadBytes` or a value above the app validator limit.
+
 ## Recovery Persistence Boundary
 
 `peerdeal_sync` owns recovery-window validation and JSON file store contracts.
