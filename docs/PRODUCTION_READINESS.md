@@ -320,6 +320,9 @@ the gates below are satisfied.
 - App receipt key-ring loaders now fail closed when native storage reports
   multiple active signing or encryption keys, preventing ambiguous platform
   key rotation state from selecting an arbitrary active receipt key.
+- App receipt key-ring loaders and writers now fail closed before native
+  storage calls when the app-owned receipt key namespace is blank or padded,
+  preventing malformed key-ring configuration from reaching platform storage.
 - App receipt key-ring writers now map receipt signing/encryption keys into
   generic native secure-key mutation records, fail closed before invalid
   save/delete requests, and keep receipt semantics out of

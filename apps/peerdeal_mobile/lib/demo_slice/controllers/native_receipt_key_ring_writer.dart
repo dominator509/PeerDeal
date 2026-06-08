@@ -55,6 +55,11 @@ class NativeReceiptKeyRingWriter {
   }
 
   Future<ReceiptKeyRingWriteResult> deleteKey(String keyId) async {
+    if (!_isValidNamespace(namespace)) {
+      return const ReceiptKeyRingWriteResult.failure(
+        warning: 'Secure receipt key namespace is invalid.',
+      );
+    }
     if (keyId.trim().isEmpty || keyId.contains(':')) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Receipt key delete request is invalid.',
@@ -74,6 +79,11 @@ class NativeReceiptKeyRingWriter {
   }
 
   Future<ReceiptKeyRingWriteResult> _save(SecureKeyRecord record) async {
+    if (!_isValidNamespace(namespace)) {
+      return const ReceiptKeyRingWriteResult.failure(
+        warning: 'Secure receipt key namespace is invalid.',
+      );
+    }
     if (!record.isUsable) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Receipt key save request is invalid.',
@@ -103,6 +113,9 @@ class NativeReceiptKeyRingWriter {
       ),
     );
   }
+
+  static bool _isValidNamespace(String namespace) =>
+      namespace.trim().isNotEmpty && namespace.trim() == namespace;
 
   static String _safeNativeWarning(
     String? warning, {

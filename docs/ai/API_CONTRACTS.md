@@ -119,6 +119,8 @@ fall back to relay-only join bootstrap plans.
 - Receipt import/export/verification failures must fail closed.
 - App receipt key-ring loaders must fail closed when native storage exposes
   ambiguous active signing or encryption keys.
+- App receipt key-ring loaders and writers must reject malformed app-owned
+  receipt key namespaces before calling native storage.
 - App orchestration should surface scrubbed diagnostics, not raw secrets,
   credentials, or platform exception payloads.
 

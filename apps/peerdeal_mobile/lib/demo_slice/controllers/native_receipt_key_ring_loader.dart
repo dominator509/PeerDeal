@@ -26,6 +26,13 @@ class NativeReceiptKeyRingLoader {
   final String namespace;
 
   Future<ReceiptKeyRingLoadResult> load() async {
+    if (!_isValidNamespace(namespace)) {
+      return const ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key namespace is invalid.'],
+      );
+    }
+
     final SecureKeyStorageSnapshot snapshot;
     try {
       snapshot = await _bridge.loadKeyRing(namespace: namespace);
@@ -114,6 +121,9 @@ class NativeReceiptKeyRingLoader {
     }
     return warnings;
   }
+
+  static bool _isValidNamespace(String namespace) =>
+      namespace.trim().isNotEmpty && namespace.trim() == namespace;
 
   ReceiptSigningKey? _activeSigningKey(List<SecureKeyRecord> records) {
     for (final record in records.where((record) => record.active)) {

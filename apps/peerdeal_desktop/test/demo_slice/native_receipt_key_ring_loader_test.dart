@@ -72,6 +72,27 @@ void main() {
     expect(result.warnings.single, isNot(contains('locked')));
   });
 
+  test('fails closed before native load for invalid namespace', () async {
+    final bridge = _FakeSecureKeyStorageBridge(
+      snapshot: const SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[],
+      ),
+    );
+
+    final result = await NativeReceiptKeyRingLoader(
+      bridge: bridge,
+      namespace: ' peerdeal.receipts',
+    ).load();
+
+    expect(result.hasSigningKey, isFalse);
+    expect(result.hasEncryptionKey, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key namespace is invalid.',
+    ]);
+    expect(bridge.namespace, isNull);
+  });
+
   test(
     'fails closed when native storage has multiple active receipt keys',
     () async {

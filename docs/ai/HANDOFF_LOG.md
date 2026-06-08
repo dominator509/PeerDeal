@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Receipt Key Namespace Gate
+
+Summary:
+Hardened mobile and desktop native receipt key-ring loaders and writers so
+blank or padded app-owned receipt key namespaces fail closed before any native
+secure-storage load, save, or delete call.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_writer.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_receipt_key_ring_loader_test.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_receipt_key_ring_writer_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_writer.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_receipt_key_ring_loader_test.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_receipt_key_ring_writer_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\native_receipt_key_ring_loader_test.dart test\demo_slice\native_receipt_key_ring_writer_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\native_receipt_key_ring_loader_test.dart test\demo_slice\native_receipt_key_ring_writer_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Native platform secure-storage implementations still need to enforce their
+  own namespace isolation and storage permissions.
+
+Next reviewer:
+Continue with native/platform implementation gaps or the next codable
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Receipt Active Key Ambiguity Gate
 
 Summary:

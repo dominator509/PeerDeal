@@ -57,6 +57,23 @@ void main() {
     expect(bridge.savedKeys, isEmpty);
   });
 
+  test('fails closed before native save for invalid namespace', () async {
+    final bridge = _RecordingSecureKeyStorageBridge();
+    final writer = NativeReceiptKeyRingWriter(
+      bridge: bridge,
+      namespace: 'peerdeal.receipts ',
+    );
+
+    final result = await writer.saveSigningKey(
+      const ReceiptSigningKey(keyId: 'receipt_signing_1', secret: 'signing'),
+      active: true,
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Secure receipt key namespace is invalid.');
+    expect(bridge.savedKeys, isEmpty);
+  });
+
   test('propagates native mutation failure without throwing', () async {
     final bridge = _RecordingSecureKeyStorageBridge(
       saveResult: const SecureKeyStorageMutationResult.failure(
@@ -111,6 +128,17 @@ void main() {
 
     expect(result.isSuccess, isFalse);
     expect(result.warning, 'Receipt key delete request is invalid.');
+    expect(bridge.deletedKeys, isEmpty);
+  });
+
+  test('fails closed before native delete for invalid namespace', () async {
+    final bridge = _RecordingSecureKeyStorageBridge();
+    final writer = NativeReceiptKeyRingWriter(bridge: bridge, namespace: '');
+
+    final result = await writer.deleteKey('receipt_signing_1');
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Secure receipt key namespace is invalid.');
     expect(bridge.deletedKeys, isEmpty);
   });
 }
