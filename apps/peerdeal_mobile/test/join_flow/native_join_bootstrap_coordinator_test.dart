@@ -159,6 +159,39 @@ void main() {
     },
   );
 
+  test(
+    'keeps relay fallback before native lookup when scope is padded',
+    () async {
+      final provider = _RecordingBootstrapCandidateProvider();
+      final bridge = _CountingLocalNetworkBridge();
+      final coordinator = NativeJoinBootstrapCoordinator(
+        bridge: bridge,
+        provider: provider,
+      );
+
+      final plan = await coordinator.buildPlan(
+        resolvedInvite: const ResolvedInvite(
+          inviteId: 'invite-1',
+          tableId: 'table-1 ',
+          sessionId: 'sess-1',
+          modeType: 'open_table',
+          protocolVersion: '1.0.0',
+          requiresReceiptAck: true,
+          requiresRetentionAck: true,
+          requiresCaptureAck: true,
+        ),
+        roleGrant: _roleGrant,
+      );
+
+      expect(plan.requiresBootstrap, isTrue);
+      expect(plan.peerCandidates, isEmpty);
+      expect(plan.relayFallbackAllowed, isTrue);
+      expect(provider.request, isNull);
+      expect(bridge.capabilityLookups, 0);
+      expect(bridge.discoveryLookups, 0);
+    },
+  );
+
   test('keeps relay fallback when local discovery is unavailable', () async {
     final coordinator = NativeJoinBootstrapCoordinator(
       bridge: _ThrowingLocalNetworkBridge(),

@@ -50,7 +50,7 @@ class NativeBootstrapCandidateLoader {
     required String sessionId,
     required String tableId,
   }) async {
-    if (!_hasText(sessionId) || !_hasText(tableId)) {
+    if (!_isValidScope(sessionId) || !_isValidScope(tableId)) {
       return const NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: 'unavailable',
         warnings: <String>['Local network bootstrap scope is invalid.'],
@@ -156,6 +156,11 @@ class NativeBootstrapCandidateLoader {
 
   static bool _hasText(String? value) =>
       value != null && value.trim().isNotEmpty;
+
+  static bool _isValidScope(String value) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty && trimmed == value;
+  }
 
   static String _nativeNotes(
     LocalNetworkCapability capability,

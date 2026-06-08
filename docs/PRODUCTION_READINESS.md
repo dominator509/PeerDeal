@@ -203,6 +203,9 @@ the gates below are satisfied.
 - App-owned local-network bootstrap loaders and join coordinators now validate
   app-owned session/table bootstrap scope before native capability lookup,
   keeping malformed route or invite scope from reaching platform discovery.
+- App-owned local-network bootstrap loaders and join coordinators now reject
+  padded session/table bootstrap scope before native capability lookup, keeping
+  ambiguous route or invite scope from reaching platform discovery.
 - App-owned local-network bootstrap loaders now scrub native capability and
   discovery warnings, bound native notes/interface hints, and normalize
   native-discovered endpoint ids before mounted table and join bootstrap paths
@@ -459,7 +462,7 @@ the gates below are satisfied.
   injection, app-owned setup intent injection, app-owned transport
   payload-limit enforcement, app-owned transport sink validation, app-owned
   transport receive-scope validation, bounded app-owned table/join bootstrap
-  mapping, app-owned
+  mapping, app-owned local-network bootstrap scope validation, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are

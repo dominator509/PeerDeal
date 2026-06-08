@@ -29,8 +29,8 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     required ResolvedInvite resolvedInvite,
     required RoleGrant roleGrant,
   }) async {
-    if (!_hasText(resolvedInvite.sessionId) ||
-        !_hasText(resolvedInvite.tableId)) {
+    if (!_isValidScope(resolvedInvite.sessionId) ||
+        !_isValidScope(resolvedInvite.tableId)) {
       return const BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],
@@ -137,7 +137,10 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     return result;
   }
 
-  static bool _hasText(String value) => value.trim().isNotEmpty;
+  static bool _isValidScope(String value) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty && trimmed == value;
+  }
 
   static String _safeNativeText(String value) {
     final normalized = value
