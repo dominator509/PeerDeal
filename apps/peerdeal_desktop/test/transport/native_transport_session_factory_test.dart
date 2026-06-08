@@ -52,9 +52,32 @@ void main() {
 
       expect(result.available, isFalse);
       expect(result.session, isNull);
-      expect(result.warnings, ['transport disabled']);
+      expect(result.warnings, [
+        'Native transport reported a platform warning.',
+      ]);
     },
   );
+
+  test('loadSession scrubs native warning and note diagnostics', () async {
+    final result = await NativeTransportSessionFactory(
+      bridge: _FakeNativeTransportBridge(
+        capability: NativeTransportCapability(
+          available: true,
+          sendSupported: true,
+          receiveSupported: true,
+          maxPayloadBytes: 4096,
+          notes: '${'native '.padRight(120, 'x')}\nsecret',
+          warning: 'transport_error: C:\\secret\\transport.log',
+        ),
+      ),
+    ).loadSession(handler: _RecordingTransportFrameHandler());
+
+    expect(result.available, isTrue);
+    expect(result.warnings, ['Native transport reported a platform warning.']);
+    expect(result.warnings.single, isNot(contains('transport.log')));
+    expect(result.session!.nativeNotes, isNot(contains('\n')));
+    expect(result.session!.nativeNotes.length, lessThanOrEqualTo(96));
+  });
 
   test('loadSession fails closed when capability lookup throws', () async {
     final result = await NativeTransportSessionFactory(

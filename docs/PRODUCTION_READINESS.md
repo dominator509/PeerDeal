@@ -123,6 +123,10 @@ the gates below are satisfied.
 - App shells now include native transport session factories that default to
   `MethodChannelNativeTransportBridge` and only expose validated
   `peerdeal_network` sender/drain construction to app orchestration.
+- App native transport session/drain adapters now scrub native capability and
+  receive warnings plus bound native notes before exposing app transport load
+  results, preserving validated send/receive behavior without leaking platform
+  diagnostic detail.
 - Native transport session factories now fail closed during session loading
   unless native capability reports send and receive support, so app
   orchestration can reject unavailable platform transport before exposing
@@ -295,8 +299,9 @@ the gates below are satisfied.
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, app-owned transport payload-limit
   enforcement, bounded app-owned table/join bootstrap mapping, app-owned
-  capture diagnostic scrubbing, scrubbed route-failure diagnostics, and
-  method-channel payload gates are locked for those follow-up implementations.
+  transport/capture diagnostic scrubbing, scrubbed route-failure diagnostics,
+  and method-channel payload gates are locked for those follow-up
+  implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

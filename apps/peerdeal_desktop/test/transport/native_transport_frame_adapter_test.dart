@@ -105,7 +105,24 @@ void main() {
 
     expect(result.available, isFalse);
     expect(result.results, isEmpty);
-    expect(result.warnings, ['transport locked']);
+    expect(result.warnings, ['Native transport reported a platform warning.']);
+  });
+
+  test('scrubs native receive warning detail while draining', () async {
+    final drain = NativeTransportFrameDrain(
+      bridge: _FakeNativeTransportBridge(
+        receiveWarning: 'receive_failed: C:\\secret\\frames.log',
+      ),
+      receiver: ValidatingTransportFrameReceiver(
+        handler: _RecordingTransportFrameHandler(),
+      ),
+    );
+
+    final result = await drain.drain(sessionId: 'session_1', peerId: 'peer_b');
+
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport reported a platform warning.']);
+    expect(result.warnings.single, isNot(contains('frames.log')));
   });
 }
 

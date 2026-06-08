@@ -11,7 +11,7 @@ class NativeTransportFrameSink implements TransportFrameSink {
   Future<void> sendFrame(TransportFrame frame) async {
     final result = await _bridge.sendFrame(_toNativeFrame(frame));
     if (!result.isSuccess) {
-      throw StateError(result.warning ?? 'Native transport send failed.');
+      throw StateError('Native transport send failed.');
     }
   }
 }
@@ -45,7 +45,10 @@ class NativeTransportFrameDrain {
     if (!snapshot.available) {
       return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>[
-          snapshot.warning ?? 'Native transport receive unavailable.',
+          _safeNativeWarning(
+            snapshot.warning,
+            fallback: 'Native transport receive unavailable.',
+          ),
         ],
       );
     }
@@ -69,8 +72,23 @@ class NativeTransportFrameDrain {
       results: List<TransportFrameReceiveResult>.unmodifiable(results),
       warnings: snapshot.warning == null
           ? const <String>[]
-          : <String>[snapshot.warning!],
+          : <String>[
+              _safeNativeWarning(
+                snapshot.warning,
+                fallback: 'Native transport receive warning.',
+              ),
+            ],
     );
+  }
+
+  static String _safeNativeWarning(
+    String? warning, {
+    required String fallback,
+  }) {
+    if (warning == null || warning.trim().isEmpty) {
+      return fallback;
+    }
+    return 'Native transport reported a platform warning.';
   }
 }
 

@@ -36,7 +36,10 @@ class NativeTransportSessionFactory {
         !capability.receiveSupported) {
       return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>[
-          capability.warning ?? 'Native transport session unavailable.',
+          _safeNativeWarning(
+            capability.warning,
+            fallback: 'Native transport session unavailable.',
+          ),
         ],
       );
     }
@@ -58,11 +61,16 @@ class NativeTransportSessionFactory {
         sender: _createSender(bridge),
         drain: _createDrain(bridge: bridge, handler: handler),
         maxPayloadBytes: capability.maxPayloadBytes,
-        nativeNotes: capability.notes,
+        nativeNotes: _safeNativeNotes(capability.notes),
       ),
       warnings: capability.warning == null
           ? const <String>[]
-          : <String>[capability.warning!],
+          : <String>[
+              _safeNativeWarning(
+                capability.warning,
+                fallback: 'Native transport session warning.',
+              ),
+            ],
     );
   }
 
@@ -98,6 +106,31 @@ class NativeTransportSessionFactory {
 
   NativeTransportBridge get _resolvedBridge {
     return _bridge ?? MethodChannelNativeTransportBridge();
+  }
+
+  static String _safeNativeWarning(
+    String? warning, {
+    required String fallback,
+  }) {
+    if (warning == null || warning.trim().isEmpty) {
+      return fallback;
+    }
+    return 'Native transport reported a platform warning.';
+  }
+
+  static String _safeNativeNotes(String notes) {
+    final normalized = notes
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (normalized.isEmpty) {
+      return 'unavailable';
+    }
+    const maxLength = 96;
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return normalized.substring(0, maxLength);
   }
 }
 
