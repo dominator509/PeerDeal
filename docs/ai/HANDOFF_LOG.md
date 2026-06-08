@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Wizard Setup Identity Gate
+
+Summary:
+Hardened `peerdeal_wizard` setup resolution so direct wizard callers cannot
+turn blank setup intent or host identities into build-ready plans. The resolver
+now trims intent ids and carries blank identity problems as unresolved issues
+that validation rejects before Game File compilation.
+
+Files changed:
+- `packages/peerdeal_wizard/lib/src/engine/default_preset_resolver.dart`
+- `packages/peerdeal_wizard/test/preset_resolver_test.dart`
+- `packages/peerdeal_wizard/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_wizard`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- Whitespace-padded setup intent ids are normalized before plan id generation.
+  This is intentional to prevent whitespace-bearing production plan ids.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - App Receipt Source Conflict Preservation
 
 Summary:

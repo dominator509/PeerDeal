@@ -101,6 +101,9 @@ the gates below are satisfied.
 - Wizard setup validation now rejects unsupported variant ids before Game File
   compilation, so launch setup cannot produce build-ready files for variants
   outside the currently implemented Hold'em boundary.
+- Wizard setup resolution now trims setup intent ids and rejects blank setup
+  intent or host identities before Game File compilation, so direct wizard
+  callers cannot emit build-ready plans with malformed setup identity.
 - Wizard Game File compilation now rechecks build-ready mode and variant ids,
   so manually constructed setup plans cannot bypass resolver validation and
   emit unsupported production Game Files.

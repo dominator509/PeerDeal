@@ -9,14 +9,17 @@ class DefaultPresetResolver implements PresetResolver {
 
   @override
   PresetResolutionResult mergeLayers(List<PresetLayer> layers) {
-    final ordered = [...layers]..sort((a, b) => a.priority.compareTo(b.priority));
+    final ordered = [...layers]
+      ..sort((a, b) => a.priority.compareTo(b.priority));
     final merged = <String, Object?>{};
     final conflicts = <String>[];
 
     for (final layer in ordered) {
       for (final entry in layer.values.entries) {
         if (merged.containsKey(entry.key) && merged[entry.key] != entry.value) {
-          conflicts.add('Conflict on ${entry.key} resolved in favor of ${layer.presetId}.');
+          conflicts.add(
+            'Conflict on ${entry.key} resolved in favor of ${layer.presetId}.',
+          );
         }
         merged[entry.key] = entry.value;
       }
@@ -24,7 +27,9 @@ class DefaultPresetResolver implements PresetResolver {
 
     return PresetResolutionResult(
       mergedValues: merged,
-      appliedPresetIds: ordered.map((layer) => layer.presetId).toList(growable: false),
+      appliedPresetIds: ordered
+          .map((layer) => layer.presetId)
+          .toList(growable: false),
       conflicts: conflicts,
     );
   }
@@ -34,6 +39,8 @@ class DefaultPresetResolver implements PresetResolver {
     required SetupIntent intent,
     required List<PresetLayer> presetLayers,
   }) {
+    final intentId = intent.intentId.trim();
+    final hostPseudonymousId = intent.hostPseudonymousId.trim();
     final presetResolution = mergeLayers(presetLayers);
     final resolved = <String, Object?>{
       ...presetResolution.mergedValues,
@@ -50,8 +57,12 @@ class DefaultPresetResolver implements PresetResolver {
       }
     }
 
-    final modeId = (intent.modePreference ?? resolved['mode_type'] ?? 'open_table').toString();
-    final variantId = (intent.variantPreference ?? resolved['variant_id'] ?? 'holdem_nlhe').toString();
+    final modeId =
+        (intent.modePreference ?? resolved['mode_type'] ?? 'open_table')
+            .toString();
+    final variantId =
+        (intent.variantPreference ?? resolved['variant_id'] ?? 'holdem_nlhe')
+            .toString();
 
     if (intent.seatCountPreference != null) {
       resolved['seat_count'] = intent.seatCountPreference;
@@ -64,12 +75,18 @@ class DefaultPresetResolver implements PresetResolver {
     }
 
     final unresolvedIssues = <String>[...intent.ambiguities];
+    if (intentId.isEmpty) {
+      unresolvedIssues.add('setup_intent_id_missing');
+    }
+    if (hostPseudonymousId.isEmpty) {
+      unresolvedIssues.add('setup_host_missing');
+    }
     if (resolved['seat_count'] == null) {
       unresolvedIssues.add('seat_count_missing');
     }
 
     return ResolvedSetupDraft(
-      intentId: intent.intentId,
+      intentId: intentId,
       modeId: modeId,
       variantId: variantId,
       resolvedFields: resolved,
@@ -103,10 +120,16 @@ class DefaultPresetResolver implements PresetResolver {
     }
 
     final policyProfiles = <String, String>{
-      'privacy_profile': (draft.resolvedFields['retention_profile'] ?? 'privacy.default').toString(),
-      'capture_profile': (draft.resolvedFields['table_capture_policy'] ?? 'capture.protected').toString(),
+      'privacy_profile':
+          (draft.resolvedFields['retention_profile'] ?? 'privacy.default')
+              .toString(),
+      'capture_profile':
+          (draft.resolvedFields['table_capture_policy'] ?? 'capture.protected')
+              .toString(),
       'network_profile': 'network.hybrid_default',
-      'retention_profile': (draft.resolvedFields['retention_profile'] ?? 'retention.standard').toString(),
+      'retention_profile':
+          (draft.resolvedFields['retention_profile'] ?? 'retention.standard')
+              .toString(),
     };
 
     return ValidatedSetupPlan(

@@ -39,8 +39,37 @@ void main() {
 
       expect(result.buildReady, isFalse);
       expect(result.validationResult.isValid, isFalse);
-      expect(result.validationResult.errors, contains('unsupported_variant_id'));
+      expect(
+        result.validationResult.errors,
+        contains('unsupported_variant_id'),
+      );
       expect(result.validationResult.warnings, isEmpty);
+    });
+
+    test('rejects malformed setup identity before Game File compilation', () {
+      const resolver = DefaultPresetResolver();
+      const intent = SetupIntent(
+        intentId: '   ',
+        sourceType: SetupSurface.simple,
+        hostPseudonymousId: '   ',
+        modePreference: 'open_table',
+        variantPreference: 'holdem_nlhe',
+        seatCountPreference: 6,
+      );
+
+      final draft = resolver.resolveIntent(
+        intent: intent,
+        presetLayers: const <PresetLayer>[],
+      );
+      final result = resolver.validateDraft(draft);
+
+      expect(draft.intentId, isEmpty);
+      expect(result.buildReady, isFalse);
+      expect(result.validationResult.isValid, isFalse);
+      expect(result.validationResult.errors, <String>[
+        'setup_intent_id_missing',
+        'setup_host_missing',
+      ]);
     });
 
     test('accepts supported Holdem variant draft', () {

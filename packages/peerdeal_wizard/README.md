@@ -33,6 +33,9 @@ are present.
 - `DefaultPresetResolver.validateDraft(...)` rejects unsupported variants
   before Game File compilation; the launch wizard only builds `holdem_nlhe`
   plans until additional variant packages are implemented.
+- `DefaultPresetResolver.resolveIntent(...)` trims setup intent ids and marks
+  blank setup intent or host identities as unresolved issues before validation,
+  preventing malformed setup identity from becoming a build-ready plan.
 - `DefaultGameFileCompiler.tryCompile(...)` rechecks build-ready mode and
   variant support, so manually constructed plans cannot bypass resolver
   validation.
