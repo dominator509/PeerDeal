@@ -50,6 +50,13 @@ class NativeBootstrapCandidateLoader {
     required String sessionId,
     required String tableId,
   }) async {
+    if (!_hasText(sessionId) || !_hasText(tableId)) {
+      return const NativeBootstrapCandidateLoadResult.unavailable(
+        nativeNotes: 'unavailable',
+        warnings: <String>['Local network bootstrap scope is invalid.'],
+      );
+    }
+
     if (_maxPeerCandidates < 1) {
       return const NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: 'unavailable',

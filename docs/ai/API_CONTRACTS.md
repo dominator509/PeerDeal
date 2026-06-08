@@ -112,7 +112,8 @@ closed before mounted table routes load recovery windows.
 facts only. Mobile and desktop app loaders/coordinators trim, deduplicate, and
 cap discovered peer endpoints before passing them to `peerdeal_network`
 bootstrap candidate resolution. Invalid caps fail closed for table loading and
-fall back to relay-only join bootstrap plans.
+fall back to relay-only join bootstrap plans. Invalid app-owned session/table
+bootstrap scope must fail closed or fall back before native capability lookup.
 
 ## Error Shape
 

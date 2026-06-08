@@ -14,6 +14,48 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Local Network Bootstrap Scope Gate
+
+Summary:
+Hardened mobile and desktop local-network bootstrap paths so table bootstrap
+loaders fail closed, and join bootstrap coordinators fall back to relay-only
+plans, before native capability lookup when app-owned session/table bootstrap
+scope is blank.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_mobile/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_mobile/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_desktop/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_desktop/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\native_bootstrap_candidate_loader_test.dart test\join_flow\native_join_bootstrap_coordinator_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\native_bootstrap_candidate_loader_test.dart test\join_flow\native_join_bootstrap_coordinator_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Native local-network discovery still requires platform-native
+  implementations behind the locked bridge contract.
+
+Next reviewer:
+Continue with native/platform implementation gaps or the next codable
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Transport Direct Payload Gate
 
 Summary:

@@ -29,6 +29,15 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     required ResolvedInvite resolvedInvite,
     required RoleGrant roleGrant,
   }) async {
+    if (!_hasText(resolvedInvite.sessionId) ||
+        !_hasText(resolvedInvite.tableId)) {
+      return const BootstrapPlan(
+        requiresBootstrap: true,
+        peerCandidates: <String>[],
+        relayFallbackAllowed: true,
+      );
+    }
+
     if (_maxPeerCandidates < 1) {
       return const BootstrapPlan(
         requiresBootstrap: true,
@@ -127,6 +136,8 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     }
     return result;
   }
+
+  static bool _hasText(String value) => value.trim().isNotEmpty;
 
   static String _safeNativeText(String value) {
     final normalized = value

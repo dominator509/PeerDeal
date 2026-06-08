@@ -126,6 +126,29 @@ void main() {
     },
   );
 
+  test(
+    'fails closed before native lookup when bootstrap scope is invalid',
+    () async {
+      final bridge = _CountingLocalNetworkBridge();
+      final provider = _RecordingBootstrapCandidateProvider();
+
+      final result = await NativeBootstrapCandidateLoader(
+        bridge: bridge,
+        provider: provider,
+      ).load(sessionId: ' ', tableId: 'table-1');
+
+      expect(result.discoveryAvailable, isFalse);
+      expect(result.candidates, isEmpty);
+      expect(result.nativeNotes, 'unavailable');
+      expect(result.warnings, <String>[
+        'Local network bootstrap scope is invalid.',
+      ]);
+      expect(bridge.capabilityLookups, 0);
+      expect(bridge.discoveryLookups, 0);
+      expect(provider.request, isNull);
+    },
+  );
+
   test('fails closed when local network discovery is unsupported', () async {
     final result = await NativeBootstrapCandidateLoader(
       bridge: _FakeLocalNetworkBridge(

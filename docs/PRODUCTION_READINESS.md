@@ -194,6 +194,9 @@ the gates below are satisfied.
 - App-owned local-network bootstrap loaders now fail closed before native
   capability lookup when the app-owned peer candidate limit is invalid, keeping
   bad app configuration from reaching local-network platform discovery.
+- App-owned local-network bootstrap loaders and join coordinators now validate
+  app-owned session/table bootstrap scope before native capability lookup,
+  keeping malformed route or invite scope from reaching platform discovery.
 - App-owned local-network bootstrap loaders now scrub native capability and
   discovery warnings, bound native notes/interface hints, and normalize
   native-discovered endpoint ids before mounted table and join bootstrap paths
