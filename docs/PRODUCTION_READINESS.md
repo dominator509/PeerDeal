@@ -413,6 +413,10 @@ the gates below are satisfied.
 - App shells now accept validated app-owned production navigation descriptors
   through the mobile and desktop runtime objects, so shell home navigation can
   link to mounted non-demo routes without extending the demo route registry.
+- App shells now accept app-owned home surface builders through the mobile and
+  desktop runtime objects, so production callers can replace the demo home
+  surface while still receiving validated home navigation entries. Builder
+  failures fail closed to the scrubbed route-unavailable surface.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all

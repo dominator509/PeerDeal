@@ -76,8 +76,11 @@ production route maps; `/demo/*` stays reserved for the demo registry.
 Runtime objects may set the initial route only to `/`, an enabled demo route,
 or a validated production route. Runtime objects may also expose validated
 production navigation descriptors whose paths must reference mounted production
-routes. Production navigation remains app-shell work and should replace or
-extend app routes without moving route policy into shared packages.
+routes. Runtime objects may provide an app-owned home surface builder, which
+receives validated home navigation entries and may replace the default demo
+home surface; builder failures render the existing route-unavailable fallback.
+Production navigation and home composition remain app-shell work and should
+replace or extend app routes without moving route policy into shared packages.
 
 ## Network Transport Boundary
 

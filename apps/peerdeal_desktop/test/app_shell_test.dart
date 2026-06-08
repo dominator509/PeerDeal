@@ -863,6 +863,56 @@ void main() {
     expect(find.text('Production table route'), findsOneWidget);
   });
 
+  testWidgets('uses app-owned home surface builder', (tester) async {
+    var homePaths = const <String>[];
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.table,
+          },
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live table',
+              path: '/table-live',
+            ),
+          ],
+          homeSurfaceBuilder: (context, navigation) {
+            homePaths = navigation.map((entry) => entry.path).toList();
+            return const Text('Production home surface');
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Production home surface'), findsOneWidget);
+    expect(find.text('PeerDeal demo'), findsNothing);
+    expect(homePaths, <String>[DemoSliceRoutes.table, '/table-live']);
+  });
+
+  testWidgets('fails closed when app-owned home surface builder throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          homeSurfaceBuilder: (context, navigation) {
+            throw StateError('home surface unavailable');
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.text('Result: ERR_ROUTE_UNAVAILABLE'), findsOneWidget);
+    expect(find.text('Route: ${DemoSliceRoutes.home}'), findsOneWidget);
+  });
+
   testWidgets('rejects production navigation for unmounted routes', (
     tester,
   ) async {

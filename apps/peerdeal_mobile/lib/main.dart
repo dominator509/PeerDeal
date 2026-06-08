@@ -26,6 +26,11 @@ import 'setup_flow/setup_flow_route.dart';
 typedef DemoReceiptFactory =
     PeerDealReceipt Function(DemoScenarioSnapshot snapshot);
 typedef PeerDealAppRouteMap = Map<String, WidgetBuilder>;
+typedef PeerDealHomeSurfaceBuilder =
+    Widget Function(
+      BuildContext context,
+      List<PeerDealAppNavigationEntry> navigation,
+    );
 
 class PeerDealAppNavigationEntry {
   const PeerDealAppNavigationEntry({required this.label, required this.path});
@@ -57,6 +62,7 @@ class PeerDealMobileRuntime {
     this.enabledDemoRoutePaths,
     this.productionRoutes,
     this.productionNavigation,
+    this.homeSurfaceBuilder,
     this.initialRoute,
   });
 
@@ -77,6 +83,7 @@ class PeerDealMobileRuntime {
   final Set<String>? enabledDemoRoutePaths;
   final PeerDealAppRouteMap? productionRoutes;
   final List<PeerDealAppNavigationEntry>? productionNavigation;
+  final PeerDealHomeSurfaceBuilder? homeSurfaceBuilder;
   final String? initialRoute;
 
   PeerDealMobileRuntime withOverrides({
@@ -97,6 +104,7 @@ class PeerDealMobileRuntime {
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
+    PeerDealHomeSurfaceBuilder? homeSurfaceBuilder,
     String? initialRoute,
   }) {
     return PeerDealMobileRuntime(
@@ -131,6 +139,7 @@ class PeerDealMobileRuntime {
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
       productionRoutes: productionRoutes ?? this.productionRoutes,
       productionNavigation: productionNavigation ?? this.productionNavigation,
+      homeSurfaceBuilder: homeSurfaceBuilder ?? this.homeSurfaceBuilder,
       initialRoute: initialRoute ?? this.initialRoute,
     );
   }
@@ -157,6 +166,7 @@ class PeerDealMobileApp extends StatefulWidget {
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
+    PeerDealHomeSurfaceBuilder? homeSurfaceBuilder,
     String? initialRoute,
   }) : _runtime = runtime,
        _receiptPresenter = presenter,
@@ -176,6 +186,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
        _productionRoutes = productionRoutes,
        _productionNavigation = productionNavigation,
+       _homeSurfaceBuilder = homeSurfaceBuilder,
        _initialRoute = initialRoute;
 
   final PeerDealMobileRuntime? _runtime;
@@ -196,6 +207,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final Set<String>? _enabledDemoRoutePaths;
   final PeerDealAppRouteMap? _productionRoutes;
   final List<PeerDealAppNavigationEntry>? _productionNavigation;
+  final PeerDealHomeSurfaceBuilder? _homeSurfaceBuilder;
   final String? _initialRoute;
 
   @override
@@ -228,6 +240,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
       productionRoutes: widget._productionRoutes,
       productionNavigation: widget._productionNavigation,
+      homeSurfaceBuilder: widget._homeSurfaceBuilder,
       initialRoute: widget._initialRoute,
     );
   }
@@ -361,25 +374,42 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     BuildContext context,
     List<PeerDealAppNavigationEntry> productionNavigation,
   ) {
+    final navigation = _homeNavigationEntries(productionNavigation);
+    final homeSurfaceBuilder = _runtime.homeSurfaceBuilder;
+    if (homeSurfaceBuilder != null) {
+      try {
+        return homeSurfaceBuilder(context, navigation);
+      } catch (_) {
+        return const AppRouteFallbackScreen(routeName: DemoSliceRoutes.home);
+      }
+    }
     return DemoHomeScreen(
       controller: _controller,
-      navigationActions: <DemoHomeNavigationAction>[
+      navigationActions: navigation
+          .map(
+            (route) => DemoHomeNavigationAction(
+              label: route.label,
+              onPressed: () => Navigator.of(context).pushNamed(route.path),
+            ),
+          )
+          .toList(growable: false),
+      onSelectScenario: _selectScenario,
+    );
+  }
+
+  List<PeerDealAppNavigationEntry> _homeNavigationEntries(
+    List<PeerDealAppNavigationEntry> productionNavigation,
+  ) {
+    return List<PeerDealAppNavigationEntry>.unmodifiable(
+      <PeerDealAppNavigationEntry>[
         ...DemoSliceRoutes.enabledPrimaryNavigation(
           _runtime.enabledDemoRoutePaths,
         ).map(
-          (route) => DemoHomeNavigationAction(
-            label: route.label,
-            onPressed: () => Navigator.of(context).pushNamed(route.path),
-          ),
+          (route) =>
+              PeerDealAppNavigationEntry(label: route.label, path: route.path),
         ),
-        ...productionNavigation.map(
-          (route) => DemoHomeNavigationAction(
-            label: route.label,
-            onPressed: () => Navigator.of(context).pushNamed(route.path),
-          ),
-        ),
+        ...productionNavigation,
       ],
-      onSelectScenario: _selectScenario,
     );
   }
 
