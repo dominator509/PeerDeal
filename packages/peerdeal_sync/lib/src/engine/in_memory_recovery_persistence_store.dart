@@ -46,6 +46,44 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
       );
     }
 
+    final existingSnapshot = record.snapshot;
+    if (existingSnapshot != null) {
+      if (snapshot.snapshotBaseEventSeq <
+          existingSnapshot.snapshotBaseEventSeq) {
+        return RecoveryPersistenceResult(
+          isSuccess: false,
+          conflicts: <SyncConflict>[
+            SyncConflict(
+              code: 'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_REGRESSION',
+              message:
+                  'Persisted snapshot would replace a newer snapshot checkpoint.',
+              severity: SyncConflictSeverity.fatal,
+              expected: '${existingSnapshot.snapshotBaseEventSeq}',
+              actual: '${snapshot.snapshotBaseEventSeq}',
+            ),
+          ],
+        );
+      }
+
+      if (snapshot.snapshotBaseEventSeq ==
+              existingSnapshot.snapshotBaseEventSeq &&
+          snapshot.snapshotHash != existingSnapshot.snapshotHash) {
+        return RecoveryPersistenceResult(
+          isSuccess: false,
+          conflicts: <SyncConflict>[
+            SyncConflict(
+              code: 'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_HASH_MISMATCH',
+              message:
+                  'Persisted snapshot hash changed for an existing checkpoint.',
+              severity: SyncConflictSeverity.fatal,
+              expected: existingSnapshot.snapshotHash,
+              actual: snapshot.snapshotHash,
+            ),
+          ],
+        );
+      }
+    }
+
     record.snapshot = snapshot;
     return const RecoveryPersistenceResult.success();
   }

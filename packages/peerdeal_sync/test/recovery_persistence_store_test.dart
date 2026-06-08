@@ -158,6 +158,61 @@ void main() {
     );
     expect(store.loadWindow(scope).snapshot, isNull);
   });
+
+  test('rejects snapshot regression without replacing checkpoint', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    store.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
+      ],
+    );
+    store.saveSnapshot(
+      scope: scope,
+      snapshot: _snapshot(seq: 2, hash: 'snapshot_hash_2'),
+    );
+
+    final result = store.saveSnapshot(
+      scope: scope,
+      snapshot: _snapshot(seq: 1, hash: 'snapshot_hash_1'),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_REGRESSION',
+    );
+    expect(store.loadWindow(scope).snapshot?.snapshotBaseEventSeq, 2);
+  });
+
+  test('rejects snapshot hash replacement for existing checkpoint', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    store.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+      ],
+    );
+    store.saveSnapshot(
+      scope: scope,
+      snapshot: _snapshot(seq: 1, hash: 'snapshot_hash_1'),
+    );
+
+    final result = store.saveSnapshot(
+      scope: scope,
+      snapshot: _snapshot(seq: 1, hash: 'snapshot_hash_tampered'),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_HASH_MISMATCH',
+    );
+    expect(result.conflicts.single.expected, 'snapshot_hash_1');
+    expect(result.conflicts.single.actual, 'snapshot_hash_tampered');
+    expect(store.loadWindow(scope).snapshot?.snapshotHash, 'snapshot_hash_1');
+  });
 }
 
 EventEnvelope _event({
@@ -182,5 +237,17 @@ EventEnvelope _event({
     payload: const <String, Object?>{},
     prevEventHash: prevHash,
     eventHash: hash,
+  );
+}
+
+SnapshotEnvelope _snapshot({required int seq, required String hash}) {
+  return SnapshotEnvelope(
+    snapshotId: 'snapshot_$seq',
+    protocolVersion: '1.0.0',
+    tableId: 'table_1',
+    sessionId: 'session_1',
+    snapshotBaseEventSeq: seq,
+    snapshotHash: hash,
+    payload: const <String, Object?>{},
   );
 }

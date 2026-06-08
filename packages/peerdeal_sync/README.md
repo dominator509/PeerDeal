@@ -34,3 +34,5 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
   table/session or protocol mismatches, sequence gaps, hash-chain breaks, and
   snapshots ahead of the stored event stream before mutating stored recovery
   windows.
+- Persisted snapshots cannot regress to an older checkpoint or replace an
+  existing checkpoint with a different snapshot hash.

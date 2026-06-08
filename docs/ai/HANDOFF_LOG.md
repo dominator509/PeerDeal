@@ -84,6 +84,40 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Sync Snapshot Persistence Integrity
+
+Summary:
+Hardened the sync recovery persistence seam so stored snapshots cannot regress
+to an older checkpoint or replace an existing checkpoint at the same base event
+sequence with a different snapshot hash. This protects verified recovery
+anchors from stale or tampered snapshot writes while leaving durable platform
+storage implementation as a separate gap.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `packages/peerdeal_sync/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_sync`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- Durable platform persistence remains pending; this slice hardens the
+  contract-level in-memory persistence gate.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Network Transport Frame Gate
 
 Summary:

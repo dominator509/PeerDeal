@@ -179,6 +179,9 @@ the gates below are satisfied.
   in-memory validation gate that rejects mismatched table/session scope,
   protocol drift, sequence gaps, hash-chain breaks, and snapshots ahead of the
   stored event stream before mutating recovery windows.
+- Sync recovery persistence now rejects snapshot checkpoint regression and
+  same-sequence snapshot hash replacement, preserving newer verified recovery
+  anchors from stale or tampered snapshot writes.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
