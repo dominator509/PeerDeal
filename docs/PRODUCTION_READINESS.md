@@ -112,6 +112,10 @@ the gates below are satisfied.
 - Network transport receive contracts now include a validating receiver
   boundary that rejects invalid frames before session handlers see them and
   converts handler failures into explicit failed receive results.
+- Native bridge contracts now include a generic transport method-channel seam
+  for capability lookup, byte-frame sends, and inbound frame snapshots, failing
+  closed on invalid requests, platform failures, or malformed payloads without
+  putting routing policy in the native bridge package.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when

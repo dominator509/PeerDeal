@@ -10,3 +10,7 @@ export 'src/secure_storage/method_channel_secure_key_storage_bridge.dart';
 export 'src/secure_storage/secure_key_storage_bridge.dart';
 export 'src/secure_storage/secure_key_storage_bridge_models.dart';
 export 'src/secure_storage/secure_key_storage_channel_contract.dart';
+export 'src/transport/method_channel_native_transport_bridge.dart';
+export 'src/transport/native_transport_bridge.dart';
+export 'src/transport/native_transport_bridge_models.dart';
+export 'src/transport/native_transport_channel_contract.dart';

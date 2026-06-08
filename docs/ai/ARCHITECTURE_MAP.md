@@ -15,7 +15,7 @@ packages add policy without mutating universal core truth.
 | --- | --- | --- |
 | App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, setup/join flows, demo slices, app-owned presenters/controllers, native-to-package mapping |
 | Shared UI | `peerdeal_ui_kit` | Safe-surface widgets and render models |
-| Native seams | `peerdeal_native_bridges` | Method-channel contracts for platform facts |
+| Native seams | `peerdeal_native_bridges` | Method-channel contracts for platform facts and generic byte transport |
 | Network confidence | `peerdeal_network` | Route class, confidence, primary peer selection, transport frame send/receive gates |
 | Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, anchors, snapshots, safe-close recovery |
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy |
@@ -99,7 +99,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 
 | Risk | Status |
 | --- | --- |
-| Production transport | Scaffold-level; no live peer transport yet |
+| Production transport | Native transport method-channel seam and network frame gates exist; no live peer transport implementation yet |
 | Platform key storage | Method-channel seam exists; native implementation pending |
 | Persistence | Canonical recovery-window file store exists; production database/platform persistence not implemented |
 | App flows | Demo routes plus mounted setup/join orchestration seams, mounted table/join native bootstrap mapping, and unknown-route fallback exist; production navigation polish remains |

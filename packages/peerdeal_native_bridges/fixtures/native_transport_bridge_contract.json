@@ -1,0 +1,30 @@
+{
+  "channel": "peerdeal/native_bridges/transport",
+  "methods": {
+    "getCapability": {
+      "available": true,
+      "sendSupported": true,
+      "receiveSupported": true,
+      "maxPayloadBytes": 4096,
+      "notes": "loopback-test-transport",
+      "warning": null
+    },
+    "sendFrame": {
+      "success": true,
+      "warning": null
+    },
+    "receiveFrames": {
+      "available": true,
+      "frames": [
+        {
+          "sessionId": "session_1",
+          "senderPeerId": "peer_a",
+          "recipientPeerId": "peer_b",
+          "sequence": 7,
+          "payloadBytes": [1, 2, 3, 4]
+        }
+      ],
+      "warning": null
+    }
+  }
+}

@@ -305,6 +305,42 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Native Transport Channel Contract
+
+Summary:
+Added a generic native transport method-channel seam in
+`peerdeal_native_bridges` for capability lookup, byte-frame sends, and inbound
+frame snapshots. The seam is intentionally transport-adjacent only: it carries
+session/peer identifiers, sequence numbers, and payload bytes, while routing
+policy and protocol truth stay in `peerdeal_network` and higher layers.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/peerdeal_native_bridges.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_bridge.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_bridge_models.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_channel_contract.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/method_channel_native_transport_bridge.dart`
+- `packages/peerdeal_native_bridges/fixtures/native_transport_bridge_contract.json`
+- `packages/peerdeal_native_bridges/test/method_channel_native_transport_bridge_test.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `packages/peerdeal_native_bridges/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/method_channel_native_transport_bridge_test.dart test/native_bridge_channel_contract_test.dart`
+  in `packages/peerdeal_native_bridges`
+
+Risks:
+- Real native transport remains pending; this locks the Dart method-channel
+  contract only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Canonical Recovery File Writes
 
 Summary:

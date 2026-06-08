@@ -238,6 +238,132 @@ void main() {
     expect(result.isSuccess, isFalse);
     expect(result.warning, 'Secure key storage mutation failed.');
   });
+
+  test('native transport channel contract decodes fixture payloads', () {
+    final fixture = _loadFixture('native_transport_bridge_contract.json');
+    final methods = fixture['methods'] as Map<String, Object?>;
+    final capabilityPayload =
+        methods[NativeTransportChannelContract.getCapabilityMethod]
+            as Map<String, Object?>;
+    final sendPayload =
+        methods[NativeTransportChannelContract.sendFrameMethod]
+            as Map<String, Object?>;
+    final receivePayload =
+        methods[NativeTransportChannelContract.receiveFramesMethod]
+            as Map<String, Object?>;
+
+    expect(fixture['channel'], NativeTransportChannelContract.channelName);
+
+    final capability = NativeTransportChannelContract.decodeCapability(
+      capabilityPayload,
+    );
+    final sendResult = NativeTransportChannelContract.decodeSendResult(
+      sendPayload,
+    );
+    final snapshot = NativeTransportChannelContract.decodeReceiveSnapshot(
+      receivePayload,
+    );
+
+    expect(capability.available, isTrue);
+    expect(capability.sendSupported, isTrue);
+    expect(capability.receiveSupported, isTrue);
+    expect(capability.maxPayloadBytes, 4096);
+    expect(capability.notes, 'loopback-test-transport');
+    expect(capability.warning, isNull);
+    expect(sendResult.isSuccess, isTrue);
+    expect(snapshot.available, isTrue);
+    expect(snapshot.frames.single.sessionId, 'session_1');
+    expect(snapshot.frames.single.payloadBytes, [1, 2, 3, 4]);
+  });
+
+  test('native transport channel contract fails closed on null payloads', () {
+    final capability = NativeTransportChannelContract.decodeCapability(null);
+    final sendResult = NativeTransportChannelContract.decodeSendResult(null);
+    final snapshot = NativeTransportChannelContract.decodeReceiveSnapshot(null);
+
+    expect(capability.available, isFalse);
+    expect(capability.sendSupported, isFalse);
+    expect(capability.receiveSupported, isFalse);
+    expect(capability.warning, contains('unavailable'));
+    expect(sendResult.isSuccess, isFalse);
+    expect(sendResult.warning, contains('unavailable'));
+    expect(snapshot.available, isFalse);
+    expect(snapshot.frames, isEmpty);
+    expect(snapshot.warning, contains('unavailable'));
+  });
+
+  test('native transport channel contract tolerates malformed fields', () {
+    final capability = NativeTransportChannelContract.decodeCapability(
+      const <String, Object?>{
+        'available': 'true',
+        'sendSupported': 1,
+        'receiveSupported': 'false',
+        'maxPayloadBytes': -1,
+        'notes': false,
+        'warning': <String>['bad'],
+      },
+    );
+    final sendResult = NativeTransportChannelContract.decodeSendResult(
+      const <String, Object?>{
+        'success': 'true',
+        'warning': <String>['bad'],
+      },
+    );
+    final snapshot = NativeTransportChannelContract.decodeReceiveSnapshot(
+      const <String, Object?>{
+        'available': true,
+        'frames': <Object?>[
+          <String, Object?>{
+            'sessionId': 'session_1',
+            'senderPeerId': 'peer_a',
+            'recipientPeerId': 'peer_a',
+            'sequence': 1,
+            'payloadBytes': <int>[1],
+          },
+          <String, Object?>{
+            'sessionId': 'session_1',
+            'senderPeerId': 'peer_a',
+            'recipientPeerId': 'peer_b',
+            'sequence': 2,
+            'payloadBytes': <Object?>[1, 'bad', 300],
+          },
+        ],
+        'warning': <String>['bad'],
+      },
+    );
+
+    expect(capability.available, isFalse);
+    expect(capability.sendSupported, isFalse);
+    expect(capability.receiveSupported, isFalse);
+    expect(capability.maxPayloadBytes, 0);
+    expect(capability.notes, 'unavailable');
+    expect(capability.warning, isNull);
+    expect(sendResult.isSuccess, isFalse);
+    expect(sendResult.warning, 'Native transport send failed.');
+    expect(snapshot.available, isTrue);
+    expect(snapshot.frames, isEmpty);
+    expect(snapshot.warning, isNull);
+  });
+
+  test('native transport channel contract encodes frames', () {
+    final payload = NativeTransportChannelContract.encodeFrame(
+      const NativeTransportFrame(
+        sessionId: 'session_1',
+        senderPeerId: 'peer_a',
+        recipientPeerId: 'peer_b',
+        sequence: 7,
+        payloadBytes: <int>[1, 2, 3, 4],
+      ),
+    );
+
+    expect(payload, {
+      'sessionId': 'session_1',
+      'senderPeerId': 'peer_a',
+      'recipientPeerId': 'peer_b',
+      'sequence': 7,
+      'payloadBytes': [1, 2, 3, 4],
+    });
+  });
 }
 
 Map<String, Object?> _loadFixture(String name) {

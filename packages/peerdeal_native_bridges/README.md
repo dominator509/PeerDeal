@@ -8,6 +8,7 @@ to observe local device capabilities.
 
 ## Owns
 - local-network permission and capability bridge seams
+- native transport capability and byte-frame bridge seams
 - platform channel wrappers
 - native hook result models
 - package-local bridge tests and fixtures
@@ -35,6 +36,9 @@ to observe local device capabilities.
 - Method-channel secure key storage mutations have generic save/delete
   contracts that fail closed on invalid requests, platform failures, or
   malformed mutation results.
+- Method-channel native transport capability, send, and receive contracts
+  normalize byte-frame payloads and fail closed on invalid requests, platform
+  failures, or malformed payloads.
 - Native bridge warnings are normalized for app-layer safe-surface and network
   routing policy.
 - Channel names, method names, fixture payloads, and decode behavior are locked
@@ -52,5 +56,7 @@ to observe local device capabilities.
   `getCapability` and `discoverPeers`.
 - Secure key storage channel: `peerdeal/native_bridges/secure_key_storage` with
   `loadKeyRing`, `saveKey`, and `deleteKey`.
+- Native transport channel: `peerdeal/native_bridges/transport` with
+  `getCapability`, `sendFrame`, and `receiveFrames`.
 - Missing payloads or platform errors must return unavailable facts with a
   warning, not throw through to policy or app code.
