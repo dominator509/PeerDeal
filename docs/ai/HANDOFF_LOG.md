@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - App Unknown Route Fallback
+
+Summary:
+Added fail-closed unknown-route handling in both Flutter app shells. Unsupported
+route names now render an explicit rejected route-unavailable surface instead
+of relying on default framework route errors.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/navigation/app_route_fallback_screen.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/navigation/app_route_fallback_screen.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- This hardens app navigation failure behavior, but it is not final production
+  navigation design or visual polish.
+- Native transport, durable persistence, platform implementations, and final UI
+  polish remain tracked readiness gaps.
+
+Next reviewer:
+Continue with app-shell navigation polish or platform implementation work where
+the environment can exercise it.
+
+---
+
 ### 2026-06-08 - Codex - Mounted Setup Flow Route
 
 Summary:

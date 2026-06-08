@@ -180,6 +180,20 @@ void main() {
     expect(find.text('Result: ERR_SETUP_FLOW_UNAVAILABLE'), findsOneWidget);
   });
 
+  testWidgets('fails closed for unknown app routes', (tester) async {
+    await tester.pumpWidget(const PeerDealDesktopApp());
+
+    Navigator.of(
+      tester.element(find.text('PeerDeal demo')),
+    ).pushNamed('/unknown-route');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.text('State: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_ROUTE_UNAVAILABLE'), findsOneWidget);
+    expect(find.text('Route: /unknown-route'), findsOneWidget);
+  });
+
   testWidgets('fails closed when app-owned join factory throws', (
     tester,
   ) async {

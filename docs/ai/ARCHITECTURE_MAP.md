@@ -100,7 +100,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Production transport | Scaffold-level; no live peer transport yet |
 | Platform key storage | Method-channel seam exists; native implementation pending |
 | Persistence | Event-store/snapshot storage not production implemented |
-| App flows | Demo routes plus mounted setup/join orchestration seams exist; production navigation polish remains |
+| App flows | Demo routes plus mounted setup/join orchestration seams and unknown-route fallback exist; production navigation polish remains |
 | UI polish | Demo UI, not production-polished |
 | Capture blocking | Best-effort policy only; platform limits must be stated honestly |
 

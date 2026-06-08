@@ -172,6 +172,9 @@ the gates below are satisfied.
 - Mounted app setup routes now receive app-owned setup orchestrator factories,
   expose compiled/rejected setup outcomes through navigation, and fail closed
   when route-level setup orchestration is unavailable.
+- App shells now fail closed for unknown route names with an explicit rejected
+  route-unavailable surface instead of relying on default framework route
+  errors.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
 - Receipt export now fails closed to an unavailable artifact when signing or

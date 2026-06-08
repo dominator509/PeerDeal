@@ -16,6 +16,7 @@ import 'demo_slice/screens/demo_receipt_screen.dart';
 import 'demo_slice/screens/demo_table_screen.dart';
 import 'join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'join_flow/join_flow_route.dart';
+import 'navigation/app_route_fallback_screen.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
 import 'setup_flow/setup_flow_route.dart';
 
@@ -107,6 +108,16 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
             JoinFlowRoute(orchestratorFactory: _joinFlowOrchestratorFactory),
         DemoSliceRoutes.setup: (_) =>
             SetupFlowRoute(orchestratorFactory: _setupFlowOrchestratorFactory),
+      },
+      onUnknownRoute: _unknownRoute,
+    );
+  }
+
+  Route<void> _unknownRoute(RouteSettings settings) {
+    return PageRouteBuilder<void>(
+      settings: settings,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return AppRouteFallbackScreen(routeName: settings.name);
       },
     );
   }

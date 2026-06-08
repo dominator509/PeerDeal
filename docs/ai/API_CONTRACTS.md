@@ -66,6 +66,7 @@ Known route categories include:
 - Receipt/recovery surface.
 - Join flow.
 - Setup flow.
+- Unknown route fallback.
 
 TODO: Treat concrete route paths and production navigation as app-shell details
 unless verified from the app route source in the current branch.
