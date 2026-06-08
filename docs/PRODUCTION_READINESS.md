@@ -314,6 +314,11 @@ the gates below are satisfied.
   can enter from the app shell boundary instead of relying on hardcoded demo
   session ids; table routes fail closed when runtime scope construction is
   unavailable.
+- Mobile and desktop app shells now expose app-owned runtime dependency
+  objects that group mounted-route factories for receipts, join/setup
+  orchestration, bootstrap loading, and recovery scope/persistence. Existing
+  per-factory constructor injection remains available, but production callers
+  can now replace route orchestration dependencies as a stable app-shell unit.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -326,11 +331,12 @@ the gates below are satisfied.
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
-  loading, mounted recovery-window loading, app-owned table runtime-scope
-  injection, canonical app-route registry validation, app-owned join
-  invite-context injection, app-owned receipt envelope injection, app-owned
-  setup intent injection, app-owned transport payload-limit enforcement,
-  bounded app-owned table/join bootstrap mapping, app-owned
+  loading, mounted recovery-window loading, app-owned route runtime dependency
+  grouping, app-owned table runtime-scope injection, canonical app-route
+  registry validation, app-owned join invite-context injection, app-owned
+  receipt envelope injection, app-owned setup intent injection, app-owned
+  transport payload-limit enforcement, bounded app-owned table/join bootstrap
+  mapping, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates are locked for those follow-up implementations.

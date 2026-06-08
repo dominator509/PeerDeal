@@ -30,9 +30,40 @@ void main() {
   runApp(const PeerDealDesktopApp());
 }
 
+class PeerDealDesktopRuntime {
+  const PeerDealDesktopRuntime({
+    this.receiptPresenter,
+    this.receiptArtifactVerifierFactory,
+    this.receiptExportArtifact,
+    this.receiptExportArtifactFactory,
+    this.receiptFactory,
+    this.joinFlowOrchestratorFactory,
+    this.joinFlowInviteContextFactory,
+    this.setupFlowOrchestratorFactory,
+    this.setupFlowIntentFactory,
+    this.bootstrapCandidateLoaderFactory,
+    this.recoveryPersistenceStoreFactory,
+    this.tableRuntimeScopeFactory,
+  });
+
+  final DemoReceiptSurfacePresenter? receiptPresenter;
+  final DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory;
+  final ReceiptExportArtifact? receiptExportArtifact;
+  final ReceiptExportArtifactBuilder? receiptExportArtifactFactory;
+  final DemoReceiptFactory? receiptFactory;
+  final JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory;
+  final JoinFlowInviteContextFactory? joinFlowInviteContextFactory;
+  final SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory;
+  final SetupFlowIntentFactory? setupFlowIntentFactory;
+  final NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory;
+  final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
+  final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
+}
+
 class PeerDealDesktopApp extends StatefulWidget {
   const PeerDealDesktopApp({
     super.key,
+    PeerDealDesktopRuntime? runtime,
     DemoReceiptSurfacePresenter? presenter,
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
@@ -45,7 +76,8 @@ class PeerDealDesktopApp extends StatefulWidget {
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
-  }) : _receiptPresenter = presenter,
+  }) : _runtime = runtime,
+       _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
        _receiptExportArtifactFactory = receiptExportArtifactFactory,
@@ -58,6 +90,7 @@ class PeerDealDesktopApp extends StatefulWidget {
        _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory,
        _tableRuntimeScopeFactory = tableRuntimeScopeFactory;
 
+  final PeerDealDesktopRuntime? _runtime;
   final DemoReceiptSurfacePresenter? _receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? _receiptExportArtifact;
@@ -82,8 +115,29 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   final DemoRecoveryResultFactory _recoveryResultFactory =
       const DemoRecoveryResultFactory();
 
+  PeerDealDesktopRuntime get _runtime {
+    return widget._runtime ??
+        PeerDealDesktopRuntime(
+          receiptPresenter: widget._receiptPresenter,
+          receiptArtifactVerifierFactory:
+              widget._receiptArtifactVerifierFactory,
+          receiptExportArtifact: widget._receiptExportArtifact,
+          receiptExportArtifactFactory: widget._receiptExportArtifactFactory,
+          receiptFactory: widget._receiptFactory,
+          joinFlowOrchestratorFactory: widget._joinFlowOrchestratorFactory,
+          joinFlowInviteContextFactory: widget._joinFlowInviteContextFactory,
+          setupFlowOrchestratorFactory: widget._setupFlowOrchestratorFactory,
+          setupFlowIntentFactory: widget._setupFlowIntentFactory,
+          bootstrapCandidateLoaderFactory:
+              widget._bootstrapCandidateLoaderFactory,
+          recoveryPersistenceStoreFactory:
+              widget._recoveryPersistenceStoreFactory,
+          tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
+        );
+  }
+
   DemoReceiptSurfacePresenter? get _receiptPresenter =>
-      widget._receiptPresenter;
+      _runtime.receiptPresenter;
 
   DemoScenarioSnapshot get _activeSnapshot {
     return DemoScenarioSnapshots.tryById(_controller.activeScenario.id) ??
@@ -115,7 +169,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
             ),
             bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
             recoveryPersistenceStoreFactory: _recoveryPersistenceStoreFactory,
-            runtimeScopeFactory: widget._tableRuntimeScopeFactory,
+            runtimeScopeFactory: _runtime.tableRuntimeScopeFactory,
             onOpenChat: () =>
                 Navigator.of(context).pushNamed(DemoSliceRoutes.chatRoute.path),
             onOpenReceipt: () => Navigator.of(
@@ -131,25 +185,25 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           DemoSliceRoutes.receiptRoute.path: (_) => DemoReceiptRoute(
             snapshot: _activeSnapshot,
             presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
-            exportArtifact: widget._receiptExportArtifact,
+            exportArtifact: _runtime.receiptExportArtifact,
             receipt: _safeReceiptFor(_activeSnapshot),
-            exportArtifactFactory: widget._receiptExportArtifact == null
-                ? widget._receiptExportArtifactFactory
+            exportArtifactFactory: _runtime.receiptExportArtifact == null
+                ? _runtime.receiptExportArtifactFactory
                 : null,
             artifactVerifier:
-                widget._receiptExportArtifact == null &&
-                    widget._receiptExportArtifactFactory == null
+                _runtime.receiptExportArtifact == null &&
+                    _runtime.receiptExportArtifactFactory == null
                 ? null
                 : _createReceiptArtifactVerifier(),
             recovery: _recoveryResultFactory.createFor(_activeSnapshot),
           ),
           DemoSliceRoutes.joinRoute.path: (_) => JoinFlowRoute(
             orchestratorFactory: _joinFlowOrchestratorFactory,
-            inviteContextFactory: widget._joinFlowInviteContextFactory,
+            inviteContextFactory: _runtime.joinFlowInviteContextFactory,
           ),
           DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
             orchestratorFactory: _setupFlowOrchestratorFactory,
-            setupIntentFactory: widget._setupFlowIntentFactory,
+            setupIntentFactory: _runtime.setupFlowIntentFactory,
           ),
         },
         allowedExtraPaths: const <String>{Navigator.defaultRouteName},
@@ -188,7 +242,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   }
 
   DemoReceiptArtifactVerifierFactory get _receiptArtifactVerifierFactory {
-    return widget._receiptArtifactVerifierFactory ??
+    return _runtime.receiptArtifactVerifierFactory ??
         DemoReceiptArtifactVerifierFactory.methodChannel();
   }
 
@@ -201,28 +255,28 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   }
 
   JoinFlowOrchestratorFactory get _joinFlowOrchestratorFactory {
-    return widget._joinFlowOrchestratorFactory ??
+    return _runtime.joinFlowOrchestratorFactory ??
         const DemoJoinFlowOrchestratorFactory().create;
   }
 
   SetupFlowOrchestratorFactory get _setupFlowOrchestratorFactory {
-    return widget._setupFlowOrchestratorFactory ??
+    return _runtime.setupFlowOrchestratorFactory ??
         () => const SetupFlowOrchestrator();
   }
 
   NativeBootstrapCandidateLoaderFactory get _bootstrapCandidateLoaderFactory {
-    return widget._bootstrapCandidateLoaderFactory ??
+    return _runtime.bootstrapCandidateLoaderFactory ??
         NativeBootstrapCandidateLoader.methodChannel;
   }
 
   AppRecoveryPersistenceStoreFactory? get _recoveryPersistenceStoreFactory {
-    return widget._recoveryPersistenceStoreFactory ??
+    return _runtime.recoveryPersistenceStoreFactory ??
         AppRecoveryPersistenceStoreFactory.fromEnvironment();
   }
 
   PeerDealReceipt? _safeReceiptFor(DemoScenarioSnapshot snapshot) {
     try {
-      return (widget._receiptFactory ?? _receiptFor)(snapshot);
+      return (_runtime.receiptFactory ?? _receiptFor)(snapshot);
     } on Object {
       return null;
     }

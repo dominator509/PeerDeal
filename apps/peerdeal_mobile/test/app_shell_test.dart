@@ -265,6 +265,26 @@ void main() {
     expect(find.text('Bootstrap route: lanDirect'), findsOneWidget);
   });
 
+  testWidgets('routes table dependencies through app runtime object', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          bootstrapCandidateLoaderFactory: () => NativeBootstrapCandidateLoader(
+            bridge: const _StaticLocalNetworkBridge(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bootstrap: 2 candidates'), findsOneWidget);
+    expect(find.text('Bootstrap route: lanDirect'), findsOneWidget);
+  });
+
   testWidgets('mounted table fails closed when bootstrap factory throws', (
     tester,
   ) async {

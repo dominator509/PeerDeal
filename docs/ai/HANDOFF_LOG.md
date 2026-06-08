@@ -1237,3 +1237,40 @@ Risks:
 
 Next reviewer:
 Codex should run the full local gate set and commit if green.
+
+---
+
+### 2026-06-08 - Codex - App Runtime Dependency Boundary
+
+Summary:
+Added app-owned runtime dependency objects for the mobile and desktop shells.
+Mounted-route dependencies for receipt presentation/export/verification,
+join/setup orchestration, native bootstrap loading, recovery persistence, and
+table runtime scope can now be supplied as a single app-shell unit while the
+existing per-factory constructor injection remains supported.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- Final production navigation, platform native implementations, and product UI
+  validation remain pending; this only locks the app-shell dependency boundary.
+
+Next reviewer:
+Codex should run focused app shell tests, then the full local gate set, and
+commit if green.
