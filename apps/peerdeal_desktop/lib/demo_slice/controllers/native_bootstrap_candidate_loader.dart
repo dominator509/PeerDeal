@@ -50,6 +50,13 @@ class NativeBootstrapCandidateLoader {
     required String sessionId,
     required String tableId,
   }) async {
+    if (_maxPeerCandidates < 1) {
+      return const NativeBootstrapCandidateLoadResult.unavailable(
+        nativeNotes: 'unavailable',
+        warnings: <String>['Local network peer candidate limit is invalid.'],
+      );
+    }
+
     final LocalNetworkCapability capability;
     try {
       capability = await _bridge.getCapability();
@@ -90,15 +97,6 @@ class NativeBootstrapCandidateLoader {
       if (_hasText(discovery.warning))
         'Local network reported a platform warning.',
     ];
-    if (_maxPeerCandidates < 1) {
-      return NativeBootstrapCandidateLoadResult.unavailable(
-        nativeNotes: _nativeNotes(capability, discovery),
-        warnings: <String>[
-          ...discoveryWarnings,
-          'Local network peer candidate limit is invalid.',
-        ],
-      );
-    }
     if (!discovery.permissionGranted) {
       return NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: _nativeNotes(capability, discovery),

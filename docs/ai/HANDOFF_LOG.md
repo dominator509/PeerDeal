@@ -305,6 +305,43 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Native Bootstrap App Candidate Limit Gate
+
+Summary:
+Hardened mobile and desktop `NativeBootstrapCandidateLoader.load(...)` so an
+invalid app-owned peer candidate limit fails closed before local-network
+capability or discovery lookup. This keeps bad app bootstrap configuration from
+crossing the native bridge while preserving existing discovery normalization and
+candidate bounding.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\native_bootstrap_candidate_loader_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\native_bootstrap_candidate_loader_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This locks app bootstrap configuration validation only; real local-network
+  discovery implementations remain a tracked readiness gap.
+
+Next reviewer:
+- Verify deployed app shells configure a positive peer candidate limit where
+  native bootstrap discovery is enabled.
+
 ### 2026-06-08 - Codex - Native Transport App Payload Limit Gate
 
 Summary:

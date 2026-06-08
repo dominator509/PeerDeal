@@ -109,28 +109,20 @@ void main() {
   test(
     'fails closed when local network peer candidate limit is invalid',
     () async {
+      final bridge = _CountingLocalNetworkBridge();
       final result = await NativeBootstrapCandidateLoader(
-        bridge: const _FakeLocalNetworkBridge(
-          capability: LocalNetworkCapability(
-            discoverySupported: true,
-            permissionPromptSupported: true,
-            broadcastSupported: true,
-            notes: 'local-network-ready',
-          ),
-          discovery: LocalNetworkDiscoverySnapshot(
-            permissionGranted: true,
-            foundEndpoints: <String>['peer-a'],
-            interfaceHints: <String>[],
-          ),
-        ),
+        bridge: bridge,
         maxPeerCandidates: 0,
       ).load(sessionId: 'session-1', tableId: 'table-1');
 
       expect(result.discoveryAvailable, isFalse);
       expect(result.candidates, isEmpty);
+      expect(result.nativeNotes, 'unavailable');
       expect(result.warnings, <String>[
         'Local network peer candidate limit is invalid.',
       ]);
+      expect(bridge.capabilityLookups, 0);
+      expect(bridge.discoveryLookups, 0);
     },
   );
 
@@ -246,6 +238,32 @@ class _ThrowingLocalNetworkBridge implements LocalNetworkBridge {
   @override
   Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
     throw StateError('not reached');
+  }
+}
+
+class _CountingLocalNetworkBridge implements LocalNetworkBridge {
+  int capabilityLookups = 0;
+  int discoveryLookups = 0;
+
+  @override
+  Future<LocalNetworkCapability> getCapability() async {
+    capabilityLookups += 1;
+    return const LocalNetworkCapability(
+      discoverySupported: true,
+      permissionPromptSupported: true,
+      broadcastSupported: true,
+      notes: 'local-network-ready',
+    );
+  }
+
+  @override
+  Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
+    discoveryLookups += 1;
+    return const LocalNetworkDiscoverySnapshot(
+      permissionGranted: true,
+      foundEndpoints: <String>['peer-a'],
+      interfaceHints: <String>[],
+    );
   }
 }
 

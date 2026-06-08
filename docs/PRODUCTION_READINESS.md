@@ -154,6 +154,9 @@ the gates below are satisfied.
   normalized native peer discovery before candidate resolution, warning or
   falling back safely when platform discovery is invalid or exceeds the app
   candidate limit.
+- App-owned local-network bootstrap loaders now fail closed before native
+  capability lookup when the app-owned peer candidate limit is invalid, keeping
+  bad app configuration from reaching local-network platform discovery.
 - App-owned local-network bootstrap loaders now scrub native capability and
   discovery warnings, bound native notes/interface hints, and normalize
   native-discovered endpoint ids before mounted table and join bootstrap paths
