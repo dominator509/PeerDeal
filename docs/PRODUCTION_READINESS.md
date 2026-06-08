@@ -301,6 +301,9 @@ the gates below are satisfied.
 - Mounted join routes now validate app-owned invite contexts before deeper
   orchestration, rejecting blank invite codes and whitespace-only rejoin tokens
   before adapter calls can observe malformed production invite input.
+- App join-flow orchestrators now reject blank or padded invite codes and
+  rejoin tokens before invite resolution or governance commit adapters run, so
+  direct app orchestration cannot bypass route-level invite guards.
 - Wizard Game File compilation now exposes a fail-closed `tryCompile` boundary
   so app/session setup flows can reject invalid setup plans without compiler
   exceptions escaping orchestration.
@@ -461,9 +464,10 @@ the gates below are satisfied.
   injection, canonical app-route
   registry validation, app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
-  app-owned join invite-context injection, app-owned receipt envelope
-  injection, app-owned setup intent injection, app-owned setup identity
-  validation, app-owned transport payload-limit enforcement, app-owned
+  app-owned join invite-context injection, app-owned join input validation,
+  app-owned receipt envelope injection, app-owned setup intent injection,
+  app-owned setup identity validation, app-owned transport payload-limit
+  enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned

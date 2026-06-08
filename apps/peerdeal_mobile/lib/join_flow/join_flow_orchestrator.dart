@@ -37,6 +37,9 @@ class JoinFlowOrchestrator {
   final ProtocolCatalog _protocolCatalog;
 
   Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
+    final invalidContext = await _invalidInviteContextOutcome(context);
+    if (invalidContext != null) return invalidContext;
+
     await _safeEmitState(
       state: JoinFlowState.inviteUnresolved,
       resultCode: 'JOIN_STARTED',
@@ -227,18 +230,13 @@ class JoinFlowOrchestrator {
   }
 
   Future<JoinFlowOutcome> runRejoin(InviteContext context) async {
+    final invalidContext = await _invalidInviteContextOutcome(
+      context,
+      rejoinRequired: true,
+    );
+    if (invalidContext != null) return invalidContext;
+
     final rejoinToken = context.rejoinToken;
-    if (rejoinToken == null || rejoinToken.isEmpty) {
-      await _safeEmitState(
-        state: JoinFlowState.joinRejected,
-        resultCode: 'ERR_REJOIN_TOKEN_REQUIRED',
-      );
-      return const JoinFlowOutcome(
-        state: JoinFlowState.joinRejected,
-        status: JoinDecisionStatus.rejoinRejected,
-        resultCode: 'ERR_REJOIN_TOKEN_REQUIRED',
-      );
-    }
 
     await _safeEmitState(
       state: JoinFlowState.rejoinPending,
@@ -278,7 +276,7 @@ class JoinFlowOrchestrator {
     try {
       commit = await _governanceCommitter.commitRejoin(
         resolvedInvite: resolvedInvite,
-        rejoinToken: rejoinToken,
+        rejoinToken: rejoinToken!,
       );
     } on Object {
       return _adapterFailureOutcome(
@@ -310,6 +308,56 @@ class JoinFlowOrchestrator {
       status: JoinDecisionStatus.okRejoined,
       resultCode: 'OK_REJOINED',
     );
+  }
+
+  Future<JoinFlowOutcome?> _invalidInviteContextOutcome(
+    InviteContext context, {
+    bool rejoinRequired = false,
+  }) async {
+    if (!_isExactNonEmpty(context.inviteCode)) {
+      const resultCode = 'ERR_INVITE_CONTEXT_INVALID';
+      const diagnostics = <ProtocolDiagnostic>[
+        ProtocolDiagnostic(
+          code: resultCode,
+          message: 'Invite context is invalid.',
+        ),
+      ];
+      await _safeEmitState(
+        state: JoinFlowState.joinRejected,
+        resultCode: resultCode,
+        diagnostics: diagnostics,
+        message: 'Invite context is invalid.',
+      );
+      return const JoinFlowOutcome(
+        state: JoinFlowState.joinRejected,
+        status: JoinDecisionStatus.rejected,
+        resultCode: resultCode,
+        diagnostics: diagnostics,
+        message: 'Invite context is invalid.',
+      );
+    }
+
+    final rejoinToken = context.rejoinToken;
+    if (rejoinRequired &&
+        (rejoinToken == null || !_isExactNonEmpty(rejoinToken))) {
+      const resultCode = 'ERR_REJOIN_TOKEN_REQUIRED';
+      await _safeEmitState(
+        state: JoinFlowState.joinRejected,
+        resultCode: resultCode,
+      );
+      return const JoinFlowOutcome(
+        state: JoinFlowState.joinRejected,
+        status: JoinDecisionStatus.rejoinRejected,
+        resultCode: resultCode,
+      );
+    }
+
+    return null;
+  }
+
+  static bool _isExactNonEmpty(String value) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty && trimmed == value;
   }
 
   List<ProtocolDiagnostic> _protocolIncompatibleDiagnostics(

@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Join Input Padding Gate
+
+Summary:
+Hardened mobile and desktop join-flow orchestrators so direct app
+orchestration rejects blank or padded invite codes and rejoin tokens before
+invite resolution or governance commit adapters run. Focused tests prove padded
+values fail closed before throwing invite resolvers are reached.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_orchestrator.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_orchestrator_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_orchestrator.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_orchestrator_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\join_flow\join_flow_orchestrator_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\join_flow\join_flow_orchestrator_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks app-owned join input validation only; final production invite UX
+  and live transport integrations remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Setup Identity Padding Gate
 
 Summary:

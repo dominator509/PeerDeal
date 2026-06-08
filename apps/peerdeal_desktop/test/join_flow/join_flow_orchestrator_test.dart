@@ -196,6 +196,31 @@ void main() {
     expect(sink.log.last, 'joinRejected:ERR_INVITE_RESOLUTION_FAILED');
   });
 
+  test('rejects padded invite context before invite resolution', () async {
+    final sink = RecordingJoinEventSink();
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: _ThrowingInviteResolver(),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(),
+      roleAuthorizer: FakeRoleAuthorizer(),
+      bootstrapCoordinator: FakeBootstrapCoordinator(),
+      governanceCommitter: FakeGovernanceCommitter(),
+      eventSink: sink,
+    );
+
+    final result = await orchestrator.runFirstJoin(
+      const InviteContext(
+        inviteCode: ' ABC123',
+        requestedRole: RequestedRole.player,
+      ),
+    );
+
+    expect(result.state, JoinFlowState.joinRejected);
+    expect(result.status, JoinDecisionStatus.rejected);
+    expect(result.resultCode, 'ERR_INVITE_CONTEXT_INVALID');
+    expect(sink.log.last, 'joinRejected:ERR_INVITE_CONTEXT_INVALID');
+  });
+
   test('preserves adapter failure outcome when event sink throws', () async {
     final orchestrator = JoinFlowOrchestrator(
       inviteResolver: _ThrowingInviteResolver(),
@@ -251,6 +276,32 @@ void main() {
       'message': 'Rejoin commit failed.',
     });
     expect(sink.log.last, 'joinRejected:ERR_REJOIN_COMMIT_FAILED');
+  });
+
+  test('rejects padded rejoin token before invite resolution', () async {
+    final sink = RecordingJoinEventSink();
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: _ThrowingInviteResolver(),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(),
+      roleAuthorizer: FakeRoleAuthorizer(),
+      bootstrapCoordinator: FakeBootstrapCoordinator(),
+      governanceCommitter: FakeGovernanceCommitter(acceptRejoin: true),
+      eventSink: sink,
+    );
+
+    final result = await orchestrator.runRejoin(
+      const InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+        rejoinToken: ' rj_001',
+      ),
+    );
+
+    expect(result.state, JoinFlowState.joinRejected);
+    expect(result.status, JoinDecisionStatus.rejoinRejected);
+    expect(result.resultCode, 'ERR_REJOIN_TOKEN_REQUIRED');
+    expect(sink.log.last, 'joinRejected:ERR_REJOIN_TOKEN_REQUIRED');
   });
 }
 
