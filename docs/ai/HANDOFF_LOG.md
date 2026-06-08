@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Join Bootstrap Provider Fallback
+
+Summary:
+Mobile and desktop app-owned join bootstrap coordinators now convert
+`BootstrapCandidateProvider` failures into relay-only bootstrap plans after
+native discovery succeeds. This aligns join bootstrap with mounted table
+bootstrap behavior and keeps candidate resolution faults from escaping the app
+boundary.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_desktop/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_mobile/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `apps/peerdeal_desktop/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\join_flow\native_join_bootstrap_coordinator_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\join_flow\native_join_bootstrap_coordinator_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This locks app-level fallback behavior only; real native discovery and live
+  transport remain platform implementation gaps.
+
+Next reviewer:
+Verify production candidate providers surface useful scrubbed diagnostics when
+real local-network discovery is wired.
+
+---
+
 ### 2026-06-08 - Codex - Network Validating Receive Boundary
 
 Summary:

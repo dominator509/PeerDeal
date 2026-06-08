@@ -66,15 +66,24 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
       );
     }
 
-    final candidates = await _provider.resolveCandidates(
-      BootstrapResolutionRequest(
-        sessionId: resolvedInvite.sessionId,
-        tableId: resolvedInvite.tableId,
-        preferLan: true,
-        relayAllowed: true,
-        peerIds: peerIds,
-      ),
-    );
+    final List<BootstrapCandidate> candidates;
+    try {
+      candidates = await _provider.resolveCandidates(
+        BootstrapResolutionRequest(
+          sessionId: resolvedInvite.sessionId,
+          tableId: resolvedInvite.tableId,
+          preferLan: true,
+          relayAllowed: true,
+          peerIds: peerIds,
+        ),
+      );
+    } on Object {
+      return const BootstrapPlan(
+        requiresBootstrap: true,
+        peerCandidates: <String>[],
+        relayFallbackAllowed: true,
+      );
+    }
 
     return BootstrapPlan(
       requiresBootstrap: true,

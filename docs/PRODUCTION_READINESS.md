@@ -153,6 +153,9 @@ the gates below are satisfied.
 - App-owned join bootstrap coordinators now fall back before native capability
   lookup when the app-owned peer candidate limit is invalid, keeping bad join
   bootstrap configuration from reaching local-network platform discovery.
+- App-owned join bootstrap coordinators now preserve relay fallback when
+  app/network candidate resolution fails after native discovery, aligning join
+  bootstrap with mounted table bootstrap fail-closed behavior.
 - App-owned local-network bootstrap loaders and join coordinators now bound
   normalized native peer discovery before candidate resolution, warning or
   falling back safely when platform discovery is invalid or exceeds the app
@@ -361,7 +364,8 @@ the gates below are satisfied.
   mapping, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
-  payload gates are locked for those follow-up implementations.
+  payload gates, plus relay fallback on join candidate resolution failure, are
+  locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

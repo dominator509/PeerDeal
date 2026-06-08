@@ -141,7 +141,7 @@ void main() {
     expect(plan.relayFallbackAllowed, isTrue);
   });
 
-  test('lets provider failures reject through join orchestration', () async {
+  test('keeps relay fallback when provider resolution fails', () async {
     final coordinator = NativeJoinBootstrapCoordinator(
       bridge: const _StaticLocalNetworkBridge(
         capability: LocalNetworkCapability(
@@ -159,13 +159,14 @@ void main() {
       provider: _ThrowingBootstrapCandidateProvider(),
     );
 
-    expect(
-      () => coordinator.buildPlan(
-        resolvedInvite: _resolvedInvite,
-        roleGrant: _roleGrant,
-      ),
-      throwsStateError,
+    final plan = await coordinator.buildPlan(
+      resolvedInvite: _resolvedInvite,
+      roleGrant: _roleGrant,
     );
+
+    expect(plan.requiresBootstrap, isTrue);
+    expect(plan.peerCandidates, isEmpty);
+    expect(plan.relayFallbackAllowed, isTrue);
   });
 }
 
