@@ -832,6 +832,53 @@ void main() {
     expect(find.text('Production table route'), findsOneWidget);
   });
 
+  testWidgets('routes production navigation actions through app home', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live table',
+              path: '/table-live',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      find.widgetWithText(PeerDealActionButton, 'Live table'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Live table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Production table route'), findsOneWidget);
+  });
+
+  testWidgets('rejects production navigation for unmounted routes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          productionNavigation: <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(label: 'Missing', path: '/missing'),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
   testWidgets('starts on app-owned production initial route', (tester) async {
     await tester.pumpWidget(
       PeerDealDesktopApp(

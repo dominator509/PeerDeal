@@ -74,9 +74,10 @@ registry at construction time, with `/` allowed only as an explicit framework
 default-route alias. App runtime objects may also provide validated non-demo
 production route maps; `/demo/*` stays reserved for the demo registry.
 Runtime objects may set the initial route only to `/`, an enabled demo route,
-or a validated production route. Production navigation remains app-shell work
-and should replace or extend app routes without moving route policy into shared
-packages.
+or a validated production route. Runtime objects may also expose validated
+production navigation descriptors whose paths must reference mounted production
+routes. Production navigation remains app-shell work and should replace or
+extend app routes without moving route policy into shared packages.
 
 ## Network Transport Boundary
 

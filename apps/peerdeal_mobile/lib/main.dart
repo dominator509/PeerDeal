@@ -27,6 +27,13 @@ typedef DemoReceiptFactory =
     PeerDealReceipt Function(DemoScenarioSnapshot snapshot);
 typedef PeerDealAppRouteMap = Map<String, WidgetBuilder>;
 
+class PeerDealAppNavigationEntry {
+  const PeerDealAppNavigationEntry({required this.label, required this.path});
+
+  final String label;
+  final String path;
+}
+
 void main() {
   runApp(const PeerDealMobileApp());
 }
@@ -49,6 +56,7 @@ class PeerDealMobileRuntime {
     this.tableRuntimeScopeFactory,
     this.enabledDemoRoutePaths,
     this.productionRoutes,
+    this.productionNavigation,
     this.initialRoute,
   });
 
@@ -68,6 +76,7 @@ class PeerDealMobileRuntime {
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
   final Set<String>? enabledDemoRoutePaths;
   final PeerDealAppRouteMap? productionRoutes;
+  final List<PeerDealAppNavigationEntry>? productionNavigation;
   final String? initialRoute;
 
   PeerDealMobileRuntime withOverrides({
@@ -87,6 +96,7 @@ class PeerDealMobileRuntime {
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
+    List<PeerDealAppNavigationEntry>? productionNavigation,
     String? initialRoute,
   }) {
     return PeerDealMobileRuntime(
@@ -120,6 +130,7 @@ class PeerDealMobileRuntime {
       enabledDemoRoutePaths:
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
       productionRoutes: productionRoutes ?? this.productionRoutes,
+      productionNavigation: productionNavigation ?? this.productionNavigation,
       initialRoute: initialRoute ?? this.initialRoute,
     );
   }
@@ -145,6 +156,7 @@ class PeerDealMobileApp extends StatefulWidget {
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
+    List<PeerDealAppNavigationEntry>? productionNavigation,
     String? initialRoute,
   }) : _runtime = runtime,
        _receiptPresenter = presenter,
@@ -163,6 +175,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _tableRuntimeScopeFactory = tableRuntimeScopeFactory,
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
        _productionRoutes = productionRoutes,
+       _productionNavigation = productionNavigation,
        _initialRoute = initialRoute;
 
   final PeerDealMobileRuntime? _runtime;
@@ -182,6 +195,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
   final Set<String>? _enabledDemoRoutePaths;
   final PeerDealAppRouteMap? _productionRoutes;
+  final List<PeerDealAppNavigationEntry>? _productionNavigation;
   final String? _initialRoute;
 
   @override
@@ -213,6 +227,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
       productionRoutes: widget._productionRoutes,
+      productionNavigation: widget._productionNavigation,
       initialRoute: widget._initialRoute,
     );
   }
@@ -236,6 +251,10 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     final productionRoutes = _validatedProductionRoutes(
       _runtime.productionRoutes,
     );
+    final productionNavigation = _validatedProductionNavigation(
+      _runtime.productionNavigation,
+      productionRoutes.keys.toSet(),
+    );
     final initialRoute = _validatedInitialRoute(
       enabledRoutePaths: enabledRoutePaths,
       productionRoutePaths: productionRoutes.keys.toSet(),
@@ -255,8 +274,10 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       },
       routes: DemoSliceRoutes.requireMountedRouteMap(
         <String, WidgetBuilder>{
-          Navigator.defaultRouteName: _buildHome,
-          DemoSliceRoutes.homeRoute.path: _buildHome,
+          Navigator.defaultRouteName: (context) =>
+              _buildHome(context, productionNavigation),
+          DemoSliceRoutes.homeRoute.path: (context) =>
+              _buildHome(context, productionNavigation),
           if (enabledRoutePaths.contains(DemoSliceRoutes.tableRoute.path))
             DemoSliceRoutes.tableRoute.path: (context) => DemoTableRoute(
               snapshot: _activeSnapshot,
@@ -336,20 +357,28 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     );
   }
 
-  Widget _buildHome(BuildContext context) {
+  Widget _buildHome(
+    BuildContext context,
+    List<PeerDealAppNavigationEntry> productionNavigation,
+  ) {
     return DemoHomeScreen(
       controller: _controller,
-      navigationActions:
-          DemoSliceRoutes.enabledPrimaryNavigation(
-                _runtime.enabledDemoRoutePaths,
-              )
-              .map(
-                (route) => DemoHomeNavigationAction(
-                  label: route.label,
-                  onPressed: () => Navigator.of(context).pushNamed(route.path),
-                ),
-              )
-              .toList(growable: false),
+      navigationActions: <DemoHomeNavigationAction>[
+        ...DemoSliceRoutes.enabledPrimaryNavigation(
+          _runtime.enabledDemoRoutePaths,
+        ).map(
+          (route) => DemoHomeNavigationAction(
+            label: route.label,
+            onPressed: () => Navigator.of(context).pushNamed(route.path),
+          ),
+        ),
+        ...productionNavigation.map(
+          (route) => DemoHomeNavigationAction(
+            label: route.label,
+            onPressed: () => Navigator.of(context).pushNamed(route.path),
+          ),
+        ),
+      ],
       onSelectScenario: _selectScenario,
     );
   }
@@ -390,6 +419,35 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     }
 
     return Map<String, WidgetBuilder>.unmodifiable(validated);
+  }
+
+  List<PeerDealAppNavigationEntry> _validatedProductionNavigation(
+    List<PeerDealAppNavigationEntry>? navigation,
+    Set<String> productionRoutePaths,
+  ) {
+    if (navigation == null || navigation.isEmpty) {
+      return const <PeerDealAppNavigationEntry>[];
+    }
+
+    final labels = <String>{};
+    final paths = <String>{};
+    final validated = <PeerDealAppNavigationEntry>[];
+
+    for (final entry in navigation) {
+      final label = entry.label.trim();
+      final path = entry.path.trim();
+      if (label.isEmpty ||
+          label != entry.label ||
+          path != entry.path ||
+          !productionRoutePaths.contains(path) ||
+          !labels.add(label) ||
+          !paths.add(path)) {
+        throw StateError('Production navigation contains invalid metadata.');
+      }
+      validated.add(entry);
+    }
+
+    return List<PeerDealAppNavigationEntry>.unmodifiable(validated);
   }
 
   String _validatedInitialRoute({

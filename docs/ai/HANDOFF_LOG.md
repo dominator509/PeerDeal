@@ -14,6 +14,44 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - App Production Navigation Gate
+
+Summary:
+Added validated app-owned production navigation descriptors to both app runtime
+objects. Mobile and desktop home navigation can now link to mounted non-demo
+production routes, and malformed labels, duplicate metadata, or paths that do
+not reference production routes fail closed before the shell renders.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Runtime callers must mount a production route before advertising it through
+  production navigation descriptors.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - App Initial Route Gate
 
 Summary:
