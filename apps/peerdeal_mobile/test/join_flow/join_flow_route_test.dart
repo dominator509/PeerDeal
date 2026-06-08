@@ -1,13 +1,16 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:peerdeal_mobile/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_route.dart';
 
 void main() {
+  const demoFactory = DemoJoinFlowOrchestratorFactory();
+
   testWidgets('runs first join flow on mount', (tester) async {
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: JoinFlowRoute(),
+        child: JoinFlowRoute(orchestratorFactory: demoFactory.create),
       ),
     );
 
@@ -21,9 +24,9 @@ void main() {
 
   testWidgets('can switch to ack-required and rejoin outcomes', (tester) async {
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: JoinFlowRoute(),
+        child: JoinFlowRoute(orchestratorFactory: demoFactory.create),
       ),
     );
     await tester.pumpAndSettle();
@@ -43,9 +46,9 @@ void main() {
 
   testWidgets('can switch to mounted rejection outcomes', (tester) async {
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: JoinFlowRoute(),
+        child: JoinFlowRoute(orchestratorFactory: demoFactory.create),
       ),
     );
     await tester.pumpAndSettle();

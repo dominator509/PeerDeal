@@ -147,6 +147,24 @@ void main() {
     expect(find.text('Result: OK_JOINED'), findsOneWidget);
   });
 
+  testWidgets('fails closed when app-owned join factory throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        joinFlowOrchestratorFactory: (_) {
+          throw StateError('join flow unavailable');
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_JOIN_FLOW_UNAVAILABLE'), findsOneWidget);
+  });
+
   testWidgets('selected scenario drives mounted demo routes', (tester) async {
     await tester.pumpWidget(const PeerDealMobileApp());
 

@@ -81,3 +81,44 @@ Risks:
 
 Next reviewer:
 Codex should run the full local gate set and commit if green.
+
+---
+
+### 2026-06-08 - Codex - App-Owned Join Factory Boundary
+
+Summary:
+Moved join-flow demo adapter construction out of mounted `JoinFlowRoute` and
+behind app-owned orchestrator factories in both app shells. `JoinFlowRoute` now
+requires an injected factory, and mounted app tests cover fail-closed behavior
+when the app boundary cannot construct a join orchestrator.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/lib/join_flow/demo_join_flow_orchestrator_factory.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/lib/join_flow/demo_join_flow_orchestrator_factory.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/join_flow/join_flow_route_test.dart test/app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/join_flow/join_flow_route_test.dart test/app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- The default factory still uses demo adapters until production invite,
+  transport, disclosure, and governance implementations exist.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.

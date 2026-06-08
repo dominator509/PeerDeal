@@ -152,6 +152,9 @@ the gates below are satisfied.
   orchestrator setup fails before adapter guards can run.
 - Join orchestration now treats event-sink failures as non-decision side-effect
   failures, preserving join/rejection outcomes instead of throwing.
+- Mounted join routes now receive orchestrator factories from the app shell
+  boundary instead of constructing demo adapters inside the route, with
+  fail-closed coverage when factory setup is unavailable.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
 - Receipt export now fails closed to an unavailable artifact when signing or

@@ -14,6 +14,7 @@ import 'demo_slice/screens/demo_chat_screen.dart';
 import 'demo_slice/screens/demo_home_screen.dart';
 import 'demo_slice/screens/demo_receipt_screen.dart';
 import 'demo_slice/screens/demo_table_screen.dart';
+import 'join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'join_flow/join_flow_route.dart';
 
 void main() {
@@ -26,13 +27,16 @@ class PeerDealMobileApp extends StatefulWidget {
     DemoReceiptSurfacePresenter? presenter,
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
+    JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
   }) : _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
-       _receiptExportArtifact = receiptExportArtifact;
+       _receiptExportArtifact = receiptExportArtifact,
+       _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory;
 
   final DemoReceiptSurfacePresenter? _receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? _receiptExportArtifact;
+  final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
 
   @override
   State<PeerDealMobileApp> createState() => _PeerDealMobileAppState();
@@ -94,7 +98,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
               : _createReceiptArtifactVerifier(),
           recovery: _recoveryResultFactory.createFor(_activeSnapshot),
         ),
-        DemoSliceRoutes.join: (_) => const JoinFlowRoute(),
+        DemoSliceRoutes.join: (_) =>
+            JoinFlowRoute(orchestratorFactory: _joinFlowOrchestratorFactory),
       },
     );
   }
@@ -127,5 +132,10 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     } on Object {
       return null;
     }
+  }
+
+  JoinFlowOrchestratorFactory get _joinFlowOrchestratorFactory {
+    return widget._joinFlowOrchestratorFactory ??
+        const DemoJoinFlowOrchestratorFactory().create;
   }
 }

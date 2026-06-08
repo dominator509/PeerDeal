@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
-import 'fakes.dart';
 import 'join_flow_models.dart';
 import 'join_flow_orchestrator.dart';
 
@@ -13,16 +12,18 @@ enum JoinFlowDemoMode {
   rejoin,
 }
 
+typedef JoinFlowOrchestratorFactory =
+    JoinFlowOrchestrator Function(JoinFlowDemoMode mode);
+
 class JoinFlowRoute extends StatefulWidget {
   const JoinFlowRoute({
     super.key,
     this.initialMode = JoinFlowDemoMode.firstJoin,
-    JoinFlowOrchestrator Function(JoinFlowDemoMode mode)? orchestratorFactory,
+    required JoinFlowOrchestratorFactory orchestratorFactory,
   }) : _orchestratorFactory = orchestratorFactory;
 
   final JoinFlowDemoMode initialMode;
-  final JoinFlowOrchestrator Function(JoinFlowDemoMode mode)?
-  _orchestratorFactory;
+  final JoinFlowOrchestratorFactory _orchestratorFactory;
 
   @override
   State<JoinFlowRoute> createState() => _JoinFlowRouteState();
@@ -84,8 +85,7 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
 
   Future<JoinFlowOutcome> _run(JoinFlowDemoMode mode) async {
     try {
-      final orchestrator =
-          widget._orchestratorFactory?.call(mode) ?? _demoOrchestrator(mode);
+      final orchestrator = widget._orchestratorFactory(mode);
       final context = InviteContext(
         inviteCode: 'ABC123',
         requestedRole: RequestedRole.player,
@@ -115,29 +115,6 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
       _mode = mode;
       _outcome = _run(mode);
     });
-  }
-
-  JoinFlowOrchestrator _demoOrchestrator(JoinFlowDemoMode mode) {
-    return JoinFlowOrchestrator(
-      inviteResolver: FakeInviteResolver(
-        protocolVersion: mode == JoinFlowDemoMode.unsupportedProtocol
-            ? '2.0.0'
-            : '1.0.0',
-      ),
-      joinNegotiator: FakeJoinNegotiator(),
-      disclosureCoordinator: FakeDisclosureCoordinator(
-        allAccepted: mode != JoinFlowDemoMode.ackRequired,
-      ),
-      roleAuthorizer: FakeRoleAuthorizer(
-        allow: mode != JoinFlowDemoMode.roleDenied,
-      ),
-      bootstrapCoordinator: FakeBootstrapCoordinator(),
-      governanceCommitter: FakeGovernanceCommitter(
-        acceptJoin: true,
-        acceptRejoin: true,
-      ),
-      eventSink: RecordingJoinEventSink(),
-    );
   }
 }
 
