@@ -13,7 +13,7 @@ packages add policy without mutating universal core truth.
 
 | Layer | Packages / apps | Responsibility |
 | --- | --- | --- |
-| App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, demo slices, app-owned presenters/controllers |
+| App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, setup/join flows, demo slices, app-owned presenters/controllers |
 | Shared UI | `peerdeal_ui_kit` | Safe-surface widgets and render models |
 | Native seams | `peerdeal_native_bridges` | Method-channel contracts for platform facts |
 | Network confidence | `peerdeal_network` | Route class, confidence, primary peer selection |
@@ -74,6 +74,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Replay | `packages/peerdeal_replay/lib/peerdeal_replay.dart` |
 | Sync/recovery | `packages/peerdeal_sync/lib/peerdeal_sync.dart` |
 | Receipts | `packages/peerdeal_receipts/lib/peerdeal_receipts.dart` |
+| Wizard/setup | `packages/peerdeal_wizard/lib/peerdeal_wizard.dart` |
 | Native bridges | `packages/peerdeal_native_bridges/lib/peerdeal_native_bridges.dart` |
 
 ## Persistence
@@ -99,7 +100,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Production transport | Scaffold-level; no live peer transport yet |
 | Platform key storage | Method-channel seam exists; native implementation pending |
 | Persistence | Event-store/snapshot storage not production implemented |
-| App flows | Demo routes exist; production navigation/orchestration remains |
+| App flows | Demo routes plus setup/join orchestration seams exist; production navigation remains |
 | UI polish | Demo UI, not production-polished |
 | Capture blocking | Best-effort policy only; platform limits must be stated honestly |
 

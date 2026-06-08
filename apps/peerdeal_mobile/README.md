@@ -16,4 +16,11 @@ This overlay is meant to sit on top of:
 - packages/peerdeal_sync
 - earlier governance and wizard overlays
 
+Setup flow:
+- `lib/setup_flow/` resolves setup intent through `peerdeal_wizard`, validates
+  the draft, and compiles a Game File with the fail-closed `tryCompile`
+  boundary before app routes can consume it.
+- Setup orchestration returns explicit compiled/rejected outcomes; UI does not
+  own Game File truth or catch compiler exceptions directly.
+
 It does NOT introduce a new top-level package.

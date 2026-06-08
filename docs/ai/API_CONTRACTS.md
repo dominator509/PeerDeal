@@ -49,6 +49,7 @@ Agents should import each package through its barrel file:
 | `peerdeal_receipts` | `package:peerdeal_receipts/peerdeal_receipts.dart` |
 | `peerdeal_privacy` | `package:peerdeal_privacy/peerdeal_privacy.dart` |
 | `peerdeal_capture` | `package:peerdeal_capture/peerdeal_capture.dart` |
+| `peerdeal_wizard` | `package:peerdeal_wizard/peerdeal_wizard.dart` |
 | `peerdeal_ui_kit` | `package:peerdeal_ui_kit/peerdeal_ui_kit.dart` |
 | `peerdeal_native_bridges` | `package:peerdeal_native_bridges/peerdeal_native_bridges.dart` |
 
@@ -64,6 +65,7 @@ Known route categories include:
 - Chat surface.
 - Receipt/recovery surface.
 - Join flow.
+- Setup flow.
 
 TODO: Treat concrete route paths and production navigation as app-shell details
 unless verified from the app route source in the current branch.

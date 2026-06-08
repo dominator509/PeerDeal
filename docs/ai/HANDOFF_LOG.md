@@ -14,6 +14,54 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - App Setup Flow Orchestrator
+
+Summary:
+Added app-owned setup-flow orchestrators in both Flutter shells. The new
+boundary resolves setup intent through `peerdeal_wizard`, validates the draft,
+and compiles the Game File with `tryCompile`, returning explicit
+compiled/rejected outcomes so UI routes do not own setup truth or catch compiler
+exceptions directly.
+
+Files changed:
+- `apps/peerdeal_mobile/pubspec.yaml`
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_models.dart`
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_orchestrator.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_orchestrator_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/pubspec.yaml`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_models.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_orchestrator.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_orchestrator_test.dart`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/setup_flow/setup_flow_orchestrator_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test/setup_flow/setup_flow_orchestrator_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- This is an app-service boundary, not production navigation or UI polish.
+- Native transport, durable persistence, and platform implementations remain
+  tracked readiness gaps.
+
+Next reviewer:
+Continue by mounting setup-flow outcomes in production-oriented app navigation,
+or by implementing platform-native contracts outside this chat environment.
+
+---
+
 ### 2026-06-07 - DeepSeek-Claude + Codex - Docs Bootstrap
 
 Summary:

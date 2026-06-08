@@ -17,6 +17,7 @@ dependencies:
   peerdeal_receipts: ^0.1.0
   peerdeal_sync: ^0.1.0
   peerdeal_ui_kit: ^0.1.0
+  peerdeal_wizard: ^0.1.0
 
 dev_dependencies:
   flutter_test:

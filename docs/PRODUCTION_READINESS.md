@@ -165,6 +165,10 @@ the gates below are satisfied.
 - Wizard Game File compilation now exposes a fail-closed `tryCompile` boundary
   so app/session setup flows can reject invalid setup plans without compiler
   exceptions escaping orchestration.
+- App setup-flow orchestrators now resolve setup intent through
+  `peerdeal_wizard`, validate drafts, and compile Game Files through
+  `tryCompile`, returning explicit compiled/rejected outcomes before UI routes
+  can consume setup results.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
 - Receipt export now fails closed to an unavailable artifact when signing or
