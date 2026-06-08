@@ -97,7 +97,20 @@ class NativeReceiptKeyRingWriter {
   ) {
     if (result.isSuccess) return const ReceiptKeyRingWriteResult.success();
     return ReceiptKeyRingWriteResult.failure(
-      warning: result.warning ?? 'Secure receipt key mutation failed.',
+      warning: _safeNativeWarning(
+        result.warning,
+        fallback: 'Secure receipt key mutation failed.',
+      ),
     );
+  }
+
+  static String _safeNativeWarning(
+    String? warning, {
+    required String fallback,
+  }) {
+    if (warning == null || warning.trim().isEmpty) {
+      return fallback;
+    }
+    return 'Secure receipt key storage reported a platform warning.';
   }
 }

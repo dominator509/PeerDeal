@@ -39,7 +39,7 @@ void main() {
         cipher: HmacSha256ReceiptCipher(keyProvider: keyRing),
       ).inspect(artifact);
 
-    expect(inspection.status, 'ok');
+      expect(inspection.status, 'ok');
       expect(inspection.message, 'Receipt artifact verified.');
     },
   );
@@ -88,7 +88,10 @@ void main() {
     final artifact = await factory.exportSignedEncrypted(_receipt);
 
     expect(artifact.artifactType, 'unavailable');
-    expect(artifact.reason, 'secure storage locked');
+    expect(
+      artifact.reason,
+      'Secure receipt key storage reported a platform warning.',
+    );
     expect(bridge.savedKeys, isEmpty);
   });
 
@@ -103,7 +106,10 @@ void main() {
     final artifact = await factory.exportSignedEncrypted(_receipt);
 
     expect(artifact.artifactType, 'unavailable');
-    expect(artifact.reason, 'secure key save denied');
+    expect(
+      artifact.reason,
+      'Secure receipt key storage reported a platform warning.',
+    );
     expect(bridge.savedKeys.single.key.purpose, 'receipt_signing');
   });
 }

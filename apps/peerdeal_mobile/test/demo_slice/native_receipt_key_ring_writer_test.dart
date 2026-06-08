@@ -71,7 +71,11 @@ void main() {
     );
 
     expect(result.isSuccess, isFalse);
-    expect(result.warning, 'secure storage locked');
+    expect(
+      result.warning,
+      'Secure receipt key storage reported a platform warning.',
+    );
+    expect(result.warning, isNot(contains('locked')));
   });
 
   test('fails closed when native save throws', () async {

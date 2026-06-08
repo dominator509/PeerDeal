@@ -238,6 +238,9 @@ the gates below are satisfied.
   preserving explicit rejected navigation outcomes.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
+- App receipt key-ring loaders, writers, and provisioners now scrub native
+  secure-key storage warning detail before returning app receipt key-ring
+  warnings, while preserving app-generated invalid-request warnings.
 - App receipt key-ring writers now map receipt signing/encryption keys into
   generic native secure-key mutation records, fail closed before invalid
   save/delete requests, and keep receipt semantics out of
@@ -304,8 +307,8 @@ the gates below are satisfied.
   loading, mounted recovery-window loading, app-owned transport payload-limit
   enforcement, bounded app-owned table/join bootstrap mapping, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
-  diagnostics, and method-channel payload gates are locked for those follow-up
-  implementations.
+  diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
+  payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

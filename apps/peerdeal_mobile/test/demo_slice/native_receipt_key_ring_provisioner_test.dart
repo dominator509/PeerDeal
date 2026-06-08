@@ -108,7 +108,9 @@ void main() {
     final result = await provisioner.ensureActiveKeys();
 
     expect(result.isSuccess, isFalse);
-    expect(result.warnings, <String>['secure storage locked']);
+    expect(result.warnings, <String>[
+      'Secure receipt key storage reported a platform warning.',
+    ]);
     expect(result.keysCreated, 0);
     expect(bridge.savedKeys, isEmpty);
   });
@@ -124,7 +126,9 @@ void main() {
     final result = await provisioner.ensureActiveKeys();
 
     expect(result.isSuccess, isFalse);
-    expect(result.warnings, <String>['secure key save denied']);
+    expect(result.warnings, <String>[
+      'Secure receipt key storage reported a platform warning.',
+    ]);
     expect(result.keysCreated, 0);
     expect(bridge.savedKeys.single.key.purpose, 'receipt_signing');
   });

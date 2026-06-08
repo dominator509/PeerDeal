@@ -66,7 +66,10 @@ void main() {
 
     expect(result.hasSigningKey, isFalse);
     expect(result.hasEncryptionKey, isFalse);
-    expect(result.warnings, ['secure storage locked']);
+    expect(result.warnings, [
+      'Secure receipt key storage reported a platform warning.',
+    ]);
+    expect(result.warnings.single, isNot(contains('locked')));
   });
 
   test('fails closed when native secure key storage throws', () async {

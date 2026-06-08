@@ -82,7 +82,9 @@ void main() {
 
     expect(result.status, 'rejected');
     expect(result.message, 'Receipt signing key is unavailable.');
-    expect(result.diagnostics, ['secure storage locked']);
+    expect(result.diagnostics, [
+      'Secure receipt key storage reported a platform warning.',
+    ]);
   });
 }
 

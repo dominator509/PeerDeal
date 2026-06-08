@@ -40,7 +40,10 @@ class NativeReceiptKeyRingLoader {
       return ReceiptKeyRingLoadResult(
         keyRing: const ReceiptKeyRingSnapshot(),
         warnings: <String>[
-          snapshot.warning ?? 'Secure receipt key storage is unavailable.',
+          _safeNativeWarning(
+            snapshot.warning,
+            fallback: 'Secure receipt key storage is unavailable.',
+          ),
         ],
       );
     }
@@ -118,5 +121,15 @@ class NativeReceiptKeyRingLoader {
               ReceiptEncryptionKey(keyId: record.keyId, secret: record.secret),
         )
         .toList(growable: false);
+  }
+
+  static String _safeNativeWarning(
+    String? warning, {
+    required String fallback,
+  }) {
+    if (warning == null || warning.trim().isEmpty) {
+      return fallback;
+    }
+    return 'Secure receipt key storage reported a platform warning.';
   }
 }
