@@ -14,6 +14,56 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Mounted Setup Flow Route
+
+Summary:
+Mounted the setup-flow boundary in both Flutter app shells. Demo home now links
+to a setup route that receives an app-owned `SetupFlowOrchestrator` factory,
+compiles build-ready setup intent through `peerdeal_wizard`, can display
+fail-closed rejected setup outcomes, and returns a rejected unavailable outcome
+when route-level factory construction fails.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_route_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_route_test.dart`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/setup_flow/setup_flow_orchestrator_test.dart test/setup_flow/setup_flow_route_test.dart test/app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/setup_flow/setup_flow_orchestrator_test.dart test/setup_flow/setup_flow_route_test.dart test/app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- This mounts setup orchestration but is still a demo-grade route surface, not
+  final production UX or navigation polish.
+- Native transport, durable persistence, and platform implementations remain
+  tracked readiness gaps.
+
+Next reviewer:
+Continue with another app-flow route mount or with platform implementation
+work outside this chat environment.
+
+---
+
 ### 2026-06-08 - Codex - App Setup Flow Orchestrator
 
 Summary:

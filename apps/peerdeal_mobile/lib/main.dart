@@ -16,6 +16,8 @@ import 'demo_slice/screens/demo_receipt_screen.dart';
 import 'demo_slice/screens/demo_table_screen.dart';
 import 'join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'join_flow/join_flow_route.dart';
+import 'setup_flow/setup_flow_orchestrator.dart';
+import 'setup_flow/setup_flow_route.dart';
 
 void main() {
   runApp(const PeerDealMobileApp());
@@ -28,15 +30,18 @@ class PeerDealMobileApp extends StatefulWidget {
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
+    SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
   }) : _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
-       _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory;
+       _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
+       _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory;
 
   final DemoReceiptSurfacePresenter? _receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? _receiptExportArtifact;
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
+  final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
 
   @override
   State<PeerDealMobileApp> createState() => _PeerDealMobileAppState();
@@ -100,6 +105,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
         ),
         DemoSliceRoutes.join: (_) =>
             JoinFlowRoute(orchestratorFactory: _joinFlowOrchestratorFactory),
+        DemoSliceRoutes.setup: (_) =>
+            SetupFlowRoute(orchestratorFactory: _setupFlowOrchestratorFactory),
       },
     );
   }
@@ -112,6 +119,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       onOpenReceipt: () =>
           Navigator.of(context).pushNamed(DemoSliceRoutes.receipt),
       onOpenJoin: () => Navigator.of(context).pushNamed(DemoSliceRoutes.join),
+      onOpenSetup: () =>
+          Navigator.of(context).pushNamed(DemoSliceRoutes.setup),
       onSelectScenario: _selectScenario,
     );
   }
@@ -137,5 +146,10 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   JoinFlowOrchestratorFactory get _joinFlowOrchestratorFactory {
     return widget._joinFlowOrchestratorFactory ??
         const DemoJoinFlowOrchestratorFactory().create;
+  }
+
+  SetupFlowOrchestratorFactory get _setupFlowOrchestratorFactory {
+    return widget._setupFlowOrchestratorFactory ??
+        () => const SetupFlowOrchestrator();
   }
 }

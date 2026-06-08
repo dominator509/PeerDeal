@@ -147,6 +147,39 @@ void main() {
     expect(find.text('Result: OK_JOINED'), findsOneWidget);
   });
 
+  testWidgets('routes from demo home to setup flow', (tester) async {
+    await tester.pumpWidget(const PeerDealMobileApp());
+
+    await tester.tap(find.text('Setup'));
+    await tester.pump();
+
+    expect(find.text('Loading setup'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Setup flow'), findsOneWidget);
+    expect(find.text('Status: compiled'), findsOneWidget);
+    expect(find.text('Result: OK_GAME_FILE_COMPILED'), findsOneWidget);
+  });
+
+  testWidgets('fails closed when app-owned setup factory throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        setupFlowOrchestratorFactory: () {
+          throw StateError('setup flow unavailable');
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Setup'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_FLOW_UNAVAILABLE'), findsOneWidget);
+  });
+
   testWidgets('fails closed when app-owned join factory throws', (
     tester,
   ) async {

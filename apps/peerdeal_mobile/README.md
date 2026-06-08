@@ -22,5 +22,7 @@ Setup flow:
   boundary before app routes can consume it.
 - Setup orchestration returns explicit compiled/rejected outcomes; UI does not
   own Game File truth or catch compiler exceptions directly.
+- The mounted setup route receives an app-owned orchestrator factory and fails
+  closed when setup orchestration is unavailable.
 
 It does NOT introduce a new top-level package.

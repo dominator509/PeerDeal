@@ -169,6 +169,9 @@ the gates below are satisfied.
   `peerdeal_wizard`, validate drafts, and compile Game Files through
   `tryCompile`, returning explicit compiled/rejected outcomes before UI routes
   can consume setup results.
+- Mounted app setup routes now receive app-owned setup orchestrator factories,
+  expose compiled/rejected setup outcomes through navigation, and fail closed
+  when route-level setup orchestration is unavailable.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
 - Receipt export now fails closed to an unavailable artifact when signing or
