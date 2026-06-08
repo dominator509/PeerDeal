@@ -48,6 +48,39 @@ void main() {
     expect(() => validated['/demo/other'] = 1, throwsUnsupportedError);
   });
 
+  test('route map validation locks canonical route registry metadata', () {
+    final validated = DemoSliceRoutes.requireMountedRouteMap(<String, int>{
+      for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,
+    });
+
+    expect(validated, hasLength(DemoSliceRoutes.mountedRoutes.length));
+    expect(DemoSliceRoutes.mountedRoutes.first.path, DemoSliceRoutes.home);
+    expect(
+      DemoSliceRoutes.mountedRoutes.map((route) => route.path),
+      everyElement(
+        allOf(
+          startsWith('/demo'),
+          isNot(contains('?')),
+          isNot(contains('#')),
+          isNot(contains('//')),
+        ),
+      ),
+    );
+    expect(
+      DemoSliceRoutes.mountedRoutes
+          .where(
+            (route) =>
+                route.label.trim().isEmpty || route.surface.trim().isEmpty,
+          )
+          .toList(),
+      isEmpty,
+    );
+    expect(
+      DemoSliceRoutes.primaryNavigation.map((route) => route.path),
+      isNot(contains(DemoSliceRoutes.home)),
+    );
+  });
+
   test('route map validation rejects missing mounted routes', () {
     final routes = <String, int>{
       for (final route in DemoSliceRoutes.mountedRoutes)

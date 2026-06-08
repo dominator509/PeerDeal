@@ -183,6 +183,10 @@ the gates below are satisfied.
 - App shells now expose app-owned route registries with stable mounted route
   descriptors and primary-navigation definitions, and home navigation is driven
   from those descriptors instead of scattered route labels.
+- App route registries now validate canonical mounted route metadata before
+  route maps are exposed, rejecting non-demo paths, query/fragment-bearing
+  paths, empty labels/surfaces, duplicate metadata, or primary navigation that
+  references home/unmounted routes.
 - App shell mounted route maps now validate against the app-owned route
   registries at construction time, allowing only the explicit framework default
   route alias so mounted navigation cannot silently drift from the registry.
@@ -304,11 +308,12 @@ the gates below are satisfied.
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
-  loading, mounted recovery-window loading, app-owned transport payload-limit
-  enforcement, bounded app-owned table/join bootstrap mapping, app-owned
-  local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
-  diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
-  payload gates are locked for those follow-up implementations.
+  loading, mounted recovery-window loading, canonical app-route registry
+  validation, app-owned transport payload-limit enforcement, bounded app-owned
+  table/join bootstrap mapping, app-owned local-network/transport/capture
+  diagnostic scrubbing, scrubbed route-failure diagnostics, scrubbed receipt
+  secure-key diagnostics, and method-channel payload gates are locked for those
+  follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

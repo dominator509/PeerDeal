@@ -65,6 +65,8 @@ class DemoSliceRoutes {
     Map<String, T> routes, {
     Set<String> allowedExtraPaths = const <String>{},
   }) {
+    _validateRouteRegistry();
+
     final mountedPaths = mountedRoutes.map((route) => route.path).toSet();
     final routePaths = routes.keys.toSet();
     final missingPaths = mountedPaths.difference(routePaths).toList()..sort();
@@ -84,6 +86,53 @@ class DemoSliceRoutes {
     }
 
     return Map<String, T>.unmodifiable(routes);
+  }
+
+  static void _validateRouteRegistry() {
+    final registryError = _routeRegistryError();
+    if (registryError != null) {
+      throw StateError(registryError);
+    }
+  }
+
+  static String? _routeRegistryError() {
+    if (mountedRoutes.isEmpty || mountedRoutes.first.path != home) {
+      return 'Mounted demo route registry must start with the home route.';
+    }
+
+    final mountedPaths = <String>{};
+    final labels = <String>{};
+    final surfaces = <String>{};
+    for (final route in mountedRoutes) {
+      final path = route.path;
+      if (!_isCanonicalMountedPath(path)) {
+        return 'Mounted demo route registry contains a non-canonical path.';
+      }
+      if (route.label.trim().isEmpty || route.surface.trim().isEmpty) {
+        return 'Mounted demo route registry contains empty route metadata.';
+      }
+      if (!mountedPaths.add(path) ||
+          !labels.add(route.label) ||
+          !surfaces.add(route.surface)) {
+        return 'Mounted demo route registry contains duplicate metadata.';
+      }
+    }
+
+    for (final route in primaryNavigation) {
+      if (route.path == home || !mountedPaths.contains(route.path)) {
+        return 'Primary demo navigation must reference mounted non-home routes.';
+      }
+    }
+
+    return null;
+  }
+
+  static bool _isCanonicalMountedPath(String path) {
+    return path.startsWith('/demo') &&
+        !path.endsWith('/') &&
+        !path.contains('?') &&
+        !path.contains('#') &&
+        !path.contains('//');
   }
 }
 
