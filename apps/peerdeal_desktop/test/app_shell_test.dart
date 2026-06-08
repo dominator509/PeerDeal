@@ -832,6 +832,36 @@ void main() {
     expect(find.text('Production table route'), findsOneWidget);
   });
 
+  testWidgets('starts on app-owned production initial route', (tester) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          initialRoute: '/table-live',
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Production table route'), findsOneWidget);
+    expect(find.text('PeerDeal demo'), findsNothing);
+  });
+
+  testWidgets('rejects initial routes that are not mounted', (tester) async {
+    await tester.pumpWidget(
+      const PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: <String>{DemoSliceRoutes.home},
+          initialRoute: DemoSliceRoutes.receipt,
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
   testWidgets('rejects production routes that collide with demo namespace', (
     tester,
   ) async {

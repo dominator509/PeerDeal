@@ -406,6 +406,10 @@ the gates below are satisfied.
   mobile and desktop runtime objects, reserving `/demo/*` for the demo registry
   while allowing non-demo flows to mount without editing shared package or demo
   route policy.
+- App shells now accept a validated app-owned initial route through the mobile
+  and desktop runtime objects, so production callers can boot directly into a
+  mounted non-demo route while disabled or malformed startup routes fail closed
+  before app construction reaches `WidgetsApp`.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -421,9 +425,10 @@ the gates below are satisfied.
   loading, mounted recovery-window loading, app-owned route runtime dependency
   grouping, app-owned table runtime-scope injection, canonical app-route
   registry validation, app-owned production route-map extension, app-owned
-  join invite-context injection, app-owned receipt envelope injection,
-  app-owned setup intent injection, app-owned transport payload-limit
-  enforcement, bounded app-owned table/join bootstrap mapping, app-owned
+  startup route selection, app-owned join invite-context injection, app-owned
+  receipt envelope injection, app-owned setup intent injection, app-owned
+  transport payload-limit enforcement, bounded app-owned table/join bootstrap
+  mapping, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are

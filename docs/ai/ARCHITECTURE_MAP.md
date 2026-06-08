@@ -106,7 +106,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Production transport | Native transport method-channel seam, app-owned capability-gated transport adapters/factories, payload-limit enforcement, and network frame gates exist; no live peer transport implementation yet |
 | Platform key storage | Method-channel read/write seams plus app-owned receipt key provisioning, export, and verification mapping exist; native implementation pending |
 | Persistence | Canonical recovery-window file store, app-owned store factories, environment-configured recovery roots, and mounted recovery-window loading exist; production database/platform persistence not implemented |
-| App flows | Demo routes plus mounted setup/join orchestration seams, bounded mounted table/join native bootstrap mapping, mounted receipt export/verify wiring, app-owned route registries, enabled demo-route gates, validated app-owned production route maps, and unknown-route fallback exist; production navigation polish remains |
+| App flows | Demo routes plus mounted setup/join orchestration seams, bounded mounted table/join native bootstrap mapping, mounted receipt export/verify wiring, app-owned route registries, enabled demo-route gates, validated app-owned production route maps, validated app-owned initial routes, and unknown-route fallback exist; production navigation polish remains |
 | UI polish | Shared app-shell scaffold/action/status/info primitives exist and mounted home/table/chat/receipt/join/setup/fallback routes consume them; final production UI validation remains |
 | Capture blocking | Best-effort policy only; platform limits must be stated honestly |
 

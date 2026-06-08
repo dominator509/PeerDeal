@@ -49,6 +49,7 @@ class PeerDealDesktopRuntime {
     this.tableRuntimeScopeFactory,
     this.enabledDemoRoutePaths,
     this.productionRoutes,
+    this.initialRoute,
   });
 
   final DemoReceiptSurfacePresenter? receiptPresenter;
@@ -67,6 +68,7 @@ class PeerDealDesktopRuntime {
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
   final Set<String>? enabledDemoRoutePaths;
   final PeerDealAppRouteMap? productionRoutes;
+  final String? initialRoute;
 
   PeerDealDesktopRuntime withOverrides({
     DemoReceiptSurfacePresenter? receiptPresenter,
@@ -85,6 +87,7 @@ class PeerDealDesktopRuntime {
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
+    String? initialRoute,
   }) {
     return PeerDealDesktopRuntime(
       receiptPresenter: receiptPresenter ?? this.receiptPresenter,
@@ -117,6 +120,7 @@ class PeerDealDesktopRuntime {
       enabledDemoRoutePaths:
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
       productionRoutes: productionRoutes ?? this.productionRoutes,
+      initialRoute: initialRoute ?? this.initialRoute,
     );
   }
 }
@@ -141,6 +145,7 @@ class PeerDealDesktopApp extends StatefulWidget {
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
+    String? initialRoute,
   }) : _runtime = runtime,
        _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
@@ -157,7 +162,8 @@ class PeerDealDesktopApp extends StatefulWidget {
        _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory,
        _tableRuntimeScopeFactory = tableRuntimeScopeFactory,
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
-       _productionRoutes = productionRoutes;
+       _productionRoutes = productionRoutes,
+       _initialRoute = initialRoute;
 
   final PeerDealDesktopRuntime? _runtime;
   final DemoReceiptSurfacePresenter? _receiptPresenter;
@@ -176,6 +182,7 @@ class PeerDealDesktopApp extends StatefulWidget {
   final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
   final Set<String>? _enabledDemoRoutePaths;
   final PeerDealAppRouteMap? _productionRoutes;
+  final String? _initialRoute;
 
   @override
   State<PeerDealDesktopApp> createState() => _PeerDealDesktopAppState();
@@ -206,6 +213,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
       productionRoutes: widget._productionRoutes,
+      initialRoute: widget._initialRoute,
     );
   }
 
@@ -228,10 +236,15 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     final productionRoutes = _validatedProductionRoutes(
       _runtime.productionRoutes,
     );
+    final initialRoute = _validatedInitialRoute(
+      enabledRoutePaths: enabledRoutePaths,
+      productionRoutePaths: productionRoutes.keys.toSet(),
+      initialRoute: _runtime.initialRoute,
+    );
     return WidgetsApp(
       title: 'PeerDeal Desktop',
       color: const Color(0xFF1B5E20),
-      initialRoute: DemoSliceRoutes.home,
+      initialRoute: initialRoute,
       pageRouteBuilder: <T>(settings, builder) {
         return PageRouteBuilder<T>(
           settings: settings,
@@ -377,6 +390,27 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     }
 
     return Map<String, WidgetBuilder>.unmodifiable(validated);
+  }
+
+  String _validatedInitialRoute({
+    required Set<String> enabledRoutePaths,
+    required Set<String> productionRoutePaths,
+    required String? initialRoute,
+  }) {
+    final route = initialRoute ?? DemoSliceRoutes.home;
+    if (route.trim() != route ||
+        route.isEmpty ||
+        route.contains('?') ||
+        route.contains('#') ||
+        route.contains('//')) {
+      throw StateError('Initial app route is invalid.');
+    }
+    if (route == Navigator.defaultRouteName ||
+        enabledRoutePaths.contains(route) ||
+        productionRoutePaths.contains(route)) {
+      return route;
+    }
+    throw StateError('Initial app route is not mounted.');
   }
 
   DemoReceiptArtifactVerifierFactory get _receiptArtifactVerifierFactory {
