@@ -16,6 +16,15 @@ class SetupFlowOrchestrator {
     required SetupIntent intent,
     List<PresetLayer> presetLayers = const <PresetLayer>[],
   }) {
+    final intentErrors = _setupIntentErrors(intent);
+    if (intentErrors.isNotEmpty) {
+      return SetupFlowOutcome(
+        status: SetupFlowStatus.rejected,
+        resultCode: 'ERR_SETUP_INTENT_INVALID',
+        errors: intentErrors,
+      );
+    }
+
     try {
       final draft = _presetResolver.resolveIntent(
         intent: intent,
@@ -48,5 +57,17 @@ class SetupFlowOrchestrator {
         errors: <String>['setup_flow_failed'],
       );
     }
+  }
+
+  List<String> _setupIntentErrors(SetupIntent intent) {
+    final errors = <String>[];
+    if (intent.intentId.trim().isEmpty) {
+      errors.add('setup_intent_id_missing');
+    }
+    if (intent.hostPseudonymousId.trim().isEmpty) {
+      errors.add('setup_host_missing');
+    }
+
+    return List<String>.unmodifiable(errors);
   }
 }

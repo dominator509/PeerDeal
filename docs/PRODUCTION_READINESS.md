@@ -281,6 +281,9 @@ the gates below are satisfied.
   so production setup sources can feed `peerdeal_wizard` through the app shell
   boundary instead of leaving hardcoded demo setup intent inside the route; the
   route fails closed when intent construction is unavailable.
+- App setup-flow orchestrators now reject blank setup intent and host
+  pseudonymous identities before wizard resolution, so malformed production
+  setup sources cannot emit blank plan ids or reach compiler dependencies.
 - App shells now fail closed for unknown route names with an explicit rejected
   route-unavailable surface instead of relying on default framework route
   errors.

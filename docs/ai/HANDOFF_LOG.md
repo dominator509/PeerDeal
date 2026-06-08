@@ -14,6 +14,50 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Setup Intent Identity Gate
+
+Summary:
+Hardened app setup-flow orchestration in both Flutter shells so malformed
+app-owned setup identities fail closed before `peerdeal_wizard` resolution.
+Blank setup intent ids and host pseudonymous ids now produce an explicit
+`ERR_SETUP_INTENT_INVALID` outcome, and mounted setup routes surface that
+rejection for injected production setup intent sources.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_orchestrator.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_orchestrator_test.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_orchestrator.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_orchestrator_test.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test\setup_flow\setup_flow_orchestrator_test.dart` in
+  `apps/peerdeal_mobile`
+- `dart test test\setup_flow\setup_flow_orchestrator_test.dart` in
+  `apps/peerdeal_desktop`
+- `flutter test --no-pub test\setup_flow\setup_flow_route_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\setup_flow\setup_flow_route_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- This is app-boundary validation only. The wizard still treats setup intent
+  identity as caller-owned structured input.
+
+Next reviewer:
+Continue with the next production-readiness app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Join Invite Context Gate
 
 Summary:
