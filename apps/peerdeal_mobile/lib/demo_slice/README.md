@@ -40,3 +40,8 @@ order is native local-network bridge -> normalized discovery snapshot ->
 `peerdeal_network` bootstrap candidate provider -> mounted table route ->
 render-only table screen. The native bridge stays generic and does not own
 table, invite, or session policy.
+
+Join-flow bootstrap planning follows the same boundary rule through the
+app-owned `NativeJoinBootstrapCoordinator`: native local-network bridge ->
+normalized discovery -> `peerdeal_network` bootstrap candidates -> join
+`BootstrapPlan`.

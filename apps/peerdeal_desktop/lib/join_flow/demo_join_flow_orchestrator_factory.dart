@@ -1,9 +1,15 @@
 import 'fakes.dart';
+import 'join_flow_adapters.dart';
 import 'join_flow_orchestrator.dart';
 import 'join_flow_route.dart';
+import 'native_join_bootstrap_coordinator.dart';
 
 class DemoJoinFlowOrchestratorFactory {
-  const DemoJoinFlowOrchestratorFactory();
+  const DemoJoinFlowOrchestratorFactory({
+    BootstrapCoordinator? bootstrapCoordinator,
+  }) : _bootstrapCoordinator = bootstrapCoordinator;
+
+  final BootstrapCoordinator? _bootstrapCoordinator;
 
   JoinFlowOrchestrator create(JoinFlowDemoMode mode) {
     return JoinFlowOrchestrator(
@@ -19,7 +25,9 @@ class DemoJoinFlowOrchestratorFactory {
       roleAuthorizer: FakeRoleAuthorizer(
         allow: mode != JoinFlowDemoMode.roleDenied,
       ),
-      bootstrapCoordinator: FakeBootstrapCoordinator(),
+      bootstrapCoordinator:
+          _bootstrapCoordinator ??
+          NativeJoinBootstrapCoordinator.methodChannel(),
       governanceCommitter: FakeGovernanceCommitter(
         acceptJoin: true,
         acceptRejoin: true,

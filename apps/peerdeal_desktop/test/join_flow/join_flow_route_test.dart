@@ -1,10 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_desktop/join_flow/demo_join_flow_orchestrator_factory.dart';
+import 'package:peerdeal_desktop/join_flow/fakes.dart';
 import 'package:peerdeal_desktop/join_flow/join_flow_route.dart';
 
 void main() {
-  const demoFactory = DemoJoinFlowOrchestratorFactory();
+  final demoFactory = DemoJoinFlowOrchestratorFactory(
+    bootstrapCoordinator: FakeBootstrapCoordinator(),
+  );
 
   testWidgets('runs first join flow on mount', (tester) async {
     await tester.pumpWidget(

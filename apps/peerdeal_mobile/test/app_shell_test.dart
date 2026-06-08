@@ -4,6 +4,8 @@ import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_ver
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_bootstrap_candidate_loader.dart';
+import 'package:peerdeal_mobile/join_flow/demo_join_flow_orchestrator_factory.dart';
+import 'package:peerdeal_mobile/join_flow/fakes.dart';
 import 'package:peerdeal_mobile/main.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -12,7 +14,13 @@ import '../../../tools/test_helpers/demo_receipt_route_test_support.dart';
 
 void main() {
   testWidgets('mounts demo home instead of placeholder root', (tester) async {
-    await tester.pumpWidget(const PeerDealMobileApp());
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+          bootstrapCoordinator: FakeBootstrapCoordinator(),
+        ).create,
+      ),
+    );
 
     expect(find.byType(Placeholder), findsNothing);
     expect(find.text('PeerDeal demo'), findsOneWidget);
@@ -176,7 +184,13 @@ void main() {
   });
 
   testWidgets('routes from demo home to join flow', (tester) async {
-    await tester.pumpWidget(const PeerDealMobileApp());
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+          bootstrapCoordinator: FakeBootstrapCoordinator(),
+        ).create,
+      ),
+    );
 
     await tester.tap(find.text('Join'));
     await tester.pump();

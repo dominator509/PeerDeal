@@ -305,6 +305,45 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Native Join Bootstrap Coordinator
+
+Summary:
+Added app-owned `NativeJoinBootstrapCoordinator` implementations in mobile and
+desktop. The mounted demo join factory now uses this coordinator by default
+instead of hard-coded fake peer candidates. The coordinator reads generic
+native local-network facts, normalizes endpoint strings, delegates candidate
+resolution to `peerdeal_network`, and emits join `BootstrapPlan` inputs with
+relay fallback preserved when local discovery is unavailable.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_mobile/lib/join_flow/demo_join_flow_orchestrator_factory.dart`
+- `apps/peerdeal_mobile/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/README.md`
+- `apps/peerdeal_desktop/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_desktop/lib/join_flow/demo_join_flow_orchestrator_factory.dart`
+- `apps/peerdeal_desktop/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/join_flow/native_join_bootstrap_coordinator_test.dart test/join_flow/join_flow_orchestrator_test.dart test/app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/join_flow/native_join_bootstrap_coordinator_test.dart test/join_flow/join_flow_orchestrator_test.dart test/app_shell_test.dart` in `apps/peerdeal_desktop`
+
+Remaining gaps:
+- Real native local-network discovery and production transport remain pending
+  platform work. This slice removes fake join bootstrap candidates from the
+  default app factory but does not implement live transport.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App Local-Network Bootstrap Boundary
 
 Summary:

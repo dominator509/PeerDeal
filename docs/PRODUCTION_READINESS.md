@@ -117,6 +117,10 @@ the gates below are satisfied.
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
   native capability, discovery, factory construction, or candidate resolution
   is unavailable.
+- Mounted join-flow factories now use an app-owned native bootstrap coordinator
+  instead of hard-coded fake peer candidates, mapping normalized local-network
+  discovery into join `BootstrapPlan` inputs while preserving relay fallback
+  when local discovery is unavailable.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.
@@ -214,8 +218,9 @@ the gates below are satisfied.
   discovery, production transport, durable persistence, and polished app UI
   cannot be completed inside the current ChatGPT project environment because
   they require native platform implementations and device/OS integration. The
-  Dart contracts, recovery persistence seam, app-owned bootstrap mapping, and
-  method-channel payload gates are locked for those follow-up implementations.
+  Dart contracts, recovery persistence seam, app-owned table/join bootstrap
+  mapping, and method-channel payload gates are locked for those follow-up
+  implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
