@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
 
+import '../../recovery/app_recovery_persistence_store_factory.dart';
 import '../controllers/demo_network_confidence_presenter.dart';
 import '../controllers/native_bootstrap_candidate_loader.dart';
 import '../models/demo_scenario_snapshot.dart';
@@ -11,6 +13,7 @@ class DemoTableRoute extends StatefulWidget {
     required this.snapshot,
     required this.networkConfidence,
     required this.bootstrapCandidateLoaderFactory,
+    this.recoveryPersistenceStoreFactory,
     required this.onOpenChat,
     required this.onOpenReceipt,
   });
@@ -18,6 +21,7 @@ class DemoTableRoute extends StatefulWidget {
   final DemoScenarioSnapshot snapshot;
   final DemoNetworkConfidenceVm networkConfidence;
   final NativeBootstrapCandidateLoaderFactory bootstrapCandidateLoaderFactory;
+  final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
   final VoidCallback onOpenChat;
   final VoidCallback onOpenReceipt;
 
@@ -27,18 +31,27 @@ class DemoTableRoute extends StatefulWidget {
 
 class _DemoTableRouteState extends State<DemoTableRoute> {
   late Future<NativeBootstrapCandidateLoadResult> _bootstrapFuture;
+  late Future<DemoRecoveryPersistenceLoadResult> _recoveryPersistenceFuture;
 
   @override
   void initState() {
     super.initState();
     _bootstrapFuture = _loadBootstrapCandidates();
+    _recoveryPersistenceFuture = _loadRecoveryPersistence();
   }
 
   @override
   void didUpdateWidget(DemoTableRoute oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.snapshot.scenarioId != widget.snapshot.scenarioId) {
+    if (oldWidget.snapshot.scenarioId != widget.snapshot.scenarioId ||
+        oldWidget.bootstrapCandidateLoaderFactory !=
+            widget.bootstrapCandidateLoaderFactory) {
       _bootstrapFuture = _loadBootstrapCandidates();
+    }
+    if (oldWidget.snapshot.scenarioId != widget.snapshot.scenarioId ||
+        oldWidget.recoveryPersistenceStoreFactory !=
+            widget.recoveryPersistenceStoreFactory) {
+      _recoveryPersistenceFuture = _loadRecoveryPersistence();
     }
   }
 
@@ -47,13 +60,22 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
     return FutureBuilder<NativeBootstrapCandidateLoadResult>(
       future: _bootstrapFuture,
       builder: (context, bootstrap) {
-        return DemoTableScreen(
-          snapshot: widget.snapshot,
-          networkConfidence: widget.networkConfidence,
-          bootstrap: bootstrap.data,
-          bootstrapLoading: bootstrap.connectionState != ConnectionState.done,
-          onOpenChat: widget.onOpenChat,
-          onOpenReceipt: widget.onOpenReceipt,
+        return FutureBuilder<DemoRecoveryPersistenceLoadResult>(
+          future: _recoveryPersistenceFuture,
+          builder: (context, recoveryPersistence) {
+            return DemoTableScreen(
+              snapshot: widget.snapshot,
+              networkConfidence: widget.networkConfidence,
+              bootstrap: bootstrap.data,
+              bootstrapLoading:
+                  bootstrap.connectionState != ConnectionState.done,
+              recoveryPersistence: recoveryPersistence.data,
+              recoveryPersistenceLoading:
+                  recoveryPersistence.connectionState != ConnectionState.done,
+              onOpenChat: widget.onOpenChat,
+              onOpenReceipt: widget.onOpenReceipt,
+            );
+          },
         );
       },
     );
@@ -72,6 +94,42 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
       );
     }
   }
+
+  Future<DemoRecoveryPersistenceLoadResult> _loadRecoveryPersistence() async {
+    final factory = widget.recoveryPersistenceStoreFactory;
+    if (factory == null) {
+      return const DemoRecoveryPersistenceLoadResult.unavailable(
+        warnings: <String>['Recovery persistence store factory unavailable.'],
+      );
+    }
+
+    try {
+      final result = factory.create();
+      final store = result.store;
+      if (store == null) {
+        return DemoRecoveryPersistenceLoadResult.unavailable(
+          warnings: result.warnings,
+        );
+      }
+
+      final window = store.loadWindow(
+        RecoveryPersistenceScope(
+          tableId: widget.snapshot.scenarioId,
+          sessionId: 'demo:${widget.snapshot.scenarioId}',
+          protocolVersion: '1.x',
+        ),
+      );
+      return DemoRecoveryPersistenceLoadResult.available(
+        persistedEventCount: window.events.length,
+        hasSnapshot: window.snapshot != null,
+        warnings: result.warnings,
+      );
+    } on Object {
+      return const DemoRecoveryPersistenceLoadResult.unavailable(
+        warnings: <String>['Recovery persistence window unavailable.'],
+      );
+    }
+  }
 }
 
 class DemoTableScreen extends StatelessWidget {
@@ -81,6 +139,8 @@ class DemoTableScreen extends StatelessWidget {
     required this.networkConfidence,
     this.bootstrap,
     this.bootstrapLoading = false,
+    this.recoveryPersistence,
+    this.recoveryPersistenceLoading = false,
     required this.onOpenChat,
     required this.onOpenReceipt,
   });
@@ -89,6 +149,8 @@ class DemoTableScreen extends StatelessWidget {
   final DemoNetworkConfidenceVm networkConfidence;
   final NativeBootstrapCandidateLoadResult? bootstrap;
   final bool bootstrapLoading;
+  final DemoRecoveryPersistenceLoadResult? recoveryPersistence;
+  final bool recoveryPersistenceLoading;
   final VoidCallback onOpenChat;
   final VoidCallback onOpenReceipt;
 
@@ -119,6 +181,22 @@ class DemoTableScreen extends StatelessWidget {
             ),
           if (bootstrap != null && bootstrap!.warnings.isNotEmpty)
             Text('Bootstrap warning: ${bootstrap!.warnings.first}'),
+          if (recoveryPersistenceLoading)
+            const Text('Recovery persistence: loading')
+          else if (recoveryPersistence == null ||
+              !recoveryPersistence!.isAvailable)
+            const Text('Recovery persistence: unavailable')
+          else
+            Text(
+              'Recovery persistence: '
+              '${recoveryPersistence!.persistedEventCount} events',
+            ),
+          if (recoveryPersistence != null &&
+              recoveryPersistence!.warnings.isNotEmpty)
+            Text(
+              'Recovery persistence warning: '
+              '${recoveryPersistence!.warnings.first}',
+            ),
           Text('Receipt: ${snapshot.receipt.verificationState}'),
           _DemoRouteAction(label: 'Chat', onTap: onOpenChat),
           _DemoRouteAction(label: 'Receipt', onTap: onOpenReceipt),
@@ -126,6 +204,24 @@ class DemoTableScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class DemoRecoveryPersistenceLoadResult {
+  const DemoRecoveryPersistenceLoadResult.available({
+    required this.persistedEventCount,
+    required this.hasSnapshot,
+    this.warnings = const <String>[],
+  }) : isAvailable = true;
+
+  const DemoRecoveryPersistenceLoadResult.unavailable({required this.warnings})
+    : isAvailable = false,
+      persistedEventCount = 0,
+      hasSnapshot = false;
+
+  final bool isAvailable;
+  final int persistedEventCount;
+  final bool hasSnapshot;
+  final List<String> warnings;
 }
 
 class _DemoRouteAction extends StatelessWidget {

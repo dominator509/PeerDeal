@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_artifact_verifier.dart';
@@ -11,8 +13,11 @@ import 'package:peerdeal_desktop/demo_slice/controllers/native_receipt_key_ring_
 import 'package:peerdeal_desktop/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_desktop/join_flow/fakes.dart';
 import 'package:peerdeal_desktop/main.dart';
+import 'package:peerdeal_desktop/recovery/app_recovery_persistence_store_factory.dart';
 import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 import '../../../tools/test_helpers/demo_receipt_route_test_support.dart';
 
@@ -223,6 +228,61 @@ void main() {
     );
   });
 
+  testWidgets('mounted table fails closed without recovery persistence root', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const PeerDealDesktopApp());
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Recovery persistence: unavailable'), findsOneWidget);
+    expect(
+      find.text(
+        'Recovery persistence warning: '
+        'Recovery persistence store factory unavailable.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('mounted table loads app-provided recovery persistence window', (
+    tester,
+  ) async {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_desktop_mounted_recovery_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+    final factory = AppRecoveryPersistenceStoreFactory(
+      rootDirectoryFactory: () => directory,
+    );
+    final store = factory.create().store!;
+    final append = store.appendEvents(
+      scope: const RecoveryPersistenceScope(
+        tableId: 'open_table_live_turn',
+        sessionId: 'demo:open_table_live_turn',
+        protocolVersion: '1.x',
+      ),
+      events: <EventEnvelope>[
+        _recoveryEvent(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+      ],
+    );
+    expect(append.isSuccess, isTrue);
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(recoveryPersistenceStoreFactory: factory),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Recovery persistence: 1 events'), findsOneWidget);
+  });
+
   testWidgets('routes from demo home to join flow', (tester) async {
     await tester.pumpWidget(
       PeerDealDesktopApp(
@@ -423,4 +483,26 @@ class _SavedSecureKey {
 
   final String namespace;
   final SecureKeyRecord key;
+}
+
+EventEnvelope _recoveryEvent({
+  required int seq,
+  required String prevHash,
+  required String hash,
+}) {
+  return EventEnvelope(
+    eventId: 'evt_$seq',
+    eventType: 'RecoveryEventPersisted',
+    eventVersion: '1.0',
+    protocolVersion: '1.x',
+    eventSeq: seq,
+    tableId: 'open_table_live_turn',
+    sessionId: 'demo:open_table_live_turn',
+    handId: null,
+    emittedAt: '2026-06-08T00:00:00Z',
+    actorRef: 'system',
+    payload: const <String, Object?>{},
+    prevEventHash: prevHash,
+    eventHash: hash,
+  );
 }

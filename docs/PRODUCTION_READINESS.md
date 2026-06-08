@@ -250,6 +250,10 @@ the gates below are satisfied.
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is
   unavailable.
+- Mounted app table routes now consume the app-owned recovery persistence
+  factory when one is supplied, load the active scenario recovery window, and
+  fail closed with an explicit warning when no platform persistence root is
+  available.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -260,9 +264,9 @@ the gates below are satisfied.
   environment because they require native platform implementations and
   device/OS integration. The Dart contracts, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
-  app-owned recovery store construction, app-owned table/join bootstrap
-  mapping, and method-channel payload gates are locked for those follow-up
-  implementations.
+  app-owned recovery store construction and mounted recovery-window loading,
+  app-owned table/join bootstrap mapping, and method-channel payload gates are
+  locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

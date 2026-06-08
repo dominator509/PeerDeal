@@ -19,6 +19,7 @@ import 'demo_slice/screens/demo_table_screen.dart';
 import 'join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'join_flow/join_flow_route.dart';
 import 'navigation/app_route_fallback_screen.dart';
+import 'recovery/app_recovery_persistence_store_factory.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
 import 'setup_flow/setup_flow_route.dart';
 
@@ -36,13 +37,15 @@ class PeerDealMobileApp extends StatefulWidget {
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
+    AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
   }) : _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
        _receiptExportArtifactFactory = receiptExportArtifactFactory,
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
-       _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory;
+       _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory,
+       _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory;
 
   final DemoReceiptSurfacePresenter? _receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
@@ -51,6 +54,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
   final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
+  final AppRecoveryPersistenceStoreFactory? _recoveryPersistenceStoreFactory;
 
   @override
   State<PeerDealMobileApp> createState() => _PeerDealMobileAppState();
@@ -94,6 +98,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
             _activeSnapshot,
           ),
           bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
+          recoveryPersistenceStoreFactory:
+              widget._recoveryPersistenceStoreFactory,
           onOpenChat: () =>
               Navigator.of(context).pushNamed(DemoSliceRoutes.chat),
           onOpenReceipt: () =>

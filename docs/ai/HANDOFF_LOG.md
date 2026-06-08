@@ -875,6 +875,39 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Mounted Recovery Persistence Loading
+
+Summary:
+Wired the app-owned recovery persistence store factory into mounted table
+routes in both app shells. The route now loads the active scenario recovery
+window when the app supplies a platform/root-backed factory and fails closed
+with an explicit warning when no platform persistence root is available.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- Real platform root selection and production database/platform persistence
+  remain pending; this locks mounted app loading of the existing durable store
+  only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Secure Key Storage Mutation Contract
 
 Summary:
