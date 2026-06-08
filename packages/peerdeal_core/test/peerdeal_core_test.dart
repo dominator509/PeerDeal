@@ -231,6 +231,32 @@ void main() {
     expect(errors, contains('OpenTableSession requires table_id'));
   });
 
+  test('validator rejects blank command envelope identity fields', () {
+    const command = CommandEnvelope(
+      commandId: ' ',
+      commandType: 'OpenTableSession',
+      commandVersion: ' ',
+      protocolVersion: ' ',
+      tableId: ' ',
+      sessionId: null,
+      handId: null,
+      issuedAt: ' ',
+      actorRef: ' ',
+      payload: <String, Object?>{},
+    );
+
+    final errors = CoreCommandValidator().validate(command);
+
+    expect(errors, <String>[
+      'command_id is required',
+      'command_version is required',
+      'protocol_version is required',
+      'issued_at is required',
+      'actor_ref is required',
+      'OpenTableSession requires table_id',
+    ]);
+  });
+
   test('core accepts fixture-backed protocol open session spine', () {
     final command = commandEnvelopeFromJson(
       loadProtocolFixture('commands/open_table_session_command_v1.json'),

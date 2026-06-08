@@ -6,15 +6,32 @@ class CoreCommandValidator {
   List<String> validate(CommandEnvelope command) {
     final errors = <String>[];
 
-    if (command.commandType.isEmpty) {
+    if (command.commandId.trim().isEmpty) {
+      errors.add('command_id is required');
+    }
+
+    if (command.commandType.trim().isEmpty) {
       errors.add('command_type is required');
     }
 
-    if (command.actorRef.isEmpty) {
+    if (command.commandVersion.trim().isEmpty) {
+      errors.add('command_version is required');
+    }
+
+    if (command.protocolVersion.trim().isEmpty) {
+      errors.add('protocol_version is required');
+    }
+
+    if (command.issuedAt.trim().isEmpty) {
+      errors.add('issued_at is required');
+    }
+
+    if (command.actorRef.trim().isEmpty) {
       errors.add('actor_ref is required');
     }
 
-    if (command.commandType == 'OpenTableSession' && command.tableId == null) {
+    if (command.commandType == 'OpenTableSession' &&
+        (command.tableId == null || command.tableId!.trim().isEmpty)) {
       errors.add('OpenTableSession requires table_id');
     }
 

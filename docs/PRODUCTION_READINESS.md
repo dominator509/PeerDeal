@@ -81,6 +81,9 @@ the gates below are satisfied.
   close-before-closed ordering, and terminal closed/wiped state projection.
 - Core projection coverage now locks every accepted protocol event fixture to a
   replay-safe reducer path, so fixture additions cannot bypass core tests.
+- Core command validation now rejects whitespace-only command identity,
+  protocol/version, issue timestamp, actor, and Open Table table identity
+  fields before accepted command paths can reach reducer orchestration.
 - Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
   core metadata projection, replay through the core projector, and sync
   snapshot + suffix recovery.

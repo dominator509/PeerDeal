@@ -14,6 +14,37 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Core Command Identity Gate
+
+Summary:
+Hardened `CoreCommandValidator` so whitespace-only command envelope identity
+fields fail validation before accepted command paths reach core orchestration.
+Open Table commands now also reject blank table ids, not only missing table ids.
+
+Files changed:
+- `packages/peerdeal_core/lib/src/validation/core_command_validator.dart`
+- `packages/peerdeal_core/test/peerdeal_core_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_core`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- Existing callers that used whitespace placeholders in command envelopes will
+  now receive validation errors instead of passing the core command gate.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Wizard Compile Plan Identity Gate
 
 Summary:
