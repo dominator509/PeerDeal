@@ -143,6 +143,9 @@ the gates below are satisfied.
   normalized native peer discovery before candidate resolution, warning or
   falling back safely when platform discovery is invalid or exceeds the app
   candidate limit.
+- App safe-surface capture coordinators now scrub native warning detail and
+  bound native notes before projecting capture plans into UI render models,
+  preserving fail-closed obscuring without exposing platform exception text.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.
@@ -288,8 +291,9 @@ the gates below are satisfied.
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, app-owned transport payload-limit
-  enforcement, bounded app-owned table/join bootstrap mapping, and
-  method-channel payload gates are locked for those follow-up implementations.
+  enforcement, bounded app-owned table/join bootstrap mapping, app-owned
+  capture diagnostic scrubbing, and method-channel payload gates are locked for
+  those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

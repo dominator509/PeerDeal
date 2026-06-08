@@ -24,7 +24,10 @@ void main() {
       expect(plan.shouldRequestNativeBlocking, isTrue);
       expect(plan.shouldObscure, isTrue);
       expect(plan.nativeNotes, 'screen-protection-supported');
-      expect(plan.warning, 'best-effort');
+      expect(
+        plan.warning,
+        'Native capture protection reported a platform warning.',
+      );
     },
   );
 
@@ -56,7 +59,33 @@ void main() {
     expect(plan.shouldRequestNativeBlocking, isFalse);
     expect(plan.shouldObscure, isTrue);
     expect(plan.nativeNotes, 'unavailable');
-    expect(plan.warning, contains('could not be read'));
+    expect(
+      plan.warning,
+      'Native capture protection reported a platform warning.',
+    );
+  });
+
+  test('scrubs native warning detail before projecting capture plan', () async {
+    final coordinator = CaptureSurfaceCoordinator(
+      bridge: _FakeCaptureProtectionBridge(
+        capability: CaptureProtectionCapability(
+          blockingSupported: false,
+          obscuringSupported: true,
+          notes: '${'trusted '.padRight(120, 'x')}\nsecret',
+          warning: 'capture_failed: platform path C:\\secret\\screen.log',
+        ),
+      ),
+    );
+
+    final plan = await coordinator.resolve(CaptureSurface.receiptDetail);
+
+    expect(
+      plan.warning,
+      'Native capture protection reported a platform warning.',
+    );
+    expect(plan.warning, isNot(contains('screen.log')));
+    expect(plan.nativeNotes, isNot(contains('\n')));
+    expect(plan.nativeNotes.length, lessThanOrEqualTo(96));
   });
 }
 

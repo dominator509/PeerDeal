@@ -40,14 +40,14 @@ class CaptureSurfaceCoordinator {
       capability: CapturePlatformCapability(
         supportsBlocking: nativeCapability.blockingSupported,
         supportsObscuring: nativeCapability.obscuringSupported,
-        warning: nativeCapability.warning,
+        warning: _safeWarning(nativeCapability.warning),
       ),
     );
 
     return CaptureSurfacePlan(
       surface: surface,
       decision: decision,
-      nativeNotes: nativeCapability.notes,
+      nativeNotes: _safeNotes(nativeCapability.notes),
     );
   }
 
@@ -60,5 +60,27 @@ class CaptureSurfaceCoordinator {
             'Capture protection capability could not be read from the platform.',
       );
     }
+  }
+
+  static String? _safeWarning(String? warning) {
+    if (warning == null || warning.trim().isEmpty) {
+      return null;
+    }
+    return 'Native capture protection reported a platform warning.';
+  }
+
+  static String _safeNotes(String notes) {
+    final normalized = notes
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (normalized.isEmpty) {
+      return 'unavailable';
+    }
+    const maxLength = 96;
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return normalized.substring(0, maxLength);
   }
 }
