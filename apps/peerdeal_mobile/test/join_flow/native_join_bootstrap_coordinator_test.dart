@@ -37,6 +37,75 @@ void main() {
     expect(provider.request!.peerIds, <String>['peer-a', 'peer-b']);
   });
 
+  test(
+    'caps normalized native discovery endpoints before join bootstrap',
+    () async {
+      final provider = _RecordingBootstrapCandidateProvider();
+      final coordinator = NativeJoinBootstrapCoordinator(
+        bridge: const _StaticLocalNetworkBridge(
+          capability: LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: true,
+            notes: 'local-network-ready',
+          ),
+          discovery: LocalNetworkDiscoverySnapshot(
+            permissionGranted: true,
+            foundEndpoints: <String>[
+              'peer-a',
+              'peer-b',
+              'peer-c',
+              'peer-a',
+              ' ',
+            ],
+            interfaceHints: <String>[],
+          ),
+        ),
+        provider: provider,
+        maxPeerCandidates: 2,
+      );
+
+      final plan = await coordinator.buildPlan(
+        resolvedInvite: _resolvedInvite,
+        roleGrant: _roleGrant,
+      );
+
+      expect(plan.peerCandidates, <String>['peer-a', 'peer-b']);
+      expect(provider.request!.peerIds, <String>['peer-a', 'peer-b']);
+    },
+  );
+
+  test('keeps relay fallback when peer candidate limit is invalid', () async {
+    final provider = _RecordingBootstrapCandidateProvider();
+    final coordinator = NativeJoinBootstrapCoordinator(
+      bridge: const _StaticLocalNetworkBridge(
+        capability: LocalNetworkCapability(
+          discoverySupported: true,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: 'local-network-ready',
+        ),
+        discovery: LocalNetworkDiscoverySnapshot(
+          permissionGranted: true,
+          foundEndpoints: <String>['peer-a'],
+          interfaceHints: <String>[],
+        ),
+      ),
+      provider: provider,
+      maxPeerCandidates: 0,
+    );
+
+    final plan = await coordinator.buildPlan(
+      resolvedInvite: _resolvedInvite,
+      roleGrant: _roleGrant,
+    );
+
+    expect(plan.requiresBootstrap, isTrue);
+    expect(plan.peerCandidates, isEmpty);
+    expect(plan.relayFallbackAllowed, isTrue);
+    expect(provider.request, isNull);
+  });
+
   test('keeps relay fallback when local discovery is unavailable', () async {
     final coordinator = NativeJoinBootstrapCoordinator(
       bridge: _ThrowingLocalNetworkBridge(),

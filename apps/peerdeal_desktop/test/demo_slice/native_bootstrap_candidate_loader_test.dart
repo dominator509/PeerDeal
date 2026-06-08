@@ -35,6 +35,74 @@ void main() {
     expect(result.candidates.last.routeClass, NetworkRouteClass.p2pRemote);
   });
 
+  test(
+    'caps normalized native discovery endpoints before resolution',
+    () async {
+      final provider = _RecordingBootstrapCandidateProvider();
+      final result = await NativeBootstrapCandidateLoader(
+        bridge: const _FakeLocalNetworkBridge(
+          capability: LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: true,
+            notes: 'local-network-ready',
+          ),
+          discovery: LocalNetworkDiscoverySnapshot(
+            permissionGranted: true,
+            foundEndpoints: <String>[
+              'peer-a',
+              'peer-b',
+              'peer-c',
+              'peer-a',
+              ' ',
+            ],
+            interfaceHints: <String>[],
+          ),
+        ),
+        provider: provider,
+        maxPeerCandidates: 2,
+      ).load(sessionId: 'session-1', tableId: 'table-1');
+
+      expect(result.discoveryAvailable, isTrue);
+      expect(provider.request!.peerIds, <String>['peer-a', 'peer-b']);
+      expect(result.candidates.map((candidate) => candidate.peerId), <String>[
+        'peer-a',
+        'peer-b',
+      ]);
+      expect(result.warnings, <String>[
+        'Local network discovery peer candidate limit reached.',
+      ]);
+    },
+  );
+
+  test(
+    'fails closed when local network peer candidate limit is invalid',
+    () async {
+      final result = await NativeBootstrapCandidateLoader(
+        bridge: const _FakeLocalNetworkBridge(
+          capability: LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: true,
+            notes: 'local-network-ready',
+          ),
+          discovery: LocalNetworkDiscoverySnapshot(
+            permissionGranted: true,
+            foundEndpoints: <String>['peer-a'],
+            interfaceHints: <String>[],
+          ),
+        ),
+        maxPeerCandidates: 0,
+      ).load(sessionId: 'session-1', tableId: 'table-1');
+
+      expect(result.discoveryAvailable, isFalse);
+      expect(result.candidates, isEmpty);
+      expect(result.warnings, <String>[
+        'Local network peer candidate limit is invalid.',
+      ]);
+    },
+  );
+
   test('fails closed when local network discovery is unsupported', () async {
     final result = await NativeBootstrapCandidateLoader(
       bridge: _FakeLocalNetworkBridge(
@@ -127,5 +195,27 @@ class _ThrowingBootstrapCandidateProvider
     BootstrapResolutionRequest request,
   ) async {
     throw StateError('bootstrap failed');
+  }
+}
+
+class _RecordingBootstrapCandidateProvider
+    implements BootstrapCandidateProvider {
+  BootstrapResolutionRequest? request;
+
+  @override
+  Future<List<BootstrapCandidate>> resolveCandidates(
+    BootstrapResolutionRequest request,
+  ) async {
+    this.request = request;
+    return request.peerIds
+        .map(
+          (peerId) => BootstrapCandidate(
+            peerId: peerId,
+            routeClass: NetworkRouteClass.lanDirect,
+            reachable: true,
+            priority: request.peerIds.length,
+          ),
+        )
+        .toList(growable: false);
   }
 }

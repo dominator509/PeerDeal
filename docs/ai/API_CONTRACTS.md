@@ -96,6 +96,14 @@ accepts an injected root directory factory, and the mobile/desktop shells may
 default it from `PEERDEAL_RECOVERY_ROOT`. Blank, missing, or throwing roots fail
 closed before mounted table routes load recovery windows.
 
+## Local Network Bootstrap Boundary
+
+`peerdeal_native_bridges` exposes generic local-network capability and discovery
+facts only. Mobile and desktop app loaders/coordinators trim, deduplicate, and
+cap discovered peer endpoints before passing them to `peerdeal_network`
+bootstrap candidate resolution. Invalid caps fail closed for table loading and
+fall back to relay-only join bootstrap plans.
+
 ## Error Shape
 
 - Protocol failures use `ProtocolDiagnostic`.

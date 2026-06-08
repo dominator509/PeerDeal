@@ -9,8 +9,10 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     required LocalNetworkBridge bridge,
     BootstrapCandidateProvider provider =
         const BasicBootstrapCandidateProvider(),
+    int maxPeerCandidates = 32,
   }) : _bridge = bridge,
-       _provider = provider;
+       _provider = provider,
+       _maxPeerCandidates = maxPeerCandidates;
 
   factory NativeJoinBootstrapCoordinator.methodChannel() {
     return NativeJoinBootstrapCoordinator(
@@ -20,6 +22,7 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
 
   final LocalNetworkBridge _bridge;
   final BootstrapCandidateProvider _provider;
+  final int _maxPeerCandidates;
 
   @override
   Future<BootstrapPlan> buildPlan({
@@ -43,8 +46,17 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
         relayFallbackAllowed: true,
       );
     }
+    if (_maxPeerCandidates < 1) {
+      return const BootstrapPlan(
+        requiresBootstrap: true,
+        peerCandidates: <String>[],
+        relayFallbackAllowed: true,
+      );
+    }
 
-    final peerIds = _normalizedUnique(discovery.foundEndpoints);
+    final peerIds = _normalizedUnique(
+      discovery.foundEndpoints,
+    ).take(_maxPeerCandidates).toList();
     if (peerIds.isEmpty) {
       return const BootstrapPlan(
         requiresBootstrap: true,

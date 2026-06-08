@@ -31,8 +31,10 @@ class NativeBootstrapCandidateLoader {
     required LocalNetworkBridge bridge,
     BootstrapCandidateProvider provider =
         const BasicBootstrapCandidateProvider(),
+    int maxPeerCandidates = 32,
   }) : _bridge = bridge,
-       _provider = provider;
+       _provider = provider,
+       _maxPeerCandidates = maxPeerCandidates;
 
   factory NativeBootstrapCandidateLoader.methodChannel() {
     return NativeBootstrapCandidateLoader(
@@ -42,6 +44,7 @@ class NativeBootstrapCandidateLoader {
 
   final LocalNetworkBridge _bridge;
   final BootstrapCandidateProvider _provider;
+  final int _maxPeerCandidates;
 
   Future<NativeBootstrapCandidateLoadResult> load({
     required String sessionId,
@@ -85,6 +88,15 @@ class NativeBootstrapCandidateLoader {
       ...warnings,
       if (_hasText(discovery.warning)) discovery.warning!,
     ];
+    if (_maxPeerCandidates < 1) {
+      return NativeBootstrapCandidateLoadResult.unavailable(
+        nativeNotes: _nativeNotes(capability, discovery),
+        warnings: <String>[
+          ...discoveryWarnings,
+          'Local network peer candidate limit is invalid.',
+        ],
+      );
+    }
     if (!discovery.permissionGranted) {
       return NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: _nativeNotes(capability, discovery),
@@ -92,13 +104,19 @@ class NativeBootstrapCandidateLoader {
       );
     }
 
-    final peerIds = _normalizedUnique(discovery.foundEndpoints);
+    final normalizedPeerIds = _normalizedUnique(discovery.foundEndpoints);
+    final peerIds = normalizedPeerIds.take(_maxPeerCandidates).toList();
+    final peerWarnings = <String>[
+      ...discoveryWarnings,
+      if (normalizedPeerIds.length > peerIds.length)
+        'Local network discovery peer candidate limit reached.',
+    ];
     if (peerIds.isEmpty) {
       return NativeBootstrapCandidateLoadResult(
         discoveryAvailable: true,
         nativeNotes: _nativeNotes(capability, discovery),
         candidates: const <BootstrapCandidate>[],
-        warnings: discoveryWarnings,
+        warnings: peerWarnings,
       );
     }
 
@@ -116,13 +134,13 @@ class NativeBootstrapCandidateLoader {
         discoveryAvailable: true,
         nativeNotes: _nativeNotes(capability, discovery),
         candidates: candidates,
-        warnings: discoveryWarnings,
+        warnings: peerWarnings,
       );
     } catch (_) {
       return NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: _nativeNotes(capability, discovery),
         warnings: <String>[
-          ...discoveryWarnings,
+          ...peerWarnings,
           'Local network bootstrap candidates could not be resolved.',
         ],
       );

@@ -947,6 +947,43 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Local Network Peer Candidate Cap
+
+Summary:
+Mobile and desktop app local-network bootstrap paths now cap normalized native
+peer discovery before candidate resolution. Mounted table loaders warn when
+discovery exceeds the app candidate limit and fail closed when the configured
+limit is invalid. Join bootstrap coordinators apply the same cap and fall back
+to relay-only bootstrap when the limit is invalid, keeping noisy platform
+discovery from flooding app/network bootstrap resolution.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_mobile/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_mobile/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_desktop/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\native_bootstrap_candidate_loader_test.dart test\join_flow\native_join_bootstrap_coordinator_test.dart test\join_flow\join_flow_orchestrator_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\native_bootstrap_candidate_loader_test.dart test\join_flow\native_join_bootstrap_coordinator_test.dart test\join_flow\join_flow_orchestrator_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- This bounds app intake of native discovery facts; it does not implement real
+  platform local-network discovery.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Native Transport Payload Limit Guard
 
 Summary:

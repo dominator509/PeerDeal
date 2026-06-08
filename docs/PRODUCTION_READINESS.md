@@ -139,6 +139,10 @@ the gates below are satisfied.
   instead of hard-coded fake peer candidates, mapping normalized local-network
   discovery into join `BootstrapPlan` inputs while preserving relay fallback
   when local discovery is unavailable.
+- App-owned local-network bootstrap loaders and join coordinators now bound
+  normalized native peer discovery before candidate resolution, warning or
+  falling back safely when platform discovery is invalid or exceeds the app
+  candidate limit.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.
@@ -284,8 +288,8 @@ the gates below are satisfied.
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, app-owned transport payload-limit
-  enforcement, app-owned table/join bootstrap mapping, and method-channel
-  payload gates are locked for those follow-up implementations.
+  enforcement, bounded app-owned table/join bootstrap mapping, and
+  method-channel payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
