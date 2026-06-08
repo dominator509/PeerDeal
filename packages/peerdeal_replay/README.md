@@ -20,3 +20,12 @@ Starter scaffold for PeerDeal replay, reconstruction, and mismatch diagnostics.
 ## Starter status
 This scaffold is aligned to the locked PeerDeal replay/recovery direction and is intended
 as the first package drop for Sprint 7. It is not yet a production reconstruction engine.
+
+## Hardened scaffold coverage
+- Replay rejects unsupported request, snapshot, and event protocol/catalog
+  identities before projection.
+- Replay event windows reject sequence gaps, non-increasing event sequences,
+  hash-chain breaks, and snapshot suffix gaps before projection.
+- Replay now rejects event or snapshot table/session scope mismatches against
+  the replay request before projection, so reconstruction cannot merge another
+  table/session stream into verified state.

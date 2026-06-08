@@ -305,6 +305,40 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Replay Scope Mismatch Gate
+
+Summary:
+Hardened `BasicReplayEngine` so replay rejects event and snapshot table/session
+scope mismatches against the replay request before projection. This prevents
+reconstruction from merging another table/session stream into verified replay
+state.
+
+Files changed:
+- `packages/peerdeal_replay/lib/src/engine/basic_replay_engine.dart`
+- `packages/peerdeal_replay/test/basic_replay_engine_test.dart`
+- `packages/peerdeal_replay/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test\basic_replay_engine_test.dart` in
+  `packages/peerdeal_replay`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This locks replay-window scope validation only; live transport, platform
+  persistence, and app routing still remain separate readiness work.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App Recovery Persistence Store Factory
 
 Summary:

@@ -402,6 +402,67 @@ void main() {
     );
   });
 
+  test('rejects event scope mismatch before projection', () {
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        events: const <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'OpenTableSessionOpened',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'other_table',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:00Z',
+            actorRef: 'host_1',
+            payload: <String, Object?>{},
+            prevEventHash: 'root',
+            eventHash: 'hash_1',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_EVENT_SCOPE_MISMATCH');
+    expect(result.mismatches.single.expected, 'table_1/session_1');
+    expect(result.mismatches.single.actual, 'other_table/session_1');
+  });
+
+  test('rejects snapshot scope mismatch before projection', () {
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        snapshot: const SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'other_session',
+          snapshotBaseEventSeq: 1,
+          snapshotHash: 'snap_hash',
+          payload: <String, Object?>{},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_SNAPSHOT_SCOPE_MISMATCH');
+    expect(result.mismatches.single.expected, 'table_1/session_1');
+    expect(result.mismatches.single.actual, 'table_1/other_session');
+  });
+
   test('rejects unsupported event artifact before projection', () {
     final result = engine.replay(
       ReplayRequest(

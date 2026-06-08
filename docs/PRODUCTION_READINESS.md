@@ -284,6 +284,9 @@ the gates below are satisfied.
   or cipher adapters throw.
 - Receipt HMAC signature verification now fails closed when verification key
   lookup throws.
+- Replay now rejects event and snapshot table/session scope mismatches against
+  the replay request before projection, preventing reconstruction from merging
+  another table/session stream into verified state.
 - Sync recovery now converts conflict-detector, snapshot-applier, and
   projector exceptions into fatal safe-close conflicts instead of allowing
   recovery dependency failures to escape.

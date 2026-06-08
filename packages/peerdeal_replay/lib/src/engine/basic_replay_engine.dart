@@ -31,7 +31,10 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
 
   @override
   ReplayResult<TState> replay(ReplayRequest request) {
-    final mismatches = <ReplayMismatch>[..._validateProtocolVersions(request)];
+    final mismatches = <ReplayMismatch>[
+      ..._validateProtocolVersions(request),
+      ..._validateReplayScope(request),
+    ];
 
     if (mismatches.isNotEmpty) {
       return ReplayResult<TState>(
@@ -211,6 +214,40 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
           ),
         );
       }
+    }
+
+    return mismatches;
+  }
+
+  List<ReplayMismatch> _validateReplayScope(ReplayRequest request) {
+    final mismatches = <ReplayMismatch>[];
+    final snapshot = request.snapshot;
+    if (snapshot != null &&
+        (snapshot.tableId != request.tableId ||
+            snapshot.sessionId != request.sessionId)) {
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_SNAPSHOT_SCOPE_MISMATCH',
+          message: 'Replay snapshot scope does not match the request.',
+          expected: '${request.tableId}/${request.sessionId}',
+          actual: '${snapshot.tableId}/${snapshot.sessionId}',
+        ),
+      );
+    }
+
+    for (final event in request.events) {
+      if (event.tableId == request.tableId &&
+          event.sessionId == request.sessionId) {
+        continue;
+      }
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_EVENT_SCOPE_MISMATCH',
+          message: 'Replay event scope does not match the request.',
+          expected: '${request.tableId}/${request.sessionId}',
+          actual: '${event.tableId}/${event.sessionId}',
+        ),
+      );
     }
 
     return mismatches;
