@@ -123,6 +123,10 @@ the gates below are satisfied.
 - App shells now include native transport session factories that default to
   `MethodChannelNativeTransportBridge` and only expose validated
   `peerdeal_network` sender/drain construction to app orchestration.
+- Native transport session factories now fail closed during session loading
+  unless native capability reports send and receive support, so app
+  orchestration can reject unavailable platform transport before exposing
+  validated send/drain handles.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when

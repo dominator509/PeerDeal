@@ -99,7 +99,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 
 | Risk | Status |
 | --- | --- |
-| Production transport | Native transport method-channel seam, app-owned transport adapters/factories, and network frame gates exist; no live peer transport implementation yet |
+| Production transport | Native transport method-channel seam, app-owned capability-gated transport adapters/factories, and network frame gates exist; no live peer transport implementation yet |
 | Platform key storage | Method-channel seam exists; native implementation pending |
 | Persistence | Canonical recovery-window file store exists; production database/platform persistence not implemented |
 | App flows | Demo routes plus mounted setup/join orchestration seams, mounted table/join native bootstrap mapping, and unknown-route fallback exist; production navigation polish remains |

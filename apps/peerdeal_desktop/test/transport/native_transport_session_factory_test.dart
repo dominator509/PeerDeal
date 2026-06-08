@@ -4,6 +4,70 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'loads available session only when native transport supports it',
+    () async {
+      final bridge = _FakeNativeTransportBridge(
+        capability: const NativeTransportCapability(
+          available: true,
+          sendSupported: true,
+          receiveSupported: true,
+          maxPayloadBytes: 4096,
+          notes: 'native-ready',
+        ),
+        receiveFrames: [_nativeFrame()],
+      );
+      final handler = _RecordingTransportFrameHandler();
+
+      final result = await NativeTransportSessionFactory(
+        bridge: bridge,
+      ).loadSession(handler: handler);
+
+      expect(result.available, isTrue);
+      expect(result.session?.maxPayloadBytes, 4096);
+      expect(result.session?.nativeNotes, 'native-ready');
+
+      final send = await result.session!.sender.send(_frame());
+      final receive = await result.session!.drain.drain(
+        sessionId: 'session_1',
+        peerId: 'peer_b',
+      );
+
+      expect(send.sent, isTrue);
+      expect(receive.available, isTrue);
+      expect(handler.frames.single.fromPeerId, 'peer_a');
+    },
+  );
+
+  test(
+    'loadSession fails closed when native transport is unsupported',
+    () async {
+      final result = await NativeTransportSessionFactory(
+        bridge: _FakeNativeTransportBridge(
+          capability: const NativeTransportCapability.unavailable(
+            warning: 'transport disabled',
+          ),
+        ),
+      ).loadSession(handler: _RecordingTransportFrameHandler());
+
+      expect(result.available, isFalse);
+      expect(result.session, isNull);
+      expect(result.warnings, ['transport disabled']);
+    },
+  );
+
+  test('loadSession fails closed when capability lookup throws', () async {
+    final result = await NativeTransportSessionFactory(
+      bridge: _ThrowingCapabilityTransportBridge(),
+    ).loadSession(handler: _RecordingTransportFrameHandler());
+
+    expect(result.available, isFalse);
+    expect(result.session, isNull);
+    expect(result.warnings, [
+      'Native transport capability could not be loaded.',
+    ]);
+  });
+
   test('creates validated sender backed by native transport', () async {
     final bridge = _FakeNativeTransportBridge();
     final sender = NativeTransportSessionFactory(bridge: bridge).createSender();
@@ -99,15 +163,23 @@ NativeTransportFrame _nativeFrame() {
 
 class _FakeNativeTransportBridge implements NativeTransportBridge {
   _FakeNativeTransportBridge({
+    this.capability = const NativeTransportCapability(
+      available: true,
+      sendSupported: true,
+      receiveSupported: true,
+      maxPayloadBytes: 4096,
+      notes: 'test',
+    ),
     List<NativeTransportFrame> receiveFrames = const <NativeTransportFrame>[],
   }) : _receiveFrames = receiveFrames;
 
+  final NativeTransportCapability capability;
   final List<NativeTransportFrame> _receiveFrames;
   final List<NativeTransportFrame> sentFrames = <NativeTransportFrame>[];
 
   @override
   Future<NativeTransportCapability> getCapability() async {
-    return const NativeTransportCapability.unavailable();
+    return capability;
   }
 
   @override
@@ -127,6 +199,28 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   ) async {
     sentFrames.add(frame);
     return const NativeTransportSendResult(isSuccess: true);
+  }
+}
+
+class _ThrowingCapabilityTransportBridge implements NativeTransportBridge {
+  @override
+  Future<NativeTransportCapability> getCapability() async {
+    throw StateError('capability failed');
+  }
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+  }) async {
+    return const NativeTransportReceiveSnapshot.unavailable();
+  }
+
+  @override
+  Future<NativeTransportSendResult> sendFrame(
+    NativeTransportFrame frame,
+  ) async {
+    return const NativeTransportSendResult.failure(warning: 'unavailable');
   }
 }
 

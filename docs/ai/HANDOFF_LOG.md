@@ -305,6 +305,41 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Capability-Gated Native Transport Sessions
+
+Summary:
+Extended app-owned native transport session factories so production
+orchestration can call `loadSession(...)` and fail closed unless the native
+transport bridge reports available send and receive capability. Available
+sessions expose only validated `peerdeal_network` sender/drain handles plus
+native capability metadata.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_session_factory_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_session_factory_test.dart`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/transport/native_transport_session_factory_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/transport/native_transport_session_factory_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- Real native transport remains pending; this slice adds the app capability
+  gate for the existing Dart/method-channel transport boundary only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App Native Transport Session Factories
 
 Summary:
