@@ -49,6 +49,10 @@ class DefaultGameFileCompiler implements GameFileCompiler {
 
   List<String> _buildReadyErrors(ValidatedSetupPlan plan) {
     final errors = <String>[];
+    if (plan.planId.trim().isEmpty) {
+      errors.add('setup_plan_id_missing');
+    }
+
     if (plan.modeId != 'open_table' && plan.modeId != 'tournament') {
       errors.add('unsupported_mode_id');
     }

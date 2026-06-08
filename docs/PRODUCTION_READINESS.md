@@ -104,9 +104,9 @@ the gates below are satisfied.
 - Wizard setup resolution now trims setup intent ids and rejects blank setup
   intent or host identities before Game File compilation, so direct wizard
   callers cannot emit build-ready plans with malformed setup identity.
-- Wizard Game File compilation now rechecks build-ready mode and variant ids,
-  so manually constructed setup plans cannot bypass resolver validation and
-  emit unsupported production Game Files.
+- Wizard Game File compilation now rechecks build-ready mode, variant ids, and
+  non-empty plan identity, so manually constructed setup plans cannot bypass
+  resolver validation and emit unsupported or malformed production Game Files.
 - Mode governance now locks deterministic waitlist promotion ordering and
   rejects promotion when mode policy, manager permission, or waitlist head
   state does not allow it.

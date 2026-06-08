@@ -50,6 +50,26 @@ void main() {
       expect(() => compiler.compile(plan), throwsStateError);
     });
 
+    test('compile rejects build-ready plans with blank plan identity', () {
+      const compiler = DefaultGameFileCompiler();
+      const plan = ValidatedSetupPlan(
+        planId: '   ',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        policyProfileIds: <String, String>{
+          'privacy_profile': 'privacy.default',
+          'capture_profile': 'capture.protected',
+          'network_profile': 'network.hybrid_default',
+          'retention_profile': 'retention.standard',
+        },
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        validationResult: ValidationResult(isValid: true),
+        buildReady: true,
+      );
+
+      expect(() => compiler.compile(plan), throwsStateError);
+    });
+
     test('tryCompile returns compiled result for build-ready plan', () {
       const compiler = DefaultGameFileCompiler();
       const plan = ValidatedSetupPlan(
@@ -122,6 +142,30 @@ void main() {
 
       expect(result.isCompiled, isFalse);
       expect(result.errors, ['setup_plan_not_build_ready']);
+    });
+
+    test('tryCompile rejects build-ready plans with blank plan identity', () {
+      const compiler = DefaultGameFileCompiler();
+      const plan = ValidatedSetupPlan(
+        planId: '   ',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        policyProfileIds: <String, String>{
+          'privacy_profile': 'privacy.default',
+          'capture_profile': 'capture.protected',
+          'network_profile': 'network.hybrid_default',
+          'retention_profile': 'retention.standard',
+        },
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        validationResult: ValidationResult(isValid: true),
+        buildReady: true,
+      );
+
+      final result = compiler.tryCompile(plan);
+
+      expect(result.isCompiled, isFalse);
+      expect(result.gameFile, isNull);
+      expect(result.errors, ['setup_plan_id_missing']);
     });
 
     test('tryCompile rejects build-ready unsupported variant plan', () {

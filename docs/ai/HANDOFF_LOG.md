@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Wizard Compile Plan Identity Gate
+
+Summary:
+Hardened `DefaultGameFileCompiler` so manually constructed build-ready setup
+plans with blank plan ids cannot compile into Game Files. Strict `compile`
+throws and `tryCompile` now rejects with `setup_plan_id_missing`, preserving the
+resolver identity gate at the compiler boundary.
+
+Files changed:
+- `packages/peerdeal_wizard/lib/src/engine/default_game_file_compiler.dart`
+- `packages/peerdeal_wizard/test/game_file_compiler_test.dart`
+- `packages/peerdeal_wizard/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_wizard`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- Manually constructed plans with whitespace-only ids now fail closed even if
+  marked build-ready.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Wizard Setup Identity Gate
 
 Summary:

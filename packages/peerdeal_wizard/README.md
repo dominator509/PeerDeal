@@ -37,5 +37,5 @@ are present.
   blank setup intent or host identities as unresolved issues before validation,
   preventing malformed setup identity from becoming a build-ready plan.
 - `DefaultGameFileCompiler.tryCompile(...)` rechecks build-ready mode and
-  variant support, so manually constructed plans cannot bypass resolver
-  validation.
+  variant support plus non-empty plan identity, so manually constructed plans
+  cannot bypass resolver validation.
