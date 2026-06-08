@@ -395,6 +395,9 @@ the gates below are satisfied.
   dependency overrides instead of silently ignoring them, preventing production
   route injection drift when callers compose the stable runtime object with
   focused app-shell overrides.
+- Mounted join and setup routes now accept app-owned enabled-mode gates through
+  the mobile and desktop runtime objects, so production callers can hide demo
+  branches and fail closed when disabled route modes are requested.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all

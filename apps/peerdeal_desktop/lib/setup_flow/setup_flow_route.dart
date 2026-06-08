@@ -14,14 +14,22 @@ class SetupFlowRoute extends StatefulWidget {
   const SetupFlowRoute({
     super.key,
     this.initialMode = SetupFlowDemoMode.buildReady,
+    Set<SetupFlowDemoMode>? enabledModes,
     required SetupFlowOrchestratorFactory orchestratorFactory,
     SetupFlowIntentFactory? setupIntentFactory,
   }) : _orchestratorFactory = orchestratorFactory,
-       _setupIntentFactory = setupIntentFactory ?? _defaultSetupIntentFor;
+       _setupIntentFactory = setupIntentFactory ?? _defaultSetupIntentFor,
+       _enabledModes =
+           enabledModes ??
+           const <SetupFlowDemoMode>{
+             SetupFlowDemoMode.buildReady,
+             SetupFlowDemoMode.invalid,
+           };
 
   final SetupFlowDemoMode initialMode;
   final SetupFlowOrchestratorFactory _orchestratorFactory;
   final SetupFlowIntentFactory _setupIntentFactory;
+  final Set<SetupFlowDemoMode> _enabledModes;
 
   @override
   State<SetupFlowRoute> createState() => _SetupFlowRouteState();
@@ -47,14 +55,16 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
           title: 'Setup flow',
           subtitle: 'Game File setup compilation',
           actions: <Widget>[
-            PeerDealActionButton(
-              label: 'Compile build-ready setup',
-              onPressed: () => _selectMode(SetupFlowDemoMode.buildReady),
-            ),
-            PeerDealActionButton(
-              label: 'Compile invalid setup',
-              onPressed: () => _selectMode(SetupFlowDemoMode.invalid),
-            ),
+            if (_isModeEnabled(SetupFlowDemoMode.buildReady))
+              PeerDealActionButton(
+                label: 'Compile build-ready setup',
+                onPressed: () => _selectMode(SetupFlowDemoMode.buildReady),
+              ),
+            if (_isModeEnabled(SetupFlowDemoMode.invalid))
+              PeerDealActionButton(
+                label: 'Compile invalid setup',
+                onPressed: () => _selectMode(SetupFlowDemoMode.invalid),
+              ),
           ],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,6 +82,14 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
   }
 
   Future<SetupFlowOutcome> _run(SetupFlowDemoMode mode) async {
+    if (!_isModeEnabled(mode)) {
+      return const SetupFlowOutcome(
+        status: SetupFlowStatus.rejected,
+        resultCode: 'ERR_SETUP_FLOW_MODE_DISABLED',
+        errors: <String>['setup_flow_mode_disabled'],
+      );
+    }
+
     try {
       return widget._orchestratorFactory().compileSetup(
         intent: widget._setupIntentFactory(mode),
@@ -86,10 +104,15 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
   }
 
   void _selectMode(SetupFlowDemoMode mode) {
+    if (!_isModeEnabled(mode)) return;
     setState(() {
       _mode = mode;
       _outcome = _run(mode);
     });
+  }
+
+  bool _isModeEnabled(SetupFlowDemoMode mode) {
+    return widget._enabledModes.contains(mode);
   }
 }
 

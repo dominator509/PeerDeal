@@ -22,14 +22,25 @@ class JoinFlowRoute extends StatefulWidget {
   const JoinFlowRoute({
     super.key,
     this.initialMode = JoinFlowDemoMode.firstJoin,
+    Set<JoinFlowDemoMode>? enabledModes,
     required JoinFlowOrchestratorFactory orchestratorFactory,
     JoinFlowInviteContextFactory? inviteContextFactory,
   }) : _orchestratorFactory = orchestratorFactory,
-       _inviteContextFactory = inviteContextFactory ?? _defaultInviteContextFor;
+       _inviteContextFactory = inviteContextFactory ?? _defaultInviteContextFor,
+       _enabledModes =
+           enabledModes ??
+           const <JoinFlowDemoMode>{
+             JoinFlowDemoMode.firstJoin,
+             JoinFlowDemoMode.ackRequired,
+             JoinFlowDemoMode.unsupportedProtocol,
+             JoinFlowDemoMode.roleDenied,
+             JoinFlowDemoMode.rejoin,
+           };
 
   final JoinFlowDemoMode initialMode;
   final JoinFlowOrchestratorFactory _orchestratorFactory;
   final JoinFlowInviteContextFactory _inviteContextFactory;
+  final Set<JoinFlowDemoMode> _enabledModes;
 
   @override
   State<JoinFlowRoute> createState() => _JoinFlowRouteState();
@@ -55,27 +66,32 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
           title: 'Join flow',
           subtitle: 'Invite, disclosure, role, and rejoin checks',
           actions: <Widget>[
-            PeerDealActionButton(
-              label: 'Run first join',
-              onPressed: () => _selectMode(JoinFlowDemoMode.firstJoin),
-            ),
-            PeerDealActionButton(
-              label: 'Run ack required',
-              onPressed: () => _selectMode(JoinFlowDemoMode.ackRequired),
-            ),
-            PeerDealActionButton(
-              label: 'Run unsupported protocol',
-              onPressed: () =>
-                  _selectMode(JoinFlowDemoMode.unsupportedProtocol),
-            ),
-            PeerDealActionButton(
-              label: 'Run role denied',
-              onPressed: () => _selectMode(JoinFlowDemoMode.roleDenied),
-            ),
-            PeerDealActionButton(
-              label: 'Run rejoin',
-              onPressed: () => _selectMode(JoinFlowDemoMode.rejoin),
-            ),
+            if (_isModeEnabled(JoinFlowDemoMode.firstJoin))
+              PeerDealActionButton(
+                label: 'Run first join',
+                onPressed: () => _selectMode(JoinFlowDemoMode.firstJoin),
+              ),
+            if (_isModeEnabled(JoinFlowDemoMode.ackRequired))
+              PeerDealActionButton(
+                label: 'Run ack required',
+                onPressed: () => _selectMode(JoinFlowDemoMode.ackRequired),
+              ),
+            if (_isModeEnabled(JoinFlowDemoMode.unsupportedProtocol))
+              PeerDealActionButton(
+                label: 'Run unsupported protocol',
+                onPressed: () =>
+                    _selectMode(JoinFlowDemoMode.unsupportedProtocol),
+              ),
+            if (_isModeEnabled(JoinFlowDemoMode.roleDenied))
+              PeerDealActionButton(
+                label: 'Run role denied',
+                onPressed: () => _selectMode(JoinFlowDemoMode.roleDenied),
+              ),
+            if (_isModeEnabled(JoinFlowDemoMode.rejoin))
+              PeerDealActionButton(
+                label: 'Run rejoin',
+                onPressed: () => _selectMode(JoinFlowDemoMode.rejoin),
+              ),
           ],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,6 +109,21 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
   }
 
   Future<JoinFlowOutcome> _run(JoinFlowDemoMode mode) async {
+    if (!_isModeEnabled(mode)) {
+      return const JoinFlowOutcome(
+        state: JoinFlowState.joinRejected,
+        status: JoinDecisionStatus.rejected,
+        resultCode: 'ERR_JOIN_FLOW_MODE_DISABLED',
+        diagnostics: <ProtocolDiagnostic>[
+          ProtocolDiagnostic(
+            code: 'ERR_JOIN_FLOW_MODE_DISABLED',
+            message: 'Join flow mode is unavailable.',
+          ),
+        ],
+        message: 'Join flow mode is unavailable.',
+      );
+    }
+
     try {
       final orchestrator = widget._orchestratorFactory(mode);
       final context = widget._inviteContextFactory(mode);
@@ -119,10 +150,15 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
   }
 
   void _selectMode(JoinFlowDemoMode mode) {
+    if (!_isModeEnabled(mode)) return;
     setState(() {
       _mode = mode;
       _outcome = _run(mode);
     });
+  }
+
+  bool _isModeEnabled(JoinFlowDemoMode mode) {
+    return widget._enabledModes.contains(mode);
   }
 }
 

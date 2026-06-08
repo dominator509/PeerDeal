@@ -14,9 +14,11 @@ import 'package:peerdeal_mobile/demo_slice/models/demo_scenario_snapshot.dart';
 import 'package:peerdeal_mobile/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_mobile/join_flow/fakes.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
+import 'package:peerdeal_mobile/join_flow/join_flow_route.dart';
 import 'package:peerdeal_mobile/main.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_persistence_store_factory.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
+import 'package:peerdeal_mobile/setup_flow/setup_flow_route.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
@@ -558,6 +560,30 @@ void main() {
     expect(find.text('Result: ERR_REJOIN_TOKEN_REQUIRED'), findsOneWidget);
   });
 
+  testWidgets('routes join mode gates through app runtime object', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+            bootstrapCoordinator: FakeBootstrapCoordinator(),
+          ).create,
+          joinFlowEnabledModes: const <JoinFlowDemoMode>{
+            JoinFlowDemoMode.firstJoin,
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Run first join'), findsOneWidget);
+    expect(find.text('Run rejoin'), findsNothing);
+    expect(find.text('State: joined'), findsOneWidget);
+  });
+
   testWidgets('routes from demo home to setup flow', (tester) async {
     await tester.pumpWidget(const PeerDealMobileApp());
 
@@ -571,6 +597,27 @@ void main() {
     expect(find.text('Setup flow'), findsOneWidget);
     expect(find.text('Status: compiled'), findsOneWidget);
     expect(find.text('Result: OK_GAME_FILE_COMPILED'), findsOneWidget);
+  });
+
+  testWidgets('routes setup mode gates through app runtime object', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          setupFlowEnabledModes: <SetupFlowDemoMode>{
+            SetupFlowDemoMode.buildReady,
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Setup'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Compile build-ready setup'), findsOneWidget);
+    expect(find.text('Compile invalid setup'), findsNothing);
+    expect(find.text('Status: compiled'), findsOneWidget);
   });
 
   testWidgets('fails closed when app-owned setup factory throws', (

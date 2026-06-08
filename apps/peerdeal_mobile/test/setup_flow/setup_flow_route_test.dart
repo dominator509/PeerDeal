@@ -43,6 +43,29 @@ void main() {
     expect(find.text('Error: seat_count_missing'), findsOneWidget);
   });
 
+  testWidgets('hides disabled modes and rejects disabled initial mode', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF1B5E20),
+        builder: (_, _) => SetupFlowRoute(
+          initialMode: SetupFlowDemoMode.invalid,
+          enabledModes: const <SetupFlowDemoMode>{SetupFlowDemoMode.buildReady},
+          orchestratorFactory: () => const SetupFlowOrchestrator(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Compile build-ready setup'), findsOneWidget);
+    expect(find.text('Compile invalid setup'), findsNothing);
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_FLOW_MODE_DISABLED'), findsOneWidget);
+    expect(find.text('Error: setup_flow_mode_disabled'), findsOneWidget);
+  });
+
   testWidgets('uses injected setup intent factory', (tester) async {
     await tester.pumpWidget(
       WidgetsApp(

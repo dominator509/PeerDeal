@@ -70,6 +70,28 @@ void main() {
     expect(find.text('Result: ERR_REJOIN_TOKEN_REQUIRED'), findsOneWidget);
   });
 
+  testWidgets(
+    'hides disabled modes and fails closed for disabled initial mode',
+    (tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: JoinFlowRoute(
+            initialMode: JoinFlowDemoMode.rejoin,
+            enabledModes: const <JoinFlowDemoMode>{JoinFlowDemoMode.firstJoin},
+            orchestratorFactory: demoFactory.create,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Run first join'), findsOneWidget);
+      expect(find.text('Run rejoin'), findsNothing);
+      expect(find.text('State: joinRejected'), findsOneWidget);
+      expect(find.text('Result: ERR_JOIN_FLOW_MODE_DISABLED'), findsOneWidget);
+    },
+  );
+
   testWidgets('fails closed when invite context factory throws', (
     tester,
   ) async {

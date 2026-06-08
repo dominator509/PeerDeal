@@ -39,8 +39,10 @@ class PeerDealDesktopRuntime {
     this.receiptFactory,
     this.joinFlowOrchestratorFactory,
     this.joinFlowInviteContextFactory,
+    this.joinFlowEnabledModes,
     this.setupFlowOrchestratorFactory,
     this.setupFlowIntentFactory,
+    this.setupFlowEnabledModes,
     this.bootstrapCandidateLoaderFactory,
     this.recoveryPersistenceStoreFactory,
     this.tableRuntimeScopeFactory,
@@ -53,8 +55,10 @@ class PeerDealDesktopRuntime {
   final DemoReceiptFactory? receiptFactory;
   final JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory;
   final JoinFlowInviteContextFactory? joinFlowInviteContextFactory;
+  final Set<JoinFlowDemoMode>? joinFlowEnabledModes;
   final SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory;
   final SetupFlowIntentFactory? setupFlowIntentFactory;
+  final Set<SetupFlowDemoMode>? setupFlowEnabledModes;
   final NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
@@ -67,8 +71,10 @@ class PeerDealDesktopRuntime {
     DemoReceiptFactory? receiptFactory,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
+    Set<JoinFlowDemoMode>? joinFlowEnabledModes,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     SetupFlowIntentFactory? setupFlowIntentFactory,
+    Set<SetupFlowDemoMode>? setupFlowEnabledModes,
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
@@ -86,10 +92,13 @@ class PeerDealDesktopRuntime {
           joinFlowOrchestratorFactory ?? this.joinFlowOrchestratorFactory,
       joinFlowInviteContextFactory:
           joinFlowInviteContextFactory ?? this.joinFlowInviteContextFactory,
+      joinFlowEnabledModes: joinFlowEnabledModes ?? this.joinFlowEnabledModes,
       setupFlowOrchestratorFactory:
           setupFlowOrchestratorFactory ?? this.setupFlowOrchestratorFactory,
       setupFlowIntentFactory:
           setupFlowIntentFactory ?? this.setupFlowIntentFactory,
+      setupFlowEnabledModes:
+          setupFlowEnabledModes ?? this.setupFlowEnabledModes,
       bootstrapCandidateLoaderFactory:
           bootstrapCandidateLoaderFactory ??
           this.bootstrapCandidateLoaderFactory,
@@ -113,8 +122,10 @@ class PeerDealDesktopApp extends StatefulWidget {
     DemoReceiptFactory? receiptFactory,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
+    Set<JoinFlowDemoMode>? joinFlowEnabledModes,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     SetupFlowIntentFactory? setupFlowIntentFactory,
+    Set<SetupFlowDemoMode>? setupFlowEnabledModes,
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
@@ -126,8 +137,10 @@ class PeerDealDesktopApp extends StatefulWidget {
        _receiptFactory = receiptFactory,
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
        _joinFlowInviteContextFactory = joinFlowInviteContextFactory,
+       _joinFlowEnabledModes = joinFlowEnabledModes,
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
        _setupFlowIntentFactory = setupFlowIntentFactory,
+       _setupFlowEnabledModes = setupFlowEnabledModes,
        _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory,
        _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory,
        _tableRuntimeScopeFactory = tableRuntimeScopeFactory;
@@ -140,8 +153,10 @@ class PeerDealDesktopApp extends StatefulWidget {
   final DemoReceiptFactory? _receiptFactory;
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
   final JoinFlowInviteContextFactory? _joinFlowInviteContextFactory;
+  final Set<JoinFlowDemoMode>? _joinFlowEnabledModes;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
   final SetupFlowIntentFactory? _setupFlowIntentFactory;
+  final Set<SetupFlowDemoMode>? _setupFlowEnabledModes;
   final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? _recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
@@ -166,8 +181,10 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       receiptFactory: widget._receiptFactory,
       joinFlowOrchestratorFactory: widget._joinFlowOrchestratorFactory,
       joinFlowInviteContextFactory: widget._joinFlowInviteContextFactory,
+      joinFlowEnabledModes: widget._joinFlowEnabledModes,
       setupFlowOrchestratorFactory: widget._setupFlowOrchestratorFactory,
       setupFlowIntentFactory: widget._setupFlowIntentFactory,
+      setupFlowEnabledModes: widget._setupFlowEnabledModes,
       bootstrapCandidateLoaderFactory: widget._bootstrapCandidateLoaderFactory,
       recoveryPersistenceStoreFactory: widget._recoveryPersistenceStoreFactory,
       tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
@@ -236,10 +253,12 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           DemoSliceRoutes.joinRoute.path: (_) => JoinFlowRoute(
             orchestratorFactory: _joinFlowOrchestratorFactory,
             inviteContextFactory: _runtime.joinFlowInviteContextFactory,
+            enabledModes: _runtime.joinFlowEnabledModes,
           ),
           DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
             orchestratorFactory: _setupFlowOrchestratorFactory,
             setupIntentFactory: _runtime.setupFlowIntentFactory,
+            enabledModes: _runtime.setupFlowEnabledModes,
           ),
         },
         allowedExtraPaths: const <String>{Navigator.defaultRouteName},

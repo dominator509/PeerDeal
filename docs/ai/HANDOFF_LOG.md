@@ -14,6 +14,50 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - App Route Mode Gates
+
+Summary:
+Added app-owned enabled-mode gates to mounted join and setup routes in both app
+shells. The stable mobile and desktop runtime objects can now restrict which
+demo route branches are exposed, and disabled initial modes fail closed instead
+of running hidden demo flows.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_route_test.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_route_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\join_flow\join_flow_route_test.dart test\setup_flow\setup_flow_route_test.dart test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\join_flow\join_flow_route_test.dart test\setup_flow\setup_flow_route_test.dart test\app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Runtime callers that intentionally disable the initially selected join/setup
+  mode now receive explicit unavailable outcomes instead of implicit fallback.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Sync Genesis Recovery Gate
 
 Summary:
