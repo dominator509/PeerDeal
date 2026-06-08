@@ -131,6 +131,37 @@ void main() {
     expect(find.text('receipt_id: r_1'), findsNothing);
   });
 
+  testWidgets('rejects conflicting receipt export sources', (tester) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+    var exportFactoryCalled = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DemoReceiptRoute(
+          snapshot: _fixtureSnapshot('verification_receipt_review.json'),
+          presenter: presenter,
+          exportArtifact: _signedArtifact,
+          receipt: _receipt,
+          exportArtifactFactory: (_) async {
+            exportFactoryCalled = true;
+            throw StateError('conflicting export source used');
+          },
+        ),
+      ),
+    );
+    expect(find.text('Loading receipt'), findsOneWidget);
+
+    await tester.pump();
+
+    expect(exportFactoryCalled, isFalse);
+    expect(captureBridge.requestCount, 1);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
   testWidgets('fails closed when receipt presentation throws', (tester) async {
     await tester.pumpWidget(
       Directionality(

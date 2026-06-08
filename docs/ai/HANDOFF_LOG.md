@@ -14,6 +14,44 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Receipt Export Source Conflict Gate
+
+Summary:
+Hardened mounted receipt routes in both app shells so conflicting receipt export
+sources fail closed. If a route receives both a prebuilt export artifact and an
+export factory, it now projects a rejected receipt surface instead of silently
+preferring one source.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_receipt_screen_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_receipt_screen_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\demo_receipt_screen_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\demo_receipt_screen_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This locks app-route receipt export source validation only. Platform secure
+  storage and final production receipt UX remain tracked readiness gaps.
+
+Next reviewer:
+Keep route-level receipt export configuration gates aligned with future
+production receipt source orchestration.
+
+---
+
 ### 2026-06-08 - Codex - Wizard Compiler Support Gate
 
 Summary:

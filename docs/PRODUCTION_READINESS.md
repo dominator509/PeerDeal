@@ -224,6 +224,9 @@ the gates below are satisfied.
   fields.
 - Mounted app receipt routes receive artifact verifier factories from the app
   shell boundary, keeping method-channel construction out of receipt screens.
+- Mounted app receipt routes now reject conflicting receipt export sources
+  before using either a prebuilt artifact or an export factory, preventing
+  production injection drift from silently choosing one receipt path.
 - App artifact verifiers now use native-loaded signing and encryption keys for
   signed/encrypted receipt export inspection, failing closed when encryption
   material is unavailable.

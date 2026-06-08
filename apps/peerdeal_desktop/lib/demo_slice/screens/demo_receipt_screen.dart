@@ -85,6 +85,16 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
 
   Future<DemoReceiptSurfaceVm> _presentUnsafe() async {
     final artifact = widget.exportArtifact;
+    if (artifact != null && widget.exportArtifactFactory != null) {
+      return widget.presenter.present(
+        receipt: const ReceiptScanResult(
+          status: 'rejected',
+          message: 'Receipt export source configuration is invalid.',
+        ),
+        recovery: widget.recovery,
+      );
+    }
+
     if (artifact != null) {
       return _presentArtifact(artifact);
     }
