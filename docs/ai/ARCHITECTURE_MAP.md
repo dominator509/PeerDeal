@@ -54,7 +54,8 @@ Recovery:
 Receipts:
 
 1. Receipt service exports minimized receipt data.
-2. Optional signing/encryption produces opaque artifacts.
+2. App-owned export factories provision native-backed receipt keys, then
+   optional signing/encryption produces opaque artifacts.
 3. Import/scan verifies signatures, decrypts when configured, and authorizes
    session/user binding.
 4. Wiped or malformed receipts fail closed.
@@ -101,7 +102,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Risk | Status |
 | --- | --- |
 | Production transport | Native transport method-channel seam, app-owned capability-gated transport adapters/factories, and network frame gates exist; no live peer transport implementation yet |
-| Platform key storage | Method-channel read/write seams and app-owned receipt key provisioning/mapping exist; native implementation pending |
+| Platform key storage | Method-channel read/write seams plus app-owned receipt key provisioning, export, and verification mapping exist; native implementation pending |
 | Persistence | Canonical recovery-window file store exists; production database/platform persistence not implemented |
 | App flows | Demo routes plus mounted setup/join orchestration seams, mounted table/join native bootstrap mapping, and unknown-route fallback exist; production navigation polish remains |
 | UI polish | Demo UI, not production-polished |

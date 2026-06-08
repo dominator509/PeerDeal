@@ -305,6 +305,39 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - App Receipt Export Artifact Factory
+
+Summary:
+Added app-owned receipt export artifact factories in both app shells. The
+factory provisions native-backed receipt keys, builds receipt signer/cipher
+adapters from the provisioned key ring, and exports signed/encrypted artifacts
+through the receipt service. Export fails closed when native key loading or
+key mutation cannot complete.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_export_artifact_factory.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_receipt_export_artifact_factory_test.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/README.md`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_export_artifact_factory.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_receipt_export_artifact_factory_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\native_receipt_key_ring_loader_test.dart test\demo_slice\native_receipt_key_ring_writer_test.dart test\demo_slice\native_receipt_key_ring_provisioner_test.dart test\demo_slice\native_receipt_export_artifact_factory_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\native_receipt_key_ring_loader_test.dart test\demo_slice\native_receipt_key_ring_writer_test.dart test\demo_slice\native_receipt_key_ring_provisioner_test.dart test\demo_slice\native_receipt_export_artifact_factory_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- Real keychain/keystore implementations remain pending; this locks the app
+  export boundary that will consume them.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App Receipt Key-Ring Provisioner
 
 Summary:

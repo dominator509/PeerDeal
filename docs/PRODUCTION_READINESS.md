@@ -215,6 +215,9 @@ the gates below are satisfied.
   create missing active signing/encryption keys with secure random material,
   persist them through the app-owned writer boundary, and fail closed when
   native storage is unavailable or mutation fails.
+- App receipt export artifact factories now provision native-backed receipt
+  keys before signed/encrypted export, build signer/cipher adapters from the
+  provisioned key ring, and fail closed when key provisioning is unavailable.
 - Receipt export now fails closed to an unavailable artifact when signing or
   encryption adapters throw.
 - Receipt import inspection now rejects signed artifacts when verifier adapters

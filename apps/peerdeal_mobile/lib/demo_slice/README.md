@@ -42,6 +42,11 @@ secure-key bridge -> app key-ring loader -> missing active key generation ->
 app key-ring writer. Provisioning must fail closed when native storage cannot
 be loaded or a write is rejected.
 
+Receipt export should use `NativeReceiptExportArtifactFactory`: key-ring
+provisioner -> receipt signer/cipher adapters -> receipt service export. Do
+not export signed/encrypted artifacts from app code that bypasses native-backed
+key provisioning.
+
 ## Local Bootstrap Flow
 
 Demo bootstrap candidate loading should use
