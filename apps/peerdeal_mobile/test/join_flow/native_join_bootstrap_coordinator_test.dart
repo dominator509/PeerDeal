@@ -106,20 +106,9 @@ void main() {
 
   test('keeps relay fallback when peer candidate limit is invalid', () async {
     final provider = _RecordingBootstrapCandidateProvider();
+    final bridge = _CountingLocalNetworkBridge();
     final coordinator = NativeJoinBootstrapCoordinator(
-      bridge: const _StaticLocalNetworkBridge(
-        capability: LocalNetworkCapability(
-          discoverySupported: true,
-          permissionPromptSupported: true,
-          broadcastSupported: true,
-          notes: 'local-network-ready',
-        ),
-        discovery: LocalNetworkDiscoverySnapshot(
-          permissionGranted: true,
-          foundEndpoints: <String>['peer-a'],
-          interfaceHints: <String>[],
-        ),
-      ),
+      bridge: bridge,
       provider: provider,
       maxPeerCandidates: 0,
     );
@@ -133,6 +122,8 @@ void main() {
     expect(plan.peerCandidates, isEmpty);
     expect(plan.relayFallbackAllowed, isTrue);
     expect(provider.request, isNull);
+    expect(bridge.capabilityLookups, 0);
+    expect(bridge.discoveryLookups, 0);
   });
 
   test('keeps relay fallback when local discovery is unavailable', () async {
@@ -219,6 +210,32 @@ class _ThrowingLocalNetworkBridge implements LocalNetworkBridge {
   @override
   Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
     throw StateError('not reached');
+  }
+}
+
+class _CountingLocalNetworkBridge implements LocalNetworkBridge {
+  int capabilityLookups = 0;
+  int discoveryLookups = 0;
+
+  @override
+  Future<LocalNetworkCapability> getCapability() async {
+    capabilityLookups += 1;
+    return const LocalNetworkCapability(
+      discoverySupported: true,
+      permissionPromptSupported: true,
+      broadcastSupported: true,
+      notes: 'local-network-ready',
+    );
+  }
+
+  @override
+  Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
+    discoveryLookups += 1;
+    return const LocalNetworkDiscoverySnapshot(
+      permissionGranted: true,
+      foundEndpoints: <String>['peer-a'],
+      interfaceHints: <String>[],
+    );
   }
 }
 

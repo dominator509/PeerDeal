@@ -29,6 +29,14 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     required ResolvedInvite resolvedInvite,
     required RoleGrant roleGrant,
   }) async {
+    if (_maxPeerCandidates < 1) {
+      return const BootstrapPlan(
+        requiresBootstrap: true,
+        peerCandidates: <String>[],
+        relayFallbackAllowed: true,
+      );
+    }
+
     final capability = await _safeCapability();
     if (!capability.discoverySupported) {
       return const BootstrapPlan(
@@ -40,13 +48,6 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
 
     final discovery = await _safeDiscovery();
     if (!discovery.permissionGranted) {
-      return const BootstrapPlan(
-        requiresBootstrap: true,
-        peerCandidates: <String>[],
-        relayFallbackAllowed: true,
-      );
-    }
-    if (_maxPeerCandidates < 1) {
       return const BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],

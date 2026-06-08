@@ -150,6 +150,9 @@ the gates below are satisfied.
   instead of hard-coded fake peer candidates, mapping normalized local-network
   discovery into join `BootstrapPlan` inputs while preserving relay fallback
   when local discovery is unavailable.
+- App-owned join bootstrap coordinators now fall back before native capability
+  lookup when the app-owned peer candidate limit is invalid, keeping bad join
+  bootstrap configuration from reaching local-network platform discovery.
 - App-owned local-network bootstrap loaders and join coordinators now bound
   normalized native peer discovery before candidate resolution, warning or
   falling back safely when platform discovery is invalid or exceeds the app
