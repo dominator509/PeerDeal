@@ -305,6 +305,42 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - App Native Transport Validation Adapters
+
+Summary:
+Added app-owned transport adapters in both app shells that map generic
+`peerdeal_native_bridges` byte frames to `peerdeal_network` `TransportFrame`
+objects. Outbound sends are intended to run through
+`ValidatingTransportFrameSender`, and inbound native frame drains run through a
+provided `TransportFrameReceiver`, so native transport cannot bypass the
+network frame validation boundary.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_frame_adapter_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_frame_adapter_test.dart`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/transport/native_transport_frame_adapter_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/transport/native_transport_frame_adapter_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- Real native transport remains pending; this slice composes the Dart app
+  boundary and validation gate only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Native Transport Channel Contract
 
 Summary:

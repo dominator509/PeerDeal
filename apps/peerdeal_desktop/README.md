@@ -24,5 +24,8 @@ Setup flow:
   own Game File truth or catch compiler exceptions directly.
 - The mounted setup route receives an app-owned orchestrator factory and fails
   closed when setup orchestration is unavailable.
+- `lib/transport/` adapts generic native byte-frame transport to
+  `peerdeal_network` validating sender/receiver boundaries. Native transport
+  remains platform-owned; app adapters only compose package public APIs.
 
 It does NOT introduce a new top-level package.

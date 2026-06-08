@@ -116,6 +116,10 @@ the gates below are satisfied.
   for capability lookup, byte-frame sends, and inbound frame snapshots, failing
   closed on invalid requests, platform failures, or malformed payloads without
   putting routing policy in the native bridge package.
+- App shells now include app-owned native transport adapters that compose the
+  generic native byte-frame bridge with `peerdeal_network` validating
+  sender/receiver boundaries, so app transport sends and inbound drains cannot
+  bypass network frame validation.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
