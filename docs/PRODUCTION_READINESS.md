@@ -227,6 +227,9 @@ the gates below are satisfied.
 - Mounted app receipt routes now reject conflicting receipt export sources
   before using either a prebuilt artifact or an export factory, preventing
   production injection drift from silently choosing one receipt path.
+- Mounted app receipt routes now reject direct receipt inputs when no export
+  factory is available, and app shells no longer pass default demo receipt
+  envelopes unless export or injected receipt orchestration needs them.
 - App artifact verifiers now use native-loaded signing and encryption keys for
   signed/encrypted receipt export inspection, failing closed when encryption
   material is unavailable.

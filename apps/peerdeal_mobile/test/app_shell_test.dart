@@ -147,6 +147,29 @@ void main() {
     expect(exportedUserId, 'user_injected');
   });
 
+  testWidgets('fails closed when receipt factory has no export path', (
+    tester,
+  ) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        presenter: presenter,
+        receiptFactory: (snapshot) =>
+            _receiptForSnapshot(snapshot, pseudonymousUserId: 'user_injected'),
+      ),
+    );
+
+    await tester.tap(find.text('Receipt'));
+    await tester.pumpAndSettle();
+
+    expect(captureBridge.requestCount, 1);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
   testWidgets('fails closed when app-owned receipt factory throws', (
     tester,
   ) async {

@@ -14,6 +14,48 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Receipt Export Path Gate
+
+Summary:
+Hardened receipt route input handling in both app shells. Direct
+`PeerDealReceipt` input now fails closed when no export factory is available,
+and app roots only pass default demo receipts when an export path or injected
+receipt source requires one.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_receipt_screen_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_receipt_screen_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\demo_receipt_screen_test.dart
+  test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\demo_receipt_screen_test.dart
+  test\app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks receipt input/export path agreement only. Platform secure storage
+  and final production receipt UX remain tracked readiness gaps.
+
+Next reviewer:
+Keep app receipt source injection aligned with the mounted route export
+artifact factory boundary.
+
+---
+
 ### 2026-06-08 - Codex - Receipt Export Source Conflict Gate
 
 Summary:

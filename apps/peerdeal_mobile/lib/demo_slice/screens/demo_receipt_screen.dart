@@ -101,6 +101,16 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
 
     final exportFactory = widget.exportArtifactFactory;
     final receipt = widget.receipt;
+    if (exportFactory == null && receipt != null) {
+      return widget.presenter.present(
+        receipt: const ReceiptScanResult(
+          status: 'rejected',
+          message: 'Receipt export path is unavailable.',
+        ),
+        recovery: widget.recovery,
+      );
+    }
+
     if (exportFactory != null && receipt == null) {
       return widget.presenter.present(
         receipt: const ReceiptScanResult(

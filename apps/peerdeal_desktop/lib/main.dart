@@ -186,7 +186,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
             snapshot: _activeSnapshot,
             presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
             exportArtifact: _runtime.receiptExportArtifact,
-            receipt: _safeReceiptFor(_activeSnapshot),
+            receipt: _receiptInputFor(_activeSnapshot),
             exportArtifactFactory: _runtime.receiptExportArtifact == null
                 ? _runtime.receiptExportArtifactFactory
                 : null,
@@ -280,6 +280,15 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     } on Object {
       return null;
     }
+  }
+
+  PeerDealReceipt? _receiptInputFor(DemoScenarioSnapshot snapshot) {
+    if (_runtime.receiptFactory == null &&
+        _runtime.receiptExportArtifactFactory == null) {
+      return null;
+    }
+
+    return _safeReceiptFor(snapshot);
   }
 
   PeerDealReceipt _receiptFor(DemoScenarioSnapshot snapshot) {

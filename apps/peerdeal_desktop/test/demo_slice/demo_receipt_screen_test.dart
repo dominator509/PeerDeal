@@ -162,6 +162,30 @@ void main() {
     expect(find.text('Receipt content hidden'), findsOneWidget);
   });
 
+  testWidgets('rejects receipt input without export path', (tester) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DemoReceiptRoute(
+          snapshot: _fixtureSnapshot('verification_receipt_review.json'),
+          presenter: presenter,
+          receipt: _receipt,
+        ),
+      ),
+    );
+    expect(find.text('Loading receipt'), findsOneWidget);
+
+    await tester.pump();
+
+    expect(captureBridge.requestCount, 1);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
   testWidgets('fails closed when receipt presentation throws', (tester) async {
     await tester.pumpWidget(
       Directionality(
