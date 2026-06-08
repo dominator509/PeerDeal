@@ -83,8 +83,8 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 - Event streams are the authoritative state source.
 - Snapshots are recovery accelerators only.
 - Receipts are export/restore artifacts, not general persistence.
-- Sync recovery has in-memory and JSON file-backed recovery-window stores;
-  platform/database persistence remains a production gap.
+- Sync recovery has in-memory and canonical JSON file-backed recovery-window
+  stores; platform/database persistence remains a production gap.
 - Secure key storage has Dart/method-channel seams; platform implementations
   remain a production-readiness gap.
 
@@ -101,7 +101,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | --- | --- |
 | Production transport | Scaffold-level; no live peer transport yet |
 | Platform key storage | Method-channel seam exists; native implementation pending |
-| Persistence | Recovery-window file store exists; production database/platform persistence not implemented |
+| Persistence | Canonical recovery-window file store exists; production database/platform persistence not implemented |
 | App flows | Demo routes plus mounted setup/join orchestration seams, mounted table/join native bootstrap mapping, and unknown-route fallback exist; production navigation polish remains |
 | UI polish | Demo UI, not production-polished |
 | Capture blocking | Best-effort policy only; platform limits must be stated honestly |

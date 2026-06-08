@@ -248,6 +248,40 @@ void main() {
     expect(window.snapshot?.snapshotHash, 'snapshot_hash_2');
   });
 
+  test('file store writes canonical recovery window JSON', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final result = writer.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+      ],
+    );
+
+    final persisted = directory.listSync().whereType<File>().single;
+    final rawJson = persisted.readAsStringSync();
+
+    expect(result.isSuccess, isTrue);
+    expect(rawJson, startsWith('{"events":['));
+    expect(
+      rawJson,
+      canonicalJsonEncode(<String, Object?>{
+        'snapshot': null,
+        'events': <Object?>[
+          _event(seq: 1, prevHash: 'genesis', hash: 'hash_1').toJson(),
+        ],
+      }),
+    );
+  });
+
   test('file store fails closed on corrupt persisted data', () {
     final directory = Directory.systemTemp.createTempSync(
       'peerdeal_recovery_store_',

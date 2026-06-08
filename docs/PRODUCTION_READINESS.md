@@ -214,6 +214,9 @@ the gates below are satisfied.
   round-trips protocol event/snapshot envelopes through public JSON parsers,
   rehydrates through the same validation gate before writes, and fails closed
   on corrupt persisted files instead of resuming unsafe recovery windows.
+- Sync recovery file persistence now writes canonical protocol JSON through a
+  temporary file before replacing the durable recovery window, locking stable
+  on-disk bytes for diagnostics and reducing direct-write corruption risk.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all

@@ -305,6 +305,35 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Canonical Recovery File Writes
+
+Summary:
+Hardened `JsonFileRecoveryPersistenceStore` so durable recovery windows are
+written as canonical protocol JSON through a temporary file before replacing
+the stored window. This keeps on-disk bytes stable for diagnostics and reduces
+direct-write corruption risk while preserving the existing sync persistence
+contract and validation gate.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `packages/peerdeal_sync/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test/recovery_persistence_store_test.dart` in `packages/peerdeal_sync`
+
+Risks:
+- Production database/platform persistence remains pending; this hardens the
+  Dart file-backed recovery store only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - File Recovery Persistence Store
 
 Summary:

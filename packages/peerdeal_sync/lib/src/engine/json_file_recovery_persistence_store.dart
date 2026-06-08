@@ -98,15 +98,29 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     RecoveryPersistenceScope scope,
     PersistedRecoveryWindow window,
   ) {
+    File? tempFile;
     try {
       if (!_rootDirectory.existsSync()) {
         _rootDirectory.createSync(recursive: true);
       }
-      _fileFor(
-        scope,
-      ).writeAsStringSync(jsonEncode(_encodeWindow(window)), flush: true);
+      final file = _fileFor(scope);
+      tempFile = File(
+        '${file.path}.tmp.${DateTime.now().microsecondsSinceEpoch}',
+      );
+      tempFile.writeAsStringSync(
+        canonicalJsonEncode(_encodeWindow(window)),
+        flush: true,
+      );
+      tempFile.renameSync(file.path);
       return const RecoveryPersistenceResult.success();
     } on Object {
+      if (tempFile != null && tempFile.existsSync()) {
+        try {
+          tempFile.deleteSync();
+        } on Object {
+          // Best-effort cleanup; the failed persistence result is authoritative.
+        }
+      }
       return const RecoveryPersistenceResult(
         isSuccess: false,
         conflicts: <SyncConflict>[

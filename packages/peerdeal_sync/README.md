@@ -39,3 +39,5 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
 - A JSON file-backed recovery store can durably round-trip event/snapshot
   windows through protocol envelope parsers and fails closed when persisted
   data is corrupt.
+- File-backed recovery windows are written as canonical protocol JSON through
+  a temporary file before replacing the durable window.
