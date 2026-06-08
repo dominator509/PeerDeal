@@ -37,6 +37,11 @@ receipt signing/encryption key material -> generic native secure-key mutation
 bridge. The native bridge stays generic and does not own receipt key purpose,
 algorithm, rotation, or verification policy.
 
+Receipt key provisioning should use `NativeReceiptKeyRingProvisioner`: native
+secure-key bridge -> app key-ring loader -> missing active key generation ->
+app key-ring writer. Provisioning must fail closed when native storage cannot
+be loaded or a write is rejected.
+
 ## Local Bootstrap Flow
 
 Demo bootstrap candidate loading should use
