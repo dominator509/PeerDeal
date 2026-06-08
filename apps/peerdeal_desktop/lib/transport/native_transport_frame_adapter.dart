@@ -44,6 +44,12 @@ class NativeTransportFrameDrain {
       );
     }
 
+    if (!_isValidReceiveScope(sessionId) || !_isValidReceiveScope(peerId)) {
+      return const NativeTransportFrameDrainResult.unavailable(
+        warnings: <String>['Native transport receive scope is invalid.'],
+      );
+    }
+
     final NativeTransportReceiveSnapshot snapshot;
     try {
       snapshot = await _bridge!.receiveFrames(
@@ -103,6 +109,11 @@ class NativeTransportFrameDrain {
       return fallback;
     }
     return 'Native transport reported a platform warning.';
+  }
+
+  static bool _isValidReceiveScope(String value) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty && trimmed == value;
   }
 }
 

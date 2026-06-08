@@ -93,6 +93,23 @@ void main() {
     expect(handler.frames, isEmpty);
   });
 
+  test('rejects invalid receive scope before native receive', () async {
+    final bridge = _FakeNativeTransportBridge(receiveFrames: [_nativeFrame()]);
+    final handler = _RecordingTransportFrameHandler();
+    final drain = NativeTransportFrameDrain(
+      bridge: bridge,
+      receiver: ValidatingTransportFrameReceiver(handler: handler),
+    );
+
+    final result = await drain.drain(sessionId: 'session_1', peerId: ' peer_b');
+
+    expect(result.available, isFalse);
+    expect(result.results, isEmpty);
+    expect(result.warnings, ['Native transport receive scope is invalid.']);
+    expect(bridge.receiveLookups, 0);
+    expect(handler.frames, isEmpty);
+  });
+
   test('fails closed when native receive is unavailable', () async {
     final drain = NativeTransportFrameDrain(
       bridge: _FakeNativeTransportBridge(receiveWarning: 'transport locked'),
@@ -157,6 +174,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   final String? receiveWarning;
   final List<NativeTransportFrame> _receiveFrames;
   final List<NativeTransportFrame> sentFrames = <NativeTransportFrame>[];
+  int receiveLookups = 0;
 
   @override
   Future<NativeTransportCapability> getCapability() async {
@@ -174,6 +192,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
     required String sessionId,
     required String peerId,
   }) async {
+    receiveLookups += 1;
     if (receiveWarning != null) {
       return NativeTransportReceiveSnapshot.unavailable(
         warning: receiveWarning,

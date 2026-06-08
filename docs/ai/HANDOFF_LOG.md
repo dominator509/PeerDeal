@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Native Transport Receive Scope Gate
+
+Summary:
+Added mobile and desktop app-shell guards so `NativeTransportFrameDrain` rejects
+blank or padded receive session/peer scope before invoking native transport
+receive methods. Focused tests prove malformed app scope fails closed without
+calling the generic native bridge.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_frame_adapter_test.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_frame_adapter_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\transport\native_transport_frame_adapter_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\transport\native_transport_frame_adapter_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks the app-owned receive-scope gate only; live platform transport
+  implementations remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Local Network Bootstrap Scope Gate
 
 Summary:

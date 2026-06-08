@@ -172,6 +172,9 @@ the gates below are satisfied.
 - Native transport session factories now also fail closed before native send or
   receive calls when direct sender/drain creation uses an invalid app-owned
   payload limit, keeping all app transport entry points aligned.
+- App-owned native transport drains now reject blank or padded receive
+  session/peer scope before native receive calls, keeping malformed app route
+  scope from reaching platform transport.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
@@ -447,8 +450,8 @@ the gates below are satisfied.
   startup route selection, app-owned production navigation descriptors,
   app-owned join invite-context injection, app-owned receipt envelope
   injection, app-owned setup intent injection, app-owned transport
-  payload-limit enforcement, bounded app-owned table/join bootstrap mapping,
-  app-owned
+  payload-limit enforcement, app-owned transport receive-scope validation,
+  bounded app-owned table/join bootstrap mapping, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are

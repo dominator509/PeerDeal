@@ -96,7 +96,8 @@ payload limit used by the default `BasicTransportFrameValidator`. Session
 loading fails closed when native capability reports a non-positive
 `maxPayloadBytes` or a value above the app validator limit. Direct sender and
 drain creation also fail closed before native send/receive calls when the
-app-owned payload limit is invalid.
+app-owned payload limit is invalid. Native transport drains also reject invalid
+app-owned receive session/peer scope before calling platform receive methods.
 
 ## Recovery Persistence Boundary
 
