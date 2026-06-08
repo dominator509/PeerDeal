@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - App Runtime Override Merge
+
+Summary:
+Hardened mobile and desktop app runtime dependency composition. When callers
+provide both a runtime dependency object and focused constructor-level
+overrides, the non-null constructor overrides are merged instead of being
+silently ignored.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Constructor overrides now take precedence over fields inside a provided
+  runtime object. This preserves existing focused injection behavior but callers
+  should avoid passing conflicting dependencies.
+
+Next reviewer:
+Keep runtime dependency grouping and focused constructor overrides aligned as
+non-demo app orchestration replaces demo routes.
+
+---
+
 ### 2026-06-08 - Codex - Receipt Export Path Gate
 
 Summary:

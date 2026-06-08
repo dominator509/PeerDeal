@@ -308,6 +308,29 @@ void main() {
     expect(find.text('Bootstrap route: lanDirect'), findsOneWidget);
   });
 
+  testWidgets('constructor dependencies override app runtime object', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          bootstrapCandidateLoaderFactory: () {
+            throw StateError('runtime bootstrap unavailable');
+          },
+        ),
+        bootstrapCandidateLoaderFactory: () => NativeBootstrapCandidateLoader(
+          bridge: const _StaticLocalNetworkBridge(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bootstrap: 2 candidates'), findsOneWidget);
+    expect(find.text('Bootstrap route: lanDirect'), findsOneWidget);
+  });
+
   testWidgets('mounted table fails closed when bootstrap factory throws', (
     tester,
   ) async {

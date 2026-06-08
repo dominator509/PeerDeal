@@ -58,6 +58,48 @@ class PeerDealMobileRuntime {
   final NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
+
+  PeerDealMobileRuntime withOverrides({
+    DemoReceiptSurfacePresenter? receiptPresenter,
+    DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
+    ReceiptExportArtifact? receiptExportArtifact,
+    ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
+    DemoReceiptFactory? receiptFactory,
+    JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
+    JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
+    SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
+    SetupFlowIntentFactory? setupFlowIntentFactory,
+    NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
+    AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
+    DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
+  }) {
+    return PeerDealMobileRuntime(
+      receiptPresenter: receiptPresenter ?? this.receiptPresenter,
+      receiptArtifactVerifierFactory:
+          receiptArtifactVerifierFactory ?? this.receiptArtifactVerifierFactory,
+      receiptExportArtifact:
+          receiptExportArtifact ?? this.receiptExportArtifact,
+      receiptExportArtifactFactory:
+          receiptExportArtifactFactory ?? this.receiptExportArtifactFactory,
+      receiptFactory: receiptFactory ?? this.receiptFactory,
+      joinFlowOrchestratorFactory:
+          joinFlowOrchestratorFactory ?? this.joinFlowOrchestratorFactory,
+      joinFlowInviteContextFactory:
+          joinFlowInviteContextFactory ?? this.joinFlowInviteContextFactory,
+      setupFlowOrchestratorFactory:
+          setupFlowOrchestratorFactory ?? this.setupFlowOrchestratorFactory,
+      setupFlowIntentFactory:
+          setupFlowIntentFactory ?? this.setupFlowIntentFactory,
+      bootstrapCandidateLoaderFactory:
+          bootstrapCandidateLoaderFactory ??
+          this.bootstrapCandidateLoaderFactory,
+      recoveryPersistenceStoreFactory:
+          recoveryPersistenceStoreFactory ??
+          this.recoveryPersistenceStoreFactory,
+      tableRuntimeScopeFactory:
+          tableRuntimeScopeFactory ?? this.tableRuntimeScopeFactory,
+    );
+  }
 }
 
 class PeerDealMobileApp extends StatefulWidget {
@@ -116,24 +158,20 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       const DemoRecoveryResultFactory();
 
   PeerDealMobileRuntime get _runtime {
-    return widget._runtime ??
-        PeerDealMobileRuntime(
-          receiptPresenter: widget._receiptPresenter,
-          receiptArtifactVerifierFactory:
-              widget._receiptArtifactVerifierFactory,
-          receiptExportArtifact: widget._receiptExportArtifact,
-          receiptExportArtifactFactory: widget._receiptExportArtifactFactory,
-          receiptFactory: widget._receiptFactory,
-          joinFlowOrchestratorFactory: widget._joinFlowOrchestratorFactory,
-          joinFlowInviteContextFactory: widget._joinFlowInviteContextFactory,
-          setupFlowOrchestratorFactory: widget._setupFlowOrchestratorFactory,
-          setupFlowIntentFactory: widget._setupFlowIntentFactory,
-          bootstrapCandidateLoaderFactory:
-              widget._bootstrapCandidateLoaderFactory,
-          recoveryPersistenceStoreFactory:
-              widget._recoveryPersistenceStoreFactory,
-          tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
-        );
+    return (widget._runtime ?? const PeerDealMobileRuntime()).withOverrides(
+      receiptPresenter: widget._receiptPresenter,
+      receiptArtifactVerifierFactory: widget._receiptArtifactVerifierFactory,
+      receiptExportArtifact: widget._receiptExportArtifact,
+      receiptExportArtifactFactory: widget._receiptExportArtifactFactory,
+      receiptFactory: widget._receiptFactory,
+      joinFlowOrchestratorFactory: widget._joinFlowOrchestratorFactory,
+      joinFlowInviteContextFactory: widget._joinFlowInviteContextFactory,
+      setupFlowOrchestratorFactory: widget._setupFlowOrchestratorFactory,
+      setupFlowIntentFactory: widget._setupFlowIntentFactory,
+      bootstrapCandidateLoaderFactory: widget._bootstrapCandidateLoaderFactory,
+      recoveryPersistenceStoreFactory: widget._recoveryPersistenceStoreFactory,
+      tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
+    );
   }
 
   DemoReceiptSurfacePresenter? get _receiptPresenter =>

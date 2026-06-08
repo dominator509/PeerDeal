@@ -363,6 +363,10 @@ the gates below are satisfied.
   orchestration, bootstrap loading, and recovery scope/persistence. Existing
   per-factory constructor injection remains available, but production callers
   can now replace route orchestration dependencies as a stable app-shell unit.
+- App runtime dependency objects now merge non-null constructor-level
+  dependency overrides instead of silently ignoring them, preventing production
+  route injection drift when callers compose the stable runtime object with
+  focused app-shell overrides.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
