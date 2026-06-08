@@ -5,6 +5,8 @@ class SecureKeyStorageChannelContract {
 
   static const channelName = 'peerdeal/native_bridges/secure_key_storage';
   static const loadKeyRingMethod = 'loadKeyRing';
+  static const saveKeyMethod = 'saveKey';
+  static const deleteKeyMethod = 'deleteKey';
 
   static SecureKeyStorageSnapshot decodeSnapshot(
     Map<String, Object?>? payload,
@@ -62,6 +64,40 @@ class SecureKeyStorageChannelContract {
       algorithm: algorithm,
       secret: secret,
       active: _boolValue(active),
+    );
+  }
+
+  static Map<String, Object?> encodeKey(SecureKeyRecord key) {
+    return <String, Object?>{
+      'keyId': key.keyId,
+      'purpose': key.purpose,
+      'algorithm': key.algorithm,
+      'secret': key.secret,
+      'active': key.active,
+    };
+  }
+
+  static SecureKeyStorageMutationResult decodeMutationResult(
+    Map<String, Object?>? payload,
+  ) {
+    if (payload == null) {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'Secure key storage mutation result is unavailable.',
+      );
+    }
+
+    final success = _boolValue(payload['success']);
+    if (!success) {
+      return SecureKeyStorageMutationResult.failure(
+        warning:
+            _stringValue(payload['warning']) ??
+            'Secure key storage mutation failed.',
+      );
+    }
+
+    return SecureKeyStorageMutationResult(
+      isSuccess: true,
+      warning: _stringValue(payload['warning']),
     );
   }
 

@@ -36,3 +36,13 @@ class SecureKeyStorageSnapshot {
   final List<SecureKeyRecord> keys;
   final String? warning;
 }
+
+class SecureKeyStorageMutationResult {
+  const SecureKeyStorageMutationResult({required this.isSuccess, this.warning});
+
+  const SecureKeyStorageMutationResult.failure({required this.warning})
+    : isSuccess = false;
+
+  final bool isSuccess;
+  final String? warning;
+}

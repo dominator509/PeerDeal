@@ -84,6 +84,45 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Secure Key Storage Mutation Contract
+
+Summary:
+Extended the generic native secure key storage bridge with save/delete
+method-channel contracts and fail-closed mutation results. The new mutation
+interface is separate from the existing read-only bridge so app loaders and
+test fakes do not need unused write methods. The contract remains
+receipt-agnostic; platform implementations still own real OS storage.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_bridge.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_bridge_models.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_channel_contract.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/method_channel_secure_key_storage_bridge.dart`
+- `packages/peerdeal_native_bridges/fixtures/secure_key_storage_bridge_contract.json`
+- `packages/peerdeal_native_bridges/test/method_channel_secure_key_storage_bridge_test.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `packages/peerdeal_native_bridges/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub` in `packages/peerdeal_native_bridges`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- Real platform storage remains pending; this locks the generic Dart
+  method-channel contract only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App-Owned Join Factory Boundary
 
 Summary:

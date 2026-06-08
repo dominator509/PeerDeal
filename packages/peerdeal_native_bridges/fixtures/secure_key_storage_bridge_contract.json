@@ -19,6 +19,12 @@
           "active": true
         }
       ]
+    },
+    "saveKey": {
+      "success": true
+    },
+    "deleteKey": {
+      "success": true
     }
   }
 }

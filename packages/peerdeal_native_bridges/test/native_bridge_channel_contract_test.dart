@@ -133,10 +133,22 @@ void main() {
     final payload =
         methods[SecureKeyStorageChannelContract.loadKeyRingMethod]
             as Map<String, Object?>;
+    final savePayload =
+        methods[SecureKeyStorageChannelContract.saveKeyMethod]
+            as Map<String, Object?>;
+    final deletePayload =
+        methods[SecureKeyStorageChannelContract.deleteKeyMethod]
+            as Map<String, Object?>;
 
     expect(fixture['channel'], SecureKeyStorageChannelContract.channelName);
 
     final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(payload);
+    final saveResult = SecureKeyStorageChannelContract.decodeMutationResult(
+      savePayload,
+    );
+    final deleteResult = SecureKeyStorageChannelContract.decodeMutationResult(
+      deletePayload,
+    );
 
     expect(snapshot.available, isTrue);
     expect(snapshot.keys.map((key) => key.keyId), [
@@ -145,6 +157,8 @@ void main() {
     ]);
     expect(snapshot.keys.first.active, isTrue);
     expect(snapshot.warning, isNull);
+    expect(saveResult.isSuccess, isTrue);
+    expect(deleteResult.isSuccess, isTrue);
   });
 
   test('secure key storage channel contract fails closed on null payload', () {
@@ -184,6 +198,45 @@ void main() {
     expect(snapshot.keys, hasLength(1));
     expect(snapshot.keys.single.keyId, 'receipt_signing_1');
     expect(snapshot.keys.single.active, isFalse);
+  });
+
+  test('secure key storage channel contract encodes key records', () {
+    final payload = SecureKeyStorageChannelContract.encodeKey(
+      const SecureKeyRecord(
+        keyId: 'receipt_signing_1',
+        purpose: 'receipt_signing',
+        algorithm: 'hmac-sha256',
+        secret: 'signing_secret_1',
+        active: true,
+      ),
+    );
+
+    expect(payload, {
+      'keyId': 'receipt_signing_1',
+      'purpose': 'receipt_signing',
+      'algorithm': 'hmac-sha256',
+      'secret': 'signing_secret_1',
+      'active': true,
+    });
+  });
+
+  test('secure key storage mutation result fails closed on null payload', () {
+    final result = SecureKeyStorageChannelContract.decodeMutationResult(null);
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, contains('unavailable'));
+  });
+
+  test('secure key storage mutation result tolerates malformed fields', () {
+    final result = SecureKeyStorageChannelContract.decodeMutationResult(
+      const <String, Object?>{
+        'success': 'true',
+        'warning': <String>['bad'],
+      },
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Secure key storage mutation failed.');
   });
 }
 

@@ -114,6 +114,9 @@ the gates below are satisfied.
 - Native bridge contracts now include a secure key storage method-channel seam
   for normalized key-ring snapshots, without putting receipt semantics in the
   native bridge package.
+- Native secure key storage contracts now lock generic save/delete mutation
+  methods and fail-closed mutation results without adding receipt semantics to
+  the native bridge package.
 - App demo receipt paths now map native secure key storage snapshots into
   receipt-owned key-ring providers before signed artifact verification.
 - App demo receipt presenters can consume a verifier boundary that loads native
