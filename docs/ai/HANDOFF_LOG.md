@@ -84,6 +84,45 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Network Transport Frame Gate
+
+Summary:
+Added a `peerdeal_network` transport frame model and validator contract so
+future LAN/relay transport implementations have a package-owned frame gate.
+The validator fails closed on missing session/peer identities, self-send
+frames, invalid sequences, empty payloads, and oversized payloads. This does
+not implement live transport; it locks the transport boundary that live
+adapters must satisfy.
+
+Files changed:
+- `packages/peerdeal_network/lib/peerdeal_network.dart`
+- `packages/peerdeal_network/lib/src/contracts/transport_frame_validator.dart`
+- `packages/peerdeal_network/lib/src/models/transport_frame.dart`
+- `packages/peerdeal_network/lib/src/models/transport_frame_validation_result.dart`
+- `packages/peerdeal_network/lib/src/services/basic_transport_frame_validator.dart`
+- `packages/peerdeal_network/test/basic_transport_frame_validator_test.dart`
+- `packages/peerdeal_network/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_network`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- Live peer transport remains pending; this slice only adds the deterministic
+  transport frame gate.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Secure Key Storage Mutation Contract
 
 Summary:

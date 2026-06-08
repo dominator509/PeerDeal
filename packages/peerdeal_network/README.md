@@ -14,6 +14,7 @@ score, and recover network paths without owning game truth.
 - direct-to-relay transition planning
 - network confidence scoring
 - primary peer election and transfer policy
+- transport frame validation before platform transport send/receive code
 
 ## Must not own
 - poker rules
@@ -36,3 +37,6 @@ score, and recover network paths without owning game truth.
 - Primary peer election fails closed when every peer is anchor-mismatched.
 - Confidence classification degrades or requires recovery when peers lag the
   event index.
+- Transport frame validation fails closed on missing session/peer identities,
+  self-send frames, invalid sequence numbers, empty payloads, and oversized
+  payloads before live transport implementations see the frame.

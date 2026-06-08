@@ -102,6 +102,10 @@ the gates below are satisfied.
   opaque receipt exports, minimized receipt export metadata, capture-warning
   propagation, native bridge failure normalization, and locked method-channel
   contracts for future platform implementations.
+- Network transport contracts now include a package-owned frame validation gate
+  that fails closed on malformed session/peer identities, self-send frames,
+  invalid sequence numbers, empty payloads, and oversized payloads before
+  platform transport adapters send data.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.
