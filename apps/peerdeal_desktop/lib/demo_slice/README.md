@@ -37,5 +37,6 @@ verifier -> presenter -> safe surface.
 Demo bootstrap candidate loading should use
 `NativeBootstrapCandidateLoader.methodChannel()` at the app boundary. The call
 order is native local-network bridge -> normalized discovery snapshot ->
-`peerdeal_network` bootstrap candidate provider -> app route or presenter. The
-native bridge stays generic and does not own table, invite, or session policy.
+`peerdeal_network` bootstrap candidate provider -> mounted table route ->
+render-only table screen. The native bridge stays generic and does not own
+table, invite, or session policy.

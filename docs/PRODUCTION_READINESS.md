@@ -112,10 +112,11 @@ the gates below are satisfied.
 - Network transport receive contracts now include a validating receiver
   boundary that rejects invalid frames before session handlers see them and
   converts handler failures into explicit failed receive results.
-- App demo local-network bootstrap paths now map normalized native discovery
-  snapshots into `peerdeal_network` bootstrap candidate resolution at the app
-  boundary, failing closed when native capability, discovery, or candidate
-  resolution is unavailable.
+- Mounted app table routes now load native local-network bootstrap snapshots
+  through an app-owned factory, map normalized discovery facts into
+  `peerdeal_network` bootstrap candidate resolution, and fail closed when
+  native capability, discovery, factory construction, or candidate resolution
+  is unavailable.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.

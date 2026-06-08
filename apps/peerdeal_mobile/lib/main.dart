@@ -7,6 +7,7 @@ import 'demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'demo_slice/controllers/demo_receipt_surface_presenter.dart';
 import 'demo_slice/controllers/demo_recovery_result_factory.dart';
 import 'demo_slice/controllers/demo_slice_controller.dart';
+import 'demo_slice/controllers/native_bootstrap_candidate_loader.dart';
 import 'demo_slice/demo_slice_routes.dart';
 import 'demo_slice/models/demo_scenario_snapshot.dart';
 import 'demo_slice/scenarios/demo_scenario_snapshots.dart';
@@ -32,17 +33,20 @@ class PeerDealMobileApp extends StatefulWidget {
     ReceiptExportArtifact? receiptExportArtifact,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
+    NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
   }) : _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
-       _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory;
+       _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
+       _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory;
 
   final DemoReceiptSurfacePresenter? _receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? _receiptExportArtifact;
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
+  final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
 
   @override
   State<PeerDealMobileApp> createState() => _PeerDealMobileAppState();
@@ -80,11 +84,12 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       routes: <String, WidgetBuilder>{
         Navigator.defaultRouteName: _buildHome,
         DemoSliceRoutes.home: _buildHome,
-        DemoSliceRoutes.table: (context) => DemoTableScreen(
+        DemoSliceRoutes.table: (context) => DemoTableRoute(
           snapshot: _activeSnapshot,
           networkConfidence: _networkConfidencePresenter.present(
             _activeSnapshot,
           ),
+          bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
           onOpenChat: () =>
               Navigator.of(context).pushNamed(DemoSliceRoutes.chat),
           onOpenReceipt: () =>
@@ -130,8 +135,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       onOpenReceipt: () =>
           Navigator.of(context).pushNamed(DemoSliceRoutes.receipt),
       onOpenJoin: () => Navigator.of(context).pushNamed(DemoSliceRoutes.join),
-      onOpenSetup: () =>
-          Navigator.of(context).pushNamed(DemoSliceRoutes.setup),
+      onOpenSetup: () => Navigator.of(context).pushNamed(DemoSliceRoutes.setup),
       onSelectScenario: _selectScenario,
     );
   }
@@ -162,5 +166,10 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   SetupFlowOrchestratorFactory get _setupFlowOrchestratorFactory {
     return widget._setupFlowOrchestratorFactory ??
         () => const SetupFlowOrchestrator();
+  }
+
+  NativeBootstrapCandidateLoaderFactory get _bootstrapCandidateLoaderFactory {
+    return widget._bootstrapCandidateLoaderFactory ??
+        NativeBootstrapCandidateLoader.methodChannel;
   }
 }

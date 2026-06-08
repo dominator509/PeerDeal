@@ -313,14 +313,22 @@ loaders read generic `peerdeal_native_bridges` local-network capability and
 discovery snapshots, normalize endpoint strings at the app boundary, and pass
 them to `peerdeal_network` bootstrap candidate resolution. Capability,
 discovery, permission, and provider failures return explicit fail-closed
-results instead of throwing.
+results instead of throwing. Mounted table routes now receive an app-owned
+loader factory, load bootstrap candidates asynchronously, and render only the
+resulting table view state.
 
 Files changed:
 - `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
 - `apps/peerdeal_mobile/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
 - `apps/peerdeal_mobile/lib/demo_slice/README.md`
 - `apps/peerdeal_desktop/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
 - `apps/peerdeal_desktop/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
 - `apps/peerdeal_desktop/lib/demo_slice/README.md`
 - `docs/PRODUCTION_READINESS.md`
 - `docs/ai/ARCHITECTURE_MAP.md`
@@ -329,11 +337,13 @@ Files changed:
 Tests run:
 - `flutter test --no-pub test/demo_slice/native_bootstrap_candidate_loader_test.dart` in `apps/peerdeal_mobile`
 - `flutter test --no-pub test/demo_slice/native_bootstrap_candidate_loader_test.dart` in `apps/peerdeal_desktop`
+- `flutter test --no-pub test/app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/app_shell_test.dart` in `apps/peerdeal_desktop`
 
 Remaining gaps:
-- Real native local-network discovery, production transport, and route wiring
-  remain pending platform/app work. This slice locks the Dart app-boundary
-  mapping only.
+- Real native local-network discovery and production transport remain pending
+  platform work. This slice locks the Dart app-boundary mapping and mounted
+  route consumption only.
 
 Next reviewer:
 Codex should run the full local gate set and commit if green.

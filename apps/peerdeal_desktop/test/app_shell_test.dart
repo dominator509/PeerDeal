@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_artifact_verifier.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_artifact_verifier_factory.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_surface_presenter.dart';
+import 'package:peerdeal_desktop/demo_slice/controllers/native_bootstrap_candidate_loader.dart';
 import 'package:peerdeal_desktop/main.dart';
 import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 
 import '../../../tools/test_helpers/demo_receipt_route_test_support.dart';
 
@@ -130,6 +132,47 @@ void main() {
     expect(find.text('Demo chat'), findsOneWidget);
     expect(find.text('Scenario: open_table_live_turn'), findsOneWidget);
     expect(find.text('Unread: 3'), findsOneWidget);
+  });
+
+  testWidgets('mounted table loads native bootstrap candidates', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        bootstrapCandidateLoaderFactory: () => NativeBootstrapCandidateLoader(
+          bridge: const _StaticLocalNetworkBridge(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bootstrap: 2 candidates'), findsOneWidget);
+    expect(find.text('Bootstrap route: lanDirect'), findsOneWidget);
+  });
+
+  testWidgets('mounted table fails closed when bootstrap factory throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        bootstrapCandidateLoaderFactory: () {
+          throw StateError('bootstrap unavailable');
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bootstrap: unavailable'), findsOneWidget);
+    expect(
+      find.text(
+        'Bootstrap warning: Local network bootstrap loader unavailable.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('routes from demo home to join flow', (tester) async {
@@ -258,5 +301,28 @@ class _ThrowingVerifierFactory extends DemoReceiptArtifactVerifierFactory {
   @override
   DemoReceiptArtifactVerifier create() {
     throw StateError('verifier factory unavailable');
+  }
+}
+
+class _StaticLocalNetworkBridge implements LocalNetworkBridge {
+  const _StaticLocalNetworkBridge();
+
+  @override
+  Future<LocalNetworkCapability> getCapability() async {
+    return const LocalNetworkCapability(
+      discoverySupported: true,
+      permissionPromptSupported: true,
+      broadcastSupported: true,
+      notes: 'local-network-ready',
+    );
+  }
+
+  @override
+  Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
+    return const LocalNetworkDiscoverySnapshot(
+      permissionGranted: true,
+      foundEndpoints: <String>['peer-a', 'peer-b'],
+      interfaceHints: <String>['wifi'],
+    );
   }
 }

@@ -1,6 +1,9 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 
+typedef NativeBootstrapCandidateLoaderFactory =
+    NativeBootstrapCandidateLoader Function();
+
 class NativeBootstrapCandidateLoadResult {
   const NativeBootstrapCandidateLoadResult({
     required this.discoveryAvailable,
