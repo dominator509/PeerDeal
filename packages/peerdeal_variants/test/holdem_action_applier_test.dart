@@ -97,11 +97,54 @@ void main() {
     expect(actor.committedThisHand, 250);
     expect(result.state.pot, 350);
     expect(result.state.currentBetToCall, 250);
+    expect(result.state.minimumRaiseAmount, 150);
     expect(result.state.lastAggressorSeat, 2);
     expect(result.state.lastActionSummary, 'seat_2_raise_200');
     expect(result.isBettingRoundComplete, isFalse);
     expect(result.nextActorSeat, 3);
     expect(result.state.currentActorSeat, 3);
+  });
+
+  test('applies opening bet as next minimum raise size', () {
+    final result = applier.apply(
+      state: buildState(
+        currentBetToCall: 0,
+        pot: 0,
+        seats: const <HoldemSeatState>[
+          HoldemSeatState(
+            seat: 1,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+          ),
+          HoldemSeatState(
+            seat: 2,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+          ),
+          HoldemSeatState(
+            seat: 3,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+          ),
+        ],
+      ),
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.bet,
+        amount: 300,
+      ),
+    );
+
+    expect(result.isApplied, isTrue);
+    expect(result.state.currentBetToCall, 300);
+    expect(result.state.minimumRaiseAmount, 300);
+    expect(result.state.lastAggressorSeat, 2);
   });
 
   test('applies fold without changing pot or commitments', () {
@@ -173,6 +216,57 @@ void main() {
     expect(result.state.lastAggressorSeat, isNull);
     expect(result.isBettingRoundComplete, isFalse);
     expect(result.nextActorSeat, 1);
+  });
+
+  test('applies short all-in over current bet without full-raise reopen', () {
+    final result = applier.apply(
+      state: buildState(
+        seats: const <HoldemSeatState>[
+          HoldemSeatState(
+            seat: 1,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+          HoldemSeatState(
+            seat: 2,
+            stack: 75,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 50,
+            committedThisHand: 50,
+          ),
+          HoldemSeatState(
+            seat: 3,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+            committedThisHand: 100,
+          ),
+        ],
+      ),
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.allIn,
+      ),
+    );
+
+    final actor = result.state.findSeat(2)!;
+
+    expect(result.isApplied, isTrue);
+    expect(actor.stack, 0);
+    expect(actor.allIn, isTrue);
+    expect(actor.committedThisRound, 125);
+    expect(result.state.currentBetToCall, 125);
+    expect(result.state.minimumRaiseAmount, 100);
+    expect(result.state.lastAggressorSeat, isNull);
+    expect(result.nextActorSeat, 3);
   });
 
   test('marks betting round complete after the final call', () {

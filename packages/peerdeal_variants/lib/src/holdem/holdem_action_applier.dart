@@ -52,7 +52,12 @@ class HoldemActionApplier {
     );
     final newCommittedThisRound = actor.committedThisRound + contribution;
     final newStack = actor.stack - contribution;
-    final opensOrRaisesBet = newCommittedThisRound > state.currentBetToCall;
+    final increasesBetToCall = newCommittedThisRound > state.currentBetToCall;
+    final raiseIncrement = increasesBetToCall
+        ? newCommittedThisRound - state.currentBetToCall
+        : 0;
+    final isFullBetOrRaise =
+        increasesBetToCall && raiseIncrement >= state.minimumRaiseAmount;
     final updatedActor = actor.copyWith(
       stack: newStack,
       inHand: action.type == HoldemTableActionType.fold ? false : actor.inHand,
@@ -68,15 +73,18 @@ class HoldemActionApplier {
     final updatedState = state.copyWith(
       seats: updatedSeats,
       pot: state.pot + contribution,
-      currentBetToCall: opensOrRaisesBet
+      currentBetToCall: increasesBetToCall
           ? newCommittedThisRound
           : state.currentBetToCall,
+      minimumRaiseAmount: isFullBetOrRaise
+          ? raiseIncrement
+          : state.minimumRaiseAmount,
       actedSeatsThisRound: _actedSeatsAfter(
         state: state,
         actedSeat: action.actorSeat,
-        opensOrRaisesBet: opensOrRaisesBet,
+        opensOrRaisesBet: isFullBetOrRaise,
       ),
-      lastAggressorSeat: opensOrRaisesBet
+      lastAggressorSeat: isFullBetOrRaise
           ? action.actorSeat
           : state.lastAggressorSeat,
       lastActionSummary: _summaryFor(action, contribution),

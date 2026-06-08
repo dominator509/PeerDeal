@@ -119,3 +119,9 @@ winner.
 Zero-bet streets track `actedSeatsThisRound`, so checked flop/turn/river rounds
 complete deterministically once every actionable seat has acted. Street
 transitions reset that marker before the next betting round opens.
+
+Full opening bets and full raises update `minimumRaiseAmount` to the actual
+bet or raise increment for the next legal raise. Short all-ins can increase the
+amount future seats must call, but they do not reset the minimum raise size or
+claim last-aggressor/reopen semantics unless they meet the current full-raise
+threshold.

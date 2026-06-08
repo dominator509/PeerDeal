@@ -87,6 +87,10 @@ the gates below are satisfied.
 - Hold'em variant coverage now spans betting-round completion through checked
   streets, showdown reveal, settlement preparation/projection, uncontested
   settlement, hand completion, and settlement event emission.
+- Hold'em action application now carries production raise sizing semantics:
+  full opening bets and full raises update the next minimum raise amount, while
+  short all-ins can increase the amount to call without claiming full-raise
+  reopen or last-aggressor semantics.
 - Mode governance now locks deterministic waitlist promotion ordering and
   rejects promotion when mode policy, manager permission, or waitlist head
   state does not allow it.

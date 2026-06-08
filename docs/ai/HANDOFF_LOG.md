@@ -1274,3 +1274,38 @@ Risks:
 Next reviewer:
 Codex should run focused app shell tests, then the full local gate set, and
 commit if green.
+
+---
+
+### 2026-06-08 - Codex - Holdem Raise Sizing Semantics
+
+Summary:
+Hardened Hold'em action application so full opening bets and full raises update
+the next legal minimum raise amount. Short all-ins that increase the amount to
+call now preserve the prior minimum raise size and do not claim
+last-aggressor/full-raise reopen semantics unless they meet the current
+full-raise threshold.
+
+Files changed:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_action_applier.dart`
+- `packages/peerdeal_variants/test/holdem_action_applier_test.dart`
+- `packages/peerdeal_variants/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test\holdem_action_applier_test.dart` in
+  `packages/peerdeal_variants`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This hardens variant-local action semantics only; session/core event emission
+  and platform app integration remain separate readiness work.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
