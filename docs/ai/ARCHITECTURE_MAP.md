@@ -89,8 +89,8 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   configuration, and mounted table-route loading; platform/database persistence
   remains a production gap.
 - Secure key storage has Dart/method-channel read/write seams plus app-owned
-  receipt key-ring provisioning and mapping; platform implementations remain a
-  production-readiness gap.
+  receipt key-ring provisioning, mapping, and ambiguous-active-key rejection;
+  platform implementations remain a production-readiness gap.
 
 ## Auth / Authorization
 
@@ -104,7 +104,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Risk | Status |
 | --- | --- |
 | Production transport | Native transport method-channel seam, app-owned capability-gated transport adapters/factories, payload-limit enforcement, and network frame gates exist; no live peer transport implementation yet |
-| Platform key storage | Method-channel read/write seams plus app-owned receipt key provisioning, export, and verification mapping exist; native implementation pending |
+| Platform key storage | Method-channel read/write seams plus app-owned receipt key provisioning, ambiguous active-key rejection, export, and verification mapping exist; native implementation pending |
 | Persistence | Canonical recovery-window file store, app-owned store factories, environment-configured recovery roots, and mounted recovery-window loading exist; production database/platform persistence not implemented |
 | App flows | Demo routes plus mounted setup/join orchestration seams, bounded mounted table/join native bootstrap mapping, mounted receipt export/verify wiring, app-owned route registries, enabled demo-route gates, validated app-owned production route maps, validated app-owned initial routes, validated production navigation descriptors, app-owned home surface builders, and unknown-route fallback exist; production navigation polish remains |
 | UI polish | Shared app-shell scaffold/action/status/info primitives exist and mounted home/table/chat/receipt/join/setup/fallback routes consume them; app shells can replace demo home surfaces through runtime builders; final production UI validation remains |

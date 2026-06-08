@@ -115,6 +115,40 @@ void main() {
     expect(bridge.savedKeys, isEmpty);
   });
 
+  test('does not provision over ambiguous active native keys', () async {
+    final bridge = _ProvisioningBridge(
+      snapshot: const SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'receipt_signing_1',
+            purpose: 'receipt_signing',
+            algorithm: 'hmac-sha256',
+            secret: 'signing_1',
+            active: true,
+          ),
+          SecureKeyRecord(
+            keyId: 'receipt_signing_2',
+            purpose: 'receipt_signing',
+            algorithm: 'hmac-sha256',
+            secret: 'signing_2',
+            active: true,
+          ),
+        ],
+      ),
+    );
+    final provisioner = _provisioner(bridge);
+
+    final result = await provisioner.ensureActiveKeys();
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key storage contains multiple active signing keys.',
+    ]);
+    expect(result.keysCreated, 0);
+    expect(bridge.savedKeys, isEmpty);
+  });
+
   test('fails closed when native key save fails', () async {
     final bridge = _ProvisioningBridge(
       saveResult: const SecureKeyStorageMutationResult.failure(

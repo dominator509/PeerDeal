@@ -72,6 +72,56 @@ void main() {
     expect(result.warnings.single, isNot(contains('locked')));
   });
 
+  test(
+    'fails closed when native storage has multiple active receipt keys',
+    () async {
+      final bridge = _FakeSecureKeyStorageBridge(
+        snapshot: const SecureKeyStorageSnapshot(
+          available: true,
+          keys: <SecureKeyRecord>[
+            SecureKeyRecord(
+              keyId: 'receipt_signing_1',
+              purpose: 'receipt_signing',
+              algorithm: 'hmac-sha256',
+              secret: 'signing_secret_1',
+              active: true,
+            ),
+            SecureKeyRecord(
+              keyId: 'receipt_signing_2',
+              purpose: 'receipt_signing',
+              algorithm: 'hmac-sha256',
+              secret: 'signing_secret_2',
+              active: true,
+            ),
+            SecureKeyRecord(
+              keyId: 'receipt_encryption_1',
+              purpose: 'receipt_encryption',
+              algorithm: 'external',
+              secret: 'encryption_secret_1',
+              active: true,
+            ),
+            SecureKeyRecord(
+              keyId: 'receipt_encryption_2',
+              purpose: 'receipt_encryption',
+              algorithm: 'external',
+              secret: 'encryption_secret_2',
+              active: true,
+            ),
+          ],
+        ),
+      );
+
+      final result = await NativeReceiptKeyRingLoader(bridge: bridge).load();
+
+      expect(result.hasSigningKey, isFalse);
+      expect(result.hasEncryptionKey, isFalse);
+      expect(result.warnings, <String>[
+        'Secure receipt key storage contains multiple active signing keys.',
+        'Secure receipt key storage contains multiple active encryption keys.',
+      ]);
+    },
+  );
+
   test('fails closed when native secure key storage throws', () async {
     final result = await NativeReceiptKeyRingLoader(
       bridge: _ThrowingSecureKeyStorageBridge(),

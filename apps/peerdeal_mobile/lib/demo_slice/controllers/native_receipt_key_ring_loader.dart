@@ -58,6 +58,16 @@ class NativeReceiptKeyRingLoader {
       purpose: 'receipt_encryption',
       algorithm: 'external',
     );
+    final warnings = _activeKeyWarnings(
+      signingRecords: signingRecords,
+      encryptionRecords: encryptionRecords,
+    );
+    if (warnings.isNotEmpty) {
+      return ReceiptKeyRingLoadResult(
+        keyRing: const ReceiptKeyRingSnapshot(),
+        warnings: warnings,
+      );
+    }
 
     return ReceiptKeyRingLoadResult(
       keyRing: ReceiptKeyRingSnapshot(
@@ -85,6 +95,24 @@ class NativeReceiptKeyRingLoader {
             .toList()
           ..sort((left, right) => left.keyId.compareTo(right.keyId));
     return filtered;
+  }
+
+  List<String> _activeKeyWarnings({
+    required List<SecureKeyRecord> signingRecords,
+    required List<SecureKeyRecord> encryptionRecords,
+  }) {
+    final warnings = <String>[];
+    if (signingRecords.where((record) => record.active).length > 1) {
+      warnings.add(
+        'Secure receipt key storage contains multiple active signing keys.',
+      );
+    }
+    if (encryptionRecords.where((record) => record.active).length > 1) {
+      warnings.add(
+        'Secure receipt key storage contains multiple active encryption keys.',
+      );
+    }
+    return warnings;
   }
 
   ReceiptSigningKey? _activeSigningKey(List<SecureKeyRecord> records) {

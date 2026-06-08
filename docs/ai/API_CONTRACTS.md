@@ -117,6 +117,8 @@ fall back to relay-only join bootstrap plans.
 - Protocol failures use `ProtocolDiagnostic`.
 - Sync/replay failures expose structured mismatch/conflict codes.
 - Receipt import/export/verification failures must fail closed.
+- App receipt key-ring loaders must fail closed when native storage exposes
+  ambiguous active signing or encryption keys.
 - App orchestration should surface scrubbed diagnostics, not raw secrets,
   credentials, or platform exception payloads.
 
