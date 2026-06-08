@@ -101,6 +101,9 @@ the gates below are satisfied.
 - Wizard setup validation now rejects unsupported variant ids before Game File
   compilation, so launch setup cannot produce build-ready files for variants
   outside the currently implemented Hold'em boundary.
+- Wizard Game File compilation now rechecks build-ready mode and variant ids,
+  so manually constructed setup plans cannot bypass resolver validation and
+  emit unsupported production Game Files.
 - Mode governance now locks deterministic waitlist promotion ordering and
   rejects promotion when mode policy, manager permission, or waitlist head
   state does not allow it.

@@ -14,6 +14,40 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Wizard Compiler Support Gate
+
+Summary:
+Hardened the Game File compiler as a second validation boundary. Even if a
+caller manually constructs a build-ready `ValidatedSetupPlan`, the compiler now
+rejects unsupported mode and variant ids before emitting a Game File.
+
+Files changed:
+- `packages/peerdeal_wizard/lib/src/engine/default_game_file_compiler.dart`
+- `packages/peerdeal_wizard/test/game_file_compiler_test.dart`
+- `packages/peerdeal_wizard/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_wizard`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This intentionally preserves the current Open Table/Tournament and
+  `holdem_nlhe` launch boundary. Future supported modes/variants must widen
+  resolver and compiler validation together.
+
+Next reviewer:
+Keep compiler support gates in sync with any production-ready mode or variant
+expansion.
+
+---
+
 ### 2026-06-08 - Codex - Wizard Unsupported Variant Gate
 
 Summary:

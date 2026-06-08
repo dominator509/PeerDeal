@@ -7,7 +7,10 @@ class DefaultGameFileCompiler implements GameFileCompiler {
 
   @override
   Map<String, Object?> compile(ValidatedSetupPlan plan) {
-    if (!plan.buildReady || !plan.validationResult.isValid) {
+    final buildReadyErrors = _buildReadyErrors(plan);
+    if (!plan.buildReady ||
+        !plan.validationResult.isValid ||
+        buildReadyErrors.isNotEmpty) {
       throw StateError('ValidatedSetupPlan is not build-ready.');
     }
 
@@ -16,9 +19,14 @@ class DefaultGameFileCompiler implements GameFileCompiler {
 
   @override
   GameFileCompileResult tryCompile(ValidatedSetupPlan plan) {
-    if (!plan.buildReady || !plan.validationResult.isValid) {
+    final buildReadyErrors = _buildReadyErrors(plan);
+    if (!plan.buildReady ||
+        !plan.validationResult.isValid ||
+        buildReadyErrors.isNotEmpty) {
       final errors = plan.validationResult.errors.isEmpty
-          ? const <String>['setup_plan_not_build_ready']
+          ? buildReadyErrors.isEmpty
+                ? const <String>['setup_plan_not_build_ready']
+                : buildReadyErrors
           : plan.validationResult.errors;
       return GameFileCompileResult.rejected(
         errors: List<String>.unmodifiable(errors),
@@ -37,6 +45,19 @@ class DefaultGameFileCompiler implements GameFileCompiler {
         warnings: List<String>.unmodifiable(plan.validationResult.warnings),
       );
     }
+  }
+
+  List<String> _buildReadyErrors(ValidatedSetupPlan plan) {
+    final errors = <String>[];
+    if (plan.modeId != 'open_table' && plan.modeId != 'tournament') {
+      errors.add('unsupported_mode_id');
+    }
+
+    if (plan.variantId != 'holdem_nlhe') {
+      errors.add('unsupported_variant_id');
+    }
+
+    return List<String>.unmodifiable(errors);
   }
 
   Map<String, Object?> _compileBuildReadyPlan(ValidatedSetupPlan plan) {

@@ -123,5 +123,53 @@ void main() {
       expect(result.isCompiled, isFalse);
       expect(result.errors, ['setup_plan_not_build_ready']);
     });
+
+    test('tryCompile rejects build-ready unsupported variant plan', () {
+      const compiler = DefaultGameFileCompiler();
+      const plan = ValidatedSetupPlan(
+        planId: 'plan_unsupported_variant',
+        modeId: 'open_table',
+        variantId: 'omaha_plo',
+        policyProfileIds: <String, String>{
+          'privacy_profile': 'privacy.default',
+          'capture_profile': 'capture.protected',
+          'network_profile': 'network.hybrid_default',
+          'retention_profile': 'retention.standard',
+        },
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        validationResult: ValidationResult(isValid: true),
+        buildReady: true,
+      );
+
+      final result = compiler.tryCompile(plan);
+
+      expect(result.isCompiled, isFalse);
+      expect(result.gameFile, isNull);
+      expect(result.errors, ['unsupported_variant_id']);
+    });
+
+    test('tryCompile rejects build-ready unsupported mode plan', () {
+      const compiler = DefaultGameFileCompiler();
+      const plan = ValidatedSetupPlan(
+        planId: 'plan_unsupported_mode',
+        modeId: 'cash_private',
+        variantId: 'holdem_nlhe',
+        policyProfileIds: <String, String>{
+          'privacy_profile': 'privacy.default',
+          'capture_profile': 'capture.protected',
+          'network_profile': 'network.hybrid_default',
+          'retention_profile': 'retention.standard',
+        },
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        validationResult: ValidationResult(isValid: true),
+        buildReady: true,
+      );
+
+      final result = compiler.tryCompile(plan);
+
+      expect(result.isCompiled, isFalse);
+      expect(result.gameFile, isNull);
+      expect(result.errors, ['unsupported_mode_id']);
+    });
   });
 }
