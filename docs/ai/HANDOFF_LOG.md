@@ -14,6 +14,44 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Join Invite Context Gate
+
+Summary:
+Hardened mounted join routes in both app shells so app-owned invite contexts are
+validated before deeper orchestration. Blank invite codes and whitespace-only
+rejoin tokens now fail closed at the route boundary instead of reaching join
+adapters.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\join_flow\join_flow_route_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\join_flow\join_flow_route_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This validates mounted route invite context shape only. Production invite
+  retrieval and native/local transport remain tracked readiness gaps.
+
+Next reviewer:
+Keep route-level invite context validation aligned with future production
+invite source adapters.
+
+---
+
 ### 2026-06-08 - Codex - App Runtime Override Merge
 
 Summary:

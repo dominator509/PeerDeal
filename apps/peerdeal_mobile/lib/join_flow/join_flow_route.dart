@@ -96,6 +96,9 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
     try {
       final orchestrator = widget._orchestratorFactory(mode);
       final context = widget._inviteContextFactory(mode);
+      final invalidContext = _invalidInviteContextOutcome(mode, context);
+      if (invalidContext != null) return invalidContext;
+
       return mode == JoinFlowDemoMode.rejoin
           ? await orchestrator.runRejoin(context)
           : await orchestrator.runFirstJoin(context);
@@ -121,6 +124,38 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
       _outcome = _run(mode);
     });
   }
+}
+
+JoinFlowOutcome? _invalidInviteContextOutcome(
+  JoinFlowDemoMode mode,
+  InviteContext context,
+) {
+  if (context.inviteCode.trim().isEmpty) {
+    return const JoinFlowOutcome(
+      state: JoinFlowState.joinRejected,
+      status: JoinDecisionStatus.rejected,
+      resultCode: 'ERR_INVITE_CONTEXT_INVALID',
+      diagnostics: <ProtocolDiagnostic>[
+        ProtocolDiagnostic(
+          code: 'ERR_INVITE_CONTEXT_INVALID',
+          message: 'Invite context is invalid.',
+        ),
+      ],
+      message: 'Invite context is invalid.',
+    );
+  }
+
+  final rejoinToken = context.rejoinToken;
+  if (mode == JoinFlowDemoMode.rejoin &&
+      (rejoinToken == null || rejoinToken.trim().isEmpty)) {
+    return const JoinFlowOutcome(
+      state: JoinFlowState.joinRejected,
+      status: JoinDecisionStatus.rejoinRejected,
+      resultCode: 'ERR_REJOIN_TOKEN_REQUIRED',
+    );
+  }
+
+  return null;
 }
 
 InviteContext _defaultInviteContextFor(JoinFlowDemoMode mode) {

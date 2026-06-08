@@ -90,6 +90,56 @@ void main() {
     expect(find.text('Result: ERR_JOIN_FLOW_UNAVAILABLE'), findsOneWidget);
   });
 
+  testWidgets('fails closed before orchestration for invalid invite context', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: demoFactory.create,
+          inviteContextFactory: (_) => const InviteContext(
+            inviteCode: '   ',
+            requestedRole: RequestedRole.player,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_INVITE_CONTEXT_INVALID'), findsOneWidget);
+    expect(
+      find.text('ERR_INVITE_CONTEXT_INVALID: Invite context is invalid.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('fails closed before rejoin for whitespace rejoin token', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: demoFactory.create,
+          inviteContextFactory: (_) => const InviteContext(
+            inviteCode: 'ABC123',
+            requestedRole: RequestedRole.player,
+            rejoinToken: '   ',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Run rejoin'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_REJOIN_TOKEN_REQUIRED'), findsOneWidget);
+  });
+
   testWidgets('can switch to mounted rejection outcomes', (tester) async {
     await tester.pumpWidget(
       Directionality(

@@ -264,6 +264,9 @@ the gates below are satisfied.
   the app shell boundary instead of leaving hardcoded invite/rejoin tokens
   inside the route; the route fails closed when invite context construction is
   unavailable.
+- Mounted join routes now validate app-owned invite contexts before deeper
+  orchestration, rejecting blank invite codes and whitespace-only rejoin tokens
+  before adapter calls can observe malformed production invite input.
 - Wizard Game File compilation now exposes a fail-closed `tryCompile` boundary
   so app/session setup flows can reject invalid setup plans without compiler
   exceptions escaping orchestration.
