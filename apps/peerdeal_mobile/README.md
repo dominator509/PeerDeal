@@ -26,6 +26,7 @@ Setup flow:
   closed when setup orchestration is unavailable.
 - `lib/transport/` adapts generic native byte-frame transport to
   `peerdeal_network` validating sender/receiver boundaries. Native transport
-  remains platform-owned; app adapters only compose package public APIs.
+  remains platform-owned; app adapters and factories only compose package
+  public APIs.
 
 It does NOT introduce a new top-level package.

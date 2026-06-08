@@ -305,6 +305,41 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - App Native Transport Session Factories
+
+Summary:
+Added app-owned native transport session factories in both app shells. The
+factory defaults to `MethodChannelNativeTransportBridge` and creates only
+validated `peerdeal_network` transport senders plus native frame drains backed
+by validating receivers. This gives app orchestration a stable construction
+boundary without manually composing native bridges and validation gates.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_session_factory_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_session_factory_test.dart`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/transport/native_transport_frame_adapter_test.dart test/transport/native_transport_session_factory_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/transport/native_transport_frame_adapter_test.dart test/transport/native_transport_session_factory_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- Real native transport remains pending; this slice locks app construction of
+  the Dart/native validation composition only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App Native Transport Validation Adapters
 
 Summary:

@@ -120,6 +120,9 @@ the gates below are satisfied.
   generic native byte-frame bridge with `peerdeal_network` validating
   sender/receiver boundaries, so app transport sends and inbound drains cannot
   bypass network frame validation.
+- App shells now include native transport session factories that default to
+  `MethodChannelNativeTransportBridge` and only expose validated
+  `peerdeal_network` sender/drain construction to app orchestration.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
