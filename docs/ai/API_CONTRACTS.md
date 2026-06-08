@@ -58,7 +58,7 @@ Do not import another package's `src/`.
 ## App Route Surface
 
 Current app shells mount demo-oriented routes rather than production app flows.
-Known route categories include:
+Verified mounted route categories include:
 
 - Demo home / scenario selection.
 - Table surface.
@@ -68,8 +68,11 @@ Known route categories include:
 - Setup flow.
 - Unknown route fallback.
 
-TODO: Treat concrete route paths and production navigation as app-shell details
-unless verified from the app route source in the current branch.
+Concrete mounted demo route paths are app-shell details owned by each app's
+`DemoSliceRoutes` registry. App `MaterialApp` route maps validate against that
+registry at construction time, with `/` allowed only as an explicit framework
+default-route alias. Production navigation remains app-shell work and should
+replace or extend the registry without moving route policy into shared packages.
 
 ## Network Transport Boundary
 

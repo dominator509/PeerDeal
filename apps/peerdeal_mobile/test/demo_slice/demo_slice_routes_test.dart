@@ -31,4 +31,44 @@ void main() {
     expect(DemoSliceRoutes.tryByPath(DemoSliceRoutes.table)?.label, 'Table');
     expect(DemoSliceRoutes.tryByPath('/missing'), isNull);
   });
+
+  test('route map validation accepts mounted routes and explicit aliases', () {
+    final validated = DemoSliceRoutes.requireMountedRouteMap(
+      <String, int>{
+        for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,
+        '/': 1,
+      },
+      allowedExtraPaths: const <String>{'/'},
+    );
+
+    expect(
+      validated.keys,
+      containsAll(DemoSliceRoutes.mountedRoutes.map((route) => route.path)),
+    );
+    expect(() => validated['/demo/other'] = 1, throwsUnsupportedError);
+  });
+
+  test('route map validation rejects missing mounted routes', () {
+    final routes = <String, int>{
+      for (final route in DemoSliceRoutes.mountedRoutes)
+        if (route.path != DemoSliceRoutes.receipt) route.path: 1,
+    };
+
+    expect(
+      () => DemoSliceRoutes.requireMountedRouteMap(routes),
+      throwsA(isA<StateError>()),
+    );
+  });
+
+  test('route map validation rejects unexpected routes', () {
+    final routes = <String, int>{
+      for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,
+      '/unexpected': 1,
+    };
+
+    expect(
+      () => DemoSliceRoutes.requireMountedRouteMap(routes),
+      throwsA(isA<StateError>()),
+    );
+  });
 }

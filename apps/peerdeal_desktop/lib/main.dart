@@ -89,48 +89,53 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           },
         );
       },
-      routes: <String, WidgetBuilder>{
-        Navigator.defaultRouteName: _buildHome,
-        DemoSliceRoutes.homeRoute.path: _buildHome,
-        DemoSliceRoutes.tableRoute.path: (context) => DemoTableRoute(
-          snapshot: _activeSnapshot,
-          networkConfidence: _networkConfidencePresenter.present(
-            _activeSnapshot,
+      routes: DemoSliceRoutes.requireMountedRouteMap(
+        <String, WidgetBuilder>{
+          Navigator.defaultRouteName: _buildHome,
+          DemoSliceRoutes.homeRoute.path: _buildHome,
+          DemoSliceRoutes.tableRoute.path: (context) => DemoTableRoute(
+            snapshot: _activeSnapshot,
+            networkConfidence: _networkConfidencePresenter.present(
+              _activeSnapshot,
+            ),
+            bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
+            recoveryPersistenceStoreFactory:
+                widget._recoveryPersistenceStoreFactory,
+            onOpenChat: () =>
+                Navigator.of(context).pushNamed(DemoSliceRoutes.chatRoute.path),
+            onOpenReceipt: () => Navigator.of(
+              context,
+            ).pushNamed(DemoSliceRoutes.receiptRoute.path),
           ),
-          bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
-          recoveryPersistenceStoreFactory:
-              widget._recoveryPersistenceStoreFactory,
-          onOpenChat: () =>
-              Navigator.of(context).pushNamed(DemoSliceRoutes.chatRoute.path),
-          onOpenReceipt: () => Navigator.of(
-            context,
-          ).pushNamed(DemoSliceRoutes.receiptRoute.path),
-        ),
-        DemoSliceRoutes.chatRoute.path: (context) => DemoChatScreen(
-          snapshot: _activeSnapshot,
-          onOpenTable: () =>
-              Navigator.of(context).pushNamed(DemoSliceRoutes.tableRoute.path),
-        ),
-        DemoSliceRoutes.receiptRoute.path: (_) => DemoReceiptRoute(
-          snapshot: _activeSnapshot,
-          presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
-          exportArtifact: widget._receiptExportArtifact,
-          receipt: _receiptFor(_activeSnapshot),
-          exportArtifactFactory: widget._receiptExportArtifact == null
-              ? widget._receiptExportArtifactFactory
-              : null,
-          artifactVerifier:
-              widget._receiptExportArtifact == null &&
-                  widget._receiptExportArtifactFactory == null
-              ? null
-              : _createReceiptArtifactVerifier(),
-          recovery: _recoveryResultFactory.createFor(_activeSnapshot),
-        ),
-        DemoSliceRoutes.joinRoute.path: (_) =>
-            JoinFlowRoute(orchestratorFactory: _joinFlowOrchestratorFactory),
-        DemoSliceRoutes.setupRoute.path: (_) =>
-            SetupFlowRoute(orchestratorFactory: _setupFlowOrchestratorFactory),
-      },
+          DemoSliceRoutes.chatRoute.path: (context) => DemoChatScreen(
+            snapshot: _activeSnapshot,
+            onOpenTable: () => Navigator.of(
+              context,
+            ).pushNamed(DemoSliceRoutes.tableRoute.path),
+          ),
+          DemoSliceRoutes.receiptRoute.path: (_) => DemoReceiptRoute(
+            snapshot: _activeSnapshot,
+            presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
+            exportArtifact: widget._receiptExportArtifact,
+            receipt: _receiptFor(_activeSnapshot),
+            exportArtifactFactory: widget._receiptExportArtifact == null
+                ? widget._receiptExportArtifactFactory
+                : null,
+            artifactVerifier:
+                widget._receiptExportArtifact == null &&
+                    widget._receiptExportArtifactFactory == null
+                ? null
+                : _createReceiptArtifactVerifier(),
+            recovery: _recoveryResultFactory.createFor(_activeSnapshot),
+          ),
+          DemoSliceRoutes.joinRoute.path: (_) =>
+              JoinFlowRoute(orchestratorFactory: _joinFlowOrchestratorFactory),
+          DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
+            orchestratorFactory: _setupFlowOrchestratorFactory,
+          ),
+        },
+        allowedExtraPaths: const <String>{Navigator.defaultRouteName},
+      ),
       onUnknownRoute: _unknownRoute,
     );
   }

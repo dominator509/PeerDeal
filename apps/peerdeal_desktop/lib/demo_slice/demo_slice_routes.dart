@@ -60,6 +60,31 @@ class DemoSliceRoutes {
     }
     return null;
   }
+
+  static Map<String, T> requireMountedRouteMap<T>(
+    Map<String, T> routes, {
+    Set<String> allowedExtraPaths = const <String>{},
+  }) {
+    final mountedPaths = mountedRoutes.map((route) => route.path).toSet();
+    final routePaths = routes.keys.toSet();
+    final missingPaths = mountedPaths.difference(routePaths).toList()..sort();
+    final extraPaths =
+        routePaths
+            .difference(mountedPaths)
+            .difference(allowedExtraPaths)
+            .toList()
+          ..sort();
+
+    if (missingPaths.isNotEmpty || extraPaths.isNotEmpty) {
+      throw StateError(
+        'Mounted demo route map drifted from route registry. '
+        'Missing: ${missingPaths.join(', ')}. '
+        'Extra: ${extraPaths.join(', ')}.',
+      );
+    }
+
+    return Map<String, T>.unmodifiable(routes);
+  }
 }
 
 class DemoSliceRouteDefinition {

@@ -165,6 +165,9 @@ the gates below are satisfied.
 - App shells now expose app-owned route registries with stable mounted route
   descriptors and primary-navigation definitions, and home navigation is driven
   from those descriptors instead of scattered route labels.
+- App shell mounted route maps now validate against the app-owned route
+  registries at construction time, allowing only the explicit framework default
+  route alias so mounted navigation cannot silently drift from the registry.
 - Demo receipt presenters in both app shells can route signed receipt export
   artifacts through fail-closed verification before projecting safe receipt
   fields.

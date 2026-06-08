@@ -947,6 +947,39 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - App Route Map Registry Validation
+
+Summary:
+Mounted app route maps in both app shells now pass through the app-owned
+`DemoSliceRoutes.requireMountedRouteMap` invariant before `WidgetsApp` sees
+them. The guard rejects missing mounted routes and unexpected extra routes while
+allowing `/` only as an explicit framework default-route alias, reducing route
+drift while production navigation remains app-shell owned.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_slice_routes_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_slice_routes_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\demo_slice_routes_test.dart test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\demo_slice_routes_test.dart test\app_shell_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- This locks demo mounted-route coverage only; final production navigation and
+  non-demo route replacement still need product validation.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - App Route Registry
 
 Summary:
