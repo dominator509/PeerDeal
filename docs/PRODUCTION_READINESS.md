@@ -395,6 +395,9 @@ the gates below are satisfied.
 - App recovery persistence store factories now fail closed when app-provided or
   environment-provided recovery roots contain control characters, preventing
   malformed root configuration from constructing durable JSON stores.
+- App recovery persistence store factories now also fail closed when
+  app-provided recovery roots are padded with leading or trailing whitespace,
+  preventing ambiguous durable JSON store roots from being constructed.
 - Mounted app table routes now consume the app-owned recovery persistence
   factory when one is supplied, load the active scenario recovery window, and
   fail closed with an explicit warning when no platform persistence root is
@@ -447,8 +450,9 @@ the gates below are satisfied.
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
-  loading, mounted recovery-window loading, app-owned route runtime dependency
-  grouping, app-owned table runtime-scope injection, canonical app-route
+  loading, app-owned recovery root validation, mounted recovery-window loading,
+  app-owned route runtime dependency grouping, app-owned table runtime-scope
+  injection, canonical app-route
   registry validation, app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
   app-owned join invite-context injection, app-owned receipt envelope

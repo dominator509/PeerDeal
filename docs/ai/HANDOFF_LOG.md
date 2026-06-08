@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Recovery Root Padding Gate
+
+Summary:
+Hardened mobile and desktop app-owned recovery persistence factories so
+app-provided durable root directories fail closed when padded with leading or
+trailing whitespace. This prevents ambiguous JSON recovery store roots from
+being constructed before platform/database persistence exists.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks app-owned root validation only; production platform/database
+  persistence remains pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Native Transport Sink Validation Gate
 
 Summary:

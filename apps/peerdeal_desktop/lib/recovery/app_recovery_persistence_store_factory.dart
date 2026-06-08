@@ -69,6 +69,7 @@ class AppRecoveryPersistenceStoreFactory {
   static bool _isValidRootPath(String path) {
     final normalized = path.trim();
     return normalized.isNotEmpty &&
+        normalized == path &&
         !RegExp(r'[\x00-\x1F\x7F]').hasMatch(normalized);
   }
 }
