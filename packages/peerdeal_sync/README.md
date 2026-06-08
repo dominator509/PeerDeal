@@ -9,11 +9,12 @@ This package owns:
 - conflict detection
 - reconciliation result shaping
 - reconnect / handoff / transfer recovery coordination
+- recovery persistence contracts for snapshot/event windows
 - safe-close recommendation on irreconcilable mismatch
 
 ## Deliberate non-goals for this starter
 - no live transport implementation
-- no full persistence layer
+- no durable platform persistence implementation
 - no production replay viewer
 - no split-brain UI
 - no real bootstrap service
@@ -29,3 +30,7 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
   apply-stage conflicts.
 - Conflict-detector, snapshot-applier, and projector exceptions are normalized
   into fatal safe-close conflicts instead of escaping recovery callers.
+- The recovery persistence contract has an in-memory gate that rejects
+  table/session or protocol mismatches, sequence gaps, hash-chain breaks, and
+  snapshots ahead of the stored event stream before mutating stored recovery
+  windows.

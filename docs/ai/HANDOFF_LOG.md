@@ -42,3 +42,42 @@ Risks:
 Next reviewer:
 Codex or DeepSeek-Claude should keep these docs concise and update only durable
 facts.
+
+---
+
+### 2026-06-08 - Codex - Sync Recovery Persistence Seam
+
+Summary:
+Added a sync-owned recovery persistence contract plus an in-memory validation
+store for snapshot/event recovery windows. The store rejects scope drift,
+protocol drift, sequence gaps, hash-chain breaks, and snapshots ahead of the
+stored event stream before mutating state. This advances the persistence
+software seam without claiming durable platform storage is complete.
+
+Files changed:
+- `packages/peerdeal_sync/lib/peerdeal_sync.dart`
+- `packages/peerdeal_sync/lib/src/contracts/recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/models/persisted_recovery_window.dart`
+- `packages/peerdeal_sync/lib/src/models/recovery_persistence_result.dart`
+- `packages/peerdeal_sync/lib/src/models/recovery_persistence_scope.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `packages/peerdeal_sync/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- Durable platform persistence remains a production gap; this slice locks the
+  package contract and validation behavior only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.

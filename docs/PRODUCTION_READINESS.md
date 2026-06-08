@@ -67,7 +67,7 @@ the gates below are satisfied.
 
 ## Current highest-risk blockers
 - Live transport, native OS implementations, production cryptographic key
-  management, and persistence remain scaffold-level.
+  management, and durable platform persistence remain scaffold-level.
 - App shells now mount demo, receipt, safe-surface, and join-flow routes, but
   runtime navigation still needs production UI and non-demo orchestration.
 - App UI is not production-polished.
@@ -165,15 +165,20 @@ the gates below are satisfied.
 - Sync recovery now converts conflict-detector, snapshot-applier, and
   projector exceptions into fatal safe-close conflicts instead of allowing
   recovery dependency failures to escape.
+- Sync recovery persistence now has a package-owned store contract and
+  in-memory validation gate that rejects mismatched table/session scope,
+  protocol drift, sequence gaps, hash-chain breaks, and snapshots ahead of the
+  stored event stream before mutating recovery windows.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
   checked-in markdown files were reviewed directly from source.
 - Platform-native secure storage, capture blocking, local-network discovery,
-  production transport, persistence, and polished app UI cannot be completed
-  inside the current ChatGPT project environment because they require native
-  platform implementations and device/OS integration. The Dart contracts and
-  method-channel payload gates are locked for those follow-up implementations.
+  production transport, durable persistence, and polished app UI cannot be
+  completed inside the current ChatGPT project environment because they require
+  native platform implementations and device/OS integration. The Dart
+  contracts, recovery persistence seam, and method-channel payload gates are
+  locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
