@@ -162,6 +162,9 @@ the gates below are satisfied.
   status pill, and info row in `peerdeal_ui_kit`, and mounted home, table,
   chat, receipt, join, setup, and unknown-route surfaces in both app shells use
   them instead of raw placeholder columns.
+- App shells now expose app-owned route registries with stable mounted route
+  descriptors and primary-navigation definitions, and home navigation is driven
+  from those descriptors instead of scattered route labels.
 - Demo receipt presenters in both app shells can route signed receipt export
   artifacts through fail-closed verification before projecting safe receipt
   fields.

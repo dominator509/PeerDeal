@@ -8,20 +8,12 @@ class DemoHomeScreen extends StatelessWidget {
   const DemoHomeScreen({
     super.key,
     required this.controller,
-    required this.onOpenTable,
-    required this.onOpenChat,
-    required this.onOpenReceipt,
-    required this.onOpenJoin,
-    required this.onOpenSetup,
+    required this.navigationActions,
     required this.onSelectScenario,
   });
 
   final DemoSliceController controller;
-  final VoidCallback onOpenTable;
-  final VoidCallback onOpenChat;
-  final VoidCallback onOpenReceipt;
-  final VoidCallback onOpenJoin;
-  final VoidCallback onOpenSetup;
+  final List<DemoHomeNavigationAction> navigationActions;
   final ValueChanged<String> onSelectScenario;
 
   @override
@@ -29,13 +21,14 @@ class DemoHomeScreen extends StatelessWidget {
     return PeerDealAppScaffold(
       title: 'PeerDeal demo',
       subtitle: 'Fixture-backed app orchestration',
-      actions: <Widget>[
-        PeerDealActionButton(label: 'Table', onPressed: onOpenTable),
-        PeerDealActionButton(label: 'Chat', onPressed: onOpenChat),
-        PeerDealActionButton(label: 'Receipt', onPressed: onOpenReceipt),
-        PeerDealActionButton(label: 'Join', onPressed: onOpenJoin),
-        PeerDealActionButton(label: 'Setup', onPressed: onOpenSetup),
-      ],
+      actions: navigationActions
+          .map(
+            (action) => PeerDealActionButton(
+              label: action.label,
+              onPressed: action.onPressed,
+            ),
+          )
+          .toList(growable: false),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -51,6 +44,16 @@ class DemoHomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class DemoHomeNavigationAction {
+  const DemoHomeNavigationAction({
+    required this.label,
+    required this.onPressed,
+  });
+
+  final String label;
+  final VoidCallback onPressed;
 }
 
 class _ScenarioSummary extends StatelessWidget {

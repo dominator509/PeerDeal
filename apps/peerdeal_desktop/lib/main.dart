@@ -91,8 +91,8 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       },
       routes: <String, WidgetBuilder>{
         Navigator.defaultRouteName: _buildHome,
-        DemoSliceRoutes.home: _buildHome,
-        DemoSliceRoutes.table: (context) => DemoTableRoute(
+        DemoSliceRoutes.homeRoute.path: _buildHome,
+        DemoSliceRoutes.tableRoute.path: (context) => DemoTableRoute(
           snapshot: _activeSnapshot,
           networkConfidence: _networkConfidencePresenter.present(
             _activeSnapshot,
@@ -101,16 +101,17 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           recoveryPersistenceStoreFactory:
               widget._recoveryPersistenceStoreFactory,
           onOpenChat: () =>
-              Navigator.of(context).pushNamed(DemoSliceRoutes.chat),
-          onOpenReceipt: () =>
-              Navigator.of(context).pushNamed(DemoSliceRoutes.receipt),
+              Navigator.of(context).pushNamed(DemoSliceRoutes.chatRoute.path),
+          onOpenReceipt: () => Navigator.of(
+            context,
+          ).pushNamed(DemoSliceRoutes.receiptRoute.path),
         ),
-        DemoSliceRoutes.chat: (context) => DemoChatScreen(
+        DemoSliceRoutes.chatRoute.path: (context) => DemoChatScreen(
           snapshot: _activeSnapshot,
           onOpenTable: () =>
-              Navigator.of(context).pushNamed(DemoSliceRoutes.table),
+              Navigator.of(context).pushNamed(DemoSliceRoutes.tableRoute.path),
         ),
-        DemoSliceRoutes.receipt: (_) => DemoReceiptRoute(
+        DemoSliceRoutes.receiptRoute.path: (_) => DemoReceiptRoute(
           snapshot: _activeSnapshot,
           presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
           exportArtifact: widget._receiptExportArtifact,
@@ -125,9 +126,9 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
               : _createReceiptArtifactVerifier(),
           recovery: _recoveryResultFactory.createFor(_activeSnapshot),
         ),
-        DemoSliceRoutes.join: (_) =>
+        DemoSliceRoutes.joinRoute.path: (_) =>
             JoinFlowRoute(orchestratorFactory: _joinFlowOrchestratorFactory),
-        DemoSliceRoutes.setup: (_) =>
+        DemoSliceRoutes.setupRoute.path: (_) =>
             SetupFlowRoute(orchestratorFactory: _setupFlowOrchestratorFactory),
       },
       onUnknownRoute: _unknownRoute,
@@ -146,12 +147,14 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   Widget _buildHome(BuildContext context) {
     return DemoHomeScreen(
       controller: _controller,
-      onOpenTable: () => Navigator.of(context).pushNamed(DemoSliceRoutes.table),
-      onOpenChat: () => Navigator.of(context).pushNamed(DemoSliceRoutes.chat),
-      onOpenReceipt: () =>
-          Navigator.of(context).pushNamed(DemoSliceRoutes.receipt),
-      onOpenJoin: () => Navigator.of(context).pushNamed(DemoSliceRoutes.join),
-      onOpenSetup: () => Navigator.of(context).pushNamed(DemoSliceRoutes.setup),
+      navigationActions: DemoSliceRoutes.primaryNavigation
+          .map(
+            (route) => DemoHomeNavigationAction(
+              label: route.label,
+              onPressed: () => Navigator.of(context).pushNamed(route.path),
+            ),
+          )
+          .toList(growable: false),
       onSelectScenario: _selectScenario,
     );
   }

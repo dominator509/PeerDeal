@@ -947,6 +947,40 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - App Route Registry
+
+Summary:
+Added app-owned mounted route descriptors and primary-navigation definitions in
+both app shells. Home navigation now derives labels and destinations from the
+route registry instead of scattering route labels and paths through the UI, and
+focused tests lock uniqueness, lookup, and primary navigation coverage.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_slice_routes_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_slice_routes_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\demo_slice_routes_test.dart test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\demo_slice_routes_test.dart test\app_shell_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- This locks the current mounted route registry; final production navigation
+  still needs product validation and non-demo route replacement.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Mounted Route UI Shell Coverage
 
 Summary:
