@@ -32,6 +32,41 @@ void main() {
     expect(DemoSliceRoutes.tryByPath('/missing'), isNull);
   });
 
+  test('enabled mounted route subset keeps home and selected routes', () {
+    final enabled = DemoSliceRoutes.enabledMountedRoutes(const <String>{
+      DemoSliceRoutes.home,
+      DemoSliceRoutes.table,
+    });
+
+    expect(enabled.map((route) => route.path), <String>[
+      DemoSliceRoutes.home,
+      DemoSliceRoutes.table,
+    ]);
+    expect(
+      DemoSliceRoutes.enabledPrimaryNavigation(const <String>{
+        DemoSliceRoutes.home,
+        DemoSliceRoutes.table,
+      }).map((route) => route.path),
+      <String>[DemoSliceRoutes.table],
+    );
+  });
+
+  test('enabled mounted route subset rejects unsafe route config', () {
+    expect(
+      () => DemoSliceRoutes.enabledMountedRoutes(const <String>{
+        DemoSliceRoutes.table,
+      }),
+      throwsA(isA<StateError>()),
+    );
+    expect(
+      () => DemoSliceRoutes.enabledMountedRoutes(const <String>{
+        DemoSliceRoutes.home,
+        '/demo/missing',
+      }),
+      throwsA(isA<StateError>()),
+    );
+  });
+
   test('route map validation accepts mounted routes and explicit aliases', () {
     final validated = DemoSliceRoutes.requireMountedRouteMap(
       <String, int>{
@@ -46,6 +81,24 @@ void main() {
       containsAll(DemoSliceRoutes.mountedRoutes.map((route) => route.path)),
     );
     expect(() => validated['/demo/other'] = 1, throwsUnsupportedError);
+  });
+
+  test('route map validation accepts an enabled route subset', () {
+    final expectedRoutes = DemoSliceRoutes.enabledMountedRoutes(const <String>{
+      DemoSliceRoutes.home,
+      DemoSliceRoutes.table,
+    });
+    final validated = DemoSliceRoutes.requireMountedRouteMap(
+      <String, int>{for (final route in expectedRoutes) route.path: 1, '/': 1},
+      expectedRoutes: expectedRoutes,
+      allowedExtraPaths: const <String>{'/'},
+    );
+
+    expect(
+      validated.keys,
+      containsAll(<String>[DemoSliceRoutes.home, DemoSliceRoutes.table]),
+    );
+    expect(validated.keys, isNot(contains(DemoSliceRoutes.receipt)));
   });
 
   test('route map validation locks canonical route registry metadata', () {

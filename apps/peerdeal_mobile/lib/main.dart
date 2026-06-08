@@ -46,6 +46,7 @@ class PeerDealMobileRuntime {
     this.bootstrapCandidateLoaderFactory,
     this.recoveryPersistenceStoreFactory,
     this.tableRuntimeScopeFactory,
+    this.enabledDemoRoutePaths,
   });
 
   final DemoReceiptSurfacePresenter? receiptPresenter;
@@ -62,6 +63,7 @@ class PeerDealMobileRuntime {
   final NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
+  final Set<String>? enabledDemoRoutePaths;
 
   PeerDealMobileRuntime withOverrides({
     DemoReceiptSurfacePresenter? receiptPresenter,
@@ -78,6 +80,7 @@ class PeerDealMobileRuntime {
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
+    Set<String>? enabledDemoRoutePaths,
   }) {
     return PeerDealMobileRuntime(
       receiptPresenter: receiptPresenter ?? this.receiptPresenter,
@@ -107,6 +110,8 @@ class PeerDealMobileRuntime {
           this.recoveryPersistenceStoreFactory,
       tableRuntimeScopeFactory:
           tableRuntimeScopeFactory ?? this.tableRuntimeScopeFactory,
+      enabledDemoRoutePaths:
+          enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
     );
   }
 }
@@ -129,6 +134,7 @@ class PeerDealMobileApp extends StatefulWidget {
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
+    Set<String>? enabledDemoRoutePaths,
   }) : _runtime = runtime,
        _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
@@ -143,7 +149,8 @@ class PeerDealMobileApp extends StatefulWidget {
        _setupFlowEnabledModes = setupFlowEnabledModes,
        _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory,
        _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory,
-       _tableRuntimeScopeFactory = tableRuntimeScopeFactory;
+       _tableRuntimeScopeFactory = tableRuntimeScopeFactory,
+       _enabledDemoRoutePaths = enabledDemoRoutePaths;
 
   final PeerDealMobileRuntime? _runtime;
   final DemoReceiptSurfacePresenter? _receiptPresenter;
@@ -160,6 +167,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? _recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
+  final Set<String>? _enabledDemoRoutePaths;
 
   @override
   State<PeerDealMobileApp> createState() => _PeerDealMobileAppState();
@@ -188,6 +196,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       bootstrapCandidateLoaderFactory: widget._bootstrapCandidateLoaderFactory,
       recoveryPersistenceStoreFactory: widget._recoveryPersistenceStoreFactory,
       tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
+      enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
     );
   }
 
@@ -201,6 +210,12 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
 
   @override
   Widget build(BuildContext context) {
+    final enabledMountedRoutes = DemoSliceRoutes.enabledMountedRoutes(
+      _runtime.enabledDemoRoutePaths,
+    );
+    final enabledRoutePaths = enabledMountedRoutes
+        .map((route) => route.path)
+        .toSet();
     return WidgetsApp(
       title: 'PeerDeal Mobile',
       color: const Color(0xFF1B5E20),
@@ -217,50 +232,66 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
         <String, WidgetBuilder>{
           Navigator.defaultRouteName: _buildHome,
           DemoSliceRoutes.homeRoute.path: _buildHome,
-          DemoSliceRoutes.tableRoute.path: (context) => DemoTableRoute(
-            snapshot: _activeSnapshot,
-            networkConfidence: _networkConfidencePresenter.present(
-              _activeSnapshot,
+          if (enabledRoutePaths.contains(DemoSliceRoutes.tableRoute.path))
+            DemoSliceRoutes.tableRoute.path: (context) => DemoTableRoute(
+              snapshot: _activeSnapshot,
+              networkConfidence: _networkConfidencePresenter.present(
+                _activeSnapshot,
+              ),
+              bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
+              recoveryPersistenceStoreFactory: _recoveryPersistenceStoreFactory,
+              runtimeScopeFactory: _runtime.tableRuntimeScopeFactory,
+              onOpenChat:
+                  enabledRoutePaths.contains(DemoSliceRoutes.chatRoute.path)
+                  ? () => Navigator.of(
+                      context,
+                    ).pushNamed(DemoSliceRoutes.chatRoute.path)
+                  : null,
+              onOpenReceipt:
+                  enabledRoutePaths.contains(DemoSliceRoutes.receiptRoute.path)
+                  ? () => Navigator.of(
+                      context,
+                    ).pushNamed(DemoSliceRoutes.receiptRoute.path)
+                  : null,
             ),
-            bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
-            recoveryPersistenceStoreFactory: _recoveryPersistenceStoreFactory,
-            runtimeScopeFactory: _runtime.tableRuntimeScopeFactory,
-            onOpenChat: () =>
-                Navigator.of(context).pushNamed(DemoSliceRoutes.chatRoute.path),
-            onOpenReceipt: () => Navigator.of(
-              context,
-            ).pushNamed(DemoSliceRoutes.receiptRoute.path),
-          ),
-          DemoSliceRoutes.chatRoute.path: (context) => DemoChatScreen(
-            snapshot: _activeSnapshot,
-            onOpenTable: () => Navigator.of(
-              context,
-            ).pushNamed(DemoSliceRoutes.tableRoute.path),
-          ),
-          DemoSliceRoutes.receiptRoute.path: (_) => DemoReceiptRoute(
-            snapshot: _activeSnapshot,
-            presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
-            exportArtifact: _runtime.receiptExportArtifact,
-            receipt: _receiptInputFor(_activeSnapshot),
-            exportArtifactFactory: _runtime.receiptExportArtifactFactory,
-            artifactVerifier:
-                _runtime.receiptExportArtifact == null &&
-                    _runtime.receiptExportArtifactFactory == null
-                ? null
-                : _createReceiptArtifactVerifier(),
-            recovery: _recoveryResultFactory.createFor(_activeSnapshot),
-          ),
-          DemoSliceRoutes.joinRoute.path: (_) => JoinFlowRoute(
-            orchestratorFactory: _joinFlowOrchestratorFactory,
-            inviteContextFactory: _runtime.joinFlowInviteContextFactory,
-            enabledModes: _runtime.joinFlowEnabledModes,
-          ),
-          DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
-            orchestratorFactory: _setupFlowOrchestratorFactory,
-            setupIntentFactory: _runtime.setupFlowIntentFactory,
-            enabledModes: _runtime.setupFlowEnabledModes,
-          ),
+          if (enabledRoutePaths.contains(DemoSliceRoutes.chatRoute.path))
+            DemoSliceRoutes.chatRoute.path: (context) => DemoChatScreen(
+              snapshot: _activeSnapshot,
+              onOpenTable:
+                  enabledRoutePaths.contains(DemoSliceRoutes.tableRoute.path)
+                  ? () => Navigator.of(
+                      context,
+                    ).pushNamed(DemoSliceRoutes.tableRoute.path)
+                  : null,
+            ),
+          if (enabledRoutePaths.contains(DemoSliceRoutes.receiptRoute.path))
+            DemoSliceRoutes.receiptRoute.path: (_) => DemoReceiptRoute(
+              snapshot: _activeSnapshot,
+              presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
+              exportArtifact: _runtime.receiptExportArtifact,
+              receipt: _receiptInputFor(_activeSnapshot),
+              exportArtifactFactory: _runtime.receiptExportArtifactFactory,
+              artifactVerifier:
+                  _runtime.receiptExportArtifact == null &&
+                      _runtime.receiptExportArtifactFactory == null
+                  ? null
+                  : _createReceiptArtifactVerifier(),
+              recovery: _recoveryResultFactory.createFor(_activeSnapshot),
+            ),
+          if (enabledRoutePaths.contains(DemoSliceRoutes.joinRoute.path))
+            DemoSliceRoutes.joinRoute.path: (_) => JoinFlowRoute(
+              orchestratorFactory: _joinFlowOrchestratorFactory,
+              inviteContextFactory: _runtime.joinFlowInviteContextFactory,
+              enabledModes: _runtime.joinFlowEnabledModes,
+            ),
+          if (enabledRoutePaths.contains(DemoSliceRoutes.setupRoute.path))
+            DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
+              orchestratorFactory: _setupFlowOrchestratorFactory,
+              setupIntentFactory: _runtime.setupFlowIntentFactory,
+              enabledModes: _runtime.setupFlowEnabledModes,
+            ),
         },
+        expectedRoutes: enabledMountedRoutes,
         allowedExtraPaths: const <String>{Navigator.defaultRouteName},
       ),
       onUnknownRoute: _unknownRoute,
@@ -279,14 +310,17 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   Widget _buildHome(BuildContext context) {
     return DemoHomeScreen(
       controller: _controller,
-      navigationActions: DemoSliceRoutes.primaryNavigation
-          .map(
-            (route) => DemoHomeNavigationAction(
-              label: route.label,
-              onPressed: () => Navigator.of(context).pushNamed(route.path),
-            ),
-          )
-          .toList(growable: false),
+      navigationActions:
+          DemoSliceRoutes.enabledPrimaryNavigation(
+                _runtime.enabledDemoRoutePaths,
+              )
+              .map(
+                (route) => DemoHomeNavigationAction(
+                  label: route.label,
+                  onPressed: () => Navigator.of(context).pushNamed(route.path),
+                ),
+              )
+              .toList(growable: false),
       onSelectScenario: _selectScenario,
     );
   }

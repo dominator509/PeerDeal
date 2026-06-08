@@ -19,8 +19,8 @@ class DemoTableRoute extends StatefulWidget {
     required this.bootstrapCandidateLoaderFactory,
     this.recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? runtimeScopeFactory,
-    required this.onOpenChat,
-    required this.onOpenReceipt,
+    this.onOpenChat,
+    this.onOpenReceipt,
   }) : _runtimeScopeFactory = runtimeScopeFactory ?? _defaultRuntimeScopeFor;
 
   final DemoScenarioSnapshot snapshot;
@@ -28,8 +28,8 @@ class DemoTableRoute extends StatefulWidget {
   final NativeBootstrapCandidateLoaderFactory bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory _runtimeScopeFactory;
-  final VoidCallback onOpenChat;
-  final VoidCallback onOpenReceipt;
+  final VoidCallback? onOpenChat;
+  final VoidCallback? onOpenReceipt;
 
   @override
   State<DemoTableRoute> createState() => _DemoTableRouteState();
@@ -163,8 +163,8 @@ class DemoTableScreen extends StatelessWidget {
   final bool bootstrapLoading;
   final DemoRecoveryPersistenceLoadResult? recoveryPersistence;
   final bool recoveryPersistenceLoading;
-  final VoidCallback onOpenChat;
-  final VoidCallback onOpenReceipt;
+  final VoidCallback? onOpenChat;
+  final VoidCallback? onOpenReceipt;
 
   @override
   Widget build(BuildContext context) {
@@ -172,8 +172,10 @@ class DemoTableScreen extends StatelessWidget {
       title: 'Demo table',
       subtitle: 'Mounted table orchestration',
       actions: <Widget>[
-        PeerDealActionButton(label: 'Chat', onPressed: onOpenChat),
-        PeerDealActionButton(label: 'Receipt', onPressed: onOpenReceipt),
+        if (onOpenChat != null)
+          PeerDealActionButton(label: 'Chat', onPressed: onOpenChat!),
+        if (onOpenReceipt != null)
+          PeerDealActionButton(label: 'Receipt', onPressed: onOpenReceipt!),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

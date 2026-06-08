@@ -398,6 +398,10 @@ the gates below are satisfied.
 - Mounted join and setup routes now accept app-owned enabled-mode gates through
   the mobile and desktop runtime objects, so production callers can hide demo
   branches and fail closed when disabled route modes are requested.
+- Mounted demo routes now accept app-owned enabled-route gates through the
+  mobile and desktop runtime objects, so production callers can expose only
+  explicitly allowed dev/demo paths while disabled route requests fall through
+  the scrubbed route-unavailable surface.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all

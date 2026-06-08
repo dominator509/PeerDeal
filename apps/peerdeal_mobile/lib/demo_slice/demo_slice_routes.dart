@@ -61,13 +61,53 @@ class DemoSliceRoutes {
     return null;
   }
 
+  static List<DemoSliceRouteDefinition> enabledMountedRoutes(
+    Set<String>? enabledRoutePaths,
+  ) {
+    _validateRouteRegistry();
+    if (enabledRoutePaths == null) return mountedRoutes;
+
+    final requestedPaths = enabledRoutePaths.map((path) => path.trim()).toSet();
+    final mountedPaths = mountedRoutes.map((route) => route.path).toSet();
+    final unknownPaths = requestedPaths.difference(mountedPaths).toList()
+      ..sort();
+
+    if (unknownPaths.isNotEmpty) {
+      throw StateError(
+        'Enabled demo route paths contain unknown routes: '
+        '${unknownPaths.join(', ')}.',
+      );
+    }
+    if (!requestedPaths.contains(home)) {
+      throw StateError('Enabled demo route paths must include the home route.');
+    }
+
+    return mountedRoutes
+        .where((route) => requestedPaths.contains(route.path))
+        .toList(growable: false);
+  }
+
+  static List<DemoSliceRouteDefinition> enabledPrimaryNavigation(
+    Set<String>? enabledRoutePaths,
+  ) {
+    final enabledPaths = enabledMountedRoutes(
+      enabledRoutePaths,
+    ).map((route) => route.path).toSet();
+    return primaryNavigation
+        .where((route) => enabledPaths.contains(route.path))
+        .toList(growable: false);
+  }
+
   static Map<String, T> requireMountedRouteMap<T>(
     Map<String, T> routes, {
+    List<DemoSliceRouteDefinition>? expectedRoutes,
     Set<String> allowedExtraPaths = const <String>{},
   }) {
     _validateRouteRegistry();
 
-    final mountedPaths = mountedRoutes.map((route) => route.path).toSet();
+    final mountedPaths = (expectedRoutes ?? mountedRoutes)
+        .map((route) => route.path)
+        .toSet();
     final routePaths = routes.keys.toSet();
     final missingPaths = mountedPaths.difference(routePaths).toList()..sort();
     final extraPaths =

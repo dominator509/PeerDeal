@@ -10,6 +10,7 @@ import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_export_art
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_provisioner.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_writer.dart';
+import 'package:peerdeal_mobile/demo_slice/demo_slice_routes.dart';
 import 'package:peerdeal_mobile/demo_slice/models/demo_scenario_snapshot.dart';
 import 'package:peerdeal_mobile/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_mobile/join_flow/fakes.dart';
@@ -23,6 +24,7 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 import 'package:peerdeal_wizard/peerdeal_wizard.dart';
 
 import '../../../tools/test_helpers/demo_receipt_route_test_support.dart';
@@ -756,6 +758,56 @@ void main() {
 
     expect(find.text('Scenario: chat_heavy_table'), findsOneWidget);
     expect(find.text('Unread: 19'), findsOneWidget);
+  });
+
+  testWidgets('routes enabled demo paths through app runtime object', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          enabledDemoRoutePaths: <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.table,
+          },
+        ),
+      ),
+    );
+
+    expect(find.widgetWithText(PeerDealActionButton, 'Table'), findsOneWidget);
+    expect(find.widgetWithText(PeerDealActionButton, 'Receipt'), findsNothing);
+    expect(find.widgetWithText(PeerDealActionButton, 'Join'), findsNothing);
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Demo table'), findsOneWidget);
+    expect(find.widgetWithText(PeerDealActionButton, 'Chat'), findsNothing);
+    expect(find.widgetWithText(PeerDealActionButton, 'Receipt'), findsNothing);
+  });
+
+  testWidgets('disabled demo paths fail closed through unknown-route surface', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          enabledDemoRoutePaths: <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.table,
+          },
+        ),
+      ),
+    );
+
+    Navigator.of(
+      tester.element(find.text('PeerDeal demo')),
+    ).pushNamed(DemoSliceRoutes.receipt);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.text('Result: ERR_ROUTE_UNAVAILABLE'), findsOneWidget);
+    expect(find.text('Route: ${DemoSliceRoutes.receipt}'), findsOneWidget);
   });
 
   testWidgets('mounted table classifies recovery network confidence', (

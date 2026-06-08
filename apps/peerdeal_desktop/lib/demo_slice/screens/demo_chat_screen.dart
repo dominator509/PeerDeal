@@ -4,14 +4,10 @@ import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 import '../models/demo_scenario_snapshot.dart';
 
 class DemoChatScreen extends StatelessWidget {
-  const DemoChatScreen({
-    super.key,
-    required this.snapshot,
-    required this.onOpenTable,
-  });
+  const DemoChatScreen({super.key, required this.snapshot, this.onOpenTable});
 
   final DemoScenarioSnapshot snapshot;
-  final VoidCallback onOpenTable;
+  final VoidCallback? onOpenTable;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +15,8 @@ class DemoChatScreen extends StatelessWidget {
       title: 'Demo chat',
       subtitle: 'Fixture-backed table conversation',
       actions: <Widget>[
-        PeerDealActionButton(label: 'Table', onPressed: onOpenTable),
+        if (onOpenTable != null)
+          PeerDealActionButton(label: 'Table', onPressed: onOpenTable!),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
