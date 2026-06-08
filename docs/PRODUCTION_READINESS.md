@@ -234,6 +234,10 @@ the gates below are satisfied.
 - Mounted app setup routes now receive app-owned setup orchestrator factories,
   expose compiled/rejected setup outcomes through navigation, and fail closed
   when route-level setup orchestration is unavailable.
+- Mounted app setup routes now also receive app-owned setup intent factories,
+  so production setup sources can feed `peerdeal_wizard` through the app shell
+  boundary instead of leaving hardcoded demo setup intent inside the route; the
+  route fails closed when intent construction is unavailable.
 - App shells now fail closed for unknown route names with an explicit rejected
   route-unavailable surface instead of relying on default framework route
   errors.
@@ -309,11 +313,11 @@ the gates below are satisfied.
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, canonical app-route registry
-  validation, app-owned transport payload-limit enforcement, bounded app-owned
-  table/join bootstrap mapping, app-owned local-network/transport/capture
-  diagnostic scrubbing, scrubbed route-failure diagnostics, scrubbed receipt
-  secure-key diagnostics, and method-channel payload gates are locked for those
-  follow-up implementations.
+  validation, app-owned setup intent injection, app-owned transport
+  payload-limit enforcement, bounded app-owned table/join bootstrap mapping,
+  app-owned local-network/transport/capture diagnostic scrubbing, scrubbed
+  route-failure diagnostics, scrubbed receipt secure-key diagnostics, and
+  method-channel payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

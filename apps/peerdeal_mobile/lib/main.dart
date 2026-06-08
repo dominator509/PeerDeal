@@ -36,6 +36,7 @@ class PeerDealMobileApp extends StatefulWidget {
     ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
+    SetupFlowIntentFactory? setupFlowIntentFactory,
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
   }) : _receiptPresenter = presenter,
@@ -44,6 +45,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _receiptExportArtifactFactory = receiptExportArtifactFactory,
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
+       _setupFlowIntentFactory = setupFlowIntentFactory,
        _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory,
        _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory;
 
@@ -53,6 +55,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final ReceiptExportArtifactBuilder? _receiptExportArtifactFactory;
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
+  final SetupFlowIntentFactory? _setupFlowIntentFactory;
   final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? _recoveryPersistenceStoreFactory;
 
@@ -131,6 +134,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
               JoinFlowRoute(orchestratorFactory: _joinFlowOrchestratorFactory),
           DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
             orchestratorFactory: _setupFlowOrchestratorFactory,
+            setupIntentFactory: widget._setupFlowIntentFactory,
           ),
         },
         allowedExtraPaths: const <String>{Navigator.defaultRouteName},

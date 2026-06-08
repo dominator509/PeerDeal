@@ -8,16 +8,20 @@ import 'setup_flow_orchestrator.dart';
 enum SetupFlowDemoMode { buildReady, invalid }
 
 typedef SetupFlowOrchestratorFactory = SetupFlowOrchestrator Function();
+typedef SetupFlowIntentFactory = SetupIntent Function(SetupFlowDemoMode mode);
 
 class SetupFlowRoute extends StatefulWidget {
   const SetupFlowRoute({
     super.key,
     this.initialMode = SetupFlowDemoMode.buildReady,
     required SetupFlowOrchestratorFactory orchestratorFactory,
-  }) : _orchestratorFactory = orchestratorFactory;
+    SetupFlowIntentFactory? setupIntentFactory,
+  }) : _orchestratorFactory = orchestratorFactory,
+       _setupIntentFactory = setupIntentFactory ?? _defaultSetupIntentFor;
 
   final SetupFlowDemoMode initialMode;
   final SetupFlowOrchestratorFactory _orchestratorFactory;
+  final SetupFlowIntentFactory _setupIntentFactory;
 
   @override
   State<SetupFlowRoute> createState() => _SetupFlowRouteState();
@@ -70,7 +74,7 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
   Future<SetupFlowOutcome> _run(SetupFlowDemoMode mode) async {
     try {
       return widget._orchestratorFactory().compileSetup(
-        intent: _intentFor(mode),
+        intent: widget._setupIntentFactory(mode),
       );
     } on Object {
       return const SetupFlowOutcome(
@@ -81,31 +85,31 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
     }
   }
 
-  SetupIntent _intentFor(SetupFlowDemoMode mode) {
-    if (mode == SetupFlowDemoMode.invalid) {
-      return const SetupIntent(
-        intentId: 'intent_invalid',
-        sourceType: SetupSurface.simple,
-        hostPseudonymousId: 'host_demo',
-      );
-    }
-
-    return const SetupIntent(
-      intentId: 'intent_open_table',
-      sourceType: SetupSurface.simple,
-      hostPseudonymousId: 'host_demo',
-      modePreference: 'open_table',
-      variantPreference: 'holdem_nlhe',
-      seatCountPreference: 6,
-    );
-  }
-
   void _selectMode(SetupFlowDemoMode mode) {
     setState(() {
       _mode = mode;
       _outcome = _run(mode);
     });
   }
+}
+
+SetupIntent _defaultSetupIntentFor(SetupFlowDemoMode mode) {
+  if (mode == SetupFlowDemoMode.invalid) {
+    return const SetupIntent(
+      intentId: 'intent_invalid',
+      sourceType: SetupSurface.simple,
+      hostPseudonymousId: 'host_demo',
+    );
+  }
+
+  return const SetupIntent(
+    intentId: 'intent_open_table',
+    sourceType: SetupSurface.simple,
+    hostPseudonymousId: 'host_demo',
+    modePreference: 'open_table',
+    variantPreference: 'holdem_nlhe',
+    seatCountPreference: 6,
+  );
 }
 
 class _SetupOutcomeView extends StatelessWidget {

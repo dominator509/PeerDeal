@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_mobile/setup_flow/setup_flow_orchestrator.dart';
 import 'package:peerdeal_mobile/setup_flow/setup_flow_route.dart';
+import 'package:peerdeal_wizard/peerdeal_wizard.dart';
 
 void main() {
   testWidgets('renders compiled setup outcome', (tester) async {
@@ -40,6 +41,50 @@ void main() {
     expect(find.text('Status: rejected'), findsOneWidget);
     expect(find.text('Result: ERR_SETUP_NOT_BUILD_READY'), findsOneWidget);
     expect(find.text('Error: seat_count_missing'), findsOneWidget);
+  });
+
+  testWidgets('uses injected setup intent factory', (tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF1B5E20),
+        builder: (_, _) => SetupFlowRoute(
+          orchestratorFactory: () => const SetupFlowOrchestrator(),
+          setupIntentFactory: (_) => const SetupIntent(
+            intentId: 'intent_injected_invalid',
+            sourceType: SetupSurface.simple,
+            hostPseudonymousId: 'host_injected',
+            modePreference: 'open_table',
+            variantPreference: 'holdem_nlhe',
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_NOT_BUILD_READY'), findsOneWidget);
+    expect(find.text('Error: seat_count_missing'), findsOneWidget);
+  });
+
+  testWidgets('fails closed when setup intent factory throws', (tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF1B5E20),
+        builder: (_, _) => SetupFlowRoute(
+          orchestratorFactory: () => const SetupFlowOrchestrator(),
+          setupIntentFactory: (_) {
+            throw StateError('setup intent unavailable');
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_FLOW_UNAVAILABLE'), findsOneWidget);
+    expect(find.text('Error: setup_flow_unavailable'), findsOneWidget);
   });
 
   testWidgets('fails closed when setup factory throws', (tester) async {

@@ -18,6 +18,7 @@ import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
+import 'package:peerdeal_wizard/peerdeal_wizard.dart';
 
 import '../../../tools/test_helpers/demo_receipt_route_test_support.dart';
 
@@ -335,6 +336,29 @@ void main() {
 
     expect(find.text('Status: rejected'), findsOneWidget);
     expect(find.text('Result: ERR_SETUP_FLOW_UNAVAILABLE'), findsOneWidget);
+  });
+
+  testWidgets('routes setup through app-owned setup intent factory', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        setupFlowIntentFactory: (_) => const SetupIntent(
+          intentId: 'intent_shell_invalid',
+          sourceType: SetupSurface.simple,
+          hostPseudonymousId: 'host_shell',
+          modePreference: 'open_table',
+          variantPreference: 'holdem_nlhe',
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Setup'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_NOT_BUILD_READY'), findsOneWidget);
+    expect(find.text('Error: seat_count_missing'), findsOneWidget);
   });
 
   testWidgets('fails closed for unknown app routes', (tester) async {
