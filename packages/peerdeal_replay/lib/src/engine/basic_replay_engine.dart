@@ -64,14 +64,31 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       );
     }
 
-    var state = projector.createBaseState(
-      tableId: request.tableId,
-      sessionId: request.sessionId,
-      protocolVersion: request.protocolVersion,
-    );
+    late TState state;
+    try {
+      state = projector.createBaseState(
+        tableId: request.tableId,
+        sessionId: request.sessionId,
+        protocolVersion: request.protocolVersion,
+      );
 
-    for (final event in selectedEvents) {
-      state = projector.applyEvent(state: state, event: event);
+      for (final event in selectedEvents) {
+        state = projector.applyEvent(state: state, event: event);
+      }
+    } on Object catch (error) {
+      return ReplayResult<TState>(
+        isSuccess: false,
+        state: null,
+        finalAppliedEventSeq: null,
+        reconstructedAnchor: null,
+        mismatches: <ReplayMismatch>[
+          ReplayMismatch(
+            code: 'ERR_REPLAY_PROJECTOR_FAILURE',
+            message: 'Replay projector failed during reconstruction.',
+            actual: error.runtimeType.toString(),
+          ),
+        ],
+      );
     }
 
     final reconstructedAnchor = anchorHashCalculator.calculate(

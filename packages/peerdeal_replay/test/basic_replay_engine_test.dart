@@ -570,6 +570,72 @@ void main() {
     expect(result.mismatches.single.expected, 3);
     expect(result.mismatches.single.actual, 4);
   });
+
+  test('fails closed when replay projector cannot create base state', () {
+    final failingEngine = BasicReplayEngine<FakeTableProjection>(
+      projector: const _ThrowingReplayProjector(throwOnCreate: true),
+    );
+
+    final result = failingEngine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.finalAppliedEventSeq, isNull);
+    expect(result.reconstructedAnchor, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_PROJECTOR_FAILURE');
+    expect(
+      result.mismatches.single.message,
+      'Replay projector failed during reconstruction.',
+    );
+    expect(result.mismatches.single.actual, '_ReplayProjectorFailure');
+  });
+
+  test('fails closed when replay projector cannot apply an event', () {
+    final failingEngine = BasicReplayEngine<FakeTableProjection>(
+      projector: const _ThrowingReplayProjector(throwOnApply: true),
+    );
+
+    final result = failingEngine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        events: const <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'OpenTableSessionOpened',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:00Z',
+            actorRef: 'host_1',
+            payload: <String, Object?>{'phase': 'OPEN_READY'},
+            prevEventHash: 'root',
+            eventHash: 'hash_1',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.finalAppliedEventSeq, isNull);
+    expect(result.reconstructedAnchor, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_PROJECTOR_FAILURE');
+    expect(result.mismatches.single.actual, '_ReplayProjectorFailure');
+  });
 }
 
 List<EventEnvelope> _loadHoldemShowdownSettlementEvents() {
@@ -636,4 +702,47 @@ class _CoreReplayProjector implements ReplayStateProjector<TableState> {
   }) {
     return const CoreReducer().apply(state, event);
   }
+}
+
+class _ThrowingReplayProjector
+    implements ReplayStateProjector<FakeTableProjection> {
+  const _ThrowingReplayProjector({
+    this.throwOnCreate = false,
+    this.throwOnApply = false,
+  });
+
+  final bool throwOnCreate;
+  final bool throwOnApply;
+
+  @override
+  FakeTableProjection createBaseState({
+    required String tableId,
+    required String sessionId,
+    required String protocolVersion,
+  }) {
+    if (throwOnCreate) {
+      throw const _ReplayProjectorFailure();
+    }
+    return FakeTableProjection(
+      tableId: tableId,
+      sessionId: sessionId,
+      protocolVersion: protocolVersion,
+      appliedEventTypes: const <String>[],
+    );
+  }
+
+  @override
+  FakeTableProjection applyEvent({
+    required FakeTableProjection state,
+    required EventEnvelope event,
+  }) {
+    if (throwOnApply) {
+      throw const _ReplayProjectorFailure();
+    }
+    return state.copyWithEvent(event.eventType);
+  }
+}
+
+class _ReplayProjectorFailure implements Exception {
+  const _ReplayProjectorFailure();
 }

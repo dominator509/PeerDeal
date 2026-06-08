@@ -305,6 +305,40 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Replay Projector Failure Gate
+
+Summary:
+Hardened `BasicReplayEngine` so projector base-state construction or event
+application failures return an explicit failed replay result instead of letting
+reconstruction exceptions escape. The diagnostic exposes the exception type
+only and does not surface exception text.
+
+Files changed:
+- `packages/peerdeal_replay/lib/src/engine/basic_replay_engine.dart`
+- `packages/peerdeal_replay/test/basic_replay_engine_test.dart`
+- `packages/peerdeal_replay/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\basic_replay_engine_test.dart` in
+  `packages/peerdeal_replay`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This locks replay dependency failure handling only; live transport, platform
+  persistence, native implementations, and final production UI remain tracked
+  readiness gaps.
+
+Next reviewer:
+- Verify no replay callers depend on projector exceptions escaping the replay
+  boundary.
+
 ### 2026-06-08 - Codex - Replay Scope Mismatch Gate
 
 Summary:

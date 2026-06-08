@@ -287,6 +287,9 @@ the gates below are satisfied.
 - Replay now rejects event and snapshot table/session scope mismatches against
   the replay request before projection, preventing reconstruction from merging
   another table/session stream into verified state.
+- Replay now converts projector base-state or event-application failures into
+  explicit failed replay results, preserving fail-closed reconstruction
+  behavior when a projector dependency faults.
 - Sync recovery now converts conflict-detector, snapshot-applier, and
   projector exceptions into fatal safe-close conflicts instead of allowing
   recovery dependency failures to escape.

@@ -29,3 +29,5 @@ as the first package drop for Sprint 7. It is not yet a production reconstructio
 - Replay now rejects event or snapshot table/session scope mismatches against
   the replay request before projection, so reconstruction cannot merge another
   table/session stream into verified state.
+- Replay now converts projector construction/application failures into an
+  explicit failed result instead of letting reconstruction exceptions escape.
