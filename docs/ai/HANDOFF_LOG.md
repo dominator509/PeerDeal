@@ -947,6 +947,44 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Mounted Route UI Shell Coverage
+
+Summary:
+Moved the remaining mounted chat, receipt, join, setup, and unknown-route
+surfaces in both app shells onto the shared `peerdeal_ui_kit` app-shell
+primitives. This extends the prior home/table UI primitive adoption across the
+demo route surface while preserving app-owned orchestration and exact
+fail-closed result text.
+
+Files changed:
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_app_scaffold.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_chat_screen.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_mobile/lib/navigation/app_route_fallback_screen.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_chat_screen.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_desktop/lib/navigation/app_route_fallback_screen.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart test\demo_slice\demo_receipt_screen_test.dart test\join_flow\join_flow_route_test.dart test\setup_flow\setup_flow_route_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart test\demo_slice\demo_receipt_screen_test.dart test\join_flow\join_flow_route_test.dart test\setup_flow\setup_flow_route_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- Final production UI validation still requires product/device review; this
+  locks shared shell coverage for currently mounted route surfaces.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Secure Key Storage Mutation Contract
 
 Summary:

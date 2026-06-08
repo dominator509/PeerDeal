@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 import 'package:peerdeal_wizard/peerdeal_wizard.dart';
 
 import 'setup_flow_models.dart';
@@ -38,25 +39,27 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
     return FutureBuilder<SetupFlowOutcome>(
       future: _outcome,
       builder: (context, snapshot) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
+        return PeerDealAppScaffold(
+          title: 'Setup flow',
+          subtitle: 'Game File setup compilation',
+          actions: <Widget>[
+            PeerDealActionButton(
+              label: 'Compile build-ready setup',
+              onPressed: () => _selectMode(SetupFlowDemoMode.buildReady),
+            ),
+            PeerDealActionButton(
+              label: 'Compile invalid setup',
+              onPressed: () => _selectMode(SetupFlowDemoMode.invalid),
+            ),
+          ],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const Text('Setup flow'),
-              const SizedBox(height: 16),
+              PeerDealInfoRow(label: 'Mode', value: _mode.name),
               if (!snapshot.hasData)
                 const Text('Loading setup')
               else
                 _SetupOutcomeView(outcome: snapshot.requireData),
-              _SetupModeAction(
-                label: 'Compile build-ready setup',
-                onTap: () => _selectMode(SetupFlowDemoMode.buildReady),
-              ),
-              _SetupModeAction(
-                label: 'Compile invalid setup',
-                onTap: () => _selectMode(SetupFlowDemoMode.invalid),
-              ),
             ],
           ),
         );
@@ -115,31 +118,15 @@ class _SetupOutcomeView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        PeerDealInfoRow(label: 'Status', value: outcome.status.name),
         Text('Status: ${outcome.status.name}'),
+        PeerDealInfoRow(label: 'Result', value: outcome.resultCode),
         Text('Result: ${outcome.resultCode}'),
         if (outcome.gameFile != null)
           Text('Game File: ${outcome.gameFile?['game_file_version']}'),
         for (final error in outcome.errors) Text('Error: $error'),
         for (final warning in outcome.warnings) Text('Warning: $warning'),
       ],
-    );
-  }
-}
-
-class _SetupModeAction extends StatelessWidget {
-  const _SetupModeAction({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(label),
-      ),
     );
   }
 }

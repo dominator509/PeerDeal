@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 import '../models/demo_scenario_snapshot.dart';
 
@@ -14,22 +15,27 @@ class DemoChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
+    return PeerDealAppScaffold(
+      title: 'Demo chat',
+      subtitle: 'Fixture-backed table conversation',
+      actions: <Widget>[
+        PeerDealActionButton(label: 'Table', onPressed: onOpenTable),
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text('Demo chat'),
+          PeerDealInfoRow(label: 'Scenario', value: snapshot.scenarioId),
           Text('Scenario: ${snapshot.scenarioId}'),
-          Text('Unread: ${snapshot.chat.unreadCount}'),
-          Text('Disappearing: ${snapshot.chat.disappearingEnabled}'),
-          GestureDetector(
-            onTap: onOpenTable,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text('Table'),
-            ),
+          PeerDealInfoRow(
+            label: 'Unread',
+            value: snapshot.chat.unreadCount.toString(),
           ),
+          Text('Unread: ${snapshot.chat.unreadCount}'),
+          PeerDealInfoRow(
+            label: 'Disappearing',
+            value: snapshot.chat.disappearingEnabled.toString(),
+          ),
+          Text('Disappearing: ${snapshot.chat.disappearingEnabled}'),
         ],
       ),
     );

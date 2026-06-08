@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:peerdeal_capture/peerdeal_capture.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 import '../../safe_surface/safe_surface.dart';
 import '../controllers/demo_receipt_artifact_verifier.dart';
@@ -62,7 +63,11 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
       future: _surface,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Text('Loading receipt');
+          return const PeerDealAppScaffold(
+            title: 'Receipt review',
+            subtitle: 'Safe receipt and recovery projection',
+            child: Text('Loading receipt'),
+          );
         }
 
         return DemoReceiptScreen(surface: snapshot.requireData);
@@ -148,22 +153,26 @@ class DemoReceiptScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeSurface(
-      model: surface.safeSurface,
-      obscuredChild: const Text('Receipt content hidden'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(surface.receipt.status),
-          Text(surface.receipt.message),
-          for (final field in surface.receipt.shareableFields.entries)
-            Text('${field.key}: ${field.value}'),
-          if (surface.recovery case final recovery?) ...[
-            Text(recovery.recommendedAction),
-            for (final diagnostic in recovery.diagnosticsJson)
-              Text('${diagnostic['code']}: ${diagnostic['message']}'),
+    return PeerDealAppScaffold(
+      title: 'Receipt review',
+      subtitle: 'Safe receipt and recovery projection',
+      child: SafeSurface(
+        model: surface.safeSurface,
+        obscuredChild: const Text('Receipt content hidden'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(surface.receipt.status),
+            Text(surface.receipt.message),
+            for (final field in surface.receipt.shareableFields.entries)
+              Text('${field.key}: ${field.value}'),
+            if (surface.recovery case final recovery?) ...[
+              Text(recovery.recommendedAction),
+              for (final diagnostic in recovery.diagnosticsJson)
+                Text('${diagnostic['code']}: ${diagnostic['message']}'),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

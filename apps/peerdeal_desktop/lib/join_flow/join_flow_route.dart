@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 import 'join_flow_models.dart';
 import 'join_flow_orchestrator.dart';
@@ -45,37 +46,40 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
     return FutureBuilder<JoinFlowOutcome>(
       future: _outcome,
       builder: (context, snapshot) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
+        return PeerDealAppScaffold(
+          title: 'Join flow',
+          subtitle: 'Invite, disclosure, role, and rejoin checks',
+          actions: <Widget>[
+            PeerDealActionButton(
+              label: 'Run first join',
+              onPressed: () => _selectMode(JoinFlowDemoMode.firstJoin),
+            ),
+            PeerDealActionButton(
+              label: 'Run ack required',
+              onPressed: () => _selectMode(JoinFlowDemoMode.ackRequired),
+            ),
+            PeerDealActionButton(
+              label: 'Run unsupported protocol',
+              onPressed: () =>
+                  _selectMode(JoinFlowDemoMode.unsupportedProtocol),
+            ),
+            PeerDealActionButton(
+              label: 'Run role denied',
+              onPressed: () => _selectMode(JoinFlowDemoMode.roleDenied),
+            ),
+            PeerDealActionButton(
+              label: 'Run rejoin',
+              onPressed: () => _selectMode(JoinFlowDemoMode.rejoin),
+            ),
+          ],
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const Text('Join flow'),
-              const SizedBox(height: 16),
+              PeerDealInfoRow(label: 'Mode', value: _mode.name),
               if (!snapshot.hasData)
                 const Text('Loading join')
               else
                 _JoinOutcomeView(outcome: snapshot.requireData),
-              _JoinModeAction(
-                label: 'Run first join',
-                onTap: () => _selectMode(JoinFlowDemoMode.firstJoin),
-              ),
-              _JoinModeAction(
-                label: 'Run ack required',
-                onTap: () => _selectMode(JoinFlowDemoMode.ackRequired),
-              ),
-              _JoinModeAction(
-                label: 'Run unsupported protocol',
-                onTap: () => _selectMode(JoinFlowDemoMode.unsupportedProtocol),
-              ),
-              _JoinModeAction(
-                label: 'Run role denied',
-                onTap: () => _selectMode(JoinFlowDemoMode.roleDenied),
-              ),
-              _JoinModeAction(
-                label: 'Run rejoin',
-                onTap: () => _selectMode(JoinFlowDemoMode.rejoin),
-              ),
             ],
           ),
         );
@@ -128,29 +132,13 @@ class _JoinOutcomeView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        PeerDealInfoRow(label: 'State', value: outcome.state.name),
         Text('State: ${outcome.state.name}'),
+        PeerDealInfoRow(label: 'Result', value: outcome.resultCode),
         Text('Result: ${outcome.resultCode}'),
         for (final diagnostic in outcome.diagnostics)
           Text('${diagnostic.code}: ${diagnostic.message}'),
       ],
-    );
-  }
-}
-
-class _JoinModeAction extends StatelessWidget {
-  const _JoinModeAction({required this.label, required this.onTap});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Text(label),
-      ),
     );
   }
 }

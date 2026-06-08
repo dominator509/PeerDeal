@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 class AppRouteFallbackScreen extends StatelessWidget {
   const AppRouteFallbackScreen({super.key, this.routeName});
@@ -8,13 +9,14 @@ class AppRouteFallbackScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = routeName;
-    return Padding(
-      padding: const EdgeInsets.all(24),
+    return PeerDealAppScaffold(
+      title: 'Route unavailable',
+      subtitle: 'Rejected navigation request',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text('Route unavailable'),
-          const SizedBox(height: 16),
+          const PeerDealStatusPill(label: 'Rejected', severity: 'error'),
+          const SizedBox(height: 12),
           const Text('State: rejected'),
           const Text('Result: ERR_ROUTE_UNAVAILABLE'),
           if (name != null && name.isNotEmpty) Text('Route: $name'),

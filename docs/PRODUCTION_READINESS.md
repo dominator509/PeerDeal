@@ -159,8 +159,9 @@ the gates below are satisfied.
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
 - Shared app-shell UI primitives now cover a reusable scaffold, action button,
-  status pill, and info row in `peerdeal_ui_kit`, and mounted home/table routes
-  in both app shells use them instead of raw placeholder columns.
+  status pill, and info row in `peerdeal_ui_kit`, and mounted home, table,
+  chat, receipt, join, setup, and unknown-route surfaces in both app shells use
+  them instead of raw placeholder columns.
 - Demo receipt presenters in both app shells can route signed receipt export
   artifacts through fail-closed verification before projecting safe receipt
   fields.
