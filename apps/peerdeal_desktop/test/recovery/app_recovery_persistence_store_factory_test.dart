@@ -119,6 +119,37 @@ void main() {
     expect(result.store, isNull);
     expect(result.warnings, <String>['Recovery persistence root is invalid.']);
   });
+
+  test('fails closed when app provides control-character recovery root', () {
+    final factory = AppRecoveryPersistenceStoreFactory(
+      rootDirectoryFactory: () => Directory('C:\\recovery\nsecret'),
+    );
+
+    final result = factory.create();
+
+    expect(result.isAvailable, isFalse);
+    expect(result.store, isNull);
+    expect(result.warnings, <String>['Recovery persistence root is invalid.']);
+  });
+
+  test(
+    'fails closed when environment provides control-character recovery root',
+    () {
+      final factory = AppRecoveryPersistenceStoreFactory.fromEnvironment(
+        environment: const <String, String>{
+          peerDealRecoveryRootEnvironmentVariable: 'C:\\recovery\nsecret',
+        },
+      );
+
+      final result = factory!.create();
+
+      expect(result.isAvailable, isFalse);
+      expect(result.store, isNull);
+      expect(result.warnings, <String>[
+        'Recovery persistence root is invalid.',
+      ]);
+    },
+  );
 }
 
 EventEnvelope _event({

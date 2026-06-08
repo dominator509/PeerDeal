@@ -55,7 +55,7 @@ class AppRecoveryPersistenceStoreFactory {
       );
     }
 
-    if (rootDirectory.path.trim().isEmpty) {
+    if (!_isValidRootPath(rootDirectory.path)) {
       return const AppRecoveryPersistenceStoreLoadResult.unavailable(
         warnings: <String>['Recovery persistence root is invalid.'],
       );
@@ -64,5 +64,11 @@ class AppRecoveryPersistenceStoreFactory {
     return AppRecoveryPersistenceStoreLoadResult.available(
       store: JsonFileRecoveryPersistenceStore(rootDirectory: rootDirectory),
     );
+  }
+
+  static bool _isValidRootPath(String path) {
+    final normalized = path.trim();
+    return normalized.isNotEmpty &&
+        !RegExp(r'[\x00-\x1F\x7F]').hasMatch(normalized);
   }
 }

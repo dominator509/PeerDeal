@@ -305,6 +305,43 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Recovery Root Control Character Gate
+
+Summary:
+Hardened mobile and desktop `AppRecoveryPersistenceStoreFactory` so
+app-provided or environment-provided recovery roots containing control
+characters fail closed before constructing a durable JSON recovery store. This
+keeps malformed recovery-root configuration out of `peerdeal_sync` while
+preserving the app-owned environment configuration boundary.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This locks app recovery-root configuration validation only; production
+  database/platform persistence remains a tracked readiness gap.
+
+Next reviewer:
+- Verify deployment configuration provides a stable, printable recovery root
+  where durable JSON recovery persistence is enabled.
+
 ### 2026-06-08 - Codex - Native Bootstrap App Candidate Limit Gate
 
 Summary:

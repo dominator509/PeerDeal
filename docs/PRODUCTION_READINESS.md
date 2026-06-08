@@ -321,6 +321,9 @@ the gates below are satisfied.
   from the `PEERDEAL_RECOVERY_ROOT` environment variable, preserving explicit
   constructor injection while giving deployed shells a durable root
   configuration path without adding package-level platform policy.
+- App recovery persistence store factories now fail closed when app-provided or
+  environment-provided recovery roots contain control characters, preventing
+  malformed root configuration from constructing durable JSON stores.
 - Mounted app table routes now consume the app-owned recovery persistence
   factory when one is supplied, load the active scenario recovery window, and
   fail closed with an explicit warning when no platform persistence root is
