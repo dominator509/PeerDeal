@@ -97,7 +97,7 @@ class NativeTransportSessionFactory {
       );
     }
     return ValidatingTransportFrameSender(
-      sink: NativeTransportFrameSink(bridge: bridge),
+      sink: NativeTransportFrameSink(bridge: bridge, validator: _validator),
       validator: _validator,
     );
   }

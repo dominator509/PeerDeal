@@ -2,13 +2,21 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 
 class NativeTransportFrameSink implements TransportFrameSink {
-  const NativeTransportFrameSink({required NativeTransportBridge bridge})
-    : _bridge = bridge;
+  const NativeTransportFrameSink({
+    required NativeTransportBridge bridge,
+    TransportFrameValidator validator = const BasicTransportFrameValidator(),
+  }) : _bridge = bridge,
+       _validator = validator;
 
   final NativeTransportBridge _bridge;
+  final TransportFrameValidator _validator;
 
   @override
   Future<void> sendFrame(TransportFrame frame) async {
+    if (!_validator.validate(frame).isValid) {
+      throw StateError('Native transport frame rejected.');
+    }
+
     final result = await _bridge.sendFrame(_toNativeFrame(frame));
     if (!result.isSuccess) {
       throw StateError('Native transport send failed.');

@@ -40,6 +40,29 @@ void main() {
     expect(bridge.sentFrames, isEmpty);
   });
 
+  test(
+    'sink rejects invalid frames before native transport sees them',
+    () async {
+      final bridge = _FakeNativeTransportBridge();
+      final sink = NativeTransportFrameSink(bridge: bridge);
+
+      await expectLater(
+        sink.sendFrame(
+          const TransportFrame(
+            sessionId: 'session_1',
+            fromPeerId: 'peer_a',
+            toPeerId: 'peer_a',
+            sequence: 1,
+            payload: <int>[1],
+          ),
+        ),
+        throwsStateError,
+      );
+
+      expect(bridge.sentFrames, isEmpty);
+    },
+  );
+
   test('converts native send failure into network send rejection', () async {
     final bridge = _FakeNativeTransportBridge(sendWarning: 'socket closed');
     final sender = ValidatingTransportFrameSender(

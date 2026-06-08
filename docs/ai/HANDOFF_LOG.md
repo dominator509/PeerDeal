@@ -14,6 +14,42 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Native Transport Sink Validation Gate
+
+Summary:
+Added mobile and desktop app-shell guards so `NativeTransportFrameSink`
+validates outbound frames before invoking generic native transport send methods,
+even when the sink is constructed directly. Session factories now pass their
+configured app validator into the sink so direct adapter and factory sender
+limits stay aligned.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_frame_adapter_test.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_frame_adapter_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\transport\native_transport_frame_adapter_test.dart test\transport\native_transport_session_factory_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\transport\native_transport_frame_adapter_test.dart test\transport\native_transport_session_factory_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks the app-owned send adapter gate only; live platform transport
+  implementations remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Native Transport Receive Scope Gate
 
 Summary:
