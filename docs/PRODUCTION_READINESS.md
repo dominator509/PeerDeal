@@ -98,6 +98,9 @@ the gates below are satisfied.
   validates blind phase, amounts, seat eligibility, and duplicate commitments
   before posting blinds, including short all-in blinds, and then advances to
   hole-card dealing without leaking session policy into variants.
+- Wizard setup validation now rejects unsupported variant ids before Game File
+  compilation, so launch setup cannot produce build-ready files for variants
+  outside the currently implemented Hold'em boundary.
 - Mode governance now locks deterministic waitlist promotion ordering and
   rejects promotion when mode policy, manager permission, or waitlist head
   state does not allow it.

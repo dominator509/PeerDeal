@@ -99,7 +99,7 @@ class DefaultPresetResolver implements PresetResolver {
     }
 
     if (draft.variantId != 'holdem_nlhe') {
-      warnings.add('Only holdem_nlhe is assumed in the starter scaffold.');
+      errors.add('unsupported_variant_id');
     }
 
     final policyProfiles = <String, String>{

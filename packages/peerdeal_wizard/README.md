@@ -30,3 +30,6 @@ are present.
 - `DefaultGameFileCompiler.tryCompile(...)` returns an explicit rejected result
   with validation errors and warnings so app flows can fail closed without
   letting setup compiler exceptions escape.
+- `DefaultPresetResolver.validateDraft(...)` rejects unsupported variants
+  before Game File compilation; the launch wizard only builds `holdem_nlhe`
+  plans until additional variant packages are implemented.

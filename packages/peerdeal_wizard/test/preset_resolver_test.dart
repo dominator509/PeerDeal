@@ -24,5 +24,41 @@ void main() {
       expect(result.mergedValues['seat_count'], 8);
       expect(result.conflicts, isNotEmpty);
     });
+
+    test('rejects unsupported variants before Game File compilation', () {
+      const resolver = DefaultPresetResolver();
+      const draft = ResolvedSetupDraft(
+        intentId: 'intent_unsupported_variant',
+        modeId: 'open_table',
+        variantId: 'omaha_plo',
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        appliedPresetIds: <String>['builtin_open_table'],
+      );
+
+      final result = resolver.validateDraft(draft);
+
+      expect(result.buildReady, isFalse);
+      expect(result.validationResult.isValid, isFalse);
+      expect(result.validationResult.errors, contains('unsupported_variant_id'));
+      expect(result.validationResult.warnings, isEmpty);
+    });
+
+    test('accepts supported Holdem variant draft', () {
+      const resolver = DefaultPresetResolver();
+      const draft = ResolvedSetupDraft(
+        intentId: 'intent_holdem',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        appliedPresetIds: <String>['builtin_open_table'],
+      );
+
+      final result = resolver.validateDraft(draft);
+
+      expect(result.buildReady, isTrue);
+      expect(result.validationResult.isValid, isTrue);
+      expect(result.validationResult.errors, isEmpty);
+      expect(result.validationResult.warnings, isEmpty);
+    });
   });
 }

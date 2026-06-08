@@ -14,6 +14,41 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Wizard Unsupported Variant Gate
+
+Summary:
+Hardened wizard setup validation so unsupported variant ids are validation
+errors instead of warnings. Launch setup now fails closed before Game File
+compilation when a draft asks for anything outside the implemented
+`holdem_nlhe` boundary.
+
+Files changed:
+- `packages/peerdeal_wizard/lib/src/engine/default_preset_resolver.dart`
+- `packages/peerdeal_wizard/test/preset_resolver_test.dart`
+- `packages/peerdeal_wizard/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_wizard`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This preserves the current Hold'em-first launch boundary. Adding Omaha/PLO
+  later will require adding the variant implementation and then widening this
+  validator intentionally.
+
+Next reviewer:
+Keep setup wizard validation aligned with the set of variant adapters that are
+actually production-ready.
+
+---
+
 ### 2026-06-08 - Codex - Holdem Blind Posting Gate
 
 Summary:
