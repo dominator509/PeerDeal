@@ -31,3 +31,11 @@ Demo receipt artifact verification should use
 `DemoReceiptArtifactVerifierFactory.methodChannel()` at the app boundary. The
 call order is native secure-key bridge -> app key-ring loader -> artifact
 verifier -> presenter -> safe surface.
+
+## Local Bootstrap Flow
+
+Demo bootstrap candidate loading should use
+`NativeBootstrapCandidateLoader.methodChannel()` at the app boundary. The call
+order is native local-network bridge -> normalized discovery snapshot ->
+`peerdeal_network` bootstrap candidate provider -> app route or presenter. The
+native bridge stays generic and does not own table, invite, or session policy.

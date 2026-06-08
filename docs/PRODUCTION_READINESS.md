@@ -112,6 +112,10 @@ the gates below are satisfied.
 - Network transport receive contracts now include a validating receiver
   boundary that rejects invalid frames before session handlers see them and
   converts handler failures into explicit failed receive results.
+- App demo local-network bootstrap paths now map normalized native discovery
+  snapshots into `peerdeal_network` bootstrap candidate resolution at the app
+  boundary, failing closed when native capability, discovery, or candidate
+  resolution is unavailable.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.
@@ -205,12 +209,12 @@ the gates below are satisfied.
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
   checked-in markdown files were reviewed directly from source.
-- Platform-native secure storage, capture blocking, local-network discovery,
-  production transport, durable persistence, and polished app UI cannot be
-  completed inside the current ChatGPT project environment because they require
-  native platform implementations and device/OS integration. The Dart
-  contracts, recovery persistence seam, and method-channel payload gates are
-  locked for those follow-up implementations.
+- Platform-native secure storage, capture blocking, real local-network
+  discovery, production transport, durable persistence, and polished app UI
+  cannot be completed inside the current ChatGPT project environment because
+  they require native platform implementations and device/OS integration. The
+  Dart contracts, recovery persistence seam, app-owned bootstrap mapping, and
+  method-channel payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

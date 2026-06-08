@@ -305,6 +305,41 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - App Local-Network Bootstrap Boundary
+
+Summary:
+Added app-owned native bootstrap candidate loaders in both app shells. The
+loaders read generic `peerdeal_native_bridges` local-network capability and
+discovery snapshots, normalize endpoint strings at the app boundary, and pass
+them to `peerdeal_network` bootstrap candidate resolution. Capability,
+discovery, permission, and provider failures return explicit fail-closed
+results instead of throwing.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/README.md`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/demo_slice/native_bootstrap_candidate_loader_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/demo_slice/native_bootstrap_candidate_loader_test.dart` in `apps/peerdeal_desktop`
+
+Remaining gaps:
+- Real native local-network discovery, production transport, and route wiring
+  remain pending platform/app work. This slice locks the Dart app-boundary
+  mapping only.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Wizard Safe Compile Boundary
 
 Summary:
