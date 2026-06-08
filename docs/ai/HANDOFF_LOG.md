@@ -84,6 +84,43 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - Wizard Safe Compile Boundary
+
+Summary:
+Added a fail-closed `GameFileCompileResult` and `DefaultGameFileCompiler.tryCompile`
+boundary so app/session setup flows can reject invalid or non-build-ready wizard
+plans without compiler exceptions escaping orchestration. The existing strict
+`compile` API remains for direct misuse detection.
+
+Files changed:
+- `packages/peerdeal_wizard/lib/src/models/game_file_compile_result.dart`
+- `packages/peerdeal_wizard/lib/src/contracts/game_file_compiler.dart`
+- `packages/peerdeal_wizard/lib/src/engine/default_game_file_compiler.dart`
+- `packages/peerdeal_wizard/lib/peerdeal_wizard.dart`
+- `packages/peerdeal_wizard/test/game_file_compiler_test.dart`
+- `packages/peerdeal_wizard/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_wizard`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- App shells still mount demo-oriented setup/navigation surfaces; this slice
+  only locks the wizard compile boundary for future app orchestration.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Sync Snapshot Persistence Integrity
 
 Summary:

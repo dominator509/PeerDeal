@@ -162,6 +162,9 @@ the gates below are satisfied.
 - Mounted join routes now receive orchestrator factories from the app shell
   boundary instead of constructing demo adapters inside the route, with
   fail-closed coverage when factory setup is unavailable.
+- Wizard Game File compilation now exposes a fail-closed `tryCompile` boundary
+  so app/session setup flows can reject invalid setup plans without compiler
+  exceptions escaping orchestration.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
 - Receipt export now fails closed to an unavailable artifact when signing or

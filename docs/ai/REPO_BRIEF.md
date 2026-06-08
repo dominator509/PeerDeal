@@ -46,7 +46,7 @@ truth. Every hand/session must be reconstructable from ordered protocol events.
 | `peerdeal_ui_kit` | Shared UI models/widgets such as safe surfaces |
 | `peerdeal_native_bridges` | Method-channel seams for native platform facts |
 | `peerdeal_testkit` | Shared test helpers and fixture utilities |
-| `peerdeal_wizard` | Setup/join scaffold helpers; TODO: refine durable scope |
+| `peerdeal_wizard` | Setup intent normalization, preset resolution, validated setup plans, Game File compilation, and tooltip/helper metadata |
 
 ## Commands
 

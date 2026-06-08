@@ -10,6 +10,7 @@ Starter scaffold for PeerDeal setup generation and preset resolution.
 - helper / suggestion orchestration
 - tooltip/help metadata registry
 - Game File compilation orchestration
+- fail-closed Game File compile result shaping for app/session orchestration
 
 ## Must not own
 - live table mutation
@@ -22,3 +23,10 @@ Starter scaffold for PeerDeal setup generation and preset resolution.
 This is a scaffold aligned to the locked PeerDeal wizard/setup specs. It is intended
 for wiring into the larger monorepo once the Game File, mode, and variant packages
 are present.
+
+## Hardened scaffold coverage
+- `DefaultGameFileCompiler.compile(...)` remains strict and throws for direct
+  callers that misuse a non-build-ready plan.
+- `DefaultGameFileCompiler.tryCompile(...)` returns an explicit rejected result
+  with validation errors and warnings so app flows can fail closed without
+  letting setup compiler exceptions escape.

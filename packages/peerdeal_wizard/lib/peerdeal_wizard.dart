@@ -4,6 +4,7 @@ export 'src/contracts/tooltip_registry.dart';
 export 'src/models/setup_surface.dart';
 export 'src/models/setup_intent.dart';
 export 'src/models/helper_suggestion.dart';
+export 'src/models/game_file_compile_result.dart';
 export 'src/models/resolved_setup_draft.dart';
 export 'src/models/validated_setup_plan.dart';
 export 'src/models/preset_models.dart';
