@@ -91,6 +91,9 @@ the gates below are satisfied.
   full opening bets and full raises update the next minimum raise amount, while
   short all-ins can increase the amount to call without claiming full-raise
   reopen or last-aggressor semantics.
+- Hold'em showdown evaluation now fails closed when fewer than two active
+  non-folded seats are present, keeping single-winner hands on the uncontested
+  settlement path instead of allowing accidental showdown settlement.
 - Mode governance now locks deterministic waitlist promotion ordering and
   rejects promotion when mode policy, manager permission, or waitlist head
   state does not allow it.

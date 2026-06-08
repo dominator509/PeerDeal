@@ -77,6 +77,11 @@ void main() {
               holeCards: <String>['Th', '9d'],
               isFolded: false,
             ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Ac', '3c'],
+              isFolded: false,
+            ),
           ],
         ),
       );

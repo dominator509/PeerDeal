@@ -118,6 +118,35 @@ void main() {
     expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'));
   });
 
+  test('fails closed when showdown has fewer than two active seats', () {
+    final state = buildState();
+    const input = ShowdownEvaluationInput(
+      boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
+      seats: <ShowdownSeatInput>[
+        ShowdownSeatInput(
+          seat: 1,
+          holeCards: <String>['Th', '9d'],
+          isFolded: false,
+        ),
+        ShowdownSeatInput(
+          seat: 2,
+          holeCards: <String>['Ac', '3c'],
+          isFolded: true,
+        ),
+      ],
+    );
+
+    final result = coordinator.reveal(state: state, input: input);
+
+    expect(result.isRevealed, isFalse);
+    expect(result.state, same(state));
+    expect(result.evaluation.results, isEmpty);
+    expect(
+      result.warnings,
+      contains('ERR_HOLDEM_SHOWDOWN_ACTIVE_SEAT_COUNT'),
+    );
+  });
+
   test('prepares settlement from revealed clean showdown evaluation', () {
     final reveal = coordinator.reveal(state: buildState(), input: validInput);
 

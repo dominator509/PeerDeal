@@ -15,6 +15,10 @@ class HoldemShowdownEvaluator {
 
     final ranked = input.seats.where((seat) => !seat.isFolded).toList()
       ..sort((a, b) => a.seat.compareTo(b.seat));
+    if (ranked.length < 2) {
+      warnings.add('ERR_HOLDEM_SHOWDOWN_ACTIVE_SEAT_COUNT');
+    }
+
     if (ranked.any((seat) => seat.holeCards.length != 2)) {
       warnings.add('ERR_HOLDEM_SHOWDOWN_HOLE_CARD_COUNT');
     }

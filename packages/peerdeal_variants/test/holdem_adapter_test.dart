@@ -138,6 +138,33 @@ void main() {
       expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_DUPLICATE_CARD'));
     });
 
+    test('showdown fails safely with fewer than two active seats', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '2c'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['Th', '9c'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['7c', '8d'],
+              isFolded: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(result.results, isEmpty);
+      expect(
+        result.warnings,
+        contains('ERR_HOLDEM_SHOWDOWN_ACTIVE_SEAT_COUNT'),
+      );
+      expect(result.winnerGroups, isEmpty);
+    });
+
     test('showdown evaluator orders all launch hand categories', () {
       final cases = <_ShowdownCase>[
         _ShowdownCase(

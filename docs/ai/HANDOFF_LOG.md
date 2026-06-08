@@ -14,6 +14,43 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Holdem Showdown Active Seat Gate
+
+Summary:
+Hold'em showdown evaluation now rejects inputs with fewer than two active
+non-folded seats. The showdown coordinator fails closed on that warning, keeping
+single-winner hands on the existing uncontested-settlement path instead of
+allowing accidental showdown settlement.
+
+Files changed:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_showdown_evaluator.dart`
+- `packages/peerdeal_variants/test/holdem_adapter_test.dart`
+- `packages/peerdeal_variants/test/holdem_showdown_coordinator_test.dart`
+- `packages/peerdeal_variants/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test\holdem_adapter_test.dart test\holdem_showdown_coordinator_test.dart test\holdem_lifecycle_settlement_test.dart test\holdem_action_street_coordinator_test.dart`
+  in `packages/peerdeal_variants`
+- `dart test` in `packages/peerdeal_variants`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- This hardens Hold'em lifecycle semantics only; production app orchestration
+  must still route one-active-seat hands through uncontested settlement.
+
+Next reviewer:
+Continue closing variant-local lifecycle gaps before platform-native work,
+especially blind/posting and session-owned event emission integration.
+
+---
+
 ### 2026-06-08 - Codex - Join Bootstrap Provider Fallback
 
 Summary:

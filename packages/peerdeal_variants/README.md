@@ -94,8 +94,9 @@ or actor state is not ready.
 
 `HoldemShowdownCoordinator.reveal(...)` gates the transition from
 `showdownPrep` to `showdownReveal`. It requires the showdown input board to
-match the hand state board and only reveals when `HoldemShowdownEvaluator`
-returns no warnings. It does not project settlement or mutate ledger state.
+match the hand state board, requires at least two active non-folded showdown
+seats, and only reveals when `HoldemShowdownEvaluator` returns no warnings. It
+does not project settlement or mutate ledger state.
 `HoldemShowdownCoordinator.prepareSettlement(...)` then gates
 `showdownReveal` to `settling` only for a clean, non-empty showdown evaluation;
 actual pot settlement remains in the settlement projector/core pot engine path.
