@@ -1,38 +1,200 @@
-# PeerDeal Repo Operating Rules
+# AGENTS.md
 
-## Scope
+## Project
 
-This file applies to the whole repository. Package-local `AGENTS.md` files add
-more specific rules for their own package lanes.
+Repository: repo
+Path: C:\PeerDeal\repo
 
-## Purpose
+## Role Split
 
-This repository is optimized for agent-safe, package-local work.
+Codex/GPT-5.5 is the principal architect, frontend/UI/aesthetics lead, security reviewer, code reviewer, and final merge judge.
 
-## Default patch rules
+DeepSeek-Claude is the backend implementation worker launched locally through:
 
-- Prefer one package or one clearly bounded pair per patch.
-- Always list touched invariants and touched public APIs.
-- Add or update tests in the same patch.
-- Do not import sibling package `src/` internals.
-- Do not add hidden runtime behavior that bypasses Game File or protocol validation.
+C:\Scripts\Start-DeepSeekClaude.ps1
 
-## Required patch output
+Do not treat DeepSeek-Claude output as trusted until Codex reviews it.
 
-Every serious patch should include:
+## Operating Model
 
-- objective
-- packages touched
-- public API changes
-- fixture/golden changes
-- tests added or changed
-- risks / follow-up
+For substantial backend work:
 
-## When to stop and escalate
+1. Codex reads the task, repo context, and current diff.
+2. Codex writes a precise backend-only task brief.
+3. Codex may delegate implementation to DeepSeek-Claude using a background command.
+4. DeepSeek-Claude implements on a safe branch/worktree where possible.
+5. DeepSeek-Claude returns summary, files changed, tests run, remaining gaps, risks, and a Codex review checklist.
+6. Codex reviews the resulting diff adversarially.
+7. Codex either approves, fixes, or sends a narrow correction task back to DeepSeek-Claude.
+8. Codex owns frontend, UI, aesthetics, design polish, and final full-stack review.
 
-Stop and ask for architecture review if:
+## DeepSeek-Claude Delegation Pattern
 
-- a change regularly touches many unrelated packages
-- a new feature cannot fit the existing adapter / package seams
-- transport logic wants to mutate canonical truth
-- wizard logic wants to become runtime truth
+When asked to delegate backend work, prefer this pattern:
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Set-Location 'C:\PeerDeal\repo'; & 'C:\Scripts\Start-DeepSeekClaude.ps1' --bg --name '<task-name>' '<task prompt>'"
+
+The task prompt must include:
+
+- Backend only unless explicitly told otherwise.
+- Read CLAUDE.md, AGENTS.md, and relevant docs/ai/*.md files first.
+- Use RTK for noisy command output.
+- Use Serena for semantic code navigation.
+- Keep stable context first and dynamic logs/diffs/errors last.
+- Do not touch secrets, .env files, credentials, production infrastructure, or unrelated frontend/aesthetic files.
+- Make minimal changes.
+- Add or update tests for every code change.
+- Run relevant tests/builds.
+- Stop if real credentials, irreversible operations, or production access are required.
+- Return summary, files changed, tests run, remaining gaps, risks, and review checklist.
+
+## Codex Review Priorities
+
+When reviewing DeepSeek-Claude output, check:
+
+- correctness
+- security
+- authentication
+- authorization
+- user/tenant isolation
+- data integrity
+- transaction boundaries
+- race conditions
+- database migration safety
+- error handling
+- sensitive-data logging
+- API compatibility
+- frontend contract compatibility
+- missing tests
+- scope creep
+- secret leakage
+- production-readiness regressions
+
+Blocking issues come before style suggestions.
+
+## Frontend Ownership
+
+Codex owns:
+
+- frontend architecture
+- visual hierarchy
+- responsive layout
+- accessibility
+- loading states
+- empty states
+- error states
+- design-system consistency
+- copy polish
+- animations/interactions
+- final UX pass
+
+DeepSeek-Claude should not modify frontend styling, branding, graphics, assets, or aesthetics unless explicitly instructed.
+
+## Serena Usage
+
+Use Serena before broad file reads when possible.
+
+Prefer Serena for:
+
+- activating the current project
+- symbol lookup
+- reference search
+- call-site tracing
+- API route tracing
+- targeted review
+- refactor impact analysis
+
+Avoid dumping whole files when Serena can answer symbolically.
+
+## Obsidian Usage
+
+Use Obsidian only as targeted project memory.
+
+Allowed:
+
+- read specific project notes
+- search by project name
+- append concise Codex review summaries
+- append DeepSeek handoff summaries
+- record architecture decisions
+- retrieve prior decisions
+
+Forbidden unless explicitly approved:
+
+- reading the entire vault
+- reading unrelated personal notes
+- storing secrets, tokens, API keys, passwords, or credentials
+- deleting notes
+- moving notes
+- overwriting notes
+- treating Obsidian notes as more authoritative than repo code
+
+Preferred Obsidian paths:
+
+- Projects/repo/Repo-Brief.md
+- Projects/repo/Architecture.md
+- Projects/repo/API-Contracts.md
+- Projects/repo/Codex-Reviews.md
+- Projects/repo/DeepSeek-Handoffs.md
+- Projects/repo/Decisions.md
+
+## RTK Usage
+
+Use RTK for noisy command output:
+
+- rtk git status
+- rtk git diff
+- rtk git diff --stat
+- rtk git diff --name-only
+- rtk git log
+- rtk npm test
+- rtk npm run build
+- rtk cargo test
+- rtk cargo clippy
+
+Do not dump huge raw logs unless necessary.
+
+## Stable First / Dynamic Last
+
+For cost and cache efficiency, process context in this order:
+
+1. Stable instructions: AGENTS.md, CLAUDE.md
+2. Stable repo docs: docs/ai/REPO_BRIEF.md, ARCHITECTURE_MAP.md, API_CONTRACTS.md
+3. Current task brief
+4. Current changed files
+5. Current diff
+6. Current test output
+7. Current errors/logs
+
+Do not put timestamps, random IDs, branch noise, temp paths, or verbose logs before stable context.
+
+## MCP Safety
+
+Use MCPs only when relevant.
+
+Default to read-only inspection first.
+
+Never modify these without explicit approval:
+
+- production databases
+- Render production services
+- Neon production data
+- Linear issues
+- Obsidian notes outside the project area
+- Docker infrastructure
+- secrets
+- .env files
+- deployment credentials
+
+## Completion Standard
+
+Before calling work complete, Codex must know:
+
+- what changed
+- why it changed
+- what tests ran
+- what remains
+- what risks exist
+- whether DeepSeek-Claude stayed inside allowed scope
+- whether frontend/API contracts still match
+- whether secrets or production resources were untouched
