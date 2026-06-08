@@ -14,7 +14,7 @@ This package owns:
 
 ## Deliberate non-goals for this starter
 - no live transport implementation
-- no durable platform persistence implementation
+- no production database or platform persistence implementation
 - no production replay viewer
 - no split-brain UI
 - no real bootstrap service
@@ -36,3 +36,6 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
   windows.
 - Persisted snapshots cannot regress to an older checkpoint or replace an
   existing checkpoint with a different snapshot hash.
+- A JSON file-backed recovery store can durably round-trip event/snapshot
+  windows through protocol envelope parsers and fails closed when persisted
+  data is corrupt.

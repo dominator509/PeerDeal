@@ -644,6 +644,48 @@ void main() {
     expect(snapshot.toJson()['snapshot_version'], '1.0');
   });
 
+  test('event envelope round-trips through JSON', () {
+    final event = EventEnvelope.fromJson(
+      const EventEnvelope(
+        eventId: 'evt_1',
+        eventType: 'RecoveryEventPersisted',
+        eventVersion: '1.0',
+        protocolVersion: '1.0.0',
+        eventSeq: 1,
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        handId: null,
+        emittedAt: '2026-06-08T00:00:00Z',
+        actorRef: 'system',
+        payload: <String, Object?>{'kind': 'recovery'},
+        prevEventHash: 'genesis',
+        eventHash: 'hash_1',
+      ).toJson(),
+    );
+
+    expect(event.eventId, 'evt_1');
+    expect(event.payload['kind'], 'recovery');
+    expect(event.eventHash, 'hash_1');
+  });
+
+  test('snapshot envelope round-trips through JSON', () {
+    final snapshot = SnapshotEnvelope.fromJson(
+      const SnapshotEnvelope(
+        snapshotId: 'snap_1',
+        protocolVersion: '1.0.0',
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        snapshotBaseEventSeq: 1,
+        snapshotHash: 'snap_hash',
+        payload: <String, Object?>{'kind': 'table'},
+      ).toJson(),
+    );
+
+    expect(snapshot.snapshotId, 'snap_1');
+    expect(snapshot.snapshotType, 'TableSnapshot');
+    expect(snapshot.payload['kind'], 'table');
+  });
+
   test('protocol catalog accepts supported snapshot envelope', () {
     final decoded = fixtureJson('fixtures/snapshots/table_snapshot_v1.json');
     final result = ProtocolCatalog().checkSnapshotEnvelopeJson(decoded);

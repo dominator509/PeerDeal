@@ -21,6 +21,20 @@ class SnapshotEnvelope {
   final String snapshotHash;
   final Map<String, Object?> payload;
 
+  factory SnapshotEnvelope.fromJson(Map<String, Object?> json) {
+    return SnapshotEnvelope(
+      snapshotId: _string(json, 'snapshot_id'),
+      snapshotType: _stringWithDefault(json, 'snapshot_type', 'TableSnapshot'),
+      snapshotVersion: _stringWithDefault(json, 'snapshot_version', '1.0'),
+      protocolVersion: _string(json, 'protocol_version'),
+      tableId: _string(json, 'table_id'),
+      sessionId: _string(json, 'session_id'),
+      snapshotBaseEventSeq: _int(json, 'snapshot_base_event_seq'),
+      snapshotHash: _string(json, 'snapshot_hash'),
+      payload: _map(json, 'payload'),
+    );
+  }
+
   Map<String, Object?> toJson() => {
     'snapshot_id': snapshotId,
     'snapshot_type': snapshotType,
@@ -32,4 +46,33 @@ class SnapshotEnvelope {
     'snapshot_hash': snapshotHash,
     'payload': payload,
   };
+
+  static String _string(Map<String, Object?> json, String key) {
+    final value = json[key];
+    if (value is String) return value;
+    throw FormatException('Expected string at $key.');
+  }
+
+  static String _stringWithDefault(
+    Map<String, Object?> json,
+    String key,
+    String defaultValue,
+  ) {
+    final value = json[key];
+    if (value == null) return defaultValue;
+    if (value is String) return value;
+    throw FormatException('Expected string at $key.');
+  }
+
+  static int _int(Map<String, Object?> json, String key) {
+    final value = json[key];
+    if (value is int) return value;
+    throw FormatException('Expected int at $key.');
+  }
+
+  static Map<String, Object?> _map(Map<String, Object?> json, String key) {
+    final value = json[key];
+    if (value is Map<String, Object?>) return value;
+    throw FormatException('Expected object at $key.');
+  }
 }

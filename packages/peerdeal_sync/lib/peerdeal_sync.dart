@@ -7,6 +7,7 @@ export 'src/engine/basic_conflict_detector.dart';
 export 'src/engine/basic_snapshot_applier.dart';
 export 'src/engine/basic_sync_coordinator.dart';
 export 'src/engine/in_memory_recovery_persistence_store.dart';
+export 'src/engine/json_file_recovery_persistence_store.dart';
 export 'src/models/conflict_detection_result.dart';
 export 'src/models/persisted_recovery_window.dart';
 export 'src/models/reconciliation_result.dart';

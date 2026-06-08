@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
@@ -212,6 +214,78 @@ void main() {
     expect(result.conflicts.single.expected, 'snapshot_hash_1');
     expect(result.conflicts.single.actual, 'snapshot_hash_tampered');
     expect(store.loadWindow(scope).snapshot?.snapshotHash, 'snapshot_hash_1');
+  });
+
+  test('file store persists recovery windows across store instances', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final append = writer.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+        _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
+      ],
+    );
+    final snapshot = writer.saveSnapshot(
+      scope: scope,
+      snapshot: _snapshot(seq: 2, hash: 'snapshot_hash_2'),
+    );
+
+    final reader = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final window = reader.loadWindow(scope);
+
+    expect(append.isSuccess, isTrue);
+    expect(snapshot.isSuccess, isTrue);
+    expect(window.events.map((event) => event.eventSeq), <int>[1, 2]);
+    expect(window.snapshot?.snapshotHash, 'snapshot_hash_2');
+  });
+
+  test('file store fails closed on corrupt persisted data', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    expect(
+      writer
+          .appendEvents(
+            scope: scope,
+            events: <EventEnvelope>[
+              _event(seq: 1, prevHash: 'genesis', hash: 'hash_1'),
+            ],
+          )
+          .isSuccess,
+      isTrue,
+    );
+
+    directory.listSync().whereType<File>().single.writeAsStringSync('{bad');
+
+    final result = writer.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_FILE_CORRUPT',
+    );
+    expect(writer.loadWindow(scope).events, isEmpty);
   });
 }
 

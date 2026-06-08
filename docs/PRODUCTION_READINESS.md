@@ -210,17 +210,21 @@ the gates below are satisfied.
 - Sync recovery persistence now rejects snapshot checkpoint regression and
   same-sequence snapshot hash replacement, preserving newer verified recovery
   anchors from stale or tampered snapshot writes.
+- Sync recovery persistence now includes a JSON file-backed store that
+  round-trips protocol event/snapshot envelopes through public JSON parsers,
+  rehydrates through the same validation gate before writes, and fails closed
+  on corrupt persisted files instead of resuming unsafe recovery windows.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
   checked-in markdown files were reviewed directly from source.
 - Platform-native secure storage, capture blocking, real local-network
-  discovery, production transport, durable persistence, and polished app UI
-  cannot be completed inside the current ChatGPT project environment because
-  they require native platform implementations and device/OS integration. The
-  Dart contracts, recovery persistence seam, app-owned table/join bootstrap
-  mapping, and method-channel payload gates are locked for those follow-up
-  implementations.
+  discovery, production transport, production database/platform persistence,
+  and polished app UI cannot be completed inside the current ChatGPT project
+  environment because they require native platform implementations and
+  device/OS integration. The Dart contracts, file-backed recovery persistence
+  seam, app-owned table/join bootstrap mapping, and method-channel payload
+  gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

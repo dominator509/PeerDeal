@@ -305,6 +305,41 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-06-08 - Codex - File Recovery Persistence Store
+
+Summary:
+Added public JSON parsers for protocol event and snapshot envelopes, then added
+`JsonFileRecoveryPersistenceStore` in `peerdeal_sync`. The file store writes
+one JSON recovery window per scope, rehydrates through the existing in-memory
+validation gate before each mutation, round-trips persisted windows across
+store instances, and fails closed when stored data is corrupt.
+
+Files changed:
+- `packages/peerdeal_protocol/lib/src/models/event_envelope.dart`
+- `packages/peerdeal_protocol/lib/src/models/snapshot_envelope.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/peerdeal_sync.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `packages/peerdeal_sync/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_protocol`
+- `dart test` in `packages/peerdeal_sync`
+
+Remaining gaps:
+- Production database/platform persistence remains pending. This slice adds a
+  durable Dart file store and protocol parse boundary, not a platform storage
+  integration.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Native Join Bootstrap Coordinator
 
 Summary:
