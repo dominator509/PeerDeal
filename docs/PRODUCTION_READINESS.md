@@ -84,6 +84,9 @@ the gates below are satisfied.
 - Core command validation now rejects whitespace-only command identity,
   protocol/version, issue timestamp, actor, and Open Table table identity
   fields before accepted command paths can reach reducer orchestration.
+- Core reducer ingress now rejects whitespace-only event envelope identity,
+  scope, timestamp, actor, and hash-chain fields before protocol-compatible
+  events can mutate deterministic state.
 - Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
   core metadata projection, replay through the core projector, and sync
   snapshot + suffix recovery.

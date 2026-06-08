@@ -17,6 +17,8 @@ class CoreReducer {
   final List<InvariantGuard> invariantGuards;
 
   TableState apply(TableState current, EventEnvelope event) {
+    _ensureEventEnvelopeIdentity(event);
+
     final compatibility = protocolCatalog.checkEventEnvelope(event);
     if (!compatibility.isSupported) {
       throw InvariantViolation(
@@ -203,6 +205,32 @@ class CoreReducer {
 
     _ensureProjectedStateIsPossible(nextState);
     return nextState;
+  }
+
+  void _ensureEventEnvelopeIdentity(EventEnvelope event) {
+    final emptyFields = <String>[
+      if (event.eventId.trim().isEmpty) 'event_id',
+      if (event.eventType.trim().isEmpty) 'event_type',
+      if (event.eventVersion.trim().isEmpty) 'event_version',
+      if (event.protocolVersion.trim().isEmpty) 'protocol_version',
+      if (event.tableId.trim().isEmpty) 'table_id',
+      if (event.sessionId.trim().isEmpty) 'session_id',
+      if (event.emittedAt.trim().isEmpty) 'emitted_at',
+      if (event.actorRef.trim().isEmpty) 'actor_ref',
+      if (event.prevEventHash.trim().isEmpty) 'prev_event_hash',
+      if (event.eventHash.trim().isEmpty) 'event_hash',
+    ];
+
+    if (emptyFields.isEmpty) {
+      return;
+    }
+
+    throw InvariantViolation(
+      code: CoreInvariantCodes.eventEnvelopeIdentityEmpty,
+      message:
+          'Event envelope identity fields must be non-empty: '
+          '${emptyFields.join(', ')}.',
+    );
   }
 
   void _ensureEventCanAdvanceState(TableState current, EventEnvelope event) {

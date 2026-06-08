@@ -32,6 +32,7 @@ abstract final class CoreInvariantCodes {
       'ERR_SESSION_CLOSED_WITHOUT_CLOSE_REQUEST';
   static const sessionClosedWithActiveHand =
       'ERR_SESSION_CLOSED_WITH_ACTIVE_HAND';
+  static const eventEnvelopeIdentityEmpty = 'ERR_EVENT_ENVELOPE_IDENTITY_EMPTY';
 
   static const all = <String>[
     tableIdEmpty,
@@ -58,5 +59,6 @@ abstract final class CoreInvariantCodes {
     handEventIdMismatch,
     sessionClosedWithoutCloseRequest,
     sessionClosedWithActiveHand,
+    eventEnvelopeIdentityEmpty,
   ];
 }

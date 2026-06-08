@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Core Event Envelope Identity Gate
+
+Summary:
+Hardened `CoreReducer` so whitespace-only event envelope identity, stream
+scope, timestamp, actor, and hash-chain fields fail closed before
+protocol-compatible events can mutate deterministic state.
+
+Files changed:
+- `packages/peerdeal_core/lib/src/models/core_invariant_codes.dart`
+- `packages/peerdeal_core/lib/src/reducer/core_reducer.dart`
+- `packages/peerdeal_core/test/peerdeal_core_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_core`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Direct reducer callers that used whitespace placeholders in event envelopes
+  now receive `ERR_EVENT_ENVELOPE_IDENTITY_EMPTY` before projection.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Core Command Identity Gate
 
 Summary:

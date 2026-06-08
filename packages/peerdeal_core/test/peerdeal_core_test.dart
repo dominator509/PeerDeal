@@ -99,23 +99,28 @@ EventEnvelope protocolEvent({
 EventEnvelope copyEvent(
   EventEnvelope event, {
   String? eventId,
+  String? eventType,
+  String? eventVersion,
+  String? protocolVersion,
   int? eventSeq,
   String? tableId,
   String? sessionId,
+  String? emittedAt,
+  String? actorRef,
   String? prevEventHash,
   String? eventHash,
 }) {
   return EventEnvelope(
     eventId: eventId ?? event.eventId,
-    eventType: event.eventType,
-    eventVersion: event.eventVersion,
-    protocolVersion: event.protocolVersion,
+    eventType: eventType ?? event.eventType,
+    eventVersion: eventVersion ?? event.eventVersion,
+    protocolVersion: protocolVersion ?? event.protocolVersion,
     eventSeq: eventSeq ?? event.eventSeq,
     tableId: tableId ?? event.tableId,
     sessionId: sessionId ?? event.sessionId,
     handId: event.handId,
-    emittedAt: event.emittedAt,
-    actorRef: event.actorRef,
+    emittedAt: emittedAt ?? event.emittedAt,
+    actorRef: actorRef ?? event.actorRef,
     payload: event.payload,
     prevEventHash: prevEventHash ?? event.prevEventHash,
     eventHash: eventHash ?? event.eventHash,
@@ -732,6 +737,39 @@ void main() {
       );
     },
   );
+
+  test('core rejects protocol events with empty envelope identity fields', () {
+    final valid = protocolEvent(
+      eventId: 'evt_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+    );
+    final malformedEvents = <EventEnvelope>[
+      copyEvent(valid, eventId: ' '),
+      copyEvent(valid, eventType: ' '),
+      copyEvent(valid, eventVersion: ' '),
+      copyEvent(valid, protocolVersion: ' '),
+      copyEvent(valid, tableId: ' '),
+      copyEvent(valid, sessionId: ' '),
+      copyEvent(valid, emittedAt: ' '),
+      copyEvent(valid, actorRef: ' '),
+      copyEvent(valid, prevEventHash: ' '),
+      copyEvent(valid, eventHash: ' '),
+    ];
+
+    for (final malformed in malformedEvents) {
+      expect(
+        () => const CoreReducer().apply(TableState.initial(), malformed),
+        throwsA(
+          isA<InvariantViolation>().having(
+            (violation) => violation.code,
+            'code',
+            CoreInvariantCodes.eventEnvelopeIdentityEmpty,
+          ),
+        ),
+      );
+    }
+  });
 
   test('core rejects seated protocol state that exceeds connected count', () {
     final opened = protocolEvent(
