@@ -109,6 +109,9 @@ the gates below are satisfied.
 - Network transport send contracts now include a validating sender boundary
   that rejects invalid frames before platform sinks see them and converts sink
   failures into explicit failed send results.
+- Network transport receive contracts now include a validating receiver
+  boundary that rejects invalid frames before session handlers see them and
+  converts handler failures into explicit failed receive results.
 - Receipt signing now includes an HMAC-SHA256 adapter with explicit active and
   rotated key lookup, deterministic verification, export-service coverage, and
   fail-closed signed artifact inspection.

@@ -16,7 +16,7 @@ packages add policy without mutating universal core truth.
 | App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, setup/join flows, demo slices, app-owned presenters/controllers |
 | Shared UI | `peerdeal_ui_kit` | Safe-surface widgets and render models |
 | Native seams | `peerdeal_native_bridges` | Method-channel contracts for platform facts |
-| Network confidence | `peerdeal_network` | Route class, confidence, primary peer selection, transport frame send gates |
+| Network confidence | `peerdeal_network` | Route class, confidence, primary peer selection, transport frame send/receive gates |
 | Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, anchors, snapshots, safe-close recovery |
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy |
 | Mode/variant policy | `peerdeal_modes`, `peerdeal_variants` | Session mode policy and poker variant rules |

@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Network Validating Receive Boundary
+
+Summary:
+Added a network-owned validating transport receive boundary. Session handlers
+now have a public `TransportFrameHandler` contract, and
+`ValidatingTransportFrameReceiver` validates inbound frames before calling the
+handler, rejects malformed frames without invoking session code, and converts
+handler exceptions into explicit failed receive results.
+
+Files changed:
+- `packages/peerdeal_network/lib/peerdeal_network.dart`
+- `packages/peerdeal_network/lib/src/contracts/transport_frame_receiver.dart`
+- `packages/peerdeal_network/lib/src/contracts/transport_frame_handler.dart`
+- `packages/peerdeal_network/lib/src/models/transport_frame_receive_result.dart`
+- `packages/peerdeal_network/lib/src/services/validating_transport_frame_receiver.dart`
+- `packages/peerdeal_network/test/validating_transport_frame_receiver_test.dart`
+- `packages/peerdeal_network/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_network`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+- `dart run melos run test`
+
+Risks:
+- This locks the Dart receive boundary only; live platform transport and
+  session integration remain production-readiness gaps.
+
+Next reviewer:
+Wire production inbound transport through `ValidatingTransportFrameReceiver`
+when live transport code is added.
+
+---
+
 ### 2026-06-08 - Codex - Network Validating Send Boundary
 
 Summary:

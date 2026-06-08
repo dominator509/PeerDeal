@@ -73,10 +73,12 @@ unless verified from the app route source in the current branch.
 
 ## Network Transport Boundary
 
-`peerdeal_network` exposes transport frame validation and validating send
-contracts. Platform transport adapters should receive frames only through the
-validating sender boundary so malformed frames are rejected before adapter code
-runs and adapter failures become explicit failed send results.
+`peerdeal_network` exposes transport frame validation plus validating send and
+receive contracts. Platform transport adapters should receive outbound frames
+only through the validating sender boundary, and inbound frames should reach
+session handlers only through the validating receiver boundary. Malformed frames
+are rejected before adapter/handler code runs, and adapter/handler failures
+become explicit failed transport results.
 
 ## Error Shape
 
