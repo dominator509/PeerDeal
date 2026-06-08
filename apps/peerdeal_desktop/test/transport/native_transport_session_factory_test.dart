@@ -181,6 +181,26 @@ void main() {
   });
 
   test(
+    'factory sender rejects invalid app payload limit before native transport',
+    () async {
+      final bridge = _FakeNativeTransportBridge();
+      final sender = NativeTransportSessionFactory(
+        bridge: bridge,
+        maxPayloadBytes: 0,
+      ).createSender();
+
+      final result = await sender.send(_frame());
+
+      expect(result.sent, isFalse);
+      expect(result.reasonCode, 'ERR_TRANSPORT_UNAVAILABLE');
+      expect(result.warnings, <String>[
+        'App transport payload limit is invalid.',
+      ]);
+      expect(bridge.sentFrames, isEmpty);
+    },
+  );
+
+  test(
     'factory sender rejects invalid frame before native transport',
     () async {
       final bridge = _FakeNativeTransportBridge();
@@ -240,6 +260,32 @@ void main() {
     expect(result.results.single.reasonCode, 'ERR_TRANSPORT_FRAME_REJECTED');
     expect(handler.frames, isEmpty);
   });
+
+  test(
+    'factory drain rejects invalid app payload limit before native receive',
+    () async {
+      final bridge = _FakeNativeTransportBridge(
+        receiveFrames: [_nativeFrame()],
+      );
+      final handler = _RecordingTransportFrameHandler();
+      final drain = NativeTransportSessionFactory(
+        bridge: bridge,
+        maxPayloadBytes: 0,
+      ).createDrain(handler: handler);
+
+      final result = await drain.drain(
+        sessionId: 'session_1',
+        peerId: 'peer_b',
+      );
+
+      expect(result.available, isFalse);
+      expect(result.warnings, <String>[
+        'App transport payload limit is invalid.',
+      ]);
+      expect(bridge.receiveLookups, 0);
+      expect(handler.frames, isEmpty);
+    },
+  );
 }
 
 TransportFrame _frame() {
@@ -278,6 +324,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   final List<NativeTransportFrame> _receiveFrames;
   final List<NativeTransportFrame> sentFrames = <NativeTransportFrame>[];
   int capabilityLookups = 0;
+  int receiveLookups = 0;
 
   @override
   Future<NativeTransportCapability> getCapability() async {
@@ -290,6 +337,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
     required String sessionId,
     required String peerId,
   }) async {
+    receiveLookups += 1;
     return NativeTransportReceiveSnapshot(
       available: true,
       frames: _receiveFrames,

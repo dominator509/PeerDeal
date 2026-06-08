@@ -14,6 +14,46 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Transport Direct Payload Gate
+
+Summary:
+Hardened mobile and desktop native transport session factories so direct
+sender and drain creation fail closed before native send or receive calls when
+the app-owned payload limit is invalid. This aligns direct factory entry
+points with the existing `loadSession` payload-limit gate.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_session_factory_test.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_session_factory_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\transport\native_transport_session_factory_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\transport\native_transport_session_factory_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Live transport still requires platform-native implementations behind the
+  locked method-channel contract.
+
+Next reviewer:
+Continue with native/platform implementation gaps or the next codable
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Receipt Key Namespace Gate
 
 Summary:

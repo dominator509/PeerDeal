@@ -21,18 +21,32 @@ class NativeTransportFrameDrain {
     required NativeTransportBridge bridge,
     required TransportFrameReceiver receiver,
   }) : _bridge = bridge,
-       _receiver = receiver;
+       _receiver = receiver,
+       _unavailableWarnings = null;
 
-  final NativeTransportBridge _bridge;
-  final TransportFrameReceiver _receiver;
+  const NativeTransportFrameDrain.unavailable({required List<String> warnings})
+    : _bridge = null,
+      _receiver = null,
+      _unavailableWarnings = warnings;
+
+  final NativeTransportBridge? _bridge;
+  final TransportFrameReceiver? _receiver;
+  final List<String>? _unavailableWarnings;
 
   Future<NativeTransportFrameDrainResult> drain({
     required String sessionId,
     required String peerId,
   }) async {
+    final unavailableWarnings = _unavailableWarnings;
+    if (unavailableWarnings != null) {
+      return NativeTransportFrameDrainResult.unavailable(
+        warnings: unavailableWarnings,
+      );
+    }
+
     final NativeTransportReceiveSnapshot snapshot;
     try {
-      snapshot = await _bridge.receiveFrames(
+      snapshot = await _bridge!.receiveFrames(
         sessionId: sessionId,
         peerId: peerId,
       );
@@ -56,7 +70,7 @@ class NativeTransportFrameDrain {
     final results = <TransportFrameReceiveResult>[];
     for (final frame in snapshot.frames) {
       try {
-        results.add(await _receiver.receive(_fromNativeFrame(frame)));
+        results.add(await _receiver!.receive(_fromNativeFrame(frame)));
       } on Object {
         results.add(
           const TransportFrameReceiveResult.rejected(

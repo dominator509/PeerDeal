@@ -169,6 +169,9 @@ the gates below are satisfied.
 - Native transport session factories now fail closed before native capability
   lookup when the app-owned payload limit is invalid, keeping bad app
   configuration from reaching platform transport.
+- Native transport session factories now also fail closed before native send or
+  receive calls when direct sender/drain creation uses an invalid app-owned
+  payload limit, keeping all app transport entry points aligned.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when

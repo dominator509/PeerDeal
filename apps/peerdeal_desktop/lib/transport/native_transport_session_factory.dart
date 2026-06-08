@@ -91,6 +91,11 @@ class NativeTransportSessionFactory {
   }
 
   TransportFrameSender _createSender(NativeTransportBridge bridge) {
+    if (_maxPayloadBytes < 1) {
+      return const _UnavailableTransportFrameSender(
+        warnings: <String>['App transport payload limit is invalid.'],
+      );
+    }
     return ValidatingTransportFrameSender(
       sink: NativeTransportFrameSink(bridge: bridge),
       validator: _validator,
@@ -101,6 +106,11 @@ class NativeTransportSessionFactory {
     required NativeTransportBridge bridge,
     required TransportFrameHandler handler,
   }) {
+    if (_maxPayloadBytes < 1) {
+      return const NativeTransportFrameDrain.unavailable(
+        warnings: <String>['App transport payload limit is invalid.'],
+      );
+    }
     return NativeTransportFrameDrain(
       bridge: bridge,
       receiver: ValidatingTransportFrameReceiver(
@@ -137,6 +147,20 @@ class NativeTransportSessionFactory {
       return normalized;
     }
     return normalized.substring(0, maxLength);
+  }
+}
+
+class _UnavailableTransportFrameSender implements TransportFrameSender {
+  const _UnavailableTransportFrameSender({required this.warnings});
+
+  final List<String> warnings;
+
+  @override
+  Future<TransportFrameSendResult> send(TransportFrame frame) async {
+    return TransportFrameSendResult.rejected(
+      reasonCode: 'ERR_TRANSPORT_UNAVAILABLE',
+      warnings: warnings,
+    );
   }
 }
 

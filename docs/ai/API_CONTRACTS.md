@@ -94,7 +94,9 @@ become explicit failed transport results.
 Mobile and desktop `NativeTransportSessionFactory` instances own the app
 payload limit used by the default `BasicTransportFrameValidator`. Session
 loading fails closed when native capability reports a non-positive
-`maxPayloadBytes` or a value above the app validator limit.
+`maxPayloadBytes` or a value above the app validator limit. Direct sender and
+drain creation also fail closed before native send/receive calls when the
+app-owned payload limit is invalid.
 
 ## Recovery Persistence Boundary
 
