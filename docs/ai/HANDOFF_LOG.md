@@ -14,6 +14,41 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - App Runtime Setup Identity Coverage
+
+Summary:
+Added mounted app-shell coverage for runtime-injected setup intent factories in
+both Flutter shells. Blank setup intent and host identities now fail closed
+through the stable app runtime dependency object path, not only direct route
+injection.
+
+Files changed:
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- This is a coverage hardening slice. The behavior was introduced at the
+  setup-flow orchestrator boundary in the preceding commit.
+
+Next reviewer:
+Continue with the next production-readiness app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Setup Intent Identity Gate
 
 Summary:

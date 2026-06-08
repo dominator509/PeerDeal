@@ -284,6 +284,9 @@ the gates below are satisfied.
 - App setup-flow orchestrators now reject blank setup intent and host
   pseudonymous identities before wizard resolution, so malformed production
   setup sources cannot emit blank plan ids or reach compiler dependencies.
+- App shell runtime dependency injection now has mounted-route coverage for
+  blank setup identities, locking the production runtime object path to the
+  same fail-closed setup intent gate as direct route injection.
 - App shells now fail closed for unknown route names with an explicit rejected
   route-unavailable surface instead of relying on default framework route
   errors.

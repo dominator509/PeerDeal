@@ -579,6 +579,33 @@ void main() {
     expect(find.text('Error: seat_count_missing'), findsOneWidget);
   });
 
+  testWidgets('fails closed for app-owned setup intent with blank identity', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          setupFlowIntentFactory: (_) => const SetupIntent(
+            intentId: '   ',
+            sourceType: SetupSurface.simple,
+            hostPseudonymousId: '   ',
+            modePreference: 'open_table',
+            variantPreference: 'holdem_nlhe',
+            seatCountPreference: 6,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Setup'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_INTENT_INVALID'), findsOneWidget);
+    expect(find.text('Error: setup_intent_id_missing'), findsOneWidget);
+    expect(find.text('Error: setup_host_missing'), findsOneWidget);
+  });
+
   testWidgets('fails closed for unknown app routes', (tester) async {
     await tester.pumpWidget(const PeerDealDesktopApp());
 
