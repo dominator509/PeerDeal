@@ -309,6 +309,11 @@ the gates below are satisfied.
   factory when one is supplied, load the active scenario recovery window, and
   fail closed with an explicit warning when no platform persistence root is
   available.
+- Mounted app table routes now receive app-owned runtime scope factories for
+  bootstrap and recovery persistence lookup, so production table/session scope
+  can enter from the app shell boundary instead of relying on hardcoded demo
+  session ids; table routes fail closed when runtime scope construction is
+  unavailable.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -321,13 +326,14 @@ the gates below are satisfied.
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
-  loading, mounted recovery-window loading, canonical app-route registry
-  validation, app-owned join invite-context injection, app-owned receipt
-  envelope injection, app-owned setup intent injection, app-owned transport
-  payload-limit enforcement, bounded app-owned table/join bootstrap mapping,
-  app-owned local-network/transport/capture diagnostic scrubbing, scrubbed
-  route-failure diagnostics, scrubbed receipt secure-key diagnostics, and
-  method-channel payload gates are locked for those follow-up implementations.
+  loading, mounted recovery-window loading, app-owned table runtime-scope
+  injection, canonical app-route registry validation, app-owned join
+  invite-context injection, app-owned receipt envelope injection, app-owned
+  setup intent injection, app-owned transport payload-limit enforcement,
+  bounded app-owned table/join bootstrap mapping, app-owned
+  local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
+  diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
+  payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

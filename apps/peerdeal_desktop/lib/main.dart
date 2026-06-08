@@ -44,6 +44,7 @@ class PeerDealDesktopApp extends StatefulWidget {
     SetupFlowIntentFactory? setupFlowIntentFactory,
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
+    DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
   }) : _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
@@ -54,7 +55,8 @@ class PeerDealDesktopApp extends StatefulWidget {
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
        _setupFlowIntentFactory = setupFlowIntentFactory,
        _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory,
-       _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory;
+       _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory,
+       _tableRuntimeScopeFactory = tableRuntimeScopeFactory;
 
   final DemoReceiptSurfacePresenter? _receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
@@ -67,6 +69,7 @@ class PeerDealDesktopApp extends StatefulWidget {
   final SetupFlowIntentFactory? _setupFlowIntentFactory;
   final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? _recoveryPersistenceStoreFactory;
+  final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
 
   @override
   State<PeerDealDesktopApp> createState() => _PeerDealDesktopAppState();
@@ -112,6 +115,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
             ),
             bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
             recoveryPersistenceStoreFactory: _recoveryPersistenceStoreFactory,
+            runtimeScopeFactory: widget._tableRuntimeScopeFactory,
             onOpenChat: () =>
                 Navigator.of(context).pushNamed(DemoSliceRoutes.chatRoute.path),
             onOpenReceipt: () => Navigator.of(

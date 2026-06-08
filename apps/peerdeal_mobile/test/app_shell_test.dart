@@ -343,6 +343,74 @@ void main() {
     expect(find.text('Recovery persistence: 1 events'), findsOneWidget);
   });
 
+  testWidgets('mounted table loads app-provided runtime recovery scope', (
+    tester,
+  ) async {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_mobile_mounted_runtime_scope_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+    final factory = AppRecoveryPersistenceStoreFactory(
+      rootDirectoryFactory: () => directory,
+    );
+    final store = factory.create().store!;
+    const scope = RecoveryPersistenceScope(
+      tableId: 'prod_table_1',
+      sessionId: 'prod_session_1',
+      protocolVersion: '1.x',
+    );
+    final append = store.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _recoveryEvent(
+          seq: 1,
+          prevHash: 'genesis',
+          hash: 'hash_1',
+          tableId: scope.tableId,
+          sessionId: scope.sessionId,
+        ),
+      ],
+    );
+    expect(append.isSuccess, isTrue);
+
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        recoveryPersistenceStoreFactory: factory,
+        tableRuntimeScopeFactory: (_) => scope,
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Recovery persistence: 1 events'), findsOneWidget);
+  });
+
+  testWidgets('mounted table fails closed when runtime scope throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        bootstrapCandidateLoaderFactory: () => NativeBootstrapCandidateLoader(
+          bridge: const _StaticLocalNetworkBridge(),
+        ),
+        tableRuntimeScopeFactory: (_) {
+          throw StateError('runtime scope unavailable');
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bootstrap: unavailable'), findsOneWidget);
+    expect(find.text('Recovery persistence: unavailable'), findsOneWidget);
+  });
+
   testWidgets('routes from demo home to join flow', (tester) async {
     await tester.pumpWidget(
       PeerDealMobileApp(
@@ -633,6 +701,8 @@ EventEnvelope _recoveryEvent({
   required int seq,
   required String prevHash,
   required String hash,
+  String tableId = 'open_table_live_turn',
+  String sessionId = 'demo:open_table_live_turn',
 }) {
   return EventEnvelope(
     eventId: 'evt_$seq',
@@ -640,8 +710,8 @@ EventEnvelope _recoveryEvent({
     eventVersion: '1.0',
     protocolVersion: '1.x',
     eventSeq: seq,
-    tableId: 'open_table_live_turn',
-    sessionId: 'demo:open_table_live_turn',
+    tableId: tableId,
+    sessionId: sessionId,
     handId: null,
     emittedAt: '2026-06-08T00:00:00Z',
     actorRef: 'system',

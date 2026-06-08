@@ -8,6 +8,9 @@ import '../controllers/native_bootstrap_candidate_loader.dart';
 import '../models/demo_scenario_snapshot.dart';
 import '../widgets/demo_status_banner.dart';
 
+typedef DemoTableRuntimeScopeFactory =
+    RecoveryPersistenceScope Function(DemoScenarioSnapshot snapshot);
+
 class DemoTableRoute extends StatefulWidget {
   const DemoTableRoute({
     super.key,
@@ -15,14 +18,16 @@ class DemoTableRoute extends StatefulWidget {
     required this.networkConfidence,
     required this.bootstrapCandidateLoaderFactory,
     this.recoveryPersistenceStoreFactory,
+    DemoTableRuntimeScopeFactory? runtimeScopeFactory,
     required this.onOpenChat,
     required this.onOpenReceipt,
-  });
+  }) : _runtimeScopeFactory = runtimeScopeFactory ?? _defaultRuntimeScopeFor;
 
   final DemoScenarioSnapshot snapshot;
   final DemoNetworkConfidenceVm networkConfidence;
   final NativeBootstrapCandidateLoaderFactory bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
+  final DemoTableRuntimeScopeFactory _runtimeScopeFactory;
   final VoidCallback onOpenChat;
   final VoidCallback onOpenReceipt;
 
@@ -84,9 +89,10 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
 
   Future<NativeBootstrapCandidateLoadResult> _loadBootstrapCandidates() async {
     try {
+      final scope = widget._runtimeScopeFactory(widget.snapshot);
       return await widget.bootstrapCandidateLoaderFactory().load(
-        sessionId: 'demo:${widget.snapshot.scenarioId}',
-        tableId: widget.snapshot.scenarioId,
+        sessionId: scope.sessionId,
+        tableId: scope.tableId,
       );
     } on Object {
       return const NativeBootstrapCandidateLoadResult.unavailable(
@@ -105,6 +111,7 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
     }
 
     try {
+      final scope = widget._runtimeScopeFactory(widget.snapshot);
       final result = factory.create();
       final store = result.store;
       if (store == null) {
@@ -113,13 +120,7 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
         );
       }
 
-      final window = store.loadWindow(
-        RecoveryPersistenceScope(
-          tableId: widget.snapshot.scenarioId,
-          sessionId: 'demo:${widget.snapshot.scenarioId}',
-          protocolVersion: '1.x',
-        ),
-      );
+      final window = store.loadWindow(scope);
       return DemoRecoveryPersistenceLoadResult.available(
         persistedEventCount: window.events.length,
         hasSnapshot: window.snapshot != null,
@@ -131,6 +132,16 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
       );
     }
   }
+}
+
+RecoveryPersistenceScope _defaultRuntimeScopeFor(
+  DemoScenarioSnapshot snapshot,
+) {
+  return RecoveryPersistenceScope(
+    tableId: snapshot.scenarioId,
+    sessionId: 'demo:${snapshot.scenarioId}',
+    protocolVersion: '1.x',
+  );
 }
 
 class DemoTableScreen extends StatelessWidget {
