@@ -12,6 +12,7 @@ import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_p
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_writer.dart';
 import 'package:peerdeal_mobile/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_mobile/join_flow/fakes.dart';
+import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
 import 'package:peerdeal_mobile/main.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_persistence_store_factory.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
@@ -303,6 +304,31 @@ void main() {
     expect(find.text('Join flow'), findsOneWidget);
     expect(find.text('State: joined'), findsOneWidget);
     expect(find.text('Result: OK_JOINED'), findsOneWidget);
+  });
+
+  testWidgets('routes join through app-owned invite context factory', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+          bootstrapCoordinator: FakeBootstrapCoordinator(),
+        ).create,
+        joinFlowInviteContextFactory: (_) => const InviteContext(
+          inviteCode: 'ABC123',
+          requestedRole: RequestedRole.player,
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Run rejoin'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_REJOIN_TOKEN_REQUIRED'), findsOneWidget);
   });
 
   testWidgets('routes from demo home to setup flow', (tester) async {

@@ -35,6 +35,7 @@ class PeerDealDesktopApp extends StatefulWidget {
     ReceiptExportArtifact? receiptExportArtifact,
     ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
+    JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     SetupFlowIntentFactory? setupFlowIntentFactory,
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
@@ -44,6 +45,7 @@ class PeerDealDesktopApp extends StatefulWidget {
        _receiptExportArtifact = receiptExportArtifact,
        _receiptExportArtifactFactory = receiptExportArtifactFactory,
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
+       _joinFlowInviteContextFactory = joinFlowInviteContextFactory,
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
        _setupFlowIntentFactory = setupFlowIntentFactory,
        _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory,
@@ -54,6 +56,7 @@ class PeerDealDesktopApp extends StatefulWidget {
   final ReceiptExportArtifact? _receiptExportArtifact;
   final ReceiptExportArtifactBuilder? _receiptExportArtifactFactory;
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
+  final JoinFlowInviteContextFactory? _joinFlowInviteContextFactory;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
   final SetupFlowIntentFactory? _setupFlowIntentFactory;
   final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
@@ -130,8 +133,10 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
                 : _createReceiptArtifactVerifier(),
             recovery: _recoveryResultFactory.createFor(_activeSnapshot),
           ),
-          DemoSliceRoutes.joinRoute.path: (_) =>
-              JoinFlowRoute(orchestratorFactory: _joinFlowOrchestratorFactory),
+          DemoSliceRoutes.joinRoute.path: (_) => JoinFlowRoute(
+            orchestratorFactory: _joinFlowOrchestratorFactory,
+            inviteContextFactory: widget._joinFlowInviteContextFactory,
+          ),
           DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
             orchestratorFactory: _setupFlowOrchestratorFactory,
             setupIntentFactory: widget._setupFlowIntentFactory,

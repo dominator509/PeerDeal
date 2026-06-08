@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_desktop/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_desktop/join_flow/fakes.dart';
+import 'package:peerdeal_desktop/join_flow/join_flow_models.dart';
 import 'package:peerdeal_desktop/join_flow/join_flow_route.dart';
 
 void main() {
@@ -45,6 +46,48 @@ void main() {
 
     expect(find.text('State: rejoined'), findsOneWidget);
     expect(find.text('Result: OK_REJOINED'), findsOneWidget);
+  });
+
+  testWidgets('uses injected invite context factory', (tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: demoFactory.create,
+          inviteContextFactory: (_) => const InviteContext(
+            inviteCode: 'ABC123',
+            requestedRole: RequestedRole.player,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Run rejoin'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_REJOIN_TOKEN_REQUIRED'), findsOneWidget);
+  });
+
+  testWidgets('fails closed when invite context factory throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: demoFactory.create,
+          inviteContextFactory: (_) {
+            throw StateError('invite context unavailable');
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_JOIN_FLOW_UNAVAILABLE'), findsOneWidget);
   });
 
   testWidgets('can switch to mounted rejection outcomes', (tester) async {

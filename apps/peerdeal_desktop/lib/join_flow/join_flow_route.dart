@@ -15,16 +15,21 @@ enum JoinFlowDemoMode {
 
 typedef JoinFlowOrchestratorFactory =
     JoinFlowOrchestrator Function(JoinFlowDemoMode mode);
+typedef JoinFlowInviteContextFactory =
+    InviteContext Function(JoinFlowDemoMode mode);
 
 class JoinFlowRoute extends StatefulWidget {
   const JoinFlowRoute({
     super.key,
     this.initialMode = JoinFlowDemoMode.firstJoin,
     required JoinFlowOrchestratorFactory orchestratorFactory,
-  }) : _orchestratorFactory = orchestratorFactory;
+    JoinFlowInviteContextFactory? inviteContextFactory,
+  }) : _orchestratorFactory = orchestratorFactory,
+       _inviteContextFactory = inviteContextFactory ?? _defaultInviteContextFor;
 
   final JoinFlowDemoMode initialMode;
   final JoinFlowOrchestratorFactory _orchestratorFactory;
+  final JoinFlowInviteContextFactory _inviteContextFactory;
 
   @override
   State<JoinFlowRoute> createState() => _JoinFlowRouteState();
@@ -90,11 +95,7 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
   Future<JoinFlowOutcome> _run(JoinFlowDemoMode mode) async {
     try {
       final orchestrator = widget._orchestratorFactory(mode);
-      final context = InviteContext(
-        inviteCode: 'ABC123',
-        requestedRole: RequestedRole.player,
-        rejoinToken: mode == JoinFlowDemoMode.rejoin ? 'rj_001' : null,
-      );
+      final context = widget._inviteContextFactory(mode);
       return mode == JoinFlowDemoMode.rejoin
           ? await orchestrator.runRejoin(context)
           : await orchestrator.runFirstJoin(context);
@@ -120,6 +121,14 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
       _outcome = _run(mode);
     });
   }
+}
+
+InviteContext _defaultInviteContextFor(JoinFlowDemoMode mode) {
+  return InviteContext(
+    inviteCode: 'ABC123',
+    requestedRole: RequestedRole.player,
+    rejoinToken: mode == JoinFlowDemoMode.rejoin ? 'rj_001' : null,
+  );
 }
 
 class _JoinOutcomeView extends StatelessWidget {

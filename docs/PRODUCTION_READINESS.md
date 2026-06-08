@@ -224,6 +224,11 @@ the gates below are satisfied.
 - Mounted join routes now receive orchestrator factories from the app shell
   boundary instead of constructing demo adapters inside the route, with
   fail-closed coverage when factory setup is unavailable.
+- Mounted join routes now also receive app-owned invite-context factories, so
+  production invite sources can feed first-join and rejoin orchestration through
+  the app shell boundary instead of leaving hardcoded invite/rejoin tokens
+  inside the route; the route fails closed when invite context construction is
+  unavailable.
 - Wizard Game File compilation now exposes a fail-closed `tryCompile` boundary
   so app/session setup flows can reject invalid setup plans without compiler
   exceptions escaping orchestration.
@@ -313,11 +318,12 @@ the gates below are satisfied.
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, canonical app-route registry
-  validation, app-owned setup intent injection, app-owned transport
-  payload-limit enforcement, bounded app-owned table/join bootstrap mapping,
-  app-owned local-network/transport/capture diagnostic scrubbing, scrubbed
-  route-failure diagnostics, scrubbed receipt secure-key diagnostics, and
-  method-channel payload gates are locked for those follow-up implementations.
+  validation, app-owned join invite-context injection, app-owned setup intent
+  injection, app-owned transport payload-limit enforcement, bounded app-owned
+  table/join bootstrap mapping, app-owned local-network/transport/capture
+  diagnostic scrubbing, scrubbed route-failure diagnostics, scrubbed receipt
+  secure-key diagnostics, and method-channel payload gates are locked for those
+  follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
