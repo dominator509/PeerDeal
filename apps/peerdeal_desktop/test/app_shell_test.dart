@@ -10,6 +10,7 @@ import 'package:peerdeal_desktop/demo_slice/controllers/native_receipt_export_ar
 import 'package:peerdeal_desktop/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/native_receipt_key_ring_provisioner.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/native_receipt_key_ring_writer.dart';
+import 'package:peerdeal_desktop/demo_slice/models/demo_scenario_snapshot.dart';
 import 'package:peerdeal_desktop/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_desktop/join_flow/fakes.dart';
 import 'package:peerdeal_desktop/join_flow/join_flow_models.dart';
@@ -18,6 +19,7 @@ import 'package:peerdeal_desktop/recovery/app_recovery_persistence_store_factory
 import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_wizard/peerdeal_wizard.dart';
 
@@ -117,6 +119,62 @@ void main() {
       'receipt_signing',
       'receipt_encryption',
     ]);
+    expect(captureBridge.requestCount, 1);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
+  testWidgets('exports receipts through app-owned receipt factory', (
+    tester,
+  ) async {
+    String? exportedUserId;
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        receiptFactory: (snapshot) =>
+            _receiptForSnapshot(snapshot, pseudonymousUserId: 'user_injected'),
+        receiptExportArtifactFactory: (receipt) async {
+          exportedUserId = receipt.pseudonymousUserId;
+          return const ReceiptExportArtifact.unavailable(
+            reason: 'test artifact unavailable',
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Receipt'));
+    await tester.pumpAndSettle();
+
+    expect(exportedUserId, 'user_injected');
+  });
+
+  testWidgets('fails closed when app-owned receipt factory throws', (
+    tester,
+  ) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+    var exportCalled = false;
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        presenter: presenter,
+        receiptFactory: (_) {
+          throw StateError('receipt source unavailable');
+        },
+        receiptExportArtifactFactory: (receipt) async {
+          exportCalled = true;
+          return const ReceiptExportArtifact.unavailable(
+            reason: 'test artifact unavailable',
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('Receipt'));
+    await tester.pumpAndSettle();
+
+    expect(exportCalled, isFalse);
     expect(captureBridge.requestCount, 1);
     expect(find.text('Receipt content hidden'), findsOneWidget);
   });
@@ -473,6 +531,25 @@ void main() {
     expect(find.text('Network: recoveryRequired'), findsOneWidget);
     expect(find.text('Network action: recovery_required'), findsOneWidget);
   });
+}
+
+PeerDealReceipt _receiptForSnapshot(
+  DemoScenarioSnapshot snapshot, {
+  required String pseudonymousUserId,
+}) {
+  return PeerDealReceipt(
+    receiptId: 'receipt_${snapshot.scenarioId}',
+    receiptVersion: '1.0',
+    protocolVersion: '1.x',
+    modeType: snapshot.mode,
+    sessionId: 'session_${snapshot.scenarioId}',
+    tableId: 'table_${snapshot.scenarioId}',
+    pseudonymousUserId: pseudonymousUserId,
+    bindingMode: ReceiptBindingMode.sessionBound,
+    wipeState: ReceiptWipeState.live,
+    payloadHash: 'hash_${snapshot.scenarioId}',
+    opaquePayload: 'opaque_${snapshot.scenarioId}',
+  );
 }
 
 class _ThrowingVerifierFactory extends DemoReceiptArtifactVerifierFactory {

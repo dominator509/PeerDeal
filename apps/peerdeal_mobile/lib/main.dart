@@ -23,6 +23,9 @@ import 'recovery/app_recovery_persistence_store_factory.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
 import 'setup_flow/setup_flow_route.dart';
 
+typedef DemoReceiptFactory =
+    PeerDealReceipt Function(DemoScenarioSnapshot snapshot);
+
 void main() {
   runApp(const PeerDealMobileApp());
 }
@@ -34,6 +37,7 @@ class PeerDealMobileApp extends StatefulWidget {
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
     ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
+    DemoReceiptFactory? receiptFactory,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
@@ -44,6 +48,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
        _receiptExportArtifactFactory = receiptExportArtifactFactory,
+       _receiptFactory = receiptFactory,
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
        _joinFlowInviteContextFactory = joinFlowInviteContextFactory,
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
@@ -55,6 +60,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? _receiptExportArtifact;
   final ReceiptExportArtifactBuilder? _receiptExportArtifactFactory;
+  final DemoReceiptFactory? _receiptFactory;
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
   final JoinFlowInviteContextFactory? _joinFlowInviteContextFactory;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
@@ -122,7 +128,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
             snapshot: _activeSnapshot,
             presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
             exportArtifact: widget._receiptExportArtifact,
-            receipt: _receiptFor(_activeSnapshot),
+            receipt: _safeReceiptFor(_activeSnapshot),
             exportArtifactFactory: widget._receiptExportArtifact == null
                 ? widget._receiptExportArtifactFactory
                 : null,
@@ -208,6 +214,14 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   AppRecoveryPersistenceStoreFactory? get _recoveryPersistenceStoreFactory {
     return widget._recoveryPersistenceStoreFactory ??
         AppRecoveryPersistenceStoreFactory.fromEnvironment();
+  }
+
+  PeerDealReceipt? _safeReceiptFor(DemoScenarioSnapshot snapshot) {
+    try {
+      return (widget._receiptFactory ?? _receiptFor)(snapshot);
+    } on Object {
+      return null;
+    }
   }
 
   PeerDealReceipt _receiptFor(DemoScenarioSnapshot snapshot) {

@@ -268,6 +268,10 @@ the gates below are satisfied.
 - Mounted app receipt routes can now receive app-owned receipt export artifact
   factories, generate signed/encrypted artifacts from deterministic route
   receipt inputs, and verify them through the same native-backed key boundary.
+- Mounted app receipt routes now receive app-owned receipt factories before
+  export, so production receipt sources can supply `PeerDealReceipt` envelopes
+  through the app shell boundary instead of relying on hardcoded demo user
+  identity; export fails closed when receipt construction is unavailable.
 - Receipt export now fails closed to an unavailable artifact when signing or
   encryption adapters throw.
 - Receipt import inspection now rejects signed artifacts when verifier adapters
@@ -318,12 +322,12 @@ the gates below are satisfied.
   provisioning/read/write mapping, file-backed recovery persistence seam,
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, canonical app-route registry
-  validation, app-owned join invite-context injection, app-owned setup intent
-  injection, app-owned transport payload-limit enforcement, bounded app-owned
-  table/join bootstrap mapping, app-owned local-network/transport/capture
-  diagnostic scrubbing, scrubbed route-failure diagnostics, scrubbed receipt
-  secure-key diagnostics, and method-channel payload gates are locked for those
-  follow-up implementations.
+  validation, app-owned join invite-context injection, app-owned receipt
+  envelope injection, app-owned setup intent injection, app-owned transport
+  payload-limit enforcement, bounded app-owned table/join bootstrap mapping,
+  app-owned local-network/transport/capture diagnostic scrubbing, scrubbed
+  route-failure diagnostics, scrubbed receipt secure-key diagnostics, and
+  method-channel payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the
