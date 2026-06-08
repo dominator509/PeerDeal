@@ -225,6 +225,9 @@ the gates below are satisfied.
 - App shells now fail closed for unknown route names with an explicit rejected
   route-unavailable surface instead of relying on default framework route
   errors.
+- App route-unavailable surfaces now scrub unknown route diagnostics before UI
+  rendering, dropping query/fragment detail and bounding displayed paths while
+  preserving explicit rejected navigation outcomes.
 - App receipt key-ring loaders now fail closed to an empty key ring when native
   secure key storage throws.
 - App receipt key-ring writers now map receipt signing/encryption keys into
@@ -292,8 +295,8 @@ the gates below are satisfied.
   app-owned recovery store construction, environment-configured recovery root
   loading, mounted recovery-window loading, app-owned transport payload-limit
   enforcement, bounded app-owned table/join bootstrap mapping, app-owned
-  capture diagnostic scrubbing, and method-channel payload gates are locked for
-  those follow-up implementations.
+  capture diagnostic scrubbing, scrubbed route-failure diagnostics, and
+  method-channel payload gates are locked for those follow-up implementations.
 
 ## Next production hardening order
 1. Replace native bridge stubs with platform implementations that satisfy the

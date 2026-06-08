@@ -8,7 +8,7 @@ class AppRouteFallbackScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = routeName;
+    final name = _safeRouteName(routeName);
     return PeerDealAppScaffold(
       title: 'Route unavailable',
       subtitle: 'Rejected navigation request',
@@ -23,5 +23,25 @@ class AppRouteFallbackScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static String? _safeRouteName(String? routeName) {
+    final value = routeName;
+    if (value == null) {
+      return null;
+    }
+    final publicPath = value.split(RegExp(r'[?#]')).first;
+    final normalized = publicPath
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (normalized.isEmpty) {
+      return null;
+    }
+    const maxLength = 80;
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return normalized.substring(0, maxLength);
   }
 }

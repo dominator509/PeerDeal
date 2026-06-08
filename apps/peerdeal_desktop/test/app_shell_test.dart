@@ -351,6 +351,23 @@ void main() {
     expect(find.text('Route: /unknown-route'), findsOneWidget);
   });
 
+  testWidgets('scrubs unknown route diagnostics before rendering', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const PeerDealDesktopApp());
+
+    Navigator.of(
+      tester.element(find.text('PeerDeal demo')),
+    ).pushNamed('/unknown-${'route'.padRight(120, 'x')}?token=secret#fragment');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.textContaining('token=secret'), findsNothing);
+    expect(find.textContaining('fragment'), findsNothing);
+    final routeText = tester.widget<Text>(find.textContaining('Route: /'));
+    expect(routeText.data!.length, lessThanOrEqualTo('Route: '.length + 80));
+  });
+
   testWidgets('fails closed when app-owned join factory throws', (
     tester,
   ) async {
