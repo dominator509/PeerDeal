@@ -87,6 +87,9 @@ the gates below are satisfied.
 - Core reducer ingress now rejects whitespace-only event envelope identity,
   scope, timestamp, actor, and hash-chain fields before protocol-compatible
   events can mutate deterministic state.
+- Replay full-window validation now uses the protocol-owned genesis hash marker
+  and rejects windows that do not start at `event_seq` 1 or whose first event
+  does not chain from genesis.
 - Canonical Hold'em settlement breadcrumb coverage now spans protocol fixtures,
   core metadata projection, replay through the core projector, and sync
   snapshot + suffix recovery.

@@ -24,6 +24,28 @@ class EventWindowValidator {
           ),
         );
       }
+    } else if (events.isNotEmpty) {
+      if (events.first.eventSeq != 1) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_EVENT_WINDOW_START_GAP',
+            message: 'Full replay event windows must start at event_seq 1.',
+            expected: 1,
+            actual: events.first.eventSeq,
+          ),
+        );
+      }
+      if (events.first.prevEventHash != genesisEventHash) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_GENESIS_HASH_MISMATCH',
+            message:
+                'Full replay event windows must start from the genesis event hash.',
+            expected: genesisEventHash,
+            actual: events.first.prevEventHash,
+          ),
+        );
+      }
     }
 
     for (var i = 0; i < events.length; i++) {

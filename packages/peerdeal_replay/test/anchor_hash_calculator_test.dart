@@ -19,13 +19,19 @@ void main() {
         emittedAt: '2026-04-25T00:00:00Z',
         actorRef: 'host_1',
         payload: const {'phase': 'OPEN_READY'},
-        prevEventHash: 'root',
+        prevEventHash: genesisEventHash,
         eventHash: 'hash_1',
       ),
     ];
 
-    final first = calculator.calculate(scope: ReplayScope.session, events: events);
-    final second = calculator.calculate(scope: ReplayScope.session, events: events);
+    final first = calculator.calculate(
+      scope: ReplayScope.session,
+      events: events,
+    );
+    final second = calculator.calculate(
+      scope: ReplayScope.session,
+      events: events,
+    );
 
     expect(first, equals(second));
   });

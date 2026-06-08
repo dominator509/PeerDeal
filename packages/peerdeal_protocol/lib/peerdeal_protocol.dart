@@ -2,6 +2,7 @@ export 'src/hashing/hash_chain.dart';
 export 'src/models/command_envelope.dart';
 export 'src/models/event_envelope.dart';
 export 'src/models/protocol_catalog.dart';
+export 'src/models/protocol_constants.dart';
 export 'src/models/protocol_diagnostic.dart';
 export 'src/models/protocol_result_codes.dart';
 export 'src/models/protocol_version.dart';

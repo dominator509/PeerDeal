@@ -14,6 +14,49 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Replay Genesis Window Gate
+
+Summary:
+Added a protocol-owned `genesisEventHash` constant and hardened replay
+full-window validation so windows without a snapshot base must start at
+`event_seq` 1 and chain from the canonical genesis hash before projection.
+Replay-local fixtures now use the same genesis marker as protocol fixtures.
+
+Files changed:
+- `packages/peerdeal_protocol/lib/src/models/protocol_constants.dart`
+- `packages/peerdeal_protocol/lib/peerdeal_protocol.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `packages/peerdeal_replay/lib/src/engine/event_window_validator.dart`
+- `packages/peerdeal_replay/test/anchor_hash_calculator_test.dart`
+- `packages/peerdeal_replay/test/basic_replay_engine_test.dart`
+- `packages/peerdeal_replay/test/fixtures/basic_session_replay.json`
+- `packages/peerdeal_replay/test/mismatch_diagnostics_test.dart`
+- `packages/peerdeal_replay/test/snapshot_suffix_replayer_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test` in `packages/peerdeal_protocol`
+- `dart test` in `packages/peerdeal_replay`
+- `dart test test\basic_replay_engine_test.dart --name "does not start at event sequence 1"` in `packages/peerdeal_replay`
+- `dart test test\basic_replay_engine_test.dart --name "non-genesis first hash"` in `packages/peerdeal_replay`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Replay callers that pass partial event windows without a snapshot base now
+  fail closed instead of projecting from an unanchored suffix.
+
+Next reviewer:
+Continue with the next production-readiness package or app-boundary gap from
+`docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-08 - Codex - Core Event Envelope Identity Gate
 
 Summary:

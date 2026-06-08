@@ -658,7 +658,7 @@ void main() {
         emittedAt: '2026-06-08T00:00:00Z',
         actorRef: 'system',
         payload: <String, Object?>{'kind': 'recovery'},
-        prevEventHash: 'genesis',
+        prevEventHash: genesisEventHash,
         eventHash: 'hash_1',
       ).toJson(),
     );
@@ -666,6 +666,14 @@ void main() {
     expect(event.eventId, 'evt_1');
     expect(event.payload['kind'], 'recovery');
     expect(event.eventHash, 'hash_1');
+  });
+
+  test('genesis event hash matches accepted open-session fixture', () {
+    final decoded = fixtureJson(
+      'fixtures/events/open_table_session_opened_event_v1.json',
+    );
+
+    expect(decoded['prev_event_hash'], genesisEventHash);
   });
 
   test('snapshot envelope round-trips through JSON', () {

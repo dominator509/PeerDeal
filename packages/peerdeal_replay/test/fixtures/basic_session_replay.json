@@ -14,7 +14,7 @@
       "payload": {
         "phase": "OPEN_READY"
       },
-      "prev_event_hash": "root",
+      "prev_event_hash": "GENESIS",
       "event_hash": "hash_1"
     },
     {

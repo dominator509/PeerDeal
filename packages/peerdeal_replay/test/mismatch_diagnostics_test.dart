@@ -23,7 +23,7 @@ void main() {
         emittedAt: '2026-04-25T00:00:00Z',
         actorRef: 'host_1',
         payload: const {},
-        prevEventHash: 'root',
+        prevEventHash: genesisEventHash,
         eventHash: 'hash_1',
       ),
       EventEnvelope(
@@ -71,7 +71,7 @@ void main() {
         emittedAt: '2026-04-25T00:00:00Z',
         actorRef: 'host_1',
         payload: const {},
-        prevEventHash: 'root',
+        prevEventHash: genesisEventHash,
         eventHash: 'hash_1',
       ),
       EventEnvelope(

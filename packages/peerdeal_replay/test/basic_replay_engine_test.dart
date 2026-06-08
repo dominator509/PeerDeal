@@ -25,7 +25,7 @@ void main() {
         emittedAt: '2026-04-25T00:00:00Z',
         actorRef: 'host_1',
         payload: const {'phase': 'OPEN_READY'},
-        prevEventHash: 'root',
+        prevEventHash: genesisEventHash,
         eventHash: 'hash_1',
       ),
       EventEnvelope(
@@ -63,6 +63,78 @@ void main() {
     ]);
     expect(result.finalAppliedEventSeq, 2);
     expect(result.reconstructedAnchor, isNotNull);
+  });
+
+  test(
+    'rejects full replay window that does not start at event sequence 1',
+    () {
+      final result = engine.replay(
+        ReplayRequest(
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          protocolVersion: '1.0.0',
+          scope: ReplayScope.session,
+          events: const <EventEnvelope>[
+            EventEnvelope(
+              eventId: 'evt_2',
+              eventType: 'HandStarted',
+              eventVersion: '1.0',
+              protocolVersion: '1.0.0',
+              eventSeq: 2,
+              tableId: 'table_1',
+              sessionId: 'session_1',
+              handId: 'hand_1',
+              emittedAt: '2026-04-25T00:00:05Z',
+              actorRef: 'system',
+              payload: <String, Object?>{'phase': 'LIVE_ACTIVE'},
+              prevEventHash: genesisEventHash,
+              eventHash: 'hash_2',
+            ),
+          ],
+        ),
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.state, isNull);
+      expect(
+        result.mismatches.single.code,
+        'ERR_REPLAY_EVENT_WINDOW_START_GAP',
+      );
+    },
+  );
+
+  test('rejects full replay window with a non-genesis first hash', () {
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        events: const <EventEnvelope>[
+          EventEnvelope(
+            eventId: 'evt_1',
+            eventType: 'OpenTableSessionOpened',
+            eventVersion: '1.0',
+            protocolVersion: '1.0.0',
+            eventSeq: 1,
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            handId: null,
+            emittedAt: '2026-04-25T00:00:00Z',
+            actorRef: 'host_1',
+            payload: <String, Object?>{'phase': 'OPEN_READY'},
+            prevEventHash: 'root',
+            eventHash: 'hash_1',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_GENESIS_HASH_MISMATCH');
+    expect(result.mismatches.single.expected, genesisEventHash);
+    expect(result.mismatches.single.actual, 'root');
   });
 
   test('replays fixture-backed Holdem showdown settlement lifecycle', () {
@@ -387,7 +459,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
         ],
@@ -422,7 +494,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
         ],
@@ -483,7 +555,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
         ],
@@ -622,7 +694,7 @@ void main() {
             emittedAt: '2026-04-25T00:00:00Z',
             actorRef: 'host_1',
             payload: <String, Object?>{'phase': 'OPEN_READY'},
-            prevEventHash: 'root',
+            prevEventHash: genesisEventHash,
             eventHash: 'hash_1',
           ),
         ],
