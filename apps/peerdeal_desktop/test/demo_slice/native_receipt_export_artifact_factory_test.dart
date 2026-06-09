@@ -108,6 +108,19 @@ void main() {
     expect(artifact.reason, isNot(contains('denied')));
     expect(bridge.savedKeys.single.key.purpose, 'receipt_signing');
   });
+
+  test('fails closed when key provisioning throws', () async {
+    final factory = NativeReceiptExportArtifactFactory(
+      keyRingProvisioner: _ThrowingProvisioner(),
+      nonceFactory: () => List<int>.filled(32, 7),
+    );
+
+    final artifact = await factory.exportSignedEncrypted(_receipt);
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt key provisioning failed.');
+    expect(artifact.reason, isNot(contains('native exception')));
+  });
 }
 
 const _receipt = PeerDealReceipt(
@@ -177,4 +190,11 @@ class _SavedKey {
 
   final String namespace;
   final SecureKeyRecord key;
+}
+
+class _ThrowingProvisioner implements NativeReceiptKeyRingProvisioner {
+  @override
+  Future<ReceiptKeyRingProvisionResult> ensureActiveKeys() async {
+    throw StateError('native exception');
+  }
 }

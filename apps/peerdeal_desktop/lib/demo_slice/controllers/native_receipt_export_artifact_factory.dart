@@ -39,7 +39,15 @@ class NativeReceiptExportArtifactFactory {
   Future<ReceiptExportArtifact> exportSignedEncrypted(
     PeerDealReceipt receipt,
   ) async {
-    final provisionResult = await _keyRingProvisioner.ensureActiveKeys();
+    final ReceiptKeyRingProvisionResult provisionResult;
+    try {
+      provisionResult = await _keyRingProvisioner.ensureActiveKeys();
+    } catch (_) {
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt key provisioning failed.',
+      );
+    }
+
     if (!provisionResult.isSuccess) {
       return const ReceiptExportArtifact.unavailable(
         reason: 'Receipt key provisioning failed.',
