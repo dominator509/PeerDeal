@@ -385,6 +385,9 @@ the gates below are satisfied.
 - App receipt export artifact factories now provision native-backed receipt
   keys before signed/encrypted export, build signer/cipher adapters from the
   provisioned key ring, and fail closed when key provisioning is unavailable.
+- App receipt export artifact factories now collapse key-provisioning warning
+  detail into a stable unavailable artifact reason, preventing native or
+  provisioning diagnostics from entering export metadata.
 - Mounted app receipt routes can now receive app-owned receipt export artifact
   factories, generate signed/encrypted artifacts from deterministic route
   receipt inputs, and verify them through the same native-backed key boundary.
@@ -564,6 +567,7 @@ the gates below are satisfied.
   generic native transport exact-key validation,
   app-owned receipt delete key-id validation, generic native secure-key
   request validation,
+  app-owned receipt export provisioning diagnostic scrubbing,
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned
   local-network discovery list validation,

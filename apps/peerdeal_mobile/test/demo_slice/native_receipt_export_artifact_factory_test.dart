@@ -88,10 +88,8 @@ void main() {
     final artifact = await factory.exportSignedEncrypted(_receipt);
 
     expect(artifact.artifactType, 'unavailable');
-    expect(
-      artifact.reason,
-      'Secure receipt key storage reported a platform warning.',
-    );
+    expect(artifact.reason, 'Receipt key provisioning failed.');
+    expect(artifact.reason, isNot(contains('locked')));
     expect(bridge.savedKeys, isEmpty);
   });
 
@@ -106,10 +104,8 @@ void main() {
     final artifact = await factory.exportSignedEncrypted(_receipt);
 
     expect(artifact.artifactType, 'unavailable');
-    expect(
-      artifact.reason,
-      'Secure receipt key storage reported a platform warning.',
-    );
+    expect(artifact.reason, 'Receipt key provisioning failed.');
+    expect(artifact.reason, isNot(contains('denied')));
     expect(bridge.savedKeys.single.key.purpose, 'receipt_signing');
   });
 }

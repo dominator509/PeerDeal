@@ -174,6 +174,8 @@ coerced.
 - Protocol failures use `ProtocolDiagnostic`.
 - Sync/replay failures expose structured mismatch/conflict codes.
 - Receipt import/export/verification failures must fail closed.
+- App receipt export factories must not copy provisioning warning detail into
+  unavailable artifact reasons.
 - App receipt key-ring loaders must fail closed when native storage exposes
   ambiguous active signing or encryption keys.
 - App receipt key-ring loaders and writers must reject malformed app-owned

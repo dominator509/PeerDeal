@@ -41,10 +41,8 @@ class NativeReceiptExportArtifactFactory {
   ) async {
     final provisionResult = await _keyRingProvisioner.ensureActiveKeys();
     if (!provisionResult.isSuccess) {
-      return ReceiptExportArtifact.unavailable(
-        reason: provisionResult.warnings.isEmpty
-            ? 'Receipt key provisioning failed.'
-            : provisionResult.warnings.join(' '),
+      return const ReceiptExportArtifact.unavailable(
+        reason: 'Receipt key provisioning failed.',
       );
     }
 
