@@ -94,6 +94,60 @@ void main() {
   });
 
   test(
+    'fails closed before native load for invalid key record limit',
+    () async {
+      final bridge = _FakeSecureKeyStorageBridge(
+        snapshot: const SecureKeyStorageSnapshot(
+          available: true,
+          keys: <SecureKeyRecord>[],
+        ),
+      );
+
+      final result = await NativeReceiptKeyRingLoader(
+        bridge: bridge,
+        maxKeyRecords: 0,
+      ).load();
+
+      expect(result.hasSigningKey, isFalse);
+      expect(result.hasEncryptionKey, isFalse);
+      expect(result.warnings, <String>[
+        'Secure receipt key record limit is invalid.',
+      ]);
+      expect(bridge.namespace, isNull);
+    },
+  );
+
+  test('fails closed when native key snapshot exceeds record limit', () async {
+    final bridge = _FakeSecureKeyStorageBridge(
+      snapshot: SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[
+          for (var index = 0; index < 3; index++)
+            SecureKeyRecord(
+              keyId: 'receipt_signing_$index',
+              purpose: 'receipt_signing',
+              algorithm: 'hmac-sha256',
+              secret: 'signing_secret_$index',
+              active: index == 0,
+            ),
+        ],
+      ),
+    );
+
+    final result = await NativeReceiptKeyRingLoader(
+      bridge: bridge,
+      maxKeyRecords: 2,
+    ).load();
+
+    expect(result.hasSigningKey, isFalse);
+    expect(result.hasEncryptionKey, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key record limit reached.',
+    ]);
+    expect(bridge.namespace, 'peerdeal.receipts');
+  });
+
+  test(
     'fails closed when native storage has multiple active receipt keys',
     () async {
       final bridge = _FakeSecureKeyStorageBridge(

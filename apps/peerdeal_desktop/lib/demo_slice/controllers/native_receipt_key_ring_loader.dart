@@ -20,16 +20,24 @@ class NativeReceiptKeyRingLoader {
   const NativeReceiptKeyRingLoader({
     required SecureKeyStorageBridge bridge,
     this.namespace = defaultNamespace,
+    this.maxKeyRecords = 64,
   }) : _bridge = bridge;
 
   final SecureKeyStorageBridge _bridge;
   final String namespace;
+  final int maxKeyRecords;
 
   Future<ReceiptKeyRingLoadResult> load() async {
     if (!_isValidNamespace(namespace)) {
       return const ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key namespace is invalid.'],
+      );
+    }
+    if (maxKeyRecords < 1) {
+      return const ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key record limit is invalid.'],
       );
     }
 
@@ -52,6 +60,12 @@ class NativeReceiptKeyRingLoader {
             fallback: 'Secure receipt key storage is unavailable.',
           ),
         ],
+      );
+    }
+    if (snapshot.keys.length > maxKeyRecords) {
+      return const ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key record limit reached.'],
       );
     }
 
