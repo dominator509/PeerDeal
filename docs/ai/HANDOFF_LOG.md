@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Transport Identity Padding Gate
+
+Summary:
+Hardened package-owned transport request validation so `peerdeal_network`
+rejects padded session/peer frame identities before validating sender/receiver
+boundaries call sinks or handlers, and `peerdeal_native_bridges` rejects padded
+native transport frame/receive identities before platform send/receive calls.
+
+Files changed:
+- `packages/peerdeal_network/lib/src/services/basic_transport_frame_validator.dart`
+- `packages/peerdeal_network/test/basic_transport_frame_validator_test.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_bridge_models.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/method_channel_native_transport_bridge.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_native_transport_bridge_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test\basic_transport_frame_validator_test.dart test\validating_transport_frame_sender_test.dart test\validating_transport_frame_receiver_test.dart`
+  in `packages/peerdeal_network`
+- `flutter test --no-pub test\method_channel_native_transport_bridge_test.dart`
+  in `packages/peerdeal_native_bridges`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks Dart transport request validation only; live platform transport
+  implementations remain pending.
+
+Next reviewer:
+Continue with the next codable production-readiness gap; live platform
+transport implementations remain outside this Dart-only slice.
+
+---
+
 ### 2026-06-08 - Codex - Native Secure Key Request Gate
 
 Summary:

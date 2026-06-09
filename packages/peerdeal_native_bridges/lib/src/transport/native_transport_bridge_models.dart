@@ -40,8 +40,11 @@ class NativeTransportFrame {
 
   bool get isUsable =>
       sessionId.trim().isNotEmpty &&
+      sessionId.trim() == sessionId &&
       senderPeerId.trim().isNotEmpty &&
+      senderPeerId.trim() == senderPeerId &&
       recipientPeerId.trim().isNotEmpty &&
+      recipientPeerId.trim() == recipientPeerId &&
       senderPeerId != recipientPeerId &&
       sequence >= 0 &&
       payloadBytes.isNotEmpty;

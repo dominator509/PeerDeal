@@ -13,12 +13,18 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
 
     if (frame.sessionId.trim().isEmpty) {
       warnings.add('ERR_TRANSPORT_FRAME_SESSION_REQUIRED');
+    } else if (frame.sessionId.trim() != frame.sessionId) {
+      warnings.add('ERR_TRANSPORT_FRAME_SESSION_MALFORMED');
     }
     if (frame.fromPeerId.trim().isEmpty) {
       warnings.add('ERR_TRANSPORT_FRAME_SENDER_REQUIRED');
+    } else if (frame.fromPeerId.trim() != frame.fromPeerId) {
+      warnings.add('ERR_TRANSPORT_FRAME_SENDER_MALFORMED');
     }
     if (frame.toPeerId.trim().isEmpty) {
       warnings.add('ERR_TRANSPORT_FRAME_RECIPIENT_REQUIRED');
+    } else if (frame.toPeerId.trim() != frame.toPeerId) {
+      warnings.add('ERR_TRANSPORT_FRAME_RECIPIENT_MALFORMED');
     }
     if (frame.fromPeerId == frame.toPeerId) {
       warnings.add('ERR_TRANSPORT_FRAME_SELF_SEND');

@@ -40,6 +40,28 @@ void main() {
     expect(result.warnings, contains('ERR_TRANSPORT_FRAME_PAYLOAD_REQUIRED'));
   });
 
+  test('rejects padded frame identities', () {
+    const validator = BasicTransportFrameValidator();
+
+    final result = validator.validate(
+      const TransportFrame(
+        sessionId: ' session_1 ',
+        fromPeerId: ' peer_a ',
+        toPeerId: ' peer_b ',
+        sequence: 1,
+        payload: <int>[1],
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.warnings, contains('ERR_TRANSPORT_FRAME_SESSION_MALFORMED'));
+    expect(result.warnings, contains('ERR_TRANSPORT_FRAME_SENDER_MALFORMED'));
+    expect(
+      result.warnings,
+      contains('ERR_TRANSPORT_FRAME_RECIPIENT_MALFORMED'),
+    );
+  });
+
   test(
     'rejects self-send frames before transport implementation sees them',
     () {

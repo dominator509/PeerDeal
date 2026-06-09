@@ -163,9 +163,24 @@ void main() {
       ),
     );
     final receive = await bridge.receiveFrames(sessionId: '', peerId: 'peer_b');
+    final paddedSend = await bridge.sendFrame(
+      const NativeTransportFrame(
+        sessionId: ' session_1 ',
+        senderPeerId: 'peer_a',
+        recipientPeerId: 'peer_b',
+        sequence: 1,
+        payloadBytes: <int>[1],
+      ),
+    );
+    final paddedReceive = await bridge.receiveFrames(
+      sessionId: 'session_1',
+      peerId: ' peer_b ',
+    );
 
     expect(send.isSuccess, isFalse);
     expect(receive.available, isFalse);
+    expect(paddedSend.isSuccess, isFalse);
+    expect(paddedReceive.available, isFalse);
     expect(log, isEmpty);
   });
 }

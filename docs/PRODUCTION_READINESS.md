@@ -138,6 +138,9 @@ the gates below are satisfied.
   that fails closed on malformed session/peer identities, self-send frames,
   invalid sequence numbers, empty payloads, and oversized payloads before
   platform transport adapters send data.
+- Network transport frame validation now rejects padded session and peer
+  identities before validating sender/receiver boundaries can pass frames to
+  platform sinks or session handlers.
 - Network transport send contracts now include a validating sender boundary
   that rejects invalid frames before platform sinks see them and converts sink
   failures into explicit failed send results.
@@ -148,6 +151,9 @@ the gates below are satisfied.
   for capability lookup, byte-frame sends, and inbound frame snapshots, failing
   closed on invalid requests, platform failures, or malformed payloads without
   putting routing policy in the native bridge package.
+- Native transport method-channel wrappers now reject padded frame and receive
+  scope identities before platform send/receive calls, keeping ambiguous
+  generic transport requests out of native code.
 - App shells now include app-owned native transport adapters that compose the
   generic native byte-frame bridge with `peerdeal_network` validating
   sender/receiver boundaries, so app transport sends and inbound drains cannot
@@ -491,6 +497,7 @@ the gates below are satisfied.
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
+  package-owned transport identity validation,
   app-owned receipt delete key-id validation, generic native secure-key
   request validation,
   bounded app-owned table/join bootstrap mapping, app-owned local-network

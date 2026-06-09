@@ -79,7 +79,7 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
     required String sessionId,
     required String peerId,
   }) async {
-    if (sessionId.trim().isEmpty || peerId.trim().isEmpty) {
+    if (!_isValidReceiveScope(sessionId) || !_isValidReceiveScope(peerId)) {
       return const NativeTransportReceiveSnapshot.unavailable(
         warning: 'Native transport receive request is invalid.',
       );
@@ -110,6 +110,9 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
 
     return NativeTransportChannelContract.decodeReceiveSnapshot(result);
   }
+
+  bool _isValidReceiveScope(String value) =>
+      value.trim().isNotEmpty && value.trim() == value;
 
   String _warning(String prefix, Object error) {
     if (error is PlatformException) {

@@ -97,6 +97,9 @@ only through the validating sender boundary, and inbound frames should reach
 session handlers only through the validating receiver boundary. Malformed frames
 are rejected before adapter/handler code runs, and adapter/handler failures
 become explicit failed transport results.
+Transport frame session and peer identities must be exact nonblank strings;
+blank or padded identities fail validation before sender/receiver boundaries
+call platform sinks or session handlers.
 
 Mobile and desktop `NativeTransportSessionFactory` instances own the app
 payload limit used by the default `BasicTransportFrameValidator`. Session
@@ -106,6 +109,8 @@ drain creation also fail closed before native send/receive calls when the
 app-owned payload limit is invalid. Native transport sinks validate outbound
 frames before platform send calls, and native transport drains reject invalid
 app-owned receive session/peer scope before calling platform receive methods.
+The generic native transport method-channel bridge also rejects padded send
+frame and receive scope identities before platform calls.
 
 ## Recovery Persistence Boundary
 
