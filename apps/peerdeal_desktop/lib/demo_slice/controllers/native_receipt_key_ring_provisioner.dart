@@ -67,10 +67,18 @@ class NativeReceiptKeyRingProvisioner {
     final warnings = <String>[];
 
     if (keyRing.activeSigningKey() == null) {
-      final key = ReceiptSigningKey(
-        keyId: _keyIdFactory('receipt_signing'),
-        secret: _secretFactory(),
-      );
+      final ReceiptSigningKey key;
+      try {
+        key = ReceiptSigningKey(
+          keyId: _keyIdFactory('receipt_signing'),
+          secret: _secretFactory(),
+        );
+      } on Object {
+        return ReceiptKeyRingProvisionResult(
+          keyRing: keyRing,
+          warnings: const <String>['Receipt signing key provisioning failed.'],
+        );
+      }
       final result = await _writer.saveSigningKey(key, active: true);
       if (!result.isSuccess) {
         warnings.add(
@@ -88,10 +96,21 @@ class NativeReceiptKeyRingProvisioner {
     }
 
     if (warnings.isEmpty && keyRing.activeEncryptionKey() == null) {
-      final key = ReceiptEncryptionKey(
-        keyId: _keyIdFactory('receipt_encryption'),
-        secret: _secretFactory(),
-      );
+      final ReceiptEncryptionKey key;
+      try {
+        key = ReceiptEncryptionKey(
+          keyId: _keyIdFactory('receipt_encryption'),
+          secret: _secretFactory(),
+        );
+      } on Object {
+        return ReceiptKeyRingProvisionResult(
+          keyRing: keyRing,
+          warnings: const <String>[
+            'Receipt encryption key provisioning failed.',
+          ],
+          keysCreated: keysCreated,
+        );
+      }
       final result = await _writer.saveEncryptionKey(key, active: true);
       if (!result.isSuccess) {
         warnings.add(

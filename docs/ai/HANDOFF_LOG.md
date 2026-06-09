@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Harden Receipt Provisioning Factories
+
+Summary:
+Hardened mobile and desktop native receipt key-ring provisioners so app-owned
+key-id and key-material factory exceptions fail closed with stable provisioning
+warnings instead of escaping receipt export/provisioning paths.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_provisioner.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_receipt_key_ring_provisioner_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_provisioner.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_receipt_key_ring_provisioner_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/demo_slice/native_receipt_key_ring_provisioner_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/demo_slice/native_receipt_key_ring_provisioner_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Platform secure storage implementation remains pending; this locks app-owned
+  provisioning dependency failure handling only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Bound Receipt Key Material
 
 Summary:

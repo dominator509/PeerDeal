@@ -397,6 +397,9 @@ the gates below are satisfied.
   create missing active signing/encryption keys with secure random material,
   persist them through the app-owned writer boundary, and fail closed when
   native storage is unavailable or mutation fails.
+- App receipt key-ring provisioners now fail closed when app-owned receipt
+  key-id or key-material factories throw, preventing provisioning dependency
+  failures from escaping app export paths.
 - App receipt export artifact factories now provision native-backed receipt
   keys before signed/encrypted export, build signer/cipher adapters from the
   provisioned key ring, and fail closed when key provisioning is unavailable.
@@ -603,6 +606,7 @@ the gates below are satisfied.
   app-owned receipt secure-key record bounding,
   app-owned receipt native key-id metadata bounding,
   app-owned receipt key material bounding,
+  app-owned receipt provisioning factory failure handling,
   app-owned receipt mutation key-id bounding,
   app-owned receipt delete key-id validation, generic native secure-key
   request validation,

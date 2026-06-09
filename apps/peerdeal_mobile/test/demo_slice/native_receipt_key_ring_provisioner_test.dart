@@ -166,6 +166,48 @@ void main() {
     expect(result.keysCreated, 0);
     expect(bridge.savedKeys.single.key.purpose, 'receipt_signing');
   });
+
+  test('fails closed when signing key factories throw', () async {
+    final bridge = _ProvisioningBridge();
+    final provisioner = NativeReceiptKeyRingProvisioner(
+      loader: NativeReceiptKeyRingLoader(bridge: bridge),
+      writer: NativeReceiptKeyRingWriter(bridge: bridge),
+      secretFactory: () => throw StateError('secret failed'),
+      keyIdFactory: (purpose) => '${purpose}_test',
+    );
+
+    final result = await provisioner.ensureActiveKeys();
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warnings, <String>[
+      'Receipt signing key provisioning failed.',
+    ]);
+    expect(result.keysCreated, 0);
+    expect(bridge.savedKeys, isEmpty);
+  });
+
+  test('fails closed when encryption key factories throw', () async {
+    var secretIndex = 0;
+    final bridge = _ProvisioningBridge();
+    final provisioner = NativeReceiptKeyRingProvisioner(
+      loader: NativeReceiptKeyRingLoader(bridge: bridge),
+      writer: NativeReceiptKeyRingWriter(bridge: bridge),
+      secretFactory: () {
+        if (secretIndex++ == 0) return 'secret_0';
+        throw StateError('secret failed');
+      },
+      keyIdFactory: (purpose) => '${purpose}_test',
+    );
+
+    final result = await provisioner.ensureActiveKeys();
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warnings, <String>[
+      'Receipt encryption key provisioning failed.',
+    ]);
+    expect(result.keysCreated, 1);
+    expect(bridge.savedKeys.single.key.purpose, 'receipt_signing');
+  });
 }
 
 NativeReceiptKeyRingProvisioner _provisioner(_ProvisioningBridge bridge) {
