@@ -12,6 +12,9 @@ class DemoHomeScreen extends StatelessWidget {
     required this.demoNavigationActions,
     required this.productionNavigationActions,
     required this.onSelectScenario,
+    this.title = 'PeerDeal demo',
+    this.subtitle = 'Fixture-backed app orchestration',
+    this.showDemoScenarios = true,
     this.nativeReadiness,
   });
 
@@ -19,13 +22,16 @@ class DemoHomeScreen extends StatelessWidget {
   final List<DemoHomeNavigationAction> demoNavigationActions;
   final List<DemoHomeNavigationAction> productionNavigationActions;
   final ValueChanged<String> onSelectScenario;
+  final String title;
+  final String subtitle;
+  final bool showDemoScenarios;
   final AppNativeReadinessSnapshot? nativeReadiness;
 
   @override
   Widget build(BuildContext context) {
     return PeerDealAppScaffold(
-      title: 'PeerDeal demo',
-      subtitle: 'Fixture-backed app orchestration',
+      title: title,
+      subtitle: subtitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -53,14 +59,16 @@ class DemoHomeScreen extends StatelessWidget {
             _NavigationSection(title: 'Demo', actions: demoNavigationActions),
             const SizedBox(height: 12),
           ],
-          Text('Active scenario: ${controller.activeScenario.title}'),
-          const SizedBox(height: 12),
-          for (final scenario in controller.scenarios)
-            _ScenarioSummary(
-              scenario: scenario,
-              selected: scenario.id == controller.activeScenario.id,
-              onTap: () => onSelectScenario(scenario.id),
-            ),
+          if (showDemoScenarios) ...<Widget>[
+            Text('Active scenario: ${controller.activeScenario.title}'),
+            const SizedBox(height: 12),
+            for (final scenario in controller.scenarios)
+              _ScenarioSummary(
+                scenario: scenario,
+                selected: scenario.id == controller.activeScenario.id,
+                onTap: () => onSelectScenario(scenario.id),
+              ),
+          ],
         ],
       ),
     );

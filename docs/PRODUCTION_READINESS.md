@@ -630,6 +630,9 @@ the gates below are satisfied.
   from enabled demo navigation, preserving the combined validated navigation
   list for custom home builders while giving production routes a distinct
   default launch surface.
+- Production-only default app home surfaces now suppress demo fixture scenario
+  controls and use production-oriented title/subtitle text when the runtime
+  exposes app-owned production navigation without enabled demo actions.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -675,6 +678,7 @@ the gates below are satisfied.
   app-owned native readiness production-route gating,
   app-owned native readiness production-navigation filtering,
   app-owned default-home production/demo navigation sectioning,
+  app-owned production-only default-home demo suppression,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,

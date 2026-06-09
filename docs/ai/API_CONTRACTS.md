@@ -140,6 +140,9 @@ builders remain app-owned and receive validated navigation entries directly.
 Default home surfaces must render production navigation separately from enabled
 demo navigation; custom home builders continue to receive the combined
 validated navigation entries directly.
+When the default home has production navigation but no enabled demo navigation
+actions, it must suppress demo fixture scenario controls and use
+production-oriented title/subtitle text.
 Shared safe-surface render models must scrub and bound injected capture warning
 and native-note text before exposing render state to app UI.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning

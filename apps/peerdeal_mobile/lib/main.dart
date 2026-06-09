@@ -460,8 +460,15 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     List<PeerDealAppNavigationEntry> productionNavigation, {
     required AppNativeReadinessSnapshot? nativeReadiness,
   }) {
+    final productionOnly =
+        demoNavigation.isEmpty && productionNavigation.isNotEmpty;
     return DemoHomeScreen(
       controller: _controller,
+      title: productionOnly ? 'PeerDeal' : 'PeerDeal demo',
+      subtitle: productionOnly
+          ? 'Production app routes'
+          : 'Fixture-backed app orchestration',
+      showDemoScenarios: !productionOnly,
       demoNavigationActions: demoNavigation
           .map(
             (route) => DemoHomeNavigationAction(

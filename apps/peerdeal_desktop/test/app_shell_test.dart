@@ -1300,6 +1300,38 @@ void main() {
     expect(find.widgetWithText(PeerDealActionButton, 'Table'), findsOneWidget);
   });
 
+  testWidgets('renders production-only default home without demo scenarios', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live table',
+              path: '/table-live',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('PeerDeal'), findsOneWidget);
+    expect(find.text('Production app routes'), findsOneWidget);
+    expect(find.text('PeerDeal demo'), findsNothing);
+    expect(find.textContaining('Active scenario:'), findsNothing);
+    expect(find.text('Demo'), findsNothing);
+    expect(find.text('Production'), findsOneWidget);
+    expect(
+      find.widgetWithText(PeerDealActionButton, 'Live table'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('uses app-owned home surface builder', (tester) async {
     var homePaths = const <String>[];
 
