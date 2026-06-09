@@ -17,7 +17,7 @@ packages add policy without mutating universal core truth.
 | Shared UI | `peerdeal_ui_kit` | Safe-surface widgets and render models |
 | Native seams | `peerdeal_native_bridges` | Method-channel contracts for platform facts and generic byte transport |
 | Network confidence | `peerdeal_network` | Route class, confidence, primary peer selection, transport frame send/receive gates |
-| Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, anchors, snapshots, safe-close recovery |
+| Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, request ranges, anchors, snapshots, safe-close recovery |
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy |
 | Mode/variant policy | `peerdeal_modes`, `peerdeal_variants` | Session mode policy and poker variant rules |
 | Deterministic truth | `peerdeal_core` | Table state, reducer, invariants, pot/settlement primitives |
@@ -47,7 +47,7 @@ User/app intent:
 Recovery:
 
 1. Recovery request carries optional `SnapshotEnvelope` plus ordered events.
-2. Replay validates event windows, gaps, anchors, and unsupported versions.
+2. Replay validates request ranges, event windows, gaps, anchors, and unsupported versions.
 3. Sync detects conflicts and applies snapshot plus suffix events.
 4. Fatal conflicts recommend safe close instead of unsafe resume.
 

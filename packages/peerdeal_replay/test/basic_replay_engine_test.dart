@@ -137,6 +137,65 @@ void main() {
     expect(result.mismatches.single.actual, 'root');
   });
 
+  test('rejects non-positive replay event range before projection', () {
+    final failingEngine = BasicReplayEngine<FakeTableProjection>(
+      projector: const _ThrowingReplayProjector(throwOnCreate: true),
+    );
+
+    final result = failingEngine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        events: const <EventEnvelope>[],
+        fromEventSeq: 0,
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.finalAppliedEventSeq, isNull);
+    expect(result.reconstructedAnchor, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_EVENT_RANGE_INVALID');
+    expect(
+      result.mismatches.single.message,
+      'Replay from-event sequence must be positive.',
+    );
+    expect(result.mismatches.single.expected, '>=1');
+    expect(result.mismatches.single.actual, 0);
+  });
+
+  test('rejects inverted replay event range before projection', () {
+    final failingEngine = BasicReplayEngine<FakeTableProjection>(
+      projector: const _ThrowingReplayProjector(throwOnCreate: true),
+    );
+
+    final result = failingEngine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        events: const <EventEnvelope>[],
+        fromEventSeq: 3,
+        toEventSeq: 2,
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.finalAppliedEventSeq, isNull);
+    expect(result.reconstructedAnchor, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_EVENT_RANGE_INVALID');
+    expect(
+      result.mismatches.single.message,
+      'Replay from-event sequence must not exceed to-event sequence.',
+    );
+    expect(result.mismatches.single.expected, '<=2');
+    expect(result.mismatches.single.actual, 3);
+  });
+
   test('replays fixture-backed Holdem showdown settlement lifecycle', () {
     final events = _loadHoldemShowdownSettlementEvents();
     final first = events.first;

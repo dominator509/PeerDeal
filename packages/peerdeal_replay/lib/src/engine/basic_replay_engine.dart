@@ -34,6 +34,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     final mismatches = <ReplayMismatch>[
       ..._validateProtocolVersions(request),
       ..._validateReplayScope(request),
+      ..._validateReplayRange(request),
     ];
 
     if (mismatches.isNotEmpty) {
@@ -263,6 +264,50 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
           message: 'Replay event scope does not match the request.',
           expected: '${request.tableId}/${request.sessionId}',
           actual: '${event.tableId}/${event.sessionId}',
+        ),
+      );
+    }
+
+    return mismatches;
+  }
+
+  List<ReplayMismatch> _validateReplayRange(ReplayRequest request) {
+    final mismatches = <ReplayMismatch>[];
+    final fromEventSeq = request.fromEventSeq;
+    final toEventSeq = request.toEventSeq;
+
+    if (fromEventSeq != null && fromEventSeq < 1) {
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_EVENT_RANGE_INVALID',
+          message: 'Replay from-event sequence must be positive.',
+          expected: '>=1',
+          actual: fromEventSeq,
+        ),
+      );
+    }
+
+    if (toEventSeq != null && toEventSeq < 1) {
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_EVENT_RANGE_INVALID',
+          message: 'Replay to-event sequence must be positive.',
+          expected: '>=1',
+          actual: toEventSeq,
+        ),
+      );
+    }
+
+    if (fromEventSeq != null &&
+        toEventSeq != null &&
+        fromEventSeq > toEventSeq) {
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_EVENT_RANGE_INVALID',
+          message:
+              'Replay from-event sequence must not exceed to-event sequence.',
+          expected: '<=$toEventSeq',
+          actual: fromEventSeq,
         ),
       );
     }

@@ -26,6 +26,8 @@ as the first package drop for Sprint 7. It is not yet a production reconstructio
   identities before projection.
 - Replay event windows reject sequence gaps, non-increasing event sequences,
   hash-chain breaks, and snapshot suffix gaps before projection.
+- Replay request ranges reject non-positive or inverted event sequence bounds
+  before filtering events or invoking reconstruction projectors.
 - Replay now rejects event or snapshot table/session scope mismatches against
   the replay request before projection, so reconstruction cannot merge another
   table/session stream into verified state.

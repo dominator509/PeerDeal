@@ -55,6 +55,11 @@ Agents should import each package through its barrel file:
 
 Do not import another package's `src/`.
 
+Replay requests with `fromEventSeq` or `toEventSeq` must use positive event
+sequence bounds, and `fromEventSeq` must not exceed `toEventSeq`. Invalid
+replay ranges fail before event filtering, anchor calculation, or projector
+execution.
+
 ## App Route Surface
 
 Current app shells mount demo-oriented routes rather than production app flows.

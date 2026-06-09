@@ -90,6 +90,8 @@ the gates below are satisfied.
 - Replay full-window validation now uses the protocol-owned genesis hash marker
   and rejects windows that do not start at `event_seq` 1 or whose first event
   does not chain from genesis.
+- Replay request validation now fails closed on non-positive or inverted event
+  range bounds before filtering events or invoking reconstruction projectors.
 - Sync recovery conflict detection, snapshot apply, and recovery persistence
   now enforce the protocol-owned genesis hash for no-snapshot event windows and
   first persisted events.
@@ -656,6 +658,7 @@ the gates below are satisfied.
   device/OS integration, and product design validation. The Dart contracts,
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
+  replay event-range request validation,
   app-owned recovery store construction, exact environment-configured recovery
   root loading, app-owned recovery root validation, mounted recovery-window loading,
   app-owned route runtime dependency grouping, app-owned table runtime-scope

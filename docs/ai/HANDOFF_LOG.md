@@ -14,6 +14,44 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Validate Replay Event Ranges
+
+Summary:
+Hardened `peerdeal_replay` so replay requests fail closed when event range
+bounds are non-positive or inverted, before event filtering, anchor
+calculation, or projector execution.
+
+Files changed:
+- `packages/peerdeal_replay/lib/src/engine/basic_replay_engine.dart`
+- `packages/peerdeal_replay/test/basic_replay_engine_test.dart`
+- `packages/peerdeal_replay/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test/basic_replay_engine_test.dart`
+- `dart test`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks replay request-shape validation only; platform-native
+  implementations, production transport, durable platform persistence, and
+  final production UI remain separate readiness gaps.
+
+Next reviewer:
+Codex should continue with the next codeable replay/sync/app-boundary gap from
+`docs/PRODUCTION_READINESS.md`, or platform native work once platform folders
+are added.
+
+---
+
 ### 2026-06-09 - Codex - Lock Custom Home Native Navigation Restore
 
 Summary:
