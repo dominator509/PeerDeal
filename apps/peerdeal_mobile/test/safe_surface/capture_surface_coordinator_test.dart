@@ -84,8 +84,8 @@ void main() {
       'Native capture protection reported a platform warning.',
     );
     expect(plan.warning, isNot(contains('screen.log')));
-    expect(plan.nativeNotes, isNot(contains('\n')));
-    expect(plan.nativeNotes.length, lessThanOrEqualTo(96));
+    expect(plan.nativeNotes, 'unavailable');
+    expect(plan.nativeNotes, isNot(contains('secret')));
   });
 }
 

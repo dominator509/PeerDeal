@@ -113,6 +113,8 @@ Mounted receipt surfaces scrub receipt/recovery status, messages, shareable
 fields, recommended actions, and diagnostics before rendering. Rendered receipt
 shareable fields and recovery diagnostics must be bounded with stable
 truncation lines.
+Capture surface coordinators must scrub native warning detail and replace
+sensitive native notes with stable unavailable text before UI projection.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning
 lists before passing load results into table surfaces.
 Mounted table routes must cap injected bootstrap candidate lists before passing

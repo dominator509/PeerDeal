@@ -77,6 +77,13 @@ class CaptureSurfaceCoordinator {
     if (normalized.isEmpty) {
       return 'unavailable';
     }
+    final lower = normalized.toLowerCase();
+    if (lower.contains('secret') ||
+        lower.contains('token') ||
+        lower.contains('password') ||
+        normalized.contains('\\')) {
+      return 'unavailable';
+    }
     const maxLength = 96;
     if (normalized.length <= maxLength) {
       return normalized;

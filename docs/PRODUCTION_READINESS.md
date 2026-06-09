@@ -134,6 +134,9 @@ the gates below are satisfied.
   opaque receipt exports, minimized receipt export metadata, capture-warning
   propagation, native bridge failure normalization, and locked method-channel
   contracts for future platform implementations.
+- App-owned capture surface coordinators now scrub sensitive native capture
+  notes before UI projection, replacing token, secret, password, or platform
+  path-like notes with stable unavailable text.
 - Network transport contracts now include a package-owned frame validation gate
   that fails closed on malformed session/peer identities, self-send frames,
   invalid sequence numbers, empty payloads, and oversized payloads before
@@ -643,6 +646,7 @@ the gates below are satisfied.
   bootstrap scope validation, app-owned
   local-network discovery list validation,
   app-owned local-network sensitive-note and endpoint scrubbing,
+  app-owned capture sensitive-note scrubbing,
   app-owned table warning rendering scrubbing,
   app-owned mounted table load warning scrubbing and bounding,
   app-owned mounted table bootstrap candidate bounding,

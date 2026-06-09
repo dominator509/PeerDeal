@@ -14,6 +14,44 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Scrub Capture Native Notes
+
+Summary:
+Hardened mobile and desktop capture surface coordinators so sensitive native
+capture notes are replaced with stable unavailable text before UI projection.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/safe_surface/capture_surface_coordinator.dart`
+- `apps/peerdeal_mobile/test/safe_surface/capture_surface_coordinator_test.dart`
+- `apps/peerdeal_desktop/lib/safe_surface/capture_surface_coordinator.dart`
+- `apps/peerdeal_desktop/test/safe_surface/capture_surface_coordinator_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/safe_surface/capture_surface_coordinator_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/safe_surface/capture_surface_coordinator_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Real platform capture blocking remains pending; this locks the app-owned
+  capture diagnostic boundary only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Scrub Local-Network Bootstrap Inputs
 
 Summary:
