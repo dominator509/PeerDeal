@@ -41,19 +41,33 @@ class DemoReceiptArtifactVerifier {
     final cipher = loadResult.hasEncryptionKey
         ? HmacSha256ReceiptCipher(keyProvider: loadResult.keyRing)
         : null;
-    return OpaqueExportDecoder(
-      cipher: cipher,
-      signer: signer,
-    ).inspect(artifact);
+    return _safeInspectionResult(
+      OpaqueExportDecoder(cipher: cipher, signer: signer).inspect(artifact),
+    );
   }
 }
 
-List<String> _safeDiagnostics(List<String> warnings) {
+ReceiptExportInspectionResult _safeInspectionResult(
+  ReceiptExportInspectionResult result,
+) {
+  if (result.isAccepted) {
+    return result;
+  }
+  return ReceiptExportInspectionResult.rejected(
+    message: result.message,
+    diagnostics: _safeDiagnostics(result.diagnostics, fallbackOnEmpty: false),
+  );
+}
+
+List<String> _safeDiagnostics(
+  List<String> warnings, {
+  bool fallbackOnEmpty = true,
+}) {
   const fallback = 'Secure receipt key storage is unavailable.';
   const maxDiagnostics = 4;
   const maxDiagnosticLength = 160;
   if (warnings.isEmpty) {
-    return const <String>[fallback];
+    return fallbackOnEmpty ? const <String>[fallback] : const <String>[];
   }
   final sanitized = <String>[];
   for (final warning in warnings.take(maxDiagnostics)) {

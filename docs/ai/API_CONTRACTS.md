@@ -193,6 +193,8 @@ coerced.
   exceptions into scrubbed rejected inspection results.
 - App receipt artifact verifiers must scrub and bound key-ring loader warning
   diagnostics before returning rejected inspection results.
+- App receipt artifact verifiers must scrub and bound decoder rejection
+  diagnostics before returning inspection results to presenter paths.
 - App receipt key-ring loaders must fail closed when native storage exposes
   ambiguous active signing or encryption keys.
 - App receipt key-ring loaders must cap native secure-key snapshot records

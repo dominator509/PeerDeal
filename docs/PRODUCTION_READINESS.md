@@ -261,6 +261,8 @@ the gates below are satisfied.
   projection.
 - App receipt artifact verifiers now scrub and bound key-ring loader warning
   diagnostics before returning rejected inspection results.
+- App receipt artifact verifiers now scrub and bound decoder rejection
+  diagnostics before returning inspection results to presenter paths.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
@@ -622,6 +624,7 @@ the gates below are satisfied.
   app-owned receipt export provisioning exception handling,
   app-owned receipt verifier key-ring load exception handling,
   app-owned receipt verifier diagnostic scrubbing and bounding,
+  app-owned receipt verifier decoder diagnostic scrubbing and bounding,
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned
   local-network discovery list validation,

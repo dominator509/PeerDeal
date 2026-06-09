@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_artifact_verifier.dart';
 import 'package:peerdeal_desktop/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -131,6 +133,28 @@ void main() {
       'Secure receipt key diagnostics truncated.',
     ]);
   });
+
+  test(
+    'scrubs unsafe decoder diagnostics before returning rejection',
+    () async {
+      final keyRingLoader = NativeReceiptKeyRingLoader(
+        bridge: _FakeSecureKeyStorageBridge(snapshot: _availableSnapshot),
+      );
+      final verifier = DemoReceiptArtifactVerifier(
+        keyRingLoader: keyRingLoader,
+      );
+
+      final result = await verifier.inspect(
+        _artifactWithFormatVersion('secret\nformat'),
+      );
+
+      expect(result.status, 'rejected');
+      expect(result.message, 'Receipt artifact format is unsupported.');
+      expect(result.diagnostics, <String>[
+        'Secure receipt key storage is unavailable.',
+      ]);
+    },
+  );
 }
 
 const _availableSnapshot = SecureKeyStorageSnapshot(
@@ -179,6 +203,18 @@ const _receipt = PeerDealReceipt(
   payloadHash: 'hash_77',
   opaquePayload: 'opaque_77',
 );
+
+ReceiptExportArtifact _artifactWithFormatVersion(String formatVersion) {
+  final body = <String, Object?>{
+    'format_version': formatVersion,
+    'payload': '{}',
+  };
+  return ReceiptExportArtifact(
+    artifactType: 'opaque',
+    encodedBody: base64Encode(utf8.encode(jsonEncode(body))),
+    minimalMetadata: const <String, Object?>{},
+  );
+}
 
 class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
   const _FakeSecureKeyStorageBridge({required this.snapshot});
