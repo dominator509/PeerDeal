@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Validate Transfer And Fallback Peer IDs
+
+Summary:
+Hardened `peerdeal_network` primary-peer transfer and relay fallback planning
+so malformed or reserved peer identities cannot become actionable transfer or
+transition plans.
+
+Files changed:
+- `packages/peerdeal_network/lib/src/services/default_transfer_policy.dart`
+- `packages/peerdeal_network/lib/src/services/basic_relay_fallback_service.dart`
+- `packages/peerdeal_network/test/default_transfer_policy_test.dart`
+- `packages/peerdeal_network/test/basic_relay_fallback_service_test.dart`
+- `packages/peerdeal_network/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test/default_transfer_policy_test.dart test/basic_relay_fallback_service_test.dart`
+
+Risks:
+- This locks deterministic package-level plan gates only; real native
+  discovery, live transport, platform persistence, and final production UI
+  remain separate readiness gaps.
+
+Next reviewer:
+Codex should continue with the next codeable network/sync/app-boundary gap from
+`docs/PRODUCTION_READINESS.md`, or platform native work once platform folders
+are added.
+
+---
+
 ### 2026-06-09 - Codex - Validate Primary Peer Election IDs
 
 Summary:

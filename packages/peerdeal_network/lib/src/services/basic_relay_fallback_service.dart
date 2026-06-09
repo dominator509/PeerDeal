@@ -11,6 +11,17 @@ class BasicRelayFallbackService implements RelayFallbackService {
     required SessionPathDescriptor fallbackPath,
     required bool liveHandInProgress,
   }) {
+    if (!_isOperationalPeerId(currentPath.primaryPeerId) ||
+        !_isOperationalPeerId(fallbackPath.primaryPeerId)) {
+      return DirectRelayTransitionPlan(
+        transitionNeeded: false,
+        pauseRecommended: false,
+        fromLabel: currentPath.routeClass.name,
+        toLabel: fallbackPath.routeClass.name,
+        reason: 'invalid_peer_identity',
+      );
+    }
+
     final transitionNeeded = currentPath.routeClass != fallbackPath.routeClass;
 
     return DirectRelayTransitionPlan(
@@ -22,5 +33,17 @@ class BasicRelayFallbackService implements RelayFallbackService {
           ? 'route_class_changed'
           : 'route_class_unchanged',
     );
+  }
+
+  bool _isOperationalPeerId(String peerId) {
+    if (peerId.isEmpty || peerId.trim() != peerId) return false;
+    if (peerId == 'none' || peerId == 'unresolved') return false;
+    if (peerId.contains('::')) return false;
+
+    for (final codeUnit in peerId.codeUnits) {
+      if (codeUnit < 0x20 || codeUnit == 0x7f) return false;
+    }
+
+    return true;
   }
 }

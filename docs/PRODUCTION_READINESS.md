@@ -158,6 +158,9 @@ the gates below are satisfied.
 - Network primary-peer election now drops malformed peer metric identities and
   ignores malformed current-primary overrides before scoring, confidence
   classification, transfer decisions, or fail-closed fallback decisions.
+- Network primary-peer transfer and relay fallback planning now fail closed on
+  malformed or reserved path peer identities before emitting actionable
+  transfer or transition plans.
 - Network transport send contracts now include a validating sender boundary
   that rejects invalid frames before platform sinks see them and converts sink
   failures into explicit failed send results.

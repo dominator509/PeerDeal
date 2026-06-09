@@ -11,11 +11,15 @@ class DefaultTransferPolicy implements TransferPolicy {
     required String currentPrimaryPeerId,
     required PrimaryPeerDecision decision,
   }) {
-    if (!decision.requiresTransfer || decision.primaryPeerId == currentPrimaryPeerId) {
+    if (!decision.requiresTransfer ||
+        !_isOperationalPeerId(currentPrimaryPeerId) ||
+        !_isOperationalPeerId(decision.primaryPeerId) ||
+        decision.primaryPeerId == currentPrimaryPeerId) {
       return null;
     }
 
-    final requiresPause = decision.confidence == NetworkConfidence.recoveryRequired ||
+    final requiresPause =
+        decision.confidence == NetworkConfidence.recoveryRequired ||
         decision.confidence == NetworkConfidence.unsafe;
 
     return PrimaryPeerTransferPlan(
@@ -25,5 +29,17 @@ class DefaultTransferPolicy implements TransferPolicy {
       requiresPause: requiresPause,
       freezeOperationalEvents: true,
     );
+  }
+
+  bool _isOperationalPeerId(String peerId) {
+    if (peerId.isEmpty || peerId.trim() != peerId) return false;
+    if (peerId == 'none' || peerId == 'unresolved') return false;
+    if (peerId.contains('::')) return false;
+
+    for (final codeUnit in peerId.codeUnits) {
+      if (codeUnit < 0x20 || codeUnit == 0x7f) return false;
+    }
+
+    return true;
   }
 }
