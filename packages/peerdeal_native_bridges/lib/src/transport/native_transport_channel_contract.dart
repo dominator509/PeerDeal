@@ -88,7 +88,7 @@ class NativeTransportChannelContract {
       sessionId: _stringValue(json['sessionId']) ?? '',
       senderPeerId: _stringValue(json['senderPeerId']) ?? '',
       recipientPeerId: _stringValue(json['recipientPeerId']) ?? '',
-      sequence: _nonNegativeIntValue(json['sequence']),
+      sequence: _positiveIntValue(json['sequence']),
       payloadBytes: payloadBytes,
     );
     return frame.isUsable ? frame : null;
@@ -98,6 +98,9 @@ class NativeTransportChannelContract {
 
   static int _nonNegativeIntValue(Object? value) =>
       value is int && value >= 0 ? value : 0;
+
+  static int _positiveIntValue(Object? value) =>
+      value is int && value >= 1 ? value : 0;
 
   static String? _stringValue(Object? value) => value is String ? value : null;
 

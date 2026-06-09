@@ -46,7 +46,7 @@ class NativeTransportFrame {
       recipientPeerId.trim().isNotEmpty &&
       recipientPeerId.trim() == recipientPeerId &&
       senderPeerId != recipientPeerId &&
-      sequence >= 0 &&
+      sequence >= 1 &&
       payloadBytes.isNotEmpty;
 }
 

@@ -110,7 +110,9 @@ app-owned payload limit is invalid. Native transport sinks validate outbound
 frames before platform send calls, and native transport drains reject invalid
 app-owned receive session/peer scope before calling platform receive methods.
 The generic native transport method-channel bridge also rejects padded send
-frame and receive scope identities before platform calls.
+frame and receive scope identities before platform calls. Native transport
+frames must carry positive sequence numbers; zero or negative sequence values
+fail before platform sends and are dropped during receive-snapshot decoding.
 
 ## Recovery Persistence Boundary
 

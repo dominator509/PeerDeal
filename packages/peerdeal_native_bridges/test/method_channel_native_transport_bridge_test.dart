@@ -176,11 +176,21 @@ void main() {
       sessionId: 'session_1',
       peerId: ' peer_b ',
     );
+    final zeroSequenceSend = await bridge.sendFrame(
+      const NativeTransportFrame(
+        sessionId: 'session_1',
+        senderPeerId: 'peer_a',
+        recipientPeerId: 'peer_b',
+        sequence: 0,
+        payloadBytes: <int>[1],
+      ),
+    );
 
     expect(send.isSuccess, isFalse);
     expect(receive.available, isFalse);
     expect(paddedSend.isSuccess, isFalse);
     expect(paddedReceive.available, isFalse);
+    expect(zeroSequenceSend.isSuccess, isFalse);
     expect(log, isEmpty);
   });
 }

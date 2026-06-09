@@ -154,6 +154,10 @@ the gates below are satisfied.
 - Native transport method-channel wrappers now reject padded frame and receive
   scope identities before platform send/receive calls, keeping ambiguous
   generic transport requests out of native code.
+- Native transport method-channel wrappers now also reject zero or negative
+  frame sequence numbers on platform-bound sends and decoded receive snapshots,
+  aligning the generic native byte-frame seam with the public network transport
+  sequence contract.
 - App shells now include app-owned native transport adapters that compose the
   generic native byte-frame bridge with `peerdeal_network` validating
   sender/receiver boundaries, so app transport sends and inbound drains cannot
@@ -497,7 +501,8 @@ the gates below are satisfied.
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
-  package-owned transport identity validation,
+  package-owned transport identity validation, generic native transport
+  sequence validation,
   app-owned receipt delete key-id validation, generic native secure-key
   request validation,
   bounded app-owned table/join bootstrap mapping, app-owned local-network

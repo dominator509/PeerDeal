@@ -324,6 +324,13 @@ void main() {
             'sessionId': 'session_1',
             'senderPeerId': 'peer_a',
             'recipientPeerId': 'peer_b',
+            'sequence': 0,
+            'payloadBytes': <int>[1],
+          },
+          <String, Object?>{
+            'sessionId': 'session_1',
+            'senderPeerId': 'peer_a',
+            'recipientPeerId': 'peer_b',
             'sequence': 2,
             'payloadBytes': <Object?>[1, 'bad', 300],
           },
