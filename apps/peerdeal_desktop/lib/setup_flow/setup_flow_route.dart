@@ -91,9 +91,11 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
     }
 
     try {
-      return widget._orchestratorFactory().compileSetup(
-        intent: widget._setupIntentFactory(mode),
-      );
+      final intent = widget._setupIntentFactory(mode);
+      final invalidIntent = _invalidSetupIntentOutcome(intent);
+      if (invalidIntent != null) return invalidIntent;
+
+      return widget._orchestratorFactory().compileSetup(intent: intent);
     } on Object {
       return const SetupFlowOutcome(
         status: SetupFlowStatus.rejected,
@@ -114,6 +116,27 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
   bool _isModeEnabled(SetupFlowDemoMode mode) {
     return widget._enabledModes.contains(mode);
   }
+}
+
+SetupFlowOutcome? _invalidSetupIntentOutcome(SetupIntent intent) {
+  final errors = <String>[];
+  if (intent.intentId.trim().isEmpty) {
+    errors.add('setup_intent_id_missing');
+  } else if (intent.intentId.trim() != intent.intentId) {
+    errors.add('setup_intent_id_malformed');
+  }
+  if (intent.hostPseudonymousId.trim().isEmpty) {
+    errors.add('setup_host_missing');
+  } else if (intent.hostPseudonymousId.trim() != intent.hostPseudonymousId) {
+    errors.add('setup_host_malformed');
+  }
+
+  if (errors.isEmpty) return null;
+  return SetupFlowOutcome(
+    status: SetupFlowStatus.rejected,
+    resultCode: 'ERR_SETUP_INTENT_INVALID',
+    errors: List<String>.unmodifiable(errors),
+  );
 }
 
 SetupIntent _defaultSetupIntentFor(SetupFlowDemoMode mode) {

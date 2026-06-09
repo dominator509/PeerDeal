@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Setup Route Identity Gate
+
+Summary:
+Hardened mobile and desktop mounted setup routes so injected setup intents with
+blank or padded intent/host identities fail closed before setup orchestrator
+dependencies are constructed. Focused tests prove malformed route-level setup
+inputs return `ERR_SETUP_INTENT_INVALID` without creating the orchestrator.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\setup_flow\setup_flow_route_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\setup_flow\setup_flow_route_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks route-level setup intent identity validation only; production
+  setup UX and final platform orchestration remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Enabled Demo Route Allowlist Gate
 
 Summary:

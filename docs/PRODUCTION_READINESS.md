@@ -318,6 +318,9 @@ the gates below are satisfied.
   so production setup sources can feed `peerdeal_wizard` through the app shell
   boundary instead of leaving hardcoded demo setup intent inside the route; the
   route fails closed when intent construction is unavailable.
+- Mounted app setup routes now reject blank or padded injected setup intent
+  identities before constructing setup orchestrator dependencies, aligning the
+  route boundary with direct setup-flow validation.
 - App setup-flow orchestrators now reject blank setup intent and host
   pseudonymous identities before wizard resolution, so malformed production
   setup sources cannot emit blank plan ids or reach compiler dependencies.
@@ -473,7 +476,8 @@ the gates below are satisfied.
   startup route selection, app-owned production navigation descriptors,
   app-owned join invite-context injection, app-owned join input validation,
   app-owned receipt envelope injection, app-owned setup intent injection,
-  app-owned setup identity validation, app-owned transport payload-limit
+  route-level setup identity validation, app-owned setup identity validation,
+  app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
   app-owned receipt delete key-id validation,

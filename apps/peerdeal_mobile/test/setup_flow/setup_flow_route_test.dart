@@ -93,11 +93,16 @@ void main() {
   testWidgets('rejects injected setup intent with blank identity', (
     tester,
   ) async {
+    var orchestratorCreated = false;
+
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFF1B5E20),
         builder: (_, _) => SetupFlowRoute(
-          orchestratorFactory: () => const SetupFlowOrchestrator(),
+          orchestratorFactory: () {
+            orchestratorCreated = true;
+            return const SetupFlowOrchestrator();
+          },
           setupIntentFactory: (_) => const SetupIntent(
             intentId: '   ',
             sourceType: SetupSurface.simple,
@@ -116,6 +121,41 @@ void main() {
     expect(find.text('Result: ERR_SETUP_INTENT_INVALID'), findsOneWidget);
     expect(find.text('Error: setup_intent_id_missing'), findsOneWidget);
     expect(find.text('Error: setup_host_missing'), findsOneWidget);
+    expect(orchestratorCreated, isFalse);
+  });
+
+  testWidgets('rejects injected setup intent with padded identity', (
+    tester,
+  ) async {
+    var orchestratorCreated = false;
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF1B5E20),
+        builder: (_, _) => SetupFlowRoute(
+          orchestratorFactory: () {
+            orchestratorCreated = true;
+            throw StateError('setup dependency should not run');
+          },
+          setupIntentFactory: (_) => const SetupIntent(
+            intentId: ' intent_open_table ',
+            sourceType: SetupSurface.simple,
+            hostPseudonymousId: ' host_demo ',
+            modePreference: 'open_table',
+            variantPreference: 'holdem_nlhe',
+            seatCountPreference: 6,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_INTENT_INVALID'), findsOneWidget);
+    expect(find.text('Error: setup_intent_id_malformed'), findsOneWidget);
+    expect(find.text('Error: setup_host_malformed'), findsOneWidget);
+    expect(orchestratorCreated, isFalse);
   });
 
   testWidgets('fails closed when setup intent factory throws', (tester) async {
