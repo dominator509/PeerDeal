@@ -137,11 +137,12 @@ class DemoSliceRoutes {
   static void _validateAllowedExtraPaths(Set<String> allowedExtraPaths) {
     for (final path in allowedExtraPaths) {
       if (path == '/') continue;
+      final lowerPath = path.toLowerCase();
       if (path.trim() != path ||
           path.isEmpty ||
           path.length > _maxRoutePathLength ||
           !path.startsWith('/') ||
-          path.startsWith('/demo') ||
+          lowerPath.startsWith('/demo') ||
           path.endsWith('/') ||
           path.contains('?') ||
           path.contains('#') ||

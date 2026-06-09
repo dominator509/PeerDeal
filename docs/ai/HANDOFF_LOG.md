@@ -14,6 +14,54 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Case-Insensitive Demo Namespace Reservation
+
+Summary:
+Hardened mobile and desktop app-shell production route validation plus demo
+route-map allowed-extra validation so `/Demo/...` and other case variants of
+the reserved `/demo` namespace cannot be mounted as production extensions.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_slice_routes_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_slice_routes_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/app_shell_test.dart test/demo_slice/demo_slice_routes_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/app_shell_test.dart test/demo_slice/demo_slice_routes_test.dart`
+  in `apps/peerdeal_desktop`
+- `flutter test --no-pub test/demo_slice/demo_slice_routes_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test/demo_slice/demo_slice_routes_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Native platform implementations, production UI, live transport, real
+  local-network discovery, platform secure storage, and production persistence
+  remain external readiness gaps.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Route Map Allowed Extra Validation
 
 Summary:

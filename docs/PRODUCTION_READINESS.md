@@ -521,6 +521,9 @@ the gates below are satisfied.
   routes now enforce bounded display/routing metadata and reject backslash
   separators, preventing path-like or oversized production navigation
   descriptors from entering mounted app-shell routing.
+- App-owned production route paths and demo route-map allowed extra paths now
+  reserve the `/demo` namespace case-insensitively, preventing production
+  extensions from mounting paths that case-collide with demo routes.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -552,6 +555,7 @@ the gates below are satisfied.
   app-owned production route metadata validation, app-owned home navigation
   collision validation, app-owned production route builder failure handling,
   app-owned production route metadata bounding,
+  case-insensitive demo namespace reservation for app-owned production routes,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,

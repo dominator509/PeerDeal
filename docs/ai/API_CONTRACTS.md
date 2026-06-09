@@ -97,7 +97,9 @@ route-unavailable fallback instead of escaping app-shell routing.
 Production route paths and startup routes must not contain control characters
 or whitespace, and production navigation labels must not contain control
 characters. Production route paths and startup routes must also be bounded and
-must not contain backslash separators. Production navigation labels must be
+must not contain backslash separators. Production route paths and demo
+route-map allowed extra paths must reserve the `/demo` namespace
+case-insensitively. Production navigation labels must be
 bounded before app home composition. Production navigation labels and paths
 must not collide with enabled demo home navigation entries when the app
 composes the home surface.

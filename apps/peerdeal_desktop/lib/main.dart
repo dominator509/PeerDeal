@@ -447,12 +447,13 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
 
     for (final entry in routes.entries) {
       final path = entry.key.trim();
+      final lowerPath = path.toLowerCase();
       if (path != entry.key ||
           path.isEmpty ||
           !path.startsWith('/') ||
           path == Navigator.defaultRouteName ||
           path.length > _maxAppRoutePathLength ||
-          path.startsWith('/demo') ||
+          lowerPath.startsWith('/demo') ||
           path.endsWith('/') ||
           path.contains('?') ||
           path.contains('#') ||

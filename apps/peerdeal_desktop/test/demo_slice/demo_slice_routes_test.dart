@@ -137,6 +137,13 @@ void main() {
     expect(
       () => DemoSliceRoutes.requireMountedRouteMap(
         routes,
+        allowedExtraPaths: const <String>{'/Demo/other'},
+      ),
+      throwsA(isA<StateError>()),
+    );
+    expect(
+      () => DemoSliceRoutes.requireMountedRouteMap(
+        routes,
         allowedExtraPaths: const <String>{'/table-live '},
       ),
       throwsA(isA<StateError>()),

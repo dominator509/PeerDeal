@@ -1078,6 +1078,23 @@ void main() {
     expect(tester.takeException(), isA<StateError>());
   });
 
+  testWidgets(
+    'rejects production routes that case-collide with demo namespace',
+    (tester) async {
+      await tester.pumpWidget(
+        PeerDealMobileApp(
+          runtime: PeerDealMobileRuntime(
+            productionRoutes: <String, WidgetBuilder>{
+              '/Demo/production': (_) => const Text('bad route'),
+            },
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isA<StateError>());
+    },
+  );
+
   testWidgets('rejects production routes with unsafe characters', (
     tester,
   ) async {
