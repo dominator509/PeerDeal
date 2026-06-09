@@ -18,6 +18,8 @@ typedef JoinFlowOrchestratorFactory =
 typedef JoinFlowInviteContextFactory =
     InviteContext Function(JoinFlowDemoMode mode);
 
+const int _maxJoinDiagnostics = 4;
+
 class JoinFlowRoute extends StatefulWidget {
   const JoinFlowRoute({
     super.key,
@@ -227,11 +229,29 @@ JoinFlowOutcome _safeJoinOutcome(JoinFlowOutcome outcome) {
     state: outcome.state,
     status: outcome.status,
     resultCode: outcome.resultCode,
-    diagnostics: outcome.diagnostics
-        .map(_safeJoinDiagnostic)
-        .toList(growable: false),
+    diagnostics: _safeJoinDiagnostics(outcome.diagnostics),
     message: _isSafeJoinMessage(outcome.message) ? outcome.message : null,
   );
+}
+
+List<ProtocolDiagnostic> _safeJoinDiagnostics(
+  List<ProtocolDiagnostic> diagnostics,
+) {
+  final safeDiagnostics = diagnostics
+      .take(_maxJoinDiagnostics)
+      .map(_safeJoinDiagnostic)
+      .toList(growable: false);
+  if (diagnostics.length <= _maxJoinDiagnostics) {
+    return safeDiagnostics;
+  }
+
+  return <ProtocolDiagnostic>[
+    ...safeDiagnostics,
+    const ProtocolDiagnostic(
+      code: 'ERR_JOIN_DIAGNOSTICS_TRUNCATED',
+      message: 'Join diagnostics were truncated.',
+    ),
+  ];
 }
 
 ProtocolDiagnostic _safeJoinDiagnostic(ProtocolDiagnostic diagnostic) {

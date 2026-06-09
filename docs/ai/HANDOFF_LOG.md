@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Bound Join Route Diagnostics
+
+Summary:
+Hardened mobile and desktop join routes so injected join outcomes are scrubbed
+and capped before diagnostics render, with a stable truncation diagnostic when
+the app display limit is exceeded.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/join_flow/join_flow_route_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test/join_flow/join_flow_route_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Final production join UX still needs product/device validation; this locks
+  route-level diagnostic rendering only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Receipt Export Provisioning Reason Scrub
 
 Summary:

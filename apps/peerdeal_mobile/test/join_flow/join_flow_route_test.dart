@@ -331,6 +331,31 @@ void main() {
     );
     expect(find.textContaining('secret'), findsNothing);
   });
+
+  testWidgets('bounds injected join diagnostics before rendering', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: (_) => const _VerboseJoinFlowOrchestrator(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('OK_JOIN_0: Join diagnostic 0.'), findsOneWidget);
+    expect(find.text('OK_JOIN_3: Join diagnostic 3.'), findsOneWidget);
+    expect(find.text('OK_JOIN_4: Join diagnostic 4.'), findsNothing);
+    expect(
+      find.text(
+        'ERR_JOIN_DIAGNOSTICS_TRUNCATED: Join diagnostics were truncated.',
+      ),
+      findsOneWidget,
+    );
+  });
 }
 
 class _LeakyJoinFlowOrchestrator implements JoinFlowOrchestrator {
@@ -371,6 +396,30 @@ class _UnsafeResultJoinFlowOrchestrator implements JoinFlowOrchestrator {
           message: r'C:\secret\join.log',
         ),
       ],
+    );
+  }
+
+  @override
+  Future<JoinFlowOutcome> runRejoin(InviteContext context) =>
+      runFirstJoin(context);
+}
+
+class _VerboseJoinFlowOrchestrator implements JoinFlowOrchestrator {
+  const _VerboseJoinFlowOrchestrator();
+
+  @override
+  Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
+    return JoinFlowOutcome(
+      state: JoinFlowState.joinRejected,
+      status: JoinDecisionStatus.rejected,
+      resultCode: 'ERR_JOIN_VERBOSE',
+      diagnostics: List<ProtocolDiagnostic>.generate(
+        8,
+        (index) => ProtocolDiagnostic(
+          code: 'OK_JOIN_$index',
+          message: 'Join diagnostic $index.',
+        ),
+      ),
     );
   }
 

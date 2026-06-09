@@ -110,7 +110,8 @@ fields, recommended actions, and diagnostics before rendering.
 Join routes and join flow orchestration reject blank or padded app-owned invite
 codes and rejoin tokens before join dependencies, invite resolution, or
 governance commit adapters run. Join routes scrub app-owned join outcome result
-codes and diagnostics before rendering.
+codes and diagnostics before rendering, and they must bound rendered
+diagnostic count with a stable truncation diagnostic.
 Setup routes and setup flow orchestration reject blank or padded app-owned
 setup intent and host identities before wizard/setup dependencies run. Setup
 routes also scrub app-owned setup outcome result codes, errors, warnings, and
