@@ -25,7 +25,7 @@ class DemoReceiptArtifactVerifier {
     if (!loadResult.hasSigningKey) {
       return ReceiptExportInspectionResult.rejected(
         message: 'Receipt signing key is unavailable.',
-        diagnostics: loadResult.warnings,
+        diagnostics: _safeDiagnostics(loadResult.warnings),
       );
     }
 
@@ -34,7 +34,7 @@ class DemoReceiptArtifactVerifier {
     if (encrypted && !loadResult.hasEncryptionKey) {
       return ReceiptExportInspectionResult.rejected(
         message: 'Receipt encryption key is unavailable.',
-        diagnostics: loadResult.warnings,
+        diagnostics: _safeDiagnostics(loadResult.warnings),
       );
     }
 
@@ -46,4 +46,44 @@ class DemoReceiptArtifactVerifier {
       signer: signer,
     ).inspect(artifact);
   }
+}
+
+List<String> _safeDiagnostics(List<String> warnings) {
+  const fallback = 'Secure receipt key storage is unavailable.';
+  const maxDiagnostics = 4;
+  const maxDiagnosticLength = 160;
+  if (warnings.isEmpty) {
+    return const <String>[fallback];
+  }
+  final sanitized = <String>[];
+  for (final warning in warnings.take(maxDiagnostics)) {
+    final trimmed = warning.trim();
+    if (trimmed.isEmpty ||
+        trimmed.length > maxDiagnosticLength ||
+        !_isSafeDiagnostic(trimmed)) {
+      sanitized.add(fallback);
+    } else {
+      sanitized.add(trimmed);
+    }
+  }
+  if (warnings.length > maxDiagnostics) {
+    sanitized.add('Secure receipt key diagnostics truncated.');
+  }
+  return sanitized;
+}
+
+bool _isSafeDiagnostic(String value) {
+  final lower = value.toLowerCase();
+  if (lower.contains('secret') ||
+      lower.contains('token') ||
+      lower.contains('password') ||
+      lower.contains('credential')) {
+    return false;
+  }
+  for (final unit in value.codeUnits) {
+    if (unit < 0x20 || unit == 0x7f) {
+      return false;
+    }
+  }
+  return true;
 }

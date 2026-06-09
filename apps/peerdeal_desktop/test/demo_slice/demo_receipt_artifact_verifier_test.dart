@@ -101,6 +101,36 @@ void main() {
     expect(result.diagnostics, ['Secure receipt key storage is unavailable.']);
     expect(result.diagnostics, isNot(contains('native exception')));
   });
+
+  test('scrubs unsafe key-ring loader warning diagnostics', () async {
+    final verifier = DemoReceiptArtifactVerifier(
+      keyRingLoader: _StaticKeyRingLoader(
+        result: const ReceiptKeyRingLoadResult(
+          keyRing: ReceiptKeyRingSnapshot(),
+          warnings: <String>[
+            'secret=abc123',
+            'native\nexception',
+            '',
+            'safe warning',
+            'extra warning',
+          ],
+        ),
+      ),
+    );
+
+    final result = await verifier.inspect(
+      const OpaqueExportEncoder().encode(_receipt),
+    );
+
+    expect(result.status, 'rejected');
+    expect(result.diagnostics, <String>[
+      'Secure receipt key storage is unavailable.',
+      'Secure receipt key storage is unavailable.',
+      'Secure receipt key storage is unavailable.',
+      'safe warning',
+      'Secure receipt key diagnostics truncated.',
+    ]);
+  });
 }
 
 const _availableSnapshot = SecureKeyStorageSnapshot(
@@ -179,5 +209,28 @@ class _ThrowingKeyRingLoader implements NativeReceiptKeyRingLoader {
   @override
   Future<ReceiptKeyRingLoadResult> load() async {
     throw StateError('native exception');
+  }
+}
+
+class _StaticKeyRingLoader implements NativeReceiptKeyRingLoader {
+  const _StaticKeyRingLoader({required this.result});
+
+  final ReceiptKeyRingLoadResult result;
+
+  @override
+  final int maxKeyIdLength = 96;
+
+  @override
+  final int maxKeyRecords = 64;
+
+  @override
+  final int maxKeySecretLength = 256;
+
+  @override
+  final String namespace = NativeReceiptKeyRingLoader.defaultNamespace;
+
+  @override
+  Future<ReceiptKeyRingLoadResult> load() async {
+    return result;
   }
 }
