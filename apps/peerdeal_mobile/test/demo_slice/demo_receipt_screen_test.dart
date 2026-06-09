@@ -8,6 +8,7 @@ import 'package:peerdeal_mobile/demo_slice/models/demo_scenario_snapshot.dart';
 import 'package:peerdeal_mobile/demo_slice/screens/demo_receipt_screen.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
@@ -41,6 +42,31 @@ void main() {
 
     expect(find.text('receipt_token: <redacted>'), findsNothing);
     expect(find.text('Receipt content hidden'), findsOneWidget);
+  });
+
+  testWidgets('scrubs crafted receipt surface text before rendering', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DemoReceiptScreen(surface: _leakySurface()),
+      ),
+    );
+
+    expect(find.text('rejected'), findsOneWidget);
+    expect(find.text('Receipt detail unavailable.'), findsOneWidget);
+    expect(find.text('field_unavailable: unavailable'), findsOneWidget);
+    expect(find.text('safe_field: <redacted>'), findsOneWidget);
+    expect(find.text('unavailable'), findsOneWidget);
+    expect(
+      find.text(
+        'ERR_RECEIPT_DIAGNOSTIC_UNAVAILABLE: Receipt detail unavailable.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('secret'), findsNothing);
+    expect(find.textContaining('token'), findsNothing);
   });
 
   testWidgets('routes receipt fixture through presenter into safe screen', (
@@ -226,6 +252,43 @@ DemoReceiptSurfaceVm _surface({required bool shouldObscure}) {
     ),
     receiptCapturePlan: plan,
     safeSurface: SafeSurfaceRenderModel.fromCapturePlans([plan]),
+  );
+}
+
+DemoReceiptSurfaceVm _leakySurface() {
+  final plan = CaptureSurfacePlan(
+    surface: CaptureSurface.receiptDetail,
+    decision: const CapturePolicyDecision(
+      action: CapturePolicyAction.allow,
+      isSensitive: false,
+      reason: 'test',
+    ),
+    nativeNotes: 'test-native',
+  );
+
+  return DemoReceiptSurfaceVm(
+    receipt: const SafeReceiptScanVm(
+      status: r'ok C:\secret',
+      message: 'token sk-demo-secret',
+      shareableFields: {
+        r'bad key C:\secret': r'C:\secret\receipt.log',
+        'safe_field': '<redacted>',
+      },
+    ),
+    receiptCapturePlan: plan,
+    safeSurface: SafeSurfaceRenderModel.fromCapturePlans([plan]),
+    recovery: const SafeRecoveryVm(
+      canResume: false,
+      requiresRecovery: true,
+      safeCloseRecommended: true,
+      recommendedAction: r'resume C:\secret',
+      diagnostics: <ProtocolDiagnostic>[
+        ProtocolDiagnostic(
+          code: r'ERR C:\secret',
+          message: 'token sk-demo-secret',
+        ),
+      ],
+    ),
   );
 }
 

@@ -14,6 +14,46 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Receipt Render Metadata Scrub
+
+Summary:
+Hardened mobile and desktop receipt screens so crafted receipt/recovery surface
+view models cannot render arbitrary status, message, shareable field,
+recommended-action, or diagnostic text. The render layer preserves
+already-redacted values and replaces malformed display metadata with stable
+generic text.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_receipt_screen_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_receipt_screen_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\demo_receipt_screen_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\demo_receipt_screen_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks receipt render metadata only; platform key storage, production
+  receipt UX, and final native integrations remain pending.
+
+Next reviewer:
+Codex should continue with the next production-readiness gap.
+
+---
+
 ### 2026-06-09 - Codex - Table Warning Rendering Scrub
 
 Summary:

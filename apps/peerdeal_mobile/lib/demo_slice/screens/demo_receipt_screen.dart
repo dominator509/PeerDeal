@@ -192,20 +192,68 @@ class DemoReceiptScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(surface.receipt.status),
-            Text(surface.receipt.message),
+            Text(
+              _safeReceiptToken(surface.receipt.status, fallback: 'rejected'),
+            ),
+            Text(_safeReceiptMessage(surface.receipt.message)),
             for (final field in surface.receipt.shareableFields.entries)
-              Text('${field.key}: ${field.value}'),
+              Text(
+                '${_safeReceiptToken(field.key, fallback: 'field_unavailable')}: '
+                '${_safeReceiptValue(field.value)}',
+              ),
             if (surface.recovery case final recovery?) ...[
-              Text(recovery.recommendedAction),
+              Text(_safeReceiptToken(recovery.recommendedAction)),
               for (final diagnostic in recovery.diagnosticsJson)
-                Text('${diagnostic['code']}: ${diagnostic['message']}'),
+                Text(
+                  '${_safeReceiptToken(diagnostic['code'], fallback: 'ERR_RECEIPT_DIAGNOSTIC_UNAVAILABLE')}: ${_safeReceiptMessage(diagnostic['message'])}',
+                ),
             ],
           ],
         ),
       ),
     );
   }
+}
+
+String _safeReceiptToken(Object? value, {String fallback = 'unavailable'}) {
+  if (value is! String ||
+      value.trim() != value ||
+      value.isEmpty ||
+      value.length > 80) {
+    return fallback;
+  }
+  final isSafe = value.codeUnits.every(
+    (codeUnit) =>
+        (codeUnit >= 0x30 && codeUnit <= 0x39) ||
+        (codeUnit >= 0x41 && codeUnit <= 0x5A) ||
+        (codeUnit >= 0x61 && codeUnit <= 0x7A) ||
+        codeUnit == 0x2D ||
+        codeUnit == 0x2E ||
+        codeUnit == 0x5F,
+  );
+  return isSafe ? value : fallback;
+}
+
+String _safeReceiptMessage(Object? value) {
+  if (value is! String ||
+      value.trim() != value ||
+      value.isEmpty ||
+      value.length > 160) {
+    return 'Receipt detail unavailable.';
+  }
+  final lower = value.toLowerCase();
+  if (lower.contains('secret') || lower.contains('token')) {
+    return 'Receipt detail unavailable.';
+  }
+  final isSafe = value.codeUnits.every(
+    (codeUnit) => codeUnit >= 0x20 && codeUnit != 0x5C && codeUnit != 0x7F,
+  );
+  return isSafe ? value : 'Receipt detail unavailable.';
+}
+
+String _safeReceiptValue(Object? value) {
+  if (value == '<redacted>') return '<redacted>';
+  return _safeReceiptToken(value);
 }
 
 ReceiptScanResult _receiptScanResult(DemoScenarioSnapshot snapshot) {
