@@ -138,6 +138,8 @@ native capability lookup.
   receipt key namespaces before calling native storage.
 - App receipt key-ring writers must reject blank, padded, or delimiter-bearing
   receipt key ids before calling native delete methods.
+- Generic native secure key storage method-channel requests must reject blank
+  or padded namespaces, key ids, and key record fields before platform calls.
 - App orchestration should surface scrubbed diagnostics, not raw secrets,
   credentials, or platform exception payloads.
 

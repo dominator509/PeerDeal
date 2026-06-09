@@ -228,6 +228,9 @@ the gates below are satisfied.
 - Native secure key storage contracts now lock generic save/delete mutation
   methods and fail-closed mutation results without adding receipt semantics to
   the native bridge package.
+- Native secure key storage method-channel wrappers now reject blank or padded
+  namespaces, key ids, and key record fields before platform load/save/delete
+  calls, keeping malformed generic secure-storage requests out of native code.
 - App demo receipt paths now map native secure key storage snapshots into
   receipt-owned key-ring providers before signed artifact verification.
 - App demo receipt presenters can consume a verifier boundary that loads native
@@ -488,7 +491,8 @@ the gates below are satisfied.
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
-  app-owned receipt delete key-id validation,
+  app-owned receipt delete key-id validation, generic native secure-key
+  request validation,
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure

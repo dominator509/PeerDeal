@@ -17,6 +17,12 @@ class MethodChannelSecureKeyStorageBridge
   Future<SecureKeyStorageSnapshot> loadKeyRing({
     required String namespace,
   }) async {
+    if (!_isValidNamespace(namespace)) {
+      return const SecureKeyStorageSnapshot.unavailable(
+        warning: 'Secure key storage load request is invalid.',
+      );
+    }
+
     final Map<String, Object?>? result;
     try {
       result = await _channel.invokeMapMethod<String, Object?>(
@@ -117,10 +123,11 @@ class MethodChannelSecureKeyStorageBridge
     return SecureKeyStorageChannelContract.decodeMutationResult(result);
   }
 
-  bool _isValidNamespace(String namespace) => namespace.trim().isNotEmpty;
+  bool _isValidNamespace(String namespace) =>
+      namespace.trim().isNotEmpty && namespace.trim() == namespace;
 
   bool _isValidKeyId(String keyId) =>
-      keyId.trim().isNotEmpty && !keyId.contains(':');
+      keyId.trim().isNotEmpty && keyId.trim() == keyId && !keyId.contains(':');
 
   String _warning(String prefix, Object error) {
     if (error is PlatformException) {

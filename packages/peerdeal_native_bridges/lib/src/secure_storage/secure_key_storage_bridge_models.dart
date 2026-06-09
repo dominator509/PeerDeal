@@ -15,10 +15,14 @@ class SecureKeyRecord {
 
   bool get isUsable =>
       keyId.trim().isNotEmpty &&
+      keyId.trim() == keyId &&
       !keyId.contains(':') &&
       purpose.trim().isNotEmpty &&
+      purpose.trim() == purpose &&
       algorithm.trim().isNotEmpty &&
-      secret.trim().isNotEmpty;
+      algorithm.trim() == algorithm &&
+      secret.trim().isNotEmpty &&
+      secret.trim() == secret;
 }
 
 class SecureKeyStorageSnapshot {

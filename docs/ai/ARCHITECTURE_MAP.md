@@ -90,8 +90,9 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   loading; platform/database persistence remains a production gap.
 - Secure key storage has Dart/method-channel read/write seams plus app-owned
   receipt key-ring provisioning, namespace validation, mapping, and
-  ambiguous-active-key and delete key-id rejection; platform implementations remain a
-  production-readiness gap.
+  ambiguous-active-key and delete key-id rejection. Generic method-channel
+  requests reject malformed secure-key namespaces and records before platform
+  calls; platform implementations remain a production-readiness gap.
 
 ## Auth / Authorization
 
@@ -105,7 +106,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Risk | Status |
 | --- | --- |
 | Production transport | Native transport method-channel seam, app-owned capability-gated transport adapters/factories, payload-limit enforcement across session/sender/drain entry points, sink validation before native sends, receive-scope validation before native drains, and network frame gates exist; no live peer transport implementation yet |
-| Platform key storage | Method-channel read/write seams plus app-owned receipt key provisioning, namespace validation, ambiguous active-key rejection, delete key-id validation, export, and verification mapping exist; native implementation pending |
+| Platform key storage | Method-channel read/write seams plus generic secure-key request validation, app-owned receipt key provisioning, namespace validation, ambiguous active-key rejection, delete key-id validation, export, and verification mapping exist; native implementation pending |
 | Persistence | Canonical recovery-window file store, app-owned store factories, exact validated environment-configured recovery roots, and mounted recovery-window loading exist; production database/platform persistence not implemented |
 | App flows | Demo routes plus mounted setup/join orchestration seams, route-level and orchestrator join input validation, route-level and orchestrator setup identity validation, bounded mounted table/join native bootstrap mapping with exact scope validation, mounted receipt export/verify wiring, app-owned route registries, exact enabled demo-route gates, validated app-owned production route maps, validated app-owned initial routes, validated production navigation descriptors, app-owned home surface builders, and unknown-route fallback exist; production navigation polish remains |
 | UI polish | Shared app-shell scaffold/action/status/info primitives exist and mounted home/table/chat/receipt/join/setup/fallback routes consume them; app shells can replace demo home surfaces through runtime builders; final production UI validation remains |

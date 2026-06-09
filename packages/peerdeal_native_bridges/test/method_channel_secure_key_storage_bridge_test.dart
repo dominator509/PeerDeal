@@ -78,6 +78,22 @@ void main() {
     expect(log.single.method, 'loadKeyRing');
   });
 
+  test('rejects invalid load requests before calling platform', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          return <String, Object?>{'available': true, 'keys': <Object?>[]};
+        });
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final snapshot = await bridge.loadKeyRing(namespace: ' peerdeal.receipts ');
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.keys, isEmpty);
+    expect(snapshot.warning, 'Secure key storage load request is invalid.');
+    expect(log, isEmpty);
+  });
+
   test('saves secure key records over the method channel', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
@@ -203,9 +219,25 @@ void main() {
       namespace: '',
       keyId: 'receipt_signing_1',
     );
+    final paddedSaveResult = await bridge.saveKey(
+      namespace: 'peerdeal.receipts',
+      key: const SecureKeyRecord(
+        keyId: ' receipt_signing_1 ',
+        purpose: 'receipt_signing',
+        algorithm: 'hmac-sha256',
+        secret: 'signing_secret_1',
+        active: true,
+      ),
+    );
+    final paddedDeleteResult = await bridge.deleteKey(
+      namespace: 'peerdeal.receipts',
+      keyId: ' receipt_signing_1 ',
+    );
 
     expect(saveResult.isSuccess, isFalse);
     expect(deleteResult.isSuccess, isFalse);
+    expect(paddedSaveResult.isSuccess, isFalse);
+    expect(paddedDeleteResult.isSuccess, isFalse);
     expect(log, isEmpty);
   });
 }

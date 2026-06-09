@@ -14,6 +14,35 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Native Secure Key Request Gate
+
+Summary:
+Hardened the generic native secure key storage method-channel bridge so blank
+or padded namespaces, key ids, and key record fields fail closed before
+platform load/save/delete calls. The contract remains receipt-agnostic; app
+receipt key-ring mapping still lives in the app shells.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/method_channel_secure_key_storage_bridge.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_bridge_models.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_secure_key_storage_bridge_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub` in `packages/peerdeal_native_bridges`
+
+Risks:
+- This locks Dart method-channel request validation only; real platform secure
+  key storage implementations remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Recovery Environment Root Padding Gate
 
 Summary:
