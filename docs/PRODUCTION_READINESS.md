@@ -148,6 +148,10 @@ the gates below are satisfied.
 - Network transport frame validation now rejects padded session and peer
   identities before validating sender/receiver boundaries can pass frames to
   platform sinks or session handlers.
+- Network bootstrap candidate resolution now drops blank, padded,
+  control-character-bearing, or duplicate peer ids before assigning candidate
+  route class and priority, keeping malformed discovery identities out of path
+  selection.
 - Network transport send contracts now include a validating sender boundary
   that rejects invalid frames before platform sinks see them and converts sink
   failures into explicit failed send results.
@@ -665,6 +669,7 @@ the gates below are satisfied.
   sync recovery persistence scope-identity validation,
   app-owned recovery store construction, exact environment-configured recovery
   root loading, app-owned recovery root validation, mounted recovery-window loading,
+  package-owned bootstrap peer-id validation,
   app-owned route runtime dependency grouping, app-owned table runtime-scope
   injection, canonical app-route
   registry validation, exact app-owned enabled-route allowlists,

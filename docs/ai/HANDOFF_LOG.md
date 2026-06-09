@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Validate Bootstrap Peer IDs
+
+Summary:
+Hardened `peerdeal_network` bootstrap candidate resolution so malformed or
+duplicate peer ids are dropped before candidate route class and priority are
+assigned. This keeps raw discovery output from promoting blank, padded,
+control-character-bearing, or repeated peer identities into path selection.
+
+Files changed:
+- `packages/peerdeal_network/lib/src/services/basic_bootstrap_candidate_provider.dart`
+- `packages/peerdeal_network/test/basic_bootstrap_candidate_provider_test.dart`
+- `packages/peerdeal_network/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test/basic_bootstrap_candidate_provider_test.dart`
+- `dart test`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks package-level candidate identity filtering only; real native
+  discovery, live transport, platform persistence, and final production UI
+  remain separate readiness gaps.
+
+Next reviewer:
+Codex should continue with the next codeable network/sync/app-boundary gap from
+`docs/PRODUCTION_READINESS.md`, or platform native work once platform folders
+are added.
+
+---
+
 ### 2026-06-09 - Codex - Validate Recovery Persistence Scope Identity
 
 Summary:

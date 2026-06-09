@@ -34,6 +34,8 @@ score, and recover network paths without owning game truth.
 ## Hardened scaffold coverage
 - Route-class semantics normalize `remoteDirect`/`p2pRemote` and
   `relayFallback`/`relay` compatibility names.
+- Bootstrap candidate resolution drops blank, padded, control-character-bearing,
+  or duplicate peer ids before assigning route class and priority.
 - Session path selection is deterministic across priority, route class, and
   peer id.
 - Primary peer election fails closed when every peer is anchor-mismatched.
