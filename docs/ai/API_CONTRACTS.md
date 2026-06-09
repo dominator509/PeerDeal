@@ -136,11 +136,15 @@ codes and rejoin tokens before join dependencies, invite resolution, or
 governance commit adapters run. Join routes scrub app-owned join outcome result
 codes and diagnostics before rendering, and they must bound rendered
 diagnostic count with a stable truncation diagnostic.
+Join routes must reload their async outcome when app-owned orchestrator,
+invite-context, initial-mode, or enabled-mode dependencies change.
 Setup routes and setup flow orchestration reject blank or padded app-owned
 setup intent and host identities before wizard/setup dependencies run. Setup
 routes also scrub app-owned setup outcome result codes, errors, warnings, and
 displayed Game File versions before rendering. Rendered setup errors and
 warnings must be bounded with stable truncation markers.
+Setup routes must reload their async outcome when app-owned orchestrator,
+setup-intent, initial-mode, or enabled-mode dependencies change.
 
 ## Network Transport Boundary
 

@@ -60,6 +60,18 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
   }
 
   @override
+  void didUpdateWidget(JoinFlowRoute oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialMode != widget.initialMode ||
+        oldWidget._orchestratorFactory != widget._orchestratorFactory ||
+        oldWidget._inviteContextFactory != widget._inviteContextFactory ||
+        oldWidget._enabledModes != widget._enabledModes) {
+      _mode = widget.initialMode;
+      _outcome = _run(_mode);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<JoinFlowOutcome>(
       future: _outcome,

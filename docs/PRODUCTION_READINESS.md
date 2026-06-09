@@ -336,6 +336,10 @@ the gates below are satisfied.
 - Mounted join routes now receive orchestrator factories from the app shell
   boundary instead of constructing demo adapters inside the route, with
   fail-closed coverage when factory setup is unavailable.
+- Mounted join routes now reload their async outcome when app-owned
+  orchestrator, invite-context, initial-mode, or enabled-mode dependencies
+  change, preventing stale production invite/join decisions after runtime
+  updates.
 - Mounted join routes now also receive app-owned invite-context factories, so
   production invite sources can feed first-join and rejoin orchestration through
   the app shell boundary instead of leaving hardcoded invite/rejoin tokens
@@ -360,6 +364,9 @@ the gates below are satisfied.
 - Mounted app setup routes now receive app-owned setup orchestrator factories,
   expose compiled/rejected setup outcomes through navigation, and fail closed
   when route-level setup orchestration is unavailable.
+- Mounted setup routes now reload their async outcome when app-owned
+  orchestrator, setup-intent, initial-mode, or enabled-mode dependencies change,
+  preventing stale production setup decisions after runtime updates.
 - Mounted app setup routes now also receive app-owned setup intent factories,
   so production setup sources can feed `peerdeal_wizard` through the app shell
   boundary instead of leaving hardcoded demo setup intent inside the route; the
@@ -627,6 +634,7 @@ the gates below are satisfied.
   app-owned production route/navigation case-collision validation,
   app-owned production/demo navigation case-collision validation,
   app-owned join invite-context injection, route-level join input validation,
+  mounted join/setup async dependency reload handling,
   app-owned join input validation,
   app-owned receipt envelope injection, app-owned setup intent injection,
   route-level setup identity validation, app-owned setup identity validation,

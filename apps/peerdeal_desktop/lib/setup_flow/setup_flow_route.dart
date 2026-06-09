@@ -49,6 +49,18 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
   }
 
   @override
+  void didUpdateWidget(SetupFlowRoute oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialMode != widget.initialMode ||
+        oldWidget._orchestratorFactory != widget._orchestratorFactory ||
+        oldWidget._setupIntentFactory != widget._setupIntentFactory ||
+        oldWidget._enabledModes != widget._enabledModes) {
+      _mode = widget.initialMode;
+      _outcome = _run(_mode);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<SetupFlowOutcome>(
       future: _outcome,

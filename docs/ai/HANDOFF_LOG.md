@@ -14,6 +14,53 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Reload Mounted Flow Dependencies
+
+Summary:
+Hardened mobile and desktop mounted join/setup routes so async outcomes reload
+when app-owned factories, initial mode, or enabled mode sets change, preventing
+stale production invite/setup decisions after runtime dependency updates.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/join_flow/join_flow_route_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/setup_flow/setup_flow_route_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/join_flow/join_flow_route_test.dart`
+  in `apps/peerdeal_desktop`
+- `flutter test --no-pub test/setup_flow/setup_flow_route_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Production non-demo UI and native implementations remain pending; this locks
+  mounted join/setup async dependency refresh behavior only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Reload Mounted Table Runtime Scope
 
 Summary:

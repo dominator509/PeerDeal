@@ -72,6 +72,48 @@ void main() {
     expect(find.text('Result: ERR_REJOIN_TOKEN_REQUIRED'), findsOneWidget);
   });
 
+  testWidgets('reloads when injected invite context factory changes', (
+    tester,
+  ) async {
+    Widget routeWith(JoinFlowInviteContextFactory inviteContextFactory) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          initialMode: JoinFlowDemoMode.rejoin,
+          orchestratorFactory: demoFactory.create,
+          inviteContextFactory: inviteContextFactory,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      routeWith(
+        (_) => const InviteContext(
+          inviteCode: 'ABC123',
+          requestedRole: RequestedRole.player,
+          rejoinToken: 'rj_001',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: rejoined'), findsOneWidget);
+    expect(find.text('Result: OK_REJOINED'), findsOneWidget);
+
+    await tester.pumpWidget(
+      routeWith(
+        (_) => const InviteContext(
+          inviteCode: 'ABC123',
+          requestedRole: RequestedRole.player,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_REJOIN_TOKEN_REQUIRED'), findsOneWidget);
+  });
+
   testWidgets(
     'hides disabled modes and fails closed for disabled initial mode',
     (tester) async {

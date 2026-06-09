@@ -91,6 +91,53 @@ void main() {
     expect(find.text('Error: seat_count_missing'), findsOneWidget);
   });
 
+  testWidgets('reloads when injected setup intent factory changes', (
+    tester,
+  ) async {
+    Widget routeWith(SetupFlowIntentFactory setupIntentFactory) {
+      return WidgetsApp(
+        color: const Color(0xFF1B5E20),
+        builder: (_, _) => SetupFlowRoute(
+          orchestratorFactory: () => const SetupFlowOrchestrator(),
+          setupIntentFactory: setupIntentFactory,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+      routeWith(
+        (_) => const SetupIntent(
+          intentId: 'intent_open_table',
+          sourceType: SetupSurface.simple,
+          hostPseudonymousId: 'host_demo',
+          modePreference: 'open_table',
+          variantPreference: 'holdem_nlhe',
+          seatCountPreference: 6,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: compiled'), findsOneWidget);
+    expect(find.text('Result: OK_GAME_FILE_COMPILED'), findsOneWidget);
+
+    await tester.pumpWidget(
+      routeWith(
+        (_) => const SetupIntent(
+          intentId: 'intent_injected_invalid',
+          sourceType: SetupSurface.simple,
+          hostPseudonymousId: 'host_injected',
+          modePreference: 'open_table',
+          variantPreference: 'holdem_nlhe',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_NOT_BUILD_READY'), findsOneWidget);
+  });
+
   testWidgets('rejects injected setup intent with blank identity', (
     tester,
   ) async {
