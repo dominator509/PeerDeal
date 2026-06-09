@@ -115,6 +115,8 @@ shareable fields and recovery diagnostics must be bounded with stable
 truncation lines.
 Capture surface coordinators must scrub native warning detail and replace
 sensitive native notes with stable unavailable text before UI projection.
+Shared safe-surface render models must scrub and bound injected capture warning
+and native-note text before exposing render state to app UI.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning
 lists before passing load results into table surfaces.
 Mounted table routes must cap injected bootstrap candidate lists before passing

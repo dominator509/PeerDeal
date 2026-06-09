@@ -23,10 +23,21 @@ class SafeSurfaceRenderModel {
         (plan) => plan.shouldRequestNativeBlocking,
       ),
       warnings: List<String>.unmodifiable(
-        _uniqueNonEmpty(activePlans.map((plan) => plan.warning)),
+        _uniqueNonEmpty(
+          activePlans.map(
+            (plan) => _safeRenderText(
+              plan.warning,
+              fallback: 'Capture warning unavailable.',
+            ),
+          ),
+        ),
       ),
       nativeNotes: List<String>.unmodifiable(
-        _uniqueNonEmpty(activePlans.map((plan) => plan.nativeNotes)),
+        _uniqueNonEmpty(
+          activePlans.map(
+            (plan) => _safeRenderText(plan.nativeNotes, fallback: null),
+          ),
+        ),
       ),
     );
   }
@@ -39,5 +50,27 @@ class SafeSurfaceRenderModel {
       }
       yield value;
     }
+  }
+
+  static String? _safeRenderText(String? value, {required String? fallback}) {
+    final normalized = value
+        ?.replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (normalized == null || normalized.isEmpty) {
+      return null;
+    }
+    final lower = normalized.toLowerCase();
+    if (lower.contains('secret') ||
+        lower.contains('token') ||
+        lower.contains('password') ||
+        normalized.contains('\\')) {
+      return fallback;
+    }
+    const maxLength = 96;
+    if (normalized.length <= maxLength) {
+      return normalized;
+    }
+    return normalized.substring(0, maxLength);
   }
 }

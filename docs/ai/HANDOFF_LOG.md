@@ -14,6 +14,40 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Scrub Safe Surface Render Text
+
+Summary:
+Hardened shared safe-surface render models so injected capture warnings and
+native notes are scrubbed and bounded before app UI can inspect render state.
+
+Files changed:
+- `packages/peerdeal_ui_kit/lib/src/safe_surface/safe_surface_render_model.dart`
+- `packages/peerdeal_ui_kit/test/safe_surface_render_model_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/safe_surface_render_model_test.dart`
+  in `packages/peerdeal_ui_kit`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Real platform capture enforcement remains pending; this locks shared
+  safe-surface render text sanitization only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Scrub Capture Native Notes
 
 Summary:
