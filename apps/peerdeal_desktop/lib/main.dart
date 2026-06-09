@@ -434,6 +434,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           productionNavigation,
           nativeReadiness: null,
         ),
+        hasProductionNavigation: productionNavigation.isNotEmpty,
         nativeReadiness: null,
       );
     }
@@ -448,6 +449,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
             productionNavigation,
             nativeReadiness: nativeReadiness,
           ),
+          hasProductionNavigation: productionNavigation.isNotEmpty,
           nativeReadiness: nativeReadiness,
         );
       },
@@ -458,10 +460,10 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     BuildContext context,
     List<PeerDealAppNavigationEntry> demoNavigation,
     List<PeerDealAppNavigationEntry> productionNavigation, {
+    required bool hasProductionNavigation,
     required AppNativeReadinessSnapshot? nativeReadiness,
   }) {
-    final productionOnly =
-        demoNavigation.isEmpty && productionNavigation.isNotEmpty;
+    final productionOnly = demoNavigation.isEmpty && hasProductionNavigation;
     return DemoHomeScreen(
       controller: _controller,
       title: productionOnly ? 'PeerDeal' : 'PeerDeal demo',

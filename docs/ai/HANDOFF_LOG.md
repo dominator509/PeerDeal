@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Preserve Production Home During Readiness Filtering
+
+Summary:
+Kept mobile and desktop production-only default home presentation stable when
+native-readiness filtering hides every protected production navigation action.
+The home now uses the original validated production navigation intent, not only
+the filtered visible actions, to decide whether demo fixture controls should be
+suppressed.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/app_shell_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/app_shell_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks default app-shell presentation only; platform-native readiness
+  implementations remain separate production gaps.
+
+Next reviewer:
+Codex should continue with the next codeable production app-flow or
+native-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Suppress Demo Content On Production Home
 
 Summary:

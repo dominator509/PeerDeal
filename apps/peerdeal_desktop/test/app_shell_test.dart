@@ -1191,6 +1191,11 @@ void main() {
       find.widgetWithText(PeerDealActionButton, 'Native table'),
       findsNothing,
     );
+    expect(find.text('PeerDeal'), findsOneWidget);
+    expect(find.text('Production app routes'), findsOneWidget);
+    expect(find.text('PeerDeal demo'), findsNothing);
+    expect(find.textContaining('Active scenario:'), findsNothing);
+    expect(find.text('Demo'), findsNothing);
     expect(find.text('Native unavailable'), findsOneWidget);
   });
 
