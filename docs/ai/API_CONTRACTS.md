@@ -133,6 +133,8 @@ native capability lookup.
   ambiguous active signing or encryption keys.
 - App receipt key-ring loaders and writers must reject malformed app-owned
   receipt key namespaces before calling native storage.
+- App receipt key-ring writers must reject blank, padded, or delimiter-bearing
+  receipt key ids before calling native delete methods.
 - App orchestration should surface scrubbed diagnostics, not raw secrets,
   credentials, or platform exception payloads.
 

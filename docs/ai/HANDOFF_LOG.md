@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Receipt Delete Key Id Gate
+
+Summary:
+Hardened mobile and desktop native receipt key-ring writers so direct app-owned
+delete requests reject blank, padded, or delimiter-bearing receipt key ids
+before native secure-storage mutation calls. Focused tests prove padded delete
+ids fail closed and never reach the native bridge fake.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_writer.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_receipt_key_ring_writer_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_writer.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_receipt_key_ring_writer_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\native_receipt_key_ring_writer_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\native_receipt_key_ring_writer_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks app-owned receipt key delete validation only; native platform
+  secure-storage implementations remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Join Input Padding Gate
 
 Summary:

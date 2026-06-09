@@ -344,6 +344,9 @@ the gates below are satisfied.
 - App receipt key-ring loaders and writers now fail closed before native
   storage calls when the app-owned receipt key namespace is blank or padded,
   preventing malformed key-ring configuration from reaching platform storage.
+- App receipt key-ring writers now reject blank, padded, or delimiter-bearing
+  receipt key ids before native delete calls, preventing ambiguous app-owned
+  key deletion requests from reaching platform storage.
 - App receipt key-ring writers now map receipt signing/encryption keys into
   generic native secure-key mutation records, fail closed before invalid
   save/delete requests, and keep receipt semantics out of
@@ -469,6 +472,7 @@ the gates below are satisfied.
   app-owned setup identity validation, app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
+  app-owned receipt delete key-id validation,
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure

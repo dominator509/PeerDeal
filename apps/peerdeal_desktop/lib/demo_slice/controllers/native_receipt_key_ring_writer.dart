@@ -60,7 +60,7 @@ class NativeReceiptKeyRingWriter {
         warning: 'Secure receipt key namespace is invalid.',
       );
     }
-    if (keyId.trim().isEmpty || keyId.contains(':')) {
+    if (!_isValidKeyId(keyId)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Receipt key delete request is invalid.',
       );
@@ -116,6 +116,9 @@ class NativeReceiptKeyRingWriter {
 
   static bool _isValidNamespace(String namespace) =>
       namespace.trim().isNotEmpty && namespace.trim() == namespace;
+
+  static bool _isValidKeyId(String keyId) =>
+      keyId.trim().isNotEmpty && keyId.trim() == keyId && !keyId.contains(':');
 
   static String _safeNativeWarning(
     String? warning, {

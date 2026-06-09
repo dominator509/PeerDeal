@@ -131,6 +131,17 @@ void main() {
     expect(bridge.deletedKeys, isEmpty);
   });
 
+  test('fails closed before native delete for padded key ids', () async {
+    final bridge = _RecordingSecureKeyStorageBridge();
+    final writer = NativeReceiptKeyRingWriter(bridge: bridge);
+
+    final result = await writer.deleteKey(' receipt_signing_1 ');
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Receipt key delete request is invalid.');
+    expect(bridge.deletedKeys, isEmpty);
+  });
+
   test('fails closed before native delete for invalid namespace', () async {
     final bridge = _RecordingSecureKeyStorageBridge();
     final writer = NativeReceiptKeyRingWriter(bridge: bridge, namespace: '');
