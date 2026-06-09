@@ -16,6 +16,14 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
     required RecoveryPersistenceScope scope,
     required SnapshotEnvelope snapshot,
   }) {
+    final scopeConflicts = _validateScopeIdentity(scope);
+    if (scopeConflicts.isNotEmpty) {
+      return RecoveryPersistenceResult(
+        isSuccess: false,
+        conflicts: scopeConflicts,
+      );
+    }
+
     final conflicts = <SyncConflict>[
       ..._validateSnapshotScope(scope, snapshot),
     ];
@@ -93,6 +101,14 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
     required RecoveryPersistenceScope scope,
     required List<EventEnvelope> events,
   }) {
+    final scopeConflicts = _validateScopeIdentity(scope);
+    if (scopeConflicts.isNotEmpty) {
+      return RecoveryPersistenceResult(
+        isSuccess: false,
+        conflicts: scopeConflicts,
+      );
+    }
+
     if (events.isEmpty) {
       return const RecoveryPersistenceResult.success(
         warnings: <String>['No recovery events were appended.'],
@@ -114,6 +130,10 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
 
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
+    if (!scope.hasValidStorageIdentity) {
+      return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+    }
+
     final record = _records[scope.storageKey];
     return PersistedRecoveryWindow(
       snapshot: record?.snapshot,
@@ -121,6 +141,17 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
         record?.events ?? const <EventEnvelope>[],
       ),
     );
+  }
+
+  List<SyncConflict> _validateScopeIdentity(RecoveryPersistenceScope scope) {
+    if (scope.hasValidStorageIdentity) return const <SyncConflict>[];
+    return const <SyncConflict>[
+      SyncConflict(
+        code: 'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+        message: 'Recovery persistence scope identity is invalid.',
+        severity: SyncConflictSeverity.fatal,
+      ),
+    ];
   }
 
   List<SyncConflict> _validateSnapshotScope(

@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Validate Recovery Persistence Scope Identity
+
+Summary:
+Hardened `peerdeal_sync` recovery persistence so invalid recovery scope
+identities fail closed before mutating in-memory windows or resolving durable
+JSON file paths. Scope identities now reject blank, padded, control-character,
+and internal delimiter-bearing protocol/table/session values.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/models/recovery_persistence_scope.dart`
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `packages/peerdeal_sync/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test/recovery_persistence_store_test.dart`
+- `dart test`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks recovery persistence identity validation only; production
+  database/platform persistence, native implementations, production transport,
+  and final production UI remain separate readiness gaps.
+
+Next reviewer:
+Codex should continue with the next codeable sync/replay/app-boundary gap from
+`docs/PRODUCTION_READINESS.md`, or platform native work once platform folders
+are added.
+
+---
+
 ### 2026-06-09 - Codex - Validate Replay Event Ranges
 
 Summary:

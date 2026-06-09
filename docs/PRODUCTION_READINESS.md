@@ -465,6 +465,9 @@ the gates below are satisfied.
   in-memory validation gate that rejects mismatched table/session scope,
   protocol drift, sequence gaps, hash-chain breaks, and snapshots ahead of the
   stored event stream before mutating recovery windows.
+- Sync recovery persistence now rejects blank, padded, control-character, or
+  delimiter-bearing recovery scope identities before mutating in-memory windows
+  or resolving durable JSON file paths.
 - Sync recovery persistence now rejects snapshot checkpoint regression and
   same-sequence snapshot hash replacement, preserving newer verified recovery
   anchors from stale or tampered snapshot writes.
@@ -659,6 +662,7 @@ the gates below are satisfied.
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   replay event-range request validation,
+  sync recovery persistence scope-identity validation,
   app-owned recovery store construction, exact environment-configured recovery
   root loading, app-owned recovery root validation, mounted recovery-window loading,
   app-owned route runtime dependency grouping, app-owned table runtime-scope

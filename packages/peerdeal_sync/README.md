@@ -34,6 +34,8 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
   table/session or protocol mismatches, sequence gaps, hash-chain breaks, and
   snapshots ahead of the stored event stream before mutating stored recovery
   windows.
+- Recovery persistence scopes reject blank, padded, control-character, or
+  delimiter-bearing identities before mutating memory or resolving file paths.
 - Persisted snapshots cannot regress to an older checkpoint or replace an
   existing checkpoint with a different snapshot hash.
 - A JSON file-backed recovery store can durably round-trip event/snapshot

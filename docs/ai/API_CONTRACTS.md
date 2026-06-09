@@ -216,6 +216,9 @@ like secrets, tokens, passwords, or platform paths before exposing load results.
 ## Recovery Persistence Boundary
 
 `peerdeal_sync` owns recovery-window validation and JSON file store contracts.
+Recovery persistence scopes must use exact, non-empty protocol, table, and
+session identities without padding, control characters, or the internal `::`
+storage-key delimiter.
 App shells own durable root selection. `AppRecoveryPersistenceStoreFactory`
 accepts an injected root directory factory, and the mobile/desktop shells may
 default it from `PEERDEAL_RECOVERY_ROOT`. Blank, missing, or throwing roots fail

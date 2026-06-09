@@ -122,6 +122,42 @@ void main() {
     expect(store.loadWindow(scope).events, isEmpty);
   });
 
+  test('rejects invalid recovery persistence scope before mutating store', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    const invalidScope = RecoveryPersistenceScope(
+      tableId: ' table_1',
+      sessionId: 'session_1',
+      protocolVersion: '1.0.0',
+    );
+
+    final append = store.appendEvents(
+      scope: invalidScope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+      ],
+    );
+    final snapshot = store.saveSnapshot(
+      scope: const RecoveryPersistenceScope(
+        tableId: 'table::1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+      ),
+      snapshot: _snapshot(seq: 0, hash: 'snapshot_hash_0'),
+    );
+
+    expect(append.isSuccess, isFalse);
+    expect(
+      append.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+    );
+    expect(snapshot.isSuccess, isFalse);
+    expect(
+      snapshot.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+    );
+    expect(store.loadWindow(invalidScope).events, isEmpty);
+  });
+
   test('stores snapshot only when scope matches persisted recovery stream', () {
     final store = InMemoryRecoveryPersistenceStore();
     store.appendEvents(
@@ -338,6 +374,36 @@ void main() {
       'ERR_RECOVERY_PERSISTENCE_FILE_CORRUPT',
     );
     expect(writer.loadWindow(scope).events, isEmpty);
+  });
+
+  test('file store rejects invalid scope before writing recovery files', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final result = writer.appendEvents(
+      scope: const RecoveryPersistenceScope(
+        tableId: 'table_1',
+        sessionId: 'session_1\nsecret',
+        protocolVersion: '1.0.0',
+      ),
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+    );
+    expect(directory.listSync(), isEmpty);
   });
 }
 

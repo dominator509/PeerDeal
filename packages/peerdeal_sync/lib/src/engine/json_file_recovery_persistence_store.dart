@@ -22,6 +22,9 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     required RecoveryPersistenceScope scope,
     required SnapshotEnvelope snapshot,
   }) {
+    final scopeResult = _validateScopeIdentity(scope);
+    if (!scopeResult.isSuccess) return scopeResult;
+
     final hydrate = _hydrate(scope);
     if (!hydrate.result.isSuccess) return hydrate.result;
 
@@ -36,6 +39,9 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     required RecoveryPersistenceScope scope,
     required List<EventEnvelope> events,
   }) {
+    final scopeResult = _validateScopeIdentity(scope);
+    if (!scopeResult.isSuccess) return scopeResult;
+
     final hydrate = _hydrate(scope);
     if (!hydrate.result.isSuccess) return hydrate.result;
 
@@ -47,6 +53,10 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
 
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
+    if (!scope.hasValidStorageIdentity) {
+      return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+    }
+
     final hydrate = _hydrate(scope);
     if (!hydrate.result.isSuccess) {
       return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
@@ -132,6 +142,24 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
         ],
       );
     }
+  }
+
+  RecoveryPersistenceResult _validateScopeIdentity(
+    RecoveryPersistenceScope scope,
+  ) {
+    if (scope.hasValidStorageIdentity) {
+      return const RecoveryPersistenceResult.success();
+    }
+    return const RecoveryPersistenceResult(
+      isSuccess: false,
+      conflicts: <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+          message: 'Recovery persistence scope identity is invalid.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ],
+    );
   }
 
   _HydratedRecoveryStore _corruptStore(InMemoryRecoveryPersistenceStore store) {
