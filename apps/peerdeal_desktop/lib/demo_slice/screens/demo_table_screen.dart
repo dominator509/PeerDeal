@@ -126,13 +126,18 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
       }
 
       final window = store.loadWindow(scope);
+      final persistedEventCount = _safePersistedEventCount(window);
       return DemoRecoveryPersistenceLoadResult.available(
-        persistedEventCount: window.events.length,
+        persistedEventCount: persistedEventCount,
         hasSnapshot: window.snapshot != null,
-        warnings: _safeTableWarnings(
-          result.warnings,
-          fallback: 'Recovery persistence warning unavailable.',
-        ),
+        warnings: <String>[
+          ..._safeTableWarnings(
+            result.warnings,
+            fallback: 'Recovery persistence warning unavailable.',
+          ),
+          if (window.events.length > persistedEventCount)
+            'Recovery persistence events truncated.',
+        ],
       );
     } on Object {
       return const DemoRecoveryPersistenceLoadResult.unavailable(
@@ -150,6 +155,13 @@ RecoveryPersistenceScope _defaultRuntimeScopeFor(
     sessionId: 'demo:${snapshot.scenarioId}',
     protocolVersion: '1.x',
   );
+}
+
+int _safePersistedEventCount(PersistedRecoveryWindow window) {
+  const maxRecoveryPersistenceDisplayEvents = 128;
+  return window.events.length > maxRecoveryPersistenceDisplayEvents
+      ? maxRecoveryPersistenceDisplayEvents
+      : window.events.length;
 }
 
 NativeBootstrapCandidateLoadResult _safeBootstrapLoadResult(

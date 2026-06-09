@@ -117,6 +117,8 @@ Mounted table routes must scrub and bound injected bootstrap/recovery warning
 lists before passing load results into table surfaces.
 Mounted table routes must cap injected bootstrap candidate lists before passing
 load results into table surfaces.
+Mounted table routes must cap displayed recovery persistence event counts for
+injected recovery windows before passing load results into table surfaces.
 Join routes and join flow orchestration reject blank or padded app-owned invite
 codes and rejoin tokens before join dependencies, invite resolution, or
 governance commit adapters run. Join routes scrub app-owned join outcome result

@@ -461,6 +461,27 @@ void main() {
     );
   });
 
+  testWidgets('mounted table bounds injected recovery persistence events', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        recoveryPersistenceStoreFactory: _OversizedRecoveryFactory(),
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Recovery persistence: 128 events'), findsOneWidget);
+    expect(
+      find.text(
+        'Recovery persistence warning: Recovery persistence events truncated.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('mounted table loads app-provided recovery persistence window', (
     tester,
   ) async {
@@ -1383,6 +1404,50 @@ class _UnsafeRecoveryFactory extends AppRecoveryPersistenceStoreFactory {
         'more warning',
         'overflow warning',
       ],
+    );
+  }
+}
+
+class _OversizedRecoveryFactory extends AppRecoveryPersistenceStoreFactory {
+  _OversizedRecoveryFactory()
+    : super(rootDirectoryFactory: () => Directory.systemTemp);
+
+  @override
+  AppRecoveryPersistenceStoreLoadResult create() {
+    return AppRecoveryPersistenceStoreLoadResult.available(
+      store: _OversizedRecoveryStore(),
+    );
+  }
+}
+
+class _OversizedRecoveryStore implements RecoveryPersistenceStore {
+  @override
+  RecoveryPersistenceResult saveSnapshot({
+    required RecoveryPersistenceScope scope,
+    required SnapshotEnvelope snapshot,
+  }) {
+    return const RecoveryPersistenceResult.success();
+  }
+
+  @override
+  RecoveryPersistenceResult appendEvents({
+    required RecoveryPersistenceScope scope,
+    required List<EventEnvelope> events,
+  }) {
+    return const RecoveryPersistenceResult.success();
+  }
+
+  @override
+  PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
+    return PersistedRecoveryWindow(
+      events: List<EventEnvelope>.generate(129, (index) {
+        final seq = index + 1;
+        return _recoveryEvent(
+          seq: seq,
+          prevHash: seq == 1 ? genesisEventHash : 'hash_${seq - 1}',
+          hash: 'hash_$seq',
+        );
+      }),
     );
   }
 }

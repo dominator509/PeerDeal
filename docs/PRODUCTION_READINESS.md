@@ -483,6 +483,8 @@ the gates below are satisfied.
   persistence warnings before passing load results into table surfaces.
 - Mounted table routes now cap injected bootstrap candidate lists before
   passing load results into table surfaces.
+- Mounted table routes now cap displayed recovery persistence event counts and
+  warn when injected recovery windows exceed the app display boundary.
 - Mounted app table routes now receive app-owned runtime scope factories for
   bootstrap and recovery persistence lookup, so production table/session scope
   can enter from the app shell boundary instead of relying on hardcoded demo
@@ -635,6 +637,7 @@ the gates below are satisfied.
   app-owned table warning rendering scrubbing,
   app-owned mounted table load warning scrubbing and bounding,
   app-owned mounted table bootstrap candidate bounding,
+  app-owned mounted table recovery-window display bounding,
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are
