@@ -21,11 +21,13 @@ class NativeReceiptKeyRingLoader {
     required SecureKeyStorageBridge bridge,
     this.namespace = defaultNamespace,
     this.maxKeyRecords = 64,
+    this.maxKeyIdLength = 96,
   }) : _bridge = bridge;
 
   final SecureKeyStorageBridge _bridge;
   final String namespace;
   final int maxKeyRecords;
+  final int maxKeyIdLength;
 
   Future<ReceiptKeyRingLoadResult> load() async {
     if (!_isValidNamespace(namespace)) {
@@ -38,6 +40,12 @@ class NativeReceiptKeyRingLoader {
       return const ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key record limit is invalid.'],
+      );
+    }
+    if (maxKeyIdLength < 1) {
+      return const ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key metadata limit is invalid.'],
       );
     }
 
@@ -66,6 +74,12 @@ class NativeReceiptKeyRingLoader {
       return const ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key record limit reached.'],
+      );
+    }
+    if (snapshot.keys.any((record) => !_isValidKeyId(record.keyId))) {
+      return const ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key record metadata is invalid.'],
       );
     }
 
@@ -138,6 +152,22 @@ class NativeReceiptKeyRingLoader {
 
   static bool _isValidNamespace(String namespace) =>
       namespace.trim().isNotEmpty && namespace.trim() == namespace;
+
+  bool _isValidKeyId(String keyId) =>
+      keyId.length <= maxKeyIdLength &&
+      keyId.trim().isNotEmpty &&
+      keyId.trim() == keyId &&
+      !keyId.contains(':') &&
+      !_hasControlCharacter(keyId);
+
+  static bool _hasControlCharacter(String value) {
+    for (final codeUnit in value.codeUnits) {
+      if (codeUnit < 0x20 || codeUnit == 0x7F) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   ReceiptSigningKey? _activeSigningKey(List<SecureKeyRecord> records) {
     for (final record in records.where((record) => record.active)) {

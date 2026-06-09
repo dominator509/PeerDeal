@@ -14,6 +14,46 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Bound Receipt Native Key Metadata
+
+Summary:
+Hardened mobile and desktop native receipt key-ring loaders so native secure-key
+snapshots with oversized or control-character receipt key ids fail closed before
+generic records are mapped into receipt signing/encryption providers. Invalid
+loader metadata limits fail closed before native storage calls.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_receipt_key_ring_loader_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_receipt_key_ring_loader_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/demo_slice/native_receipt_key_ring_loader_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/demo_slice/native_receipt_key_ring_loader_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Platform secure storage implementation remains pending; this locks the
+  app-owned native receipt key metadata boundary only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Bound Receipt Mutation Key IDs
 
 Summary:

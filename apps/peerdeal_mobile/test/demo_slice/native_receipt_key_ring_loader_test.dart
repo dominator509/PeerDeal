@@ -117,6 +117,30 @@ void main() {
     },
   );
 
+  test(
+    'fails closed before native load for invalid key metadata limit',
+    () async {
+      final bridge = _FakeSecureKeyStorageBridge(
+        snapshot: const SecureKeyStorageSnapshot(
+          available: true,
+          keys: <SecureKeyRecord>[],
+        ),
+      );
+
+      final result = await NativeReceiptKeyRingLoader(
+        bridge: bridge,
+        maxKeyIdLength: 0,
+      ).load();
+
+      expect(result.hasSigningKey, isFalse);
+      expect(result.hasEncryptionKey, isFalse);
+      expect(result.warnings, <String>[
+        'Secure receipt key metadata limit is invalid.',
+      ]);
+      expect(bridge.namespace, isNull);
+    },
+  );
+
   test('fails closed when native key snapshot exceeds record limit', () async {
     final bridge = _FakeSecureKeyStorageBridge(
       snapshot: SecureKeyStorageSnapshot(
@@ -143,6 +167,61 @@ void main() {
     expect(result.hasEncryptionKey, isFalse);
     expect(result.warnings, <String>[
       'Secure receipt key record limit reached.',
+    ]);
+    expect(bridge.namespace, 'peerdeal.receipts');
+  });
+
+  test('fails closed when native key snapshot has unsafe metadata', () async {
+    final bridge = _FakeSecureKeyStorageBridge(
+      snapshot: const SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'receipt_signing_\u0001',
+            purpose: 'receipt_signing',
+            algorithm: 'hmac-sha256',
+            secret: 'signing_secret_1',
+            active: true,
+          ),
+        ],
+      ),
+    );
+
+    final result = await NativeReceiptKeyRingLoader(bridge: bridge).load();
+
+    expect(result.hasSigningKey, isFalse);
+    expect(result.hasEncryptionKey, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key record metadata is invalid.',
+    ]);
+    expect(bridge.namespace, 'peerdeal.receipts');
+  });
+
+  test('fails closed when native key ids exceed metadata limit', () async {
+    final bridge = _FakeSecureKeyStorageBridge(
+      snapshot: const SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'receipt_signing_oversized',
+            purpose: 'receipt_signing',
+            algorithm: 'hmac-sha256',
+            secret: 'signing_secret_1',
+            active: true,
+          ),
+        ],
+      ),
+    );
+
+    final result = await NativeReceiptKeyRingLoader(
+      bridge: bridge,
+      maxKeyIdLength: 12,
+    ).load();
+
+    expect(result.hasSigningKey, isFalse);
+    expect(result.hasEncryptionKey, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key record metadata is invalid.',
     ]);
     expect(bridge.namespace, 'peerdeal.receipts');
   });

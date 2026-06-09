@@ -374,6 +374,9 @@ the gates below are satisfied.
 - App receipt key-ring loaders now enforce an app-owned native key-record
   snapshot limit, failing closed before receipt key mapping when platform
   secure storage returns an oversized key set.
+- App receipt key-ring loaders now bound native receipt key-id metadata and
+  reject control characters before mapping platform records into signing or
+  encryption providers.
 - App receipt key-ring loaders and writers now fail closed before native
   storage calls when the app-owned receipt key namespace is blank or padded,
   preventing malformed key-ring configuration from reaching platform storage.
@@ -595,6 +598,7 @@ the gates below are satisfied.
   sequence validation, generic native transport byte-payload validation,
   generic native transport exact-key validation,
   app-owned receipt secure-key record bounding,
+  app-owned receipt native key-id metadata bounding,
   app-owned receipt mutation key-id bounding,
   app-owned receipt delete key-id validation, generic native secure-key
   request validation,
