@@ -21,6 +21,7 @@ import 'package:peerdeal_mobile/recovery/app_recovery_persistence_store_factory.
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
 import 'package:peerdeal_mobile/setup_flow/setup_flow_route.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
@@ -439,6 +440,25 @@ void main() {
     );
     expect(find.textContaining('secret'), findsNothing);
     expect(find.textContaining('token'), findsNothing);
+  });
+
+  testWidgets('mounted table bounds injected bootstrap candidates', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        bootstrapCandidateLoaderFactory: _OversizedBootstrapLoader.new,
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bootstrap: 32 candidates'), findsOneWidget);
+    expect(
+      find.text('Bootstrap warning: Bootstrap candidates truncated.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('mounted table loads app-provided recovery persistence window', (
@@ -1319,6 +1339,32 @@ class _UnsafeBootstrapLoader extends NativeBootstrapCandidateLoader {
         'extra warning',
         'overflow warning',
       ],
+    );
+  }
+}
+
+class _OversizedBootstrapLoader extends NativeBootstrapCandidateLoader {
+  _OversizedBootstrapLoader()
+    : super(bridge: const _StaticLocalNetworkBridge());
+
+  @override
+  Future<NativeBootstrapCandidateLoadResult> load({
+    required String sessionId,
+    required String tableId,
+  }) async {
+    return NativeBootstrapCandidateLoadResult(
+      discoveryAvailable: true,
+      nativeNotes: 'ready',
+      candidates: List<BootstrapCandidate>.generate(
+        40,
+        (index) => BootstrapCandidate(
+          peerId: 'peer_$index',
+          routeClass: NetworkRouteClass.lanDirect,
+          reachable: true,
+          priority: index,
+        ),
+      ),
+      warnings: const <String>[],
     );
   }
 }

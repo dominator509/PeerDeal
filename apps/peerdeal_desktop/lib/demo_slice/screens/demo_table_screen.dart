@@ -155,14 +155,22 @@ RecoveryPersistenceScope _defaultRuntimeScopeFor(
 NativeBootstrapCandidateLoadResult _safeBootstrapLoadResult(
   NativeBootstrapCandidateLoadResult result,
 ) {
+  const maxBootstrapCandidates = 32;
+  final candidates = result.candidates
+      .take(maxBootstrapCandidates)
+      .toList(growable: false);
   return NativeBootstrapCandidateLoadResult(
     discoveryAvailable: result.discoveryAvailable,
     nativeNotes: result.nativeNotes,
-    candidates: result.candidates,
-    warnings: _safeTableWarnings(
-      result.warnings,
-      fallback: 'Local network bootstrap warning unavailable.',
-    ),
+    candidates: candidates,
+    warnings: <String>[
+      ..._safeTableWarnings(
+        result.warnings,
+        fallback: 'Local network bootstrap warning unavailable.',
+      ),
+      if (result.candidates.length > maxBootstrapCandidates)
+        'Bootstrap candidates truncated.',
+    ],
   );
 }
 
