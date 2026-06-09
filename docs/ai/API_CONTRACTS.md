@@ -81,6 +81,8 @@ production navigation descriptors whose paths must reference mounted production
 routes. Runtime objects may provide an app-owned home surface builder, which
 receives validated home navigation entries and may replace the default demo
 home surface; builder failures render the existing route-unavailable fallback.
+Mounted production route builder failures also render the existing
+route-unavailable fallback instead of escaping app-shell routing.
 Production route paths and startup routes must not contain control characters
 or whitespace, and production navigation labels must not contain control
 characters. Production navigation labels and paths must not collide with

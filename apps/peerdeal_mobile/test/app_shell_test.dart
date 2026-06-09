@@ -832,6 +832,32 @@ void main() {
     expect(find.text('Production table route'), findsOneWidget);
   });
 
+  testWidgets('fails closed when app-owned production route builder throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) {
+              throw StateError('production route unavailable');
+            },
+          },
+        ),
+      ),
+    );
+
+    Navigator.of(
+      tester.element(find.text('PeerDeal demo')),
+    ).pushNamed('/table-live');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.text('Result: ERR_ROUTE_UNAVAILABLE'), findsOneWidget);
+    expect(find.text('Route: /table-live'), findsOneWidget);
+  });
+
   testWidgets('routes production navigation actions through app home', (
     tester,
   ) async {

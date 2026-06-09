@@ -503,6 +503,9 @@ the gates below are satisfied.
   desktop runtime objects, so production callers can replace the demo home
   surface while still receiving validated home navigation entries. Builder
   failures fail closed to the scrubbed route-unavailable surface.
+- App-owned production route builders now fail closed to the scrubbed
+  route-unavailable surface when builder execution throws, preventing mounted
+  non-demo route failures from escaping app-shell routing.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -528,7 +531,7 @@ the gates below are satisfied.
   app-owned join outcome diagnostic scrubbing, app-owned setup outcome
   diagnostic scrubbing, app-owned receipt render diagnostic scrubbing,
   app-owned production route metadata validation, app-owned home navigation
-  collision validation,
+  collision validation, app-owned production route builder failure handling,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,

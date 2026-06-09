@@ -460,10 +460,26 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       if (validated.containsKey(path)) {
         throw StateError('Production route map contains duplicate paths.');
       }
-      validated[path] = entry.value;
+      validated[path] = (context) => _buildProductionRoute(
+        context: context,
+        path: path,
+        builder: entry.value,
+      );
     }
 
     return Map<String, WidgetBuilder>.unmodifiable(validated);
+  }
+
+  Widget _buildProductionRoute({
+    required BuildContext context,
+    required String path,
+    required WidgetBuilder builder,
+  }) {
+    try {
+      return builder(context);
+    } on Object {
+      return AppRouteFallbackScreen(routeName: path);
+    }
   }
 
   List<PeerDealAppNavigationEntry> _validatedProductionNavigation(
