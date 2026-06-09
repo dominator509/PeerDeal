@@ -32,9 +32,8 @@ class AppRecoveryPersistenceStoreFactory {
   }) {
     final rootPath =
         (environment ??
-                Platform.environment)[peerDealRecoveryRootEnvironmentVariable]
-            ?.trim();
-    if (rootPath == null || rootPath.isEmpty) {
+        Platform.environment)[peerDealRecoveryRootEnvironmentVariable];
+    if (rootPath == null || rootPath.trim().isEmpty) {
       return null;
     }
 

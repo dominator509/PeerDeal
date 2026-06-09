@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Recovery Environment Root Padding Gate
+
+Summary:
+Hardened mobile and desktop recovery persistence factories so
+`PEERDEAL_RECOVERY_ROOT` is preserved exactly and padded environment-provided
+roots fail closed through the existing root validator instead of being silently
+trimmed into an accepted durable JSON store path.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_persistence_store_factory.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_persistence_store_factory_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\recovery\app_recovery_persistence_store_factory_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks environment-root validation only; production database/platform
+  persistence remains pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Join Route Input Gate
 
 Summary:

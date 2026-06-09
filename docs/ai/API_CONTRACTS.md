@@ -114,8 +114,8 @@ App shells own durable root selection. `AppRecoveryPersistenceStoreFactory`
 accepts an injected root directory factory, and the mobile/desktop shells may
 default it from `PEERDEAL_RECOVERY_ROOT`. Blank, missing, or throwing roots fail
 closed before mounted table routes load recovery windows. App-provided roots
-must also be unpadded and free of control characters before a durable JSON
-store is constructed.
+and environment-provided roots must also be unpadded and free of control
+characters before a durable JSON store is constructed.
 
 ## Local Network Bootstrap Boundary
 

@@ -410,6 +410,10 @@ the gates below are satisfied.
   from the `PEERDEAL_RECOVERY_ROOT` environment variable, preserving explicit
   constructor injection while giving deployed shells a durable root
   configuration path without adding package-level platform policy.
+- App recovery persistence store factories now preserve
+  `PEERDEAL_RECOVERY_ROOT` exactly and fail closed when environment-provided
+  recovery roots are padded, preventing ambiguous durable JSON store roots from
+  being accepted through deployment configuration.
 - App recovery persistence store factories now fail closed when app-provided or
   environment-provided recovery roots contain control characters, preventing
   malformed root configuration from constructing durable JSON stores.
@@ -470,8 +474,8 @@ the gates below are satisfied.
   device/OS integration, and product design validation. The Dart contracts,
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
-  app-owned recovery store construction, environment-configured recovery root
-  loading, app-owned recovery root validation, mounted recovery-window loading,
+  app-owned recovery store construction, exact environment-configured recovery
+  root loading, app-owned recovery root validation, mounted recovery-window loading,
   app-owned route runtime dependency grouping, app-owned table runtime-scope
   injection, canonical app-route
   registry validation, exact app-owned enabled-route allowlists,

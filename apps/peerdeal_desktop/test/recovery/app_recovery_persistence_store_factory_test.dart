@@ -57,7 +57,7 @@ void main() {
 
       final factory = AppRecoveryPersistenceStoreFactory.fromEnvironment(
         environment: <String, String>{
-          peerDealRecoveryRootEnvironmentVariable: ' ${directory.path} ',
+          peerDealRecoveryRootEnvironmentVariable: directory.path,
         },
       );
       final result = factory!.create();
@@ -73,6 +73,20 @@ void main() {
       expect(append.isSuccess, isTrue);
     },
   );
+
+  test('fails closed when environment provides padded recovery root', () {
+    final factory = AppRecoveryPersistenceStoreFactory.fromEnvironment(
+      environment: const <String, String>{
+        peerDealRecoveryRootEnvironmentVariable: ' C:\\recovery ',
+      },
+    );
+
+    final result = factory!.create();
+
+    expect(result.isAvailable, isFalse);
+    expect(result.store, isNull);
+    expect(result.warnings, <String>['Recovery persistence root is invalid.']);
+  });
 
   test(
     'returns no default factory when configured environment root is absent',
