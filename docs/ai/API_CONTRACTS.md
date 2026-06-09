@@ -110,7 +110,9 @@ composes the home surface.
 Production navigation and home composition remain app-shell work and should
 replace or extend app routes without moving route policy into shared packages.
 Mounted receipt surfaces scrub receipt/recovery status, messages, shareable
-fields, recommended actions, and diagnostics before rendering.
+fields, recommended actions, and diagnostics before rendering. Rendered receipt
+shareable fields and recovery diagnostics must be bounded with stable
+truncation lines.
 Join routes and join flow orchestration reject blank or padded app-owned invite
 codes and rejoin tokens before join dependencies, invite resolution, or
 governance commit adapters run. Join routes scrub app-owned join outcome result

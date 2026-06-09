@@ -484,6 +484,9 @@ the gates below are satisfied.
   shareable field, recommended-action, and diagnostic text before rendering,
   preserving already-redacted values while replacing malformed display
   metadata with stable generic text.
+- Mounted receipt surfaces now bound rendered shareable fields and recovery
+  diagnostics before UI projection, appending stable truncation lines when
+  injected presenter output exceeds the app display limit.
 - Mounted demo routes now accept app-owned enabled-route gates through the
   mobile and desktop runtime objects, so production callers can expose only
   explicitly allowed dev/demo paths while disabled route requests fall through
@@ -568,7 +571,8 @@ the gates below are satisfied.
   app-owned receipt envelope injection, app-owned setup intent injection,
   route-level setup identity validation, app-owned setup identity validation,
   app-owned join outcome diagnostic scrubbing and bounding, app-owned setup outcome
-  diagnostic scrubbing and bounding, app-owned receipt render diagnostic scrubbing,
+  diagnostic scrubbing and bounding, app-owned receipt render diagnostic scrubbing
+  and bounding,
   app-owned production route metadata validation, app-owned home navigation
   collision validation, app-owned production route builder failure handling,
   app-owned production route metadata bounding, app-owned production

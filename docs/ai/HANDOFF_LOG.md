@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Bound Receipt Render Collections
+
+Summary:
+Hardened mobile and desktop receipt screens so rendered receipt shareable
+fields and recovery diagnostics are capped before UI projection, with stable
+truncation lines when injected presenter output exceeds the display limit.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_receipt_screen_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_receipt_screen_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/demo_slice/demo_receipt_screen_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test/demo_slice/demo_receipt_screen_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Final production receipt UX still needs product validation; this locks
+  mounted receipt render collection bounds only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Bound Demo Route Extension Sets
 
 Summary:

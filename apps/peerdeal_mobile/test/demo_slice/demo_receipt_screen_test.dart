@@ -69,6 +69,35 @@ void main() {
     expect(find.textContaining('token'), findsNothing);
   });
 
+  testWidgets(
+    'bounds receipt fields and recovery diagnostics before rendering',
+    (tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: DemoReceiptScreen(surface: _verboseSurface()),
+        ),
+      );
+
+      expect(find.text('field_0: value_0'), findsOneWidget);
+      expect(find.text('field_3: value_3'), findsOneWidget);
+      expect(find.text('field_4: value_4'), findsNothing);
+      expect(
+        find.text('receipt_fields_truncated: unavailable'),
+        findsOneWidget,
+      );
+      expect(find.text('ERR_RECEIPT_0: Receipt diagnostic 0.'), findsOneWidget);
+      expect(find.text('ERR_RECEIPT_3: Receipt diagnostic 3.'), findsOneWidget);
+      expect(find.text('ERR_RECEIPT_4: Receipt diagnostic 4.'), findsNothing);
+      expect(
+        find.text(
+          'ERR_RECEIPT_DIAGNOSTICS_TRUNCATED: Receipt detail unavailable.',
+        ),
+        findsOneWidget,
+      );
+    },
+  );
+
   testWidgets('routes receipt fixture through presenter into safe screen', (
     tester,
   ) async {
@@ -252,6 +281,43 @@ DemoReceiptSurfaceVm _surface({required bool shouldObscure}) {
     ),
     receiptCapturePlan: plan,
     safeSurface: SafeSurfaceRenderModel.fromCapturePlans([plan]),
+  );
+}
+
+DemoReceiptSurfaceVm _verboseSurface() {
+  final plan = CaptureSurfacePlan(
+    surface: CaptureSurface.receiptDetail,
+    decision: const CapturePolicyDecision(
+      action: CapturePolicyAction.allow,
+      isSensitive: false,
+      reason: 'test',
+    ),
+    nativeNotes: 'test-native',
+  );
+
+  return DemoReceiptSurfaceVm(
+    receipt: SafeReceiptScanVm(
+      status: 'ok',
+      message: 'Receipt resolved.',
+      shareableFields: <String, Object?>{
+        for (var index = 0; index < 8; index++) 'field_$index': 'value_$index',
+      },
+    ),
+    receiptCapturePlan: plan,
+    safeSurface: SafeSurfaceRenderModel.fromCapturePlans([plan]),
+    recovery: SafeRecoveryVm(
+      canResume: false,
+      requiresRecovery: true,
+      safeCloseRecommended: true,
+      recommendedAction: 'safe_close',
+      diagnostics: <ProtocolDiagnostic>[
+        for (var index = 0; index < 8; index++)
+          ProtocolDiagnostic(
+            code: 'ERR_RECEIPT_$index',
+            message: 'Receipt diagnostic $index.',
+          ),
+      ],
+    ),
   );
 }
 

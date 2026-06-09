@@ -10,6 +10,9 @@ import '../controllers/demo_receipt_surface_presenter.dart';
 import '../controllers/native_receipt_export_artifact_factory.dart';
 import '../models/demo_scenario_snapshot.dart';
 
+const int _maxReceiptShareableFields = 4;
+const int _maxReceiptRecoveryDiagnostics = 4;
+
 class DemoReceiptRoute extends StatefulWidget {
   const DemoReceiptRoute({
     super.key,
@@ -196,16 +199,28 @@ class DemoReceiptScreen extends StatelessWidget {
               _safeReceiptToken(surface.receipt.status, fallback: 'rejected'),
             ),
             Text(_safeReceiptMessage(surface.receipt.message)),
-            for (final field in surface.receipt.shareableFields.entries)
+            for (final field in surface.receipt.shareableFields.entries.take(
+              _maxReceiptShareableFields,
+            ))
               Text(
                 '${_safeReceiptToken(field.key, fallback: 'field_unavailable')}: '
                 '${_safeReceiptValue(field.value)}',
               ),
+            if (surface.receipt.shareableFields.length >
+                _maxReceiptShareableFields)
+              const Text('receipt_fields_truncated: unavailable'),
             if (surface.recovery case final recovery?) ...[
               Text(_safeReceiptToken(recovery.recommendedAction)),
-              for (final diagnostic in recovery.diagnosticsJson)
+              for (final diagnostic in recovery.diagnosticsJson.take(
+                _maxReceiptRecoveryDiagnostics,
+              ))
                 Text(
                   '${_safeReceiptToken(diagnostic['code'], fallback: 'ERR_RECEIPT_DIAGNOSTIC_UNAVAILABLE')}: ${_safeReceiptMessage(diagnostic['message'])}',
+                ),
+              if (recovery.diagnosticsJson.length >
+                  _maxReceiptRecoveryDiagnostics)
+                const Text(
+                  'ERR_RECEIPT_DIAGNOSTICS_TRUNCATED: Receipt detail unavailable.',
                 ),
             ],
           ],
