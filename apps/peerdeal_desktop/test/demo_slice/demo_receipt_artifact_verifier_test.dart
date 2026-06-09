@@ -86,6 +86,21 @@ void main() {
       'Secure receipt key storage reported a platform warning.',
     ]);
   });
+
+  test('fails closed when key-ring loader throws', () async {
+    final verifier = DemoReceiptArtifactVerifier(
+      keyRingLoader: _ThrowingKeyRingLoader(),
+    );
+
+    final result = await verifier.inspect(
+      const OpaqueExportEncoder().encode(_receipt),
+    );
+
+    expect(result.status, 'rejected');
+    expect(result.message, 'Receipt signing key is unavailable.');
+    expect(result.diagnostics, ['Secure receipt key storage is unavailable.']);
+    expect(result.diagnostics, isNot(contains('native exception')));
+  });
 }
 
 const _availableSnapshot = SecureKeyStorageSnapshot(
@@ -145,5 +160,24 @@ class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
     required String namespace,
   }) async {
     return snapshot;
+  }
+}
+
+class _ThrowingKeyRingLoader implements NativeReceiptKeyRingLoader {
+  @override
+  final int maxKeyIdLength = 96;
+
+  @override
+  final int maxKeyRecords = 64;
+
+  @override
+  final int maxKeySecretLength = 256;
+
+  @override
+  final String namespace = NativeReceiptKeyRingLoader.defaultNamespace;
+
+  @override
+  Future<ReceiptKeyRingLoadResult> load() async {
+    throw StateError('native exception');
   }
 }

@@ -12,7 +12,16 @@ class DemoReceiptArtifactVerifier {
   Future<ReceiptExportInspectionResult> inspect(
     ReceiptExportArtifact artifact,
   ) async {
-    final loadResult = await _keyRingLoader.load();
+    final ReceiptKeyRingLoadResult loadResult;
+    try {
+      loadResult = await _keyRingLoader.load();
+    } catch (_) {
+      return const ReceiptExportInspectionResult.rejected(
+        message: 'Receipt signing key is unavailable.',
+        diagnostics: <String>['Secure receipt key storage is unavailable.'],
+      );
+    }
+
     if (!loadResult.hasSigningKey) {
       return ReceiptExportInspectionResult.rejected(
         message: 'Receipt signing key is unavailable.',

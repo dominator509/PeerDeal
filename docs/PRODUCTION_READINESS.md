@@ -256,6 +256,9 @@ the gates below are satisfied.
   receipt-owned key-ring providers before signed artifact verification.
 - App demo receipt presenters can consume a verifier boundary that loads native
   key material and fails closed before projecting receipt UI.
+- App receipt artifact verifiers now convert key-ring loader dependency
+  exceptions into scrubbed rejected inspection results before presenter
+  projection.
 - The safe-surface widget/model contract is shared through `peerdeal_ui_kit`;
   app packages own only capture coordination, receipt/recovery projection, and
   route orchestration.
@@ -615,6 +618,7 @@ the gates below are satisfied.
   request validation,
   app-owned receipt export provisioning diagnostic scrubbing,
   app-owned receipt export provisioning exception handling,
+  app-owned receipt verifier key-ring load exception handling,
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned
   local-network discovery list validation,

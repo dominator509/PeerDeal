@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Harden Receipt Verifier Key Loads
+
+Summary:
+Hardened mobile and desktop receipt artifact verifiers so key-ring loader
+dependency exceptions become scrubbed rejected inspection results instead of
+escaping verifier or presenter paths.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/demo_receipt_artifact_verifier.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_receipt_artifact_verifier_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/demo_receipt_artifact_verifier.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_receipt_artifact_verifier_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/demo_slice/demo_receipt_artifact_verifier_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/demo_slice/demo_receipt_artifact_verifier_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Platform secure storage implementation remains pending; this locks the
+  app-owned receipt verifier dependency-fault boundary only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Harden Receipt Export Provisioning Faults
 
 Summary:
