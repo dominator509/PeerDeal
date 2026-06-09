@@ -1002,6 +1002,117 @@ void main() {
     expect(find.text('Production table route'), findsOneWidget);
   });
 
+  testWidgets('routes native-ready production routes when readiness passes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          initialRoute: '/table-live',
+          nativeReadinessRequiredRoutePaths: const <String>{'/table-live'},
+          nativeReadinessLoader: AppNativeReadinessLoader(
+            captureProtectionBridge: const _StaticCaptureProtectionBridge(
+              capability: CaptureProtectionCapability(
+                blockingSupported: true,
+                obscuringSupported: true,
+                notes: 'ready',
+              ),
+            ),
+            localNetworkBridge: const _StaticLocalNetworkBridge(),
+            nativeTransportBridge: const _StaticNativeTransportBridge(
+              capability: NativeTransportCapability(
+                available: true,
+                sendSupported: true,
+                receiveSupported: true,
+                maxPayloadBytes: 1024,
+                notes: 'ready',
+              ),
+            ),
+            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
+            ),
+          ),
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Native-backed table route'),
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Native-backed table route'), findsOneWidget);
+    expect(find.text('Route unavailable'), findsNothing);
+  });
+
+  testWidgets(
+    'fails closed for production routes when native readiness fails',
+    (tester) async {
+      await tester.pumpWidget(
+        PeerDealDesktopApp(
+          runtime: PeerDealDesktopRuntime(
+            enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+            initialRoute: '/table-live',
+            nativeReadinessRequiredRoutePaths: const <String>{'/table-live'},
+            nativeReadinessLoader: AppNativeReadinessLoader(
+              captureProtectionBridge: const _StaticCaptureProtectionBridge(
+                capability: CaptureProtectionCapability.unavailable(
+                  warning: 'token native-secret',
+                ),
+              ),
+              localNetworkBridge: const _StaticLocalNetworkBridge(
+                capability: LocalNetworkCapability.unavailable(
+                  warning: r'C:\secret\lan.log',
+                ),
+              ),
+              nativeTransportBridge: const _StaticNativeTransportBridge(
+                capability: NativeTransportCapability.unavailable(
+                  warning: 'password transport-secret',
+                ),
+              ),
+              secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+                snapshot: SecureKeyStorageSnapshot.unavailable(
+                  warning: 'secret keychain detail',
+                ),
+              ),
+            ),
+            productionRoutes: <String, WidgetBuilder>{
+              '/table-live': (_) => const Text('Native-backed table route'),
+            },
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Route unavailable'), findsOneWidget);
+      expect(find.text('Route: /table-live'), findsOneWidget);
+      expect(find.text('Native-backed table route'), findsNothing);
+      expect(find.textContaining('native-secret'), findsNothing);
+      expect(find.textContaining(r'C:\secret'), findsNothing);
+      expect(find.textContaining('transport-secret'), findsNothing);
+      expect(find.textContaining('keychain detail'), findsNothing);
+    },
+  );
+
+  testWidgets('rejects native readiness gates for unmounted routes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          nativeReadinessRequiredRoutePaths: const <String>{'/missing'},
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
   testWidgets('fails closed when app-owned production route builder throws', (
     tester,
   ) async {

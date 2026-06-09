@@ -70,6 +70,7 @@ class PeerDealMobileRuntime {
     this.productionNavigation,
     this.homeSurfaceBuilder,
     this.nativeReadinessLoader,
+    this.nativeReadinessRequiredRoutePaths,
     this.initialRoute,
   });
 
@@ -92,6 +93,7 @@ class PeerDealMobileRuntime {
   final List<PeerDealAppNavigationEntry>? productionNavigation;
   final PeerDealHomeSurfaceBuilder? homeSurfaceBuilder;
   final AppNativeReadinessLoader? nativeReadinessLoader;
+  final Set<String>? nativeReadinessRequiredRoutePaths;
   final String? initialRoute;
 
   PeerDealMobileRuntime withOverrides({
@@ -114,6 +116,7 @@ class PeerDealMobileRuntime {
     List<PeerDealAppNavigationEntry>? productionNavigation,
     PeerDealHomeSurfaceBuilder? homeSurfaceBuilder,
     AppNativeReadinessLoader? nativeReadinessLoader,
+    Set<String>? nativeReadinessRequiredRoutePaths,
     String? initialRoute,
   }) {
     return PeerDealMobileRuntime(
@@ -151,6 +154,9 @@ class PeerDealMobileRuntime {
       homeSurfaceBuilder: homeSurfaceBuilder ?? this.homeSurfaceBuilder,
       nativeReadinessLoader:
           nativeReadinessLoader ?? this.nativeReadinessLoader,
+      nativeReadinessRequiredRoutePaths:
+          nativeReadinessRequiredRoutePaths ??
+          this.nativeReadinessRequiredRoutePaths,
       initialRoute: initialRoute ?? this.initialRoute,
     );
   }
@@ -179,6 +185,7 @@ class PeerDealMobileApp extends StatefulWidget {
     List<PeerDealAppNavigationEntry>? productionNavigation,
     PeerDealHomeSurfaceBuilder? homeSurfaceBuilder,
     AppNativeReadinessLoader? nativeReadinessLoader,
+    Set<String>? nativeReadinessRequiredRoutePaths,
     String? initialRoute,
   }) : _runtime = runtime,
        _receiptPresenter = presenter,
@@ -200,6 +207,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _productionNavigation = productionNavigation,
        _homeSurfaceBuilder = homeSurfaceBuilder,
        _nativeReadinessLoader = nativeReadinessLoader,
+       _nativeReadinessRequiredRoutePaths = nativeReadinessRequiredRoutePaths,
        _initialRoute = initialRoute;
 
   final PeerDealMobileRuntime? _runtime;
@@ -222,6 +230,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final List<PeerDealAppNavigationEntry>? _productionNavigation;
   final PeerDealHomeSurfaceBuilder? _homeSurfaceBuilder;
   final AppNativeReadinessLoader? _nativeReadinessLoader;
+  final Set<String>? _nativeReadinessRequiredRoutePaths;
   final String? _initialRoute;
 
   @override
@@ -258,6 +267,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       productionNavigation: widget._productionNavigation,
       homeSurfaceBuilder: widget._homeSurfaceBuilder,
       nativeReadinessLoader: widget._nativeReadinessLoader,
+      nativeReadinessRequiredRoutePaths:
+          widget._nativeReadinessRequiredRoutePaths,
       initialRoute: widget._initialRoute,
     );
   }
@@ -281,8 +292,13 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     final demoNavigation = DemoSliceRoutes.enabledPrimaryNavigation(
       _runtime.enabledDemoRoutePaths,
     );
+    final nativeReadinessRequiredRoutePaths =
+        _validatedNativeReadinessRequiredRoutes(
+          _runtime.nativeReadinessRequiredRoutePaths,
+        );
     final productionRoutes = _validatedProductionRoutes(
       _runtime.productionRoutes,
+      nativeReadinessRequiredRoutePaths: nativeReadinessRequiredRoutePaths,
     );
     final productionNavigation = _validatedProductionNavigation(
       _runtime.productionNavigation,
@@ -489,8 +505,16 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     setState(() {});
   }
 
-  PeerDealAppRouteMap _validatedProductionRoutes(PeerDealAppRouteMap? routes) {
+  PeerDealAppRouteMap _validatedProductionRoutes(
+    PeerDealAppRouteMap? routes, {
+    required Set<String> nativeReadinessRequiredRoutePaths,
+  }) {
     if (routes == null || routes.isEmpty) {
+      if (nativeReadinessRequiredRoutePaths.isNotEmpty) {
+        throw StateError(
+          'Native readiness route gate references invalid path.',
+        );
+      }
       return const <String, WidgetBuilder>{};
     }
     if (routes.length > _maxAppProductionRoutes) {
@@ -527,14 +551,83 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       if (!lowerPaths.add(lowerPath)) {
         throw StateError('Production route map contains duplicate paths.');
       }
-      validated[path] = (context) => _buildProductionRoute(
-        context: context,
-        path: path,
-        builder: entry.value,
-      );
+      validated[path] = nativeReadinessRequiredRoutePaths.contains(path)
+          ? (context) => _buildNativeReadyProductionRoute(
+              context: context,
+              path: path,
+              builder: entry.value,
+            )
+          : (context) => _buildProductionRoute(
+              context: context,
+              path: path,
+              builder: entry.value,
+            );
+    }
+
+    for (final path in nativeReadinessRequiredRoutePaths) {
+      if (!validated.containsKey(path)) {
+        throw StateError(
+          'Native readiness route gate references invalid path.',
+        );
+      }
     }
 
     return Map<String, WidgetBuilder>.unmodifiable(validated);
+  }
+
+  Set<String> _validatedNativeReadinessRequiredRoutes(Set<String>? paths) {
+    if (paths == null || paths.isEmpty) return const <String>{};
+    if (paths.length > _maxAppProductionRoutes) {
+      throw StateError('Native readiness route gate contains too many paths.');
+    }
+
+    final validated = <String>{};
+    final lowerPaths = <String>{};
+    for (final path in paths) {
+      final lowerPath = path.toLowerCase();
+      if (path.trim() != path ||
+          path.isEmpty ||
+          !path.startsWith('/') ||
+          path == Navigator.defaultRouteName ||
+          path.length > _maxAppRoutePathLength ||
+          lowerPath.startsWith('/demo') ||
+          path.endsWith('/') ||
+          path.contains('?') ||
+          path.contains('#') ||
+          path.contains('//') ||
+          path.contains(r'\') ||
+          _containsUnsafeRoutePathCharacter(path) ||
+          !validated.add(path) ||
+          !lowerPaths.add(lowerPath)) {
+        throw StateError('Native readiness route gate contains invalid path.');
+      }
+    }
+    return Set<String>.unmodifiable(validated);
+  }
+
+  Widget _buildNativeReadyProductionRoute({
+    required BuildContext context,
+    required String path,
+    required WidgetBuilder builder,
+  }) {
+    final nativeReadinessLoader = _runtime.nativeReadinessLoader;
+    if (nativeReadinessLoader == null) {
+      return AppRouteFallbackScreen(routeName: path);
+    }
+    return FutureBuilder<AppNativeReadinessSnapshot>(
+      future: _nativeReadinessFor(nativeReadinessLoader),
+      builder: (context, snapshot) {
+        final readiness = snapshot.data;
+        if (readiness == null || !readiness.allCapabilitiesReady) {
+          return AppRouteFallbackScreen(routeName: path);
+        }
+        return _buildProductionRoute(
+          context: context,
+          path: path,
+          builder: builder,
+        );
+      },
+    );
   }
 
   Widget _buildProductionRoute({
