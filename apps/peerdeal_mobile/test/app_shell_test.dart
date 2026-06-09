@@ -792,6 +792,20 @@ void main() {
     expect(routeText.data!.length, lessThanOrEqualTo('Route: '.length + 80));
   });
 
+  testWidgets('suppresses sensitive unknown route diagnostics', (tester) async {
+    await tester.pumpWidget(const PeerDealMobileApp());
+
+    Navigator.of(
+      tester.element(find.text('PeerDeal demo')),
+    ).pushNamed(r'/unknown-token-C:\secret\route');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.textContaining('Route: /'), findsNothing);
+    expect(find.textContaining('secret'), findsNothing);
+    expect(find.textContaining('token'), findsNothing);
+  });
+
   testWidgets('fails closed when app-owned join factory throws', (
     tester,
   ) async {

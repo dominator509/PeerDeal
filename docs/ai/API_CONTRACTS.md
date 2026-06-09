@@ -96,6 +96,8 @@ receives validated home navigation entries and may replace the default demo
 home surface; builder failures render the existing route-unavailable fallback.
 Mounted production route builder failures also render the existing
 route-unavailable fallback instead of escaping app-shell routing.
+Unknown route fallback surfaces must suppress sensitive route names instead of
+echoing token, secret, password, or platform path-like route diagnostics.
 Production route paths and startup routes must not contain control characters
 or whitespace, and production navigation labels must not contain control
 characters. Production route paths and startup routes must also be bounded and

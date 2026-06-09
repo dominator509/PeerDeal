@@ -38,6 +38,13 @@ class AppRouteFallbackScreen extends StatelessWidget {
     if (normalized.isEmpty) {
       return null;
     }
+    final lower = normalized.toLowerCase();
+    if (lower.contains('secret') ||
+        lower.contains('token') ||
+        lower.contains('password') ||
+        normalized.contains('\\')) {
+      return null;
+    }
     const maxLength = 80;
     if (normalized.length <= maxLength) {
       return normalized;

@@ -589,6 +589,8 @@ the gates below are satisfied.
   now enforce explicit collection-size caps before app route maps or home
   navigation are built, preventing oversized production extension injection
   from overwhelming mounted shell routing.
+- Unknown route fallback surfaces now suppress sensitive route diagnostics
+  instead of echoing token, secret, password, or platform path-like route names.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -610,6 +612,7 @@ the gates below are satisfied.
   app-owned route-map allowed-extra path validation, app-owned demo
   route-extension collection bounding,
   app-owned route-map drift diagnostic scrubbing,
+  app-owned unknown-route sensitive diagnostic suppression,
   app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
   app-owned join invite-context injection, route-level join input validation,
