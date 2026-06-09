@@ -636,6 +636,9 @@ the gates below are satisfied.
   loaders and default home surfaces render stable ready/unavailable native
   status without exposing native warning detail, while custom home builders
   remain app-owned.
+- App-owned native readiness loaders now reject padded, control-character, or
+  delimiter-bearing secure-key namespaces before native secure storage lookup,
+  preventing malformed readiness configuration from reaching platform storage.
 - App-owned production route maps can now mark specific non-demo routes as
   native-readiness-required; those routes fail closed to the scrubbed
   route-unavailable surface until the app-owned readiness loader reports all
@@ -710,6 +713,7 @@ the gates below are satisfied.
   case-insensitive demo namespace reservation for app-owned production routes,
   app-owned native readiness capability aggregation,
   app-owned native readiness runtime/home wiring,
+  app-owned native readiness secure-key namespace validation,
   app-owned native readiness production-route gating,
   app-owned native readiness production-navigation filtering,
   app-owned default-home production/demo navigation sectioning,

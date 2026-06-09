@@ -14,6 +14,38 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Validate Native Readiness Secure-Key Namespace
+
+Summary:
+Hardened mobile and desktop `AppNativeReadinessLoader` secure-key checks so
+padded, control-character-bearing, or delimiter-bearing namespaces fail closed
+before app readiness aggregation calls native secure storage.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/native_readiness/app_native_readiness_loader.dart`
+- `apps/peerdeal_mobile/test/native_readiness/app_native_readiness_loader_test.dart`
+- `apps/peerdeal_desktop/lib/native_readiness/app_native_readiness_loader.dart`
+- `apps/peerdeal_desktop/test/native_readiness/app_native_readiness_loader_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/native_readiness/app_native_readiness_loader_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/native_readiness/app_native_readiness_loader_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- Platform-native secure storage implementation remains pending; this locks
+  the app readiness input gate before that implementation is attached.
+
+Next reviewer:
+Codex should continue with the next codeable app-boundary or package-hardening
+gap from `docs/PRODUCTION_READINESS.md`, or platform native work once platform
+folders are added.
+
+---
+
 ### 2026-06-09 - Codex - Validate Transfer And Fallback Peer IDs
 
 Summary:

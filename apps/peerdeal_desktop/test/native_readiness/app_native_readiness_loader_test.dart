@@ -107,44 +107,53 @@ void main() {
   );
 
   test(
-    'rejects malformed secure-key namespace before native storage',
+    'rejects malformed secure-key namespaces before native storage',
     () async {
-      final secureStorage = _ThrowingSecureKeyStorageBridge();
-      final loader = AppNativeReadinessLoader(
-        captureProtectionBridge: _FakeCaptureProtectionBridge(
-          capability: const CaptureProtectionCapability(
-            blockingSupported: true,
-            obscuringSupported: true,
-            notes: 'ready',
+      for (final namespace in <String>[
+        ' peerdeal.receipts',
+        'peerdeal.receipts\nsecret',
+        'peerdeal::receipts',
+      ]) {
+        final secureStorage = _FakeSecureKeyStorageBridge(
+          snapshot: const SecureKeyStorageSnapshot(available: true, keys: []),
+        );
+        final loader = AppNativeReadinessLoader(
+          captureProtectionBridge: _FakeCaptureProtectionBridge(
+            capability: const CaptureProtectionCapability(
+              blockingSupported: true,
+              obscuringSupported: true,
+              notes: 'ready',
+            ),
           ),
-        ),
-        localNetworkBridge: _FakeLocalNetworkBridge(
-          capability: const LocalNetworkCapability(
-            discoverySupported: true,
-            permissionPromptSupported: true,
-            broadcastSupported: false,
-            notes: 'ready',
+          localNetworkBridge: _FakeLocalNetworkBridge(
+            capability: const LocalNetworkCapability(
+              discoverySupported: true,
+              permissionPromptSupported: true,
+              broadcastSupported: false,
+              notes: 'ready',
+            ),
           ),
-        ),
-        nativeTransportBridge: _FakeNativeTransportBridge(
-          capability: const NativeTransportCapability(
-            available: true,
-            sendSupported: true,
-            receiveSupported: true,
-            maxPayloadBytes: 1024,
-            notes: 'ready',
+          nativeTransportBridge: _FakeNativeTransportBridge(
+            capability: const NativeTransportCapability(
+              available: true,
+              sendSupported: true,
+              receiveSupported: true,
+              maxPayloadBytes: 1024,
+              notes: 'ready',
+            ),
           ),
-        ),
-        secureKeyStorageBridge: secureStorage,
-        secureKeyNamespace: ' peerdeal.receipts',
-      );
+          secureKeyStorageBridge: secureStorage,
+          secureKeyNamespace: namespace,
+        );
 
-      final snapshot = await loader.load();
+        final snapshot = await loader.load();
 
-      expect(snapshot.secureKeyStorageReady, isFalse);
-      expect(snapshot.warnings, <String>[
-        'native secure-key storage unavailable',
-      ]);
+        expect(snapshot.secureKeyStorageReady, isFalse, reason: namespace);
+        expect(snapshot.warnings, <String>[
+          'native secure-key storage unavailable',
+        ], reason: namespace);
+        expect(secureStorage.namespaces, isEmpty, reason: namespace);
+      }
     },
   );
 }

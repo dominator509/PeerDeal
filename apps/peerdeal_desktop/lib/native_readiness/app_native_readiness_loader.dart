@@ -116,8 +116,7 @@ class AppNativeReadinessLoader {
   }
 
   Future<bool> _loadSecureKeyStorage(List<String> warnings) async {
-    if (_secureKeyNamespace.trim() != _secureKeyNamespace ||
-        _secureKeyNamespace.isEmpty) {
+    if (!_isValidSecureKeyNamespace(_secureKeyNamespace)) {
       warnings.add('native secure-key storage unavailable');
       return false;
     }
@@ -134,5 +133,16 @@ class AppNativeReadinessLoader {
       warnings.add('native secure-key storage unavailable');
       return false;
     }
+  }
+
+  bool _isValidSecureKeyNamespace(String namespace) {
+    if (namespace.isEmpty || namespace.trim() != namespace) return false;
+    if (namespace.contains('::')) return false;
+
+    for (final codeUnit in namespace.codeUnits) {
+      if (codeUnit < 0x20 || codeUnit == 0x7f) return false;
+    }
+
+    return true;
   }
 }
