@@ -78,17 +78,14 @@ class NativeTransportChannelContract {
   }
 
   static NativeTransportFrame? _decodeFrame(Object? value) {
-    if (value is! Map) return null;
-    final json = <String, Object?>{
-      for (final entry in value.entries) entry.key.toString(): entry.value,
-    };
+    if (value is! Map<Object?, Object?>) return null;
 
-    final payloadBytes = _byteListValue(json['payloadBytes']);
+    final payloadBytes = _byteListValue(value['payloadBytes']);
     final frame = NativeTransportFrame(
-      sessionId: _stringValue(json['sessionId']) ?? '',
-      senderPeerId: _stringValue(json['senderPeerId']) ?? '',
-      recipientPeerId: _stringValue(json['recipientPeerId']) ?? '',
-      sequence: _positiveIntValue(json['sequence']),
+      sessionId: _stringValue(value['sessionId']) ?? '',
+      senderPeerId: _stringValue(value['senderPeerId']) ?? '',
+      recipientPeerId: _stringValue(value['recipientPeerId']) ?? '',
+      sequence: _positiveIntValue(value['sequence']),
       payloadBytes: payloadBytes,
     );
     return frame.isUsable ? frame : null;

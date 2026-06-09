@@ -14,6 +14,41 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Native Transport Exact Key Gate
+
+Summary:
+Hardened native transport receive-frame decoding so platform maps must expose
+exact field keys. Frames with keys that merely stringify to `sessionId`,
+`senderPeerId`, `recipientPeerId`, `sequence`, or `payloadBytes` are dropped
+instead of decoded.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\native_bridge_channel_contract_test.dart test\method_channel_native_transport_bridge_test.dart`
+  in `packages/peerdeal_native_bridges`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- This locks Dart/native method-channel receive payload validation only; live
+  platform transport implementations remain pending.
+
+Next reviewer:
+Continue with the next codable production-readiness gap; live platform
+transport implementations remain outside this Dart-only slice.
+
+---
+
 ### 2026-06-09 - Codex - Local Network Discovery List Gate
 
 Summary:

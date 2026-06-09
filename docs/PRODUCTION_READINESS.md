@@ -161,6 +161,8 @@ the gates below are satisfied.
 - Native transport method-channel wrappers now reject platform-bound frames
   whose payload list contains values outside the byte range, matching the
   receive decoder's fail-closed byte payload gate.
+- Native transport receive decoding now requires exact frame map field keys and
+  drops frames whose platform keys only stringify to expected field names.
 - App shells now include app-owned native transport adapters that compose the
   generic native byte-frame bridge with `peerdeal_network` validating
   sender/receiver boundaries, so app transport sends and inbound drains cannot
@@ -509,6 +511,7 @@ the gates below are satisfied.
   transport sink validation, app-owned transport receive-scope validation,
   package-owned transport identity validation, generic native transport
   sequence validation, generic native transport byte-payload validation,
+  generic native transport exact-key validation,
   app-owned receipt delete key-id validation, generic native secure-key
   request validation,
   bounded app-owned table/join bootstrap mapping, app-owned local-network

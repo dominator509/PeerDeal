@@ -115,6 +115,8 @@ frames must carry positive sequence numbers; zero or negative sequence values
 fail before platform sends and are dropped during receive-snapshot decoding.
 Native transport payload lists must contain only byte values from 0 through 255;
 invalid outbound payloads fail before platform sends.
+Native transport receive frame maps must carry exact field keys; platform maps
+whose keys merely stringify to expected field names are dropped.
 
 ## Recovery Persistence Boundary
 

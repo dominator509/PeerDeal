@@ -338,6 +338,13 @@ void main() {
             'sequence': 2,
             'payloadBytes': <Object?>[1, 'bad', 300],
           },
+          <Object?, Object?>{
+            _StringifyingKey('sessionId'): 'session_1',
+            _StringifyingKey('senderPeerId'): 'peer_a',
+            _StringifyingKey('recipientPeerId'): 'peer_b',
+            _StringifyingKey('sequence'): 3,
+            _StringifyingKey('payloadBytes'): <int>[1],
+          },
         ],
         'warning': <String>['bad'],
       },
@@ -380,4 +387,13 @@ void main() {
 Map<String, Object?> _loadFixture(String name) {
   final file = File('fixtures/$name');
   return jsonDecode(file.readAsStringSync()) as Map<String, Object?>;
+}
+
+class _StringifyingKey {
+  const _StringifyingKey(this.value);
+
+  final String value;
+
+  @override
+  String toString() => value;
 }
