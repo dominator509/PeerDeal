@@ -1226,6 +1226,48 @@ void main() {
     expect(tester.takeException(), isA<StateError>());
   });
 
+  testWidgets('rejects case-colliding production route paths', (tester) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+            '/Table-Live': (_) => const Text('Ambiguous table route'),
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
+  testWidgets('rejects case-colliding production navigation metadata', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+            '/ledger-live': (_) => const Text('Production ledger route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live table',
+              path: '/table-live',
+            ),
+            PeerDealAppNavigationEntry(
+              label: 'live table',
+              path: '/ledger-live',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
   testWidgets('rejects production navigation labels with excessive length', (
     tester,
   ) async {

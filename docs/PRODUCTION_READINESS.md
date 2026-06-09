@@ -591,6 +591,9 @@ the gates below are satisfied.
   from overwhelming mounted shell routing.
 - Unknown route fallback surfaces now suppress sensitive route diagnostics
   instead of echoing token, secret, password, or platform path-like route names.
+- App-owned production route maps and production home navigation descriptors
+  now reject case-insensitive route path or label collisions before mounted app
+  routing is built, preventing ambiguous production navigation extension input.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -615,6 +618,7 @@ the gates below are satisfied.
   app-owned unknown-route sensitive diagnostic suppression,
   app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
+  app-owned production route/navigation case-collision validation,
   app-owned join invite-context injection, route-level join input validation,
   app-owned join input validation,
   app-owned receipt envelope injection, app-owned setup intent injection,

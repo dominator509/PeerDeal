@@ -449,6 +449,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
         .map((route) => route.path)
         .toSet();
     final validated = <String, WidgetBuilder>{};
+    final lowerPaths = <String>{};
 
     for (final entry in routes.entries) {
       final path = entry.key.trim();
@@ -469,6 +470,9 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
         throw StateError('Production route map contains an invalid path.');
       }
       if (validated.containsKey(path)) {
+        throw StateError('Production route map contains duplicate paths.');
+      }
+      if (!lowerPaths.add(lowerPath)) {
         throw StateError('Production route map contains duplicate paths.');
       }
       validated[path] = (context) => _buildProductionRoute(
@@ -508,11 +512,15 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
 
     final labels = <String>{};
     final paths = <String>{};
+    final lowerLabels = <String>{};
+    final lowerPaths = <String>{};
     final validated = <PeerDealAppNavigationEntry>[];
 
     for (final entry in navigation) {
       final label = entry.label.trim();
       final path = entry.path.trim();
+      final lowerLabel = label.toLowerCase();
+      final lowerPath = path.toLowerCase();
       if (label.isEmpty ||
           label != entry.label ||
           label.length > _maxAppNavigationLabelLength ||
@@ -522,7 +530,9 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           demoNavigationLabels.contains(label) ||
           demoNavigationPaths.contains(path) ||
           !labels.add(label) ||
-          !paths.add(path)) {
+          !paths.add(path) ||
+          !lowerLabels.add(lowerLabel) ||
+          !lowerPaths.add(lowerPath)) {
         throw StateError('Production navigation contains invalid metadata.');
       }
       validated.add(entry);
