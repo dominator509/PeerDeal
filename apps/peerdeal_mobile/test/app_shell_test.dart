@@ -17,6 +17,7 @@ import 'package:peerdeal_mobile/join_flow/fakes.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_route.dart';
 import 'package:peerdeal_mobile/main.dart';
+import 'package:peerdeal_mobile/native_readiness/app_native_readiness_loader.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_persistence_store_factory.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
 import 'package:peerdeal_mobile/setup_flow/setup_flow_route.dart';
@@ -46,6 +47,90 @@ void main() {
       find.textContaining('Verification / Receipt Review'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('renders app native readiness on default home', (tester) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          nativeReadinessLoader: AppNativeReadinessLoader(
+            captureProtectionBridge: const _StaticCaptureProtectionBridge(
+              capability: CaptureProtectionCapability(
+                blockingSupported: true,
+                obscuringSupported: true,
+                notes: 'ready',
+              ),
+            ),
+            localNetworkBridge: const _StaticLocalNetworkBridge(),
+            nativeTransportBridge: const _StaticNativeTransportBridge(
+              capability: NativeTransportCapability(
+                available: true,
+                sendSupported: true,
+                receiveSupported: true,
+                maxPayloadBytes: 1024,
+                notes: 'ready',
+              ),
+            ),
+            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Native ready'), findsOneWidget);
+    expect(find.text('Native unavailable'), findsNothing);
+  });
+
+  testWidgets('renders scrubbed native readiness warnings on default home', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          nativeReadinessLoader: AppNativeReadinessLoader(
+            captureProtectionBridge: const _StaticCaptureProtectionBridge(
+              capability: CaptureProtectionCapability.unavailable(
+                warning: 'token capture-secret',
+              ),
+            ),
+            localNetworkBridge: const _StaticLocalNetworkBridge(
+              capability: LocalNetworkCapability.unavailable(
+                warning: r'C:\secret\lan.log',
+              ),
+            ),
+            nativeTransportBridge: const _StaticNativeTransportBridge(
+              capability: NativeTransportCapability.unavailable(
+                warning: 'password transport-secret',
+              ),
+            ),
+            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              snapshot: SecureKeyStorageSnapshot.unavailable(
+                warning: 'secret keychain detail',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Native unavailable'), findsOneWidget);
+    expect(find.text('native capture protection unavailable'), findsOneWidget);
+    expect(
+      find.text('native local-network discovery unavailable'),
+      findsOneWidget,
+    );
+    expect(find.text('native transport unavailable'), findsOneWidget);
+    expect(find.text('native secure-key storage unavailable'), findsOneWidget);
+    expect(find.textContaining('capture-secret'), findsNothing);
+    expect(find.textContaining(r'C:\secret'), findsNothing);
+    expect(find.textContaining('transport-secret'), findsNothing);
+    expect(find.textContaining('keychain detail'), findsNothing);
   });
 
   testWidgets('routes from demo home to receipt surface', (tester) async {
@@ -1397,17 +1482,30 @@ class _ThrowingVerifierFactory extends DemoReceiptArtifactVerifierFactory {
   }
 }
 
-class _StaticLocalNetworkBridge implements LocalNetworkBridge {
-  const _StaticLocalNetworkBridge();
+class _StaticCaptureProtectionBridge implements CaptureProtectionBridge {
+  const _StaticCaptureProtectionBridge({required this.capability});
+
+  final CaptureProtectionCapability capability;
 
   @override
-  Future<LocalNetworkCapability> getCapability() async {
-    return const LocalNetworkCapability(
+  Future<CaptureProtectionCapability> getCapability() async => capability;
+}
+
+class _StaticLocalNetworkBridge implements LocalNetworkBridge {
+  const _StaticLocalNetworkBridge({
+    this.capability = const LocalNetworkCapability(
       discoverySupported: true,
       permissionPromptSupported: true,
       broadcastSupported: true,
       notes: 'local-network-ready',
-    );
+    ),
+  });
+
+  final LocalNetworkCapability capability;
+
+  @override
+  Future<LocalNetworkCapability> getCapability() async {
+    return capability;
   }
 
   @override
@@ -1417,6 +1515,43 @@ class _StaticLocalNetworkBridge implements LocalNetworkBridge {
       foundEndpoints: <String>['peer-a', 'peer-b'],
       interfaceHints: <String>['wifi'],
     );
+  }
+}
+
+class _StaticNativeTransportBridge implements NativeTransportBridge {
+  const _StaticNativeTransportBridge({required this.capability});
+
+  final NativeTransportCapability capability;
+
+  @override
+  Future<NativeTransportCapability> getCapability() async => capability;
+
+  @override
+  Future<NativeTransportSendResult> sendFrame(
+    NativeTransportFrame frame,
+  ) async {
+    return const NativeTransportSendResult(isSuccess: true);
+  }
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+  }) async {
+    return const NativeTransportReceiveSnapshot(available: true, frames: []);
+  }
+}
+
+class _StaticSecureKeyStorageBridge implements SecureKeyStorageBridge {
+  const _StaticSecureKeyStorageBridge({required this.snapshot});
+
+  final SecureKeyStorageSnapshot snapshot;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    return snapshot;
   }
 }
 

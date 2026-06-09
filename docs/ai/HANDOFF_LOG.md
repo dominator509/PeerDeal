@@ -14,6 +14,48 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Wire Native Readiness Home Status
+
+Summary:
+Threaded app-owned native readiness loaders through mobile and desktop runtime
+objects and default home surfaces. The home now renders stable native
+ready/unavailable status from scrubbed readiness snapshots while custom home
+builders remain app-owned and synchronous.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/app_shell_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/app_shell_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This surfaces readiness for app orchestration; it still does not implement
+  platform-native capture, local-network, transport, or secure-key handlers.
+
+Next reviewer:
+Codex should continue with the next codeable app-flow or native-boundary gap
+from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Add App Native Readiness Loaders
 
 Summary:

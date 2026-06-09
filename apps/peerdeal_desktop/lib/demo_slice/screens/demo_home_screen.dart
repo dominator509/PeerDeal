@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
+import '../../native_readiness/app_native_readiness_loader.dart';
 import '../controllers/demo_slice_controller.dart';
 import '../models/demo_scenario.dart';
 
@@ -10,11 +11,13 @@ class DemoHomeScreen extends StatelessWidget {
     required this.controller,
     required this.navigationActions,
     required this.onSelectScenario,
+    this.nativeReadiness,
   });
 
   final DemoSliceController controller;
   final List<DemoHomeNavigationAction> navigationActions;
   final ValueChanged<String> onSelectScenario;
+  final AppNativeReadinessSnapshot? nativeReadiness;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +35,19 @@ class DemoHomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          if (nativeReadiness != null) ...<Widget>[
+            PeerDealStatusPill(
+              label: nativeReadiness!.allCapabilitiesReady
+                  ? 'Native ready'
+                  : 'Native unavailable',
+              severity: nativeReadiness!.allCapabilitiesReady
+                  ? 'success'
+                  : 'warning',
+            ),
+            for (final warning in nativeReadiness!.warnings)
+              PeerDealInfoRow(label: 'Native', value: warning),
+            const SizedBox(height: 12),
+          ],
           Text('Active scenario: ${controller.activeScenario.title}'),
           const SizedBox(height: 12),
           for (final scenario in controller.scenarios)

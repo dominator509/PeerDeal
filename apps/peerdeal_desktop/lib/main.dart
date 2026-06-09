@@ -18,6 +18,7 @@ import 'demo_slice/screens/demo_receipt_screen.dart';
 import 'demo_slice/screens/demo_table_screen.dart';
 import 'join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'join_flow/join_flow_route.dart';
+import 'native_readiness/app_native_readiness_loader.dart';
 import 'navigation/app_route_fallback_screen.dart';
 import 'recovery/app_recovery_persistence_store_factory.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
@@ -68,6 +69,7 @@ class PeerDealDesktopRuntime {
     this.productionRoutes,
     this.productionNavigation,
     this.homeSurfaceBuilder,
+    this.nativeReadinessLoader,
     this.initialRoute,
   });
 
@@ -89,6 +91,7 @@ class PeerDealDesktopRuntime {
   final PeerDealAppRouteMap? productionRoutes;
   final List<PeerDealAppNavigationEntry>? productionNavigation;
   final PeerDealHomeSurfaceBuilder? homeSurfaceBuilder;
+  final AppNativeReadinessLoader? nativeReadinessLoader;
   final String? initialRoute;
 
   PeerDealDesktopRuntime withOverrides({
@@ -110,6 +113,7 @@ class PeerDealDesktopRuntime {
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
     PeerDealHomeSurfaceBuilder? homeSurfaceBuilder,
+    AppNativeReadinessLoader? nativeReadinessLoader,
     String? initialRoute,
   }) {
     return PeerDealDesktopRuntime(
@@ -145,6 +149,8 @@ class PeerDealDesktopRuntime {
       productionRoutes: productionRoutes ?? this.productionRoutes,
       productionNavigation: productionNavigation ?? this.productionNavigation,
       homeSurfaceBuilder: homeSurfaceBuilder ?? this.homeSurfaceBuilder,
+      nativeReadinessLoader:
+          nativeReadinessLoader ?? this.nativeReadinessLoader,
       initialRoute: initialRoute ?? this.initialRoute,
     );
   }
@@ -172,6 +178,7 @@ class PeerDealDesktopApp extends StatefulWidget {
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
     PeerDealHomeSurfaceBuilder? homeSurfaceBuilder,
+    AppNativeReadinessLoader? nativeReadinessLoader,
     String? initialRoute,
   }) : _runtime = runtime,
        _receiptPresenter = presenter,
@@ -192,6 +199,7 @@ class PeerDealDesktopApp extends StatefulWidget {
        _productionRoutes = productionRoutes,
        _productionNavigation = productionNavigation,
        _homeSurfaceBuilder = homeSurfaceBuilder,
+       _nativeReadinessLoader = nativeReadinessLoader,
        _initialRoute = initialRoute;
 
   final PeerDealDesktopRuntime? _runtime;
@@ -213,6 +221,7 @@ class PeerDealDesktopApp extends StatefulWidget {
   final PeerDealAppRouteMap? _productionRoutes;
   final List<PeerDealAppNavigationEntry>? _productionNavigation;
   final PeerDealHomeSurfaceBuilder? _homeSurfaceBuilder;
+  final AppNativeReadinessLoader? _nativeReadinessLoader;
   final String? _initialRoute;
 
   @override
@@ -225,6 +234,8 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       const DemoNetworkConfidencePresenter();
   final DemoRecoveryResultFactory _recoveryResultFactory =
       const DemoRecoveryResultFactory();
+  AppNativeReadinessLoader? _nativeReadinessLoaderForFuture;
+  Future<AppNativeReadinessSnapshot>? _nativeReadinessFuture;
 
   PeerDealDesktopRuntime get _runtime {
     return (widget._runtime ?? const PeerDealDesktopRuntime()).withOverrides(
@@ -246,6 +257,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       productionRoutes: widget._productionRoutes,
       productionNavigation: widget._productionNavigation,
       homeSurfaceBuilder: widget._homeSurfaceBuilder,
+      nativeReadinessLoader: widget._nativeReadinessLoader,
       initialRoute: widget._initialRoute,
     );
   }
@@ -393,6 +405,27 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
         return const AppRouteFallbackScreen(routeName: DemoSliceRoutes.home);
       }
     }
+    final nativeReadinessLoader = _runtime.nativeReadinessLoader;
+    if (nativeReadinessLoader == null) {
+      return _buildDefaultHome(context, navigation, nativeReadiness: null);
+    }
+    return FutureBuilder<AppNativeReadinessSnapshot>(
+      future: _nativeReadinessFor(nativeReadinessLoader),
+      builder: (context, snapshot) {
+        return _buildDefaultHome(
+          context,
+          navigation,
+          nativeReadiness: snapshot.data,
+        );
+      },
+    );
+  }
+
+  Widget _buildDefaultHome(
+    BuildContext context,
+    List<PeerDealAppNavigationEntry> navigation, {
+    required AppNativeReadinessSnapshot? nativeReadiness,
+  }) {
     return DemoHomeScreen(
       controller: _controller,
       navigationActions: navigation
@@ -403,8 +436,27 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
             ),
           )
           .toList(growable: false),
+      nativeReadiness: nativeReadiness,
       onSelectScenario: _selectScenario,
     );
+  }
+
+  Future<AppNativeReadinessSnapshot> _nativeReadinessFor(
+    AppNativeReadinessLoader loader,
+  ) {
+    if (!identical(_nativeReadinessLoaderForFuture, loader)) {
+      _nativeReadinessLoaderForFuture = loader;
+      _nativeReadinessFuture = loader.load().catchError(
+        (_) => const AppNativeReadinessSnapshot(
+          captureProtectionReady: false,
+          localNetworkDiscoveryReady: false,
+          nativeTransportReady: false,
+          secureKeyStorageReady: false,
+          warnings: <String>['native readiness unavailable'],
+        ),
+      );
+    }
+    return _nativeReadinessFuture!;
   }
 
   List<PeerDealAppNavigationEntry> _homeNavigationEntries(

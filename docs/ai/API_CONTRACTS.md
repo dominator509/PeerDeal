@@ -127,6 +127,9 @@ Mobile and desktop app-native readiness loaders compose generic capture,
 local-network, transport, and secure-key storage bridge capability facts into
 stable readiness snapshots. Loader warnings must be app-owned stable strings;
 native warning detail and exceptions must not be exposed.
+Runtime objects may inject those loaders into the default app home surface,
+which renders stable native ready/unavailable status. Custom home builders stay
+app-owned and are not forced into an async readiness contract.
 Shared safe-surface render models must scrub and bound injected capture warning
 and native-note text before exposing render state to app UI.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning

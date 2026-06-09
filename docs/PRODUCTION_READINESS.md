@@ -614,6 +614,10 @@ the gates below are satisfied.
   capability facts into stable fail-closed readiness snapshots with scrubbed
   warnings before production flows decide whether native-backed features can be
   enabled.
+- Mobile and desktop runtime objects now accept app-owned native readiness
+  loaders and default home surfaces render stable ready/unavailable native
+  status without exposing native warning detail, while custom home builders
+  remain app-owned.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -655,6 +659,7 @@ the gates below are satisfied.
   route/navigation collection bounding,
   case-insensitive demo namespace reservation for app-owned production routes,
   app-owned native readiness capability aggregation,
+  app-owned native readiness runtime/home wiring,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
