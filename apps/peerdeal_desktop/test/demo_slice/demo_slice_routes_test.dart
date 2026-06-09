@@ -104,6 +104,16 @@ void main() {
     );
   });
 
+  test('enabled mounted route subset rejects excessive route config', () {
+    expect(
+      () => DemoSliceRoutes.enabledMountedRoutes(<String>{
+        DemoSliceRoutes.home,
+        for (var index = 0; index < 6; index++) '/demo/extra-$index',
+      }),
+      throwsA(isA<StateError>()),
+    );
+  });
+
   test('route map validation accepts mounted routes and explicit aliases', () {
     final validated = DemoSliceRoutes.requireMountedRouteMap(
       <String, int>{
@@ -152,6 +162,22 @@ void main() {
       () => DemoSliceRoutes.requireMountedRouteMap(
         routes,
         allowedExtraPaths: const <String>{r'/table\live'},
+      ),
+      throwsA(isA<StateError>()),
+    );
+  });
+
+  test('route map validation rejects excessive allowed extra paths', () {
+    final routes = <String, int>{
+      for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,
+    };
+
+    expect(
+      () => DemoSliceRoutes.requireMountedRouteMap(
+        routes,
+        allowedExtraPaths: <String>{
+          for (var index = 0; index < 26; index++) '/production-$index',
+        },
       ),
       throwsA(isA<StateError>()),
     );

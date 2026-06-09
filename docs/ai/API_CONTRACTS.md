@@ -86,6 +86,8 @@ navigation consume them.
 Mounted demo route-map allowed extras must be `/` or bounded non-demo
 production-style absolute paths without query, fragment, duplicate slash,
 backslash, trailing slash, whitespace, or control characters.
+Enabled demo route allowlists and mounted demo route-map allowed-extra path
+sets must be capped before path validation.
 Runtime objects may set the initial route only to `/`, an enabled demo route,
 or a validated production route. Runtime objects may also expose validated
 production navigation descriptors whose paths must reference mounted production

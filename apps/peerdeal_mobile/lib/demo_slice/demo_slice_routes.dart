@@ -2,6 +2,7 @@ class DemoSliceRoutes {
   static const int _maxRoutePathLength = 96;
   static const int _maxRouteLabelLength = 48;
   static const int _maxRouteSurfaceLength = 64;
+  static const int _maxAllowedExtraRoutePaths = 25;
 
   static const home = '/demo';
   static const table = '/demo/table';
@@ -70,6 +71,9 @@ class DemoSliceRoutes {
   ) {
     _validateRouteRegistry();
     if (enabledRoutePaths == null) return mountedRoutes;
+    if (enabledRoutePaths.length > mountedRoutes.length) {
+      throw StateError('Enabled demo route paths contain too many routes.');
+    }
 
     final malformedPaths = enabledRoutePaths
         .where((path) => !_isCanonicalMountedPath(path))
@@ -135,6 +139,10 @@ class DemoSliceRoutes {
   }
 
   static void _validateAllowedExtraPaths(Set<String> allowedExtraPaths) {
+    if (allowedExtraPaths.length > _maxAllowedExtraRoutePaths) {
+      throw StateError('Allowed extra route paths contain too many routes.');
+    }
+
     for (final path in allowedExtraPaths) {
       if (path == '/') continue;
       final lowerPath = path.toLowerCase();
