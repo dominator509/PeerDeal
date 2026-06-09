@@ -19,10 +19,12 @@ class NativeReceiptKeyRingWriter {
   const NativeReceiptKeyRingWriter({
     required SecureKeyStorageMutationBridge bridge,
     this.namespace = NativeReceiptKeyRingLoader.defaultNamespace,
+    this.maxKeyIdLength = 96,
   }) : _bridge = bridge;
 
   final SecureKeyStorageMutationBridge _bridge;
   final String namespace;
+  final int maxKeyIdLength;
 
   Future<ReceiptKeyRingWriteResult> saveSigningKey(
     ReceiptSigningKey key, {
@@ -60,7 +62,7 @@ class NativeReceiptKeyRingWriter {
         warning: 'Secure receipt key namespace is invalid.',
       );
     }
-    if (!_isValidKeyId(keyId)) {
+    if (!_isValidKeyId(keyId, maxKeyIdLength)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Receipt key delete request is invalid.',
       );
@@ -84,7 +86,7 @@ class NativeReceiptKeyRingWriter {
         warning: 'Secure receipt key namespace is invalid.',
       );
     }
-    if (!record.isUsable) {
+    if (!record.isUsable || !_isValidKeyId(record.keyId, maxKeyIdLength)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Receipt key save request is invalid.',
       );
@@ -117,8 +119,22 @@ class NativeReceiptKeyRingWriter {
   static bool _isValidNamespace(String namespace) =>
       namespace.trim().isNotEmpty && namespace.trim() == namespace;
 
-  static bool _isValidKeyId(String keyId) =>
-      keyId.trim().isNotEmpty && keyId.trim() == keyId && !keyId.contains(':');
+  static bool _isValidKeyId(String keyId, int maxLength) =>
+      maxLength > 0 &&
+      keyId.length <= maxLength &&
+      keyId.trim().isNotEmpty &&
+      keyId.trim() == keyId &&
+      !keyId.contains(':') &&
+      !_hasControlCharacter(keyId);
+
+  static bool _hasControlCharacter(String value) {
+    for (final codeUnit in value.codeUnits) {
+      if (codeUnit < 0x20 || codeUnit == 0x7F) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   static String _safeNativeWarning(
     String? warning, {

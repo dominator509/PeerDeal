@@ -193,6 +193,8 @@ coerced.
   before mapping generic records into receipt signing/encryption providers.
 - App receipt key-ring loaders and writers must reject malformed app-owned
   receipt key namespaces before calling native storage.
+- App receipt key-ring writers must reject oversized or control-character
+  receipt key ids before native save/delete methods.
 - App receipt key-ring writers must reject blank, padded, or delimiter-bearing
   receipt key ids before calling native delete methods.
 - Generic native secure key storage method-channel requests must reject blank

@@ -74,6 +74,63 @@ void main() {
     expect(bridge.savedKeys, isEmpty);
   });
 
+  test('fails closed before native save for oversized key ids', () async {
+    final bridge = _RecordingSecureKeyStorageBridge();
+    final writer = NativeReceiptKeyRingWriter(
+      bridge: bridge,
+      maxKeyIdLength: 12,
+    );
+
+    final result = await writer.saveSigningKey(
+      const ReceiptSigningKey(
+        keyId: 'receipt_signing_oversized',
+        secret: 'signing',
+      ),
+      active: true,
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Receipt key save request is invalid.');
+    expect(bridge.savedKeys, isEmpty);
+  });
+
+  test(
+    'fails closed before native save for control-character key ids',
+    () async {
+      final bridge = _RecordingSecureKeyStorageBridge();
+      final writer = NativeReceiptKeyRingWriter(bridge: bridge);
+
+      final result = await writer.saveEncryptionKey(
+        const ReceiptEncryptionKey(
+          keyId: 'receipt_encryption_\u0001',
+          secret: 'enc',
+        ),
+        active: true,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Receipt key save request is invalid.');
+      expect(bridge.savedKeys, isEmpty);
+    },
+  );
+
+  test('fails closed before native save for invalid key-id limit', () async {
+    final bridge = _RecordingSecureKeyStorageBridge();
+    final writer = NativeReceiptKeyRingWriter(
+      bridge: bridge,
+      maxKeyIdLength: 0,
+    );
+
+    final result = await writer.saveSigningKey(
+      const ReceiptSigningKey(keyId: 'receipt_signing_1', secret: 'signing'),
+      active: true,
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Receipt key save request is invalid.');
+    expect(bridge.savedKeys, isEmpty);
+  });
+
   test('propagates native mutation failure without throwing', () async {
     final bridge = _RecordingSecureKeyStorageBridge(
       saveResult: const SecureKeyStorageMutationResult.failure(
@@ -139,6 +196,29 @@ void main() {
 
     expect(result.isSuccess, isFalse);
     expect(result.warning, 'Receipt key delete request is invalid.');
+    expect(bridge.deletedKeys, isEmpty);
+  });
+
+  test('fails closed before native delete for unsafe key ids', () async {
+    final bridge = _RecordingSecureKeyStorageBridge();
+    final writer = NativeReceiptKeyRingWriter(
+      bridge: bridge,
+      maxKeyIdLength: 12,
+    );
+
+    final oversized = await writer.deleteKey('receipt_signing_oversized');
+    final control = await writer.deleteKey('receipt_signing_\u0001');
+    final invalidLimit = await NativeReceiptKeyRingWriter(
+      bridge: bridge,
+      maxKeyIdLength: 0,
+    ).deleteKey('receipt_signing_1');
+
+    expect(oversized.isSuccess, isFalse);
+    expect(control.isSuccess, isFalse);
+    expect(invalidLimit.isSuccess, isFalse);
+    expect(oversized.warning, 'Receipt key delete request is invalid.');
+    expect(control.warning, 'Receipt key delete request is invalid.');
+    expect(invalidLimit.warning, 'Receipt key delete request is invalid.');
     expect(bridge.deletedKeys, isEmpty);
   });
 
