@@ -113,6 +113,8 @@ Mounted receipt surfaces scrub receipt/recovery status, messages, shareable
 fields, recommended actions, and diagnostics before rendering. Rendered receipt
 shareable fields and recovery diagnostics must be bounded with stable
 truncation lines.
+Mounted table routes must scrub and bound injected bootstrap/recovery warning
+lists before passing load results into table surfaces.
 Join routes and join flow orchestration reject blank or padded app-owned invite
 codes and rejoin tokens before join dependencies, invite resolution, or
 governance commit adapters run. Join routes scrub app-owned join outcome result

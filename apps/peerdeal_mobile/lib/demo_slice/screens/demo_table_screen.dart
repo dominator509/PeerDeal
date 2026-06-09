@@ -90,9 +90,11 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
   Future<NativeBootstrapCandidateLoadResult> _loadBootstrapCandidates() async {
     try {
       final scope = widget._runtimeScopeFactory(widget.snapshot);
-      return await widget.bootstrapCandidateLoaderFactory().load(
-        sessionId: scope.sessionId,
-        tableId: scope.tableId,
+      return _safeBootstrapLoadResult(
+        await widget.bootstrapCandidateLoaderFactory().load(
+          sessionId: scope.sessionId,
+          tableId: scope.tableId,
+        ),
       );
     } on Object {
       return const NativeBootstrapCandidateLoadResult.unavailable(
@@ -116,7 +118,10 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
       final store = result.store;
       if (store == null) {
         return DemoRecoveryPersistenceLoadResult.unavailable(
-          warnings: result.warnings,
+          warnings: _safeTableWarnings(
+            result.warnings,
+            fallback: 'Recovery persistence warning unavailable.',
+          ),
         );
       }
 
@@ -124,7 +129,10 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
       return DemoRecoveryPersistenceLoadResult.available(
         persistedEventCount: window.events.length,
         hasSnapshot: window.snapshot != null,
-        warnings: result.warnings,
+        warnings: _safeTableWarnings(
+          result.warnings,
+          fallback: 'Recovery persistence warning unavailable.',
+        ),
       );
     } on Object {
       return const DemoRecoveryPersistenceLoadResult.unavailable(
@@ -142,6 +150,35 @@ RecoveryPersistenceScope _defaultRuntimeScopeFor(
     sessionId: 'demo:${snapshot.scenarioId}',
     protocolVersion: '1.x',
   );
+}
+
+NativeBootstrapCandidateLoadResult _safeBootstrapLoadResult(
+  NativeBootstrapCandidateLoadResult result,
+) {
+  return NativeBootstrapCandidateLoadResult(
+    discoveryAvailable: result.discoveryAvailable,
+    nativeNotes: result.nativeNotes,
+    candidates: result.candidates,
+    warnings: _safeTableWarnings(
+      result.warnings,
+      fallback: 'Local network bootstrap warning unavailable.',
+    ),
+  );
+}
+
+List<String> _safeTableWarnings(
+  List<String> warnings, {
+  required String fallback,
+}) {
+  const maxWarnings = 4;
+  if (warnings.isEmpty) {
+    return const <String>[];
+  }
+  return <String>[
+    for (final warning in warnings.take(maxWarnings))
+      _safeTableWarning(warning, fallback: fallback),
+    if (warnings.length > maxWarnings) 'Table warnings truncated.',
+  ];
 }
 
 class DemoTableScreen extends StatelessWidget {

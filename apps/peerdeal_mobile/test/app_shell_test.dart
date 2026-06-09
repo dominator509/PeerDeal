@@ -411,6 +411,36 @@ void main() {
     );
   });
 
+  testWidgets('mounted table scrubs injected bootstrap and recovery warnings', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        bootstrapCandidateLoaderFactory: _UnsafeBootstrapLoader.new,
+        recoveryPersistenceStoreFactory: _UnsafeRecoveryFactory(),
+      ),
+    );
+
+    await tester.tap(find.text('Table'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Bootstrap warning: Local network bootstrap warning unavailable.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'Recovery persistence warning: '
+        'Recovery persistence warning unavailable.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('secret'), findsNothing);
+    expect(find.textContaining('token'), findsNothing);
+  });
+
   testWidgets('mounted table loads app-provided recovery persistence window', (
     tester,
   ) async {
@@ -1268,6 +1298,45 @@ class _StaticLocalNetworkBridge implements LocalNetworkBridge {
       permissionGranted: true,
       foundEndpoints: <String>['peer-a', 'peer-b'],
       interfaceHints: <String>['wifi'],
+    );
+  }
+}
+
+class _UnsafeBootstrapLoader extends NativeBootstrapCandidateLoader {
+  _UnsafeBootstrapLoader() : super(bridge: const _StaticLocalNetworkBridge());
+
+  @override
+  Future<NativeBootstrapCandidateLoadResult> load({
+    required String sessionId,
+    required String tableId,
+  }) async {
+    return const NativeBootstrapCandidateLoadResult.unavailable(
+      nativeNotes: 'unavailable',
+      warnings: <String>[
+        r'C:\secret\peers.log',
+        'token bootstrap-secret',
+        'safe warning',
+        'extra warning',
+        'overflow warning',
+      ],
+    );
+  }
+}
+
+class _UnsafeRecoveryFactory extends AppRecoveryPersistenceStoreFactory {
+  _UnsafeRecoveryFactory()
+    : super(rootDirectoryFactory: () => Directory.systemTemp);
+
+  @override
+  AppRecoveryPersistenceStoreLoadResult create() {
+    return const AppRecoveryPersistenceStoreLoadResult.unavailable(
+      warnings: <String>[
+        'token recovery-secret',
+        'safe warning',
+        'another warning',
+        'more warning',
+        'overflow warning',
+      ],
     );
   }
 }
