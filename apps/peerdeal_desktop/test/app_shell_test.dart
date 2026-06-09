@@ -1418,6 +1418,61 @@ void main() {
     expect(homePaths, isEmpty);
   });
 
+  testWidgets('passes ready native production navigation to custom home', (
+    tester,
+  ) async {
+    var homePaths = const <String>[];
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          nativeReadinessRequiredRoutePaths: const <String>{'/table-live'},
+          nativeReadinessLoader: AppNativeReadinessLoader(
+            captureProtectionBridge: const _StaticCaptureProtectionBridge(
+              capability: CaptureProtectionCapability(
+                blockingSupported: true,
+                obscuringSupported: true,
+                notes: 'ready',
+              ),
+            ),
+            localNetworkBridge: const _StaticLocalNetworkBridge(),
+            nativeTransportBridge: const _StaticNativeTransportBridge(
+              capability: NativeTransportCapability(
+                available: true,
+                sendSupported: true,
+                receiveSupported: true,
+                maxPayloadBytes: 1024,
+                notes: 'ready',
+              ),
+            ),
+            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
+            ),
+          ),
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live table',
+              path: '/table-live',
+            ),
+          ],
+          homeSurfaceBuilder: (context, navigation) {
+            homePaths = navigation.map((entry) => entry.path).toList();
+            return const Text('Production home surface');
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Production home surface'), findsOneWidget);
+    expect(homePaths, <String>['/table-live']);
+  });
+
   testWidgets('fails closed when app-owned home surface builder throws', (
     tester,
   ) async {

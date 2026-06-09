@@ -14,6 +14,43 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Lock Custom Home Native Navigation Restore
+
+Summary:
+Added mirrored mobile and desktop coverage proving custom home builders receive
+native-readiness-required production navigation once readiness passes, matching
+the default home hidden/visible policy.
+
+Files changed:
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/app_shell_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/app_shell_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks the ready path for custom home navigation filtering only; platform
+  native implementations remain separate readiness gaps.
+
+Next reviewer:
+Codex should continue with the next codeable production app-flow or
+native-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Filter Custom Home Native Navigation
 
 Summary:

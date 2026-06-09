@@ -642,6 +642,9 @@ the gates below are satisfied.
 - App-owned custom home builders now receive production navigation after the
   same native-readiness filtering as the default home, preventing protected
   native-backed production routes from being advertised while unavailable.
+- App-owned custom home builders also receive native-readiness-required
+  production navigation once readiness passes, locking the same hidden/visible
+  policy as the default home.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -691,6 +694,7 @@ the gates below are satisfied.
   app-owned production-only native-readiness empty-action handling,
   app-owned production-only empty-action status rendering,
   app-owned custom-home native-readiness production-navigation filtering,
+  app-owned custom-home native-readiness production-navigation restore,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
