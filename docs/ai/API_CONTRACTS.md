@@ -83,8 +83,9 @@ receives validated home navigation entries and may replace the default demo
 home surface; builder failures render the existing route-unavailable fallback.
 Production navigation and home composition remain app-shell work and should
 replace or extend app routes without moving route policy into shared packages.
-Join flow orchestration rejects blank or padded app-owned invite codes and
-rejoin tokens before invite resolution or governance commit adapters run.
+Join routes and join flow orchestration reject blank or padded app-owned invite
+codes and rejoin tokens before join dependencies, invite resolution, or
+governance commit adapters run.
 Setup routes and setup flow orchestration reject blank or padded app-owned
 setup intent and host identities before wizard/setup dependencies run.
 

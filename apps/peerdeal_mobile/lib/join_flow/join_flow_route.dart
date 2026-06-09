@@ -125,11 +125,11 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
     }
 
     try {
-      final orchestrator = widget._orchestratorFactory(mode);
       final context = widget._inviteContextFactory(mode);
       final invalidContext = _invalidInviteContextOutcome(mode, context);
       if (invalidContext != null) return invalidContext;
 
+      final orchestrator = widget._orchestratorFactory(mode);
       return mode == JoinFlowDemoMode.rejoin
           ? await orchestrator.runRejoin(context)
           : await orchestrator.runFirstJoin(context);
@@ -166,7 +166,8 @@ JoinFlowOutcome? _invalidInviteContextOutcome(
   JoinFlowDemoMode mode,
   InviteContext context,
 ) {
-  if (context.inviteCode.trim().isEmpty) {
+  if (context.inviteCode.trim().isEmpty ||
+      context.inviteCode.trim() != context.inviteCode) {
     return const JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.rejected,
@@ -183,7 +184,9 @@ JoinFlowOutcome? _invalidInviteContextOutcome(
 
   final rejoinToken = context.rejoinToken;
   if (mode == JoinFlowDemoMode.rejoin &&
-      (rejoinToken == null || rejoinToken.trim().isEmpty)) {
+      (rejoinToken == null ||
+          rejoinToken.trim().isEmpty ||
+          rejoinToken.trim() != rejoinToken)) {
     return const JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.rejoinRejected,

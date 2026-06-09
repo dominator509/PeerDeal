@@ -301,6 +301,9 @@ the gates below are satisfied.
 - Mounted join routes now validate app-owned invite contexts before deeper
   orchestration, rejecting blank invite codes and whitespace-only rejoin tokens
   before adapter calls can observe malformed production invite input.
+- Mounted join routes now also reject padded invite codes and rejoin tokens
+  before constructing join orchestrator dependencies, aligning route-level
+  production input gates with direct join-flow validation.
 - App join-flow orchestrators now reject blank or padded invite codes and
   rejoin tokens before invite resolution or governance commit adapters run, so
   direct app orchestration cannot bypass route-level invite guards.
@@ -474,7 +477,8 @@ the gates below are satisfied.
   registry validation, exact app-owned enabled-route allowlists,
   app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
-  app-owned join invite-context injection, app-owned join input validation,
+  app-owned join invite-context injection, route-level join input validation,
+  app-owned join input validation,
   app-owned receipt envelope injection, app-owned setup intent injection,
   route-level setup identity validation, app-owned setup identity validation,
   app-owned transport payload-limit

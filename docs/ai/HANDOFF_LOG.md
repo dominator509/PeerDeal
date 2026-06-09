@@ -14,6 +14,40 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Join Route Input Gate
+
+Summary:
+Hardened mobile and desktop mounted join routes so injected invite contexts
+with blank or padded invite codes/rejoin tokens fail closed before join
+orchestrator dependencies are constructed. Focused tests prove malformed
+route-level join input returns the existing rejected result codes without
+creating the orchestrator.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\join_flow\join_flow_route_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\join_flow\join_flow_route_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks route-level join input validation only; production invite UX and
+  live transport integration remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Setup Route Identity Gate
 
 Summary:
