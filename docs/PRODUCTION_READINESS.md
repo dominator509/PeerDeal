@@ -594,6 +594,9 @@ the gates below are satisfied.
 - App-owned production route maps and production home navigation descriptors
   now reject case-insensitive route path or label collisions before mounted app
   routing is built, preventing ambiguous production navigation extension input.
+- App-owned production home navigation descriptors now also reject
+  case-insensitive label or path collisions with enabled demo home navigation,
+  keeping production extension actions distinct from mounted demo actions.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -619,6 +622,7 @@ the gates below are satisfied.
   app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
   app-owned production route/navigation case-collision validation,
+  app-owned production/demo navigation case-collision validation,
   app-owned join invite-context injection, route-level join input validation,
   app-owned join input validation,
   app-owned receipt envelope injection, app-owned setup intent injection,

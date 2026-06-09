@@ -111,6 +111,8 @@ must not collide with enabled demo home navigation entries when the app
 composes the home surface.
 Production route paths and production navigation labels must not collide
 case-insensitively within app-owned production extension metadata.
+Production navigation labels and paths must also not collide
+case-insensitively with enabled demo home navigation entries.
 Production navigation and home composition remain app-shell work and should
 replace or extend app routes without moving route policy into shared packages.
 Mounted receipt surfaces scrub receipt/recovery status, messages, shareable

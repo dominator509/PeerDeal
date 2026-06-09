@@ -510,6 +510,12 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       throw StateError('Production navigation contains too many entries.');
     }
 
+    final lowerDemoNavigationLabels = demoNavigationLabels
+        .map((label) => label.toLowerCase())
+        .toSet();
+    final lowerDemoNavigationPaths = demoNavigationPaths
+        .map((path) => path.toLowerCase())
+        .toSet();
     final labels = <String>{};
     final paths = <String>{};
     final lowerLabels = <String>{};
@@ -529,6 +535,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
           !productionRoutePaths.contains(path) ||
           demoNavigationLabels.contains(label) ||
           demoNavigationPaths.contains(path) ||
+          lowerDemoNavigationLabels.contains(lowerLabel) ||
+          lowerDemoNavigationPaths.contains(lowerPath) ||
           !labels.add(label) ||
           !paths.add(path) ||
           !lowerLabels.add(lowerLabel) ||

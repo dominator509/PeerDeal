@@ -1085,6 +1085,27 @@ void main() {
     expect(tester.takeException(), isA<StateError>());
   });
 
+  testWidgets(
+    'rejects production navigation labels that case-collide with demo',
+    (tester) async {
+      await tester.pumpWidget(
+        PeerDealDesktopApp(
+          runtime: PeerDealDesktopRuntime(
+            enabledDemoRoutePaths: const <String>{DemoSliceRoutes.table},
+            productionRoutes: <String, WidgetBuilder>{
+              '/table-live': (_) => const Text('Production table route'),
+            },
+            productionNavigation: const <PeerDealAppNavigationEntry>[
+              PeerDealAppNavigationEntry(label: 'table', path: '/table-live'),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isA<StateError>());
+    },
+  );
+
   testWidgets('starts on app-owned production initial route', (tester) async {
     await tester.pumpWidget(
       PeerDealDesktopApp(
