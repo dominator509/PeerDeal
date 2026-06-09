@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-08 - Codex - Enabled Demo Route Allowlist Gate
+
+Summary:
+Hardened mobile and desktop demo route registries so app-owned enabled-route
+allowlists reject blank or padded route paths before route matching. Focused
+tests prove padded allowlist entries fail closed instead of silently enabling a
+demo surface.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_slice_routes_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_slice_routes_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\demo_slice_routes_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\demo_slice_routes_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- This locks app-owned demo route gating only; final production navigation and
+  UI validation remain pending.
+
+Next reviewer:
+Codex should run the full local gate set and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Receipt Delete Key Id Gate
 
 Summary:

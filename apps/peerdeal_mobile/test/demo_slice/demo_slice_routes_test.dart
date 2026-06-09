@@ -65,6 +65,13 @@ void main() {
       }),
       throwsA(isA<StateError>()),
     );
+    expect(
+      () => DemoSliceRoutes.enabledMountedRoutes(const <String>{
+        DemoSliceRoutes.home,
+        '${DemoSliceRoutes.table} ',
+      }),
+      throwsA(isA<StateError>()),
+    );
   });
 
   test('route map validation accepts mounted routes and explicit aliases', () {

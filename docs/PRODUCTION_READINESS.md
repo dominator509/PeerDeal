@@ -435,6 +435,9 @@ the gates below are satisfied.
   mobile and desktop runtime objects, so production callers can expose only
   explicitly allowed dev/demo paths while disabled route requests fall through
   the scrubbed route-unavailable surface.
+- Mounted demo route allowlists now reject blank or padded enabled-route paths
+  before route matching, preventing ambiguous production route gates from
+  silently enabling demo surfaces.
 - App shells now accept validated app-owned production route maps through the
   mobile and desktop runtime objects, reserving `/demo/*` for the demo registry
   while allowing non-demo flows to mount without editing shared package or demo
@@ -465,7 +468,8 @@ the gates below are satisfied.
   loading, app-owned recovery root validation, mounted recovery-window loading,
   app-owned route runtime dependency grouping, app-owned table runtime-scope
   injection, canonical app-route
-  registry validation, app-owned production route-map extension, app-owned
+  registry validation, exact app-owned enabled-route allowlists,
+  app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
   app-owned join invite-context injection, app-owned join input validation,
   app-owned receipt envelope injection, app-owned setup intent injection,

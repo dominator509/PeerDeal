@@ -67,7 +67,15 @@ class DemoSliceRoutes {
     _validateRouteRegistry();
     if (enabledRoutePaths == null) return mountedRoutes;
 
-    final requestedPaths = enabledRoutePaths.map((path) => path.trim()).toSet();
+    final malformedPaths = enabledRoutePaths
+        .where((path) => path.trim().isEmpty || path.trim() != path)
+        .toList(growable: false);
+
+    if (malformedPaths.isNotEmpty) {
+      throw StateError('Enabled demo route paths contain malformed routes.');
+    }
+
+    final requestedPaths = enabledRoutePaths.toSet();
     final mountedPaths = mountedRoutes.map((route) => route.path).toSet();
     final unknownPaths = requestedPaths.difference(mountedPaths).toList()
       ..sort();
