@@ -174,6 +174,9 @@ the gates below are satisfied.
   receive warnings plus bound native notes before exposing app transport load
   results, preserving validated send/receive behavior without leaking platform
   diagnostic detail.
+- App native transport session factories now also scrub sensitive native notes
+  before exposing app transport load results, replacing token, secret,
+  password, or platform path-like notes with stable unavailable text.
 - Native transport session factories now fail closed during session loading
   unless native capability reports send and receive support, so app
   orchestration can reject unavailable platform transport before exposing
@@ -616,6 +619,7 @@ the gates below are satisfied.
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
   app-owned transport receive-batch bounding,
+  app-owned transport sensitive-note scrubbing,
   package-owned transport identity validation, generic native transport
   sequence validation, generic native transport byte-payload validation,
   generic native transport exact-key validation,

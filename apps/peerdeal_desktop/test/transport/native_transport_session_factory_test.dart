@@ -79,6 +79,25 @@ void main() {
     expect(result.session!.nativeNotes.length, lessThanOrEqualTo(96));
   });
 
+  test('loadSession scrubs sensitive native notes', () async {
+    final result = await NativeTransportSessionFactory(
+      bridge: _FakeNativeTransportBridge(
+        capability: const NativeTransportCapability(
+          available: true,
+          sendSupported: true,
+          receiveSupported: true,
+          maxPayloadBytes: 4096,
+          notes: r'transport token C:\secret\transport.log',
+        ),
+      ),
+    ).loadSession(handler: _RecordingTransportFrameHandler());
+
+    expect(result.available, isTrue);
+    expect(result.session!.nativeNotes, 'unavailable');
+    expect(result.session!.nativeNotes, isNot(contains('token')));
+    expect(result.session!.nativeNotes, isNot(contains('secret')));
+  });
+
   test('loadSession fails closed when capability lookup throws', () async {
     final result = await NativeTransportSessionFactory(
       bridge: _ThrowingCapabilityTransportBridge(),

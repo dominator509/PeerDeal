@@ -161,6 +161,8 @@ whose keys merely stringify to expected field names are dropped.
 App-owned native transport drains must cap receive-frame batches before session
 handlers see platform frames, and invalid app batch limits must fail closed
 before native receive calls.
+App-owned native transport session factories must scrub native notes that look
+like secrets, tokens, passwords, or platform paths before exposing load results.
 
 ## Recovery Persistence Boundary
 
