@@ -155,6 +155,9 @@ the gates below are satisfied.
 - Network session path selection now ignores malformed reachable candidate
   peer ids and malformed elected-primary overrides before returning path
   descriptors, falling back to valid candidates or unresolved state.
+- Network primary-peer election now drops malformed peer metric identities and
+  ignores malformed current-primary overrides before scoring, confidence
+  classification, transfer decisions, or fail-closed fallback decisions.
 - Network transport send contracts now include a validating sender boundary
   that rejects invalid frames before platform sinks see them and converts sink
   failures into explicit failed send results.
@@ -674,6 +677,7 @@ the gates below are satisfied.
   root loading, app-owned recovery root validation, mounted recovery-window loading,
   package-owned bootstrap peer-id validation,
   package-owned session path peer-id validation,
+  package-owned primary peer identity validation,
   app-owned route runtime dependency grouping, app-owned table runtime-scope
   injection, canonical app-route
   registry validation, exact app-owned enabled-route allowlists,

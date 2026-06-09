@@ -18,17 +18,20 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
     required String expectedAnchorHash,
     String? currentPrimaryPeerId,
   }) {
-    final items = snapshots.toList(growable: false);
+    final validCurrentPrimaryPeerId = _validPeerIdOrNull(currentPrimaryPeerId);
+    final items = snapshots
+        .where((snapshot) => _isValidPeerId(snapshot.peerId))
+        .toList(growable: false);
     if (items.isEmpty) {
-      return const PrimaryPeerDecision(
+      return PrimaryPeerDecision(
         primaryPeerId: 'none',
         confidence: NetworkConfidence.unsafe,
         reason: 'No eligible peers',
-        baselineEventIndex: 0,
-        expectedAnchorHash: '',
+        baselineEventIndex: baselineEventIndex,
+        expectedAnchorHash: expectedAnchorHash,
         requiresTransfer: false,
         requiresPause: true,
-        rankings: [],
+        rankings: const <ScoreBreakdown>[],
       );
     }
 
@@ -43,7 +46,7 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
     final winner = _firstEligibleRanking(rankings);
     if (winner == null) {
       return PrimaryPeerDecision(
-        primaryPeerId: currentPrimaryPeerId ?? 'none',
+        primaryPeerId: validCurrentPrimaryPeerId ?? 'none',
         confidence: confidence,
         reason: 'No anchor-aligned peers',
         baselineEventIndex: baselineEventIndex,
@@ -55,7 +58,8 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
     }
 
     final requiresTransfer =
-        currentPrimaryPeerId != null && winner.peerId != currentPrimaryPeerId;
+        validCurrentPrimaryPeerId != null &&
+        winner.peerId != validCurrentPrimaryPeerId;
     final requiresPause =
         confidence == NetworkConfidence.recoveryRequired ||
         confidence == NetworkConfidence.unsafe;
@@ -119,5 +123,15 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
       if (!ranking.isExcluded) return ranking;
     }
     return null;
+  }
+
+  String? _validPeerIdOrNull(String? peerId) {
+    if (peerId == null || !_isValidPeerId(peerId)) return null;
+    return peerId;
+  }
+
+  bool _isValidPeerId(String peerId) {
+    if (peerId.isEmpty || peerId.trim() != peerId) return false;
+    return peerId.runes.every((rune) => rune > 0x1f && rune != 0x7f);
   }
 }

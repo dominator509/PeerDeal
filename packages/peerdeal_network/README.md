@@ -41,6 +41,8 @@ score, and recover network paths without owning game truth.
 - Session path selection ignores malformed candidate peer ids and malformed
   elected-primary overrides before returning path descriptors.
 - Primary peer election fails closed when every peer is anchor-mismatched.
+- Primary peer election drops malformed peer metric identities and ignores
+  malformed current-primary overrides before scoring or transfer decisions.
 - Confidence classification degrades or requires recovery when peers lag the
   event index.
 - Transport frame validation fails closed on missing session/peer identities,

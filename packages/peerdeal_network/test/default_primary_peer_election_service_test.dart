@@ -120,4 +120,102 @@ void main() {
     expect(decision.reason, 'No anchor-aligned peers');
     expect(decision.rankings.every((ranking) => ranking.isExcluded), isTrue);
   });
+
+  test('drops malformed peer metrics before electing primary', () {
+    const service = DefaultPrimaryPeerElectionService(
+      confidenceClassifier: DefaultConfidenceClassifier(),
+    );
+
+    final decision = service.elect(
+      snapshots: const [
+        PeerMetricSnapshot(
+          peerId: ' peer_padded',
+          routeClass: NetworkRouteClass.lanDirect,
+          avgLatencyMs: 1,
+          ackLagMs: 1,
+          disconnectsInWindow: 0,
+          reachabilityCount: 99,
+          eventIndexLag: 0,
+          anchorAligned: true,
+          snapshotServeMs: 1,
+        ),
+        PeerMetricSnapshot(
+          peerId: 'peer_valid',
+          routeClass: NetworkRouteClass.remoteDirect,
+          avgLatencyMs: 100,
+          ackLagMs: 150,
+          disconnectsInWindow: 0,
+          reachabilityCount: 4,
+          eventIndexLag: 0,
+          anchorAligned: true,
+          snapshotServeMs: 25,
+        ),
+      ],
+      baselineEventIndex: 99,
+      expectedAnchorHash: 'anchor_99',
+    );
+
+    expect(decision.primaryPeerId, 'peer_valid');
+    expect(decision.rankings.map((ranking) => ranking.peerId), ['peer_valid']);
+  });
+
+  test('ignores malformed current primary peer id', () {
+    const service = DefaultPrimaryPeerElectionService(
+      confidenceClassifier: DefaultConfidenceClassifier(),
+    );
+
+    final decision = service.elect(
+      snapshots: const [
+        PeerMetricSnapshot(
+          peerId: 'peer_a',
+          routeClass: NetworkRouteClass.remoteDirect,
+          avgLatencyMs: 100,
+          ackLagMs: 150,
+          disconnectsInWindow: 0,
+          reachabilityCount: 4,
+          eventIndexLag: 0,
+          anchorAligned: true,
+          snapshotServeMs: 25,
+        ),
+      ],
+      baselineEventIndex: 99,
+      expectedAnchorHash: 'anchor_99',
+      currentPrimaryPeerId: 'peer_current\nsecret',
+    );
+
+    expect(decision.primaryPeerId, 'peer_a');
+    expect(decision.requiresTransfer, isFalse);
+  });
+
+  test('fails closed when every peer metric identity is malformed', () {
+    const service = DefaultPrimaryPeerElectionService(
+      confidenceClassifier: DefaultConfidenceClassifier(),
+    );
+
+    final decision = service.elect(
+      snapshots: const [
+        PeerMetricSnapshot(
+          peerId: '',
+          routeClass: NetworkRouteClass.remoteDirect,
+          avgLatencyMs: 20,
+          ackLagMs: 30,
+          disconnectsInWindow: 0,
+          reachabilityCount: 4,
+          eventIndexLag: 0,
+          anchorAligned: true,
+          snapshotServeMs: 10,
+        ),
+      ],
+      baselineEventIndex: 12,
+      expectedAnchorHash: 'anchor_12',
+      currentPrimaryPeerId: ' peer_padded',
+    );
+
+    expect(decision.primaryPeerId, 'none');
+    expect(decision.confidence, NetworkConfidence.unsafe);
+    expect(decision.requiresPause, isTrue);
+    expect(decision.rankings, isEmpty);
+    expect(decision.baselineEventIndex, 12);
+    expect(decision.expectedAnchorHash, 'anchor_12');
+  });
 }

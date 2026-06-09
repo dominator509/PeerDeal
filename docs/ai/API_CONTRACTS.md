@@ -236,7 +236,10 @@ bootstrap candidate resolution. The package bootstrap candidate provider drops
 blank, padded, control-character-bearing, or duplicate peer ids before
 assigning route class and priority. Session path selection must ignore
 malformed candidate peer ids and malformed elected-primary overrides before
-returning path descriptors. Invalid caps fail closed for table loading and
+returning path descriptors. Primary-peer election must drop malformed peer
+metric identities and ignore malformed current-primary overrides before
+scoring, confidence classification, transfer decisions, or fail-closed
+fallback decisions. Invalid caps fail closed for table loading and
 fall back to relay-only join bootstrap plans. Invalid app-owned session/table
 bootstrap scope, including padded values, must fail closed or fall back before
 native capability lookup.
