@@ -423,15 +423,23 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     }
     final nativeReadinessLoader = _runtime.nativeReadinessLoader;
     if (nativeReadinessLoader == null) {
-      return _buildDefaultHome(context, navigation, nativeReadiness: null);
+      return _buildDefaultHome(
+        context,
+        _homeNavigationForReadiness(navigation, nativeReadiness: null),
+        nativeReadiness: null,
+      );
     }
     return FutureBuilder<AppNativeReadinessSnapshot>(
       future: _nativeReadinessFor(nativeReadinessLoader),
       builder: (context, snapshot) {
+        final nativeReadiness = snapshot.data;
         return _buildDefaultHome(
           context,
-          navigation,
-          nativeReadiness: snapshot.data,
+          _homeNavigationForReadiness(
+            navigation,
+            nativeReadiness: nativeReadiness,
+          ),
+          nativeReadiness: nativeReadiness,
         );
       },
     );
@@ -455,6 +463,20 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       nativeReadiness: nativeReadiness,
       onSelectScenario: _selectScenario,
     );
+  }
+
+  List<PeerDealAppNavigationEntry> _homeNavigationForReadiness(
+    List<PeerDealAppNavigationEntry> navigation, {
+    required AppNativeReadinessSnapshot? nativeReadiness,
+  }) {
+    final protectedPaths = _runtime.nativeReadinessRequiredRoutePaths;
+    if (protectedPaths == null || protectedPaths.isEmpty) return navigation;
+    if (nativeReadiness == null || !nativeReadiness.allCapabilitiesReady) {
+      return List<PeerDealAppNavigationEntry>.unmodifiable(
+        navigation.where((entry) => !protectedPaths.contains(entry.path)),
+      );
+    }
+    return navigation;
   }
 
   Future<AppNativeReadinessSnapshot> _nativeReadinessFor(

@@ -1047,6 +1047,58 @@ void main() {
   });
 
   testWidgets(
+    'shows native-ready production navigation when readiness passes',
+    (tester) async {
+      await tester.pumpWidget(
+        PeerDealDesktopApp(
+          runtime: PeerDealDesktopRuntime(
+            enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+            nativeReadinessRequiredRoutePaths: const <String>{'/table-live'},
+            nativeReadinessLoader: AppNativeReadinessLoader(
+              captureProtectionBridge: const _StaticCaptureProtectionBridge(
+                capability: CaptureProtectionCapability(
+                  blockingSupported: true,
+                  obscuringSupported: true,
+                  notes: 'ready',
+                ),
+              ),
+              localNetworkBridge: const _StaticLocalNetworkBridge(),
+              nativeTransportBridge: const _StaticNativeTransportBridge(
+                capability: NativeTransportCapability(
+                  available: true,
+                  sendSupported: true,
+                  receiveSupported: true,
+                  maxPayloadBytes: 1024,
+                  notes: 'ready',
+                ),
+              ),
+              secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+                snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
+              ),
+            ),
+            productionRoutes: <String, WidgetBuilder>{
+              '/table-live': (_) => const Text('Native-backed table route'),
+            },
+            productionNavigation: const <PeerDealAppNavigationEntry>[
+              PeerDealAppNavigationEntry(
+                label: 'Native table',
+                path: '/table-live',
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(
+        find.widgetWithText(PeerDealActionButton, 'Native table'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets(
     'fails closed for production routes when native readiness fails',
     (tester) async {
       await tester.pumpWidget(
@@ -1095,6 +1147,52 @@ void main() {
       expect(find.textContaining('keychain detail'), findsNothing);
     },
   );
+
+  testWidgets('hides native-required production navigation until ready', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          nativeReadinessRequiredRoutePaths: const <String>{'/table-live'},
+          nativeReadinessLoader: AppNativeReadinessLoader(
+            captureProtectionBridge: const _StaticCaptureProtectionBridge(
+              capability: CaptureProtectionCapability.unavailable(
+                warning: 'token native-secret',
+              ),
+            ),
+            localNetworkBridge: const _StaticLocalNetworkBridge(
+              capability: LocalNetworkCapability.unavailable(),
+            ),
+            nativeTransportBridge: const _StaticNativeTransportBridge(
+              capability: NativeTransportCapability.unavailable(),
+            ),
+            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              snapshot: SecureKeyStorageSnapshot.unavailable(),
+            ),
+          ),
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Native-backed table route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Native table',
+              path: '/table-live',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.widgetWithText(PeerDealActionButton, 'Native table'),
+      findsNothing,
+    );
+    expect(find.text('Native unavailable'), findsOneWidget);
+  });
 
   testWidgets('rejects native readiness gates for unmounted routes', (
     tester,

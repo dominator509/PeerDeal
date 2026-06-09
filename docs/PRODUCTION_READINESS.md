@@ -622,6 +622,10 @@ the gates below are satisfied.
   native-readiness-required; those routes fail closed to the scrubbed
   route-unavailable surface until the app-owned readiness loader reports all
   native capabilities ready.
+- Default app home surfaces now hide native-readiness-required production
+  navigation actions until the same app-owned readiness snapshot reports all
+  native capabilities ready, preventing unavailable native-backed actions from
+  being advertised before route guards can pass.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -665,6 +669,7 @@ the gates below are satisfied.
   app-owned native readiness capability aggregation,
   app-owned native readiness runtime/home wiring,
   app-owned native readiness production-route gating,
+  app-owned native readiness production-navigation filtering,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,

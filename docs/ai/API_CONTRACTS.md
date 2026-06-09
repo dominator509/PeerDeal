@@ -134,6 +134,9 @@ Runtime objects may also mark mounted production route paths as
 native-readiness-required. Those route paths must be exact validated production
 paths, and protected builders must not run until readiness reports all native
 capabilities ready.
+Default home surfaces must also hide production navigation actions whose paths
+require native readiness until the same readiness snapshot passes. Custom home
+builders remain app-owned and receive validated navigation entries directly.
 Shared safe-surface render models must scrub and bound injected capture warning
 and native-note text before exposing render state to app UI.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning
