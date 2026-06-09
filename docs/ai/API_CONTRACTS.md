@@ -136,7 +136,8 @@ paths, and protected builders must not run until readiness reports all native
 capabilities ready.
 Default home surfaces must also hide production navigation actions whose paths
 require native readiness until the same readiness snapshot passes. Custom home
-builders remain app-owned and receive validated navigation entries directly.
+builders remain app-owned and receive validated navigation entries after the
+same native-readiness production-navigation filtering.
 Default home surfaces must render production navigation separately from enabled
 demo navigation; custom home builders continue to receive the combined
 validated navigation entries directly.

@@ -413,27 +413,25 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     List<PeerDealAppNavigationEntry> productionNavigation,
   ) {
     final demoNavigation = _demoHomeNavigationEntries();
-    final navigation = _homeNavigationEntries(
-      demoNavigation: demoNavigation,
-      productionNavigation: productionNavigation,
-    );
     final homeSurfaceBuilder = _runtime.homeSurfaceBuilder;
-    if (homeSurfaceBuilder != null) {
-      try {
-        return homeSurfaceBuilder(context, navigation);
-      } catch (_) {
-        return const AppRouteFallbackScreen(routeName: DemoSliceRoutes.home);
-      }
-    }
     final nativeReadinessLoader = _runtime.nativeReadinessLoader;
     if (nativeReadinessLoader == null) {
+      final readyProductionNavigation = _homeNavigationForReadiness(
+        productionNavigation,
+        nativeReadiness: null,
+      );
+      if (homeSurfaceBuilder != null) {
+        return _buildCustomHome(
+          context,
+          homeSurfaceBuilder,
+          demoNavigation,
+          readyProductionNavigation,
+        );
+      }
       return _buildDefaultHome(
         context,
         demoNavigation,
-        _homeNavigationForReadiness(
-          productionNavigation,
-          nativeReadiness: null,
-        ),
+        readyProductionNavigation,
         hasProductionNavigation: productionNavigation.isNotEmpty,
         nativeReadiness: null,
       );
@@ -442,18 +440,46 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       future: _nativeReadinessFor(nativeReadinessLoader),
       builder: (context, snapshot) {
         final nativeReadiness = snapshot.data;
+        final readyProductionNavigation = _homeNavigationForReadiness(
+          productionNavigation,
+          nativeReadiness: nativeReadiness,
+        );
+        if (homeSurfaceBuilder != null) {
+          return _buildCustomHome(
+            context,
+            homeSurfaceBuilder,
+            demoNavigation,
+            readyProductionNavigation,
+          );
+        }
         return _buildDefaultHome(
           context,
           demoNavigation,
-          _homeNavigationForReadiness(
-            productionNavigation,
-            nativeReadiness: nativeReadiness,
-          ),
+          readyProductionNavigation,
           hasProductionNavigation: productionNavigation.isNotEmpty,
           nativeReadiness: nativeReadiness,
         );
       },
     );
+  }
+
+  Widget _buildCustomHome(
+    BuildContext context,
+    PeerDealHomeSurfaceBuilder homeSurfaceBuilder,
+    List<PeerDealAppNavigationEntry> demoNavigation,
+    List<PeerDealAppNavigationEntry> productionNavigation,
+  ) {
+    try {
+      return homeSurfaceBuilder(
+        context,
+        _homeNavigationEntries(
+          demoNavigation: demoNavigation,
+          productionNavigation: productionNavigation,
+        ),
+      );
+    } catch (_) {
+      return const AppRouteFallbackScreen(routeName: DemoSliceRoutes.home);
+    }
   }
 
   Widget _buildDefaultHome(

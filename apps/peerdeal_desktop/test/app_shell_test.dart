@@ -1371,6 +1371,53 @@ void main() {
     expect(homePaths, <String>[DemoSliceRoutes.table, '/table-live']);
   });
 
+  testWidgets('filters unready native production navigation for custom home', (
+    tester,
+  ) async {
+    var homePaths = const <String>[];
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          nativeReadinessRequiredRoutePaths: const <String>{'/table-live'},
+          nativeReadinessLoader: AppNativeReadinessLoader(
+            captureProtectionBridge: const _StaticCaptureProtectionBridge(
+              capability: CaptureProtectionCapability.unavailable(),
+            ),
+            localNetworkBridge: const _StaticLocalNetworkBridge(
+              capability: LocalNetworkCapability.unavailable(),
+            ),
+            nativeTransportBridge: const _StaticNativeTransportBridge(
+              capability: NativeTransportCapability.unavailable(),
+            ),
+            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              snapshot: SecureKeyStorageSnapshot.unavailable(),
+            ),
+          ),
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live table',
+              path: '/table-live',
+            ),
+          ],
+          homeSurfaceBuilder: (context, navigation) {
+            homePaths = navigation.map((entry) => entry.path).toList();
+            return const Text('Production home surface');
+          },
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Production home surface'), findsOneWidget);
+    expect(homePaths, isEmpty);
+  });
+
   testWidgets('fails closed when app-owned home surface builder throws', (
     tester,
   ) async {
