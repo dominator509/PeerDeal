@@ -445,6 +445,9 @@ the gates below are satisfied.
   factory when one is supplied, load the active scenario recovery window, and
   fail closed with an explicit warning when no platform persistence root is
   available.
+- Mounted table surfaces now scrub app-owned bootstrap and recovery
+  persistence warning text before rendering, replacing malformed display
+  warnings with stable generic warning text.
 - Mounted app table routes now receive app-owned runtime scope factories for
   bootstrap and recovery persistence lookup, so production table/session scope
   can enter from the app shell boundary instead of relying on hardcoded demo
@@ -532,6 +535,7 @@ the gates below are satisfied.
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned
   local-network discovery list validation,
+  app-owned table warning rendering scrubbing,
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are

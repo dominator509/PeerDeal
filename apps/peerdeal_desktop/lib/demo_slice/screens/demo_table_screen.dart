@@ -206,7 +206,9 @@ class DemoTableScreen extends StatelessWidget {
               'Bootstrap route: ${bootstrap!.candidates.first.routeClass.name}',
             ),
           if (bootstrap != null && bootstrap!.warnings.isNotEmpty)
-            Text('Bootstrap warning: ${bootstrap!.warnings.first}'),
+            Text(
+              'Bootstrap warning: ${_safeTableWarning(bootstrap!.warnings.first, fallback: 'Local network bootstrap warning unavailable.')}',
+            ),
           if (recoveryPersistenceLoading)
             const Text('Recovery persistence: loading')
           else if (recoveryPersistence == null ||
@@ -221,7 +223,7 @@ class DemoTableScreen extends StatelessWidget {
               recoveryPersistence!.warnings.isNotEmpty)
             Text(
               'Recovery persistence warning: '
-              '${recoveryPersistence!.warnings.first}',
+              '${_safeTableWarning(recoveryPersistence!.warnings.first, fallback: 'Recovery persistence warning unavailable.')}',
             ),
           PeerDealInfoRow(
             label: 'Receipt',
@@ -232,6 +234,20 @@ class DemoTableScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+String _safeTableWarning(String warning, {required String fallback}) {
+  if (warning.trim() != warning || warning.isEmpty || warning.length > 96) {
+    return fallback;
+  }
+  final lower = warning.toLowerCase();
+  if (lower.contains('secret') || lower.contains('token')) {
+    return fallback;
+  }
+  final isPrintable = warning.codeUnits.every(
+    (codeUnit) => codeUnit >= 0x20 && codeUnit != 0x5C && codeUnit != 0x7F,
+  );
+  return isPrintable ? warning : fallback;
 }
 
 class DemoRecoveryPersistenceLoadResult {

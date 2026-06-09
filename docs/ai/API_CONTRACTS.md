@@ -133,7 +133,8 @@ accepts an injected root directory factory, and the mobile/desktop shells may
 default it from `PEERDEAL_RECOVERY_ROOT`. Blank, missing, or throwing roots fail
 closed before mounted table routes load recovery windows. App-provided roots
 and environment-provided roots must also be unpadded and free of control
-characters before a durable JSON store is constructed.
+characters before a durable JSON store is constructed. Mounted table surfaces
+scrub bootstrap and recovery persistence warning text before rendering.
 
 ## Local Network Bootstrap Boundary
 

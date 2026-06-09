@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Table Warning Rendering Scrub
+
+Summary:
+Hardened mobile and desktop mounted table surfaces so bootstrap and recovery
+persistence warnings are scrubbed before rendering. Unsafe warning strings
+containing paths, tokens, control characters, padding, or excessive length now
+render stable generic warning text, while existing safe app warnings continue
+to display unchanged.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_table_screen_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_table_screen_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\demo_slice\demo_table_screen_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\demo_slice\demo_table_screen_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks table warning rendering only; production transport, native
+  persistence implementations, and final production UI validation remain
+  pending.
+
+Next reviewer:
+Codex should continue with the next production-readiness gap.
+
+---
+
 ### 2026-06-09 - Codex - Join Outcome Scrubbing Gate
 
 Summary:
