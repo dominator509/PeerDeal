@@ -482,6 +482,9 @@ the gates below are satisfied.
 - Mounted demo route allowlists now reject blank or padded enabled-route paths
   before route matching, preventing ambiguous production route gates from
   silently enabling demo surfaces.
+- Mounted demo route allowlists now also enforce bounded canonical `/demo`
+  paths, reject control, query, fragment, duplicate-slash, and backslash
+  metadata, and avoid echoing unknown supplied paths in failure messages.
 - App shells now accept validated app-owned production route maps through the
   mobile and desktop runtime objects, reserving `/demo/*` for the demo registry
   while allowing non-demo flows to mount without editing shared package or demo
@@ -526,6 +529,7 @@ the gates below are satisfied.
   app-owned route runtime dependency grouping, app-owned table runtime-scope
   injection, canonical app-route
   registry validation, exact app-owned enabled-route allowlists,
+  bounded app-owned enabled-route allowlist metadata,
   app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
   app-owned join invite-context injection, route-level join input validation,

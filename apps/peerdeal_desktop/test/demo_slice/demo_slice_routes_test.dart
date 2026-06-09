@@ -72,6 +72,36 @@ void main() {
       }),
       throwsA(isA<StateError>()),
     );
+    expect(
+      () => DemoSliceRoutes.enabledMountedRoutes(const <String>{
+        DemoSliceRoutes.home,
+        r'/demo\table',
+      }),
+      throwsA(isA<StateError>()),
+    );
+    expect(
+      () => DemoSliceRoutes.enabledMountedRoutes(<String>{
+        DemoSliceRoutes.home,
+        '/demo/${List.filled(120, 'a').join()}',
+      }),
+      throwsA(isA<StateError>()),
+    );
+  });
+
+  test('enabled mounted route subset does not echo unknown paths', () {
+    expect(
+      () => DemoSliceRoutes.enabledMountedRoutes(const <String>{
+        DemoSliceRoutes.home,
+        '/demo/missing-secret-token',
+      }),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.toString(),
+          'message',
+          isNot(contains('missing-secret-token')),
+        ),
+      ),
+    );
   });
 
   test('route map validation accepts mounted routes and explicit aliases', () {
@@ -123,6 +153,7 @@ void main() {
           isNot(contains('?')),
           isNot(contains('#')),
           isNot(contains('//')),
+          isNot(contains(r'\')),
         ),
       ),
     );

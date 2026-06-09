@@ -75,6 +75,9 @@ default-route alias. App runtime objects may also provide validated non-demo
 production route maps; `/demo/*` stays reserved for the demo registry.
 Enabled demo route allowlists must use exact, nonblank route paths; padded
 allowlist entries fail closed before route matching.
+Enabled demo route allowlists must also use bounded canonical `/demo` route
+paths with no query, fragment, duplicate slash, backslash, or control
+characters. Unknown enabled demo paths fail without echoing the supplied path.
 Runtime objects may set the initial route only to `/`, an enabled demo route,
 or a validated production route. Runtime objects may also expose validated
 production navigation descriptors whose paths must reference mounted production

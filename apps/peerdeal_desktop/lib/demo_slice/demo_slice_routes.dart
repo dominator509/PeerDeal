@@ -1,4 +1,6 @@
 class DemoSliceRoutes {
+  static const int _maxRoutePathLength = 96;
+
   static const home = '/demo';
   static const table = '/demo/table';
   static const chat = '/demo/chat';
@@ -68,7 +70,7 @@ class DemoSliceRoutes {
     if (enabledRoutePaths == null) return mountedRoutes;
 
     final malformedPaths = enabledRoutePaths
-        .where((path) => path.trim().isEmpty || path.trim() != path)
+        .where((path) => !_isCanonicalMountedPath(path))
         .toList(growable: false);
 
     if (malformedPaths.isNotEmpty) {
@@ -81,10 +83,7 @@ class DemoSliceRoutes {
       ..sort();
 
     if (unknownPaths.isNotEmpty) {
-      throw StateError(
-        'Enabled demo route paths contain unknown routes: '
-        '${unknownPaths.join(', ')}.',
-      );
+      throw StateError('Enabled demo route paths contain unknown routes.');
     }
     if (!requestedPaths.contains(home)) {
       throw StateError('Enabled demo route paths must include the home route.');
@@ -176,11 +175,16 @@ class DemoSliceRoutes {
   }
 
   static bool _isCanonicalMountedPath(String path) {
-    return path.startsWith('/demo') &&
+    return path.trim() == path &&
+        path.isNotEmpty &&
+        path.length <= _maxRoutePathLength &&
+        path.startsWith('/demo') &&
         !path.endsWith('/') &&
         !path.contains('?') &&
         !path.contains('#') &&
-        !path.contains('//');
+        !path.contains('//') &&
+        !path.contains(r'\') &&
+        !path.codeUnits.any((codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F);
   }
 }
 
