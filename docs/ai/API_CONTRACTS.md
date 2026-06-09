@@ -83,7 +83,8 @@ receives validated home navigation entries and may replace the default demo
 home surface; builder failures render the existing route-unavailable fallback.
 Production route paths and startup routes must not contain control characters
 or whitespace, and production navigation labels must not contain control
-characters.
+characters. Production navigation labels and paths must not collide with
+enabled demo home navigation entries when the app composes the home surface.
 Production navigation and home composition remain app-shell work and should
 replace or extend app routes without moving route policy into shared packages.
 Join routes and join flow orchestration reject blank or padded app-owned invite

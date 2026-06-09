@@ -476,6 +476,9 @@ the gates below are satisfied.
 - App shells now reject unsafe control or whitespace characters in production
   route paths, production navigation labels, and startup routes before route
   maps are mounted.
+- App shells now reject production navigation entries whose labels or paths
+  collide with enabled demo home navigation before the home surface is built,
+  keeping composed app home actions unambiguous.
 - App shells now accept a validated app-owned initial route through the mobile
   and desktop runtime objects, so production callers can boot directly into a
   mounted non-demo route while disabled or malformed startup routes fail closed
@@ -509,7 +512,8 @@ the gates below are satisfied.
   app-owned join input validation,
   app-owned receipt envelope injection, app-owned setup intent injection,
   route-level setup identity validation, app-owned setup identity validation,
-  app-owned production route metadata validation,
+  app-owned production route metadata validation, app-owned home navigation
+  collision validation,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,

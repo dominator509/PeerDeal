@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Home Navigation Collision Gate
+
+Summary:
+Hardened mobile and desktop app shells so production navigation descriptors
+cannot reuse labels or paths from enabled demo home navigation. The check runs
+before `WidgetsApp` route construction, and the composed home-navigation list
+keeps a defensive duplicate-metadata gate before reaching the default or
+app-owned home surface.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart` in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks app-owned home navigation metadata only; final product navigation
+  design, platform native implementations, and production UI validation remain
+  pending.
+
+Next reviewer:
+Codex should continue with the next production-readiness gap.
+
+---
+
 ### 2026-06-09 - Codex - Production Route Metadata Gate
 
 Summary:

@@ -261,12 +261,17 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     final enabledRoutePaths = enabledMountedRoutes
         .map((route) => route.path)
         .toSet();
+    final demoNavigation = DemoSliceRoutes.enabledPrimaryNavigation(
+      _runtime.enabledDemoRoutePaths,
+    );
     final productionRoutes = _validatedProductionRoutes(
       _runtime.productionRoutes,
     );
     final productionNavigation = _validatedProductionNavigation(
       _runtime.productionNavigation,
       productionRoutes.keys.toSet(),
+      demoNavigationLabels: demoNavigation.map((route) => route.label).toSet(),
+      demoNavigationPaths: demoNavigation.map((route) => route.path).toSet(),
     );
     final initialRoute = _validatedInitialRoute(
       enabledRoutePaths: enabledRoutePaths,
@@ -400,17 +405,26 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   List<PeerDealAppNavigationEntry> _homeNavigationEntries(
     List<PeerDealAppNavigationEntry> productionNavigation,
   ) {
-    return List<PeerDealAppNavigationEntry>.unmodifiable(
-      <PeerDealAppNavigationEntry>[
-        ...DemoSliceRoutes.enabledPrimaryNavigation(
-          _runtime.enabledDemoRoutePaths,
-        ).map(
-          (route) =>
-              PeerDealAppNavigationEntry(label: route.label, path: route.path),
-        ),
-        ...productionNavigation,
-      ],
-    );
+    final labels = <String>{};
+    final paths = <String>{};
+    final combined = <PeerDealAppNavigationEntry>[];
+
+    for (final entry in <PeerDealAppNavigationEntry>[
+      ...DemoSliceRoutes.enabledPrimaryNavigation(
+        _runtime.enabledDemoRoutePaths,
+      ).map(
+        (route) =>
+            PeerDealAppNavigationEntry(label: route.label, path: route.path),
+      ),
+      ...productionNavigation,
+    ]) {
+      if (!labels.add(entry.label) || !paths.add(entry.path)) {
+        throw StateError('Home navigation contains duplicate metadata.');
+      }
+      combined.add(entry);
+    }
+
+    return List<PeerDealAppNavigationEntry>.unmodifiable(combined);
   }
 
   void _selectScenario(String scenarioId) {
@@ -454,8 +468,10 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
 
   List<PeerDealAppNavigationEntry> _validatedProductionNavigation(
     List<PeerDealAppNavigationEntry>? navigation,
-    Set<String> productionRoutePaths,
-  ) {
+    Set<String> productionRoutePaths, {
+    required Set<String> demoNavigationLabels,
+    required Set<String> demoNavigationPaths,
+  }) {
     if (navigation == null || navigation.isEmpty) {
       return const <PeerDealAppNavigationEntry>[];
     }
@@ -472,6 +488,8 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           _containsUnsafeLabelCharacter(label) ||
           path != entry.path ||
           !productionRoutePaths.contains(path) ||
+          demoNavigationLabels.contains(label) ||
+          demoNavigationPaths.contains(path) ||
           !labels.add(label) ||
           !paths.add(path)) {
         throw StateError('Production navigation contains invalid metadata.');
