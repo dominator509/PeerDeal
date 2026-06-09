@@ -135,6 +135,9 @@ bootstrap candidate resolution. Invalid caps fail closed for table loading and
 fall back to relay-only join bootstrap plans. Invalid app-owned session/table
 bootstrap scope, including padded values, must fail closed or fall back before
 native capability lookup.
+Discovery `foundEndpoints` and `interfaceHints` lists must contain real
+non-empty strings; malformed platform list entries are dropped rather than
+coerced.
 
 ## Error Shape
 

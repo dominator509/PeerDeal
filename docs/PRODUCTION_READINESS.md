@@ -223,6 +223,9 @@ the gates below are satisfied.
   discovery warnings, bound native notes/interface hints, and normalize
   native-discovered endpoint ids before mounted table and join bootstrap paths
   pass candidates into `peerdeal_network`.
+- Generic local-network discovery payload decoding now drops malformed endpoint
+  and interface-hint list entries instead of coercing arbitrary platform values
+  into strings.
 - App safe-surface capture coordinators now scrub native warning detail and
   bound native notes before projecting capture plans into UI render models,
   preserving fail-closed obscuring without exposing platform exception text.
@@ -510,6 +513,7 @@ the gates below are satisfied.
   request validation,
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned
+  local-network discovery list validation,
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are

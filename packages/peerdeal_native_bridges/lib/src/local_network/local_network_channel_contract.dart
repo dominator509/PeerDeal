@@ -38,12 +38,8 @@ class LocalNetworkChannelContract {
 
     return LocalNetworkDiscoverySnapshot(
       permissionGranted: _boolValue(payload['permissionGranted']),
-      foundEndpoints: _listValue(
-        payload['foundEndpoints'],
-      ).map((endpoint) => endpoint.toString()).toList(growable: false),
-      interfaceHints: _listValue(
-        payload['interfaceHints'],
-      ).map((hint) => hint.toString()).toList(growable: false),
+      foundEndpoints: _stringListValue(payload['foundEndpoints']),
+      interfaceHints: _stringListValue(payload['interfaceHints']),
       warning: _stringValue(payload['warning']),
     );
   }
@@ -54,4 +50,9 @@ class LocalNetworkChannelContract {
 
   static List<dynamic> _listValue(Object? value) =>
       value is List<dynamic> ? value : const <dynamic>[];
+
+  static List<String> _stringListValue(Object? value) => _listValue(value)
+      .whereType<String>()
+      .where((item) => item.isNotEmpty)
+      .toList(growable: false);
 }

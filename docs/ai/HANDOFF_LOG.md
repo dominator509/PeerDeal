@@ -14,6 +14,41 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Local Network Discovery List Gate
+
+Summary:
+Hardened generic local-network discovery decoding so malformed platform
+`foundEndpoints` and `interfaceHints` entries are dropped instead of coerced
+with `toString()`. This keeps arbitrary platform values out of app-owned
+bootstrap mapping.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/local_network/local_network_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\native_bridge_channel_contract_test.dart test\method_channel_local_network_bridge_test.dart`
+  in `packages/peerdeal_native_bridges`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- This locks Dart/native method-channel list payload validation only; real
+  local-network discovery implementations remain pending.
+
+Next reviewer:
+Continue with the next codable production-readiness gap; real local-network
+discovery implementations remain outside this Dart-only slice.
+
+---
+
 ### 2026-06-09 - Codex - Native Transport Byte Payload Gate
 
 Summary:

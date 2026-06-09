@@ -109,8 +109,12 @@ void main() {
     final snapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(
       const <String, Object?>{
         'permissionGranted': 'true',
-        'foundEndpoints': 'peer_a',
-        'interfaceHints': false,
+        'foundEndpoints': <Object?>['peer_a', 12, false, ''],
+        'interfaceHints': <Object?>[
+          'wifi',
+          <String>['bad'],
+          '',
+        ],
         'warning': <String>['bad'],
       },
     );
@@ -122,8 +126,8 @@ void main() {
     expect(capability.warning, isNull);
 
     expect(snapshot.permissionGranted, isFalse);
-    expect(snapshot.foundEndpoints, isEmpty);
-    expect(snapshot.interfaceHints, isEmpty);
+    expect(snapshot.foundEndpoints, ['peer_a']);
+    expect(snapshot.interfaceHints, ['wifi']);
     expect(snapshot.warning, isNull);
   });
 
