@@ -1196,6 +1196,8 @@ void main() {
     expect(find.text('PeerDeal demo'), findsNothing);
     expect(find.textContaining('Active scenario:'), findsNothing);
     expect(find.text('Demo'), findsNothing);
+    expect(find.text('Production'), findsOneWidget);
+    expect(find.text('Routes unavailable'), findsOneWidget);
     expect(find.text('Native unavailable'), findsOneWidget);
   });
 

@@ -471,6 +471,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
           ? 'Production app routes'
           : 'Fixture-backed app orchestration',
       showDemoScenarios: !productionOnly,
+      hasProductionNavigation: hasProductionNavigation,
       demoNavigationActions: demoNavigation
           .map(
             (route) => DemoHomeNavigationAction(

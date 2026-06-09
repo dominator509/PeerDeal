@@ -636,6 +636,9 @@ the gates below are satisfied.
 - Production-only default app home surfaces keep that production presentation
   even when native-readiness filtering temporarily hides every protected
   production navigation action.
+- Production-only default app home surfaces now render a stable production
+  "routes unavailable" state when app-owned production navigation exists but
+  no production action is currently launchable.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -683,6 +686,7 @@ the gates below are satisfied.
   app-owned default-home production/demo navigation sectioning,
   app-owned production-only default-home demo suppression,
   app-owned production-only native-readiness empty-action handling,
+  app-owned production-only empty-action status rendering,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,

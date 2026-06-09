@@ -12,6 +12,7 @@ class DemoHomeScreen extends StatelessWidget {
     required this.demoNavigationActions,
     required this.productionNavigationActions,
     required this.onSelectScenario,
+    this.hasProductionNavigation = false,
     this.title = 'PeerDeal demo',
     this.subtitle = 'Fixture-backed app orchestration',
     this.showDemoScenarios = true,
@@ -22,6 +23,7 @@ class DemoHomeScreen extends StatelessWidget {
   final List<DemoHomeNavigationAction> demoNavigationActions;
   final List<DemoHomeNavigationAction> productionNavigationActions;
   final ValueChanged<String> onSelectScenario;
+  final bool hasProductionNavigation;
   final String title;
   final String subtitle;
   final bool showDemoScenarios;
@@ -52,6 +54,12 @@ class DemoHomeScreen extends StatelessWidget {
             _NavigationSection(
               title: 'Production',
               actions: productionNavigationActions,
+            ),
+            const SizedBox(height: 12),
+          ] else if (hasProductionNavigation) ...<Widget>[
+            const PeerDealInfoRow(
+              label: 'Production',
+              value: 'Routes unavailable',
             ),
             const SizedBox(height: 12),
           ],
