@@ -125,11 +125,7 @@ class DemoSliceRoutes {
           ..sort();
 
     if (missingPaths.isNotEmpty || extraPaths.isNotEmpty) {
-      throw StateError(
-        'Mounted demo route map drifted from route registry. '
-        'Missing: ${missingPaths.join(', ')}. '
-        'Extra: ${extraPaths.join(', ')}.',
-      );
+      throw StateError('Mounted demo route map drifted from route registry.');
     }
 
     return Map<String, T>.unmodifiable(routes);

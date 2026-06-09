@@ -187,12 +187,18 @@ void main() {
   test('route map validation rejects unexpected routes', () {
     final routes = <String, int>{
       for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,
-      '/unexpected': 1,
+      '/unexpected-secret-token': 1,
     };
 
     expect(
       () => DemoSliceRoutes.requireMountedRouteMap(routes),
-      throwsA(isA<StateError>()),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.toString(),
+          'message',
+          isNot(contains('unexpected-secret-token')),
+        ),
+      ),
     );
   });
 }

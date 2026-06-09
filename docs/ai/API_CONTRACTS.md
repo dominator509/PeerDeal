@@ -78,6 +78,8 @@ allowlist entries fail closed before route matching.
 Enabled demo route allowlists must also use bounded canonical `/demo` route
 paths with no query, fragment, duplicate slash, backslash, or control
 characters. Unknown enabled demo paths fail without echoing the supplied path.
+Mounted demo route-map drift validation must fail with stable generic
+diagnostics rather than echoing supplied unexpected route keys.
 Runtime objects may set the initial route only to `/`, an enabled demo route,
 or a validated production route. Runtime objects may also expose validated
 production navigation descriptors whose paths must reference mounted production

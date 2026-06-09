@@ -485,6 +485,8 @@ the gates below are satisfied.
 - Mounted demo route allowlists now also enforce bounded canonical `/demo`
   paths, reject control, query, fragment, duplicate-slash, and backslash
   metadata, and avoid echoing unknown supplied paths in failure messages.
+- Mounted demo route-map drift validation now fails with stable generic
+  diagnostics instead of echoing missing or unexpected route keys.
 - App shells now accept validated app-owned production route maps through the
   mobile and desktop runtime objects, reserving `/demo/*` for the demo registry
   while allowing non-demo flows to mount without editing shared package or demo
@@ -530,6 +532,7 @@ the gates below are satisfied.
   injection, canonical app-route
   registry validation, exact app-owned enabled-route allowlists,
   bounded app-owned enabled-route allowlist metadata,
+  app-owned route-map drift diagnostic scrubbing,
   app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,
   app-owned join invite-context injection, route-level join input validation,
