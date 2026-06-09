@@ -14,6 +14,40 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Native Transport Byte Payload Gate
+
+Summary:
+Hardened the generic native transport frame model so platform-bound native
+transport sends reject payload lists containing values outside the byte range,
+matching the receive decoder's fail-closed byte-payload contract.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_bridge_models.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_native_transport_bridge_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\native_bridge_channel_contract_test.dart test\method_channel_native_transport_bridge_test.dart`
+  in `packages/peerdeal_native_bridges`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- This locks Dart/native method-channel payload validation only; live platform
+  transport implementations remain pending.
+
+Next reviewer:
+Continue with the next codable production-readiness gap; live platform
+transport implementations remain outside this Dart-only slice.
+
+---
+
 ### 2026-06-09 - Codex - Native Transport Sequence Gate
 
 Summary:

@@ -113,6 +113,8 @@ The generic native transport method-channel bridge also rejects padded send
 frame and receive scope identities before platform calls. Native transport
 frames must carry positive sequence numbers; zero or negative sequence values
 fail before platform sends and are dropped during receive-snapshot decoding.
+Native transport payload lists must contain only byte values from 0 through 255;
+invalid outbound payloads fail before platform sends.
 
 ## Recovery Persistence Boundary
 

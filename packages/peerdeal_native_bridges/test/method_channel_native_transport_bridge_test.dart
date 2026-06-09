@@ -185,12 +185,22 @@ void main() {
         payloadBytes: <int>[1],
       ),
     );
+    final invalidPayloadSend = await bridge.sendFrame(
+      const NativeTransportFrame(
+        sessionId: 'session_1',
+        senderPeerId: 'peer_a',
+        recipientPeerId: 'peer_b',
+        sequence: 1,
+        payloadBytes: <int>[1, 256],
+      ),
+    );
 
     expect(send.isSuccess, isFalse);
     expect(receive.available, isFalse);
     expect(paddedSend.isSuccess, isFalse);
     expect(paddedReceive.available, isFalse);
     expect(zeroSequenceSend.isSuccess, isFalse);
+    expect(invalidPayloadSend.isSuccess, isFalse);
     expect(log, isEmpty);
   });
 }
