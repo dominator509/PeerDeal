@@ -143,9 +143,13 @@ class DemoSliceRoutes {
       throw StateError('Allowed extra route paths contain too many routes.');
     }
 
+    final lowerPaths = <String>{};
     for (final path in allowedExtraPaths) {
-      if (path == '/') continue;
       final lowerPath = path.toLowerCase();
+      if (!lowerPaths.add(lowerPath)) {
+        throw StateError('Allowed extra route paths contain duplicate routes.');
+      }
+      if (path == '/') continue;
       if (path.trim() != path ||
           path.isEmpty ||
           path.length > _maxRoutePathLength ||

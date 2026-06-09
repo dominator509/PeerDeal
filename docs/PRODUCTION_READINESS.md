@@ -595,6 +595,8 @@ the gates below are satisfied.
 - App-owned production route paths and demo route-map allowed extra paths now
   reserve the `/demo` namespace case-insensitively, preventing production
   extensions from mounting paths that case-collide with demo routes.
+- Demo route-map allowed extra paths now reject case-insensitive duplicate
+  production extension paths before mounted route maps are accepted.
 - App-owned production route maps and production home navigation descriptors
   now enforce explicit collection-size caps before app route maps or home
   navigation are built, preventing oversized production extension injection
@@ -627,6 +629,7 @@ the gates below are satisfied.
   bounded app-owned enabled-route allowlist metadata,
   app-owned route-map allowed-extra path validation, app-owned demo
   route-extension collection bounding,
+  app-owned route-map allowed-extra case-collision validation,
   app-owned route-map drift diagnostic scrubbing,
   app-owned unknown-route sensitive diagnostic suppression,
   app-owned production route-map extension, app-owned

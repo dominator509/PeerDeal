@@ -167,6 +167,22 @@ void main() {
     );
   });
 
+  test('route map validation rejects case-colliding allowed extra paths', () {
+    final routes = <String, int>{
+      for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,
+      '/table-live': 1,
+      '/Table-Live': 1,
+    };
+
+    expect(
+      () => DemoSliceRoutes.requireMountedRouteMap(
+        routes,
+        allowedExtraPaths: const <String>{'/table-live', '/Table-Live'},
+      ),
+      throwsA(isA<StateError>()),
+    );
+  });
+
   test('route map validation rejects excessive allowed extra paths', () {
     final routes = <String, int>{
       for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,

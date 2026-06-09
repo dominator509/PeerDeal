@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Reject Allowed Extra Route Case Collisions
+
+Summary:
+Hardened mobile and desktop demo route-map allowed-extra validation so
+case-variant production extension paths cannot both be admitted as explicit
+route-map aliases.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_slice_routes_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/demo_slice_routes.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_slice_routes_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test/demo_slice/demo_slice_routes_test.dart`
+  in `apps/peerdeal_mobile`
+- `dart test test/demo_slice/demo_slice_routes_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Production non-demo route implementation remains app-owned; this locks the
+  demo route-map extension validation boundary only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Reload Mounted Flow Dependencies
 
 Summary:
