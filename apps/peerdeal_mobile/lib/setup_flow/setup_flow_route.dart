@@ -95,7 +95,9 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
       final invalidIntent = _invalidSetupIntentOutcome(intent);
       if (invalidIntent != null) return invalidIntent;
 
-      return widget._orchestratorFactory().compileSetup(intent: intent);
+      return _safeSetupOutcome(
+        widget._orchestratorFactory().compileSetup(intent: intent),
+      );
     } on Object {
       return const SetupFlowOutcome(
         status: SetupFlowStatus.rejected,
@@ -139,6 +141,55 @@ SetupFlowOutcome? _invalidSetupIntentOutcome(SetupIntent intent) {
   );
 }
 
+SetupFlowOutcome _safeSetupOutcome(SetupFlowOutcome outcome) {
+  if (!_isSafeSetupToken(outcome.resultCode)) {
+    return const SetupFlowOutcome(
+      status: SetupFlowStatus.rejected,
+      resultCode: 'ERR_SETUP_OUTCOME_INVALID',
+      errors: <String>['setup_outcome_invalid'],
+    );
+  }
+
+  return SetupFlowOutcome(
+    status: outcome.status,
+    resultCode: outcome.resultCode,
+    gameFile: outcome.gameFile,
+    errors: _safeSetupMessages(
+      outcome.errors,
+      fallback: 'setup_error_unavailable',
+    ),
+    warnings: _safeSetupMessages(
+      outcome.warnings,
+      fallback: 'setup_warning_unavailable',
+    ),
+  );
+}
+
+List<String> _safeSetupMessages(
+  List<String> messages, {
+  required String fallback,
+}) {
+  return List<String>.unmodifiable(
+    messages.map((message) => _isSafeSetupToken(message) ? message : fallback),
+  );
+}
+
+bool _isSafeSetupToken(String value) {
+  if (value.trim() != value || value.isEmpty || value.length > 80) {
+    return false;
+  }
+  return value.codeUnits.every(_isSafeSetupTokenCodeUnit);
+}
+
+bool _isSafeSetupTokenCodeUnit(int codeUnit) {
+  return (codeUnit >= 0x30 && codeUnit <= 0x39) ||
+      (codeUnit >= 0x41 && codeUnit <= 0x5A) ||
+      (codeUnit >= 0x61 && codeUnit <= 0x7A) ||
+      codeUnit == 0x2D ||
+      codeUnit == 0x2E ||
+      codeUnit == 0x5F;
+}
+
 SetupIntent _defaultSetupIntentFor(SetupFlowDemoMode mode) {
   if (mode == SetupFlowDemoMode.invalid) {
     return const SetupIntent(
@@ -173,10 +224,16 @@ class _SetupOutcomeView extends StatelessWidget {
         PeerDealInfoRow(label: 'Result', value: outcome.resultCode),
         Text('Result: ${outcome.resultCode}'),
         if (outcome.gameFile != null)
-          Text('Game File: ${outcome.gameFile?['game_file_version']}'),
+          Text(
+            'Game File: ${_safeGameFileVersion(outcome.gameFile?['game_file_version'])}',
+          ),
         for (final error in outcome.errors) Text('Error: $error'),
         for (final warning in outcome.warnings) Text('Warning: $warning'),
       ],
     );
   }
+}
+
+String _safeGameFileVersion(Object? value) {
+  return value is String && _isSafeSetupToken(value) ? value : 'unavailable';
 }

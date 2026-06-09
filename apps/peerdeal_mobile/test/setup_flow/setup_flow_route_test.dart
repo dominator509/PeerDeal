@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:peerdeal_mobile/setup_flow/setup_flow_models.dart';
 import 'package:peerdeal_mobile/setup_flow/setup_flow_orchestrator.dart';
 import 'package:peerdeal_mobile/setup_flow/setup_flow_route.dart';
 import 'package:peerdeal_wizard/peerdeal_wizard.dart';
@@ -196,4 +197,77 @@ void main() {
     expect(find.text('Result: ERR_SETUP_FLOW_UNAVAILABLE'), findsOneWidget);
     expect(find.text('Error: setup_flow_unavailable'), findsOneWidget);
   });
+
+  testWidgets('scrubs injected setup outcome before rendering', (tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF1B5E20),
+        builder: (_, _) => SetupFlowRoute(
+          orchestratorFactory: () => const _LeakySetupFlowOrchestrator(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: compiled'), findsOneWidget);
+    expect(find.text('Result: OK_GAME_FILE_COMPILED'), findsOneWidget);
+    expect(find.text('Game File: unavailable'), findsOneWidget);
+    expect(find.text('Error: setup_error_unavailable'), findsOneWidget);
+    expect(find.text('Warning: setup_warning_unavailable'), findsOneWidget);
+    expect(find.textContaining('secret'), findsNothing);
+    expect(find.textContaining('token'), findsNothing);
+  });
+
+  testWidgets('rejects unsafe injected setup result codes', (tester) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF1B5E20),
+        builder: (_, _) => SetupFlowRoute(
+          orchestratorFactory: () => const _UnsafeResultSetupFlowOrchestrator(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Status: rejected'), findsOneWidget);
+    expect(find.text('Result: ERR_SETUP_OUTCOME_INVALID'), findsOneWidget);
+    expect(find.text('Error: setup_outcome_invalid'), findsOneWidget);
+    expect(find.textContaining('secret'), findsNothing);
+  });
+}
+
+class _LeakySetupFlowOrchestrator extends SetupFlowOrchestrator {
+  const _LeakySetupFlowOrchestrator();
+
+  @override
+  SetupFlowOutcome compileSetup({
+    required SetupIntent intent,
+    List<PresetLayer> presetLayers = const <PresetLayer>[],
+  }) {
+    return const SetupFlowOutcome(
+      status: SetupFlowStatus.compiled,
+      resultCode: 'OK_GAME_FILE_COMPILED',
+      gameFile: <String, Object?>{'game_file_version': r'C:\secret\gamefile'},
+      errors: <String>[r'C:\secret\setup.log'],
+      warnings: <String>['token sk-demo-secret'],
+    );
+  }
+}
+
+class _UnsafeResultSetupFlowOrchestrator extends SetupFlowOrchestrator {
+  const _UnsafeResultSetupFlowOrchestrator();
+
+  @override
+  SetupFlowOutcome compileSetup({
+    required SetupIntent intent,
+    List<PresetLayer> presetLayers = const <PresetLayer>[],
+  }) {
+    return const SetupFlowOutcome(
+      status: SetupFlowStatus.compiled,
+      resultCode: r'OK C:\secret',
+      errors: <String>[r'C:\secret\setup.log'],
+    );
+  }
 }

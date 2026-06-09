@@ -14,6 +14,46 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Setup Outcome Scrubbing Gate
+
+Summary:
+Hardened mobile and desktop setup routes so app-owned setup orchestrator
+outcomes cannot render arbitrary result codes, errors, warnings, or Game File
+version strings. Unsafe result codes now fail closed to
+`ERR_SETUP_OUTCOME_INVALID`, while unsafe displayed errors/warnings/version
+values are replaced with stable generic safe codes.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_mobile/test/setup_flow/setup_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/setup_flow/setup_flow_route.dart`
+- `apps/peerdeal_desktop/test/setup_flow/setup_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\setup_flow\setup_flow_route_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\setup_flow\setup_flow_route_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks route-level setup outcome rendering only; final production setup
+  UX, native implementations, and production UI validation remain pending.
+
+Next reviewer:
+Codex should continue with the next production-readiness gap.
+
+---
+
 ### 2026-06-09 - Codex - Home Navigation Collision Gate
 
 Summary:

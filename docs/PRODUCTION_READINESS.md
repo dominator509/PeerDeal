@@ -462,6 +462,9 @@ the gates below are satisfied.
 - Mounted join and setup routes now accept app-owned enabled-mode gates through
   the mobile and desktop runtime objects, so production callers can hide demo
   branches and fail closed when disabled route modes are requested.
+- Mounted setup routes now scrub app-owned setup outcome result codes, errors,
+  warnings, and displayed Game File versions before rendering, replacing
+  malformed metadata with generic safe codes and rejecting unsafe result codes.
 - Mounted demo routes now accept app-owned enabled-route gates through the
   mobile and desktop runtime objects, so production callers can expose only
   explicitly allowed dev/demo paths while disabled route requests fall through
@@ -512,8 +515,8 @@ the gates below are satisfied.
   app-owned join input validation,
   app-owned receipt envelope injection, app-owned setup intent injection,
   route-level setup identity validation, app-owned setup identity validation,
-  app-owned production route metadata validation, app-owned home navigation
-  collision validation,
+  app-owned setup outcome diagnostic scrubbing, app-owned production route
+  metadata validation, app-owned home navigation collision validation,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
