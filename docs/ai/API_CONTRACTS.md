@@ -137,6 +137,9 @@ capabilities ready.
 Default home surfaces must also hide production navigation actions whose paths
 require native readiness until the same readiness snapshot passes. Custom home
 builders remain app-owned and receive validated navigation entries directly.
+Default home surfaces must render production navigation separately from enabled
+demo navigation; custom home builders continue to receive the combined
+validated navigation entries directly.
 Shared safe-surface render models must scrub and bound injected capture warning
 and native-note text before exposing render state to app UI.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning

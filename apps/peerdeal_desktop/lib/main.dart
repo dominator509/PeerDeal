@@ -412,7 +412,11 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     BuildContext context,
     List<PeerDealAppNavigationEntry> productionNavigation,
   ) {
-    final navigation = _homeNavigationEntries(productionNavigation);
+    final demoNavigation = _demoHomeNavigationEntries();
+    final navigation = _homeNavigationEntries(
+      demoNavigation: demoNavigation,
+      productionNavigation: productionNavigation,
+    );
     final homeSurfaceBuilder = _runtime.homeSurfaceBuilder;
     if (homeSurfaceBuilder != null) {
       try {
@@ -425,7 +429,11 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     if (nativeReadinessLoader == null) {
       return _buildDefaultHome(
         context,
-        _homeNavigationForReadiness(navigation, nativeReadiness: null),
+        demoNavigation,
+        _homeNavigationForReadiness(
+          productionNavigation,
+          nativeReadiness: null,
+        ),
         nativeReadiness: null,
       );
     }
@@ -435,8 +443,9 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
         final nativeReadiness = snapshot.data;
         return _buildDefaultHome(
           context,
+          demoNavigation,
           _homeNavigationForReadiness(
-            navigation,
+            productionNavigation,
             nativeReadiness: nativeReadiness,
           ),
           nativeReadiness: nativeReadiness,
@@ -447,12 +456,21 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
 
   Widget _buildDefaultHome(
     BuildContext context,
-    List<PeerDealAppNavigationEntry> navigation, {
+    List<PeerDealAppNavigationEntry> demoNavigation,
+    List<PeerDealAppNavigationEntry> productionNavigation, {
     required AppNativeReadinessSnapshot? nativeReadiness,
   }) {
     return DemoHomeScreen(
       controller: _controller,
-      navigationActions: navigation
+      demoNavigationActions: demoNavigation
+          .map(
+            (route) => DemoHomeNavigationAction(
+              label: route.label,
+              onPressed: () => Navigator.of(context).pushNamed(route.path),
+            ),
+          )
+          .toList(growable: false),
+      productionNavigationActions: productionNavigation
           .map(
             (route) => DemoHomeNavigationAction(
               label: route.label,
@@ -497,20 +515,16 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     return _nativeReadinessFuture!;
   }
 
-  List<PeerDealAppNavigationEntry> _homeNavigationEntries(
-    List<PeerDealAppNavigationEntry> productionNavigation,
-  ) {
+  List<PeerDealAppNavigationEntry> _homeNavigationEntries({
+    required List<PeerDealAppNavigationEntry> demoNavigation,
+    required List<PeerDealAppNavigationEntry> productionNavigation,
+  }) {
     final labels = <String>{};
     final paths = <String>{};
     final combined = <PeerDealAppNavigationEntry>[];
 
     for (final entry in <PeerDealAppNavigationEntry>[
-      ...DemoSliceRoutes.enabledPrimaryNavigation(
-        _runtime.enabledDemoRoutePaths,
-      ).map(
-        (route) =>
-            PeerDealAppNavigationEntry(label: route.label, path: route.path),
-      ),
+      ...demoNavigation,
       ...productionNavigation,
     ]) {
       if (!labels.add(entry.label) || !paths.add(entry.path)) {
@@ -520,6 +534,17 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     }
 
     return List<PeerDealAppNavigationEntry>.unmodifiable(combined);
+  }
+
+  List<PeerDealAppNavigationEntry> _demoHomeNavigationEntries() {
+    return List<PeerDealAppNavigationEntry>.unmodifiable(
+      DemoSliceRoutes.enabledPrimaryNavigation(
+        _runtime.enabledDemoRoutePaths,
+      ).map(
+        (route) =>
+            PeerDealAppNavigationEntry(label: route.label, path: route.path),
+      ),
+    );
   }
 
   void _selectScenario(String scenarioId) {

@@ -9,13 +9,15 @@ class DemoHomeScreen extends StatelessWidget {
   const DemoHomeScreen({
     super.key,
     required this.controller,
-    required this.navigationActions,
+    required this.demoNavigationActions,
+    required this.productionNavigationActions,
     required this.onSelectScenario,
     this.nativeReadiness,
   });
 
   final DemoSliceController controller;
-  final List<DemoHomeNavigationAction> navigationActions;
+  final List<DemoHomeNavigationAction> demoNavigationActions;
+  final List<DemoHomeNavigationAction> productionNavigationActions;
   final ValueChanged<String> onSelectScenario;
   final AppNativeReadinessSnapshot? nativeReadiness;
 
@@ -24,14 +26,6 @@ class DemoHomeScreen extends StatelessWidget {
     return PeerDealAppScaffold(
       title: 'PeerDeal demo',
       subtitle: 'Fixture-backed app orchestration',
-      actions: navigationActions
-          .map(
-            (action) => PeerDealActionButton(
-              label: action.label,
-              onPressed: action.onPressed,
-            ),
-          )
-          .toList(growable: false),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -46,6 +40,17 @@ class DemoHomeScreen extends StatelessWidget {
             ),
             for (final warning in nativeReadiness!.warnings)
               PeerDealInfoRow(label: 'Native', value: warning),
+            const SizedBox(height: 12),
+          ],
+          if (productionNavigationActions.isNotEmpty) ...<Widget>[
+            _NavigationSection(
+              title: 'Production',
+              actions: productionNavigationActions,
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (demoNavigationActions.isNotEmpty) ...<Widget>[
+            _NavigationSection(title: 'Demo', actions: demoNavigationActions),
             const SizedBox(height: 12),
           ],
           Text('Active scenario: ${controller.activeScenario.title}'),
@@ -70,6 +75,36 @@ class DemoHomeNavigationAction {
 
   final String label;
   final VoidCallback onPressed;
+}
+
+class _NavigationSection extends StatelessWidget {
+  const _NavigationSection({required this.title, required this.actions});
+
+  final String title;
+  final List<DemoHomeNavigationAction> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(title),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: actions
+              .map(
+                (action) => PeerDealActionButton(
+                  label: action.label,
+                  onPressed: action.onPressed,
+                ),
+              )
+              .toList(growable: false),
+        ),
+      ],
+    );
+  }
 }
 
 class _ScenarioSummary extends StatelessWidget {

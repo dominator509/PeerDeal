@@ -1268,6 +1268,38 @@ void main() {
     expect(find.text('Production table route'), findsOneWidget);
   });
 
+  testWidgets('separates production and demo navigation on default home', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.table,
+          },
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live table',
+              path: '/table-live',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('Production'), findsOneWidget);
+    expect(find.text('Demo'), findsOneWidget);
+    expect(
+      find.widgetWithText(PeerDealActionButton, 'Live table'),
+      findsOneWidget,
+    );
+    expect(find.widgetWithText(PeerDealActionButton, 'Table'), findsOneWidget);
+  });
+
   testWidgets('uses app-owned home surface builder', (tester) async {
     var homePaths = const <String>[];
 

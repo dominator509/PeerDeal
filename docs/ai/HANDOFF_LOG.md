@@ -14,6 +14,47 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Section Default Home Production Navigation
+
+Summary:
+Separated default mobile and desktop home navigation into production and demo
+sections so app-owned production routes have a distinct launch surface without
+changing the combined validated navigation list passed to custom home builders.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_home_screen.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/app_shell_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/app_shell_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This improves the default demo-oriented home surface only; final production
+  UI still needs product/device validation.
+
+Next reviewer:
+Codex should continue with the next codeable production app-flow or
+native-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Hide Unready Native Production Navigation
 
 Summary:
