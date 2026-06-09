@@ -32,6 +32,9 @@ typedef PeerDealHomeSurfaceBuilder =
       List<PeerDealAppNavigationEntry> navigation,
     );
 
+const int _maxAppRoutePathLength = 96;
+const int _maxAppNavigationLabelLength = 48;
+
 class PeerDealAppNavigationEntry {
   const PeerDealAppNavigationEntry({required this.label, required this.path});
 
@@ -448,11 +451,13 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
           path.isEmpty ||
           !path.startsWith('/') ||
           path == Navigator.defaultRouteName ||
+          path.length > _maxAppRoutePathLength ||
           path.startsWith('/demo') ||
           path.endsWith('/') ||
           path.contains('?') ||
           path.contains('#') ||
           path.contains('//') ||
+          path.contains(r'\') ||
           _containsUnsafeRoutePathCharacter(path) ||
           mountedDemoPaths.contains(path)) {
         throw StateError('Production route map contains an invalid path.');
@@ -501,6 +506,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       final path = entry.path.trim();
       if (label.isEmpty ||
           label != entry.label ||
+          label.length > _maxAppNavigationLabelLength ||
           _containsUnsafeLabelCharacter(label) ||
           path != entry.path ||
           !productionRoutePaths.contains(path) ||
@@ -524,9 +530,11 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     final route = initialRoute ?? DemoSliceRoutes.home;
     if (route.trim() != route ||
         route.isEmpty ||
+        route.length > _maxAppRoutePathLength ||
         route.contains('?') ||
         route.contains('#') ||
         route.contains('//') ||
+        route.contains(r'\') ||
         _containsUnsafeRoutePathCharacter(route)) {
       throw StateError('Initial app route is invalid.');
     }

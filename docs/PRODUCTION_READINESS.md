@@ -506,6 +506,10 @@ the gates below are satisfied.
 - App-owned production route builders now fail closed to the scrubbed
   route-unavailable surface when builder execution throws, preventing mounted
   non-demo route failures from escaping app-shell routing.
+- App-owned production route paths, production navigation labels, and startup
+  routes now enforce bounded display/routing metadata and reject backslash
+  separators, preventing path-like or oversized production navigation
+  descriptors from entering mounted app-shell routing.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -532,6 +536,7 @@ the gates below are satisfied.
   diagnostic scrubbing, app-owned receipt render diagnostic scrubbing,
   app-owned production route metadata validation, app-owned home navigation
   collision validation, app-owned production route builder failure handling,
+  app-owned production route metadata bounding,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
