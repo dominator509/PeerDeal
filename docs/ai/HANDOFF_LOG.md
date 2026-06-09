@@ -14,6 +14,39 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Validate Native Readiness Transport Payload Limits
+
+Summary:
+Hardened mobile and desktop `AppNativeReadinessLoader` transport readiness so
+native transport is not reported ready when platform capability exceeds the
+app-owned payload limit, and invalid app readiness limits fail before native
+transport capability lookup.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/native_readiness/app_native_readiness_loader.dart`
+- `apps/peerdeal_mobile/test/native_readiness/app_native_readiness_loader_test.dart`
+- `apps/peerdeal_desktop/lib/native_readiness/app_native_readiness_loader.dart`
+- `apps/peerdeal_desktop/test/native_readiness/app_native_readiness_loader_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/native_readiness/app_native_readiness_loader_test.dart` in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/native_readiness/app_native_readiness_loader_test.dart` in `apps/peerdeal_desktop`
+
+Risks:
+- Live platform transport implementation remains pending; this aligns
+  readiness advertising with the already locked app transport session limits.
+
+Next reviewer:
+Codex should continue with the next codeable app-boundary or package-hardening
+gap from `docs/PRODUCTION_READINESS.md`, or platform native work once platform
+folders are added.
+
+---
+
 ### 2026-06-09 - Codex - Validate Native Readiness Secure-Key Namespace
 
 Summary:

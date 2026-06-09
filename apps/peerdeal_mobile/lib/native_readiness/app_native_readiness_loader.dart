@@ -1,6 +1,7 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 
 const _defaultSecureKeyNamespace = 'peerdeal.receipts';
+const _defaultNativeTransportMaxPayloadBytes = 64 * 1024;
 
 class AppNativeReadinessSnapshot {
   const AppNativeReadinessSnapshot({
@@ -31,14 +32,17 @@ class AppNativeReadinessLoader {
     required NativeTransportBridge nativeTransportBridge,
     required SecureKeyStorageBridge secureKeyStorageBridge,
     String secureKeyNamespace = _defaultSecureKeyNamespace,
+    int nativeTransportMaxPayloadBytes = _defaultNativeTransportMaxPayloadBytes,
   }) : _captureProtectionBridge = captureProtectionBridge,
        _localNetworkBridge = localNetworkBridge,
        _nativeTransportBridge = nativeTransportBridge,
        _secureKeyStorageBridge = secureKeyStorageBridge,
-       _secureKeyNamespace = secureKeyNamespace;
+       _secureKeyNamespace = secureKeyNamespace,
+       _nativeTransportMaxPayloadBytes = nativeTransportMaxPayloadBytes;
 
   factory AppNativeReadinessLoader.methodChannel({
     String secureKeyNamespace = _defaultSecureKeyNamespace,
+    int nativeTransportMaxPayloadBytes = _defaultNativeTransportMaxPayloadBytes,
   }) {
     return AppNativeReadinessLoader(
       captureProtectionBridge: MethodChannelCaptureProtectionBridge(),
@@ -46,6 +50,7 @@ class AppNativeReadinessLoader {
       nativeTransportBridge: MethodChannelNativeTransportBridge(),
       secureKeyStorageBridge: MethodChannelSecureKeyStorageBridge(),
       secureKeyNamespace: secureKeyNamespace,
+      nativeTransportMaxPayloadBytes: nativeTransportMaxPayloadBytes,
     );
   }
 
@@ -54,6 +59,7 @@ class AppNativeReadinessLoader {
   final NativeTransportBridge _nativeTransportBridge;
   final SecureKeyStorageBridge _secureKeyStorageBridge;
   final String _secureKeyNamespace;
+  final int _nativeTransportMaxPayloadBytes;
 
   Future<AppNativeReadinessSnapshot> load() async {
     final warnings = <String>[];
@@ -100,13 +106,18 @@ class AppNativeReadinessLoader {
   }
 
   Future<bool> _loadNativeTransport(List<String> warnings) async {
+    if (_nativeTransportMaxPayloadBytes < 1) {
+      warnings.add('native transport unavailable');
+      return false;
+    }
     try {
       final capability = await _nativeTransportBridge.getCapability();
       final ready =
           capability.available &&
           capability.sendSupported &&
           capability.receiveSupported &&
-          capability.maxPayloadBytes > 0;
+          capability.maxPayloadBytes > 0 &&
+          capability.maxPayloadBytes <= _nativeTransportMaxPayloadBytes;
       if (!ready) warnings.add('native transport unavailable');
       return ready;
     } on Object {

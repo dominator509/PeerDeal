@@ -639,6 +639,9 @@ the gates below are satisfied.
 - App-owned native readiness loaders now reject padded, control-character, or
   delimiter-bearing secure-key namespaces before native secure storage lookup,
   preventing malformed readiness configuration from reaching platform storage.
+- App-owned native readiness loaders now enforce the same default transport
+  payload-limit ceiling as native transport session factories, and fail closed
+  before native capability lookup when the app-owned readiness limit is invalid.
 - App-owned production route maps can now mark specific non-demo routes as
   native-readiness-required; those routes fail closed to the scrubbed
   route-unavailable surface until the app-owned readiness loader reports all
@@ -714,6 +717,7 @@ the gates below are satisfied.
   app-owned native readiness capability aggregation,
   app-owned native readiness runtime/home wiring,
   app-owned native readiness secure-key namespace validation,
+  app-owned native readiness transport payload-limit validation,
   app-owned native readiness production-route gating,
   app-owned native readiness production-navigation filtering,
   app-owned default-home production/demo navigation sectioning,

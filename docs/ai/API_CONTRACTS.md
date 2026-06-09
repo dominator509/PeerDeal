@@ -135,6 +135,9 @@ native warning detail and exceptions must not be exposed.
 Native-readiness secure-key namespaces must be exact nonblank strings without
 padding, control characters, or the `::` storage delimiter before app loaders
 call platform secure storage.
+Native-readiness transport capability checks must enforce the app-owned payload
+limit before reporting native transport ready; invalid app limits fail before
+native transport capability lookup.
 Runtime objects may inject those loaders into the default app home surface,
 which renders stable native ready/unavailable status. Custom home builders stay
 app-owned and are not forced into an async readiness contract.
