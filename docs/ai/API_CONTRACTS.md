@@ -80,6 +80,9 @@ paths with no query, fragment, duplicate slash, backslash, or control
 characters. Unknown enabled demo paths fail without echoing the supplied path.
 Mounted demo route-map drift validation must fail with stable generic
 diagnostics rather than echoing supplied unexpected route keys.
+Mounted demo route registry labels and surface names must be exact, bounded,
+non-empty strings without control characters before app route maps or
+navigation consume them.
 Runtime objects may set the initial route only to `/`, an enabled demo route,
 or a validated production route. Runtime objects may also expose validated
 production navigation descriptors whose paths must reference mounted production

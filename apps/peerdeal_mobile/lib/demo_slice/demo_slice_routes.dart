@@ -1,5 +1,7 @@
 class DemoSliceRoutes {
   static const int _maxRoutePathLength = 96;
+  static const int _maxRouteLabelLength = 48;
+  static const int _maxRouteSurfaceLength = 64;
 
   static const home = '/demo';
   static const table = '/demo/table';
@@ -151,8 +153,9 @@ class DemoSliceRoutes {
       if (!_isCanonicalMountedPath(path)) {
         return 'Mounted demo route registry contains a non-canonical path.';
       }
-      if (route.label.trim().isEmpty || route.surface.trim().isEmpty) {
-        return 'Mounted demo route registry contains empty route metadata.';
+      if (!_isCanonicalRouteText(route.label, _maxRouteLabelLength) ||
+          !_isCanonicalRouteText(route.surface, _maxRouteSurfaceLength)) {
+        return 'Mounted demo route registry contains invalid route metadata.';
       }
       if (!mountedPaths.add(path) ||
           !labels.add(route.label) ||
@@ -181,6 +184,13 @@ class DemoSliceRoutes {
         !path.contains('//') &&
         !path.contains(r'\') &&
         !path.codeUnits.any((codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F);
+  }
+
+  static bool _isCanonicalRouteText(String value, int maxLength) {
+    return value.trim() == value &&
+        value.isNotEmpty &&
+        value.length <= maxLength &&
+        !value.codeUnits.any((codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F);
   }
 }
 

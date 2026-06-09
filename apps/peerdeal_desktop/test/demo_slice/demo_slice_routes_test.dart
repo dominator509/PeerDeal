@@ -161,7 +161,16 @@ void main() {
       DemoSliceRoutes.mountedRoutes
           .where(
             (route) =>
-                route.label.trim().isEmpty || route.surface.trim().isEmpty,
+                route.label.trim().isEmpty ||
+                route.surface.trim().isEmpty ||
+                route.label.length > 48 ||
+                route.surface.length > 64 ||
+                route.label.codeUnits.any(
+                  (codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F,
+                ) ||
+                route.surface.codeUnits.any(
+                  (codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F,
+                ),
           )
           .toList(),
       isEmpty,
