@@ -51,12 +51,14 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.snapshot.scenarioId != widget.snapshot.scenarioId ||
         oldWidget.bootstrapCandidateLoaderFactory !=
-            widget.bootstrapCandidateLoaderFactory) {
+            widget.bootstrapCandidateLoaderFactory ||
+        oldWidget._runtimeScopeFactory != widget._runtimeScopeFactory) {
       _bootstrapFuture = _loadBootstrapCandidates();
     }
     if (oldWidget.snapshot.scenarioId != widget.snapshot.scenarioId ||
         oldWidget.recoveryPersistenceStoreFactory !=
-            widget.recoveryPersistenceStoreFactory) {
+            widget.recoveryPersistenceStoreFactory ||
+        oldWidget._runtimeScopeFactory != widget._runtimeScopeFactory) {
       _recoveryPersistenceFuture = _loadRecoveryPersistence();
     }
   }

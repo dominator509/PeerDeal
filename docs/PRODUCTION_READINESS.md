@@ -502,6 +502,9 @@ the gates below are satisfied.
   can enter from the app shell boundary instead of relying on hardcoded demo
   session ids; table routes fail closed when runtime scope construction is
   unavailable.
+- Mounted app table routes now reload bootstrap and recovery persistence
+  futures when the app-owned runtime scope factory changes, preventing stale
+  production table/session scope from surviving runtime dependency updates.
 - Mobile and desktop app shells now expose app-owned runtime dependency
   objects that group mounted-route factories for receipts, join/setup
   orchestration, bootstrap loading, and recovery scope/persistence. Existing
@@ -657,6 +660,7 @@ the gates below are satisfied.
   app-owned receipt verifier decoder diagnostic scrubbing and bounding,
   bounded app-owned table/join bootstrap mapping, app-owned local-network
   bootstrap scope validation, app-owned
+  mounted table runtime-scope reload handling,
   local-network discovery list validation,
   app-owned local-network sensitive-note and endpoint scrubbing,
   app-owned capture sensitive-note scrubbing,

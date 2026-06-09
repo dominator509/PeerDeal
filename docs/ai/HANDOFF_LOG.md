@@ -14,6 +14,46 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Reload Mounted Table Runtime Scope
+
+Summary:
+Hardened mobile and desktop mounted table routes so bootstrap and recovery
+persistence futures reload when the app-owned runtime scope factory changes,
+preventing stale production table/session scope after runtime dependency
+updates.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_table_screen_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_table_screen_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/demo_slice/demo_table_screen_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/demo_slice/demo_table_screen_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Platform-native local-network discovery and production persistence roots
+  remain pending; this locks mounted table runtime-scope refresh behavior only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Reject Production Demo Navigation Case Collisions
 
 Summary:
