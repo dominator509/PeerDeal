@@ -38,6 +38,8 @@ score, and recover network paths without owning game truth.
   or duplicate peer ids before assigning route class and priority.
 - Session path selection is deterministic across priority, route class, and
   peer id.
+- Session path selection ignores malformed candidate peer ids and malformed
+  elected-primary overrides before returning path descriptors.
 - Primary peer election fails closed when every peer is anchor-mismatched.
 - Confidence classification degrades or requires recovery when peers lag the
   event index.

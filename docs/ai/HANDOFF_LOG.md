@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Validate Session Path Peer IDs
+
+Summary:
+Hardened `peerdeal_network` session path selection so malformed reachable
+candidate peer ids and malformed elected-primary overrides cannot become
+returned path descriptors. The selector now falls back to valid candidates or
+the unresolved state.
+
+Files changed:
+- `packages/peerdeal_network/lib/src/services/basic_session_path_selector.dart`
+- `packages/peerdeal_network/test/basic_session_path_selector_test.dart`
+- `packages/peerdeal_network/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test/basic_session_path_selector_test.dart`
+- `dart test`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks package-level path descriptor identity filtering only; real native
+  discovery, live transport, platform persistence, and final production UI
+  remain separate readiness gaps.
+
+Next reviewer:
+Codex should continue with the next codeable network/sync/app-boundary gap from
+`docs/PRODUCTION_READINESS.md`, or platform native work once platform folders
+are added.
+
+---
+
 ### 2026-06-09 - Codex - Validate Bootstrap Peer IDs
 
 Summary:

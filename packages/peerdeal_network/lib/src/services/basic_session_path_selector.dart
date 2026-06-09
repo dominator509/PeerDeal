@@ -13,8 +13,12 @@ class BasicSessionPathSelector implements SessionPathSelector {
     required bool relayAllowed,
     String? electedPrimaryPeerId,
   }) {
-    final reachable = candidates.where((c) => c.reachable).toList()
-      ..sort(_compareCandidates);
+    final primaryPeerId = _validPeerIdOrNull(electedPrimaryPeerId);
+    final reachable =
+        candidates
+            .where((c) => c.reachable && _isValidPeerId(c.peerId))
+            .toList()
+          ..sort(_compareCandidates);
 
     final lanCandidate = _firstWhere(
       reachable,
@@ -24,7 +28,7 @@ class BasicSessionPathSelector implements SessionPathSelector {
     if (preferLan && lanCandidate != null) {
       return SessionPathDescriptor(
         routeClass: NetworkRouteClass.lanDirect,
-        primaryPeerId: electedPrimaryPeerId ?? lanCandidate.peerId,
+        primaryPeerId: primaryPeerId ?? lanCandidate.peerId,
         usesRelay: false,
         transportAgnostic: true,
         reason: 'selected_lan_direct_path',
@@ -39,7 +43,7 @@ class BasicSessionPathSelector implements SessionPathSelector {
     if (remoteCandidate != null) {
       return SessionPathDescriptor(
         routeClass: remoteCandidate.routeClass,
-        primaryPeerId: electedPrimaryPeerId ?? remoteCandidate.peerId,
+        primaryPeerId: primaryPeerId ?? remoteCandidate.peerId,
         usesRelay: false,
         transportAgnostic: true,
         reason: 'selected_remote_p2p_path',
@@ -49,7 +53,7 @@ class BasicSessionPathSelector implements SessionPathSelector {
     if (lanCandidate != null) {
       return SessionPathDescriptor(
         routeClass: NetworkRouteClass.lanDirect,
-        primaryPeerId: electedPrimaryPeerId ?? lanCandidate.peerId,
+        primaryPeerId: primaryPeerId ?? lanCandidate.peerId,
         usesRelay: false,
         transportAgnostic: true,
         reason: 'selected_lan_direct_path',
@@ -64,7 +68,7 @@ class BasicSessionPathSelector implements SessionPathSelector {
     if (relayAllowed && relayCandidate != null) {
       return SessionPathDescriptor(
         routeClass: relayCandidate.routeClass,
-        primaryPeerId: electedPrimaryPeerId ?? relayCandidate.peerId,
+        primaryPeerId: primaryPeerId ?? relayCandidate.peerId,
         usesRelay: true,
         transportAgnostic: true,
         reason: 'selected_relay_fallback_path',
@@ -73,7 +77,7 @@ class BasicSessionPathSelector implements SessionPathSelector {
 
     return SessionPathDescriptor(
       routeClass: NetworkRouteClass.relay,
-      primaryPeerId: electedPrimaryPeerId ?? 'unresolved',
+      primaryPeerId: primaryPeerId ?? 'unresolved',
       usesRelay: false,
       transportAgnostic: true,
       reason: 'no_direct_candidate_available',
@@ -90,6 +94,16 @@ class BasicSessionPathSelector implements SessionPathSelector {
     if (routeCmp != 0) return routeCmp;
 
     return a.peerId.compareTo(b.peerId);
+  }
+
+  static String? _validPeerIdOrNull(String? peerId) {
+    if (peerId == null || !_isValidPeerId(peerId)) return null;
+    return peerId;
+  }
+
+  static bool _isValidPeerId(String peerId) {
+    if (peerId.isEmpty || peerId.trim() != peerId) return false;
+    return peerId.runes.every((rune) => rune > 0x1f && rune != 0x7f);
   }
 
   static BootstrapCandidate? _firstWhere(

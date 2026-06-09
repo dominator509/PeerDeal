@@ -234,7 +234,9 @@ facts only. Mobile and desktop app loaders/coordinators trim, deduplicate, and
 cap discovered peer endpoints before passing them to `peerdeal_network`
 bootstrap candidate resolution. The package bootstrap candidate provider drops
 blank, padded, control-character-bearing, or duplicate peer ids before
-assigning route class and priority. Invalid caps fail closed for table loading and
+assigning route class and priority. Session path selection must ignore
+malformed candidate peer ids and malformed elected-primary overrides before
+returning path descriptors. Invalid caps fail closed for table loading and
 fall back to relay-only join bootstrap plans. Invalid app-owned session/table
 bootstrap scope, including padded values, must fail closed or fall back before
 native capability lookup.

@@ -152,6 +152,9 @@ the gates below are satisfied.
   control-character-bearing, or duplicate peer ids before assigning candidate
   route class and priority, keeping malformed discovery identities out of path
   selection.
+- Network session path selection now ignores malformed reachable candidate
+  peer ids and malformed elected-primary overrides before returning path
+  descriptors, falling back to valid candidates or unresolved state.
 - Network transport send contracts now include a validating sender boundary
   that rejects invalid frames before platform sinks see them and converts sink
   failures into explicit failed send results.
@@ -670,6 +673,7 @@ the gates below are satisfied.
   app-owned recovery store construction, exact environment-configured recovery
   root loading, app-owned recovery root validation, mounted recovery-window loading,
   package-owned bootstrap peer-id validation,
+  package-owned session path peer-id validation,
   app-owned route runtime dependency grouping, app-owned table runtime-scope
   injection, canonical app-route
   registry validation, exact app-owned enabled-route allowlists,
