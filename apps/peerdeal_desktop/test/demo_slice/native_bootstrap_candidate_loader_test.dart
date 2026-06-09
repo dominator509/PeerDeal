@@ -91,6 +91,8 @@ void main() {
             permissionGranted: true,
             foundEndpoints: <String>[
               '${'peer'.padRight(120, 'x')}\nsecret',
+              r'peer-token-C:\secret\peer.log',
+              'peer-safe',
               '',
             ],
             interfaceHints: const <String>[],
@@ -100,9 +102,8 @@ void main() {
       ).load(sessionId: 'session-1', tableId: 'table-1');
 
       expect(result.discoveryAvailable, isTrue);
-      expect(provider.request!.peerIds.single, isNot(contains('\n')));
-      expect(provider.request!.peerIds.single.length, lessThanOrEqualTo(96));
-      expect(result.candidates.single.peerId, provider.request!.peerIds.single);
+      expect(provider.request!.peerIds, <String>['peer-safe']);
+      expect(result.candidates.single.peerId, 'peer-safe');
     },
   );
 
@@ -218,8 +219,8 @@ void main() {
     ]);
     expect(result.warnings.join(' '), isNot(contains('network.log')));
     expect(result.warnings.join(' '), isNot(contains('peers.log')));
-    expect(result.nativeNotes, isNot(contains('\n')));
-    expect(result.nativeNotes.length, lessThanOrEqualTo(96));
+    expect(result.nativeNotes, 'unavailable');
+    expect(result.nativeNotes, isNot(contains('secret')));
   });
 
   test('fails closed when local network bridge throws', () async {

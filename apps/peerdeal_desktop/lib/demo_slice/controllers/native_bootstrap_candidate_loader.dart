@@ -91,7 +91,7 @@ class NativeBootstrapCandidateLoader {
       discovery = await _bridge.discoverPeers();
     } catch (_) {
       return NativeBootstrapCandidateLoadResult.unavailable(
-        nativeNotes: capability.notes,
+        nativeNotes: _safeNativeText(capability.notes),
         warnings: <String>[
           ...warnings,
           'Local network discovery could not be loaded.',
@@ -181,6 +181,9 @@ class NativeBootstrapCandidateLoader {
     if (normalized.isEmpty) {
       return 'unavailable';
     }
+    if (_looksSensitive(normalized)) {
+      return 'unavailable';
+    }
     const maxLength = 96;
     if (normalized.length <= maxLength) {
       return normalized;
@@ -209,10 +212,21 @@ class NativeBootstrapCandidateLoader {
     if (normalized.isEmpty) {
       return '';
     }
+    if (_looksSensitive(normalized)) {
+      return '';
+    }
     const maxLength = 96;
     if (normalized.length <= maxLength) {
       return normalized;
     }
     return normalized.substring(0, maxLength);
+  }
+
+  static bool _looksSensitive(String value) {
+    final lower = value.toLowerCase();
+    return lower.contains('secret') ||
+        lower.contains('token') ||
+        lower.contains('password') ||
+        value.contains('\\');
   }
 }

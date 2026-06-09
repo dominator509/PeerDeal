@@ -186,7 +186,9 @@ bootstrap scope, including padded values, must fail closed or fall back before
 native capability lookup.
 Discovery `foundEndpoints` and `interfaceHints` lists must contain real
 non-empty strings; malformed platform list entries are dropped rather than
-coerced.
+coerced into route inputs. Sensitive native peer endpoints must be dropped
+before candidate resolution, and sensitive table-bootstrap native notes must be
+replaced with stable unavailable text rather than exposed to app surfaces.
 
 ## Error Shape
 

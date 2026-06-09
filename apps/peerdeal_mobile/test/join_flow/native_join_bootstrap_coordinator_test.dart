@@ -87,7 +87,12 @@ void main() {
         ),
         discovery: LocalNetworkDiscoverySnapshot(
           permissionGranted: true,
-          foundEndpoints: <String>['${'peer'.padRight(120, 'x')}\nsecret', ''],
+          foundEndpoints: <String>[
+            '${'peer'.padRight(120, 'x')}\nsecret',
+            r'peer-token-C:\secret\peer.log',
+            'peer-safe',
+            '',
+          ],
           interfaceHints: const <String>[],
         ),
       ),
@@ -99,9 +104,8 @@ void main() {
       roleGrant: _roleGrant,
     );
 
-    expect(provider.request!.peerIds.single, isNot(contains('\n')));
-    expect(provider.request!.peerIds.single.length, lessThanOrEqualTo(96));
-    expect(plan.peerCandidates.single, provider.request!.peerIds.single);
+    expect(provider.request!.peerIds, <String>['peer-safe']);
+    expect(plan.peerCandidates.single, 'peer-safe');
   });
 
   test('keeps relay fallback when peer candidate limit is invalid', () async {

@@ -14,6 +14,54 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Scrub Local-Network Bootstrap Inputs
+
+Summary:
+Hardened mobile and desktop local-network bootstrap loaders and join
+coordinators so sensitive native peer endpoints are dropped before candidate
+resolution, and sensitive table-bootstrap native notes become stable
+unavailable text.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_mobile/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_mobile/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_desktop/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- `apps/peerdeal_desktop/test/join_flow/native_join_bootstrap_coordinator_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/join_flow/native_join_bootstrap_coordinator_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+  in `apps/peerdeal_desktop`
+- `flutter test --no-pub test/join_flow/native_join_bootstrap_coordinator_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Real platform local-network discovery remains pending; this locks the
+  app-owned bootstrap sanitization boundary.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Scrub Native Transport Session Notes
 
 Summary:
