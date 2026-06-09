@@ -123,6 +123,10 @@ shareable fields and recovery diagnostics must be bounded with stable
 truncation lines.
 Capture surface coordinators must scrub native warning detail and replace
 sensitive native notes with stable unavailable text before UI projection.
+Mobile and desktop app-native readiness loaders compose generic capture,
+local-network, transport, and secure-key storage bridge capability facts into
+stable readiness snapshots. Loader warnings must be app-owned stable strings;
+native warning detail and exceptions must not be exposed.
 Shared safe-surface render models must scrub and bound injected capture warning
 and native-note text before exposing render state to app UI.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning

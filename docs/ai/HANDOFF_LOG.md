@@ -14,6 +14,48 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Add App Native Readiness Loaders
+
+Summary:
+Added mobile and desktop app-owned native readiness loaders that compose
+generic native bridge capability facts for capture protection, local-network
+discovery, native transport, and secure-key storage into stable fail-closed
+readiness snapshots with scrubbed warnings.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/native_readiness/app_native_readiness_loader.dart`
+- `apps/peerdeal_mobile/test/native_readiness/app_native_readiness_loader_test.dart`
+- `apps/peerdeal_desktop/lib/native_readiness/app_native_readiness_loader.dart`
+- `apps/peerdeal_desktop/test/native_readiness/app_native_readiness_loader_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/native_readiness/app_native_readiness_loader_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/native_readiness/app_native_readiness_loader_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This does not replace missing platform-native implementations; it gives app
+  orchestration a stable fail-closed readiness boundary for those future
+  implementations.
+
+Next reviewer:
+Codex should continue with platform implementation work if native app targets
+are added, or the next app-flow production-readiness gap that can be coded
+inside this repo snapshot.
+
+---
+
 ### 2026-06-09 - Codex - Reject Allowed Extra Route Case Collisions
 
 Summary:

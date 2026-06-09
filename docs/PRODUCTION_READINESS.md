@@ -609,6 +609,11 @@ the gates below are satisfied.
 - App-owned production home navigation descriptors now also reject
   case-insensitive label or path collisions with enabled demo home navigation,
   keeping production extension actions distinct from mounted demo actions.
+- App shells now expose app-owned native readiness loaders that compose the
+  generic capture, local-network, transport, and secure-key storage bridge
+  capability facts into stable fail-closed readiness snapshots with scrubbed
+  warnings before production flows decide whether native-backed features can be
+  enabled.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -649,6 +654,7 @@ the gates below are satisfied.
   app-owned production route metadata bounding, app-owned production
   route/navigation collection bounding,
   case-insensitive demo namespace reservation for app-owned production routes,
+  app-owned native readiness capability aggregation,
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
