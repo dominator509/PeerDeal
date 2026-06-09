@@ -20,11 +20,13 @@ class NativeReceiptKeyRingWriter {
     required SecureKeyStorageMutationBridge bridge,
     this.namespace = NativeReceiptKeyRingLoader.defaultNamespace,
     this.maxKeyIdLength = 96,
+    this.maxKeySecretLength = 256,
   }) : _bridge = bridge;
 
   final SecureKeyStorageMutationBridge _bridge;
   final String namespace;
   final int maxKeyIdLength;
+  final int maxKeySecretLength;
 
   Future<ReceiptKeyRingWriteResult> saveSigningKey(
     ReceiptSigningKey key, {
@@ -86,7 +88,9 @@ class NativeReceiptKeyRingWriter {
         warning: 'Secure receipt key namespace is invalid.',
       );
     }
-    if (!record.isUsable || !_isValidKeyId(record.keyId, maxKeyIdLength)) {
+    if (!record.isUsable ||
+        !_isValidKeyId(record.keyId, maxKeyIdLength) ||
+        !_isValidSecret(record.secret, maxKeySecretLength)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Receipt key save request is invalid.',
       );
@@ -126,6 +130,13 @@ class NativeReceiptKeyRingWriter {
       keyId.trim() == keyId &&
       !keyId.contains(':') &&
       !_hasControlCharacter(keyId);
+
+  static bool _isValidSecret(String secret, int maxLength) =>
+      maxLength > 0 &&
+      secret.length <= maxLength &&
+      secret.trim().isNotEmpty &&
+      secret.trim() == secret &&
+      !_hasControlCharacter(secret);
 
   static bool _hasControlCharacter(String value) {
     for (final codeUnit in value.codeUnits) {

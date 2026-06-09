@@ -131,6 +131,63 @@ void main() {
     expect(bridge.savedKeys, isEmpty);
   });
 
+  test('fails closed before native save for oversized key material', () async {
+    final bridge = _RecordingSecureKeyStorageBridge();
+    final writer = NativeReceiptKeyRingWriter(
+      bridge: bridge,
+      maxKeySecretLength: 12,
+    );
+
+    final result = await writer.saveSigningKey(
+      ReceiptSigningKey(
+        keyId: 'receipt_signing_1',
+        secret: 's'.padRight(20, 'x'),
+      ),
+      active: true,
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Receipt key save request is invalid.');
+    expect(bridge.savedKeys, isEmpty);
+  });
+
+  test(
+    'fails closed before native save for control-character key material',
+    () async {
+      final bridge = _RecordingSecureKeyStorageBridge();
+      final writer = NativeReceiptKeyRingWriter(bridge: bridge);
+
+      final result = await writer.saveEncryptionKey(
+        const ReceiptEncryptionKey(
+          keyId: 'receipt_encryption_1',
+          secret: 'enc\u0001',
+        ),
+        active: true,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Receipt key save request is invalid.');
+      expect(bridge.savedKeys, isEmpty);
+    },
+  );
+
+  test('fails closed before native save for invalid material limit', () async {
+    final bridge = _RecordingSecureKeyStorageBridge();
+    final writer = NativeReceiptKeyRingWriter(
+      bridge: bridge,
+      maxKeySecretLength: 0,
+    );
+
+    final result = await writer.saveSigningKey(
+      const ReceiptSigningKey(keyId: 'receipt_signing_1', secret: 'signing'),
+      active: true,
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Receipt key save request is invalid.');
+    expect(bridge.savedKeys, isEmpty);
+  });
+
   test('propagates native mutation failure without throwing', () async {
     final bridge = _RecordingSecureKeyStorageBridge(
       saveResult: const SecureKeyStorageMutationResult.failure(

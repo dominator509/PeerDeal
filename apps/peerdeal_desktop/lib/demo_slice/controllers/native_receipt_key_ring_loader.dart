@@ -22,12 +22,14 @@ class NativeReceiptKeyRingLoader {
     this.namespace = defaultNamespace,
     this.maxKeyRecords = 64,
     this.maxKeyIdLength = 96,
+    this.maxKeySecretLength = 256,
   }) : _bridge = bridge;
 
   final SecureKeyStorageBridge _bridge;
   final String namespace;
   final int maxKeyRecords;
   final int maxKeyIdLength;
+  final int maxKeySecretLength;
 
   Future<ReceiptKeyRingLoadResult> load() async {
     if (!_isValidNamespace(namespace)) {
@@ -46,6 +48,12 @@ class NativeReceiptKeyRingLoader {
       return const ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key metadata limit is invalid.'],
+      );
+    }
+    if (maxKeySecretLength < 1) {
+      return const ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key material limit is invalid.'],
       );
     }
 
@@ -80,6 +88,12 @@ class NativeReceiptKeyRingLoader {
       return const ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key record metadata is invalid.'],
+      );
+    }
+    if (snapshot.keys.any((record) => !_isValidSecret(record.secret))) {
+      return const ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key material is invalid.'],
       );
     }
 
@@ -159,6 +173,12 @@ class NativeReceiptKeyRingLoader {
       keyId.trim() == keyId &&
       !keyId.contains(':') &&
       !_hasControlCharacter(keyId);
+
+  bool _isValidSecret(String secret) =>
+      secret.length <= maxKeySecretLength &&
+      secret.trim().isNotEmpty &&
+      secret.trim() == secret &&
+      !_hasControlCharacter(secret);
 
   static bool _hasControlCharacter(String value) {
     for (final codeUnit in value.codeUnits) {

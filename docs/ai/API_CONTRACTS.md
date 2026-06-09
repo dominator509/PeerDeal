@@ -194,6 +194,9 @@ coerced.
 - App receipt key-ring loaders must reject oversized or control-character
   native receipt key ids before mapping records into signing/encryption
   providers.
+- App receipt key-ring loaders and writers must reject oversized or
+  control-character receipt key material before mapping records into
+  signing/encryption providers or native save methods.
 - App receipt key-ring loaders and writers must reject malformed app-owned
   receipt key namespaces before calling native storage.
 - App receipt key-ring writers must reject oversized or control-character
