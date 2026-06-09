@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_mobile/join_flow/demo_join_flow_orchestrator_factory.dart';
 import 'package:peerdeal_mobile/join_flow/fakes.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
+import 'package:peerdeal_mobile/join_flow/join_flow_orchestrator.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_route.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 void main() {
   final demoFactory = DemoJoinFlowOrchestratorFactory(
@@ -282,4 +284,97 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('scrubs injected join diagnostics before rendering', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: (_) => const _LeakyJoinFlowOrchestrator(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_ROLE_DENIED'), findsOneWidget);
+    expect(
+      find.text(
+        'ERR_JOIN_DIAGNOSTIC_UNAVAILABLE: Join diagnostic unavailable.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('secret'), findsNothing);
+    expect(find.textContaining('token'), findsNothing);
+  });
+
+  testWidgets('rejects unsafe injected join result codes', (tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: (_) => const _UnsafeResultJoinFlowOrchestrator(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_JOIN_OUTCOME_INVALID'), findsOneWidget);
+    expect(
+      find.text('ERR_JOIN_OUTCOME_INVALID: Join outcome is invalid.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('secret'), findsNothing);
+  });
+}
+
+class _LeakyJoinFlowOrchestrator implements JoinFlowOrchestrator {
+  const _LeakyJoinFlowOrchestrator();
+
+  @override
+  Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
+    return const JoinFlowOutcome(
+      state: JoinFlowState.joinRejected,
+      status: JoinDecisionStatus.roleDenied,
+      resultCode: 'ERR_ROLE_DENIED',
+      diagnostics: <ProtocolDiagnostic>[
+        ProtocolDiagnostic(
+          code: r'ERR C:\secret\join.log',
+          message: 'token sk-demo-secret',
+        ),
+      ],
+    );
+  }
+
+  @override
+  Future<JoinFlowOutcome> runRejoin(InviteContext context) =>
+      runFirstJoin(context);
+}
+
+class _UnsafeResultJoinFlowOrchestrator implements JoinFlowOrchestrator {
+  const _UnsafeResultJoinFlowOrchestrator();
+
+  @override
+  Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
+    return const JoinFlowOutcome(
+      state: JoinFlowState.joinReady,
+      status: JoinDecisionStatus.okJoinReady,
+      resultCode: r'OK C:\secret',
+      diagnostics: <ProtocolDiagnostic>[
+        ProtocolDiagnostic(
+          code: 'OK_JOIN_READY',
+          message: r'C:\secret\join.log',
+        ),
+      ],
+    );
+  }
+
+  @override
+  Future<JoinFlowOutcome> runRejoin(InviteContext context) =>
+      runFirstJoin(context);
 }

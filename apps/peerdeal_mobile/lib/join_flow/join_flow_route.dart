@@ -100,7 +100,9 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
               if (!snapshot.hasData)
                 const Text('Loading join')
               else
-                _JoinOutcomeView(outcome: snapshot.requireData),
+                _JoinOutcomeView(
+                  outcome: _safeJoinOutcome(snapshot.requireData),
+                ),
             ],
           ),
         );
@@ -202,6 +204,72 @@ InviteContext _defaultInviteContextFor(JoinFlowDemoMode mode) {
     inviteCode: 'ABC123',
     requestedRole: RequestedRole.player,
     rejoinToken: mode == JoinFlowDemoMode.rejoin ? 'rj_001' : null,
+  );
+}
+
+JoinFlowOutcome _safeJoinOutcome(JoinFlowOutcome outcome) {
+  if (!_isSafeJoinToken(outcome.resultCode)) {
+    return const JoinFlowOutcome(
+      state: JoinFlowState.joinRejected,
+      status: JoinDecisionStatus.rejected,
+      resultCode: 'ERR_JOIN_OUTCOME_INVALID',
+      diagnostics: <ProtocolDiagnostic>[
+        ProtocolDiagnostic(
+          code: 'ERR_JOIN_OUTCOME_INVALID',
+          message: 'Join outcome is invalid.',
+        ),
+      ],
+      message: 'Join outcome is invalid.',
+    );
+  }
+
+  return JoinFlowOutcome(
+    state: outcome.state,
+    status: outcome.status,
+    resultCode: outcome.resultCode,
+    diagnostics: outcome.diagnostics
+        .map(_safeJoinDiagnostic)
+        .toList(growable: false),
+    message: _isSafeJoinMessage(outcome.message) ? outcome.message : null,
+  );
+}
+
+ProtocolDiagnostic _safeJoinDiagnostic(ProtocolDiagnostic diagnostic) {
+  return ProtocolDiagnostic(
+    code: _isSafeJoinToken(diagnostic.code)
+        ? diagnostic.code
+        : 'ERR_JOIN_DIAGNOSTIC_UNAVAILABLE',
+    message: _isSafeJoinMessage(diagnostic.message)
+        ? diagnostic.message
+        : 'Join diagnostic unavailable.',
+  );
+}
+
+bool _isSafeJoinToken(String value) {
+  if (value.trim() != value || value.isEmpty || value.length > 80) {
+    return false;
+  }
+  return value.codeUnits.every(_isSafeJoinTokenCodeUnit);
+}
+
+bool _isSafeJoinTokenCodeUnit(int codeUnit) {
+  return (codeUnit >= 0x30 && codeUnit <= 0x39) ||
+      (codeUnit >= 0x41 && codeUnit <= 0x5A) ||
+      (codeUnit >= 0x61 && codeUnit <= 0x7A) ||
+      codeUnit == 0x2D ||
+      codeUnit == 0x2E ||
+      codeUnit == 0x5F;
+}
+
+bool _isSafeJoinMessage(String? value) {
+  if (value == null) return true;
+  if (value.trim() != value || value.isEmpty || value.length > 160) {
+    return false;
+  }
+  final lower = value.toLowerCase();
+  if (lower.contains('secret') || lower.contains('token')) return false;
+  return value.codeUnits.every(
+    (codeUnit) => codeUnit >= 0x20 && codeUnit != 0x5C && codeUnit != 0x7F,
   );
 }
 

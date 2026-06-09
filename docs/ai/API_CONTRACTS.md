@@ -89,7 +89,8 @@ Production navigation and home composition remain app-shell work and should
 replace or extend app routes without moving route policy into shared packages.
 Join routes and join flow orchestration reject blank or padded app-owned invite
 codes and rejoin tokens before join dependencies, invite resolution, or
-governance commit adapters run.
+governance commit adapters run. Join routes scrub app-owned join outcome result
+codes and diagnostics before rendering.
 Setup routes and setup flow orchestration reject blank or padded app-owned
 setup intent and host identities before wizard/setup dependencies run. Setup
 routes also scrub app-owned setup outcome result codes, errors, warnings, and

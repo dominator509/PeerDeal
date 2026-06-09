@@ -14,6 +14,46 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Join Outcome Scrubbing Gate
+
+Summary:
+Hardened mobile and desktop join routes so app-owned join orchestrator outcomes
+cannot render arbitrary result codes or diagnostics. Unsafe result codes fail
+closed to `ERR_JOIN_OUTCOME_INVALID`; unsafe diagnostic codes/messages render
+as generic safe diagnostic text while legitimate existing route diagnostics
+continue to display.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\join_flow\join_flow_route_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test\join_flow\join_flow_route_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- This locks route-level join outcome rendering only; final production join UX,
+  native implementations, and production UI validation remain pending.
+
+Next reviewer:
+Codex should continue with the next production-readiness gap.
+
+---
+
 ### 2026-06-09 - Codex - Setup Outcome Scrubbing Gate
 
 Summary:
