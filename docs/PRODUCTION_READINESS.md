@@ -477,6 +477,9 @@ the gates below are satisfied.
 - Mounted setup routes now scrub app-owned setup outcome result codes, errors,
   warnings, and displayed Game File versions before rendering, replacing
   malformed metadata with generic safe codes and rejecting unsafe result codes.
+- Mounted setup routes now bound app-owned setup errors and warnings before
+  rendering, appending stable truncation markers when injected outcomes exceed
+  the app display limit.
 - Mounted receipt surfaces now scrub receipt/recovery status, message,
   shareable field, recommended-action, and diagnostic text before rendering,
   preserving already-redacted values while replacing malformed display
@@ -557,7 +560,7 @@ the gates below are satisfied.
   app-owned receipt envelope injection, app-owned setup intent injection,
   route-level setup identity validation, app-owned setup identity validation,
   app-owned join outcome diagnostic scrubbing and bounding, app-owned setup outcome
-  diagnostic scrubbing, app-owned receipt render diagnostic scrubbing,
+  diagnostic scrubbing and bounding, app-owned receipt render diagnostic scrubbing,
   app-owned production route metadata validation, app-owned home navigation
   collision validation, app-owned production route builder failure handling,
   app-owned production route metadata bounding,

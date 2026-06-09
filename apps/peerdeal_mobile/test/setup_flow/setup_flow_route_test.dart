@@ -236,6 +236,30 @@ void main() {
     expect(find.text('Error: setup_outcome_invalid'), findsOneWidget);
     expect(find.textContaining('secret'), findsNothing);
   });
+
+  testWidgets('bounds injected setup errors and warnings before rendering', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      WidgetsApp(
+        color: const Color(0xFF1B5E20),
+        builder: (_, _) => SetupFlowRoute(
+          orchestratorFactory: () => const _VerboseSetupFlowOrchestrator(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Error: SETUP_ERROR_0'), findsOneWidget);
+    expect(find.text('Error: SETUP_ERROR_3'), findsOneWidget);
+    expect(find.text('Error: SETUP_ERROR_4'), findsNothing);
+    expect(find.text('Error: setup_errors_truncated'), findsOneWidget);
+    expect(find.text('Warning: SETUP_WARNING_0'), findsOneWidget);
+    expect(find.text('Warning: SETUP_WARNING_3'), findsOneWidget);
+    expect(find.text('Warning: SETUP_WARNING_4'), findsNothing);
+    expect(find.text('Warning: setup_warnings_truncated'), findsOneWidget);
+  });
 }
 
 class _LeakySetupFlowOrchestrator extends SetupFlowOrchestrator {
@@ -268,6 +292,23 @@ class _UnsafeResultSetupFlowOrchestrator extends SetupFlowOrchestrator {
       status: SetupFlowStatus.compiled,
       resultCode: r'OK C:\secret',
       errors: <String>[r'C:\secret\setup.log'],
+    );
+  }
+}
+
+class _VerboseSetupFlowOrchestrator extends SetupFlowOrchestrator {
+  const _VerboseSetupFlowOrchestrator();
+
+  @override
+  SetupFlowOutcome compileSetup({
+    required SetupIntent intent,
+    List<PresetLayer> presetLayers = const <PresetLayer>[],
+  }) {
+    return SetupFlowOutcome(
+      status: SetupFlowStatus.rejected,
+      resultCode: 'OK_GAME_FILE_COMPILED',
+      errors: List<String>.generate(8, (index) => 'SETUP_ERROR_$index'),
+      warnings: List<String>.generate(8, (index) => 'SETUP_WARNING_$index'),
     );
   }
 }

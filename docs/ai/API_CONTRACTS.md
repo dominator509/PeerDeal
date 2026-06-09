@@ -115,7 +115,8 @@ diagnostic count with a stable truncation diagnostic.
 Setup routes and setup flow orchestration reject blank or padded app-owned
 setup intent and host identities before wizard/setup dependencies run. Setup
 routes also scrub app-owned setup outcome result codes, errors, warnings, and
-displayed Game File versions before rendering.
+displayed Game File versions before rendering. Rendered setup errors and
+warnings must be bounded with stable truncation markers.
 
 ## Network Transport Boundary
 

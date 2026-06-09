@@ -10,6 +10,8 @@ enum SetupFlowDemoMode { buildReady, invalid }
 typedef SetupFlowOrchestratorFactory = SetupFlowOrchestrator Function();
 typedef SetupFlowIntentFactory = SetupIntent Function(SetupFlowDemoMode mode);
 
+const int _maxSetupMessages = 4;
+
 class SetupFlowRoute extends StatefulWidget {
   const SetupFlowRoute({
     super.key,
@@ -157,10 +159,12 @@ SetupFlowOutcome _safeSetupOutcome(SetupFlowOutcome outcome) {
     errors: _safeSetupMessages(
       outcome.errors,
       fallback: 'setup_error_unavailable',
+      truncationMessage: 'setup_errors_truncated',
     ),
     warnings: _safeSetupMessages(
       outcome.warnings,
       fallback: 'setup_warning_unavailable',
+      truncationMessage: 'setup_warnings_truncated',
     ),
   );
 }
@@ -168,10 +172,16 @@ SetupFlowOutcome _safeSetupOutcome(SetupFlowOutcome outcome) {
 List<String> _safeSetupMessages(
   List<String> messages, {
   required String fallback,
+  required String truncationMessage,
 }) {
-  return List<String>.unmodifiable(
-    messages.map((message) => _isSafeSetupToken(message) ? message : fallback),
-  );
+  final safeMessages = messages
+      .take(_maxSetupMessages)
+      .map((message) => _isSafeSetupToken(message) ? message : fallback)
+      .toList();
+  if (messages.length > _maxSetupMessages) {
+    safeMessages.add(truncationMessage);
+  }
+  return List<String>.unmodifiable(safeMessages);
 }
 
 bool _isSafeSetupToken(String value) {
