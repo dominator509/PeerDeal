@@ -533,6 +533,10 @@ the gates below are satisfied.
 - App-owned production route paths and demo route-map allowed extra paths now
   reserve the `/demo` namespace case-insensitively, preventing production
   extensions from mounting paths that case-collide with demo routes.
+- App-owned production route maps and production home navigation descriptors
+  now enforce explicit collection-size caps before app route maps or home
+  navigation are built, preventing oversized production extension injection
+  from overwhelming mounted shell routing.
 
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
@@ -563,7 +567,8 @@ the gates below are satisfied.
   diagnostic scrubbing and bounding, app-owned receipt render diagnostic scrubbing,
   app-owned production route metadata validation, app-owned home navigation
   collision validation, app-owned production route builder failure handling,
-  app-owned production route metadata bounding,
+  app-owned production route metadata bounding, app-owned production
+  route/navigation collection bounding,
   case-insensitive demo namespace reservation for app-owned production routes,
   app-owned transport payload-limit
   enforcement, app-owned

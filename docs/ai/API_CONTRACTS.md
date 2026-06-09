@@ -100,7 +100,9 @@ characters. Production route paths and startup routes must also be bounded and
 must not contain backslash separators. Production route paths and demo
 route-map allowed extra paths must reserve the `/demo` namespace
 case-insensitively. Production navigation labels must be
-bounded before app home composition. Production navigation labels and paths
+bounded before app home composition. Production route maps and production
+navigation descriptor lists must also be capped before app route maps or home
+navigation are built. Production navigation labels and paths
 must not collide with enabled demo home navigation entries when the app
 composes the home surface.
 Production navigation and home composition remain app-shell work and should

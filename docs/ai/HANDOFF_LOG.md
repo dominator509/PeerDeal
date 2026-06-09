@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Bound Production Route Extensions
+
+Summary:
+Hardened mobile and desktop app shells so app-owned production route maps and
+production home navigation descriptor lists must stay within explicit caps
+before mounted route maps or home navigation are built.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/app_shell_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test/app_shell_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Final production navigation design still needs product validation; this locks
+  app-shell extension bounds only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Bound Setup Route Messages
 
 Summary:

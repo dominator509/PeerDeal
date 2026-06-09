@@ -34,6 +34,8 @@ typedef PeerDealHomeSurfaceBuilder =
 
 const int _maxAppRoutePathLength = 96;
 const int _maxAppNavigationLabelLength = 48;
+const int _maxAppProductionRoutes = 24;
+const int _maxAppProductionNavigationEntries = 16;
 
 class PeerDealAppNavigationEntry {
   const PeerDealAppNavigationEntry({required this.label, required this.path});
@@ -439,6 +441,9 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     if (routes == null || routes.isEmpty) {
       return const <String, WidgetBuilder>{};
     }
+    if (routes.length > _maxAppProductionRoutes) {
+      throw StateError('Production route map contains too many routes.');
+    }
 
     final mountedDemoPaths = DemoSliceRoutes.mountedRoutes
         .map((route) => route.path)
@@ -496,6 +501,9 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   }) {
     if (navigation == null || navigation.isEmpty) {
       return const <PeerDealAppNavigationEntry>[];
+    }
+    if (navigation.length > _maxAppProductionNavigationEntries) {
+      throw StateError('Production navigation contains too many entries.');
     }
 
     final labels = <String>{};

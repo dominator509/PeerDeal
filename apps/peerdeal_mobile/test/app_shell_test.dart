@@ -1118,8 +1118,7 @@ void main() {
       PeerDealMobileApp(
         runtime: PeerDealMobileRuntime(
           productionRoutes: <String, WidgetBuilder>{
-            '/${List.filled(120, 'a').join()}': (_) =>
-                const Text('bad route'),
+            '/${List.filled(120, 'a').join()}': (_) => const Text('bad route'),
           },
         ),
       ),
@@ -1128,9 +1127,7 @@ void main() {
     expect(tester.takeException(), isA<StateError>());
   });
 
-  testWidgets('rejects production routes with path separators', (
-    tester,
-  ) async {
+  testWidgets('rejects production routes with path separators', (tester) async {
     await tester.pumpWidget(
       PeerDealMobileApp(
         runtime: PeerDealMobileRuntime(
@@ -1158,6 +1155,45 @@ void main() {
               label: List.filled(80, 'L').join(),
               path: '/table-live',
             ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
+  testWidgets('rejects excessive production route maps', (tester) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          productionRoutes: <String, WidgetBuilder>{
+            for (var index = 0; index < 25; index++)
+              '/production-$index': (_) => const Text('bad route'),
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
+  testWidgets('rejects excessive production navigation entries', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          productionRoutes: <String, WidgetBuilder>{
+            for (var index = 0; index < 17; index++)
+              '/production-$index': (_) => const Text('Production route'),
+          },
+          productionNavigation: <PeerDealAppNavigationEntry>[
+            for (var index = 0; index < 17; index++)
+              PeerDealAppNavigationEntry(
+                label: 'Production $index',
+                path: '/production-$index',
+              ),
           ],
         ),
       ),
