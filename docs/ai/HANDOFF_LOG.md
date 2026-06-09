@@ -14,6 +14,44 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Production Route Metadata Gate
+
+Summary:
+Hardened mobile and desktop app-shell production routing validation so
+production route paths, production navigation labels, and startup routes reject
+unsafe control or whitespace metadata before app routes are mounted.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test\app_shell_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test\app_shell_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+
+Risks:
+- This locks app-shell route metadata validation only; final production UI and
+  navigation product validation remain pending.
+
+Next reviewer:
+Continue with the next codable production-readiness gap; final production UI
+and navigation product validation remain outside this app-shell guardrail slice.
+
+---
+
 ### 2026-06-09 - Codex - Native Transport Exact Key Gate
 
 Summary:

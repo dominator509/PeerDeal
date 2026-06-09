@@ -439,6 +439,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
           path.contains('?') ||
           path.contains('#') ||
           path.contains('//') ||
+          _containsUnsafeRoutePathCharacter(path) ||
           mountedDemoPaths.contains(path)) {
         throw StateError('Production route map contains an invalid path.');
       }
@@ -468,6 +469,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       final path = entry.path.trim();
       if (label.isEmpty ||
           label != entry.label ||
+          _containsUnsafeLabelCharacter(label) ||
           path != entry.path ||
           !productionRoutePaths.contains(path) ||
           !labels.add(label) ||
@@ -490,7 +492,8 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
         route.isEmpty ||
         route.contains('?') ||
         route.contains('#') ||
-        route.contains('//')) {
+        route.contains('//') ||
+        _containsUnsafeRoutePathCharacter(route)) {
       throw StateError('Initial app route is invalid.');
     }
     if (route == Navigator.defaultRouteName ||
@@ -500,6 +503,12 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     }
     throw StateError('Initial app route is not mounted.');
   }
+
+  bool _containsUnsafeRoutePathCharacter(String value) =>
+      value.codeUnits.any((codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F);
+
+  bool _containsUnsafeLabelCharacter(String value) =>
+      value.codeUnits.any((codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F);
 
   DemoReceiptArtifactVerifierFactory get _receiptArtifactVerifierFactory {
     return _runtime.receiptArtifactVerifierFactory ??

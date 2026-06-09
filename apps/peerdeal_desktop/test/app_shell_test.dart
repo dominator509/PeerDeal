@@ -929,6 +929,28 @@ void main() {
     expect(tester.takeException(), isA<StateError>());
   });
 
+  testWidgets('rejects production navigation with control metadata', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live\nTable',
+              path: '/table-live',
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
   testWidgets('starts on app-owned production initial route', (tester) async {
     await tester.pumpWidget(
       PeerDealDesktopApp(
@@ -959,6 +981,22 @@ void main() {
     expect(tester.takeException(), isA<StateError>());
   });
 
+  testWidgets('rejects initial routes with unsafe characters', (tester) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          initialRoute: '/table live',
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (_) => const Text('Production table route'),
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
   testWidgets('rejects production routes that collide with demo namespace', (
     tester,
   ) async {
@@ -967,6 +1005,22 @@ void main() {
         runtime: PeerDealDesktopRuntime(
           productionRoutes: <String, WidgetBuilder>{
             '/demo/production': (_) => const Text('bad route'),
+          },
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
+  testWidgets('rejects production routes with unsafe characters', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          productionRoutes: <String, WidgetBuilder>{
+            '/table live': (_) => const Text('bad route'),
           },
         ),
       ),
