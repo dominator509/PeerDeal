@@ -113,6 +113,7 @@ class DemoSliceRoutes {
     Set<String> allowedExtraPaths = const <String>{},
   }) {
     _validateRouteRegistry();
+    _validateAllowedExtraPaths(allowedExtraPaths);
 
     final mountedPaths = (expectedRoutes ?? mountedRoutes)
         .map((route) => route.path)
@@ -131,6 +132,27 @@ class DemoSliceRoutes {
     }
 
     return Map<String, T>.unmodifiable(routes);
+  }
+
+  static void _validateAllowedExtraPaths(Set<String> allowedExtraPaths) {
+    for (final path in allowedExtraPaths) {
+      if (path == '/') continue;
+      if (path.trim() != path ||
+          path.isEmpty ||
+          path.length > _maxRoutePathLength ||
+          !path.startsWith('/') ||
+          path.startsWith('/demo') ||
+          path.endsWith('/') ||
+          path.contains('?') ||
+          path.contains('#') ||
+          path.contains('//') ||
+          path.contains(r'\') ||
+          path.codeUnits.any(
+            (codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F,
+          )) {
+        throw StateError('Allowed extra route paths contain invalid metadata.');
+      }
+    }
   }
 
   static void _validateRouteRegistry() {

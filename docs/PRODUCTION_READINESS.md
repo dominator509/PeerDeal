@@ -490,6 +490,9 @@ the gates below are satisfied.
 - Mounted demo route registry validation now bounds route labels and surface
   metadata and rejects control characters before route definitions feed
   navigation or mounted route maps.
+- Mounted demo route-map validation now also validates caller-provided allowed
+  extra route paths, allowing only `/` or bounded non-demo production-style
+  paths without unsafe routing metadata.
 - App shells now accept validated app-owned production route maps through the
   mobile and desktop runtime objects, reserving `/demo/*` for the demo registry
   while allowing non-demo flows to mount without editing shared package or demo
@@ -536,6 +539,7 @@ the gates below are satisfied.
   registry validation, exact app-owned enabled-route allowlists,
   bounded app-owned route registry metadata,
   bounded app-owned enabled-route allowlist metadata,
+  app-owned route-map allowed-extra path validation,
   app-owned route-map drift diagnostic scrubbing,
   app-owned production route-map extension, app-owned
   startup route selection, app-owned production navigation descriptors,

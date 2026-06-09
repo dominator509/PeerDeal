@@ -109,15 +109,45 @@ void main() {
       <String, int>{
         for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,
         '/': 1,
+        '/table-live': 1,
       },
-      allowedExtraPaths: const <String>{'/'},
+      allowedExtraPaths: const <String>{'/', '/table-live'},
     );
 
     expect(
       validated.keys,
       containsAll(DemoSliceRoutes.mountedRoutes.map((route) => route.path)),
     );
+    expect(validated.keys, contains('/table-live'));
     expect(() => validated['/demo/other'] = 1, throwsUnsupportedError);
+  });
+
+  test('route map validation rejects unsafe allowed extra paths', () {
+    final routes = <String, int>{
+      for (final route in DemoSliceRoutes.mountedRoutes) route.path: 1,
+    };
+
+    expect(
+      () => DemoSliceRoutes.requireMountedRouteMap(
+        routes,
+        allowedExtraPaths: const <String>{'/demo/other'},
+      ),
+      throwsA(isA<StateError>()),
+    );
+    expect(
+      () => DemoSliceRoutes.requireMountedRouteMap(
+        routes,
+        allowedExtraPaths: const <String>{'/table-live '},
+      ),
+      throwsA(isA<StateError>()),
+    );
+    expect(
+      () => DemoSliceRoutes.requireMountedRouteMap(
+        routes,
+        allowedExtraPaths: const <String>{r'/table\live'},
+      ),
+      throwsA(isA<StateError>()),
+    );
   });
 
   test('route map validation accepts an enabled route subset', () {
