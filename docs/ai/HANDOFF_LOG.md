@@ -14,6 +14,45 @@ Next reviewer:
 
 ---
 
+### 2026-06-09 - Codex - Bound Native Transport Receive Batches
+
+Summary:
+Hardened mobile and desktop native transport drains so platform receive
+snapshots are capped before frames reach session handlers, and invalid app
+batch limits fail closed before native receive calls.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_frame_adapter_test.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_frame_adapter_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/transport/native_transport_frame_adapter_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/transport/native_transport_frame_adapter_test.dart`
+  in `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run dependency-audit`
+- `dart run melos run test`
+- `git diff --check`
+
+Risks:
+- Live production transport still needs platform implementation; this locks the
+  app-owned receive batch boundary only.
+
+Next reviewer:
+Codex should continue with the next production-readiness package or
+app-boundary gap from `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-06-09 - Codex - Bound Receipt Render Collections
 
 Summary:

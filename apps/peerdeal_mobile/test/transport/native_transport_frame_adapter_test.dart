@@ -133,6 +133,55 @@ void main() {
     expect(handler.frames, isEmpty);
   });
 
+  test('rejects invalid receive batch limit before native receive', () async {
+    final bridge = _FakeNativeTransportBridge(receiveFrames: [_nativeFrame()]);
+    final handler = _RecordingTransportFrameHandler();
+    final drain = NativeTransportFrameDrain(
+      bridge: bridge,
+      receiver: ValidatingTransportFrameReceiver(handler: handler),
+      maxFramesPerDrain: 0,
+    );
+
+    final result = await drain.drain(sessionId: 'session_1', peerId: 'peer_b');
+
+    expect(result.available, isFalse);
+    expect(result.results, isEmpty);
+    expect(result.warnings, [
+      'Native transport receive batch limit is invalid.',
+    ]);
+    expect(bridge.receiveLookups, 0);
+    expect(handler.frames, isEmpty);
+  });
+
+  test(
+    'bounds native receive frame batches before handlers see them',
+    () async {
+      final handler = _RecordingTransportFrameHandler();
+      final drain = NativeTransportFrameDrain(
+        bridge: _FakeNativeTransportBridge(
+          receiveFrames: <NativeTransportFrame>[
+            for (var index = 0; index < 5; index++)
+              _nativeFrame(sequence: index + 1),
+          ],
+        ),
+        receiver: ValidatingTransportFrameReceiver(handler: handler),
+        maxFramesPerDrain: 3,
+      );
+
+      final result = await drain.drain(
+        sessionId: 'session_1',
+        peerId: 'peer_b',
+      );
+
+      expect(result.available, isTrue);
+      expect(result.results, hasLength(3));
+      expect(handler.frames.map((frame) => frame.sequence), <int>[1, 2, 3]);
+      expect(result.warnings, [
+        'Native transport receive batch limit reached.',
+      ]);
+    },
+  );
+
   test('fails closed when native receive is unavailable', () async {
     final drain = NativeTransportFrameDrain(
       bridge: _FakeNativeTransportBridge(receiveWarning: 'transport locked'),
@@ -176,13 +225,13 @@ TransportFrame _frame() {
   );
 }
 
-NativeTransportFrame _nativeFrame() {
-  return const NativeTransportFrame(
+NativeTransportFrame _nativeFrame({int sequence = 1}) {
+  return NativeTransportFrame(
     sessionId: 'session_1',
     senderPeerId: 'peer_a',
     recipientPeerId: 'peer_b',
-    sequence: 1,
-    payloadBytes: <int>[1, 2, 3],
+    sequence: sequence,
+    payloadBytes: const <int>[1, 2, 3],
   );
 }
 

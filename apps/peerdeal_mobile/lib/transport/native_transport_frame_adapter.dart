@@ -28,17 +28,21 @@ class NativeTransportFrameDrain {
   const NativeTransportFrameDrain({
     required NativeTransportBridge bridge,
     required TransportFrameReceiver receiver,
+    int maxFramesPerDrain = 64,
   }) : _bridge = bridge,
        _receiver = receiver,
+       _maxFramesPerDrain = maxFramesPerDrain,
        _unavailableWarnings = null;
 
   const NativeTransportFrameDrain.unavailable({required List<String> warnings})
     : _bridge = null,
       _receiver = null,
+      _maxFramesPerDrain = 0,
       _unavailableWarnings = warnings;
 
   final NativeTransportBridge? _bridge;
   final TransportFrameReceiver? _receiver;
+  final int _maxFramesPerDrain;
   final List<String>? _unavailableWarnings;
 
   Future<NativeTransportFrameDrainResult> drain({
@@ -55,6 +59,11 @@ class NativeTransportFrameDrain {
     if (!_isValidReceiveScope(sessionId) || !_isValidReceiveScope(peerId)) {
       return const NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive scope is invalid.'],
+      );
+    }
+    if (_maxFramesPerDrain < 1) {
+      return const NativeTransportFrameDrainResult.unavailable(
+        warnings: <String>['Native transport receive batch limit is invalid.'],
       );
     }
 
@@ -82,7 +91,7 @@ class NativeTransportFrameDrain {
     }
 
     final results = <TransportFrameReceiveResult>[];
-    for (final frame in snapshot.frames) {
+    for (final frame in snapshot.frames.take(_maxFramesPerDrain)) {
       try {
         results.add(await _receiver!.receive(_fromNativeFrame(frame)));
       } on Object {
@@ -98,14 +107,15 @@ class NativeTransportFrameDrain {
     return NativeTransportFrameDrainResult(
       available: true,
       results: List<TransportFrameReceiveResult>.unmodifiable(results),
-      warnings: snapshot.warning == null
-          ? const <String>[]
-          : <String>[
-              _safeNativeWarning(
-                snapshot.warning,
-                fallback: 'Native transport receive warning.',
-              ),
-            ],
+      warnings: <String>[
+        if (snapshot.warning != null)
+          _safeNativeWarning(
+            snapshot.warning,
+            fallback: 'Native transport receive warning.',
+          ),
+        if (snapshot.frames.length > _maxFramesPerDrain)
+          'Native transport receive batch limit reached.',
+      ],
     );
   }
 

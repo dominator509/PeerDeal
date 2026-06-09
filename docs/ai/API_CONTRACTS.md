@@ -152,6 +152,9 @@ Native transport payload lists must contain only byte values from 0 through 255;
 invalid outbound payloads fail before platform sends.
 Native transport receive frame maps must carry exact field keys; platform maps
 whose keys merely stringify to expected field names are dropped.
+App-owned native transport drains must cap receive-frame batches before session
+handlers see platform frames, and invalid app batch limits must fail closed
+before native receive calls.
 
 ## Recovery Persistence Boundary
 

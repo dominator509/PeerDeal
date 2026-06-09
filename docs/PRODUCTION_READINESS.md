@@ -193,6 +193,9 @@ the gates below are satisfied.
 - App-owned native transport drains now reject blank or padded receive
   session/peer scope before native receive calls, keeping malformed app route
   scope from reaching platform transport.
+- App-owned native transport drains now enforce a receive-frame batch limit
+  before session handlers see platform frames, and invalid app batch limits
+  fail closed before native receive calls.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
@@ -581,6 +584,7 @@ the gates below are satisfied.
   app-owned transport payload-limit
   enforcement, app-owned
   transport sink validation, app-owned transport receive-scope validation,
+  app-owned transport receive-batch bounding,
   package-owned transport identity validation, generic native transport
   sequence validation, generic native transport byte-payload validation,
   generic native transport exact-key validation,
