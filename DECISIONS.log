@@ -1,0 +1,19 @@
+# Decisions Log
+
+## DEC-2026-06-13-001
+
+Decision: Adopt baseline v1 retrofit artifacts on branch `retrofit/baseline-v1` from backup tag `pre-retrofit-20260613T075234Z`.
+
+Rationale: The retrofit bundle requires a reversible baseline before further production-readiness changes.
+
+## DEC-2026-06-13-002
+
+Decision: Normalize copied bundle text for source-text gates while preserving original archive hashes in `spec/BUNDLE_SOURCE_MANIFEST.md`.
+
+Rationale: The repository rejects BOMs, em dashes, and replacement characters in tracked source text.
+
+## DEC-2026-06-13-003
+
+Decision: Keep T1 additive and docs-only; defer existing source/config changes to later tiers.
+
+Rationale: The safest production-readiness step is to create stable shared context and rollback points before editing executable surfaces.
