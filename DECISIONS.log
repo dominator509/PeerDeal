@@ -17,3 +17,9 @@ Rationale: The repository rejects BOMs, em dashes, and replacement characters in
 Decision: Keep T1 additive and docs-only; defer existing source/config changes to later tiers.
 
 Rationale: The safest production-readiness step is to create stable shared context and rollback points before editing executable surfaces.
+
+## DEC-2026-06-13-004
+
+Decision: Pin the CI global Melos activation to 7.8.1, matching the root workspace dependency and lockfile.
+
+Rationale: CI must execute the same orchestration version as the local workspace; the previous 7.5.1 pin could produce divergent command behavior.

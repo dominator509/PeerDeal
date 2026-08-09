@@ -6,8 +6,8 @@ Generated: 2026-06-13
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T1 docs-only retrofit baseline
-- Scope: Additive documentation/spec artifacts only; no application code, dependency, CI, package-boundary, or architecture changes.
+- Current tier: T4 CI hardening slice following the T1 retrofit baseline
+- Scope: Additive documentation/spec artifacts plus CI toolchain alignment; no application or package code, dependency, package-boundary, or architecture changes.
 
 ## T1 Artifacts
 
@@ -33,6 +33,6 @@ Run after each retrofit step:
 
 ## Next Implementation Targets
 
-1. Resolve `LEGACY-GAP-2026-06-13-006` by aligning CI Melos installation with the repository dependency strategy.
-2. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md` without crossing locked package boundaries.
-3. Keep native bridge contracts generic; map app-specific receipt semantics in app shells or receipt package seams only.
+1. Replace native bridge stubs with platform implementations behind the existing generic method-channel contracts.
+2. Add platform-secure receipt key storage behind the existing receipt key-ring, cipher, and signer contracts.
+3. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md` without crossing locked package boundaries.
