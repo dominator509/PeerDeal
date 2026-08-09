@@ -6,8 +6,8 @@ Generated: 2026-06-13
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T4 CI hardening slice following the T1 retrofit baseline
-- Scope: Additive documentation/spec artifacts plus CI toolchain alignment; no application or package code, dependency, package-boundary, or architecture changes.
+- Current tier: T4 CI and dependency hardening slice following the T1 retrofit baseline
+- Scope: Additive documentation/spec artifacts plus CI and workspace toolchain alignment; no application or package code, package-boundary, or architecture changes.
 
 ## T1 Artifacts
 
@@ -19,6 +19,12 @@ Generated: 2026-06-13
 - `DECISIONS.log`
 - `spec/BUNDLE_SOURCE_MANIFEST.md`
 - `spec/baseline_v1_retrofit/**`
+
+## Recent T4 Changes
+
+- `.github/workflows/ci.yml` activates Melos 8.2.2.
+- `pubspec.yaml` and `pubspec.lock` align the workspace on Melos 8.2.2.
+- Compatible transitive lock refresh raises `mustache_template` to 2.0.5.
 
 ## Required Gates
 

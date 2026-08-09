@@ -36,7 +36,7 @@ A dependency PR must include:
 
 ## Current baseline note
 As of the dependency cleanup baseline, the workspace uses the newest resolvable
-lint and Melos tooling, with the newest resolvable transitive XML parser.
+lint and Melos tooling, with compatible transitive lockfile refreshes.
 `flutter pub outdated` may still report newer `meta`, `test`, and transitive
 versions when they are not mutually compatible with the current Flutter/Dart
 toolchain.

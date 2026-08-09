@@ -13,7 +13,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-06-13-003` | `PROJECT_STATE.md` | 2 | T1 | RESOLVED | Added current tier, branch, tag, and required gates. |
 | `LEGACY-GAP-2026-06-13-004` | `HANDOFF.md` | 5 | T1 | RESOLVED | Added current handoff snapshot for Codex/Claude continuity. |
 | `LEGACY-GAP-2026-06-13-005` | `DECISIONS.log` | 5 | T1 | RESOLVED | Added immutable decision trail for this retrofit baseline. |
-| `LEGACY-GAP-2026-06-13-006` | `.github/workflows/ci.yml` | 8 | T4 | RESOLVED | CI now activates Melos 7.8.1, matching the workspace dependency and lockfile. |
+| `LEGACY-GAP-2026-06-13-006` | `.github/workflows/ci.yml` | 8 | T4 | RESOLVED | CI now activates Melos 8.2.2, matching the workspace dependency and lockfile. |
 | `LEGACY-GAP-2026-06-13-007` | `docs/PRODUCTION_READINESS.md` | 4 | T4 | DEFERRED | Platform-native secure storage, capture blocking, local-network discovery, live transport, and durable persistence require implementation outside T1. |
 | `LEGACY-GAP-2026-06-13-008` | `docs/PRODUCTION_READINESS.md` | 4 | T4 | DEFERRED | Final production UI validation and non-demo product flow validation remain future work. |
 

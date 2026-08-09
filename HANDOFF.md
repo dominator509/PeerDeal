@@ -11,20 +11,21 @@ Trinity baseline retrofit T1 is complete, and the T4 CI hardening slice is stage
 - Added normalized retrofit bundle source under `spec/baseline_v1_retrofit/`.
 - Added bundle provenance in `spec/BUNDLE_SOURCE_MANIFEST.md`.
 - Added root bootstrap, inventory, queue, project state, handoff, and decision artifacts.
-- Aligned CI's global Melos activation with the locked workspace version, 7.8.1.
-- Did not modify application code, package code, dependency files, secrets, or existing architecture docs.
+- Aligned CI's global Melos activation with the locked workspace version, 8.2.2.
+- Upgraded the workspace Melos constraint and lockfile to 8.2.2, including compatible transitive refreshes.
+- Did not modify application code, package code, secrets, or existing architecture docs.
 
 ## Review Notes
 
 - Bundle text copied under `spec/` is normalized for repository source-text gates; original hashes are recorded in the manifest.
 - Remaining production software gaps are tracked in `HANDOFF_QUEUE.md` and existing production-readiness docs.
-- The next aggressive implementation step is platform-native bridge work behind the existing generic contracts.
+- The next aggressive implementation step is platform-native bridge work behind the existing generic contracts once host-platform projects are available.
 
 ## Gate Results
 
 - `rtk dart run melos run source-text`: passed.
 - `rtk dart run melos run boundary-check`: passed.
-- `rtk dart run melos run dependency-audit`: passed; reported 5 actionable upgrades and 9 newest-resolvable packages below latest.
+- `rtk dart run melos run dependency-audit`: passed; reported 0 actionable upgrades and 9 newer packages blocked by the current toolchain.
 - `rtk dart run melos run analyze`: passed.
 - `rtk dart run melos run test`: passed.
 - `rtk git diff --check`: passed.

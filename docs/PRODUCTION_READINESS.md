@@ -73,7 +73,7 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
-- CI now activates the locked Melos 7.8.1 baseline, keeping GitHub Actions orchestration aligned with the workspace dependency.
+- The workspace and CI now use Melos 8.2.2, and dependency audit reports zero actionable upgrades; newer `meta` and `test` versions remain toolchain-blocked.
 - The v1 scaffold protocol catalog is locked across command, event, snapshot,
   Game File, invite payload, and public result-code identities, with accepted
   fixture parity and fail-closed unsupported-version checks.

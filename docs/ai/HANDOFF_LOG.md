@@ -14,6 +14,43 @@ Next reviewer:
 
 ---
 
+### 2026-08-09 - Codex - Melos 8.2.2 Dependency Baseline
+
+Summary:
+Upgraded the workspace and GitHub Actions Melos baseline from 7.8.1 to 8.2.2,
+refreshed the lockfile, and raised the compatible `mustache_template` lock to
+2.0.5. The dependency audit now reports zero actionable upgrades.
+
+Files changed:
+- `.github/workflows/ci.yml`
+- `pubspec.yaml`
+- `pubspec.lock`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `DECISIONS.log`
+- `docs/DEPENDENCY_POLICY.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart run melos run dependency-audit`
+- `dart run melos run analyze`
+- `dart run melos run test`
+
+Risks:
+- `meta` and `test` remain newer on pub.dev but are not resolvable under the
+  current Flutter/Dart toolchain.
+- Native platform implementations, durable platform persistence, and final
+  production UI validation remain separate readiness gaps.
+
+Next reviewer:
+Codex should continue with platform-native work only after host-platform
+projects are present, or the next codeable app/package hardening slice.
+
+---
+
 ### 2026-06-09 - Codex - Validate Native Readiness Transport Payload Limits
 
 Summary:
