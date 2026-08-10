@@ -22,7 +22,8 @@ Android native transport receiver lifecycle hardening, T38 Windows native
 transport socket lifecycle hardening, T39 Android secure-key teardown
 hardening, T40 Windows native channel teardown hardening, T41 app-owned
 production session bootstrap-route mounting, and T42 app-shell route-argument
-handoff, and T43 join-to-production session handoff
+handoff, T43 join-to-production session handoff, and T44 bounded
+production-session source loading
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -163,6 +164,11 @@ are implemented on branch
 - Successful first-join and rejoin outcomes now retain their validated resolved
   invite for product session handoff. Demo and compiled Game File data remain
   non-authoritative and are not used to derive live session identity.
+- Mirrored production session bootstraps now bound product-owned source loading
+  with a configurable positive timeout and a five-second default. Mounted
+  bootstrap routes show a loading surface while hydration is pending and use
+  the existing route-unavailable fallback after timeout or other failure. The
+  source remains responsible for cancellation beneath this boundary.
 - Hardened Android native transport teardown and executor rejection handling so
   accepted method calls resolve with bounded fail-closed payloads.
 - Hardened Windows native transport setup cleanup so partial Winsock/socket

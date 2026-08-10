@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 import '../join_flow/join_flow_models.dart';
 import '../navigation/app_route_fallback_screen.dart';
@@ -72,6 +73,13 @@ class _AppHoldemProductionSessionBootstrapRouteState
     return FutureBuilder<AppHoldemProductionSessionComposition>(
       future: _composition,
       builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const PeerDealAppScaffold(
+            title: 'Opening table',
+            subtitle: 'Loading production session',
+            child: Text('Loading table'),
+          );
+        }
         final composition = snapshot.data;
         if (composition == null ||
             (widget.routeName != null &&

@@ -80,9 +80,12 @@ Local Hold'em producer flow:
    cursor/session mismatches without creating product truth.
 8. `AppHoldemProductionSessionSource` loads those inputs for a validated
    `ResolvedInvite`; `AppHoldemProductionSessionBootstrap` checks exact invite
-   and hydrated table/cursor scope before invoking the factory. Successful join
-   outcomes carry the resolved invite for this handoff. Demo snapshots and
-   compiled Game Files are not live session identity sources.
+   and hydrated table/cursor scope before invoking the factory. Source loading
+   has a positive configurable timeout with a five-second default; the mounted
+   route stays in a loading state while pending and fails closed after timeout
+   or source failure. Successful join outcomes carry the resolved invite for
+   this handoff. Demo snapshots and compiled Game Files are not live session
+   identity sources.
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session

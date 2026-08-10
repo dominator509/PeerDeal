@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_retention_coordinator.dart';
@@ -66,6 +68,31 @@ void main() {
     );
     expect(source.loadedInvite, isNull);
   });
+
+  test('bounds product source loading', () async {
+    final source = _Source(
+      _input(),
+      loadFuture: Completer<AppHoldemProductionSessionInput>().future,
+    );
+
+    await expectLater(
+      AppHoldemProductionSessionBootstrap(
+        source: source,
+        sourceLoadTimeout: const Duration(milliseconds: 1),
+      ).createForInvite(_invite()),
+      throwsA(isA<TimeoutException>()),
+    );
+  });
+
+  test('rejects a non-positive product source timeout', () async {
+    await expectLater(
+      AppHoldemProductionSessionBootstrap(
+        source: _Source(_input()),
+        sourceLoadTimeout: Duration.zero,
+      ).createForInvite(_invite()),
+      throwsArgumentError,
+    );
+  });
 }
 
 ResolvedInvite _invite() {
@@ -82,14 +109,17 @@ ResolvedInvite _invite() {
 }
 
 class _Source implements AppHoldemProductionSessionSource {
-  _Source(this.input);
+  _Source(this.input, {this.loadFuture});
 
   final AppHoldemProductionSessionInput input;
+  final Future<AppHoldemProductionSessionInput>? loadFuture;
   ResolvedInvite? loadedInvite;
 
   @override
   Future<AppHoldemProductionSessionInput> load(ResolvedInvite invite) async {
     loadedInvite = invite;
+    final pending = loadFuture;
+    if (pending != null) return pending;
     return input;
   }
 }

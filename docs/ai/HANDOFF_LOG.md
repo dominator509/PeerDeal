@@ -12,6 +12,43 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Bounded Production Session Hydration
+
+Summary:
+- Mirrored `AppHoldemProductionSessionBootstrap` owners now enforce a positive
+  configurable source-load timeout with a five-second default.
+- Mounted bootstrap routes render a loading surface while product state is
+  pending and fail closed after timeout or source failure.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/`
+- `apps/peerdeal_mobile/test/session/`
+- `apps/peerdeal_desktop/lib/session/`
+- `apps/peerdeal_desktop/test/session/`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused mobile bootstrap and bootstrap-route tests: passed, 10 tests.
+- Focused desktop bootstrap and bootstrap-route tests: passed, 10 tests.
+
+Risks:
+- The timeout bounds the bootstrap future but cannot cancel product-owned work
+  beneath it. Durable state hydration, local identity, native/device runtime
+  validation, durable database persistence, and final UX remain open.
+
+Next reviewer:
+- Keep cancellation in the concrete product source when its persistence or
+  network implementation supports it; do not use fixture or demo state as a
+  production source.
+
+---
+
 ### 2026-08-10 - Codex - App-Shell Route-Argument Handoff
 
 Summary:

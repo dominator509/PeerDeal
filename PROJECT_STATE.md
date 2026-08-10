@@ -336,6 +336,17 @@ Generated: 2026-08-10
 - Windows runtime/profile validation, Android device validation, release
   signing, and other-platform implementations remain open.
 
+## Recent T44 Changes
+
+- Mirrored `AppHoldemProductionSessionBootstrap` owners now enforce a positive
+  configurable source-load timeout with a five-second default. Their mounted
+  route adapters render a loading surface while product state is pending and
+  fail closed after timeout or source failure rather than presenting a pending
+  route as immediately unavailable.
+- Focused mobile and desktop bootstrap plus route tests passed with 10 tests
+  each. Product source hydration, local identity, native/device validation,
+  durable database persistence, and final UX remain open.
+
 ## Recent T43 Changes
 
 - Mounted join routes now preserve an identity-safe `ResolvedInvite` only for

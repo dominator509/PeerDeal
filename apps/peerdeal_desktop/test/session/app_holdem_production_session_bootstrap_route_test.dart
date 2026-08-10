@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_core/peerdeal_core.dart';
@@ -65,6 +67,33 @@ void main() {
     expect(find.text('Route unavailable'), findsOneWidget);
   });
 
+  testWidgets('shows loading and then fails closed after a source timeout', (
+    tester,
+  ) async {
+    final source = _Source(
+      _input(),
+      pending: Completer<AppHoldemProductionSessionInput>().future,
+    );
+    final bootstrap = AppHoldemProductionSessionBootstrap(
+      source: source,
+      sourceLoadTimeout: const Duration(milliseconds: 1),
+    );
+
+    await tester.pumpWidget(
+      _routeHost(
+        bootstrap: bootstrap,
+        settings: RouteSettings(name: '/holdem-live', arguments: _invite()),
+      ),
+    );
+    expect(find.text('Opening table'), findsOneWidget);
+    expect(find.text('Route unavailable'), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 2));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+  });
+
   testWidgets('fails closed when the bootstrapped route path differs', (
     tester,
   ) async {
@@ -115,16 +144,19 @@ ResolvedInvite _invite() {
 }
 
 class _Source implements AppHoldemProductionSessionSource {
-  _Source(this.input, {this.fail = false});
+  _Source(this.input, {this.fail = false, this.pending});
 
   final AppHoldemProductionSessionInput input;
   final bool fail;
+  final Future<AppHoldemProductionSessionInput>? pending;
   ResolvedInvite? loadedInvite;
 
   @override
   Future<AppHoldemProductionSessionInput> load(ResolvedInvite invite) async {
     loadedInvite = invite;
     if (fail) throw StateError('product source failed');
+    final pending = this.pending;
+    if (pending != null) return pending;
     return input;
   }
 }

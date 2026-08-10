@@ -311,7 +311,12 @@ It never derives live identifiers from demo snapshots or compiled Game Files.
 Successful first-join and rejoin `JoinFlowOutcome` values carry their resolved
 invite so product orchestration can call this bootstrap after join governance
 acceptance. Concrete persistence hydration, local identity provisioning, and
-native/device reachability remain outside the app contract.
+native/device reachability remain outside the app contract. Source loading is
+bounded by a configurable positive timeout with a five-second default; timeout
+or source failure propagates to the route adapter, which stays on a loading
+surface until the future settles and then fails closed. The source remains
+responsible for canceling work beneath this boundary when its persistence or
+network implementation supports cancellation.
 
 `AppHoldemProductionSessionBootstrapRoute` is the mirrored app-shell mounting
 adapter for callers that register a production route in `productionRoutes`. Its

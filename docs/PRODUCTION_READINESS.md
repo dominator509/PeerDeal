@@ -956,6 +956,10 @@ the gates below are satisfied.
   `JoinFlowReadyHandler` through both app runtimes. Product callers can use it
   to push the bootstrap-route adapter; rejected outcomes, stale async outcomes,
   and handler failures do not trigger handoff.
+  The mirrored production-session bootstrap now bounds product-owned source
+  hydration with a configurable positive timeout and a five-second default;
+  mounted routes show a loading surface while pending and use the existing
+  route-unavailable fallback after timeout or other failure.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

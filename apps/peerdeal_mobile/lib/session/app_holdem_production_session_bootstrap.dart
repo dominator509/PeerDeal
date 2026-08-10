@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
@@ -63,17 +65,32 @@ class AppHoldemProductionSessionBootstrap {
     required AppHoldemProductionSessionSource source,
     AppHoldemProductionSessionFactory factory =
         const AppHoldemProductionSessionFactory(),
+    this.sourceLoadTimeout = const Duration(seconds: 5),
   }) : _source = source,
        _factory = factory;
 
   final AppHoldemProductionSessionSource _source;
   final AppHoldemProductionSessionFactory _factory;
+  final Duration sourceLoadTimeout;
 
   Future<AppHoldemProductionSessionComposition> createForInvite(
     ResolvedInvite invite,
   ) async {
+    if (sourceLoadTimeout <= Duration.zero) {
+      throw ArgumentError.value(
+        sourceLoadTimeout,
+        'sourceLoadTimeout',
+        'Production session source timeout must be positive.',
+      );
+    }
     _validateInvite(invite);
-    final input = await _source.load(invite);
+    final input = await _source
+        .load(invite)
+        .timeout(
+          sourceLoadTimeout,
+          onTimeout: () =>
+              throw TimeoutException('Production session source timed out.'),
+        );
     _validateInput(invite, input);
 
     return _factory.create(
