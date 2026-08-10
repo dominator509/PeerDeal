@@ -47,6 +47,41 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Native Android and Windows Peer Transport
+
+Summary:
+- Added bounded UDP multicast host implementations behind the existing generic
+  `peerdeal/native_bridges/transport` channel.
+- Android and Windows hosts validate frame fields, encode the same host-private
+  envelope, filter receive queues by session/recipient, and close socket state
+  with the Flutter host lifecycle.
+- Repaired the malformed pinned Android NDK after verifying the exact cache and
+  compiled both native hosts through their new transport handlers.
+
+Files changed:
+- Android `NativeTransportHandler` and `MainActivity` registration.
+- Windows `WindowsNativeTransport`, `FlutterWindow` registration, CMake, and
+  Winsock linkage.
+- Existing Android `SecureKeyStorageHandler` nullability fixes exposed by the
+  first real Kotlin compilation.
+- Architecture, readiness, AI context, package README, project state, queue,
+  and handoff records.
+
+Tests run:
+- Windows `flutter build windows --debug --no-pub`: passed.
+- Android `flutter build apk --debug --no-pub`: passed.
+
+Risks:
+- Multicast/firewall/device reachability, endpoint provisioning, other-platform
+  transport, durable database persistence, and product session/state wiring
+  remain open. Host socket availability is not network-connectivity proof.
+
+Next reviewer:
+- Validate transport across real Android/Windows devices and supply the native
+  source/product session identity from the actual join flow.
+
+---
+
 ### 2026-08-10 - Codex - Typed Hold'em Production Route Registration
 
 Summary:

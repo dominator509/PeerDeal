@@ -55,8 +55,9 @@ Setup flow:
   `PEERDEAL_ANDROID_KEYSTORE`, `PEERDEAL_ANDROID_KEYSTORE_PASSWORD`,
   `PEERDEAL_ANDROID_KEY_ALIAS`, and `PEERDEAL_ANDROID_KEY_PASSWORD` together.
 - The release manifest declares `INTERNET` for the existing native-network
-  boundary; local-network discovery and live peer transport remain platform
-  implementation gaps.
+  boundary. The Android host now backs the generic live peer transport with a
+  bounded UDP multicast envelope; local-network discovery, device reachability,
+  and other-platform transport remain platform implementation gaps.
 - Android capture blocking is implemented at the host level, but runtime/device
   validation, local-network discovery, transport, production platform recovery
   persistence, and the remaining other-platform hooks are still open. The app

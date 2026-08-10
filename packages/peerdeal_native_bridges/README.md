@@ -58,5 +58,12 @@ to observe local device capabilities.
   `loadKeyRing`, `saveKey`, and `deleteKey`.
 - Native transport channel: `peerdeal/native_bridges/transport` with
   `getCapability`, `sendFrame`, and `receiveFrames`.
+- The Android and Windows hosts now back that channel with a bounded,
+  host-private UDP multicast envelope on `239.255.42.99:40442`. The envelope
+  is not a protocol artifact: it carries only the already-validated generic
+  frame fields and is filtered by session and recipient peer on receive.
+- Host socket availability does not prove local-network reachability. Device,
+  firewall, multicast, other-platform, and product endpoint validation remain
+  app/platform integration work.
 - Missing payloads or platform errors must return unavailable facts with a
   warning, not throw through to policy or app code.

@@ -46,6 +46,10 @@ Setup flow:
 - `windows/runner/windows_capture_protection.*` registers the generic
   `peerdeal/native_bridges/capture_protection` channel and applies the
   app-owned blocking decision through `SetWindowDisplayAffinity`.
+- `windows/runner/windows_native_transport.*` registers the generic
+  `peerdeal/native_bridges/transport` channel and carries validated byte frames
+  through the bounded host-private UDP multicast envelope. Device/firewall
+  reachability and endpoint provisioning remain outside the host seam.
 - Records are validated and stored as a bounded versioned envelope in Windows
   Credential Manager under a namespace-derived target. The host does not
   interpret receipt purposes, algorithms, or rotation policy.

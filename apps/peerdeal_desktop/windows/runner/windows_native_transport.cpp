@@ -1,0 +1,439 @@
+// Winsock must be included before Windows headers.
+#include "windows_native_transport.h"
+
+#include <ws2tcpip.h>
+
+#include <algorithm>
+#include <array>
+#include <limits>
+#include <optional>
+#include <utility>
+#include <variant>
+
+#include <flutter/standard_method_codec.h>
+
+namespace {
+
+constexpr char kChannelName[] = "peerdeal/native_bridges/transport";
+constexpr char kGetCapabilityMethod[] = "getCapability";
+constexpr char kSendFrameMethod[] = "sendFrame";
+constexpr char kReceiveFramesMethod[] = "receiveFrames";
+constexpr char kMulticastAddress[] = "239.255.42.99";
+constexpr unsigned short kPort = 40442;
+constexpr std::size_t kMaxPayloadBytes = 60 * 1024;
+constexpr std::size_t kMaxIdBytes = 256;
+constexpr std::size_t kMaxQueueSize = 512;
+constexpr std::size_t kMaxBatchSize = 64;
+constexpr std::size_t kHeaderBytes = 19;
+constexpr uint8_t kVersion = 1;
+constexpr std::array<uint8_t, 4> kMagic = {'P', 'D', 'L', '1'};
+
+using flutter::EncodableList;
+using flutter::EncodableMap;
+using flutter::EncodableValue;
+
+const EncodableMap* ArgumentsMap(
+    const flutter::MethodCall<EncodableValue>& method_call) {
+  const auto* arguments = method_call.arguments();
+  if (arguments == nullptr) return nullptr;
+  return std::get_if<EncodableMap>(arguments);
+}
+
+const EncodableValue* MapValue(const EncodableMap& map, const char* key) {
+  const auto found = map.find(EncodableValue(std::string(key)));
+  return found == map.end() ? nullptr : &found->second;
+}
+
+bool IsSafeText(const std::string& value) {
+  if (value.empty() || value.size() > kMaxIdBytes ||
+      static_cast<unsigned char>(value.front()) <= 0x20 ||
+      static_cast<unsigned char>(value.back()) <= 0x20) {
+    return false;
+  }
+  return std::all_of(value.begin(), value.end(), [](unsigned char byte) {
+    return byte >= 0x20 && byte != 0x7f;
+  });
+}
+
+std::optional<std::string> StringValue(const EncodableValue* value) {
+  const auto* text =
+      value == nullptr ? nullptr : std::get_if<std::string>(value);
+  if (text == nullptr || !IsSafeText(*text)) return std::nullopt;
+  return *text;
+}
+
+std::optional<uint32_t> SequenceValue(const EncodableValue* value) {
+  if (value == nullptr) return std::nullopt;
+  int64_t sequence = 0;
+  if (const auto* int32_value = std::get_if<int32_t>(value);
+      int32_value != nullptr) {
+    sequence = *int32_value;
+  } else if (const auto* int64_value = std::get_if<int64_t>(value);
+             int64_value != nullptr) {
+    sequence = *int64_value;
+  } else {
+    return std::nullopt;
+  }
+  if (sequence < 1 || sequence > std::numeric_limits<uint32_t>::max()) {
+    return std::nullopt;
+  }
+  return static_cast<uint32_t>(sequence);
+}
+
+std::optional<std::vector<uint8_t>> ByteListValue(const EncodableValue* value) {
+  if (value == nullptr) return std::nullopt;
+  if (const auto* bytes = std::get_if<std::vector<uint8_t>>(value);
+      bytes != nullptr) {
+    if (bytes->empty() || bytes->size() > kMaxPayloadBytes) {
+      return std::nullopt;
+    }
+    return *bytes;
+  }
+
+  const auto* list = std::get_if<EncodableList>(value);
+  if (list == nullptr || list->empty() || list->size() > kMaxPayloadBytes) {
+    return std::nullopt;
+  }
+  std::vector<uint8_t> bytes;
+  bytes.reserve(list->size());
+  for (const auto& item : *list) {
+    int64_t byte = -1;
+    if (const auto* int32_value = std::get_if<int32_t>(&item);
+        int32_value != nullptr) {
+      byte = *int32_value;
+    } else if (const auto* int64_value = std::get_if<int64_t>(&item);
+               int64_value != nullptr) {
+      byte = *int64_value;
+    }
+    if (byte < 0 || byte > 255) return std::nullopt;
+    bytes.push_back(static_cast<uint8_t>(byte));
+  }
+  return bytes;
+}
+
+void AppendUint16(std::vector<uint8_t>* output, uint16_t value) {
+  output->push_back(static_cast<uint8_t>((value >> 8) & 0xff));
+  output->push_back(static_cast<uint8_t>(value & 0xff));
+}
+
+void AppendUint32(std::vector<uint8_t>* output, uint32_t value) {
+  output->push_back(static_cast<uint8_t>((value >> 24) & 0xff));
+  output->push_back(static_cast<uint8_t>((value >> 16) & 0xff));
+  output->push_back(static_cast<uint8_t>((value >> 8) & 0xff));
+  output->push_back(static_cast<uint8_t>(value & 0xff));
+}
+
+bool ReadUint16(const uint8_t* bytes, std::size_t length, std::size_t* offset,
+                uint16_t* value) {
+  if (*offset + 2 > length) return false;
+  *value = static_cast<uint16_t>(bytes[*offset] << 8 | bytes[*offset + 1]);
+  *offset += 2;
+  return true;
+}
+
+bool ReadUint32(const uint8_t* bytes, std::size_t length, std::size_t* offset,
+                uint32_t* value) {
+  if (*offset + 4 > length) return false;
+  *value = (static_cast<uint32_t>(bytes[*offset]) << 24) |
+           (static_cast<uint32_t>(bytes[*offset + 1]) << 16) |
+           (static_cast<uint32_t>(bytes[*offset + 2]) << 8) |
+           static_cast<uint32_t>(bytes[*offset + 3]);
+  *offset += 4;
+  return true;
+}
+
+EncodableValue ReceivePayload(
+    std::deque<WindowsNativeTransport::TransportFrame>* queue,
+    std::mutex* queue_mutex, const std::string& session_id,
+    const std::string& peer_id) {
+  EncodableList output_frames;
+  std::deque<WindowsNativeTransport::TransportFrame> retained;
+  {
+    std::lock_guard<std::mutex> lock(*queue_mutex);
+    const std::size_t count = queue->size();
+    for (std::size_t index = 0; index < count; ++index) {
+      auto frame = std::move(queue->front());
+      queue->pop_front();
+      if (output_frames.size() < kMaxBatchSize &&
+          frame.session_id == session_id &&
+          frame.recipient_peer_id == peer_id) {
+        EncodableMap payload;
+        payload.emplace(EncodableValue("sessionId"),
+                        EncodableValue(frame.session_id));
+        payload.emplace(EncodableValue("senderPeerId"),
+                        EncodableValue(frame.sender_peer_id));
+        payload.emplace(EncodableValue("recipientPeerId"),
+                        EncodableValue(frame.recipient_peer_id));
+        payload.emplace(EncodableValue("sequence"),
+                        EncodableValue(static_cast<int64_t>(frame.sequence)));
+        EncodableList bytes;
+        bytes.reserve(frame.payload.size());
+        for (const uint8_t byte : frame.payload) {
+          bytes.emplace_back(static_cast<int32_t>(byte));
+        }
+        payload.emplace(EncodableValue("payloadBytes"),
+                        EncodableValue(std::move(bytes)));
+        output_frames.emplace_back(EncodableValue(std::move(payload)));
+      } else {
+        retained.push_back(std::move(frame));
+      }
+    }
+    queue->swap(retained);
+  }
+
+  EncodableMap payload;
+  payload.emplace(EncodableValue("available"), EncodableValue(true));
+  payload.emplace(EncodableValue("frames"),
+                  EncodableValue(std::move(output_frames)));
+  return EncodableValue(std::move(payload));
+}
+
+}  // namespace
+
+WindowsNativeTransport::WindowsNativeTransport(
+    flutter::BinaryMessenger* messenger) {
+  InitializeSocket();
+  channel_ = std::make_unique<flutter::MethodChannel<EncodableValue>>(
+      messenger, kChannelName, &flutter::StandardMethodCodec::GetInstance());
+  channel_->SetMethodCallHandler(
+      [this](const auto& method_call, auto result) {
+        HandleMethodCall(method_call, std::move(result));
+      });
+}
+
+WindowsNativeTransport::~WindowsNativeTransport() {
+  if (channel_) channel_->SetMethodCallHandler(nullptr);
+  stopping_ = true;
+  if (socket_ != INVALID_SOCKET) {
+    ::closesocket(socket_);
+    socket_ = INVALID_SOCKET;
+  }
+  if (receive_thread_.joinable()) receive_thread_.join();
+  if (wsa_started_) ::WSACleanup();
+}
+
+bool WindowsNativeTransport::InitializeSocket() {
+  WSADATA data{};
+  if (::WSAStartup(MAKEWORD(2, 2), &data) != 0) return false;
+  wsa_started_ = true;
+
+  socket_ = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+  if (socket_ == INVALID_SOCKET) return false;
+  const BOOL reuse = TRUE;
+  ::setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
+               reinterpret_cast<const char*>(&reuse), sizeof(reuse));
+
+  sockaddr_in local{};
+  local.sin_family = AF_INET;
+  local.sin_port = htons(kPort);
+  local.sin_addr.s_addr = htonl(INADDR_ANY);
+  if (::bind(socket_, reinterpret_cast<const sockaddr*>(&local), sizeof(local)) ==
+      SOCKET_ERROR) {
+    return false;
+  }
+
+  ip_mreq membership{};
+  if (::InetPtonA(AF_INET, kMulticastAddress, &membership.imr_multiaddr) != 1) {
+    return false;
+  }
+  membership.imr_interface.s_addr = htonl(INADDR_ANY);
+  if (::setsockopt(socket_, IPPROTO_IP, IP_ADD_MEMBERSHIP,
+                   reinterpret_cast<const char*>(&membership),
+                   sizeof(membership)) == SOCKET_ERROR) {
+    return false;
+  }
+
+  const unsigned char ttl = 1;
+  ::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_TTL,
+               reinterpret_cast<const char*>(&ttl), sizeof(ttl));
+  stopping_ = false;
+  receive_thread_ = std::thread([this]() { ReceiveLoop(); });
+  return true;
+}
+
+void WindowsNativeTransport::ReceiveLoop() {
+  std::array<uint8_t, kHeaderBytes + kMaxPayloadBytes> buffer{};
+  while (!stopping_) {
+    sockaddr_storage source{};
+    int source_length = sizeof(source);
+    const int received = ::recvfrom(
+        socket_, reinterpret_cast<char*>(buffer.data()),
+        static_cast<int>(buffer.size()), 0,
+        reinterpret_cast<sockaddr*>(&source), &source_length);
+    if (received == SOCKET_ERROR) {
+      if (stopping_) return;
+      continue;
+    }
+    auto frame = DecodeFrame(buffer.data(), static_cast<std::size_t>(received));
+    if (!frame.has_value()) continue;
+    std::lock_guard<std::mutex> lock(queue_mutex_);
+    while (frames_.size() >= kMaxQueueSize) frames_.pop_front();
+    frames_.push_back(std::move(frame.value()));
+  }
+}
+
+void WindowsNativeTransport::HandleMethodCall(
+    const flutter::MethodCall<EncodableValue>& method_call,
+    std::unique_ptr<flutter::MethodResult<EncodableValue>> result) {
+  try {
+    if (method_call.method_name() == kGetCapabilityMethod) {
+      result->Success(CapabilityPayload(socket_ != INVALID_SOCKET));
+      return;
+    }
+    if (method_call.method_name() == kSendFrameMethod) {
+      const auto* arguments = ArgumentsMap(method_call);
+      const auto frame = arguments == nullptr
+                             ? std::nullopt
+                             : FrameFromArguments(*arguments);
+      if (!frame.has_value() || socket_ == INVALID_SOCKET) {
+        result->Success(Failure("Native transport frame is unavailable."));
+        return;
+      }
+      std::vector<uint8_t> bytes;
+      bytes.reserve(kHeaderBytes + frame->payload.size());
+      bytes.insert(bytes.end(), kMagic.begin(), kMagic.end());
+      bytes.push_back(kVersion);
+      AppendUint16(&bytes, static_cast<uint16_t>(frame->session_id.size()));
+      AppendUint16(&bytes, static_cast<uint16_t>(frame->sender_peer_id.size()));
+      AppendUint16(&bytes,
+                   static_cast<uint16_t>(frame->recipient_peer_id.size()));
+      AppendUint32(&bytes, frame->sequence);
+      AppendUint32(&bytes, static_cast<uint32_t>(frame->payload.size()));
+      bytes.insert(bytes.end(), frame->session_id.begin(), frame->session_id.end());
+      bytes.insert(bytes.end(), frame->sender_peer_id.begin(), frame->sender_peer_id.end());
+      bytes.insert(bytes.end(), frame->recipient_peer_id.begin(), frame->recipient_peer_id.end());
+      bytes.insert(bytes.end(), frame->payload.begin(), frame->payload.end());
+
+      sockaddr_in destination{};
+      destination.sin_family = AF_INET;
+      destination.sin_port = htons(kPort);
+      if (::InetPtonA(AF_INET, kMulticastAddress, &destination.sin_addr) != 1) {
+        result->Success(Failure("Native transport destination is invalid."));
+        return;
+      }
+      const int sent = ::sendto(
+          socket_, reinterpret_cast<const char*>(bytes.data()),
+          static_cast<int>(bytes.size()), 0,
+          reinterpret_cast<const sockaddr*>(&destination), sizeof(destination));
+      if (sent != static_cast<int>(bytes.size())) {
+        result->Success(Failure("Native transport send failed."));
+        return;
+      }
+      result->Success(Success());
+      return;
+    }
+    if (method_call.method_name() == kReceiveFramesMethod) {
+      const auto* arguments = ArgumentsMap(method_call);
+      const auto session_id = arguments == nullptr
+                                  ? std::nullopt
+                                  : StringValue(MapValue(*arguments, "sessionId"));
+      const auto peer_id = arguments == nullptr
+                               ? std::nullopt
+                               : StringValue(MapValue(*arguments, "peerId"));
+      if (!session_id.has_value() || !peer_id.has_value() ||
+          socket_ == INVALID_SOCKET) {
+        result->Success(Failure("Native transport receive is unavailable."));
+        return;
+      }
+      result->Success(ReceivePayload(&frames_, &queue_mutex_, session_id.value(),
+                                     peer_id.value()));
+      return;
+    }
+    result->NotImplemented();
+  } catch (...) {
+    result->Success(Failure("Native transport action failed."));
+  }
+}
+
+std::optional<WindowsNativeTransport::TransportFrame>
+WindowsNativeTransport::FrameFromArguments(const EncodableMap& arguments) {
+  const auto session_id = StringValue(MapValue(arguments, "sessionId"));
+  const auto sender_peer_id = StringValue(MapValue(arguments, "senderPeerId"));
+  const auto recipient_peer_id =
+      StringValue(MapValue(arguments, "recipientPeerId"));
+  const auto sequence = SequenceValue(MapValue(arguments, "sequence"));
+  const auto payload = ByteListValue(MapValue(arguments, "payloadBytes"));
+  if (!session_id.has_value() || !sender_peer_id.has_value() ||
+      !recipient_peer_id.has_value() || !sequence.has_value() ||
+      !payload.has_value() || sender_peer_id == recipient_peer_id) {
+    return std::nullopt;
+  }
+  return TransportFrame{session_id.value(), sender_peer_id.value(),
+                        recipient_peer_id.value(), sequence.value(),
+                        payload.value()};
+}
+
+std::optional<WindowsNativeTransport::TransportFrame>
+WindowsNativeTransport::DecodeFrame(const uint8_t* bytes, std::size_t length) {
+  if (bytes == nullptr || length < kHeaderBytes ||
+      !std::equal(kMagic.begin(), kMagic.end(), bytes)) {
+    return std::nullopt;
+  }
+  std::size_t offset = kMagic.size();
+  if (bytes[offset++] != kVersion) return std::nullopt;
+  uint16_t session_length = 0;
+  uint16_t sender_length = 0;
+  uint16_t recipient_length = 0;
+  uint32_t sequence = 0;
+  uint32_t payload_length = 0;
+  if (!ReadUint16(bytes, length, &offset, &session_length) ||
+      !ReadUint16(bytes, length, &offset, &sender_length) ||
+      !ReadUint16(bytes, length, &offset, &recipient_length) ||
+      !ReadUint32(bytes, length, &offset, &sequence) ||
+      !ReadUint32(bytes, length, &offset, &payload_length) || sequence < 1 ||
+      session_length > kMaxIdBytes || sender_length > kMaxIdBytes ||
+      recipient_length > kMaxIdBytes || payload_length < 1 ||
+      payload_length > kMaxPayloadBytes ||
+      length != offset + session_length + sender_length + recipient_length +
+                    payload_length) {
+    return std::nullopt;
+  }
+
+  const std::string session_id(reinterpret_cast<const char*>(bytes + offset),
+                               session_length);
+  offset += session_length;
+  const std::string sender_peer_id(
+      reinterpret_cast<const char*>(bytes + offset), sender_length);
+  offset += sender_length;
+  const std::string recipient_peer_id(
+      reinterpret_cast<const char*>(bytes + offset), recipient_length);
+  offset += recipient_length;
+  if (!IsSafeText(session_id) || !IsSafeText(sender_peer_id) ||
+      !IsSafeText(recipient_peer_id) || sender_peer_id == recipient_peer_id) {
+    return std::nullopt;
+  }
+  std::vector<uint8_t> payload(bytes + offset, bytes + offset + payload_length);
+  return TransportFrame{session_id, sender_peer_id, recipient_peer_id, sequence,
+                        std::move(payload)};
+}
+
+EncodableValue WindowsNativeTransport::CapabilityPayload(bool available) {
+  EncodableMap payload;
+  payload.emplace(EncodableValue("available"), EncodableValue(available));
+  payload.emplace(EncodableValue("sendSupported"), EncodableValue(available));
+  payload.emplace(EncodableValue("receiveSupported"),
+                  EncodableValue(available));
+  payload.emplace(EncodableValue("maxPayloadBytes"),
+                  EncodableValue(static_cast<int32_t>(kMaxPayloadBytes)));
+  payload.emplace(EncodableValue("notes"),
+                  EncodableValue(available ? "windows-udp-multicast"
+                                            : "unavailable"));
+  if (!available) {
+    payload.emplace(EncodableValue("warning"),
+                    EncodableValue("Native transport socket is unavailable."));
+  }
+  return EncodableValue(std::move(payload));
+}
+
+EncodableValue WindowsNativeTransport::Failure(const char* warning) {
+  EncodableMap payload;
+  payload.emplace(EncodableValue("success"), EncodableValue(false));
+  payload.emplace(EncodableValue("warning"), EncodableValue(warning));
+  return EncodableValue(std::move(payload));
+}
+
+EncodableValue WindowsNativeTransport::Success() {
+  EncodableMap payload;
+  payload.emplace(EncodableValue("success"), EncodableValue(true));
+  return EncodableValue(std::move(payload));
+}

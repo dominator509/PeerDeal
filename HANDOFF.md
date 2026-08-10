@@ -215,7 +215,7 @@ resumable publication hardening are implemented on branch
 - T29 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
   `dependency-audit` gates: passed. Dependency audit reported 0 actionable
   upgrades; 11 newer versions remain blocked by the current toolchain.
-- Android debug APK build: not completed; both the initial and post-cache-cleanup
-  attempts failed while installing NDK `28.2.13676358` because the volume
-  exhausted during extraction. Flutter doctor itself is green; Kotlin/APK and
-  Android-device validation remain open.
+- T30 Windows `flutter build windows --debug --no-pub`: passed after adding the
+  bounded native multicast transport host.
+- T30 Android `flutter build apk --debug --no-pub`: passed after repairing the
+  pinned NDK and fixing the existing Kotlin secure-key nullability errors.

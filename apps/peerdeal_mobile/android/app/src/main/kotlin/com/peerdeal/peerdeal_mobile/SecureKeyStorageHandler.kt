@@ -84,6 +84,10 @@ internal class SecureKeyStorageHandler(context: Context) :
 
     private fun loadKeyRing(call: MethodCall, result: MethodChannel.Result) {
         val namespace = call.argument<Any?>("namespace") as? String
+            ?: run {
+                result.success(unavailablePayload("Secure key storage request is invalid."))
+                return
+            }
         if (!isValidNamespace(namespace)) {
             result.success(unavailablePayload("Secure key storage request is invalid."))
             return
@@ -102,6 +106,10 @@ internal class SecureKeyStorageHandler(context: Context) :
 
     private fun saveKey(call: MethodCall, result: MethodChannel.Result) {
         val namespace = call.argument<Any?>("namespace") as? String
+            ?: run {
+                result.success(mutationFailure("Secure key storage request is invalid."))
+                return
+            }
         val keyPayload = call.argument<Any?>("key") as? Map<*, *>
         val key = keyPayload?.let(::decodeIncomingKey)
         if (!isValidNamespace(namespace) || key == null) {
@@ -115,7 +123,11 @@ internal class SecureKeyStorageHandler(context: Context) :
         ) {
             when (val read = readRecords(namespace)) {
                 is ReadResult.Success -> {
-                    val nextRecords = read.records.filterNot { it.keyId == key.keyId } + key
+                    val validatedKey = key ?: return@submit mutationFailure(
+                        "Secure key storage request is invalid.",
+                    )
+                    val nextRecords =
+                        read.records.filterNot { it.keyId == validatedKey.keyId } + validatedKey
                     if (nextRecords.size > MAX_RECORDS || !writeRecords(namespace, nextRecords)) {
                         mutationFailure("Secure key storage mutation failed.")
                     } else {
@@ -129,7 +141,15 @@ internal class SecureKeyStorageHandler(context: Context) :
 
     private fun deleteKey(call: MethodCall, result: MethodChannel.Result) {
         val namespace = call.argument<Any?>("namespace") as? String
+            ?: run {
+                result.success(mutationFailure("Secure key storage request is invalid."))
+                return
+            }
         val keyId = call.argument<Any?>("keyId") as? String
+            ?: run {
+                result.success(mutationFailure("Secure key storage request is invalid."))
+                return
+            }
         if (!isValidNamespace(namespace) || !isValidKeyId(keyId)) {
             result.success(mutationFailure("Secure key storage request is invalid."))
             return

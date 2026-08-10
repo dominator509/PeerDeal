@@ -234,8 +234,11 @@ rejects the event. Mobile and desktop `NativeTransportSession` objects can
 compose an app-owned `AppTableSessionTransportSource` around their validated
 drain. The source enforces exact session/peer scope, a bounded 100 ms to 60 s
 poll interval, serialized in-flight polls, explicit lifecycle state, and
-  bounded scrubbed warnings. It schedules app polling only; native peer transport
-  and platform source provisioning remain outside this contract. Mobile and
+  bounded scrubbed warnings. It schedules app polling only; native peer
+  transport remains platform-owned outside this Dart contract, with bounded
+  Android/Windows host implementations behind the existing method channel.
+  Platform source provisioning and network reachability remain separate.
+  Mobile and
   desktop `AppTableSessionTransportProvisioner.load(peerId: ...)` composes the
   app runtime handler with `NativeTransportSessionFactory.loadSession`, then
   returns either a route-ready source or a bounded unavailable result. It rejects

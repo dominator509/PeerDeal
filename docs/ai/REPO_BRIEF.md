@@ -97,9 +97,11 @@ dart analyze .
   host-backed, with runtime/device validation still open. App shells prefer
   explicit `PEERDEAL_RECOVERY_ROOT` and otherwise use the generic app-support
   directory bridge: Android private no-backup storage or Windows `LocalAppData`.
-  Native peer transport, production database persistence, other-platform
-  storage, and other platform implementations remain readiness gaps documented
-  in `docs/PRODUCTION_READINESS.md`. App shells now
+  Android and Windows now also provide bounded host-backed native peer
+  transport through the existing channel, but device/network reachability,
+  production database persistence, other-platform storage, and other platform
+  implementations remain readiness gaps documented in
+  `docs/PRODUCTION_READINESS.md`. App shells now
   expose deterministic retention coordinators that connect close-time policy
   decisions to the scoped recovery-store wipe primitive, plus per-session close
   coordinators that cache the first result and prevent duplicate policy or wipe
@@ -114,8 +116,9 @@ dart analyze .
   `AppTableSessionTransportProvisioner` that composes the runtime handler with
   a validated native session and route-ready source, then inject the source
   into the table route, whose mount owns replacement and disposal. Native peer
-  transport implementation and platform source provisioning remain integration
-  gaps; Android/Windows app-private recovery-root selection is now wired.
+  Platform source provisioning and device/network transport validation remain
+  integration gaps; Android/Windows app-private recovery-root selection and
+  host-backed transport are now wired.
   Mirrored `AppHoldemTableSessionRuntime` owners now compose local Hold'em
   lifecycle projection through the variant adapter and atomically commit its
   non-retention event batches before advancing variant state/cursors. The

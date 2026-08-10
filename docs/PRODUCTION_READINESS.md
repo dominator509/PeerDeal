@@ -66,12 +66,15 @@ the gates below are satisfied.
 - CI runs the same baseline commands as local development.
 
 ## Current highest-risk blockers
-- Native live transport, capture enforcement on other platforms, and other
-  native implementations remain scaffold-level. Protocol event-byte decoding
-  and app frame-to-runtime ingestion now exist, and app-owned bounded source
-  scheduling now exists, but native source provisioning and peer transport
-  implementation are still open. Mobile Android and Windows desktop now have
-  generic secure-key, capture, and app-private recovery-storage hosts. The app
+- Native live transport now has bounded Android and Windows host
+  implementations behind the generic byte-frame channel, while capture
+  enforcement on other platforms and remaining native hooks remain open.
+  Protocol event-byte decoding and app frame-to-runtime ingestion now exist,
+  and app-owned bounded source scheduling now exists. Mobile Android and
+  Windows desktop now have generic secure-key, capture, app-private
+  recovery-storage, and multicast transport hosts. Socket availability does
+  not prove device/network reachability, firewall behavior, or production
+  endpoint provisioning. The app
   shells prefer explicit `PEERDEAL_RECOVERY_ROOT` and otherwise use native
   app-support storage, but runtime persistence/capture validation, Android
   release signing, real-device/profile validation, production database
@@ -83,8 +86,8 @@ the gates below are satisfied.
   surface refresh; its route context also exposes canonical projection
   publishing. Typed `AppHoldemProductionRouteRegistration` now merges that
   route into the validated app route map and native-readiness gate. Platform
-  source provisioning, live peer transport, and actual product session/state
-  wiring remain open. The default app-owned production Hold'em surface now
+  source provisioning, actual product session/state wiring, and device/network
+  transport validation remain open. The default app-owned production Hold'em surface now
   renders bounded runtime state, gates local actions on transport readiness, and
   publishes canonical projections; final product UX validation remains open.
 - App UI is not production-polished.
@@ -796,13 +799,13 @@ the gates below are satisfied.
 - No `.zip` project archive is present in this repository snapshot; all
   checked-in markdown files were reviewed directly from source.
 - Native capture blocking on other platforms, Android/Windows runtime and
-  device validation, real local-network discovery, production transport,
+  device/network reachability validation, real local-network discovery,
   other-platform secure storage, production database persistence, operator
-  release signing, and final production app UI cannot be completed inside the
-  current ChatGPT
-  project environment because they require native platform implementations,
-  device/OS integration, product design validation, or a repaired Android NDK
-  installation (the current Gradle configuration lacks `source.properties`).
+  release signing, and final production app UI remain open because they require
+  device/OS integration, product design validation, or owner-controlled
+  release inputs. Android and Windows bounded native transport implementations
+  are now coded and both host builds pass; host socket availability is not
+  proof of cross-device reachability or production endpoint provisioning.
   The Dart contracts,
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,

@@ -8,6 +8,7 @@ class MainActivity : FlutterActivity() {
     private var secureKeyStorageHandler: SecureKeyStorageHandler? = null
     private var captureProtectionHandler: CaptureProtectionHandler? = null
     private var appStorageDirectoryHandler: AppStorageDirectoryHandler? = null
+    private var nativeTransportHandler: NativeTransportHandler? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -31,6 +32,13 @@ class MainActivity : FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             AppStorageDirectoryHandler.CHANNEL_NAME,
         ).setMethodCallHandler(appStorageHandler)
+
+        val transportHandler = NativeTransportHandler(this)
+        nativeTransportHandler = transportHandler
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            NativeTransportHandler.CHANNEL_NAME,
+        ).setMethodCallHandler(transportHandler)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
@@ -46,10 +54,16 @@ class MainActivity : FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             AppStorageDirectoryHandler.CHANNEL_NAME,
         ).setMethodCallHandler(null)
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            NativeTransportHandler.CHANNEL_NAME,
+        ).setMethodCallHandler(null)
         secureKeyStorageHandler?.close()
         secureKeyStorageHandler = null
         captureProtectionHandler = null
         appStorageDirectoryHandler = null
+        nativeTransportHandler?.close()
+        nativeTransportHandler = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 }

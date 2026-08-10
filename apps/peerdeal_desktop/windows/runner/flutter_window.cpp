@@ -1,3 +1,5 @@
+#include <winsock2.h>
+
 #include "flutter_window.h"
 
 #include <optional>
@@ -5,6 +7,7 @@
 #include "flutter/generated_plugin_registrant.h"
 #include "windows_capture_protection.h"
 #include "windows_app_storage.h"
+#include "windows_native_transport.h"
 #include "windows_secure_key_storage.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
@@ -33,6 +36,8 @@ bool FlutterWindow::OnCreate() {
       flutter_controller_->engine()->messenger(), GetHandle());
   app_storage_ = std::make_unique<WindowsAppStorage>(
       flutter_controller_->engine()->messenger());
+  native_transport_ = std::make_unique<WindowsNativeTransport>(
+      flutter_controller_->engine()->messenger());
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
@@ -51,6 +56,7 @@ bool FlutterWindow::OnCreate() {
 void FlutterWindow::OnDestroy() {
   capture_protection_ = nullptr;
   app_storage_ = nullptr;
+  native_transport_ = nullptr;
   secure_key_storage_ = nullptr;
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
