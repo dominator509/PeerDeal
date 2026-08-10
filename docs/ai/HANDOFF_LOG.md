@@ -12,6 +12,45 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - App-Shell Bootstrap Route Registration
+
+Summary:
+- Added mirrored app-owned `AppHoldemProductionSessionBootstrapRouteRegistration`
+  descriptors.
+- Both app runtimes can now merge the existing bootstrap route into the
+  production route map and native-readiness gate. Accepted joined/rejoined
+  outcomes use a cached default handler to push the registered path when no
+  explicit `JoinFlowReadyHandler` is supplied; explicit handlers still win.
+- The registration remains route plumbing and does not create product source,
+  session state, local identity, or persistence.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_bootstrap_route_registration.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- Mirrored desktop app-shell files.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`.
+- `docs/PRODUCTION_READINESS.md`, `docs/ai/API_CONTRACTS.md`,
+  `docs/ai/ARCHITECTURE_MAP.md`, and both app READMEs.
+
+Tests run:
+- Focused mobile and desktop app-shell suites passed, 77 tests each.
+- Full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- Dart format and `git diff --check` passed.
+
+Risks:
+- Concrete product source hydration, local identity, durable persistence,
+  Android/Windows device validation, release signing, other-platform hosts,
+  and final UX remain open.
+
+Next reviewer:
+- Run the full local gate set, then wire a real product source and local identity
+  through the registered handoff without using demo or fixture state.
+
+---
+
 ### 2026-08-10 - Codex - Cancellable Production Session Hydration
 
 Summary:

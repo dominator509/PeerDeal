@@ -965,6 +965,14 @@ the gates below are satisfied.
   on source completion, cancellation, timeout, or failure. The concrete product
   source remains responsible for canceling underlying persistence or network
   work.
+  Mirrored app shells now accept an optional
+  `AppHoldemProductionSessionBootstrapRouteRegistration`. The registration
+  mounts the existing bootstrap adapter, merges it into the production route
+  map, and includes its path in the native-readiness gate. Without an explicit
+  `JoinFlowReadyHandler`, accepted joined/rejoined outcomes navigate to that
+  registered path with the identity-safe resolved invite; an explicit handler
+  overrides the default. This closes app-shell route plumbing only and does
+  not create the concrete product source, state, local identity, or persistence.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

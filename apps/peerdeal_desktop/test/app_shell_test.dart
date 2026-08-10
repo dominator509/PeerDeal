@@ -20,6 +20,8 @@ import 'package:peerdeal_desktop/main.dart';
 import 'package:peerdeal_desktop/native_readiness/app_native_readiness_loader.dart';
 import 'package:peerdeal_desktop/recovery/app_recovery_persistence_store_factory.dart';
 import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_bootstrap.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_bootstrap_route_registration.dart';
 import 'package:peerdeal_desktop/setup_flow/setup_flow_route.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
@@ -1355,6 +1357,83 @@ void main() {
     expect(find.text('inv_001'), findsOneWidget);
   });
 
+  testWidgets(
+    'hands successful join into a configured bootstrap route by default',
+    (tester) async {
+      await tester.pumpWidget(
+        PeerDealDesktopApp(
+          runtime: PeerDealDesktopRuntime(
+            enabledDemoRoutePaths: const <String>{
+              DemoSliceRoutes.home,
+              DemoSliceRoutes.join,
+            },
+            joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+              bootstrapCoordinator: FakeBootstrapCoordinator(),
+            ).create,
+            nativeReadinessLoader: AppNativeReadinessLoader(
+              captureProtectionBridge: const _StaticCaptureProtectionBridge(
+                capability: CaptureProtectionCapability(
+                  blockingSupported: true,
+                  obscuringSupported: true,
+                  notes: 'ready',
+                ),
+              ),
+              localNetworkBridge: const _StaticLocalNetworkBridge(),
+              nativeTransportBridge: const _StaticNativeTransportBridge(
+                capability: NativeTransportCapability(
+                  available: true,
+                  sendSupported: true,
+                  receiveSupported: true,
+                  maxPayloadBytes: 1024,
+                  notes: 'ready',
+                ),
+              ),
+              secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+                snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
+              ),
+            ),
+            holdemProductionSessionBootstrapRoute:
+                AppHoldemProductionSessionBootstrapRouteRegistration(
+                  path: '/holdem-live',
+                  bootstrap: AppHoldemProductionSessionBootstrap(
+                    source: _FailingProductionSessionSource(),
+                  ),
+                ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Join'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Route unavailable'), findsOneWidget);
+      expect(find.text('Route: /holdem-live'), findsOneWidget);
+    },
+  );
+
+  testWidgets('rejects a bootstrap route that collides with a route', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          productionRoutes: <String, WidgetBuilder>{
+            '/holdem-live': (_) => const Text('Existing route'),
+          },
+          holdemProductionSessionBootstrapRoute:
+              AppHoldemProductionSessionBootstrapRouteRegistration(
+                path: '/holdem-live',
+                bootstrap: AppHoldemProductionSessionBootstrap(
+                  source: _FailingProductionSessionSource(),
+                ),
+              ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
   testWidgets('separates production and demo navigation on default home', (
     tester,
   ) async {
@@ -2014,6 +2093,17 @@ class _StaticSecureKeyStorageBridge implements SecureKeyStorageBridge {
     required String namespace,
   }) async {
     return snapshot;
+  }
+}
+
+class _FailingProductionSessionSource
+    implements AppHoldemProductionSessionSource {
+  @override
+  Future<AppHoldemProductionSessionInput> load(
+    ResolvedInvite invite, {
+    Future<void>? cancellation,
+  }) async {
+    throw StateError('production session source failed');
   }
 }
 

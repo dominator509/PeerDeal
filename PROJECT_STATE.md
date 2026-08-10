@@ -336,6 +336,23 @@ Generated: 2026-08-10
 - Windows runtime/profile validation, Android device validation, release
   signing, and other-platform implementations remain open.
 
+## Recent T46 Changes
+
+- Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration`
+  descriptors. Supplying one to either app runtime now mounts the existing
+  bootstrap route, merges it into the production route map, and includes its
+  path in the native-readiness gate.
+- When no explicit `JoinFlowReadyHandler` is supplied, accepted joined/rejoined
+  outcomes navigate to the registered bootstrap path with the identity-safe
+  `ResolvedInvite`. The cached callback avoids repeated navigation when the app
+  rebuilds; an explicit handler still takes precedence.
+- Focused mobile and desktop app-shell suites passed with 77 tests each. The
+  registration remains route plumbing only; concrete product source hydration,
+  local identity, durable persistence, native/device validation, and final UX
+  remain open. Full analyze, boundary, source-text, serialized test, dependency
+  audit, and diff-check gates also passed; dependency audit reports 0 actionable
+  upgrades and 11 newer versions blocked by the current toolchain.
+
 ## Recent T45 Changes
 
 - Mirrored `AppHoldemProductionSessionSource` contracts now accept an optional

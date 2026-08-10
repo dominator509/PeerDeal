@@ -77,9 +77,12 @@ Setup flow:
 
 Accepted joined/rejoined outcomes from the mounted join route preserve an
 identity-safe `ResolvedInvite` and may invoke the injected
-`JoinFlowReadyHandler` after the frame. Product callers can push the existing
-production bootstrap route with that invite as `RouteSettings.arguments`; the
-handler does not create durable state or local identity.
+`JoinFlowReadyHandler` after the frame. When the app runtime is configured with
+an `AppHoldemProductionSessionBootstrapRouteRegistration`, the shell mounts
+that existing bootstrap route, applies its native-readiness gate, and supplies
+a default join-ready handoff to the registered path. An explicitly injected
+handler takes precedence. The registration and handler do not create durable
+state or local identity; the product source remains responsible for both.
 
 For local Hold'em lifecycle actions, construct the app-owned
 `AppHoldemTableSessionRuntime` with a validated `HoldemHandState` and

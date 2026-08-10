@@ -88,6 +88,12 @@ Local Hold'em producer flow:
    deadline timer. Successful join outcomes carry the resolved invite for this
    handoff. Demo snapshots and compiled Game Files are not live session identity
    sources.
+9. `AppHoldemProductionSessionBootstrapRouteRegistration` lets either app shell
+   merge the existing bootstrap route into its production map and native-
+   readiness gate. When no explicit `JoinFlowReadyHandler` is supplied, the
+   shell pushes that registered path with the accepted resolved invite; an
+   explicit handler wins. This remains route orchestration only and does not
+   provision product state, identity, persistence, or the concrete source.
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session

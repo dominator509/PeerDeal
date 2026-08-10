@@ -22,6 +22,7 @@ import 'native_readiness/app_native_readiness_loader.dart';
 import 'navigation/app_route_fallback_screen.dart';
 import 'recovery/app_recovery_persistence_store_factory.dart';
 import 'session/app_holdem_production_route_registration.dart';
+import 'session/app_holdem_production_session_bootstrap_route_registration.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
 import 'setup_flow/setup_flow_route.dart';
 import 'transport/app_table_session_transport_source.dart';
@@ -89,6 +90,7 @@ class PeerDealMobileRuntime {
     this.tableRuntimeScopeFactory,
     this.tableTransportSource,
     this.holdemProductionRoute,
+    this.holdemProductionSessionBootstrapRoute,
     this.enabledDemoRoutePaths,
     this.productionRoutes,
     this.productionNavigation,
@@ -115,6 +117,8 @@ class PeerDealMobileRuntime {
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
   final AppTableSessionTransportSource? tableTransportSource;
   final AppHoldemProductionRouteRegistration? holdemProductionRoute;
+  final AppHoldemProductionSessionBootstrapRouteRegistration?
+  holdemProductionSessionBootstrapRoute;
   final Set<String>? enabledDemoRoutePaths;
   final PeerDealAppRouteMap? productionRoutes;
   final List<PeerDealAppNavigationEntry>? productionNavigation;
@@ -141,6 +145,8 @@ class PeerDealMobileRuntime {
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     AppTableSessionTransportSource? tableTransportSource,
     AppHoldemProductionRouteRegistration? holdemProductionRoute,
+    AppHoldemProductionSessionBootstrapRouteRegistration?
+    holdemProductionSessionBootstrapRoute,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
@@ -181,6 +187,9 @@ class PeerDealMobileRuntime {
       tableTransportSource: tableTransportSource ?? this.tableTransportSource,
       holdemProductionRoute:
           holdemProductionRoute ?? this.holdemProductionRoute,
+      holdemProductionSessionBootstrapRoute:
+          holdemProductionSessionBootstrapRoute ??
+          this.holdemProductionSessionBootstrapRoute,
       enabledDemoRoutePaths:
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
       productionRoutes: productionRoutes ?? this.productionRoutes,
@@ -217,6 +226,8 @@ class PeerDealMobileApp extends StatefulWidget {
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     AppTableSessionTransportSource? tableTransportSource,
     AppHoldemProductionRouteRegistration? holdemProductionRoute,
+    AppHoldemProductionSessionBootstrapRouteRegistration?
+    holdemProductionSessionBootstrapRoute,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
@@ -242,6 +253,8 @@ class PeerDealMobileApp extends StatefulWidget {
        _tableRuntimeScopeFactory = tableRuntimeScopeFactory,
        _tableTransportSource = tableTransportSource,
        _holdemProductionRoute = holdemProductionRoute,
+       _holdemProductionSessionBootstrapRoute =
+           holdemProductionSessionBootstrapRoute,
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
        _productionRoutes = productionRoutes,
        _productionNavigation = productionNavigation,
@@ -268,6 +281,8 @@ class PeerDealMobileApp extends StatefulWidget {
   final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
   final AppTableSessionTransportSource? _tableTransportSource;
   final AppHoldemProductionRouteRegistration? _holdemProductionRoute;
+  final AppHoldemProductionSessionBootstrapRouteRegistration?
+  _holdemProductionSessionBootstrapRoute;
   final Set<String>? _enabledDemoRoutePaths;
   final PeerDealAppRouteMap? _productionRoutes;
   final List<PeerDealAppNavigationEntry>? _productionNavigation;
@@ -288,6 +303,9 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       const DemoRecoveryResultFactory();
   AppNativeReadinessLoader? _nativeReadinessLoaderForFuture;
   Future<AppNativeReadinessSnapshot>? _nativeReadinessFuture;
+  AppHoldemProductionSessionBootstrapRouteRegistration?
+  _defaultJoinFlowReadyRegistration;
+  JoinFlowReadyHandler? _defaultJoinFlowReadyHandler;
 
   PeerDealMobileRuntime get _runtime {
     return (widget._runtime ?? const PeerDealMobileRuntime()).withOverrides(
@@ -308,6 +326,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
       tableTransportSource: widget._tableTransportSource,
       holdemProductionRoute: widget._holdemProductionRoute,
+      holdemProductionSessionBootstrapRoute:
+          widget._holdemProductionSessionBootstrapRoute,
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
       productionRoutes: widget._productionRoutes,
       productionNavigation: widget._productionNavigation,
@@ -427,7 +447,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
               orchestratorFactory: _joinFlowOrchestratorFactory,
               inviteContextFactory: _runtime.joinFlowInviteContextFactory,
               enabledModes: _runtime.joinFlowEnabledModes,
-              onJoinReady: _runtime.joinFlowReadyHandler,
+              onJoinReady: _joinFlowReadyHandler,
             ),
           if (enabledRoutePaths.contains(DemoSliceRoutes.setupRoute.path))
             DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
@@ -642,21 +662,37 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
 
   Set<String>? _combinedNativeReadinessRequiredRoutes() {
     final route = _runtime.holdemProductionRoute;
+    final sessionRoute = _runtime.holdemProductionSessionBootstrapRoute;
     final paths = _runtime.nativeReadinessRequiredRoutePaths;
-    if (route == null) return paths;
-    return <String>{...?paths, route.path};
+    if (route == null && sessionRoute == null) return paths;
+    return <String>{
+      ...?paths,
+      if (route != null) route.path,
+      if (sessionRoute != null) sessionRoute.path,
+    };
   }
 
   PeerDealAppRouteMap? _combinedProductionRoutes() {
     final route = _runtime.holdemProductionRoute;
+    final sessionRoute = _runtime.holdemProductionSessionBootstrapRoute;
     final routes = _runtime.productionRoutes;
-    if (route == null) return routes;
+    if (route == null && sessionRoute == null) return routes;
 
     final combined = <String, WidgetBuilder>{...?routes};
-    if (combined.containsKey(route.path)) {
-      throw StateError('Holdem production route collides with a route.');
+    if (route != null) {
+      if (combined.containsKey(route.path)) {
+        throw StateError('Holdem production route collides with a route.');
+      }
+      combined[route.path] = route.builder;
     }
-    combined[route.path] = route.builder;
+    if (sessionRoute != null) {
+      if (combined.containsKey(sessionRoute.path)) {
+        throw StateError(
+          'Holdem production session route collides with a route.',
+        );
+      }
+      combined[sessionRoute.path] = sessionRoute.builder;
+    }
     return combined;
   }
 
@@ -909,6 +945,20 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   JoinFlowOrchestratorFactory get _joinFlowOrchestratorFactory {
     return _runtime.joinFlowOrchestratorFactory ??
         const DemoJoinFlowOrchestratorFactory().create;
+  }
+
+  JoinFlowReadyHandler? get _joinFlowReadyHandler {
+    final configured = _runtime.joinFlowReadyHandler;
+    if (configured != null) return configured;
+    final registration = _runtime.holdemProductionSessionBootstrapRoute;
+    if (registration == null) return null;
+    if (!identical(_defaultJoinFlowReadyRegistration, registration)) {
+      _defaultJoinFlowReadyRegistration = registration;
+      _defaultJoinFlowReadyHandler = (context, invite) {
+        Navigator.of(context).pushNamed(registration.path, arguments: invite);
+      };
+    }
+    return _defaultJoinFlowReadyHandler;
   }
 
   SetupFlowOrchestratorFactory get _setupFlowOrchestratorFactory {

@@ -331,6 +331,16 @@ existing route builder. Missing arguments, source/bootstrap errors, and route
 path mismatches use the existing safe route fallback. It does not supply the
 product session source, persistence, or local identity.
 
+`AppHoldemProductionSessionBootstrapRouteRegistration` is the app-owned
+descriptor for mounting that adapter from either app shell. When supplied to a
+mobile or desktop runtime, its route builder is merged into `productionRoutes`
+and its path is included in the native-readiness gate. If no explicit
+`JoinFlowReadyHandler` is supplied, the shell creates a cached default handler
+that pushes the registered path with the accepted `ResolvedInvite`; an
+explicit handler takes precedence. The registration only composes route
+plumbing and does not create the product source, session state, local identity,
+or persistence.
+
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through
 `RouteSettings.arguments`; it does not interpret, persist, or validate the
