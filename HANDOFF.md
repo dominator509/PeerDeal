@@ -18,8 +18,9 @@ T31 app-owned production session composition, T32 resolved-invite production
 session source/bootstrap handoff, T33 native transport lifecycle hardening,
 T34 bounded secure-key method-channel calls, T35 bounded native transport
 method-channel calls, T36 bounded local-network method-channel calls, T37
-Android native transport receiver lifecycle hardening, and T38 Windows native
-transport socket lifecycle hardening
+Android native transport receiver lifecycle hardening, T38 Windows native
+transport socket lifecycle hardening, and T39 Android secure-key teardown
+hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -33,6 +34,8 @@ are implemented on branch
 - Upgraded the workspace Melos constraint and lockfile to 8.2.2, including compatible transitive refreshes.
 - Added the generated mobile Android host and registered the generic secure-key method channel.
 - Added Keystore AES-GCM encrypted, namespace-bound, durable generic key-record storage.
+- Hardened Android secure-key worker teardown so queued storage work fails closed
+  after engine cleanup and late main-looper results cannot return key material.
 - Removed the generated release debug-signing fallback; operator-owned Android signing is environment-driven and fail-closed.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
@@ -302,3 +305,10 @@ are implemented on branch
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 newer versions remain blocked by the current toolchain.
 - T38 `git diff --check`: passed.
+- T39 focused mobile secure-key/receipt and Android manifest tests: passed, 40
+  tests.
+- T39 Android `flutter build apk --debug --no-pub`: passed.
+- T39 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- T39 `git diff --check`: passed.

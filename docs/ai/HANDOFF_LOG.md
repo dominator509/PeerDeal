@@ -12,6 +12,41 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Android Secure-Key Teardown Lifecycle
+
+Summary:
+- Hardened the Android secure-key method-channel worker around Flutter engine
+  teardown.
+- Queued storage work now fails closed after handler closure, and late results
+  on the main looper return unavailable payloads instead of native key material.
+- The generic channel payload and package boundaries are unchanged.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- `docs/PRODUCTION_READINESS.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+
+Tests run:
+- Focused mobile secure-key/receipt and Android manifest tests: passed, 40
+  tests.
+- `flutter build apk --debug --no-pub`: passed.
+- Full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- `git diff --check`: passed.
+
+Risks:
+- Android device persistence/capture behavior, release signing, and
+  other-platform native hosts remain external readiness checks.
+
+Next reviewer:
+- Continue with the next documented production gap without inventing platform
+  endpoint semantics.
+
+---
+
 ### 2026-08-10 - Codex - Windows Native Transport Socket Lifecycle
 
 Summary:

@@ -184,12 +184,22 @@ internal class SecureKeyStorageHandler(context: Context) :
         }
         try {
             worker.execute {
-                val payload = try {
-                    operation()
-                } catch (_: Exception) {
+                // Engine teardown may leave accepted work in the executor. Do
+                // not start queued storage work after the handler is closed.
+                val payload = if (closed) {
                     failurePayload()
+                } else {
+                    try {
+                        operation()
+                    } catch (_: Exception) {
+                        failurePayload()
+                    }
                 }
-                mainHandler.post { result.success(payload) }
+                mainHandler.post {
+                    // A completed load can still be waiting on the main
+                    // looper; never return a key snapshot after teardown.
+                    result.success(if (closed) failurePayload() else payload)
+                }
             }
         } catch (_: RejectedExecutionException) {
             result.success(failurePayload())

@@ -410,6 +410,9 @@ the gates below are satisfied.
 - Generic secure-key method-channel load, save, and delete calls now use a
   bounded five-second default deadline and return stable fail-closed timeout
   results instead of leaving receipt key flows indefinitely pending.
+- The Android secure-key host now rejects queued storage work after engine
+  teardown begins and suppresses late key-ring results on the main looper,
+  preventing closed Flutter engines from receiving native key material.
 - Mirrored receipt routes reject unavailable export artifacts before invoking
   native key verification, preventing failed export factories from opening an
   unnecessary secure-storage call.

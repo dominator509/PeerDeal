@@ -313,6 +313,18 @@ Generated: 2026-08-10
   persistence/capture, release signing, and other-platform implementations
   remain open.
 
+## Recent T39 Changes
+
+- Hardened the Android secure-key method-channel worker against Flutter engine
+  teardown. Queued storage work now fails closed after handler closure, and
+  late main-looper results return unavailable mutations/snapshots instead of
+  exposing native key material.
+- `rtk flutter test --no-pub` focused mobile secure-key/receipt and Android
+  manifest tests passed with 40 tests.
+- `rtk flutter build apk --debug --no-pub` passed.
+- Android device persistence/capture behavior, release signing, and other
+  platform implementations remain open for operator/device validation.
+
 ## Required Gates
 
 Run after each retrofit step:
