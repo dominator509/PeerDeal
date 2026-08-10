@@ -180,7 +180,7 @@ internal class SecureKeyStorageHandler(context: Context) :
         val masterKey = loadOrCreateMasterKey(namespace) ?: return ReadResult.Failure
         val stored = preferences.getString(preferenceKey(namespace), null)
             ?: return ReadResult.Success(emptyList())
-        if (stored.length > MAX_ENCODED_BYTES) return ReadResult.Failure
+        if (!isWithinEncodedLimit(stored)) return ReadResult.Failure
 
         val envelope = JSONObject(stored)
         if (envelope.optInt("version", -1) != STORAGE_VERSION) return ReadResult.Failure
@@ -236,12 +236,16 @@ internal class SecureKeyStorageHandler(context: Context) :
             .put("iv", Base64.encodeToString(iv, Base64.NO_WRAP))
             .put("ciphertext", Base64.encodeToString(ciphertext, Base64.NO_WRAP))
             .toString()
-        if (envelope.length > MAX_ENCODED_BYTES) return false
+        if (!isWithinEncodedLimit(envelope)) return false
 
         return preferences.edit()
             .putString(preferenceKey(namespace), envelope)
             .commit()
     }
+
+    private fun isWithinEncodedLimit(value: String): Boolean =
+        value.length <= MAX_ENCODED_BYTES &&
+            value.toByteArray(StandardCharsets.UTF_8).size <= MAX_ENCODED_BYTES
 
     private fun loadOrCreateMasterKey(namespace: String): SecretKey? {
         val alias = keyAlias(namespace)

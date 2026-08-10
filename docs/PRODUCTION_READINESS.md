@@ -153,6 +153,12 @@ the gates below are satisfied.
   encrypts namespace-bound records with an Android Keystore AES-GCM key, and
   durably commits validated mutations without adding receipt semantics to the
   native bridge package.
+- Android secure-key persistence now bounds the actual UTF-8 encoded envelope
+  bytes on both reads and writes; the write path no longer mistakes the JSON
+  field count for the persisted envelope size.
+- The release Android manifest now declares the minimum `INTERNET` permission
+  for the existing native-network boundary. This does not claim local-network
+  discovery or live peer transport implementation.
 - The mobile Android release build no longer falls back to debug signing;
   release signing is enabled only when all four operator-owned
   `PEERDEAL_ANDROID_*` environment values are supplied together.

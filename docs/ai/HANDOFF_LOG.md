@@ -14,6 +14,48 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Android Secure-Key Envelope Bound
+
+Summary:
+Fixed a concrete Android host bound defect. The secure-key handler previously
+checked `JSONObject.length()` against `MAX_ENCODED_BYTES`, which measures the
+number of JSON fields rather than the persisted envelope size. Reads and writes
+now enforce the actual UTF-8 encoded byte count. The release manifest also
+declares `INTERNET` for the existing native-network boundary.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- `apps/peerdeal_mobile/android/app/src/main/AndroidManifest.xml`
+- `apps/peerdeal_mobile/test/native/android_manifest_contract_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `HANDOFF_QUEUE.md`
+- `HANDOFF.md`
+- `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Tests run:
+- Android manifest contract test: passed.
+- `melos run analyze`: passed.
+- `melos run boundary-check`: passed.
+- `melos run source-text`: passed.
+- `melos run test`: passed.
+- `melos run dependency-audit`: passed; 0 actionable upgrades.
+- `flutter build windows --no-pub`: passed.
+- `flutter build apk --no-pub`: not completed; Gradle stopped before source
+  compilation because the configured NDK lacks `source.properties`.
+- `git diff --check`: passed before documentation edits; rerun before commit.
+
+Risks:
+The Android source and device runtime remain unverified until the local NDK is
+repaired. The manifest permission does not implement local-network discovery or
+live peer transport.
+
+Next reviewer:
+Review the staged T21 patch, then preserve the existing generic native-network
+contract until endpoint/open/listener semantics are explicitly defined.
+
+---
+
 ### 2026-08-10 - Codex - Native Bootstrap Endpoint Projection
 
 Summary:

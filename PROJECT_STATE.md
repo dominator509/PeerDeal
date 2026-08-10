@@ -104,6 +104,18 @@ Generated: 2026-08-09
 - This retains discovery facts for future platform transport provisioning but
   does not claim that native peer transport is implemented.
 
+## Recent T21 Changes
+
+- Android secure-key persistence now checks the actual UTF-8 encoded envelope
+  byte count on both read and write; the previous write guard measured JSON
+  field count rather than encoded size.
+- The release Android manifest now declares `INTERNET` for the existing native
+  network boundary. No live local-network discovery or peer transport is
+  claimed by this permission-only change.
+- The Windows release host rebuild and all repository gates passed. Android
+  APK compilation remains blocked before source compilation by the malformed
+  local NDK installation missing `source.properties`.
+
 ## Required Gates
 
 Run after each retrofit step:

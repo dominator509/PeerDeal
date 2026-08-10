@@ -7,7 +7,8 @@ Generated: 2026-08-09
 Trinity baseline retrofit T1 is complete, CI/dependency hardening is complete,
 the T4 Android plus Windows secure-key and capture-enforcement host slices are
 implemented, T19 production entrypoint native-readiness activation is wired,
-and T20 local-network endpoint projection is implemented on branch
+and T20 local-network endpoint projection plus T21 Android secure-storage bound
+hardening are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -35,6 +36,9 @@ and T20 local-network endpoint projection is implemented on branch
   documented native `peer@host[:port]` discovery values on existing network
   bootstrap candidates; malformed endpoint locations are dropped without
   exposing raw values, and bare peer IDs remain supported.
+- Android secure-key persistence now bounds the actual UTF-8 encoded envelope
+  bytes on both reads and writes; the release manifest declares `INTERNET` for
+  the existing native-network channel boundary without claiming live transport.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -89,6 +93,9 @@ and T20 local-network endpoint projection is implemented on branch
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
+- The Windows release host rebuild passed after T21. The Android release build
+  still stops during Gradle configuration because the configured NDK is missing
+  `source.properties`; no Android APK or host compile result is claimed.
 - The T18 Android Gradle compile could not configure the app because the
   configured NDK is missing `source.properties`; no Android APK or host compile
   result is claimed until that installation is repaired.
@@ -113,6 +120,13 @@ and T20 local-network endpoint projection is implemented on branch
   `dependency-audit` gates also passed.
 - T20 mobile and desktop native bootstrap endpoint projection tests: passed,
   12 tests per app.
+- T21 Android manifest contract test: passed.
+- T21 Windows release host build: passed.
+- T21 Android release APK build: not completed; Gradle stopped before source
+  compilation because `C:\Users\domin\AppData\Local\Android\sdk\ndk\28.2.13676358\source.properties` is missing.
+- T21 full repository `analyze`, `boundary-check`, `source-text`, `test`, and
+  `dependency-audit` gates: passed; dependency audit reports 0 actionable
+  upgrades.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.
