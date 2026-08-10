@@ -48,6 +48,10 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Added mirrored `AppTableSessionTransportSourceMount` route lifecycle owners
   and optional runtime injection through both app shells. Table routes now
   start an injected source and dispose it on source replacement or route exit.
+- Added mirrored `AppTableSessionTransportProvisioner` factories. App callers
+  can now bind a table runtime to its event handler, load the validated native
+  transport session, and receive a route-ready source through one fail-closed
+  app boundary.
 - Added the generic capture action contract and mirrored app coordinator
   lifecycle, including serialized native block/release and fail-closed visual
   obscuring when blocking cannot be confirmed.
@@ -66,7 +70,7 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Android and Windows host work is available for runtime persistence and
   capture validation. Remaining native gaps are other-platform capture,
   local-network discovery, native peer transport implementation and
-  production source provisioning, durable platform persistence, and
+  platform source provisioning, durable platform persistence, and
   non-Windows platform storage.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
@@ -98,6 +102,8 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
   focused tests: passed.
 - Mobile and desktop route-level source mount and table-route focused tests:
   passed.
+- Mobile and desktop transport provisioner and native-session composition
+  focused tests: passed.
 - Full repository gate/test run after retention wipe orchestration: passed.
 - Full repository gate/test run after app session-runtime wiring: passed.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup

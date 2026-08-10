@@ -33,6 +33,9 @@ Setup flow:
   `NativeTransportSession.createSource` adds app-owned bounded polling with
   serialized polls, and `AppTableSessionTransportSourceMount` owns its
   start/replacement/dispose lifecycle when injected through the app runtime.
+  `AppTableSessionTransportProvisioner` composes the runtime handler and
+  validated native session into that route-ready source, failing closed on
+  malformed peer identity or native capability failure.
 
 ## Android Host
 

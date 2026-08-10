@@ -234,10 +234,16 @@ rejects the event. Mobile and desktop `NativeTransportSession` objects can
 compose an app-owned `AppTableSessionTransportSource` around their validated
 drain. The source enforces exact session/peer scope, a bounded 100 ms to 60 s
 poll interval, serialized in-flight polls, explicit lifecycle state, and
-bounded scrubbed warnings. It schedules app polling only; native peer transport
-and source provisioning remain outside this contract. App shells expose the
-source through runtime injection, and `AppTableSessionTransportSourceMount`
-owns start, source replacement, and disposal for a mounted table route.
+  bounded scrubbed warnings. It schedules app polling only; native peer transport
+  and platform source provisioning remain outside this contract. Mobile and
+  desktop `AppTableSessionTransportProvisioner.load(peerId: ...)` composes the
+  app runtime handler with `NativeTransportSessionFactory.loadSession`, then
+  returns either a route-ready source or a bounded unavailable result. It rejects
+  invalid peer identities before native lookup and normalizes native capability
+  failures without exposing raw diagnostics. The provisioner does not create
+  session policy or choose routes. App shells expose the source through runtime
+  injection, and `AppTableSessionTransportSourceMount` owns start, source
+  replacement, and disposal for a mounted table route.
 
 ## Recovery Persistence Boundary
 
@@ -271,9 +277,11 @@ timestamps are rejected before retention or storage work.
 initial table/session/protocol identity, delegates ordered `EventEnvelope`
 projection to `peerdeal_core.CoreReducer`, and leaves state unchanged when
 projection or close retention fails. A `SessionClosed` event is committed only
-after the close adapter reports success; native transport provisioning and
-production event-source startup remain outside this contract. App route source
-mounting is an app-shell lifecycle concern.
+  after the close adapter reports success. App transport provisioning now
+  composes this handler with a validated native session and bounded source, while
+  platform transport provisioning and production event-source startup remain
+  outside this contract. App route source mounting is an app-shell lifecycle
+  concern.
 
 ## Local Network Bootstrap Boundary
 

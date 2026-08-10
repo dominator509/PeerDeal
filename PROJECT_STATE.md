@@ -65,6 +65,9 @@ Generated: 2026-08-09
 - Both app shells expose optional source injection through their runtime and
   table route; the route mount owns source start/replacement/disposal. A real
   production caller still must provision a loaded native session and handler.
+- Mirrored app transport provisioners now perform that composition through one
+  fail-closed load boundary, returning the bound handler, native session, and
+  route-ready source while keeping platform transport generic.
 
 ## Required Gates
 

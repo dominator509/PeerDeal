@@ -75,10 +75,11 @@ the gates below are satisfied.
   but runtime persistence/capture validation, Android release signing, and
   real-device/profile validation remain open.
 - App shells now mount demo, receipt, safe-surface, and join-flow routes and
-  expose app-owned table-session runtimes over the core event projector, but
-  production source provisioning, production navigation, and non-demo
-  orchestration remain open. The table route can now own an injected source's
-  lifecycle once a production caller supplies one.
+  expose app-owned table-session runtimes over the core event projector. The
+  app transport provisioner now composes those runtimes with validated native
+  sessions and route-ready sources, but platform source provisioning,
+  production navigation, and non-demo orchestration remain open. The table
+  route owns an injected source's lifecycle.
 - App UI is not production-polished.
 
 ## Covered hardening slices
@@ -255,13 +256,14 @@ the gates below are satisfied.
 - Mirrored app-owned `AppTableSessionTransportSource` controllers now compose
   loaded native transport sessions with exact session/peer scope, a bounded
   polling interval, serialized in-flight polls, explicit lifecycle state, and
-  scrubbed warning output. Platform peer transport and route-specific source
-  mounting remain integration work.
+  scrubbed warning output. Mirrored
+  `AppTableSessionTransportProvisioner` factories compose the runtime handler,
+  native session factory, and route-ready source behind one fail-closed app
+  boundary, including invalid-peer and unavailable-native handling.
 - Mirrored app shells now expose optional source injection through the runtime
   and table route, and `AppTableSessionTransportSourceMount` owns start,
-  replacement, and disposal. Production callers still must provision a loaded
-  native session and handler; native peer transport implementation remains
-  open.
+  replacement, and disposal. A real platform peer transport and platform source
+  provisioning are still required before this boundary can drive production.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when

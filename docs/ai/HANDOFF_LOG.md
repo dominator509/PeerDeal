@@ -14,6 +14,37 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - App Transport Provisioning
+
+Summary:
+Added mirrored `AppTableSessionTransportProvisioner` factories. App callers can
+now compose an existing table-session runtime, its protocol handler, a validated
+native transport session, and a route-ready source through one fail-closed
+boundary. Invalid peer identities and native capability failures become bounded
+unavailable results without exposing raw diagnostics.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/app_table_session_transport_provisioner.dart`
+- `apps/peerdeal_mobile/test/transport/app_table_session_transport_provisioner_test.dart`
+- `apps/peerdeal_desktop/lib/transport/app_table_session_transport_provisioner.dart`
+- `apps/peerdeal_desktop/test/transport/app_table_session_transport_provisioner_test.dart`
+- readiness, handoff, project-state, README, and AI context records
+
+Tests run:
+- Mobile and desktop provisioner plus native-session-factory focused tests
+- Mobile and desktop app analysis
+
+Risks:
+- A real platform peer transport and platform source provisioning are still
+  required before the provisioner can drive production sessions.
+
+Next reviewer:
+Provide a platform-backed native transport implementation and pass the
+provisioned source into the production session route without moving app policy
+into `peerdeal_native_bridges`.
+
+---
+
 ### 2026-08-10 - Codex - Route Transport Source Mounting
 
 Summary:
