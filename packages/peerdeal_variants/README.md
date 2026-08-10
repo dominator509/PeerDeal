@@ -68,8 +68,19 @@ round completion cases through `HoldemActionFlow`. Invalid actions return
 `isApplied: false` and preserve the input state.
 
 The applier only chooses the next actor within the current betting round. It
-does not open streets or emit canonical core events; those remain session/core
+does not open streets or emit canonical core events by itself; those remain
 orchestration responsibilities.
+
+`HoldemCoreProjectionAdapter` is the reusable orchestration boundary for that
+handoff. It runs the action/street and showdown coordinators, emits only
+catalog-approved `EventEnvelope` values, and applies them transactionally
+through `peerdeal_core`'s `CoreReducer`. It also projects `HandStarted`,
+`ShowdownStarted`, `ShowdownRevealed`, `SettlementProjected`,
+`SettlementBlocked`, and `HandSettled` without moving Hold'em rules into core.
+The adapter's immutable `HoldemEventCursor` owns contiguous sequence/hash
+continuity; callers supply event-id and timestamp policy. If core rejects any
+event in a batch, the returned core state, Hold'em state, cursor, and event list
+remain unchanged.
 
 ## Hold'em street advancement
 `HoldemStateMachine.advanceAfterBettingRound(...)` advances from a completed

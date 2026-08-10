@@ -8,8 +8,9 @@ Trinity baseline retrofit T1 is complete, CI/dependency hardening is complete,
 the T4 Android plus Windows secure-key and capture-enforcement host slices are
 implemented, T19 production entrypoint native-readiness activation is wired,
 and T20 local-network endpoint projection, T21 Android secure-storage bound
-hardening, T22 protocol-native command validation, and T23 removal of the
-duplicate starter core API are implemented on branch
+hardening, T22 protocol-native command validation, T23 removal of the
+duplicate starter core API, and T24 variant-to-core Hold'em event projection
+are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -137,6 +138,9 @@ duplicate starter core API are implemented on branch
   command/protocol rejection and padded/control-character identity rejection.
 - T23 focused protocol-native `peerdeal_core` suite: passed after removing the
   unused local-envelope reducer and validator seams.
+- T24 focused `peerdeal_variants` lifecycle-to-core projection suite: passed,
+  including accepted action/showdown/settlement chains and transactional
+  rollback when core rejects an event.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.

@@ -136,6 +136,19 @@ Generated: 2026-08-09
   eliminating two competing core truths.
 - The focused protocol-native core suite remains green after the migration.
 
+## Recent T24 Changes
+
+- Added `HoldemEventCursor` in `peerdeal_variants` for immutable contiguous
+  event sequencing, caller-owned event IDs/timestamps, and deterministic
+  canonical event hashes.
+- Added `HoldemCoreProjectionAdapter`, which runs the existing Hold'em action,
+  street, showdown, and settlement coordinators, emits catalog-approved
+  protocol events, and applies each batch transactionally through
+  `peerdeal_core.CoreReducer`.
+- Invalid variant actions and core projection failures preserve the original
+  Hold'em state, core state, cursor, and event list. App/session callers still
+  need to adopt this adapter in production routes.
+
 ## Required Gates
 
 Run after each retrofit step:

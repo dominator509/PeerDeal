@@ -12,6 +12,27 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Hold'em Core Projection Bridge
+
+Summary:
+- Added `HoldemEventCursor` and `HoldemCoreProjectionAdapter` to
+  `packages/peerdeal_variants`.
+- The adapter runs existing Hold'em action/street, showdown, and settlement
+  coordinators, emits catalog-approved protocol envelopes, and applies them
+  through `peerdeal_core.CoreReducer` as a transactional batch.
+- Core remains variant-agnostic. App/session callers can adopt the adapter
+  without importing package internals or constructing ad hoc event shapes.
+
+Validation:
+- Focused adapter suite passed, including action projection, automatic
+  showdown-start emission, successful settlement, invalid-action rejection, and
+  rollback when core rejects a valid variant transition.
+- No native or app code changed in this slice.
+
+Remaining:
+- Production app/session routes still need to construct and retain a
+  `HoldemHandState` and invoke this adapter for live table actions.
+
 ---
 
 ### 2026-08-10 - Codex - Core Protocol Envelope Migration

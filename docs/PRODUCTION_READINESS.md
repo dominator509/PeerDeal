@@ -120,6 +120,10 @@ the gates below are satisfied.
 - Hold'em variant coverage now spans betting-round completion through checked
   streets, showdown reveal, settlement preparation/projection, uncontested
   settlement, hand completion, and settlement event emission.
+- The variant-owned `HoldemCoreProjectionAdapter` now connects accepted
+  Hold'em action, showdown, and settlement coordinator output to
+  catalog-approved protocol events and transactional `peerdeal_core` reducer
+  projection; core remains variant-agnostic and failed batches roll back.
 - Hold'em action application now carries production raise sizing semantics:
   full opening bets and full raises update the next minimum raise amount, while
   short all-ins can increase the amount to call without claiming full-raise

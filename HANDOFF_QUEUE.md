@@ -25,6 +25,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-10-015` | `apps/peerdeal_mobile/android/` | 4 | T21 | RESOLVED | Android secure-key persistence now bounds the actual UTF-8 encoded envelope bytes on read and write; the release manifest declares the minimum INTERNET permission for the existing native-network boundary. |
 | `LEGACY-GAP-2026-08-10-016` | `packages/peerdeal_core/` | 4 | T22 | RESOLVED | Core command validation now consults the protocol catalog, rejects unsupported command artifacts and protocol versions, and rejects padded or control-character envelope identities before command acceptance. |
 | `LEGACY-GAP-2026-08-10-017` | `packages/peerdeal_core/` | 4 | T23 | RESOLVED | Removed the unused starter `CoreCommand`/`CoreEvent` and duplicate reducer/validator contracts; the public core barrel now exposes only protocol-native command/event processing and current deterministic invariants. |
+| `LEGACY-GAP-2026-08-10-018` | `packages/peerdeal_variants/` | 4 | T24 | RESOLVED | Added the variant-owned `HoldemCoreProjectionAdapter` and immutable event cursor to connect action, showdown, and settlement state-machine output to catalog-approved protocol events and transactional `CoreReducer` projection without moving Hold'em rules into core. |
 
 ## Status Definitions
 

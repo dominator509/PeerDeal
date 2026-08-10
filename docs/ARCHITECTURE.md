@@ -39,6 +39,10 @@ This chain is metadata-only. It does not move Hold'em ranking, settlement
 projection, pot math, odd-chip handling, or ledger policy into replay or sync.
 Next settlement hardening belongs in `peerdeal_variants` for Hold'em-specific
 projection rules and in `peerdeal_core` for universal pot/ledger boundaries.
+The variant-owned `HoldemCoreProjectionAdapter` now joins those boundaries by
+emitting catalog-approved protocol events and applying them through the core
+reducer transactionally; app/session code remains responsible for invoking it
+from a live table flow.
 
 ## Forbidden patterns
 - UI mutating core state directly
