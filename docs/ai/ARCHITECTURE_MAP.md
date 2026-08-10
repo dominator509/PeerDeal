@@ -54,6 +54,16 @@ Transport ingress:
    commits accepted events, including retention-gated close events.
 5. An app-owned source controller can schedule bounded polls of the loaded
    native drain, serialize overlapping polls, and stop with the route lifecycle.
+
+Local Hold'em producer flow:
+
+1. App/session code supplies validated `HoldemHandState` and `HoldemEventCursor`
+   to `AppHoldemTableSessionRuntime`.
+2. `HoldemCoreProjectionAdapter` emits catalog-approved events and projects them
+   through `peerdeal_core`.
+3. The app runtime atomically commits the non-retention batch before advancing
+   variant state or the cursor. Remote inbound events remain core-only until a
+   variant event-reducer contract exists.
 6. The app runtime can inject that source into the table route, whose mount
    owns source replacement and disposal.
 

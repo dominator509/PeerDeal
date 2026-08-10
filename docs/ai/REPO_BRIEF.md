@@ -116,6 +116,11 @@ dart analyze .
   into the table route, whose mount owns replacement and disposal. Native peer
   transport implementation and platform source provisioning remain integration
   gaps; Android/Windows app-private recovery-root selection is now wired.
+  Mirrored `AppHoldemTableSessionRuntime` owners now compose local Hold'em
+  lifecycle projection through the variant adapter and atomically commit its
+  non-retention event batches before advancing variant state/cursors. Inbound
+  transport remains generic core projection until a variant event-reducer
+  contract exists.
 
 ## Do Not Touch Without Approval
 

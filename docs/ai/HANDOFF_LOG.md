@@ -12,6 +12,26 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - App Hold'em Session Adoption
+
+Summary:
+- Added mirrored app-owned `AppHoldemTableSessionRuntime` owners in both app
+  shells and added `peerdeal_variants` as an explicit app dependency.
+- Local start/action/showdown/settlement projections now commit through the
+  existing app session runtime. New atomic non-retention batch preflight keeps
+  core state, Hold'em state, and cursor advancement synchronized.
+
+Validation:
+- Mobile and desktop focused app-session suites passed.
+- Existing app runtime retention tests passed.
+
+Remaining:
+- Production non-demo routes still need to provide validated Hold'em hand state
+  and event sinks. Generic inbound transport does not yet reconstruct variant
+  state because no variant event-reducer contract exists.
+
+---
+
 ### 2026-08-10 - Codex - Hold'em Core Projection Bridge
 
 Summary:

@@ -149,6 +149,18 @@ Generated: 2026-08-09
   Hold'em state, core state, cursor, and event list. App/session callers still
   need to adopt this adapter in production routes.
 
+## Recent T25 Changes
+
+- Added mirrored app-owned `AppHoldemTableSessionRuntime` owners in the mobile
+  and desktop shells. They expose start, action, showdown, and settlement
+  operations without moving variant rules into app UI or core.
+- Added atomic non-retention event-batch preflight/commit to both
+  `AppTableSessionRuntime` owners. App core state, Hold'em state, and the event
+  cursor advance only after the full adapter-produced batch is accepted.
+- The existing generic transport ingress still projects inbound envelopes
+  through `AppTableSessionRuntime`; a variant event-reducer contract is still
+  required before remote Hold'em events can reconstruct local variant state.
+
 ## Required Gates
 
 Run after each retrofit step:
@@ -167,4 +179,7 @@ Run after each retrofit step:
    signing.
 2. Add the remaining other-platform capture, local-network, and transport
    implementations behind the existing generic method-channel contracts.
-3. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md` without crossing locked package boundaries.
+3. Wire `AppHoldemTableSessionRuntime` into a real non-demo table route once the
+   production route supplies validated Hold'em hand state and event sinks.
+4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
+   without crossing locked package boundaries.

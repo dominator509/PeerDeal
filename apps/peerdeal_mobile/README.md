@@ -75,4 +75,11 @@ Setup flow:
   Windows host provides the same generic secure-key channel through Windows
   Credential Manager.
 
+For local Hold'em lifecycle actions, construct the app-owned
+`AppHoldemTableSessionRuntime` with a validated `HoldemHandState` and
+`HoldemEventCursor`. It calls the variant projection adapter, commits the
+resulting non-retention event batch through `AppTableSessionRuntime`, and only
+then advances variant state and the cursor. Inbound transport remains a
+generic core projection until a variant event-reducer contract is available.
+
 It does NOT introduce a new top-level package.

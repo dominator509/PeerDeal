@@ -120,6 +120,27 @@ void main() {
     expect(runtime.state.phase, TablePhase.closing);
     expect(store.wipeCalls, 0);
   });
+
+  test('preflights event batches and leaves state unchanged on rejection', () {
+    final runtime = _runtime(scope: scope, store: _FakeRecoveryStore());
+    final rejected = runtime.applyEventBatch(<EventEnvelope>[
+      _event(type: 'OpenTableSessionOpened', seq: 1),
+      _event(type: 'PlayerCalled', seq: 2, prevHash: 'hash_1'),
+    ]);
+
+    expect(rejected.isRejected, isTrue);
+    expect(rejected.reasonCode, isNotNull);
+    expect(runtime.state.eventSequence, 0);
+    expect(runtime.acceptedEventCount, 0);
+
+    final applied = runtime.applyEventBatch(<EventEnvelope>[
+      _event(type: 'OpenTableSessionOpened', seq: 1),
+      _event(type: 'SessionCloseRequested', seq: 2, prevHash: 'hash_1'),
+    ]);
+    expect(applied.isApplied, isTrue);
+    expect(runtime.state.eventSequence, 2);
+    expect(runtime.acceptedEventCount, 2);
+  });
 }
 
 AppTableSessionRuntime _runtime({

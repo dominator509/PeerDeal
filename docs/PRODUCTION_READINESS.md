@@ -124,6 +124,11 @@ the gates below are satisfied.
   Hold'em action, showdown, and settlement coordinator output to
   catalog-approved protocol events and transactional `peerdeal_core` reducer
   projection; core remains variant-agnostic and failed batches roll back.
+- Mirrored app-owned `AppHoldemTableSessionRuntime` owners now invoke that
+  adapter from app/session code and commit local non-retention event batches
+  atomically through `AppTableSessionRuntime` before advancing Hold'em state or
+  its event cursor. Generic inbound transport remains core-only until a
+  variant event-reducer contract is added.
 - Hold'em action application now carries production raise sizing semantics:
   full opening bets and full raises update the next minimum raise amount, while
   short all-ins can increase the amount to call without claiming full-raise

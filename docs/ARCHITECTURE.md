@@ -42,7 +42,10 @@ projection rules and in `peerdeal_core` for universal pot/ledger boundaries.
 The variant-owned `HoldemCoreProjectionAdapter` now joins those boundaries by
 emitting catalog-approved protocol events and applying them through the core
 reducer transactionally; app/session code remains responsible for invoking it
-from a live table flow.
+from a live table flow. Mirrored app-owned `AppHoldemTableSessionRuntime`
+owners now provide that invocation boundary and atomically commit the emitted
+non-retention batches before advancing variant state. Inbound transport still
+uses the generic core runtime until a variant event-reducer contract exists.
 
 ## Forbidden patterns
 - UI mutating core state directly

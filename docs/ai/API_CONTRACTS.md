@@ -282,6 +282,11 @@ projection or close retention fails. A `SessionClosed` event is committed only
   platform transport provisioning and production event-source startup remain
   outside this contract. App route source mounting is an app-shell lifecycle
   concern.
+`AppHoldemTableSessionRuntime` is the app-owned local Hold'em composition seam:
+it invokes `HoldemCoreProjectionAdapter`, preflights the resulting non-retention
+batch through `AppTableSessionRuntime`, and advances Hold'em state/cursor only
+after the batch commits. Inbound transport remains generic core projection
+until a variant event-reducer contract is defined.
 
 When no explicit recovery root is configured, the mobile and desktop app shells
 may call the generic `AppStorageDirectoryBridge.getAppSupportDirectory()`

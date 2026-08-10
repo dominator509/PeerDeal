@@ -9,8 +9,8 @@ the T4 Android plus Windows secure-key and capture-enforcement host slices are
 implemented, T19 production entrypoint native-readiness activation is wired,
 and T20 local-network endpoint projection, T21 Android secure-storage bound
 hardening, T22 protocol-native command validation, T23 removal of the
-duplicate starter core API, and T24 variant-to-core Hold'em event projection
-are implemented on branch
+duplicate starter core API, T24 variant-to-core Hold'em event projection, and
+T25 app-owned Hold'em session adoption are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -45,6 +45,11 @@ are implemented on branch
   padded or control-character envelope identities before command acceptance.
 - The public `peerdeal_core` barrel no longer exports unused local `CoreCommand`
   or `CoreEvent` models, duplicate reducer contracts, or starter validators;
+- Added mirrored app-owned `AppHoldemTableSessionRuntime` owners. They project
+  local start/action/showdown/settlement operations through the variant adapter,
+  then commit the resulting envelopes through the app session boundary.
+- Added atomic non-retention event-batch preflight to both app table runtimes;
+  variant state and event cursors advance only after the complete batch commits.
   protocol-native core models and reducer paths are now the sole package API.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
@@ -141,6 +146,8 @@ are implemented on branch
 - T24 focused `peerdeal_variants` lifecycle-to-core projection suite: passed,
   including accepted action/showdown/settlement chains and transactional
   rollback when core rejects an event.
+- T25 focused mobile and desktop Hold'em app-session suites: passed, including
+  local action rejection, atomic batch preflight, and showdown/settlement.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.

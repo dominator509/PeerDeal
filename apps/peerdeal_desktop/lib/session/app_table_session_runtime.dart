@@ -49,6 +49,53 @@ class AppTableSessionEventResult {
       disposition == AppTableSessionEventDisposition.rejected;
 }
 
+enum AppTableSessionEventBatchDisposition { applied, rejected }
+
+class AppTableSessionEventBatchResult {
+  AppTableSessionEventBatchResult._({
+    required this.disposition,
+    required this.state,
+    required List<EventEnvelope> events,
+    this.reasonCode,
+    List<String> warnings = const <String>[],
+  }) : events = List<EventEnvelope>.unmodifiable(events),
+       warnings = List<String>.unmodifiable(warnings);
+
+  AppTableSessionEventBatchResult.applied({
+    required TableState state,
+    required List<EventEnvelope> events,
+    List<String> warnings = const <String>[],
+  }) : this._(
+         disposition: AppTableSessionEventBatchDisposition.applied,
+         state: state,
+         events: events,
+         warnings: warnings,
+       );
+
+  AppTableSessionEventBatchResult.rejected({
+    required TableState state,
+    required String reasonCode,
+    List<String> warnings = const <String>[],
+  }) : this._(
+         disposition: AppTableSessionEventBatchDisposition.rejected,
+         state: state,
+         events: const <EventEnvelope>[],
+         reasonCode: reasonCode,
+         warnings: warnings,
+       );
+
+  final AppTableSessionEventBatchDisposition disposition;
+  final TableState state;
+  final List<EventEnvelope> events;
+  final String? reasonCode;
+  final List<String> warnings;
+
+  bool get isApplied =>
+      disposition == AppTableSessionEventBatchDisposition.applied;
+  bool get isRejected =>
+      disposition == AppTableSessionEventBatchDisposition.rejected;
+}
+
 /// Owns one app session's protocol-event projection and close-time retention.
 ///
 /// Core remains the only source of deterministic table state. This class binds
@@ -126,6 +173,87 @@ class AppTableSessionRuntime {
     return AppTableSessionEventResult.applied(
       state: _state,
       recoveryResult: recoveryResult,
+    );
+  }
+
+  /// Preflights and commits a non-retention event batch as one state change.
+  ///
+  /// Close and wipe events remain single-event operations because they carry
+  /// retention side effects. The optional expected projection fields let an
+  /// app-owned variant adapter prove that it and this runtime used the same
+  /// core reducer result before the runtime commits.
+  AppTableSessionEventBatchResult applyEventBatch(
+    List<EventEnvelope> events, {
+    int? expectedEventSequence,
+    String? expectedLastEventHash,
+  }) {
+    final incoming = List<EventEnvelope>.unmodifiable(events);
+    if (incoming.isEmpty) {
+      return AppTableSessionEventBatchResult.rejected(
+        state: _state,
+        reasonCode: 'ERR_APP_SESSION_EVENT_BATCH_EMPTY',
+      );
+    }
+
+    var projectedState = _state;
+    for (final event in incoming) {
+      if (event.eventType == 'SessionClosed' ||
+          event.eventType == 'SessionWiped') {
+        return AppTableSessionEventBatchResult.rejected(
+          state: _state,
+          reasonCode: 'ERR_APP_SESSION_BATCH_RETENTION_UNSUPPORTED',
+        );
+      }
+      if (event.tableId != _state.tableId ||
+          event.sessionId != _state.sessionId) {
+        return AppTableSessionEventBatchResult.rejected(
+          state: _state,
+          reasonCode: 'ERR_APP_SESSION_SCOPE_MISMATCH',
+        );
+      }
+      if (event.protocolVersion != _state.protocolVersion) {
+        return AppTableSessionEventBatchResult.rejected(
+          state: _state,
+          reasonCode: 'ERR_APP_SESSION_PROTOCOL_MISMATCH',
+        );
+      }
+
+      try {
+        projectedState = _reducer.apply(projectedState, event);
+      } on InvariantViolation catch (error) {
+        return AppTableSessionEventBatchResult.rejected(
+          state: _state,
+          reasonCode: error.code,
+        );
+      } on Object {
+        return AppTableSessionEventBatchResult.rejected(
+          state: _state,
+          reasonCode: 'ERR_APP_SESSION_EVENT_BATCH_REJECTED',
+        );
+      }
+    }
+
+    if (expectedEventSequence != null &&
+        projectedState.eventSequence != expectedEventSequence) {
+      return AppTableSessionEventBatchResult.rejected(
+        state: _state,
+        reasonCode: 'ERR_APP_SESSION_BATCH_PROJECTION_MISMATCH',
+      );
+    }
+    if (expectedLastEventHash != null &&
+        projectedState.metadata['last_event_hash'] != expectedLastEventHash) {
+      return AppTableSessionEventBatchResult.rejected(
+        state: _state,
+        reasonCode: 'ERR_APP_SESSION_BATCH_PROJECTION_MISMATCH',
+      );
+    }
+
+    _state = projectedState;
+    _lastAcceptedEvent = incoming.last;
+    _acceptedEventCount += incoming.length;
+    return AppTableSessionEventBatchResult.applied(
+      state: _state,
+      events: incoming,
     );
   }
 
