@@ -101,8 +101,10 @@ dart analyze .
   decisions to the scoped recovery-store wipe primitive, plus per-session close
   coordinators that cache the first result and prevent duplicate policy or wipe
   work. App-owned protocol event adapters now map supported `SessionClosed`
-  envelopes and their `emitted_at` timestamps into that boundary. Real
-  session-owner wiring remains an integration gap.
+  envelopes and their `emitted_at` timestamps into that boundary. Mirrored
+  `AppTableSessionRuntime` owners bind ordered protocol events to core state and
+  commit close state only after retention succeeds. Live transport/event-source
+  mounting and durable platform persistence remain integration gaps.
 
 ## Do Not Touch Without Approval
 

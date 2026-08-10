@@ -54,10 +54,12 @@ Setup flow:
   recovery persistence wipe after a caller supplies a closed-session time and
   policy. `AppRecoverySessionCloseCoordinator` binds that policy and scope to
   one app session, caches the first outcome, and prevents duplicate close
-  signals from repeating policy or wipe work. The real session owner must
-  invoke it when `SessionClosed` is committed. `AppRecoverySessionCloseEventAdapter`
+  signals from repeating policy or wipe work. `AppRecoverySessionCloseEventAdapter`
   provides the app-boundary mapping from a supported, scope-matching protocol
   event to that coordinator and uses the event's `emitted_at` timestamp.
-  Production session-close scheduling remains app-lifecycle work.
+  `AppTableSessionRuntime` binds that adapter to one table/session/protocol
+  stream and delegates state projection to `peerdeal_core`; it commits a close
+  only after retention succeeds. Live transport/event-source mounting and
+  production session-close scheduling remain app-lifecycle work.
 
 It does NOT introduce a new top-level package.

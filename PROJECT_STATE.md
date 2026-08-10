@@ -45,12 +45,16 @@ Generated: 2026-08-09
 - Mobile and desktop app shells now expose deterministic retention coordinators
   that invoke the recovery wipe primitive only when the app-owned policy is due,
   plus per-session close coordinators that cache the first success or failure so
-  duplicate close signals cannot repeat policy or storage work. Wiring these
-  coordinators to the real session owner remains open.
+  duplicate close signals cannot repeat policy or storage work.
 - Mirrored app session-close event adapters now ignore non-close events, reject
   unsupported versions, mismatched scopes, and invalid timestamps, and map a
   supported `SessionClosed` event's `emitted_at` value into the exactly-once
   coordinator without mutating protocol/core state.
+- Mirrored `AppTableSessionRuntime` owners now bind table/session/protocol
+  scope, delegate ordered protocol events to `peerdeal_core`, and commit a
+  `SessionClosed` projection only after the retention adapter succeeds. Live
+  transport/event-source mounting and durable database/platform persistence
+  remain open.
 
 ## Required Gates
 

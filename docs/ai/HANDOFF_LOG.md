@@ -14,6 +14,58 @@ Next reviewer:
 
 ---
 
+### 2026-08-09 - Codex - App Table Session Runtime
+
+Summary:
+Added mirrored `AppTableSessionRuntime` owners in the mobile and desktop app
+shells. Each runtime pins table/session/protocol identity, delegates ordered
+`EventEnvelope` projection to `peerdeal_core.CoreReducer`, preserves state on
+rejected events, and commits `SessionClosed` only after the existing app
+retention adapter succeeds. Failed retention leaves the runtime in its prior
+state and exposes scrub-safe reason codes/warnings.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_table_session_runtime.dart`
+- `apps/peerdeal_mobile/test/session/app_table_session_runtime_test.dart`
+- `apps/peerdeal_mobile/pubspec.yaml`
+- `apps/peerdeal_desktop/lib/session/app_table_session_runtime.dart`
+- `apps/peerdeal_desktop/test/session/app_table_session_runtime_test.dart`
+- `apps/peerdeal_desktop/pubspec.yaml`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/session/app_table_session_runtime_test.dart` in
+  `apps/peerdeal_mobile`
+- `flutter test --no-pub test/session/app_table_session_runtime_test.dart` in
+  `apps/peerdeal_desktop`
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit`
+- `git diff --check`
+
+Risks:
+- Live transport/event-source mounting, durable database/platform persistence,
+  Android/Windows runtime validation, other-platform native implementations,
+  and final production UI remain open readiness work.
+
+Next reviewer:
+Mount the runtime behind a real validated transport/event source once the
+platform transport implementation exists; keep protocol serialization outside
+the app runtime and retain `peerdeal_core` as the state authority.
+
+---
+
 ### 2026-08-09 - Codex - Windows Desktop Secure-Key Host
 
 Summary:

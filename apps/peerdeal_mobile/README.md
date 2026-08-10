@@ -53,10 +53,13 @@ Setup flow:
   persistence wipe after a caller supplies a closed-session time and policy.
   `AppRecoverySessionCloseCoordinator` binds that policy and scope to one app
   session, caches the first outcome, and prevents duplicate close signals from
-  repeating policy or wipe work. The real session owner must invoke it when
-  `SessionClosed` is committed. `AppRecoverySessionCloseEventAdapter` provides
+  repeating policy or wipe work. `AppRecoverySessionCloseEventAdapter` provides
   the app-boundary mapping from a supported, scope-matching protocol event to
-  that coordinator and uses the event's `emitted_at` timestamp. The desktop
+  that coordinator and uses the event's `emitted_at` timestamp.
+  `AppTableSessionRuntime` binds that adapter to one table/session/protocol
+  stream and delegates state projection to `peerdeal_core`; it commits a close
+  only after retention succeeds. Live transport/event-source mounting remains
+  open. The desktop
   Windows host provides the same generic secure-key channel through Windows
   Credential Manager.
 

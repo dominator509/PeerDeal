@@ -248,12 +248,17 @@ explicit timestamps, and invokes the store wipe only when due. Policy or wipe
 exceptions become fatal scrub-safe persistence results. The app-owned
 `AppRecoverySessionCloseCoordinator` binds scope and policy to one session,
 delegates the first close signal, and returns the cached result for every later
-signal, including failures; it does not emit protocol events or replace the
-real session owner. `AppRecoverySessionCloseEventAdapter` is the app-owned
+signal, including failures. `AppRecoverySessionCloseEventAdapter` is the app-owned
 protocol mapping seam: it ignores non-`SessionClosed` events, requires the
 locked catalog version and exact recovery scope, parses `emitted_at`, and only
 then delegates to the close coordinator. Invalid event versions, scopes, or
 timestamps are rejected before retention or storage work.
+`AppTableSessionRuntime` is the app-owned session owner seam: it binds the
+initial table/session/protocol identity, delegates ordered `EventEnvelope`
+projection to `peerdeal_core.CoreReducer`, and leaves state unchanged when
+projection or close retention fails. A `SessionClosed` event is committed only
+after the close adapter reports success; live transport/event-source mounting
+is still outside this contract.
 
 ## Local Network Bootstrap Boundary
 

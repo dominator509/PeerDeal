@@ -71,8 +71,10 @@ the gates below are satisfied.
   Android and Windows desktop now have generic secure-key and capture hosts,
   but runtime persistence/capture validation, Android release signing, and
   real-device/profile validation remain open.
-- App shells now mount demo, receipt, safe-surface, and join-flow routes, but
-  runtime navigation still needs production UI and non-demo orchestration.
+- App shells now mount demo, receipt, safe-surface, and join-flow routes and
+  expose app-owned table-session runtimes over the core event projector, but
+  live transport/event-source mounting, production navigation, and non-demo
+  orchestration remain open.
 - App UI is not production-polished.
 
 ## Covered hardening slices
@@ -522,11 +524,13 @@ the gates below are satisfied.
   timestamps, invoke wipe only when due, and normalize policy/storage
   exceptions to fatal persistence outcomes. Per-session app close coordinators
   cache the first success or failure, preventing duplicate close signals from
-  repeating policy or storage work. Wiring the coordinator to the real
-  `SessionClosed` owner remains an integration responsibility. App-owned
-  session-close event adapters now reject unsupported versions, mismatched
-  recovery scopes, and invalid timestamps before mapping supported
-  `SessionClosed.emitted_at` into that coordinator.
+  repeating policy or storage work. App-owned session-close event adapters now
+  reject unsupported versions, mismatched recovery scopes, and invalid
+  timestamps before mapping supported `SessionClosed.emitted_at` into that
+  coordinator. Mirrored app table-session runtimes now bind the event stream
+  to one table/session/protocol scope, delegate projection to `peerdeal_core`,
+  and refuse to commit a close when retention fails. Live transport/event-source
+  mounting and durable database/platform persistence remain integration work.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is

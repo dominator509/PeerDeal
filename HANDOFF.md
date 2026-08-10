@@ -33,6 +33,10 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Added mirrored session-close event adapters that ignore unrelated events,
   reject unsupported or mismatched `SessionClosed` envelopes, and map the
   protocol `emitted_at` timestamp into the app retention boundary.
+- Added mirrored `AppTableSessionRuntime` owners that bind table/session/
+  protocol scope, delegate event projection to `peerdeal_core`, and accept
+  `SessionClosed` only after the app retention adapter succeeds. Failed close
+  retention leaves the projected runtime state unchanged.
 - Added the generic capture action contract and mirrored app coordinator
   lifecycle, including serialized native block/release and fail-closed visual
   obscuring when blocking cannot be confirmed.
@@ -77,7 +81,9 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Mobile and desktop exactly-once session-close coordinator focused tests:
   passed.
 - Mobile and desktop session-close event adapter focused tests: passed.
+- Mobile and desktop `AppTableSessionRuntime` focused tests: passed.
 - Full repository gate/test run after retention wipe orchestration: passed.
+- Full repository gate/test run after app session-runtime wiring: passed.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume
   exhausted during extraction. Flutter doctor itself is green; Kotlin/APK and
