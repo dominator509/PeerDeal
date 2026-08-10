@@ -29,4 +29,21 @@ Setup flow:
   remains platform-owned; app adapters and factories only compose package
   public APIs and fail closed when native transport capability is unavailable.
 
+## Android Host
+
+- `android/` is the generated mobile host with application namespace
+  `com.peerdeal.peerdeal_mobile`.
+- `SecureKeyStorageHandler` registers the generic
+  `peerdeal/native_bridges/secure_key_storage` channel. It stores validated
+  generic key records as namespace-bound AES-GCM ciphertext, with the master
+  key held by Android Keystore and durable writes committed through app
+  preferences.
+- The Android host does not interpret receipt purposes, algorithms, rotation,
+  or verification policy. Those remain in the app and receipt packages.
+- Release builds never fall back to debug signing. A signed release requires
+  `PEERDEAL_ANDROID_KEYSTORE`, `PEERDEAL_ANDROID_KEYSTORE_PASSWORD`,
+  `PEERDEAL_ANDROID_KEY_ALIAS`, and `PEERDEAL_ANDROID_KEY_PASSWORD` together.
+- Live Android capture protection, local-network discovery, transport, and
+  platform recovery persistence remain separate native implementation gaps.
+
 It does NOT introduce a new top-level package.

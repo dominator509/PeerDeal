@@ -25,7 +25,7 @@ truth. Every hand/session must be reconstructable from ordered protocol events.
 
 | Path | Owns |
 | --- | --- |
-| `apps/peerdeal_mobile` | Flutter mobile shell, demo routes, app orchestration |
+| `apps/peerdeal_mobile` | Flutter mobile shell, Android host, demo routes, app orchestration |
 | `apps/peerdeal_desktop` | Flutter desktop shell, demo routes, app orchestration |
 
 ## Main Packages
@@ -91,8 +91,11 @@ dart analyze .
 - Source of truth is ordered protocol events.
 - Snapshots accelerate recovery but do not outrank verified events.
 - Receipts are opaque export artifacts, not a general database.
-- Production transport, durable event storage, and platform secure key storage
-  remain readiness gaps documented in `docs/PRODUCTION_READINESS.md`.
+- Android mobile now has a Keystore-backed generic secure-key host
+  implementation behind the existing method-channel contract. Desktop/native
+  transport, capture blocking, durable event storage, and other platform
+  implementations remain readiness gaps documented in
+  `docs/PRODUCTION_READINESS.md`.
 
 ## Do Not Touch Without Approval
 

@@ -74,3 +74,12 @@ directly or default it from `PEERDEAL_RECOVERY_ROOT`: configured root ->
 app-owned factory -> `peerdeal_sync` JSON recovery store -> mounted table route.
 Missing, blank, or throwing roots must fail closed before recovery windows are
 loaded.
+
+## Android Native Call Order
+
+On Android, the app shell registers the generic secure-key method channel in
+the host activity. Receipt flows still use the same app-owned order:
+native bridge -> key-ring loader/provisioner -> receipt signer/cipher ->
+artifact verifier -> presenter -> safe surface. Android encryption and
+Keystore access are implementation details of the generic bridge; receipt
+policy must not move into the host activity.

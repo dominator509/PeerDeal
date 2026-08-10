@@ -29,3 +29,15 @@ Rationale: CI must execute the same orchestration version as the local workspace
 Decision: Upgrade the workspace and CI Melos baseline to 8.2.2 and refresh compatible transitive lockfile versions.
 
 Rationale: The current Flutter/Dart toolchain resolved Melos 8.2.2 and `mustache_template` 2.0.5, clearing all actionable dependency audit items while preserving the existing package constraints.
+
+## DEC-2026-08-09-006
+
+Decision: Add the mobile Android host behind the existing generic secure-key
+method-channel contract, using Android Keystore AES-GCM encryption and durable
+namespace-bound preference records. Release signing must be supplied through
+operator-owned environment values and never defaults to debug keys.
+
+Rationale: The repository already locked the app/native boundary and receipt
+key-ring seams. A platform implementation can now satisfy that contract
+without moving receipt policy into `peerdeal_native_bridges` or committing
+credentials to source.

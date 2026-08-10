@@ -1,13 +1,13 @@
 # Project State
 
-Generated: 2026-06-13
+Generated: 2026-08-09
 
 ## Current Retrofit Position
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T4 CI and dependency hardening slice following the T1 retrofit baseline
-- Scope: Additive documentation/spec artifacts plus CI and workspace toolchain alignment; no application or package code, package-boundary, or architecture changes.
+- Current tier: T4 native host hardening following the T1 retrofit baseline and CI/dependency alignment
+- Scope: Additive Android host implementation behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
 
 ## T1 Artifacts
 
@@ -25,6 +25,11 @@ Generated: 2026-06-13
 - `.github/workflows/ci.yml` activates Melos 8.2.2.
 - `pubspec.yaml` and `pubspec.lock` align the workspace on Melos 8.2.2.
 - Compatible transitive lock refresh raises `mustache_template` to 2.0.5.
+- `apps/peerdeal_mobile/android/` now provides the generated Android host and
+  registers the generic secure-key method channel.
+- Android secure-key records use Keystore AES-GCM encryption and durable
+  namespace-bound storage; release signing is operator-configured and never
+  defaults to debug keys.
 
 ## Required Gates
 
@@ -39,6 +44,9 @@ Run after each retrofit step:
 
 ## Next Implementation Targets
 
-1. Replace native bridge stubs with platform implementations behind the existing generic method-channel contracts.
-2. Add platform-secure receipt key storage behind the existing receipt key-ring, cipher, and signer contracts.
+1. Validate the Android host on a real device and add the remaining native
+   capture/local-network/transport implementations behind the existing generic
+   method-channel contracts.
+2. Add desktop/other-platform secure receipt key storage behind the existing
+   receipt key-ring, cipher, and signer contracts.
 3. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md` without crossing locked package boundaries.

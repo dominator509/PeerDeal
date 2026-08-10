@@ -14,6 +14,48 @@ Next reviewer:
 
 ---
 
+### 2026-08-09 - Codex - Mobile Android Secure-Key Host
+
+Summary:
+Added the generated Android host for `peerdeal_mobile` and registered the
+existing generic secure-key method channel. The host validates generic records,
+encrypts them with a namespace-bound AES-GCM key held by Android Keystore, and
+uses durable preference commits. Receipt semantics remain in the app and
+receipt packages. Release signing no longer falls back to debug keys.
+
+Files changed:
+- `apps/peerdeal_mobile/android/`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_mobile/lib/demo_slice/README.md`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `DECISIONS.log`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter doctor -v`: passed with all Android licenses accepted.
+- Android debug APK build: not completed because the local NDK package could
+  not be installed with the available disk space.
+- Dart package gates remain to be rerun after this host slice.
+
+Risks:
+- Android source compilation and real-device Keystore persistence are not yet
+  verified. The remaining external environment issue is disk capacity, not a
+  known source error.
+- Desktop/other-platform secure storage, capture, discovery, transport, and
+  durable platform persistence remain open.
+
+Next reviewer:
+Free enough local disk for the pinned Android NDK, run the APK build and an
+Android-device persistence test, then run the full repository gate set.
+
+---
+
 ### 2026-08-09 - Codex - Melos 8.2.2 Dependency Baseline
 
 Summary:

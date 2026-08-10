@@ -66,8 +66,11 @@ the gates below are satisfied.
 - CI runs the same baseline commands as local development.
 
 ## Current highest-risk blockers
-- Live transport, native OS implementations, production cryptographic key
-  management, and durable platform persistence remain scaffold-level.
+- Live transport, native capture blocking, durable platform persistence, and
+  desktop/other-platform native implementations remain scaffold-level. Mobile
+  Android now has a generic Keystore-backed secure-key implementation, but
+  release signing still requires operator-owned keystore configuration and a
+  real-device validation pass.
 - App shells now mount demo, receipt, safe-surface, and join-flow routes, but
   runtime navigation still needs production UI and non-demo orchestration.
 - App UI is not production-polished.
@@ -137,6 +140,13 @@ the gates below are satisfied.
   opaque receipt exports, minimized receipt export metadata, capture-warning
   propagation, native bridge failure normalization, and locked method-channel
   contracts for future platform implementations.
+- The mobile Android host now registers the locked generic secure-key channel,
+  encrypts namespace-bound records with an Android Keystore AES-GCM key, and
+  durably commits validated mutations without adding receipt semantics to the
+  native bridge package.
+- The mobile Android release build no longer falls back to debug signing;
+  release signing is enabled only when all four operator-owned
+  `PEERDEAL_ANDROID_*` environment values are supplied together.
 - App-owned capture surface coordinators now scrub sensitive native capture
   notes before UI projection, replacing token, secret, password, or platform
   path-like notes with stable unavailable text.
@@ -674,9 +684,10 @@ the gates below are satisfied.
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
   checked-in markdown files were reviewed directly from source.
-- Platform-native secure storage, capture blocking, real local-network
-  discovery, production transport, production database/platform persistence,
-  and final production app UI cannot be completed inside the current ChatGPT
+- Native capture blocking, real local-network discovery, production transport,
+  desktop/other-platform secure storage, production database/platform
+  persistence, and final production app UI cannot be completed inside the
+  current ChatGPT
   project environment because they require native platform implementations,
   device/OS integration, and product design validation. The Dart contracts,
   shared app-shell UI primitives, app-owned receipt key
@@ -764,9 +775,11 @@ the gates below are satisfied.
   locked for those follow-up implementations.
 
 ## Next production hardening order
-1. Replace native bridge stubs with platform implementations that satisfy the
-   locked method-channel contracts and return the normalized capability facts
-   already covered by package tests.
-2. Add platform-secure receipt key storage behind the existing key-ring,
-   cipher, and signer contracts.
+1. Replace the remaining native bridge stubs with platform implementations
+   that satisfy the locked method-channel contracts and return the normalized
+   capability facts already covered by package tests; the mobile Android
+   secure-key channel is now implemented.
+2. Add desktop/other-platform secure receipt key storage and validate Android
+   key persistence on real devices behind the existing key-ring, cipher, and
+   signer contracts.
 3. Build app flows on top of the stable public package APIs.

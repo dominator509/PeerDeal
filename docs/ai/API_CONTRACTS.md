@@ -292,6 +292,17 @@ replaced with stable unavailable text rather than exposed to app surfaces.
   receipt key ids before calling native delete methods.
 - Generic native secure key storage method-channel requests must reject blank
   or padded namespaces, key ids, and key record fields before platform calls.
+- The mobile Android host registers
+  `peerdeal/native_bridges/secure_key_storage` with `loadKeyRing`, `saveKey`,
+  and `deleteKey`. It returns only the generic snapshot/mutation maps defined
+  by `SecureKeyStorageChannelContract`; receipt purpose and rotation policy
+  stay in app/receipt code.
+- Android host records are encrypted with AES-GCM using a namespace-bound
+  Android Keystore master key and durably committed before a mutation reports
+  success. Corrupt, oversized, unavailable, or malformed records fail closed.
+- Android release signing is operator-owned and requires all four
+  `PEERDEAL_ANDROID_*` keystore variables; the host never uses debug signing
+  for release output.
 - App orchestration should surface scrubbed diagnostics, not raw secrets,
   credentials, or platform exception payloads.
 

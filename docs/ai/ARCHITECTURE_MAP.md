@@ -15,7 +15,7 @@ packages add policy without mutating universal core truth.
 | --- | --- | --- |
 | App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, setup/join flows, demo slices, app-owned presenters/controllers, native-to-package mapping, native transport composition, native readiness aggregation |
 | Shared UI | `peerdeal_ui_kit` | Safe-surface widgets and render models |
-| Native seams | `peerdeal_native_bridges` | Method-channel contracts for platform facts and generic byte transport |
+| Native seams | `peerdeal_native_bridges` plus app hosts | Method-channel contracts for platform facts, generic byte transport, and secure key records; mobile Android supplies the first host implementation |
 | Network confidence | `peerdeal_network` | Route class, bootstrap/path/election peer-id gates, confidence, primary peer selection, transport frame send/receive gates |
 | Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, request ranges, anchors, snapshots, safe-close recovery |
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy |
@@ -93,7 +93,9 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   receipt key-ring provisioning, namespace validation, mapping, and
   ambiguous-active-key and delete key-id rejection. Generic method-channel
   requests reject malformed secure-key namespaces and records before platform
-  calls; platform implementations remain a production-readiness gap.
+  calls. The mobile Android host now encrypts generic records with an
+  Android Keystore AES-GCM key and commits them durably; desktop and other
+  platform implementations remain a production-readiness gap.
 
 ## Auth / Authorization
 
