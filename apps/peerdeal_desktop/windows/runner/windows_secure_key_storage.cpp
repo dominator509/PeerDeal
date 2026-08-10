@@ -201,7 +201,11 @@ WindowsSecureKeyStorage::WindowsSecureKeyStorage(
       });
 }
 
-WindowsSecureKeyStorage::~WindowsSecureKeyStorage() = default;
+WindowsSecureKeyStorage::~WindowsSecureKeyStorage() {
+  if (channel_) {
+    channel_->SetMethodCallHandler(nullptr);
+  }
+}
 
 void WindowsSecureKeyStorage::HandleMethodCall(
     const flutter::MethodCall<EncodableValue>& method_call,

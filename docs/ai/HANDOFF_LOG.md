@@ -12,6 +12,40 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Windows Native Channel Teardown
+
+Summary:
+- Hardened the Windows secure-key and capture method-channel owners so their
+  handlers are explicitly unregistered during destruction.
+- This matches the existing app-storage and native-transport teardown pattern;
+  generic channel payloads and package boundaries are unchanged.
+
+Files changed:
+- `apps/peerdeal_desktop/windows/runner/windows_secure_key_storage.cpp`
+- `apps/peerdeal_desktop/windows/runner/windows_capture_protection.cpp`
+- `docs/PRODUCTION_READINESS.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+
+Tests run:
+- Focused desktop receipt, secure-key loader, and capture coordinator tests:
+  passed, 21 tests.
+- `flutter build windows --debug --no-pub`: passed.
+- Full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- `git diff --check`: passed.
+
+Risks:
+- Windows runtime/profile persistence and capture behavior, Android device and
+  release-signing validation, and other-platform implementations remain open.
+
+Next reviewer:
+- Continue with the next codable gap in `docs/PRODUCTION_READINESS.md`.
+
+---
+
 ### 2026-08-10 - Codex - Android Secure-Key Teardown Lifecycle
 
 Summary:

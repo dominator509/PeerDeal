@@ -111,7 +111,11 @@ WindowsCaptureProtection::WindowsCaptureProtection(
       });
 }
 
-WindowsCaptureProtection::~WindowsCaptureProtection() = default;
+WindowsCaptureProtection::~WindowsCaptureProtection() {
+  if (channel_) {
+    channel_->SetMethodCallHandler(nullptr);
+  }
+}
 
 void WindowsCaptureProtection::HandleMethodCall(
     const flutter::MethodCall<EncodableValue>& method_call,

@@ -413,6 +413,9 @@ the gates below are satisfied.
 - The Android secure-key host now rejects queued storage work after engine
   teardown begins and suppresses late key-ring results on the main looper,
   preventing closed Flutter engines from receiving native key material.
+- Windows secure-key and capture method-channel hosts now unregister their
+  handlers during destruction, matching the existing native channel teardown
+  contract and preventing shutdown callbacks from targeting released hosts.
 - Mirrored receipt routes reject unavailable export artifacts before invoking
   native key verification, preventing failed export factories from opening an
   unnecessary secure-storage call.

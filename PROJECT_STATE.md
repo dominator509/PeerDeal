@@ -325,6 +325,17 @@ Generated: 2026-08-10
 - Android device persistence/capture behavior, release signing, and other
   platform implementations remain open for operator/device validation.
 
+## Recent T40 Changes
+
+- Windows secure-key and capture method-channel hosts now unregister their
+  handlers during destruction, preventing shutdown dispatch from targeting
+  released native channel owners.
+- `rtk flutter test --no-pub` focused desktop receipt, secure-key loader, and
+  capture coordinator tests passed with 21 tests.
+- `rtk flutter build windows --debug --no-pub` passed.
+- Windows runtime/profile validation, Android device validation, release
+  signing, and other-platform implementations remain open.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -19,8 +19,8 @@ session source/bootstrap handoff, T33 native transport lifecycle hardening,
 T34 bounded secure-key method-channel calls, T35 bounded native transport
 method-channel calls, T36 bounded local-network method-channel calls, T37
 Android native transport receiver lifecycle hardening, T38 Windows native
-transport socket lifecycle hardening, and T39 Android secure-key teardown
-hardening
+transport socket lifecycle hardening, T39 Android secure-key teardown
+hardening, and T40 Windows native channel teardown hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -312,3 +312,10 @@ are implemented on branch
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 newer versions remain blocked by the current toolchain.
 - T39 `git diff --check`: passed.
+- T40 focused desktop receipt, secure-key loader, and capture coordinator tests:
+  passed, 21 tests.
+- T40 `flutter build windows --debug --no-pub`: passed.
+- T40 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- T40 `git diff --check`: passed.
