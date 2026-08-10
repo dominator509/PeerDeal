@@ -343,6 +343,16 @@ or persistence. Its `fromSource(...)` constructor is the preferred app-edge
 assembly path when a product-owned source is available; it accepts the same
 injected factory and positive source-load timeout used by the bootstrap.
 
+`AppHoldemProductionSessionConfiguration.fromSource(...)` is the alternate
+runtime-facing app contract. It creates one stable
+`AppHoldemProductionSessionBootstrapRouteRegistration` from the supplied
+source, route path, optional factory, and positive source-load timeout. Mobile
+and desktop runtimes use that registration for production-route merging,
+native-readiness gating, and default join handoff. Supplying both this
+configuration and the explicit registration is rejected with `StateError`;
+the configuration still does not own source, state, identity, persistence, or
+native transport.
+
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through
 `RouteSettings.arguments`; it does not interpret, persist, or validate the

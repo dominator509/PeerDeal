@@ -336,6 +336,21 @@ Generated: 2026-08-10
 - Windows runtime/profile validation, Android device validation, release
   signing, and other-platform implementations remain open.
 
+## Recent T48 Changes
+
+- Added mirrored `AppHoldemProductionSessionConfiguration.fromSource(...)`
+  configuration objects. Each app runtime derives one stable source-backed
+  route registration and reuses it for production route merging, native
+  readiness, and the default join handoff.
+- Supplying both the existing explicit route registration and the new
+  configuration fails closed with `StateError`; the configuration does not own
+  product state, identity, persistence, or native transport. Focused mobile and
+  desktop app-shell suites passed with 78 tests each. The Android debug APK and
+  Windows debug host builds passed, as did the full analyze, boundary,
+  source-text, serialized test, dependency audit, and diff-check gates.
+  Dependency audit reports 0 actionable upgrades and 11 newer versions below
+  the current toolchain ceiling.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

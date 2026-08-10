@@ -86,6 +86,10 @@ state or local identity; the product source remains responsible for both.
 Use `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)` to
 assemble the source, bootstrap, timeout, and route registration at this app
 boundary without moving persistence or session truth into the shell.
+For runtime-owned configuration, pass one
+`AppHoldemProductionSessionConfiguration.fromSource(...)` instead; the shell
+derives that registration once and reuses it for route merging, readiness, and
+the default join handoff. Supplying both configuration forms fails closed.
 
 For local Hold'em lifecycle actions, construct the app-owned
 `AppHoldemTableSessionRuntime` with a validated `HoldemHandState` and

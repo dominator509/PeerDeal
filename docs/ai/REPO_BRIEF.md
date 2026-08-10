@@ -144,7 +144,10 @@ File data. The concrete source, durable persistence, local identity, and
 device/network validation remain integration-owned. The mirrored app shells
 also expose `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource`
 to assemble an injected source, bootstrap timeout, and route handoff without
-creating product state in the shell.
+creating product state in the shell. Runtime configuration can instead use
+`AppHoldemProductionSessionConfiguration.fromSource(...)`; each shell derives
+one stable registration for route/readiness/join wiring and rejects dual
+configuration forms.
 
 ## Do Not Touch Without Approval
 

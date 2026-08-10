@@ -95,7 +95,10 @@ Local Hold'em producer flow:
    explicit handler wins. This remains route orchestration only and does not
    provision product state, identity, persistence, or the concrete source. The
    `fromSource(...)` constructor keeps source, bootstrap, timeout, and route
-   registration assembly at this app boundary.
+   registration assembly at this app boundary. Each runtime can instead accept
+   one `AppHoldemProductionSessionConfiguration.fromSource(...)` and derive a
+   stable registration once; explicit and configured registrations cannot both
+   be supplied.
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session

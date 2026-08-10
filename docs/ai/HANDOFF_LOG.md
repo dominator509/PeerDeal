@@ -12,6 +12,44 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Runtime Production Session Configuration
+
+Summary:
+- Added mirrored `AppHoldemProductionSessionConfiguration.fromSource(...)`
+  runtime configuration objects.
+- Each app runtime derives one stable source-backed route registration and
+  reuses it for production route merging, native-readiness gating, and default
+  join handoff.
+- Supplying both the explicit registration and runtime configuration fails
+  closed with `StateError`; no product state, identity, persistence, or native
+  transport ownership moved into the shell.
+
+Files changed:
+- Mirrored app runtime, configuration, and app-shell test files.
+- Mirrored app READMEs, `docs/PRODUCTION_READINESS.md`, and stable AI context.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, and `PROJECT_STATE.md`.
+
+Tests run:
+- Focused mobile and desktop app-shell suites: 78 tests each, passed.
+- Android debug APK and Windows debug host builds: passed.
+- Full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit`: passed.
+- Dependency audit: 0 actionable upgrades; 11 newer versions below the
+  current toolchain ceiling.
+- Dart format and `git diff --check`: passed.
+
+Risks:
+- The concrete product source, authoritative state persistence/serialization,
+  local identity provisioning, device/network validation, other-platform
+  hosts, release signing, and final UX remain open.
+
+Next reviewer:
+- Supply the source-backed configuration from the real product session owner
+  once its persistence and identity contracts exist; keep the app and generic
+  native package boundaries intact.
+
+---
+
 ### 2026-08-10 - Codex - Source-Backed Bootstrap Route Assembly
 
 Summary:

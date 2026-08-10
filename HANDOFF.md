@@ -24,8 +24,9 @@ hardening, T40 Windows native channel teardown hardening, T41 app-owned
 production session bootstrap-route mounting, and T42 app-shell route-argument
 handoff, T43 join-to-production session handoff, T44 bounded production-session
 source loading, T45 cancellable production-session source loading, T46
-app-shell bootstrap-route registration with default join-ready navigation, and
-T47 source-backed bootstrap-route assembly
+app-shell bootstrap-route registration with default join-ready navigation,
+T47 source-backed bootstrap-route assembly, and T48 runtime-owned production
+session configuration
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -181,6 +182,10 @@ are implemented on branch
   product-owned source with the existing bootstrap, optional factory, and
   positive load timeout at one app boundary. It does not invent or persist
   product state.
+- Added mirrored `AppHoldemProductionSessionConfiguration.fromSource(...)`
+  runtime configuration. Each shell derives one stable registration for route
+  merging, readiness, and default join handoff; supplying both explicit and
+  configured registrations fails closed with `StateError`.
 - Hardened Android native transport teardown and executor rejection handling so
   accepted method calls resolve with bounded fail-closed payloads.
 - Hardened Windows native transport setup cleanup so partial Winsock/socket
@@ -202,7 +207,8 @@ are implemented on branch
   local identity wiring, and final product navigation/UX validation. The
   generic app-shell route-argument handoff is implemented; it does not create
   a product source or durable session state. The registered route now closes the
-  default app-flow handoff while preserving explicit callback overrides.
+  default app-flow handoff while preserving explicit callback overrides. T48
+  also closes the runtime configuration path without inventing product state.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
@@ -381,3 +387,10 @@ are implemented on branch
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 newer versions remain blocked by the current toolchain.
 - T47 Dart format and `git diff --check`: passed.
+- T48 focused mobile and desktop app-shell suites: passed, 78 tests each.
+- T48 Android `flutter build apk --debug --no-pub`: passed.
+- T48 Windows `flutter build windows --debug --no-pub`: passed.
+- T48 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions below the current toolchain ceiling.
+- T48 Dart format and `git diff --check`: passed.

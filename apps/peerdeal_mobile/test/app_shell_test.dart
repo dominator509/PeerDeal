@@ -22,6 +22,7 @@ import 'package:peerdeal_mobile/recovery/app_recovery_persistence_store_factory.
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_session_bootstrap.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_session_bootstrap_route_registration.dart';
+import 'package:peerdeal_mobile/session/app_holdem_production_session_configuration.dart';
 import 'package:peerdeal_mobile/setup_flow/setup_flow_route.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
@@ -1392,8 +1393,8 @@ void main() {
                 snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
               ),
             ),
-            holdemProductionSessionBootstrapRoute:
-                AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(
+            holdemProductionSession:
+                AppHoldemProductionSessionConfiguration.fromSource(
                   path: '/holdem-live',
                   source: _FailingProductionSessionSource(),
                 ),
@@ -1421,6 +1422,29 @@ void main() {
           holdemProductionSessionBootstrapRoute:
               AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(
                 path: '/holdem-live',
+                source: _FailingProductionSessionSource(),
+              ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isA<StateError>());
+  });
+
+  testWidgets('rejects conflicting production session configurations', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          holdemProductionSessionBootstrapRoute:
+              AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(
+                path: '/holdem-explicit',
+                source: _FailingProductionSessionSource(),
+              ),
+          holdemProductionSession:
+              AppHoldemProductionSessionConfiguration.fromSource(
+                path: '/holdem-configured',
                 source: _FailingProductionSessionSource(),
               ),
         ),

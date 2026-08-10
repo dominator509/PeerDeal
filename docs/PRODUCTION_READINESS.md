@@ -976,6 +976,12 @@ not create the concrete product source, state, local identity, or persistence.
 The registration also exposes a mirrored `fromSource(...)` constructor that
 keeps source, bootstrap timeout, and route assembly together at the app edge;
 the product source remains caller-owned.
+The mirrored app runtimes also accept one
+`AppHoldemProductionSessionConfiguration.fromSource(...)`, derive the route
+registration once, and reuse it for route merging, readiness, and default
+join handoff. Supplying both the explicit registration and configuration is
+rejected with a state error; this remains app orchestration and does not add
+state serialization, persistence, identity provisioning, or a concrete source.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
