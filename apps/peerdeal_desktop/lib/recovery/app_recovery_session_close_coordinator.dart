@@ -18,6 +18,8 @@ class AppRecoverySessionCloseCoordinator {
   final RetentionPolicy _policy;
   AppRecoveryRetentionEnforcementResult? _result;
 
+  RecoveryPersistenceScope get scope => _scope;
+
   bool get isClosed => _result != null;
 
   AppRecoveryRetentionEnforcementResult close({

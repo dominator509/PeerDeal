@@ -54,7 +54,10 @@ Setup flow:
   `AppRecoverySessionCloseCoordinator` binds that policy and scope to one app
   session, caches the first outcome, and prevents duplicate close signals from
   repeating policy or wipe work. The real session owner must invoke it when
-  `SessionClosed` is committed. The desktop Windows host provides the same
-  generic secure-key channel through Windows Credential Manager.
+  `SessionClosed` is committed. `AppRecoverySessionCloseEventAdapter` provides
+  the app-boundary mapping from a supported, scope-matching protocol event to
+  that coordinator and uses the event's `emitted_at` timestamp. The desktop
+  Windows host provides the same generic secure-key channel through Windows
+  Credential Manager.
 
 It does NOT introduce a new top-level package.

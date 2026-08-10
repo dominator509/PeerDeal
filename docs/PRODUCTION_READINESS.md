@@ -523,7 +523,10 @@ the gates below are satisfied.
   exceptions to fatal persistence outcomes. Per-session app close coordinators
   cache the first success or failure, preventing duplicate close signals from
   repeating policy or storage work. Wiring the coordinator to the real
-  `SessionClosed` owner remains an integration responsibility.
+  `SessionClosed` owner remains an integration responsibility. App-owned
+  session-close event adapters now reject unsupported versions, mismatched
+  recovery scopes, and invalid timestamps before mapping supported
+  `SessionClosed.emitted_at` into that coordinator.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is

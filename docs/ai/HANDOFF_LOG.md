@@ -2802,6 +2802,50 @@ Run the full repository gates and commit if green.
 
 ---
 
+### 2026-08-09 - Codex - SessionClosed Retention Event Adapter
+
+Summary:
+Added mirrored app-owned `AppRecoverySessionCloseEventAdapter` seams. They
+ignore unrelated events, require the locked protocol catalog entry and exact
+recovery scope for `SessionClosed`, reject malformed timestamps, and map the
+event's `emitted_at` value into the existing exactly-once retention coordinator.
+Protocol reducer truth and event emission remain outside the adapter.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_session_close_coordinator.dart`
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_session_close_event_adapter.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_session_close_event_adapter_test.dart`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_session_close_coordinator.dart`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_session_close_event_adapter.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_session_close_event_adapter_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/recovery/app_recovery_session_close_event_adapter_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/recovery/app_recovery_session_close_event_adapter_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- The concrete production session owner still must invoke this adapter when
+  the reducer accepts `SessionClosed`; platform/database persistence and native
+  runtime validation remain open.
+
+Next reviewer:
+Run the full repository gates and connect the adapter to the real session
+owner when that orchestration surface is available.
+
+---
+
 ### 2026-08-09 - Codex - Exactly-Once Session-Close Retention
 
 Summary:

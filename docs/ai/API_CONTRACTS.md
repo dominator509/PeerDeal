@@ -249,7 +249,11 @@ exceptions become fatal scrub-safe persistence results. The app-owned
 `AppRecoverySessionCloseCoordinator` binds scope and policy to one session,
 delegates the first close signal, and returns the cached result for every later
 signal, including failures; it does not emit protocol events or replace the
-real session owner.
+real session owner. `AppRecoverySessionCloseEventAdapter` is the app-owned
+protocol mapping seam: it ignores non-`SessionClosed` events, requires the
+locked catalog version and exact recovery scope, parses `emitted_at`, and only
+then delegates to the close coordinator. Invalid event versions, scopes, or
+timestamps are rejected before retention or storage work.
 
 ## Local Network Bootstrap Boundary
 

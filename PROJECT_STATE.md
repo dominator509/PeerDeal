@@ -47,6 +47,10 @@ Generated: 2026-08-09
   plus per-session close coordinators that cache the first success or failure so
   duplicate close signals cannot repeat policy or storage work. Wiring these
   coordinators to the real session owner remains open.
+- Mirrored app session-close event adapters now ignore non-close events, reject
+  unsupported versions, mismatched scopes, and invalid timestamps, and map a
+  supported `SessionClosed` event's `emitted_at` value into the exactly-once
+  coordinator without mutating protocol/core state.
 
 ## Required Gates
 
