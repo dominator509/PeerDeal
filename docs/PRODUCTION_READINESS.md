@@ -97,6 +97,9 @@ the gates below are satisfied.
 - Core command validation now rejects whitespace-only command identity,
   protocol/version, issue timestamp, actor, and Open Table table identity
   fields before accepted command paths can reach reducer orchestration.
+- Core command validation now consults the protocol catalog and rejects
+  unsupported command artifacts or protocol versions, plus padded or
+  control-character command and scope identities.
 - Core reducer ingress now rejects whitespace-only event envelope identity,
   scope, timestamp, actor, and hash-chain fields before protocol-compatible
   events can mutate deterministic state.

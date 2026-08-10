@@ -262,6 +262,67 @@ void main() {
     ]);
   });
 
+  test('validator rejects unsupported protocol command artifacts', () {
+    const command = CommandEnvelope(
+      commandId: 'cmd_unsupported',
+      commandType: 'UnknownCommand',
+      commandVersion: '1.0',
+      protocolVersion: '1.0.0',
+      tableId: 'table_001',
+      sessionId: null,
+      handId: null,
+      issuedAt: '2026-04-25T12:05:00Z',
+      actorRef: 'host_alpha',
+      payload: <String, Object?>{},
+    );
+
+    expect(
+      CoreCommandValidator().validate(command),
+      contains('command artifact is unsupported'),
+    );
+  });
+
+  test('validator rejects unsupported protocol versions', () {
+    const command = CommandEnvelope(
+      commandId: 'cmd_unsupported_protocol',
+      commandType: 'OpenTableSession',
+      commandVersion: '1.0',
+      protocolVersion: '2.0.0',
+      tableId: 'table_001',
+      sessionId: null,
+      handId: null,
+      issuedAt: '2026-04-25T12:05:00Z',
+      actorRef: 'host_alpha',
+      payload: <String, Object?>{},
+    );
+
+    expect(
+      CoreCommandValidator().validate(command),
+      contains('protocol_version is unsupported'),
+    );
+  });
+
+  test('validator rejects padded and control-character identities', () {
+    const command = CommandEnvelope(
+      commandId: ' cmd_padded',
+      commandType: 'OpenTableSession\n',
+      commandVersion: '1.0',
+      protocolVersion: '1.0.0',
+      tableId: 'table_001',
+      sessionId: null,
+      handId: null,
+      issuedAt: '2026-04-25T12:05:00Z',
+      actorRef: 'host_alpha',
+      payload: <String, Object?>{},
+    );
+
+    final errors = CoreCommandValidator().validate(command);
+
+    expect(errors, contains('command_id contains unsafe characters'));
+    expect(errors, contains('command_type contains unsafe characters'));
+    expect(errors, isNot(contains('command artifact is unsupported')));
+  });
+
   test('core accepts fixture-backed protocol open session spine', () {
     final command = commandEnvelopeFromJson(
       loadProtocolFixture('commands/open_table_session_command_v1.json'),

@@ -23,6 +23,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-10-013` | `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T19 | RESOLVED | Production entrypoints now install the app-owned method-channel native readiness loader; unavailable host capabilities render as unavailable and cannot silently bypass readiness-gated routes. |
 | `LEGACY-GAP-2026-08-10-014` | `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T20 | RESOLVED | App-owned local-network bootstrap loaders now split documented `peer@host[:port]` discovery values, validate host/port shape, preserve bare peer IDs, and project safe endpoint metadata onto existing `BootstrapCandidate` fields. |
 | `LEGACY-GAP-2026-08-10-015` | `apps/peerdeal_mobile/android/` | 4 | T21 | RESOLVED | Android secure-key persistence now bounds the actual UTF-8 encoded envelope bytes on read and write; the release manifest declares the minimum INTERNET permission for the existing native-network boundary. |
+| `LEGACY-GAP-2026-08-10-016` | `packages/peerdeal_core/` | 4 | T22 | RESOLVED | Core command validation now consults the protocol catalog, rejects unsupported command artifacts and protocol versions, and rejects padded or control-character envelope identities before command acceptance. |
 
 ## Status Definitions
 

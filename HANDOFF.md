@@ -7,8 +7,8 @@ Generated: 2026-08-09
 Trinity baseline retrofit T1 is complete, CI/dependency hardening is complete,
 the T4 Android plus Windows secure-key and capture-enforcement host slices are
 implemented, T19 production entrypoint native-readiness activation is wired,
-and T20 local-network endpoint projection plus T21 Android secure-storage bound
-hardening are implemented on branch
+and T20 local-network endpoint projection, T21 Android secure-storage bound
+hardening, and T22 protocol-native command validation are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -39,6 +39,8 @@ hardening are implemented on branch
 - Android secure-key persistence now bounds the actual UTF-8 encoded envelope
   bytes on both reads and writes; the release manifest declares `INTERNET` for
   the existing native-network channel boundary without claiming live transport.
+- Core command validation now rejects unsupported protocol catalog entries and
+  padded or control-character envelope identities before command acceptance.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -127,6 +129,8 @@ hardening are implemented on branch
 - T21 full repository `analyze`, `boundary-check`, `source-text`, `test`, and
   `dependency-audit` gates: passed; dependency audit reports 0 actionable
   upgrades.
+- T22 focused `peerdeal_core` validation tests: passed, including unsupported
+  command/protocol rejection and padded/control-character identity rejection.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.

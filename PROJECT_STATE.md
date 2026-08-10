@@ -116,6 +116,16 @@ Generated: 2026-08-09
   APK compilation remains blocked before source compilation by the malformed
   local NDK installation missing `source.properties`.
 
+## Recent T22 Changes
+
+- `CoreCommandValidator` now uses the protocol catalog to reject unsupported
+  command artifacts and protocol versions before command acceptance.
+- Command, scope, timestamp, actor, and optional table/session/hand identity
+  strings now reject leading or trailing whitespace and ASCII control
+  characters when non-blank.
+- Existing blank-field error ordering and fixture-backed command acceptance
+  remain unchanged; the focused core suite passes.
+
 ## Required Gates
 
 Run after each retrofit step:

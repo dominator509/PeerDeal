@@ -30,10 +30,12 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
 - action validator and table orchestrator contracts
 - deterministic fixture loader for starter tests
 - replay-safe projection coverage for every accepted protocol event fixture
+- protocol-native command validation against the catalog and safe envelope
+  identity boundaries
 
 ## Intended next implementation moves
-1. replace starter local envelopes with shared protocol models where legacy
-   reducer seams remain
+1. complete replacement of starter local envelopes with shared protocol models
+   where legacy reducer seams remain
 2. wire real Hold'em hand lifecycle state machine output into core projection
 3. wire pot engine and settlement boundary into ledger-safe core events
 4. add broader replay-safe reducer coverage from canonical fixtures

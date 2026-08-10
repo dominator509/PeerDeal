@@ -14,6 +14,38 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Core Command Catalog and Identity Validation
+
+Summary:
+Closed the documented legacy core command-validation gap. `CoreCommandValidator`
+now checks command type/version/protocol compatibility through the shared
+`ProtocolCatalog`, rejects unsupported command artifacts and protocol versions,
+and rejects padded or ASCII control-character command and scope identities.
+Existing blank-field error ordering and accepted fixture behavior remain intact.
+
+Files changed:
+- `packages/peerdeal_core/lib/src/validation/core_command_validator.dart`
+- `packages/peerdeal_core/test/peerdeal_core_test.dart`
+- `packages/peerdeal_core/README.md`
+- `HANDOFF_QUEUE.md`
+- `HANDOFF.md`
+- `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Tests run:
+- Focused `peerdeal_core` test suite: passed.
+
+Risks:
+The validator hardens the existing protocol-native command seam; it does not
+create a command dispatcher or claim that live transport, discovery, database
+persistence, native runtime validation, or production UI is complete.
+
+Next reviewer:
+Run the full repository gates, then continue with the next actionable gap in
+`docs/PRODUCTION_READINESS.md` without inventing transport endpoint semantics.
+
+---
+
 ### 2026-08-10 - Codex - Android Secure-Key Envelope Bound
 
 Summary:
