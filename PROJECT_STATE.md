@@ -52,8 +52,8 @@ Generated: 2026-08-09
   coordinator without mutating protocol/core state.
 - Mirrored `AppTableSessionRuntime` owners now bind table/session/protocol
   scope, delegate ordered protocol events to `peerdeal_core`, and commit a
-  `SessionClosed` projection only after the retention adapter succeeds. Live
-  transport/event-source mounting and durable database/platform persistence
+  `SessionClosed` projection only after the retention adapter succeeds.
+  Production source provisioning and durable database/platform persistence
   remain open.
 - Protocol now exposes a bounded canonical `EventEnvelopeCodec`; mirrored app
   transport handlers use it behind `peerdeal_network` receiver validation,
@@ -61,7 +61,10 @@ Generated: 2026-08-09
 - Loaded app transport sessions can now create mirrored bounded source
   controllers that validate scope, serialize polls, and stop cleanly across
   route lifecycle changes. Native live transport implementation and
-  platform-specific source mounting remain open.
+  production source provisioning remain open.
+- Both app shells expose optional source injection through their runtime and
+  table route; the route mount owns source start/replacement/disposal. A real
+  production caller still must provision a loaded native session and handler.
 
 ## Required Gates
 

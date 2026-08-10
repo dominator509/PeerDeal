@@ -14,6 +14,48 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Route Transport Source Mounting
+
+Summary:
+Added mirrored `AppTableSessionTransportSourceMount` lifecycle owners and
+optional source injection through both app runtime objects into
+`DemoTableRoute`. A mounted route starts its injected source, disposes the old
+source on replacement, and disposes the active source on route exit.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/app_table_session_transport_source_mount.dart`
+- `apps/peerdeal_mobile/test/transport/app_table_session_transport_source_mount_test.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_table_screen_test.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_desktop/lib/transport/app_table_session_transport_source_mount.dart`
+- `apps/peerdeal_desktop/test/transport/app_table_session_transport_source_mount_test.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_table_screen.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_table_screen_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- readiness and handoff records
+
+Tests run:
+- Mobile and desktop mount lifecycle focused tests
+- Mobile and desktop table-route focused tests
+- Mobile and desktop app analysis
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit` (0 actionable upgrades)
+- `git diff --check`
+
+Risks:
+- Production callers still need a loaded native session, handler, and actual
+  platform peer transport before injecting a source.
+
+Next reviewer:
+Provision the source from a real production session bootstrap and keep the
+generic native bridge free of app route policy.
+
+---
+
 ### 2026-08-10 - Codex - App Transport Source Lifecycle
 
 Summary:
@@ -55,8 +97,8 @@ Tests run:
 - `git diff --check`
 
 Risks:
-- Native peer transport implementation and route-specific source mounting are
-  still open; the controller only schedules the existing generic native drain.
+- Native peer transport implementation and production source provisioning are
+  still open; the mount only owns an injected source's app route lifecycle.
 
 Next reviewer:
 Mount a source from a real production session route once the platform peer

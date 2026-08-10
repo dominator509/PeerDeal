@@ -31,7 +31,8 @@ Setup flow:
   `AppTableSessionTransportHandler` decodes canonical protocol event bytes and
   delegates them to the bound table-session runtime after frame validation.
   `NativeTransportSession.createSource` adds app-owned bounded polling with
-  serialized polls and explicit route-lifecycle stop/dispose behavior.
+  serialized polls, and `AppTableSessionTransportSourceMount` owns its
+  start/replacement/dispose lifecycle when injected through the app runtime.
 
 ## Windows Host
 
@@ -63,7 +64,8 @@ Setup flow:
   event to that coordinator and uses the event's `emitted_at` timestamp.
   `AppTableSessionRuntime` binds that adapter to one table/session/protocol
   stream and delegates state projection to `peerdeal_core`; it commits a close
-  only after retention succeeds. Live transport/event-source mounting and
-  production session-close scheduling remain app-lifecycle work.
+  only after retention succeeds. Native live transport provisioning and
+  production session-close scheduling remain app-lifecycle work; an injected
+  source is owned by the table route mount.
 
 It does NOT introduce a new top-level package.

@@ -23,6 +23,7 @@ import 'navigation/app_route_fallback_screen.dart';
 import 'recovery/app_recovery_persistence_store_factory.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
 import 'setup_flow/setup_flow_route.dart';
+import 'transport/app_table_session_transport_source.dart';
 
 typedef DemoReceiptFactory =
     PeerDealReceipt Function(DemoScenarioSnapshot snapshot);
@@ -65,6 +66,7 @@ class PeerDealMobileRuntime {
     this.bootstrapCandidateLoaderFactory,
     this.recoveryPersistenceStoreFactory,
     this.tableRuntimeScopeFactory,
+    this.tableTransportSource,
     this.enabledDemoRoutePaths,
     this.productionRoutes,
     this.productionNavigation,
@@ -88,6 +90,7 @@ class PeerDealMobileRuntime {
   final NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
+  final AppTableSessionTransportSource? tableTransportSource;
   final Set<String>? enabledDemoRoutePaths;
   final PeerDealAppRouteMap? productionRoutes;
   final List<PeerDealAppNavigationEntry>? productionNavigation;
@@ -111,6 +114,7 @@ class PeerDealMobileRuntime {
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
+    AppTableSessionTransportSource? tableTransportSource,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
@@ -147,6 +151,7 @@ class PeerDealMobileRuntime {
           this.recoveryPersistenceStoreFactory,
       tableRuntimeScopeFactory:
           tableRuntimeScopeFactory ?? this.tableRuntimeScopeFactory,
+      tableTransportSource: tableTransportSource ?? this.tableTransportSource,
       enabledDemoRoutePaths:
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
       productionRoutes: productionRoutes ?? this.productionRoutes,
@@ -180,6 +185,7 @@ class PeerDealMobileApp extends StatefulWidget {
     NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
+    AppTableSessionTransportSource? tableTransportSource,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
@@ -202,6 +208,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _bootstrapCandidateLoaderFactory = bootstrapCandidateLoaderFactory,
        _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory,
        _tableRuntimeScopeFactory = tableRuntimeScopeFactory,
+       _tableTransportSource = tableTransportSource,
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
        _productionRoutes = productionRoutes,
        _productionNavigation = productionNavigation,
@@ -225,6 +232,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final NativeBootstrapCandidateLoaderFactory? _bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? _recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
+  final AppTableSessionTransportSource? _tableTransportSource;
   final Set<String>? _enabledDemoRoutePaths;
   final PeerDealAppRouteMap? _productionRoutes;
   final List<PeerDealAppNavigationEntry>? _productionNavigation;
@@ -262,6 +270,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       bootstrapCandidateLoaderFactory: widget._bootstrapCandidateLoaderFactory,
       recoveryPersistenceStoreFactory: widget._recoveryPersistenceStoreFactory,
       tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
+      tableTransportSource: widget._tableTransportSource,
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
       productionRoutes: widget._productionRoutes,
       productionNavigation: widget._productionNavigation,
@@ -337,6 +346,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
               ),
               bootstrapCandidateLoaderFactory: _bootstrapCandidateLoaderFactory,
               recoveryPersistenceStoreFactory: _recoveryPersistenceStoreFactory,
+              transportSource: _runtime.tableTransportSource,
               runtimeScopeFactory: _runtime.tableRuntimeScopeFactory,
               onOpenChat:
                   enabledRoutePaths.contains(DemoSliceRoutes.chatRoute.path)

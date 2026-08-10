@@ -108,9 +108,10 @@ dart analyze .
   bounded canonical `EventEnvelopeCodec`, and mirrored app transport handlers
   decode validated byte frames into that runtime. Loaded native sessions also
   expose bounded app-owned source scheduling with serialized polls and
-  lifecycle stop/dispose behavior. Native peer transport implementation,
-  route-specific source mounting, and durable platform persistence remain
-  integration gaps.
+  lifecycle stop/dispose behavior. Both app shells can inject the source into
+  the table route, whose mount owns source replacement and disposal. Native
+  peer transport implementation, production source provisioning, and durable
+  platform persistence remain integration gaps.
 
 ## Do Not Touch Without Approval
 

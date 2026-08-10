@@ -7,6 +7,8 @@ import 'package:peerdeal_desktop/demo_slice/controllers/native_bootstrap_candida
 import 'package:peerdeal_desktop/demo_slice/scenarios/demo_scenario_snapshots.dart';
 import 'package:peerdeal_desktop/demo_slice/screens/demo_table_screen.dart';
 import 'package:peerdeal_desktop/recovery/app_recovery_persistence_store_factory.dart';
+import 'package:peerdeal_desktop/transport/app_table_session_transport_source.dart';
+import 'package:peerdeal_desktop/transport/native_transport_frame_adapter.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
@@ -196,11 +198,41 @@ void main() {
 
     expect(find.text('Recovery persistence: 2 events'), findsOneWidget);
   });
+
+  testWidgets('mounts and disposes the optional route transport source', (
+    tester,
+  ) async {
+    final source = AppTableSessionTransportSource(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      drain: () async => const NativeTransportFrameDrainResult(
+        available: true,
+        results: <TransportFrameReceiveResult>[],
+      ),
+    );
+
+    await tester.pumpWidget(
+      _tableRoute(
+        recoveryPersistenceStoreFactory: null,
+        runtimeScopeFactory: (_) => const RecoveryPersistenceScope(
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          protocolVersion: '1.x',
+        ),
+        transportSource: source,
+      ),
+    );
+    expect(source.state, AppTableSessionTransportSourceState.running);
+
+    await tester.pumpWidget(const SizedBox());
+    expect(source.state, AppTableSessionTransportSourceState.disposed);
+  });
 }
 
 Widget _tableRoute({
-  required AppRecoveryPersistenceStoreFactory recoveryPersistenceStoreFactory,
+  required AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
   required DemoTableRuntimeScopeFactory runtimeScopeFactory,
+  AppTableSessionTransportSource? transportSource,
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -213,6 +245,7 @@ Widget _tableRoute({
       bootstrapCandidateLoaderFactory: () =>
           NativeBootstrapCandidateLoader(bridge: const _NoDiscoveryBridge()),
       recoveryPersistenceStoreFactory: recoveryPersistenceStoreFactory,
+      transportSource: transportSource,
       runtimeScopeFactory: runtimeScopeFactory,
       onOpenChat: null,
       onOpenReceipt: null,

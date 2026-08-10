@@ -235,7 +235,9 @@ compose an app-owned `AppTableSessionTransportSource` around their validated
 drain. The source enforces exact session/peer scope, a bounded 100 ms to 60 s
 poll interval, serialized in-flight polls, explicit lifecycle state, and
 bounded scrubbed warnings. It schedules app polling only; native peer transport
-and route-specific source mounting remain outside this contract.
+and source provisioning remain outside this contract. App shells expose the
+source through runtime injection, and `AppTableSessionTransportSourceMount`
+owns start, source replacement, and disposal for a mounted table route.
 
 ## Recovery Persistence Boundary
 
@@ -269,8 +271,9 @@ timestamps are rejected before retention or storage work.
 initial table/session/protocol identity, delegates ordered `EventEnvelope`
 projection to `peerdeal_core.CoreReducer`, and leaves state unchanged when
 projection or close retention fails. A `SessionClosed` event is committed only
-after the close adapter reports success; live transport/event-source mounting
-is still outside this contract.
+after the close adapter reports success; native transport provisioning and
+production event-source startup remain outside this contract. App route source
+mounting is an app-shell lifecycle concern.
 
 ## Local Network Bootstrap Boundary
 

@@ -3,6 +3,8 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 import '../../recovery/app_recovery_persistence_store_factory.dart';
+import '../../transport/app_table_session_transport_source.dart';
+import '../../transport/app_table_session_transport_source_mount.dart';
 import '../controllers/demo_network_confidence_presenter.dart';
 import '../controllers/native_bootstrap_candidate_loader.dart';
 import '../models/demo_scenario_snapshot.dart';
@@ -18,6 +20,7 @@ class DemoTableRoute extends StatefulWidget {
     required this.networkConfidence,
     required this.bootstrapCandidateLoaderFactory,
     this.recoveryPersistenceStoreFactory,
+    this.transportSource,
     DemoTableRuntimeScopeFactory? runtimeScopeFactory,
     this.onOpenChat,
     this.onOpenReceipt,
@@ -27,6 +30,7 @@ class DemoTableRoute extends StatefulWidget {
   final DemoNetworkConfidenceVm networkConfidence;
   final NativeBootstrapCandidateLoaderFactory bootstrapCandidateLoaderFactory;
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
+  final AppTableSessionTransportSource? transportSource;
   final DemoTableRuntimeScopeFactory _runtimeScopeFactory;
   final VoidCallback? onOpenChat;
   final VoidCallback? onOpenReceipt;
@@ -65,7 +69,7 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<NativeBootstrapCandidateLoadResult>(
+    final table = FutureBuilder<NativeBootstrapCandidateLoadResult>(
       future: _bootstrapFuture,
       builder: (context, bootstrap) {
         return FutureBuilder<DemoRecoveryPersistenceLoadResult>(
@@ -87,6 +91,9 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
         );
       },
     );
+    final source = widget.transportSource;
+    if (source == null) return table;
+    return AppTableSessionTransportSourceMount(source: source, child: table);
   }
 
   Future<NativeBootstrapCandidateLoadResult> _loadBootstrapCandidates() async {

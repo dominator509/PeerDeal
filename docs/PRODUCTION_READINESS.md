@@ -70,14 +70,15 @@ the gates below are satisfied.
   platform persistence, and other native implementations remain scaffold-level.
   Protocol event-byte decoding and app frame-to-runtime ingestion now exist,
   and app-owned bounded source scheduling now exists, but native source
-  mounting and peer transport implementation are still open. Mobile
+  provisioning and peer transport implementation are still open. Mobile
   Android and Windows desktop now have generic secure-key and capture hosts,
   but runtime persistence/capture validation, Android release signing, and
   real-device/profile validation remain open.
 - App shells now mount demo, receipt, safe-surface, and join-flow routes and
   expose app-owned table-session runtimes over the core event projector, but
-  live transport/event-source mounting, production navigation, and non-demo
-  orchestration remain open.
+  production source provisioning, production navigation, and non-demo
+  orchestration remain open. The table route can now own an injected source's
+  lifecycle once a production caller supplies one.
 - App UI is not production-polished.
 
 ## Covered hardening slices
@@ -256,6 +257,11 @@ the gates below are satisfied.
   polling interval, serialized in-flight polls, explicit lifecycle state, and
   scrubbed warning output. Platform peer transport and route-specific source
   mounting remain integration work.
+- Mirrored app shells now expose optional source injection through the runtime
+  and table route, and `AppTableSessionTransportSourceMount` owns start,
+  replacement, and disposal. Production callers still must provision a loaded
+  native session and handler; native peer transport implementation remains
+  open.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
@@ -543,9 +549,10 @@ the gates below are satisfied.
   coordinator. Mirrored app table-session runtimes now bind the event stream
   to one table/session/protocol scope, delegate projection to `peerdeal_core`,
   and refuse to commit a close when retention fails. Canonical event-byte
-  decoding, frame-to-runtime handlers, and bounded app source scheduling are
-  available, while native transport source mounting and durable
-  database/platform persistence remain integration work.
+  decoding, frame-to-runtime handlers, bounded app source scheduling, and
+  route lifecycle source mounting are available, while native transport
+  provisioning and durable database/platform persistence remain integration
+  work.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is
