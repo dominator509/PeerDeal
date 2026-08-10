@@ -309,6 +309,15 @@ invite so product orchestration can call this bootstrap after join governance
 acceptance. Concrete persistence hydration, local identity provisioning, and
 native/device reachability remain outside the app contract.
 
+`AppHoldemProductionSessionBootstrapRoute` is the mirrored app-shell mounting
+adapter for callers that register a production route in `productionRoutes`. Its
+`fromRouteSettings(...)` builder requires a `ResolvedInvite` in
+`RouteSettings.arguments`, invokes the injected bootstrap, checks that the
+bootstrapped route path exactly matches the requested route, and mounts the
+existing route builder. Missing arguments, source/bootstrap errors, and route
+path mismatches use the existing safe route fallback. It does not supply the
+product session source, persistence, or local identity.
+
 `AppHoldemProductionTableSurface` reads bounded state from the route context and
 dispatches local actions through `AppHoldemTableSessionRuntime`. It renders
 controls only for the configured local seat during a betting phase with a live

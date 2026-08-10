@@ -46,6 +46,47 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Production Session Bootstrap Route Mounting
+
+Summary:
+- Added mirrored app-owned `AppHoldemProductionSessionBootstrapRoute` adapters.
+- Product route maps can pass a real `ResolvedInvite` through route arguments,
+  invoke the existing validated bootstrap, and mount its route without deriving
+  state or local identity from demo data.
+- Missing arguments, source/bootstrap failures, and route-path mismatches fail
+  closed through the existing safe route fallback.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_bootstrap_route.dart`
+- `apps/peerdeal_mobile/test/session/app_holdem_production_session_bootstrap_route_test.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_bootstrap_route.dart`
+- `apps/peerdeal_desktop/test/session/app_holdem_production_session_bootstrap_route_test.dart`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused mobile bootstrap-route tests: passed, four tests.
+- Focused desktop bootstrap-route tests: passed, four tests.
+- Full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- Dart format and `git diff --check`: passed.
+
+Risks:
+- The concrete product session source, durable state hydration, local identity,
+  Android device validation, runtime capture/key validation, release signing,
+  and other-platform hosts remain open.
+
+Next reviewer:
+- Wire this adapter from the real product join/session flow once the product
+  source and local identity providers exist; do not use demo or fixture data.
+
+---
+
 ### 2026-08-10 - Codex - Android Secure-Key Teardown Lifecycle
 
 Summary:

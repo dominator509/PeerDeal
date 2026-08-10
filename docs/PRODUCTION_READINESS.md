@@ -939,7 +939,12 @@ the gates below are satisfied.
   checks; mirrored `AppHoldemProductionSessionSource` and
   `AppHoldemProductionSessionBootstrap` seams now validate resolved-invite
   correlation before invoking that factory. The real product source still
-  owns durable state hydration and local identity.
+  owns durable state hydration and local identity. Mirrored
+  `AppHoldemProductionSessionBootstrapRoute` adapters now accept a resolved
+  invite through route arguments, invoke that bootstrap, enforce exact route
+  path correlation, and mount the existing validated route. Missing arguments,
+  source failures, and path mismatches fail closed; this adapter does not
+  create a product session source or local identity.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

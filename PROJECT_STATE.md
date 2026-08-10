@@ -336,6 +336,19 @@ Generated: 2026-08-10
 - Windows runtime/profile validation, Android device validation, release
   signing, and other-platform implementations remain open.
 
+## Recent T41 Changes
+
+- Added mirrored app-owned `AppHoldemProductionSessionBootstrapRoute` adapters.
+  Product route maps can pass a real `ResolvedInvite` through route arguments,
+  invoke the existing session bootstrap, and mount its validated production
+  route without deriving state or identity from demo data.
+- Missing invite arguments, product-source failures, and a mismatch between
+  the requested route path and the bootstrapped route path fail closed through
+  the existing route-unavailable surface.
+- Focused mobile and desktop bootstrap-route tests passed with four tests each.
+  Durable state hydration, local identity, device/runtime validation, and
+  final product navigation remain open.
+
 ## Required Gates
 
 Run after each retrofit step:
