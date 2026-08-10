@@ -8,7 +8,8 @@ Trinity baseline retrofit T1 is complete, CI/dependency hardening is complete,
 the T4 Android plus Windows secure-key and capture-enforcement host slices are
 implemented, T19 production entrypoint native-readiness activation is wired,
 and T20 local-network endpoint projection, T21 Android secure-storage bound
-hardening, and T22 protocol-native command validation are implemented on branch
+hardening, T22 protocol-native command validation, and T23 removal of the
+duplicate starter core API are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -41,6 +42,9 @@ hardening, and T22 protocol-native command validation are implemented on branch
   the existing native-network channel boundary without claiming live transport.
 - Core command validation now rejects unsupported protocol catalog entries and
   padded or control-character envelope identities before command acceptance.
+- The public `peerdeal_core` barrel no longer exports unused local `CoreCommand`
+  or `CoreEvent` models, duplicate reducer contracts, or starter validators;
+  protocol-native core models and reducer paths are now the sole package API.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -131,6 +135,8 @@ hardening, and T22 protocol-native command validation are implemented on branch
   upgrades.
 - T22 focused `peerdeal_core` validation tests: passed, including unsupported
   command/protocol rejection and padded/control-character identity rejection.
+- T23 focused protocol-native `peerdeal_core` suite: passed after removing the
+  unused local-envelope reducer and validator seams.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.

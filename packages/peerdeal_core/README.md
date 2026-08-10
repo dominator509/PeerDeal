@@ -1,14 +1,13 @@
 # peerdeal_core
 
-Deterministic core starter scaffold for PeerDeal.
+Deterministic protocol-native core for PeerDeal.
 
 ## Purpose
 This package owns the universal deterministic core boundary:
 - table/session state projection
 - reducer boundary
-- command validation contracts
+- protocol-native command validation
 - invariant guard contracts
-- table orchestrator contract
 
 It must **not** own:
 - UI
@@ -21,21 +20,18 @@ It must **not** own:
 ## Public entrypoint
 Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling packages or apps.
 
-## Current scaffold contents
-- starter table state model
-- command and event envelopes for local core application
-- reducer interface + default reducer
+## Current core contents
+- protocol `CommandEnvelope` and `EventEnvelope` models supplied by
+  `peerdeal_protocol`
+- deterministic table state model and protocol-native reducer
 - invariant guard interface + baseline guards for identity, counters,
   participant counts, hand-scoped events, and terminal closed/wiped states
-- action validator and table orchestrator contracts
 - deterministic fixture loader for starter tests
 - replay-safe projection coverage for every accepted protocol event fixture
 - protocol-native command validation against the catalog and safe envelope
   identity boundaries
 
 ## Intended next implementation moves
-1. complete replacement of starter local envelopes with shared protocol models
-   where legacy reducer seams remain
-2. wire real Hold'em hand lifecycle state machine output into core projection
-3. wire pot engine and settlement boundary into ledger-safe core events
-4. add broader replay-safe reducer coverage from canonical fixtures
+1. wire real Hold'em hand lifecycle state machine output into core projection
+2. wire pot engine and settlement boundary into ledger-safe core events
+3. add broader replay-safe reducer coverage from canonical fixtures

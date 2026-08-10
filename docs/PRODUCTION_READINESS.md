@@ -100,6 +100,9 @@ the gates below are satisfied.
 - Core command validation now consults the protocol catalog and rejects
   unsupported command artifacts or protocol versions, plus padded or
   control-character command and scope identities.
+- The core public API no longer exposes the unused starter local command/event
+  models or duplicate reducer and validator seams; protocol-native envelopes
+  are now the sole command/event boundary in `peerdeal_core`.
 - Core reducer ingress now rejects whitespace-only event envelope identity,
   scope, timestamp, actor, and hash-chain fields before protocol-compatible
   events can mutate deterministic state.

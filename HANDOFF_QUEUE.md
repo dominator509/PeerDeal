@@ -24,6 +24,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-10-014` | `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T20 | RESOLVED | App-owned local-network bootstrap loaders now split documented `peer@host[:port]` discovery values, validate host/port shape, preserve bare peer IDs, and project safe endpoint metadata onto existing `BootstrapCandidate` fields. |
 | `LEGACY-GAP-2026-08-10-015` | `apps/peerdeal_mobile/android/` | 4 | T21 | RESOLVED | Android secure-key persistence now bounds the actual UTF-8 encoded envelope bytes on read and write; the release manifest declares the minimum INTERNET permission for the existing native-network boundary. |
 | `LEGACY-GAP-2026-08-10-016` | `packages/peerdeal_core/` | 4 | T22 | RESOLVED | Core command validation now consults the protocol catalog, rejects unsupported command artifacts and protocol versions, and rejects padded or control-character envelope identities before command acceptance. |
+| `LEGACY-GAP-2026-08-10-017` | `packages/peerdeal_core/` | 4 | T23 | RESOLVED | Removed the unused starter `CoreCommand`/`CoreEvent` and duplicate reducer/validator contracts; the public core barrel now exposes only protocol-native command/event processing and current deterministic invariants. |
 
 ## Status Definitions
 

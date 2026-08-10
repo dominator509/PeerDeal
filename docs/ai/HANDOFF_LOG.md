@@ -14,6 +14,51 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Core Protocol Envelope Migration
+
+Summary:
+Closed the documented core migration gap. Removed the unused starter local
+`CoreCommand`/`CoreEvent` models and duplicate reducer, action-validator,
+orchestrator, and application-result contracts and tests. The public
+`peerdeal_core` barrel now exposes only the protocol-native command/event path,
+keeping deterministic state projection and invariant guards as the sole core
+truth.
+
+Files changed:
+- `packages/peerdeal_core/lib/peerdeal_core.dart`
+- `packages/peerdeal_core/lib/src/contracts/action_validator.dart`
+- `packages/peerdeal_core/lib/src/contracts/core_reducer.dart`
+- `packages/peerdeal_core/lib/src/contracts/table_orchestrator.dart`
+- `packages/peerdeal_core/lib/src/models/command_application_result.dart`
+- `packages/peerdeal_core/lib/src/models/command_validation_result.dart`
+- `packages/peerdeal_core/lib/src/models/core_command.dart`
+- `packages/peerdeal_core/lib/src/models/core_event.dart`
+- `packages/peerdeal_core/lib/src/models/reducer_context.dart`
+- `packages/peerdeal_core/lib/src/reducer/default_core_reducer.dart`
+- `packages/peerdeal_core/lib/src/validation/basic_action_validator.dart`
+- `packages/peerdeal_core/test/basic_action_validator_test.dart`
+- `packages/peerdeal_core/test/default_core_reducer_test.dart`
+- `packages/peerdeal_core/README.md`
+- `HANDOFF_QUEUE.md`
+- `HANDOFF.md`
+- `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Tests run:
+- Focused protocol-native `peerdeal_core` suite: passed.
+
+Risks:
+This removes unused scaffold exports from the private, non-publishable core
+package. No app or package production source referenced the removed symbols.
+The Hold'em lifecycle-to-core event integration and native runtime gaps remain
+open.
+
+Next reviewer:
+Run the full repository gates, then continue with the documented Hold'em/core
+integration work.
+
+---
+
 ### 2026-08-10 - Codex - Core Command Catalog and Identity Validation
 
 Summary:

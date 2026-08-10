@@ -126,6 +126,16 @@ Generated: 2026-08-09
 - Existing blank-field error ordering and fixture-backed command acceptance
   remain unchanged; the focused core suite passes.
 
+## Recent T23 Changes
+
+- Removed the unused starter local `CoreCommand`/`CoreEvent` models and their
+  duplicate reducer, action-validator, orchestrator, and application-result
+  contracts.
+- The `peerdeal_core` public barrel now exposes the protocol-native
+  `CommandEnvelope`/`EventEnvelope` path through the core reducer and validator,
+  eliminating two competing core truths.
+- The focused protocol-native core suite remains green after the migration.
+
 ## Required Gates
 
 Run after each retrofit step:
