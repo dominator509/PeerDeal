@@ -10,6 +10,7 @@
 
 class WindowsSecureKeyStorage;
 class WindowsCaptureProtection;
+class WindowsAppStorage;
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
@@ -37,6 +38,9 @@ class FlutterWindow : public Win32Window {
 
   // The native capture policy action channel owned by this app host.
   std::unique_ptr<WindowsCaptureProtection> capture_protection_;
+
+  // The generic app-private support-directory channel owned by this host.
+  std::unique_ptr<WindowsAppStorage> app_storage_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 typedef RecoveryPersistenceRootDirectoryFactory = Directory Function();
@@ -39,6 +40,31 @@ class AppRecoveryPersistenceStoreFactory {
 
     return AppRecoveryPersistenceStoreFactory(
       rootDirectoryFactory: () => Directory(rootPath),
+    );
+  }
+
+  static Future<AppRecoveryPersistenceStoreFactory?> fromNativeAppSupport({
+    AppStorageDirectoryBridge? bridge,
+  }) async {
+    final AppStorageDirectorySnapshot snapshot;
+    try {
+      snapshot = await (bridge ?? MethodChannelAppStorageDirectoryBridge())
+          .getAppSupportDirectory();
+    } on Object {
+      return null;
+    }
+
+    final appSupportPath = snapshot.directoryPath;
+    if (!snapshot.available ||
+        appSupportPath == null ||
+        !_isValidRootPath(appSupportPath)) {
+      return null;
+    }
+
+    return AppRecoveryPersistenceStoreFactory(
+      rootDirectoryFactory: () => Directory(
+        '$appSupportPath${Platform.pathSeparator}PeerDeal${Platform.pathSeparator}recovery',
+      ),
     );
   }
 

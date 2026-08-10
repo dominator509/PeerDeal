@@ -5,8 +5,9 @@ Generated: 2026-08-09
 ## Current Work
 
 Trinity baseline retrofit T1 is complete, CI/dependency hardening is complete,
-and the T4 Android plus Windows secure-key and capture-enforcement host slices
-are implemented on branch `retrofit/baseline-v1` from backup tag
+the T4 Android plus Windows secure-key and capture-enforcement host slices are
+implemented, and T18 app-private recovery persistence selection is wired on
+branch `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
 ## What Changed
@@ -21,6 +22,11 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Removed the generated release debug-signing fallback; operator-owned Android signing is environment-driven and fail-closed.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
+- Added the generic app-support directory method-channel contract. Android
+  returns private no-backup app storage and Windows returns `LocalAppData`.
+- Both app shells now prefer `PEERDEAL_RECOVERY_ROOT` and otherwise use the
+  native app-support directory to construct their app-owned JSON recovery store.
+  Native lookup and root validation fail closed.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -69,12 +75,15 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Remaining production software gaps are tracked in `HANDOFF_QUEUE.md` and existing production-readiness docs.
 - Android and Windows host work is available for runtime persistence and
   capture validation. Remaining native gaps are other-platform capture,
-  local-network discovery, native peer transport implementation and
-  platform source provisioning, durable platform persistence, and
-  non-Windows platform storage.
+  local-network discovery, native peer transport implementation and platform
+  source provisioning, production database persistence, other-platform
+  storage, and non-demo production navigation/UI.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
+- The T18 Android Gradle compile could not configure the app because the
+  configured NDK is missing `source.properties`; no Android APK or host compile
+  result is claimed until that installation is repaired.
 
 ## Gate Results
 
@@ -84,6 +93,13 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - `rtk dart run melos run analyze`: passed.
 - `rtk dart run melos run test`: passed.
 - `rtk git diff --check`: passed.
+- T18 focused native app-storage bridge tests: passed, 49 tests.
+- T18 focused mobile recovery factory tests: passed, 11 tests.
+- T18 focused desktop recovery factory tests: passed, 12 tests.
+- T18 `flutter build windows --debug --no-pub`: passed.
+- T18 full repository `analyze`, `boundary-check`, `source-text`, `test`, and
+  `dependency-audit` gates: passed; dependency audit reports 0 actionable
+  upgrades.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.

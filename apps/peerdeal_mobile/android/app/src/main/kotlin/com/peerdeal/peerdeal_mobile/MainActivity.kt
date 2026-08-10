@@ -7,6 +7,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private var secureKeyStorageHandler: SecureKeyStorageHandler? = null
     private var captureProtectionHandler: CaptureProtectionHandler? = null
+    private var appStorageDirectoryHandler: AppStorageDirectoryHandler? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -23,6 +24,13 @@ class MainActivity : FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             CaptureProtectionHandler.CHANNEL_NAME,
         ).setMethodCallHandler(captureHandler)
+
+        val appStorageHandler = AppStorageDirectoryHandler(this)
+        appStorageDirectoryHandler = appStorageHandler
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            AppStorageDirectoryHandler.CHANNEL_NAME,
+        ).setMethodCallHandler(appStorageHandler)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
@@ -34,9 +42,14 @@ class MainActivity : FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             CaptureProtectionHandler.CHANNEL_NAME,
         ).setMethodCallHandler(null)
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            AppStorageDirectoryHandler.CHANNEL_NAME,
+        ).setMethodCallHandler(null)
         secureKeyStorageHandler?.close()
         secureKeyStorageHandler = null
         captureProtectionHandler = null
+        appStorageDirectoryHandler = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 }

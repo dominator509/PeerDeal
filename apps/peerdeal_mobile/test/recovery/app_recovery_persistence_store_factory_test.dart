@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:peerdeal_mobile/recovery/app_recovery_persistence_store_factory.dart';
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
@@ -108,6 +109,45 @@ void main() {
     },
   );
 
+  test('creates recovery storage below native app support directory', () async {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_mobile_native_support_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) directory.deleteSync(recursive: true);
+    });
+
+    final factory =
+        await AppRecoveryPersistenceStoreFactory.fromNativeAppSupport(
+          bridge: _FakeAppStorageDirectoryBridge(directory.path),
+        );
+    final result = factory!.create();
+    final append = result.store!.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+      ],
+    );
+
+    expect(result.isAvailable, isTrue);
+    expect(append.isSuccess, isTrue);
+    expect(
+      Directory(
+        '${directory.path}${Platform.pathSeparator}PeerDeal${Platform.pathSeparator}recovery',
+      ).existsSync(),
+      isTrue,
+    );
+  });
+
+  test('returns no factory when native app support is unavailable', () async {
+    final factory =
+        await AppRecoveryPersistenceStoreFactory.fromNativeAppSupport(
+          bridge: const _UnavailableAppStorageDirectoryBridge(),
+        );
+
+    expect(factory, isNull);
+  });
+
   test('fails closed when app cannot provide recovery root', () {
     final factory = AppRecoveryPersistenceStoreFactory(
       rootDirectoryFactory: () => throw StateError('root unavailable'),
@@ -198,4 +238,25 @@ EventEnvelope _event({
     prevEventHash: prevHash,
     eventHash: hash,
   );
+}
+
+class _FakeAppStorageDirectoryBridge implements AppStorageDirectoryBridge {
+  const _FakeAppStorageDirectoryBridge(this.path);
+
+  final String path;
+
+  @override
+  Future<AppStorageDirectorySnapshot> getAppSupportDirectory() async {
+    return AppStorageDirectorySnapshot(available: true, directoryPath: path);
+  }
+}
+
+class _UnavailableAppStorageDirectoryBridge
+    implements AppStorageDirectoryBridge {
+  const _UnavailableAppStorageDirectoryBridge();
+
+  @override
+  Future<AppStorageDirectorySnapshot> getAppSupportDirectory() async {
+    return const AppStorageDirectorySnapshot.unavailable();
+  }
 }

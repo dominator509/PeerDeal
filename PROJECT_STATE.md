@@ -69,6 +69,20 @@ Generated: 2026-08-09
   fail-closed load boundary, returning the bound handler, native session, and
   route-ready source while keeping platform transport generic.
 
+## Recent T18 Changes
+
+- Added the generic `AppStorageDirectoryBridge` and bounded method-channel
+  contract for app-support directory discovery.
+- Android now returns private no-backup app storage and Windows now returns
+  `LocalAppData`; neither host owns recovery or receipt policy.
+- Both app shells prefer the explicit `PEERDEAL_RECOVERY_ROOT` override and
+  otherwise construct the app-owned JSON recovery store below native app-support
+  storage. Missing or malformed native results fail closed.
+- Focused Dart coverage passes and the Windows debug host build passes. Android
+  host/runtime persistence, release-signing, and device/profile validation
+  remain required; the current Android Gradle configuration also stops on an
+  NDK installation missing `source.properties`.
+
 ## Required Gates
 
 Run after each retrofit step:

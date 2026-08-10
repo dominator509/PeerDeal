@@ -283,6 +283,14 @@ projection or close retention fails. A `SessionClosed` event is committed only
   outside this contract. App route source mounting is an app-shell lifecycle
   concern.
 
+When no explicit recovery root is configured, the mobile and desktop app shells
+may call the generic `AppStorageDirectoryBridge.getAppSupportDirectory()`
+contract. Android returns private no-backup app storage and Windows returns
+`LocalAppData`; the app shell appends its own `PeerDeal/recovery` scope and the
+native bridge owns no recovery or receipt semantics. Missing, malformed, or
+failed native directory results return no default factory and therefore fail
+closed.
+
 ## Local Network Bootstrap Boundary
 
 `peerdeal_native_bridges` exposes generic local-network capability and discovery

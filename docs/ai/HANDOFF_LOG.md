@@ -14,6 +14,49 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Native App-Support Recovery Persistence
+
+Summary:
+Added a generic app-support directory method-channel contract and wired both app
+shells to use it as the default recovery-root source after the explicit
+`PEERDEAL_RECOVERY_ROOT` override. Android returns private no-backup app storage;
+Windows returns `LocalAppData`. Recovery and retention policy remain app-owned,
+and malformed, unavailable, or failed native results return no default factory.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/app_storage/`
+- `packages/peerdeal_native_bridges/fixtures/app_storage_directory_bridge_contract.json`
+- `packages/peerdeal_native_bridges/test/method_channel_app_storage_directory_bridge_test.dart`
+- Android app-storage handler and `MainActivity` registration
+- Windows app-storage host, Flutter-window ownership, and CMake wiring
+- Both app-shell recovery factories and entrypoints
+- readiness and handoff records
+
+Tests run:
+- Native bridge focused Flutter suite: passed, 49 tests.
+- Mobile recovery factory focused suite: passed, 11 tests.
+- Desktop recovery factory focused suite: passed, 12 tests.
+- `melos run analyze`, `boundary-check`, `source-text`, `test`, and
+  `dependency-audit`: passed; dependency audit reports 0 actionable upgrades.
+- `git diff --check`: passed.
+- `flutter build windows --debug --no-pub`: passed.
+- Android `app:compileDebugKotlin` was attempted twice and stopped during
+  Gradle configuration because the configured NDK lacks `source.properties`;
+  no Android host compile or APK result is claimed.
+
+Risks:
+- This provides app-private JSON recovery persistence roots on Android and
+  Windows; it does not provide a production database, other-platform storage,
+  live peer transport, or runtime/device validation. Android host validation
+  also needs a repaired NDK installation.
+
+Next reviewer:
+- Commit and push after reviewing the staged file list. Android APK/runtime
+  validation, release signing, device/profile validation, and NDK repair remain
+  external.
+
+---
+
 ### 2026-08-10 - Codex - App Transport Provisioning
 
 Summary:

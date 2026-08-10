@@ -66,14 +66,16 @@ the gates below are satisfied.
 - CI runs the same baseline commands as local development.
 
 ## Current highest-risk blockers
-- Native live transport, capture enforcement on other platforms, durable
-  platform persistence, and other native implementations remain scaffold-level.
-  Protocol event-byte decoding and app frame-to-runtime ingestion now exist,
-  and app-owned bounded source scheduling now exists, but native source
-  provisioning and peer transport implementation are still open. Mobile
-  Android and Windows desktop now have generic secure-key and capture hosts,
-  but runtime persistence/capture validation, Android release signing, and
-  real-device/profile validation remain open.
+- Native live transport, capture enforcement on other platforms, and other
+  native implementations remain scaffold-level. Protocol event-byte decoding
+  and app frame-to-runtime ingestion now exist, and app-owned bounded source
+  scheduling now exists, but native source provisioning and peer transport
+  implementation are still open. Mobile Android and Windows desktop now have
+  generic secure-key, capture, and app-private recovery-storage hosts. The app
+  shells prefer explicit `PEERDEAL_RECOVERY_ROOT` and otherwise use native
+  app-support storage, but runtime persistence/capture validation, Android
+  release signing, real-device/profile validation, production database
+  persistence, and other-platform storage remain open.
 - App shells now mount demo, receipt, safe-surface, and join-flow routes and
   expose app-owned table-session runtimes over the core event projector. The
   app transport provisioner now composes those runtimes with validated native
@@ -157,6 +159,11 @@ the gates below are satisfied.
 - The Windows desktop host now registers the generic secure-key channel and
   persists bounded versioned records through Windows Credential Manager without
   adding receipt semantics to the native bridge.
+- A generic app-support directory channel now lets app shells select durable
+  recovery storage without moving recovery policy into native bridges. Android
+  returns private no-backup app storage and Windows returns `LocalAppData`;
+  explicit `PEERDEAL_RECOVERY_ROOT` configuration remains the higher-priority
+  override and all unavailable or malformed results fail closed.
 - Android and Windows hosts now implement the generic capture action contract;
   Android toggles `FLAG_SECURE`, Windows uses `SetWindowDisplayAffinity` on
   Windows 10 build 19041 or newer, and receipt route disposal releases
@@ -553,8 +560,9 @@ the gates below are satisfied.
   and refuse to commit a close when retention fails. Canonical event-byte
   decoding, frame-to-runtime handlers, bounded app source scheduling, and
   route lifecycle source mounting are available, while native transport
-  provisioning and durable database/platform persistence remain integration
-  work.
+  provisioning and durable database persistence remain integration work. The
+  Android and Windows app shells now also select app-private recovery roots
+  through the generic native app-support directory contract.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is
@@ -739,17 +747,20 @@ the gates below are satisfied.
   checked-in markdown files were reviewed directly from source.
 - Native capture blocking on other platforms, Android/Windows runtime and
   device validation, real local-network discovery, production transport,
-  other-platform secure storage, production database/platform
-  persistence, and final production app UI cannot be completed inside the
+  other-platform secure storage, production database persistence, operator
+  release signing, and final production app UI cannot be completed inside the
   current ChatGPT
   project environment because they require native platform implementations,
-  device/OS integration, and product design validation. The Dart contracts,
+  device/OS integration, product design validation, or a repaired Android NDK
+  installation (the current Gradle configuration lacks `source.properties`).
+  The Dart contracts,
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   replay event-range request validation,
   sync recovery persistence scope-identity validation,
   app-owned recovery store construction, exact environment-configured recovery
-  root loading, app-owned recovery root validation, mounted recovery-window loading,
+  root loading, native app-support recovery-root fallback, app-owned recovery
+  root validation, mounted recovery-window loading,
   package-owned bootstrap peer-id validation,
   package-owned session path peer-id validation,
   package-owned primary peer identity validation,

@@ -1,0 +1,10 @@
+{
+  "channel": "peerdeal/native_bridges/app_storage",
+  "methods": {
+    "getAppSupportDirectory": {
+      "available": true,
+      "directoryPath": "C:\\Users\\peerdeal\\AppData\\Local",
+      "warning": null
+    }
+  }
+}

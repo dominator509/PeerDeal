@@ -94,10 +94,12 @@ dart analyze .
 - Android mobile now has a Keystore-backed generic secure-key host, and the
   Windows desktop host now uses Credential Manager, both behind the existing
   method-channel contract. Android and Windows capture enforcement is now
-  host-backed, with runtime/device validation still open. Native peer
-  transport, production platform persistence, and other platform
-  implementations remain readiness gaps documented in
-  `docs/PRODUCTION_READINESS.md`. App shells now
+  host-backed, with runtime/device validation still open. App shells prefer
+  explicit `PEERDEAL_RECOVERY_ROOT` and otherwise use the generic app-support
+  directory bridge: Android private no-backup storage or Windows `LocalAppData`.
+  Native peer transport, production database persistence, other-platform
+  storage, and other platform implementations remain readiness gaps documented
+  in `docs/PRODUCTION_READINESS.md`. App shells now
   expose deterministic retention coordinators that connect close-time policy
   decisions to the scoped recovery-store wipe primitive, plus per-session close
   coordinators that cache the first result and prevent duplicate policy or wipe
@@ -112,8 +114,8 @@ dart analyze .
   `AppTableSessionTransportProvisioner` that composes the runtime handler with
   a validated native session and route-ready source, then inject the source
   into the table route, whose mount owns replacement and disposal. Native peer
-  transport implementation, platform source provisioning, and durable platform
-  persistence remain integration gaps.
+  transport implementation and platform source provisioning remain integration
+  gaps; Android/Windows app-private recovery-root selection is now wired.
 
 ## Do Not Touch Without Approval
 

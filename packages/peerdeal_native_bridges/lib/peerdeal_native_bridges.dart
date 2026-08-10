@@ -1,3 +1,7 @@
+export 'src/app_storage/app_storage_directory_bridge.dart';
+export 'src/app_storage/app_storage_directory_bridge_models.dart';
+export 'src/app_storage/app_storage_directory_channel_contract.dart';
+export 'src/app_storage/method_channel_app_storage_directory_bridge.dart';
 export 'src/capture_protection/capture_protection_bridge.dart';
 export 'src/capture_protection/capture_protection_bridge_models.dart';
 export 'src/capture_protection/capture_protection_channel_contract.dart';

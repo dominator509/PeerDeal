@@ -46,8 +46,16 @@ class PeerDealAppNavigationEntry {
   final String path;
 }
 
-void main() {
-  runApp(const PeerDealMobileApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final recoveryPersistenceStoreFactory =
+      AppRecoveryPersistenceStoreFactory.fromEnvironment() ??
+      await AppRecoveryPersistenceStoreFactory.fromNativeAppSupport();
+  runApp(
+    PeerDealMobileApp(
+      recoveryPersistenceStoreFactory: recoveryPersistenceStoreFactory,
+    ),
+  );
 }
 
 class PeerDealMobileRuntime {

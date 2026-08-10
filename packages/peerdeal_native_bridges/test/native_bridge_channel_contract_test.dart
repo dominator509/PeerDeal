@@ -5,6 +5,38 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('app storage directory channel contract decodes fixture payload', () {
+    final fixture = _loadFixture('app_storage_directory_bridge_contract.json');
+    final methods = fixture['methods'] as Map<String, Object?>;
+    final payload =
+        methods[AppStorageDirectoryChannelContract.getAppSupportDirectoryMethod]
+            as Map<String, Object?>;
+
+    final snapshot =
+        AppStorageDirectoryChannelContract.decodeAppSupportDirectory(payload);
+
+    expect(fixture['channel'], AppStorageDirectoryChannelContract.channelName);
+    expect(snapshot.available, isTrue);
+    expect(snapshot.directoryPath, r'C:\Users\peerdeal\AppData\Local');
+    expect(snapshot.warning, isNull);
+  });
+
+  test('app storage directory channel contract fails closed on bad paths', () {
+    final padded = AppStorageDirectoryChannelContract.decodeAppSupportDirectory(
+      const <String, Object?>{
+        'available': true,
+        'directoryPath': ' C:\\recovery ',
+      },
+    );
+    final missing =
+        AppStorageDirectoryChannelContract.decodeAppSupportDirectory(null);
+
+    expect(padded.available, isFalse);
+    expect(padded.directoryPath, isNull);
+    expect(padded.warning, 'Native app storage directory is unavailable.');
+    expect(missing.available, isFalse);
+  });
+
   test('capture protection channel contract decodes fixture payload', () {
     final fixture = _loadFixture('capture_protection_bridge_contract.json');
     final methods = fixture['methods'] as Map<String, Object?>;
