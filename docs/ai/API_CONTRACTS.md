@@ -372,9 +372,14 @@ closed.
 ## Local Network Bootstrap Boundary
 
 `peerdeal_native_bridges` exposes generic local-network capability and discovery
-facts only. Mobile and desktop app loaders/coordinators trim, deduplicate, and
-cap discovered peer endpoints before passing them to `peerdeal_network`
-bootstrap candidate resolution. The package bootstrap candidate provider drops
+facts only. Each method-channel capability or discovery call uses a bounded
+five-second default deadline and returns an unavailable fact on timeout or caller
+cancellation. The app-owned default bootstrap loader supplies cancellation for
+table-route replacement and disposal; this contract does not define discovery
+service, endpoint, or routing policy.
+Mobile and desktop app loaders/coordinators trim, deduplicate, and cap discovered
+peer endpoints before passing them to `peerdeal_network` bootstrap candidate
+resolution. The package bootstrap candidate provider drops
 blank, padded, control-character-bearing, or duplicate peer ids before
 assigning route class and priority. Session path selection must ignore
 malformed candidate peer ids and malformed elected-primary overrides before

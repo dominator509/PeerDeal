@@ -335,6 +335,12 @@ the gates below are satisfied.
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
   native capability, discovery, factory construction, or candidate resolution
   is unavailable.
+- Generic local-network capability and discovery method-channel calls now have
+  a bounded five-second default deadline with stable fail-closed timeout and
+  cancellation results. Default app bootstrap loaders cancel in-flight native
+  calls when table routes are replaced or disposed. Real platform discovery,
+  permission behavior, reachability, and other-platform implementations remain
+  external validation and implementation work.
 - Mounted join-flow factories now use an app-owned native bootstrap coordinator
   instead of hard-coded fake peer candidates, mapping normalized local-network
   discovery into join `BootstrapPlan` inputs while preserving relay fallback

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -144,4 +146,72 @@ void main() {
       expect(log.single.method, 'discoverPeers');
     },
   );
+
+  test('bounds a pending capability lookup', () async {
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          return pending.future;
+        });
+
+    final capability = await MethodChannelLocalNetworkBridge(
+      channel: channel,
+      timeout: const Duration(milliseconds: 1),
+    ).getCapability();
+
+    expect(capability.warning, 'Local network call timed out.');
+    expect(log.single.method, 'getCapability');
+    pending.complete(null);
+  });
+
+  test('bounds a pending discovery lookup', () async {
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          return pending.future;
+        });
+
+    final snapshot = await MethodChannelLocalNetworkBridge(
+      channel: channel,
+      timeout: const Duration(milliseconds: 1),
+    ).discoverPeers();
+
+    expect(snapshot.warning, 'Local network call timed out.');
+    expect(log.single.method, 'discoverPeers');
+    pending.complete(null);
+  });
+
+  test('cancels an in-flight capability lookup', () async {
+    final pending = Completer<Object?>();
+    final cancellation = Completer<void>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          return pending.future;
+        });
+
+    final lookup = MethodChannelLocalNetworkBridge(
+      channel: channel,
+      cancellation: cancellation.future,
+    ).getCapability();
+    cancellation.complete();
+
+    final capability = await lookup;
+
+    expect(capability.warning, 'Local network call cancelled.');
+    expect(log.single.method, 'getCapability');
+    pending.complete(null);
+  });
+
+  test('rejects a non-positive call timeout', () {
+    expect(
+      () => MethodChannelLocalNetworkBridge(
+        channel: channel,
+        timeout: Duration.zero,
+      ),
+      throwsArgumentError,
+    );
+  });
 }

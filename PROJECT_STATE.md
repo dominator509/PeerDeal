@@ -277,6 +277,19 @@ Generated: 2026-08-10
   cross-device reachability, and other-platform transport remain external
   checks.
 
+## Recent T36 Changes
+
+- Added a bounded five-second default deadline to generic local-network
+  method-channel capability and discovery calls, returning stable fail-closed
+  facts when platform calls do not complete.
+- Added caller cancellation to the default app bootstrap loader and table route
+  replacement/disposal lifecycle, so in-flight local-network calls and local
+  deadline timers do not outlive their route.
+- Added focused timeout, cancellation, constructor-validation, and mirrored
+  route lifecycle coverage. Real platform discovery, permission behavior,
+  device/network reachability, and other-platform implementations remain
+  external checks.
+
 ## Required Gates
 
 Run after each retrofit step:

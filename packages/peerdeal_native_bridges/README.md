@@ -44,6 +44,10 @@ to observe local device capabilities.
   results.
 - Callers may provide a cancellation signal; cancellation completes the bridge
   operation fail closed and cancels its local deadline timer.
+- Local-network method-channel capability and discovery calls use the same
+  bounded five-second default deadline and stable fail-closed timeout results.
+  App-owned bootstrap loaders may provide cancellation for route lifecycle
+  teardown; discovery and routing policy remain outside this package.
 - Native bridge warnings are normalized for app-layer safe-surface and network
   routing policy.
 - Channel names, method names, fixture payloads, and decode behavior are locked

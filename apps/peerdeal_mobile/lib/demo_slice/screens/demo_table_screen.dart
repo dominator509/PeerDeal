@@ -42,6 +42,7 @@ class DemoTableRoute extends StatefulWidget {
 class _DemoTableRouteState extends State<DemoTableRoute> {
   late Future<NativeBootstrapCandidateLoadResult> _bootstrapFuture;
   late Future<DemoRecoveryPersistenceLoadResult> _recoveryPersistenceFuture;
+  NativeBootstrapCandidateLoader? _bootstrapLoader;
 
   @override
   void initState() {
@@ -57,6 +58,7 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
         oldWidget.bootstrapCandidateLoaderFactory !=
             widget.bootstrapCandidateLoaderFactory ||
         oldWidget._runtimeScopeFactory != widget._runtimeScopeFactory) {
+      _cancelBootstrapLoader();
       _bootstrapFuture = _loadBootstrapCandidates();
     }
     if (oldWidget.snapshot.scenarioId != widget.snapshot.scenarioId ||
@@ -65,6 +67,12 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
         oldWidget._runtimeScopeFactory != widget._runtimeScopeFactory) {
       _recoveryPersistenceFuture = _loadRecoveryPersistence();
     }
+  }
+
+  @override
+  void dispose() {
+    _cancelBootstrapLoader();
+    super.dispose();
   }
 
   @override
@@ -99,11 +107,10 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
   Future<NativeBootstrapCandidateLoadResult> _loadBootstrapCandidates() async {
     try {
       final scope = widget._runtimeScopeFactory(widget.snapshot);
+      final loader = widget.bootstrapCandidateLoaderFactory();
+      _bootstrapLoader = loader;
       return _safeBootstrapLoadResult(
-        await widget.bootstrapCandidateLoaderFactory().load(
-          sessionId: scope.sessionId,
-          tableId: scope.tableId,
-        ),
+        await loader.load(sessionId: scope.sessionId, tableId: scope.tableId),
       );
     } on Object {
       return const NativeBootstrapCandidateLoadResult.unavailable(
@@ -111,6 +118,11 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
         warnings: <String>['Local network bootstrap loader unavailable.'],
       );
     }
+  }
+
+  void _cancelBootstrapLoader() {
+    _bootstrapLoader?.cancel();
+    _bootstrapLoader = null;
   }
 
   Future<DemoRecoveryPersistenceLoadResult> _loadRecoveryPersistence() async {

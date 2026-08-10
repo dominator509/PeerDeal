@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 
@@ -34,17 +36,38 @@ class NativeBootstrapCandidateLoader {
     int maxPeerCandidates = 32,
   }) : _bridge = bridge,
        _provider = provider,
-       _maxPeerCandidates = maxPeerCandidates;
+       _maxPeerCandidates = maxPeerCandidates,
+       _cancellation = null;
 
   factory NativeBootstrapCandidateLoader.methodChannel() {
-    return NativeBootstrapCandidateLoader(
-      bridge: MethodChannelLocalNetworkBridge(),
+    final cancellation = Completer<void>();
+    return NativeBootstrapCandidateLoader._methodChannel(
+      cancellation: cancellation,
+      bridge: MethodChannelLocalNetworkBridge(
+        cancellation: cancellation.future,
+      ),
     );
   }
+
+  NativeBootstrapCandidateLoader._methodChannel({
+    required LocalNetworkBridge bridge,
+    required Completer<void> cancellation,
+  }) : _bridge = bridge,
+       _provider = const BasicBootstrapCandidateProvider(),
+       _maxPeerCandidates = 32,
+       _cancellation = cancellation;
 
   final LocalNetworkBridge _bridge;
   final BootstrapCandidateProvider _provider;
   final int _maxPeerCandidates;
+  final Completer<void>? _cancellation;
+
+  void cancel() {
+    final cancellation = _cancellation;
+    if (cancellation != null && !cancellation.isCompleted) {
+      cancellation.complete();
+    }
+  }
 
   Future<NativeBootstrapCandidateLoadResult> load({
     required String sessionId,

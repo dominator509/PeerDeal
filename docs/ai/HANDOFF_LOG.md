@@ -47,6 +47,46 @@ Run the full repository gates, then continue with the next actionable gap in
 
 ---
 
+### 2026-08-10 - Codex - Local-Network Method-Channel Deadline
+
+Summary:
+- Added a bounded five-second default deadline to generic local-network
+  capability and discovery method-channel calls.
+- Added stable fail-closed timeout and cancellation facts. Default app bootstrap
+  loaders carry caller cancellation, and table routes cancel in-flight loaders
+  during replacement or disposal.
+- Kept discovery, endpoint, routing, and receipt policy outside the native
+  bridge package.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/local_network/method_channel_local_network_bridge.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_local_network_bridge_test.dart`
+- Mirrored mobile and desktop bootstrap loaders, table routes, and route tests
+- `packages/peerdeal_native_bridges/README.md` and mirrored demo-slice READMEs
+- `docs/PRODUCTION_READINESS.md`, `docs/ai/API_CONTRACTS.md`, and
+  `docs/ai/ARCHITECTURE_MAP.md`
+- `PROJECT_STATE.md`, `HANDOFF.md`, and `HANDOFF_QUEUE.md`
+
+Tests run:
+- Focused local-network method-channel suite: passed, 10 tests.
+- Mirrored mobile and desktop bootstrap-loader/table-route suites: passed, 17
+  tests each.
+- Full analyzer, boundary-check, source-text, serialized test, and
+  dependency-audit gates: passed; dependency audit reported zero actionable
+  upgrades.
+
+Risks:
+- Real platform discovery, permission behavior, device/network reachability,
+  and other-platform local-network implementations remain external readiness
+  checks.
+
+Next reviewer:
+Continue with the next actionable production gap in
+`docs/PRODUCTION_READINESS.md` after runtime Android/Windows validation; do not
+invent local-network service or endpoint semantics.
+
+---
+
 ### 2026-08-10 - Codex - Secure-Key Method-Channel Deadline
 
 Summary:

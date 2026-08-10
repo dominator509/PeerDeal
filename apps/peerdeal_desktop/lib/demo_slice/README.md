@@ -60,6 +60,9 @@ order is native local-network bridge -> normalized discovery snapshot ->
 `peerdeal_network` bootstrap candidate provider -> mounted table route ->
 render-only table screen. The native bridge stays generic and does not own
 table, invite, or session policy.
+The default loader carries an app-owned cancellation signal, and the table
+route cancels it on bootstrap replacement or route disposal. Native capability
+and discovery calls also fail closed after their bounded default deadline.
 
 Join-flow bootstrap planning follows the same boundary rule through the
 app-owned `NativeJoinBootstrapCoordinator`: native local-network bridge ->

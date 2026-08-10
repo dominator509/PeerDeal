@@ -227,12 +227,47 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     expect(source.state, AppTableSessionTransportSourceState.disposed);
   });
+
+  testWidgets('cancels bootstrap loaders on replacement and disposal', (
+    tester,
+  ) async {
+    final firstLoader = _TrackingNativeBootstrapCandidateLoader();
+    final secondLoader = _TrackingNativeBootstrapCandidateLoader();
+    final scope = const RecoveryPersistenceScope(
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      protocolVersion: '1.x',
+    );
+
+    await tester.pumpWidget(
+      _tableRoute(
+        recoveryPersistenceStoreFactory: null,
+        runtimeScopeFactory: (_) => scope,
+        bootstrapCandidateLoaderFactory: () => firstLoader,
+      ),
+    );
+    expect(firstLoader.cancelled, isFalse);
+
+    await tester.pumpWidget(
+      _tableRoute(
+        recoveryPersistenceStoreFactory: null,
+        runtimeScopeFactory: (_) => scope,
+        bootstrapCandidateLoaderFactory: () => secondLoader,
+      ),
+    );
+    expect(firstLoader.cancelled, isTrue);
+    expect(secondLoader.cancelled, isFalse);
+
+    await tester.pumpWidget(const SizedBox());
+    expect(secondLoader.cancelled, isTrue);
+  });
 }
 
 Widget _tableRoute({
   required AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
   required DemoTableRuntimeScopeFactory runtimeScopeFactory,
   AppTableSessionTransportSource? transportSource,
+  NativeBootstrapCandidateLoaderFactory? bootstrapCandidateLoaderFactory,
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -242,8 +277,11 @@ Widget _tableRoute({
         confidence: NetworkConfidence.stable,
         recoveryRecommended: false,
       ),
-      bootstrapCandidateLoaderFactory: () =>
-          NativeBootstrapCandidateLoader(bridge: const _NoDiscoveryBridge()),
+      bootstrapCandidateLoaderFactory:
+          bootstrapCandidateLoaderFactory ??
+          (() => NativeBootstrapCandidateLoader(
+            bridge: const _NoDiscoveryBridge(),
+          )),
       recoveryPersistenceStoreFactory: recoveryPersistenceStoreFactory,
       transportSource: transportSource,
       runtimeScopeFactory: runtimeScopeFactory,
@@ -288,5 +326,19 @@ class _NoDiscoveryBridge implements LocalNetworkBridge {
   @override
   Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
     return const LocalNetworkDiscoverySnapshot.unavailable();
+  }
+}
+
+class _TrackingNativeBootstrapCandidateLoader
+    extends NativeBootstrapCandidateLoader {
+  _TrackingNativeBootstrapCandidateLoader()
+    : super(bridge: const _NoDiscoveryBridge());
+
+  bool cancelled = false;
+
+  @override
+  void cancel() {
+    cancelled = true;
+    super.cancel();
   }
 }
