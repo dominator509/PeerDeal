@@ -82,6 +82,40 @@ void main() {
     expect(runtime.handState.phase, HoldemHandPhase.showdownReveal);
   });
 
+  test('resumes partial publication from the sent event offset', () async {
+    final runtime = _runtime(_showdownState());
+    expect(runtime.startHand().isApplied, isTrue);
+    final projection = runtime.revealShowdown(input: _showdownInput);
+    final firstSender = _RecordingTransportSender(failAtSend: 2);
+    final publisher = AppHoldemProjectionTransportPublisher(
+      sender: firstSender,
+      localPeerId: 'peer_local',
+      remotePeerId: 'peer_remote',
+    );
+
+    final partial = await publisher.publish(projection);
+    final retrySender = _RecordingTransportSender();
+    final retryPublisher = AppHoldemProjectionTransportPublisher(
+      sender: retrySender,
+      localPeerId: 'peer_local',
+      remotePeerId: 'peer_remote',
+    );
+    final resumed = await retryPublisher.publish(
+      projection,
+      startEventIndex: partial.sentEventCount,
+    );
+
+    expect(resumed.isComplete, isTrue);
+    expect(resumed.sentEventCount, projection.events.length);
+    expect(retrySender.frames, hasLength(1));
+    expect(
+      const EventEnvelopeCodec()
+          .decode(retrySender.frames.single.payload)
+          .eventId,
+      projection.events[1].eventId,
+    );
+  });
+
   test('reconstructs adapter events through the inbound app boundary', () {
     const adapter = HoldemCoreProjectionAdapter();
     final initial = _preflopState();

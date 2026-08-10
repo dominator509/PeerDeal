@@ -83,8 +83,10 @@ the gates below are satisfied.
   surface refresh; its route context also exposes canonical projection
   publishing. Typed `AppHoldemProductionRouteRegistration` now merges that
   route into the validated app route map and native-readiness gate. Platform
-  source provisioning, live peer transport, actual product session/state
-  wiring, and final production UI remain open.
+  source provisioning, live peer transport, and actual product session/state
+  wiring remain open. The default app-owned production Hold'em surface now
+  renders bounded runtime state, gates local actions on transport readiness, and
+  publishes canonical projections; final product UX validation remains open.
 - App UI is not production-polished.
 
 ## Covered hardening slices
@@ -145,6 +147,10 @@ the gates below are satisfied.
   app-shell registration boundary. The shells auto-merge its route and
   navigation metadata, require native readiness, and render the existing
   scrubbed route-unavailable surface when readiness is absent.
+- Mirrored `AppHoldemProductionTableSurface` owners now render bounded runtime
+  state and expose only local-seat betting controls backed by a live canonical
+  publisher. Partial projection sends retain an event offset and resume from
+  the first unsent event without replaying variant rules or delivered frames.
 - Hold'em action application now carries production raise sizing semantics:
   full opening bets and full raises update the next minimum raise amount, while
   short all-ins can increase the amount to call without claiming full-raise
@@ -881,9 +887,10 @@ the gates below are satisfied.
   local-network/transport/capture diagnostic scrubbing, scrubbed route-failure
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are
-  locked for those follow-up implementations. The app-owned Hold'em route and
-  publisher and typed registration seams are also implemented; actual product
-  session/state provisioning, navigation, and UI validation remain open.
+  locked for those follow-up implementations. The app-owned Hold'em route,
+  publisher, typed registration, and default production-surface seams are also
+  implemented; actual product session/state provisioning, native transport,
+  navigation polish, and UI validation remain open.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
@@ -893,7 +900,7 @@ the gates below are satisfied.
    that satisfy the locked method-channel contracts, starting with other
    platform secure receipt key storage and capture enforcement behind the
    existing key-ring, cipher, signer, and app capture contracts.
-3. Supply `AppHoldemProductionRouteRegistration` from the real product
-   session/state source and final surface builder; complete production
+3. Supply `AppHoldemProductionRouteRegistration.withDefaultSurface` from the
+   real product session/state source and local identity; complete product
    navigation/UI validation while keeping native transport/device validation
    and durable database persistence separate.

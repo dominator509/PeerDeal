@@ -12,6 +12,41 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Production Hold'em Surface and Resumable Publication
+
+Summary:
+- Added mirrored `AppHoldemProductionTableSurface` owners that render bounded
+  runtime state and expose local-seat actions only during transport-backed
+  betting turns.
+- Added `withDefaultSurface(...)` route-registration factories.
+- Added publisher event offsets so partial sends resume from the first unsent
+  event instead of replaying delivered frames.
+
+Files changed:
+- Mirrored app production surface, route registration, publisher, and focused
+  runtime/route tests.
+- `PROJECT_STATE.md`, `HANDOFF.md`, `HANDOFF_QUEUE.md`,
+  `docs/PRODUCTION_READINESS.md`, `docs/ARCHITECTURE.md`, and `docs/ai/` docs.
+
+Tests run:
+- Mobile and desktop focused route suites: passed, 7 tests each.
+- Mobile and desktop runtime/publisher suites: passed, 9 tests each.
+- Mobile and desktop static analysis: passed.
+- Full `melos run analyze`, `boundary-check`, `source-text`, serialized
+  `test`, and `dependency-audit` gates: passed.
+- Dependency audit: 0 actionable upgrades; 11 newer versions remain blocked by
+  the current Dart/Flutter toolchain.
+
+Risks:
+- Product session/state provisioning, native peer transport, durable database
+  persistence, device validation, and final product UX validation remain open.
+
+Next reviewer:
+- Supply the default registration from the real validated product runtime and
+  local identity; keep native transport behind the existing generic contract.
+
+---
+
 ### 2026-08-10 - Codex - Typed Hold'em Production Route Registration
 
 Summary:

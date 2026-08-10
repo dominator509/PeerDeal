@@ -61,9 +61,16 @@ class AppHoldemProjectionTransportPublisher {
   final EventEnvelopeCodec _codec;
 
   Future<AppHoldemProjectionPublishResult> publish(
-    AppHoldemProjectionResult projection,
-  ) async {
+    AppHoldemProjectionResult projection, {
+    int startEventIndex = 0,
+  }) async {
     final events = projection.events;
+    if (startEventIndex < 0 || startEventIndex > events.length) {
+      return AppHoldemProjectionPublishResult.rejected(
+        reasonCode: 'ERR_HOLDEM_PROJECTION_EVENT_OFFSET_INVALID',
+        totalEventCount: events.length,
+      );
+    }
     if (!projection.isApplied) {
       return AppHoldemProjectionPublishResult.rejected(
         reasonCode: 'ERR_HOLDEM_PROJECTION_NOT_APPLIED',
@@ -83,8 +90,8 @@ class AppHoldemProjectionTransportPublisher {
       );
     }
 
-    var sentEventCount = 0;
-    for (final event in events) {
+    var sentEventCount = startEventIndex;
+    for (final event in events.skip(startEventIndex)) {
       if (event.tableId != projection.projection.coreState.tableId ||
           event.sessionId != projection.projection.coreState.sessionId ||
           event.protocolVersion !=

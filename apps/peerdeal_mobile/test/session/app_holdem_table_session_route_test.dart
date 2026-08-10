@@ -9,6 +9,7 @@ import 'package:peerdeal_mobile/recovery/app_recovery_retention_coordinator.dart
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_coordinator.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_event_adapter.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_route_registration.dart';
+import 'package:peerdeal_mobile/session/app_holdem_production_table_surface.dart';
 import 'package:peerdeal_mobile/session/app_holdem_table_session_route.dart';
 import 'package:peerdeal_mobile/session/app_holdem_table_session_runtime.dart';
 import 'package:peerdeal_mobile/session/app_table_session_runtime.dart';
@@ -84,6 +85,35 @@ void main() {
     expect(find.text('registered holdem route'), findsNothing);
   });
 
+  testWidgets('default registration mounts the production table surface', (
+    tester,
+  ) async {
+    final registration =
+        AppHoldemProductionRouteRegistration.withDefaultSurface(
+          path: '/holdem-live',
+          navigationLabel: 'Live Holdem',
+          runtime: _runtime(),
+          peerId: 'peer_remote',
+          localPeerId: 'peer_local',
+          localSeat: 1,
+        );
+
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          holdemProductionRoute: registration,
+          nativeReadinessLoader: _readyReadinessLoader(),
+          initialRoute: '/holdem-live',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text("Hold'em table"), findsOneWidget);
+    expect(find.text('Peer session unavailable'), findsOneWidget);
+    expect(find.text('Fold'), findsNothing);
+  });
+
   testWidgets('provisions transport and refreshes after an inbound event', (
     tester,
   ) async {
@@ -126,6 +156,55 @@ void main() {
     expect(find.text('seq:2:available'), findsOneWidget);
     expect(runtime.coreState.eventSequence, 2);
     expect(bridge.receiveCalls, 1);
+  });
+
+  testWidgets('production table surface publishes a local call', (
+    tester,
+  ) async {
+    final runtime = _runtime();
+    final projection = const HoldemCoreProjectionAdapter().startHand(
+      coreState: runtime.coreState,
+      handState: runtime.handState,
+      cursor: runtime.cursor,
+    );
+    final bridge = _FakeNativeTransportBridge(
+      receiveFrame: NativeTransportFrame(
+        sessionId: 'sess_001',
+        senderPeerId: 'peer_remote',
+        recipientPeerId: 'peer_local',
+        sequence: projection.events.single.eventSeq,
+        payloadBytes: const EventEnvelopeCodec().encode(
+          projection.events.single,
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AppHoldemTableSessionRoute(
+          runtime: runtime,
+          peerId: 'peer_remote',
+          nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
+          timerFactory: (interval, callback) =>
+              Timer(const Duration(hours: 1), () {}),
+          surfaceBuilder: (context, routeContext) =>
+              AppHoldemProductionTableSurface(
+                routeContext: routeContext,
+                localPeerId: 'peer_local',
+                localSeat: 1,
+              ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Call'), findsOneWidget);
+    await tester.tap(find.text('Call'));
+    await tester.pumpAndSettle();
+
+    expect(bridge.sendCalls, 1);
+    expect(find.text('Action synchronized'), findsOneWidget);
   });
 
   testWidgets('keeps the production surface mounted when transport is absent', (
@@ -361,6 +440,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
 
   final NativeTransportFrame receiveFrame;
   int receiveCalls = 0;
+  int sendCalls = 0;
   bool _served = false;
 
   @override
@@ -397,6 +477,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   Future<NativeTransportSendResult> sendFrame(
     NativeTransportFrame frame,
   ) async {
+    sendCalls++;
     return const NativeTransportSendResult(isSuccess: true);
   }
 }

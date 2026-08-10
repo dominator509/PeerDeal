@@ -11,8 +11,9 @@ and T20 local-network endpoint projection, T21 Android secure-storage bound
 hardening, T22 protocol-native command validation, T23 removal of the
 duplicate starter core API, T24 variant-to-core Hold'em event projection, and
 T25 app-owned Hold'em session adoption, T26 remote Hold'em event
-reconstruction, T27 app-owned Hold'em route orchestration, and T28 typed
-Hold'em production-route registration are implemented on branch
+reconstruction, T27 app-owned Hold'em route orchestration, T28 typed
+Hold'em production-route registration, and T29 production Hold'em surface and
+resumable publication hardening are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -66,6 +67,10 @@ Hold'em production-route registration are implemented on branch
 - Added mirrored typed `AppHoldemProductionRouteRegistration` owners. App
   shells merge them into validated production route maps, auto-register
   navigation metadata, and native-gate the route before mounting its surface.
+- Added mirrored `AppHoldemProductionTableSurface` owners and default route
+  registration factories. They render bounded runtime projection state, expose
+  local-seat controls only when transport-backed publication is ready, and
+  resume partial projection sends from the first unsent event.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -114,11 +119,12 @@ Hold'em production-route registration are implemented on branch
 - Remaining production software gaps are tracked in `HANDOFF_QUEUE.md` and existing production-readiness docs.
 - Android and Windows host work is available for runtime persistence and
   capture validation. The app-owned non-demo Hold'em route orchestration and
-  typed route-registration seams are now implemented. Remaining native gaps are
-  other-platform capture,
+  typed route-registration and default production-surface seams are now
+  implemented. Remaining native gaps are other-platform capture,
   local-network discovery, native peer transport implementation and platform
   source provisioning, production database persistence, other-platform
-  storage, product route/state wiring, and final production navigation/UI.
+  storage, product session/state provisioning, and final production
+  navigation/UX validation.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
@@ -201,6 +207,14 @@ Hold'em production-route registration are implemented on branch
 - T28 focused mobile and desktop route-registration tests: passed, including
   automatic navigation registration, native-ready mounting, and fail-closed
   mounting without readiness.
+- T29 focused mobile and desktop production-surface route tests: passed, including
+  default surface mounting, transport-gated controls, and canonical local-call
+  publication.
+- T29 mobile and desktop runtime/publisher tests: passed, including resumable
+  partial-send publication from the first unsent event.
+- T29 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed. Dependency audit reported 0 actionable
+  upgrades; 11 newer versions remain blocked by the current toolchain.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume
   exhausted during extraction. Flutter doctor itself is green; Kotlin/APK and

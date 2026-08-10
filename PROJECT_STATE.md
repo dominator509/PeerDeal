@@ -193,6 +193,17 @@ Generated: 2026-08-09
   readiness for the route. Missing readiness fails closed before the route
   surface mounts.
 
+## Recent T29 Changes
+
+- Added mirrored `AppHoldemProductionTableSurface` owners. They render bounded
+  Hold'em projection state and expose local controls only when the configured
+  seat, betting phase, native transport, and canonical publisher are ready.
+- Added default route-registration factories that mount the production surface
+  without making UI or variant code responsible for route validation.
+- Projection publishing now accepts an event offset, and the production
+  surface resumes partial sends from the first unsent event instead of replaying
+  an already-delivered prefix.
+
 ## Required Gates
 
 Run after each retrofit step:
@@ -211,8 +222,8 @@ Run after each retrofit step:
    signing.
 2. Add the remaining other-platform capture, local-network, and transport
    implementations behind the existing generic method-channel contracts.
-3. Supply `AppHoldemProductionRouteRegistration` from the product's real
-   session/state source and final surface builder; native peer transport
-   implementation and device validation remain separate work.
+3. Supply `AppHoldemProductionRouteRegistration.withDefaultSurface` from the
+   product's real session/state source and local identity; native peer transport
+   implementation, device validation, and final UX validation remain separate.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
    without crossing locked package boundaries.

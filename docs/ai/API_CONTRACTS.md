@@ -274,7 +274,17 @@ and optional native transport factory to one route path and navigation label.
 Both app shells merge it into the existing validated production route map,
 automatically add its path to native-readiness-required routes, and fail closed
 to the existing route-unavailable surface when readiness is absent. Session and
-variant state construction remains the product caller's responsibility.
+variant state construction remains the product caller's responsibility. Its
+`withDefaultSurface(...)` constructor supplies the app-owned production table
+surface while still requiring the caller's validated runtime, local peer id, and
+local seat.
+
+`AppHoldemProductionTableSurface` reads bounded state from the route context and
+dispatches local actions through `AppHoldemTableSessionRuntime`. It renders
+controls only for the configured local seat during a betting phase with a live
+publisher. The publisher accepts `startEventIndex`; after a partial send the
+surface resumes at the returned `sentEventCount` so already-delivered event
+frames are not replayed.
 
 ## Recovery Persistence Boundary
 

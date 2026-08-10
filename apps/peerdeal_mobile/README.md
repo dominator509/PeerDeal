@@ -93,6 +93,8 @@ platform/product integration work.
 `AppHoldemProductionRouteRegistration` is the typed app-shell registration for
 this route. It auto-merges the route and navigation entry, requires native
 readiness, and keeps validated session/state construction with the product
-caller.
+caller. `withDefaultSurface(...)` mounts the app-owned production Hold'em
+surface, which renders runtime projection state and only enables local actions
+when transport-backed publication is available.
 
 It does NOT introduce a new top-level package.

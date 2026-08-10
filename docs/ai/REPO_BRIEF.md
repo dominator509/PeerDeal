@@ -127,8 +127,10 @@ dart analyze .
   publish canonical projection frames and report partial sends. Native live
   transport and actual product route/state wiring remain open. Mirrored
   `AppHoldemProductionRouteRegistration` owners now merge typed Hold'em routes
-  into the app route map and native-readiness gate; callers still provide the
-  validated session/state source and final surface.
+  into the app route map and native-readiness gate. The
+  `withDefaultSurface(...)` factory mounts the app-owned bounded production
+  table surface; callers still provide the validated session/state source and
+  local identity. Projection retries resume from the publisher's event offset.
 
 ## Do Not Touch Without Approval
 

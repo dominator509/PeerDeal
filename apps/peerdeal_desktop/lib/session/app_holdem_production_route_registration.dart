@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../transport/app_table_session_transport_source.dart';
 import '../transport/native_transport_session_factory.dart';
+import 'app_holdem_production_table_surface.dart';
 import 'app_holdem_table_session_route.dart';
 import 'app_holdem_table_session_runtime.dart';
 
@@ -21,6 +22,35 @@ class AppHoldemProductionRouteRegistration {
     this.pollInterval = const Duration(seconds: 1),
     this.timerFactory,
   });
+
+  /// Builds a route with the app-owned production table surface.
+  ///
+  /// The caller still supplies the validated runtime and local identity. The
+  /// surface owns presentation and transport-backed action dispatch only.
+  AppHoldemProductionRouteRegistration.withDefaultSurface({
+    required String path,
+    required String navigationLabel,
+    required AppHoldemTableSessionRuntime runtime,
+    required String peerId,
+    required String localPeerId,
+    required int localSeat,
+    NativeTransportSessionFactory? nativeSessionFactory,
+    Duration pollInterval = const Duration(seconds: 1),
+    NativeTransportSourceTimerFactory? timerFactory,
+  }) : this(
+         path: path,
+         navigationLabel: navigationLabel,
+         runtime: runtime,
+         peerId: peerId,
+         surfaceBuilder: (_, routeContext) => AppHoldemProductionTableSurface(
+           routeContext: routeContext,
+           localPeerId: localPeerId,
+           localSeat: localSeat,
+         ),
+         nativeSessionFactory: nativeSessionFactory,
+         pollInterval: pollInterval,
+         timerFactory: timerFactory,
+       );
 
   final String path;
   final String navigationLabel;

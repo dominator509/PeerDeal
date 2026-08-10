@@ -57,7 +57,11 @@ integration remain outside this seam.
 Typed `AppHoldemProductionRouteRegistration` owners now merge that seam into
 the mobile and desktop production route maps, auto-register navigation, and
 require native readiness before mounting; product callers still own session
-state construction and the final surface.
+state construction and local identity. The app-owned
+`AppHoldemProductionTableSurface` renders bounded projection state and routes
+local actions through the runtime and canonical publisher; it never evaluates
+variant rules or becomes a second state store. Partial publication resumes from
+the publisher's reported event offset.
 
 ## Forbidden patterns
 - UI mutating core state directly
