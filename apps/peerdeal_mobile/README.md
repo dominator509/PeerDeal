@@ -84,6 +84,9 @@ that existing bootstrap route, applies its native-readiness gate, and supplies
 a default join-ready handoff to the registered path. An explicitly injected
 handler takes precedence. The registration and handler do not create durable
 state or local identity; the product source remains responsible for both.
+Use `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)` to
+assemble the source, bootstrap, timeout, and route registration at this app
+boundary without moving persistence or session truth into the shell.
 
 For local Hold'em lifecycle actions, construct the app-owned
 `AppHoldemTableSessionRuntime` with a validated `HoldemHandState` and

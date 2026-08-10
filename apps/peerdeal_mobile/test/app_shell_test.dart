@@ -1393,11 +1393,9 @@ void main() {
               ),
             ),
             holdemProductionSessionBootstrapRoute:
-                AppHoldemProductionSessionBootstrapRouteRegistration(
+                AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(
                   path: '/holdem-live',
-                  bootstrap: AppHoldemProductionSessionBootstrap(
-                    source: _FailingProductionSessionSource(),
-                  ),
+                  source: _FailingProductionSessionSource(),
                 ),
           ),
         ),
@@ -1421,11 +1419,9 @@ void main() {
             '/holdem-live': (_) => const Text('Existing route'),
           },
           holdemProductionSessionBootstrapRoute:
-              AppHoldemProductionSessionBootstrapRouteRegistration(
+              AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(
                 path: '/holdem-live',
-                bootstrap: AppHoldemProductionSessionBootstrap(
-                  source: _FailingProductionSessionSource(),
-                ),
+                source: _FailingProductionSessionSource(),
               ),
         ),
       ),

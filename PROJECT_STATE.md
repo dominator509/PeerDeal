@@ -336,6 +336,20 @@ Generated: 2026-08-10
 - Windows runtime/profile validation, Android device validation, release
   signing, and other-platform implementations remain open.
 
+## Recent T47 Changes
+
+- Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`
+  factories. They assemble an injected product source with the existing
+  bootstrap, optional production session factory, and positive load timeout at
+  one app boundary before route registration.
+- The factory does not create table state, Hold'em state, local identity,
+  persistence, or native transport; those remain owned by the product source
+  and its injected dependencies. Focused mobile and desktop app-shell suites
+  passed with 77 tests each. Android debug APK and Windows debug host builds
+  passed, as did the full analyze, boundary, source-text, serialized test,
+  dependency audit, and diff-check gates; dependency audit reports 0 actionable
+  upgrades and 11 newer versions blocked by the current toolchain.
+
 ## Recent T46 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration`

@@ -93,7 +93,9 @@ Local Hold'em producer flow:
    readiness gate. When no explicit `JoinFlowReadyHandler` is supplied, the
    shell pushes that registered path with the accepted resolved invite; an
    explicit handler wins. This remains route orchestration only and does not
-   provision product state, identity, persistence, or the concrete source.
+   provision product state, identity, persistence, or the concrete source. The
+   `fromSource(...)` constructor keeps source, bootstrap, timeout, and route
+   registration assembly at this app boundary.
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session

@@ -23,8 +23,9 @@ transport socket lifecycle hardening, T39 Android secure-key teardown
 hardening, T40 Windows native channel teardown hardening, T41 app-owned
 production session bootstrap-route mounting, and T42 app-shell route-argument
 handoff, T43 join-to-production session handoff, T44 bounded production-session
-source loading, T45 cancellable production-session source loading, and T46
-app-shell bootstrap-route registration with default join-ready navigation
+source loading, T45 cancellable production-session source loading, T46
+app-shell bootstrap-route registration with default join-ready navigation, and
+T47 source-backed bootstrap-route assembly
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -176,6 +177,10 @@ are implemented on branch
   native-readiness gate, and supplies cached default join-ready navigation when
   no explicit handler is configured. The registration does not create product
   state, local identity, persistence, or a concrete source.
+- The mirrored registration now exposes `fromSource(...)`, assembling a
+  product-owned source with the existing bootstrap, optional factory, and
+  positive load timeout at one app boundary. It does not invent or persist
+  product state.
 - Hardened Android native transport teardown and executor rejection handling so
   accepted method calls resolve with bounded fail-closed payloads.
 - Hardened Windows native transport setup cleanup so partial Winsock/socket
@@ -369,3 +374,10 @@ are implemented on branch
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 newer versions remain blocked by the current toolchain.
 - T46 Dart format and `git diff --check`: passed.
+- T47 focused mobile and desktop app-shell suites: passed, 77 tests each.
+- T47 Android `flutter build apk --debug --no-pub`: passed.
+- T47 Windows `flutter build windows --debug --no-pub`: passed.
+- T47 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- T47 Dart format and `git diff --check`: passed.

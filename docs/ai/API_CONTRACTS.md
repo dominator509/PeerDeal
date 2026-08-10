@@ -339,7 +339,9 @@ and its path is included in the native-readiness gate. If no explicit
 that pushes the registered path with the accepted `ResolvedInvite`; an
 explicit handler takes precedence. The registration only composes route
 plumbing and does not create the product source, session state, local identity,
-or persistence.
+or persistence. Its `fromSource(...)` constructor is the preferred app-edge
+assembly path when a product-owned source is available; it accepts the same
+injected factory and positive source-load timeout used by the bootstrap.
 
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through

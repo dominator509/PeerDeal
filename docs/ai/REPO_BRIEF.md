@@ -141,7 +141,10 @@ retries resume from the publisher's event offset. Mirrored
 owners now provide the resolved-invite handoff, validate hydrated table/cursor
 scope, and invoke the factory without deriving live identity from demo or Game
 File data. The concrete source, durable persistence, local identity, and
-device/network validation remain integration-owned.
+device/network validation remain integration-owned. The mirrored app shells
+also expose `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource`
+to assemble an injected source, bootstrap timeout, and route handoff without
+creating product state in the shell.
 
 ## Do Not Touch Without Approval
 

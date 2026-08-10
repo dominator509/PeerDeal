@@ -12,6 +12,43 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Source-Backed Bootstrap Route Assembly
+
+Summary:
+- Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`
+  factories.
+- The app boundary now assembles a product-owned source with the existing
+  bootstrap, optional session factory, and positive load timeout before the
+  default join-ready route handoff.
+- The factory does not create product state, local identity, persistence, or
+  native transport; those remain caller-owned.
+
+Files changed:
+- Mirrored app session registration files and app-shell tests.
+- Both app READMEs, `docs/PRODUCTION_READINESS.md`, `docs/ai/REPO_BRIEF.md`,
+  `docs/ai/ARCHITECTURE_MAP.md`, `docs/ai/API_CONTRACTS.md`.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, and `PROJECT_STATE.md`.
+
+Tests run:
+- Focused mobile and desktop app-shell suites passed, 77 tests each.
+- Android `flutter build apk --debug --no-pub` passed.
+- Windows `flutter build windows --debug --no-pub` passed.
+- Full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- Dart format and `git diff --check` passed.
+
+Risks:
+- The concrete product source, durable persistence, local identity, native
+  device validation, release signing, other-platform hosts, and final UX remain
+  open.
+
+Next reviewer:
+- Run the full repository gates and supply a real product-owned source when its
+  persistence and identity contracts are available.
+
+---
+
 ### 2026-08-10 - Codex - App-Shell Bootstrap Route Registration
 
 Summary:
