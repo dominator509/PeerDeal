@@ -41,6 +41,10 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
   `AppTableSessionTransportHandler`s. Validating transport receivers can now
   decode canonical event bytes, bind frame/session identity, and reject events
   that the app runtime cannot commit.
+- Added mirrored app-owned `AppTableSessionTransportSource` controllers.
+  Loaded native transport sessions can now create exact-scope polling sources
+  with bounded intervals, serialized polls, explicit start/stop/dispose state,
+  and scrubbed bounded warnings.
 - Added the generic capture action contract and mirrored app coordinator
   lifecycle, including serialized native block/release and fail-closed visual
   obscuring when blocking cannot be confirmed.
@@ -58,7 +62,8 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Remaining production software gaps are tracked in `HANDOFF_QUEUE.md` and existing production-readiness docs.
 - Android and Windows host work is available for runtime persistence and
   capture validation. Remaining native gaps are other-platform capture,
-  local-network discovery, live transport, durable platform persistence, and
+  local-network discovery, native peer transport implementation and
+  platform-specific source mounting, durable platform persistence, and
   non-Windows platform storage.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
@@ -86,6 +91,8 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
   passed.
 - Mobile and desktop session-close event adapter focused tests: passed.
 - Mobile and desktop `AppTableSessionRuntime` focused tests: passed.
+- Mobile and desktop transport-source lifecycle and loaded-session composition
+  focused tests: passed.
 - Full repository gate/test run after retention wipe orchestration: passed.
 - Full repository gate/test run after app session-runtime wiring: passed.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup

@@ -1,6 +1,7 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 
+import 'app_table_session_transport_source.dart';
 import 'native_transport_frame_adapter.dart';
 
 class NativeTransportSessionFactory {
@@ -183,6 +184,21 @@ class NativeTransportSession {
   final NativeTransportFrameDrain drain;
   final int maxPayloadBytes;
   final String nativeNotes;
+
+  AppTableSessionTransportSource createSource({
+    required String sessionId,
+    required String peerId,
+    Duration pollInterval = const Duration(seconds: 1),
+    NativeTransportSourceTimerFactory? timerFactory,
+  }) {
+    return AppTableSessionTransportSource(
+      drain: () => drain.drain(sessionId: sessionId, peerId: peerId),
+      sessionId: sessionId,
+      peerId: peerId,
+      pollInterval: pollInterval,
+      timerFactory: timerFactory,
+    );
+  }
 }
 
 class NativeTransportSessionLoadResult {

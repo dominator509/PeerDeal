@@ -256,6 +256,24 @@ void main() {
     expect(handler.frames.single.toPeerId, 'peer_b');
   });
 
+  test('creates a scoped app transport source from a loaded session', () async {
+    final handler = _RecordingTransportFrameHandler();
+    final loaded = await NativeTransportSessionFactory(
+      bridge: _FakeNativeTransportBridge(receiveFrames: [_nativeFrame()]),
+    ).loadSession(handler: handler);
+
+    final source = loaded.session!.createSource(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      pollInterval: const Duration(milliseconds: 100),
+    );
+    final result = await source.pollNow();
+
+    expect(result.available, isTrue);
+    expect(result.acceptedFrameCount, 1);
+    expect(handler.frames.single.toPeerId, 'peer_b');
+  });
+
   test('factory drain rejects invalid native frames', () async {
     final handler = _RecordingTransportFrameHandler();
     final drain = NativeTransportSessionFactory(

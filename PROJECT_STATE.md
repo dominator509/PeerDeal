@@ -58,7 +58,10 @@ Generated: 2026-08-09
 - Protocol now exposes a bounded canonical `EventEnvelopeCodec`; mirrored app
   transport handlers use it behind `peerdeal_network` receiver validation,
   enforce frame/event session identity, and reject runtime projection failures.
-  Native live transport implementation and source mounting remain open.
+- Loaded app transport sessions can now create mirrored bounded source
+  controllers that validate scope, serialize polls, and stop cleanly across
+  route lifecycle changes. Native live transport implementation and
+  platform-specific source mounting remain open.
 
 ## Required Gates
 

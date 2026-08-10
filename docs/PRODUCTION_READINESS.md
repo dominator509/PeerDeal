@@ -69,7 +69,8 @@ the gates below are satisfied.
 - Native live transport, capture enforcement on other platforms, durable
   platform persistence, and other native implementations remain scaffold-level.
   Protocol event-byte decoding and app frame-to-runtime ingestion now exist,
-  but the native source and peer transport are still open. Mobile
+  and app-owned bounded source scheduling now exists, but native source
+  mounting and peer transport implementation are still open. Mobile
   Android and Windows desktop now have generic secure-key and capture hosts,
   but runtime persistence/capture validation, Android release signing, and
   real-device/profile validation remain open.
@@ -250,6 +251,11 @@ the gates below are satisfied.
   that codec behind network receiver validation, require frame/event session
   identity agreement, and reject events that the app session runtime cannot
   commit.
+- Mirrored app-owned `AppTableSessionTransportSource` controllers now compose
+  loaded native transport sessions with exact session/peer scope, a bounded
+  polling interval, serialized in-flight polls, explicit lifecycle state, and
+  scrubbed warning output. Platform peer transport and route-specific source
+  mounting remain integration work.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
@@ -537,9 +543,9 @@ the gates below are satisfied.
   coordinator. Mirrored app table-session runtimes now bind the event stream
   to one table/session/protocol scope, delegate projection to `peerdeal_core`,
   and refuse to commit a close when retention fails. Canonical event-byte
-  decoding and frame-to-runtime handlers are available, while native transport
-  source mounting and durable database/platform persistence remain integration
-  work.
+  decoding, frame-to-runtime handlers, and bounded app source scheduling are
+  available, while native transport source mounting and durable
+  database/platform persistence remain integration work.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is

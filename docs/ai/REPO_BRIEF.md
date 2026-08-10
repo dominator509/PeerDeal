@@ -94,9 +94,10 @@ dart analyze .
 - Android mobile now has a Keystore-backed generic secure-key host, and the
   Windows desktop host now uses Credential Manager, both behind the existing
   method-channel contract. Android and Windows capture enforcement is now
-  host-backed, with runtime/device validation still open. Native transport,
-  production platform persistence, and other platform implementations remain
-  readiness gaps documented in `docs/PRODUCTION_READINESS.md`. App shells now
+  host-backed, with runtime/device validation still open. Native peer
+  transport, production platform persistence, and other platform
+  implementations remain readiness gaps documented in
+  `docs/PRODUCTION_READINESS.md`. App shells now
   expose deterministic retention coordinators that connect close-time policy
   decisions to the scoped recovery-store wipe primitive, plus per-session close
   coordinators that cache the first result and prevent duplicate policy or wipe
@@ -105,8 +106,11 @@ dart analyze .
   `AppTableSessionRuntime` owners bind ordered protocol events to core state and
   commit close state only after retention succeeds. The protocol exposes a
   bounded canonical `EventEnvelopeCodec`, and mirrored app transport handlers
-  decode validated byte frames into that runtime. Native live transport/source
-  mounting and durable platform persistence remain integration gaps.
+  decode validated byte frames into that runtime. Loaded native sessions also
+  expose bounded app-owned source scheduling with serialized polls and
+  lifecycle stop/dispose behavior. Native peer transport implementation,
+  route-specific source mounting, and durable platform persistence remain
+  integration gaps.
 
 ## Do Not Touch Without Approval
 

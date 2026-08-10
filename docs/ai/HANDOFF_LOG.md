@@ -14,6 +14,56 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - App Transport Source Lifecycle
+
+Summary:
+Added mirrored app-owned `AppTableSessionTransportSource` controllers and
+`NativeTransportSession.createSource` composition. Loaded native sessions can
+now poll through their already validated drains with exact scope, bounded
+intervals, serialized in-flight work, explicit lifecycle state, and scrubbed
+bounded warnings.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/app_table_session_transport_source.dart`
+- `apps/peerdeal_mobile/test/transport/app_table_session_transport_source_test.dart`
+- `apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_session_factory_test.dart`
+- `apps/peerdeal_desktop/lib/transport/app_table_session_transport_source.dart`
+- `apps/peerdeal_desktop/test/transport/app_table_session_transport_source_test.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_session_factory_test.dart`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Mobile and desktop source lifecycle focused tests
+- Mobile and desktop native session factory focused tests
+- Mobile and desktop app analysis
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit` (0 actionable upgrades)
+- `git diff --check`
+
+Risks:
+- Native peer transport implementation and route-specific source mounting are
+  still open; the controller only schedules the existing generic native drain.
+
+Next reviewer:
+Mount a source from a real production session route once the platform peer
+transport implementation supplies an actual receive source.
+
+---
+
 ### 2026-08-10 - Codex - Protocol Event Transport Ingress
 
 Summary:

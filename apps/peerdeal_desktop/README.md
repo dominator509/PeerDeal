@@ -30,6 +30,8 @@ Setup flow:
   public APIs and fail closed when native transport capability is unavailable.
   `AppTableSessionTransportHandler` decodes canonical protocol event bytes and
   delegates them to the bound table-session runtime after frame validation.
+  `NativeTransportSession.createSource` adds app-owned bounded polling with
+  serialized polls and explicit route-lifecycle stop/dispose behavior.
 
 ## Windows Host
 

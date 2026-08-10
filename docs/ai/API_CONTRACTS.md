@@ -230,8 +230,12 @@ oversized payloads and is the only codec used by the mirrored app
 `AppTableSessionTransportHandler`s. Those handlers run behind the validating
 network receiver, require frame/session identity agreement, delegate to
 `AppTableSessionRuntime`, and fail the receive when projection or retention
-rejects the event. Native peer transport and source scheduling remain outside
-this contract.
+rejects the event. Mobile and desktop `NativeTransportSession` objects can
+compose an app-owned `AppTableSessionTransportSource` around their validated
+drain. The source enforces exact session/peer scope, a bounded 100 ms to 60 s
+poll interval, serialized in-flight polls, explicit lifecycle state, and
+bounded scrubbed warnings. It schedules app polling only; native peer transport
+and route-specific source mounting remain outside this contract.
 
 ## Recovery Persistence Boundary
 
