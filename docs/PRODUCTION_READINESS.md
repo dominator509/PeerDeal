@@ -841,8 +841,8 @@ the gates below are satisfied.
 - Native capture blocking on other platforms, Android/Windows runtime and
   device/network reachability validation, real local-network discovery,
   other-platform secure storage, production database persistence, operator
-  release signing, and final production app UI remain open because they require
-  device/OS integration, product design validation, or owner-controlled
+  release signing, and final production app UI validation remain open because
+  they require device/OS integration, product design validation, or owner-controlled
   release inputs. Android and Windows bounded native transport implementations
   are now coded and both host builds pass; host socket availability is not
   proof of cross-device reachability or production endpoint provisioning.
@@ -984,6 +984,13 @@ registration once, and reuse it for route merging, readiness, and default
 join handoff. Supplying both the explicit registration and configuration is
 rejected with a state error; this remains app orchestration and does not add
 state serialization, persistence, identity provisioning, or a concrete source.
+
+The T50 UI hardening pass now gives shared action controls explicit accessible
+labels and tap actions, stacks fact rows below 360px, and projects mirrored
+production Hold'em phase, betting-round, current-actor, and seats-header state
+with user-facing labels. This closes the codable presentation/accessibility
+gap; final visual design review, text-scale/device validation, and end-to-end
+product navigation remain external validation work.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

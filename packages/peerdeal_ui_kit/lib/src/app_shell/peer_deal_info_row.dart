@@ -8,21 +8,40 @@ class PeerDealInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(
-            width: 150,
-            child: Text(
-              label,
-              style: const TextStyle(color: Color(0xFF9CB4AD)),
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact =
+            constraints.maxWidth.isFinite && constraints.maxWidth < 360;
+        final content = isCompact
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _labelText(),
+                  const SizedBox(height: 2),
+                  Text(value),
+                ],
+              )
+            : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(width: 150, child: _labelText()),
+                  Expanded(child: Text(value)),
+                ],
+              );
+        return Semantics(
+          container: true,
+          label: '$label: $value',
+          excludeSemantics: true,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 3),
+            child: content,
           ),
-          Expanded(child: Text(value)),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  Widget _labelText() {
+    return Text(label, style: const TextStyle(color: Color(0xFF9CB4AD)));
   }
 }

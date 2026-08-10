@@ -111,7 +111,38 @@ void main() {
 
     expect(find.text("Hold'em table"), findsOneWidget);
     expect(find.text('Peer session unavailable'), findsOneWidget);
+    expect(find.text('Betting preflop'), findsOneWidget);
+    expect(find.text('bettingPreflop'), findsNothing);
     expect(find.text('Fold'), findsNothing);
+  });
+
+  testWidgets('production table surface labels an idle actor safely', (
+    tester,
+  ) async {
+    final registration =
+        AppHoldemProductionRouteRegistration.withDefaultSurface(
+          path: '/holdem-live',
+          navigationLabel: 'Live Holdem',
+          runtime: _runtime(initialHandState: _idleState()),
+          peerId: 'peer_remote',
+          localPeerId: 'peer_local',
+          localSeat: 1,
+        );
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          holdemProductionRoute: registration,
+          nativeReadinessLoader: _readyReadinessLoader(),
+          initialRoute: '/holdem-live',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Waiting to start'), findsOneWidget);
+    expect(find.text('Seat 0'), findsNothing);
+    expect(find.text('handIdle'), findsNothing);
   });
 
   testWidgets('provisions transport and refreshes after an inbound event', (
@@ -280,7 +311,7 @@ AppNativeReadinessLoader _readyReadinessLoader() {
   );
 }
 
-AppHoldemTableSessionRuntime _runtime() {
+AppHoldemTableSessionRuntime _runtime({HoldemHandState? initialHandState}) {
   const scope = RecoveryPersistenceScope(
     tableId: 'tbl_001',
     sessionId: 'sess_001',
@@ -300,8 +331,45 @@ AppHoldemTableSessionRuntime _runtime() {
   );
   return AppHoldemTableSessionRuntime(
     sessionRuntime: sessionRuntime,
-    initialHandState: _preflopState(),
+    initialHandState: initialHandState ?? _preflopState(),
     initialCursor: _cursor(),
+  );
+}
+
+HoldemHandState _idleState() {
+  return const HoldemHandState(
+    handId: 'hand_idle',
+    phase: HoldemHandPhase.handIdle,
+    bettingRound: HoldemBettingRound.none,
+    currentActorSeat: 0,
+    buttonSeat: 1,
+    smallBlindSeat: 2,
+    bigBlindSeat: 3,
+    currentBetToCall: 0,
+    minimumRaiseAmount: 100,
+    seats: <HoldemSeatState>[
+      HoldemSeatState(
+        seat: 1,
+        stack: 1000,
+        inHand: false,
+        folded: false,
+        allIn: false,
+      ),
+      HoldemSeatState(
+        seat: 2,
+        stack: 900,
+        inHand: false,
+        folded: false,
+        allIn: false,
+      ),
+      HoldemSeatState(
+        seat: 3,
+        stack: 900,
+        inHand: false,
+        folded: false,
+        allIn: false,
+      ),
+    ],
   );
 }
 

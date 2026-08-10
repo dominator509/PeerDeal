@@ -14,7 +14,12 @@ class PeerDealActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
+      enabled: true,
+      label: label,
+      onTap: onPressed,
+      excludeSemantics: true,
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onPressed,
         child: DecoratedBox(
           decoration: BoxDecoration(

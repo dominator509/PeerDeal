@@ -34,6 +34,17 @@ void main() {
     await tester.tap(find.text('Open'));
 
     expect(tapped, isTrue);
+    expect(find.bySemanticsLabel('Open'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Open')),
+      matchesSemantics(
+        label: 'Open',
+        isButton: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasTapAction: true,
+      ),
+    );
   });
 
   testWidgets('status pill and info row render compact operational facts', (
@@ -53,5 +64,33 @@ void main() {
 
     expect(find.text('stable'), findsNWidgets(2));
     expect(find.text('Network'), findsOneWidget);
+  });
+
+  testWidgets('info row stacks content within a narrow viewport', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 240,
+            child: PeerDealInfoRow(
+              label: 'Current actor',
+              value: 'Waiting for seat 12',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Current actor'), findsOneWidget);
+    expect(find.text('Waiting for seat 12'), findsOneWidget);
+    expect(
+      tester.getRect(find.text('Waiting for seat 12')).top,
+      greaterThan(tester.getRect(find.text('Current actor')).bottom),
+    );
+    expect(tester.takeException(), isNull);
   });
 }

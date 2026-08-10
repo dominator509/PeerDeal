@@ -26,7 +26,8 @@ handoff, T43 join-to-production session handoff, T44 bounded production-session
 source loading, T45 cancellable production-session source loading, T46
 app-shell bootstrap-route registration with default join-ready navigation,
 T47 source-backed bootstrap-route assembly, T48 runtime-owned production
-session configuration, and T49 fail-closed Android release signing
+session configuration, T49 fail-closed Android release signing, and T50
+production table UI accessibility/responsive hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -43,6 +44,9 @@ are implemented on branch
 - Hardened Android secure-key worker teardown so queued storage work fails closed
   after engine cleanup and late main-looper results cannot return key material.
 - Removed the generated release debug-signing fallback; operator-owned Android signing is environment-driven and fail-closed.
+- Hardened the shared app-shell action/fact semantics and narrow-layout behavior;
+  mirrored production Hold'em surfaces now render human-readable phase, round,
+  actor, and seats state without exposing enum internals.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -400,3 +404,9 @@ are implemented on branch
 - T49 Android release build without signing values: failed closed at Gradle
   configuration with the expected stable signing error.
 - T49 Android debug `flutter build apk --debug --no-pub`: passed.
+- T50 focused UI-kit widget tests: passed, 3 tests.
+- T50 focused mobile and desktop production table/session widget suites: passed,
+  8 tests each.
+- T50 Android `flutter build apk --debug --no-pub`: passed.
+- T50 Windows `flutter build windows --debug --no-pub`: passed.
+- T50 Dart format and `rtk git diff --check`: passed.

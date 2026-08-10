@@ -12,6 +12,41 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Production Hold'em UI Hardening
+
+Summary:
+- Shared action controls now expose explicit labels and tap actions through
+  semantics; shared fact rows combine label/value semantics and stack below
+  360px to avoid narrow-layout overflow.
+- Mirrored production Hold'em surfaces now use human-readable phase and
+  betting-round labels, render no idle `Seat 0`, and expose the seats section
+  as a semantic header.
+
+Files changed:
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_action_button.dart`.
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_info_row.dart` and its
+  focused widget test.
+- Mirrored `apps/peerdeal_mobile/` and `apps/peerdeal_desktop/` Hold'em surface
+  and session-route tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused UI-kit widget suite: passed, 3 tests.
+- Focused mobile and desktop production table/session suites: passed, 8 tests
+  each.
+- Android debug APK and Windows debug host builds passed.
+
+Risks:
+- Final visual design review, text-scale/device validation, native runtime
+  validation, product source provisioning, and durable persistence remain open.
+
+Next reviewer:
+- Validate the mirrored surfaces at production device sizes and accessibility
+  text scales, then continue with the real product source/state integration.
+
+---
+
 ### 2026-08-10 - Codex - Fail-Closed Android Release Signing
 
 Summary:

@@ -75,22 +75,22 @@ class _AppHoldemProductionTableSurfaceState
             label: 'Hand',
             value: _safeValue(hand.handId, fallback: 'Hand unavailable'),
           ),
-          PeerDealInfoRow(label: 'Phase', value: hand.phase.name),
+          PeerDealInfoRow(label: 'Phase', value: _phaseLabel(hand.phase)),
           PeerDealInfoRow(
             label: 'Betting round',
-            value: hand.bettingRound.name,
+            value: _bettingRoundLabel(hand.bettingRound),
           ),
           PeerDealInfoRow(label: 'Pot', value: hand.pot.toString()),
           PeerDealInfoRow(
             label: 'Current actor',
-            value: 'Seat ${hand.currentActorSeat}',
+            value: _actorLabel(hand.currentActorSeat),
           ),
           PeerDealInfoRow(
             label: 'Board',
             value: _safeCardList(hand.boardCards),
           ),
           const SizedBox(height: 12),
-          const Text('Seats'),
+          Semantics(header: true, child: const Text('Seats')),
           const SizedBox(height: 4),
           for (final seat in hand.seats) _buildSeatRow(seat),
           const SizedBox(height: 12),
@@ -143,7 +143,7 @@ class _AppHoldemProductionTableSurfaceState
       return PeerDealInfoRow(
         label: 'Actions',
         value: hand.currentActorSeat == widget.localSeat
-            ? 'Unavailable during ${hand.phase.name}'
+            ? 'Unavailable during ${_phaseLabel(hand.phase)}'
             : 'Waiting for seat ${hand.currentActorSeat}',
       );
     }
@@ -245,7 +245,7 @@ class _AppHoldemProductionTableSurfaceState
     if (!transportReady) return 'Transport unavailable';
     if (canAct) return 'Your turn';
     if (_isBettingPhase(hand.phase)) return 'Waiting';
-    return hand.phase.name;
+    return _phaseLabel(hand.phase);
   }
 
   String _statusSeverity(
@@ -446,6 +446,39 @@ class _AppHoldemProductionTableSurfaceState
         phase == HoldemHandPhase.bettingFlop ||
         phase == HoldemHandPhase.bettingTurn ||
         phase == HoldemHandPhase.bettingRiver;
+  }
+
+  String _actorLabel(int seat) => seat > 0 ? 'Seat $seat' : 'None';
+
+  String _bettingRoundLabel(HoldemBettingRound round) {
+    return switch (round) {
+      HoldemBettingRound.none => 'None',
+      HoldemBettingRound.preflop => 'Preflop',
+      HoldemBettingRound.flop => 'Flop',
+      HoldemBettingRound.turn => 'Turn',
+      HoldemBettingRound.river => 'River',
+    };
+  }
+
+  String _phaseLabel(HoldemHandPhase phase) {
+    return switch (phase) {
+      HoldemHandPhase.handIdle => 'Waiting to start',
+      HoldemHandPhase.handPreparing => 'Preparing hand',
+      HoldemHandPhase.blindsPosting => 'Posting blinds',
+      HoldemHandPhase.dealingHole => 'Dealing hole cards',
+      HoldemHandPhase.bettingPreflop => 'Betting preflop',
+      HoldemHandPhase.dealingFlop => 'Dealing flop',
+      HoldemHandPhase.bettingFlop => 'Betting flop',
+      HoldemHandPhase.dealingTurn => 'Dealing turn',
+      HoldemHandPhase.bettingTurn => 'Betting turn',
+      HoldemHandPhase.dealingRiver => 'Dealing river',
+      HoldemHandPhase.bettingRiver => 'Betting river',
+      HoldemHandPhase.showdownPrep => 'Preparing showdown',
+      HoldemHandPhase.showdownReveal => 'Revealing showdown',
+      HoldemHandPhase.settling => 'Settling hand',
+      HoldemHandPhase.handComplete => 'Hand complete',
+      HoldemHandPhase.handAbortedSafe => 'Hand stopped safely',
+    };
   }
 
   String _safeCardList(List<String> cards) {

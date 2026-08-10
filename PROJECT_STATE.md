@@ -363,6 +363,17 @@ Generated: 2026-08-10
   passed. Operator signing credentials and Android device/profile validation
   remain external.
 
+## Recent T50 Changes
+
+- Shared app-shell action controls now expose their visible label and tap action
+  through semantics, while info rows merge each fact into one readable semantic
+  value and stack label/value content below 360px.
+- Mirrored production Hold'em surfaces now render human-readable phase and
+  betting-round labels, suppress the misleading idle `Seat 0` display, and mark
+  the seats section as a semantic header. Focused UI-kit and mobile/desktop
+  production-table suites passed; Android debug APK and Windows debug host
+  builds also passed. Final visual/device UX validation remains external.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`
