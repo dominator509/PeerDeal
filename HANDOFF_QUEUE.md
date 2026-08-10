@@ -21,6 +21,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-09-011` | `apps/peerdeal_mobile/android/`, `apps/peerdeal_desktop/windows/` | 4 | T4 | DEFERRED | Added Android `FLAG_SECURE` and Windows `SetWindowDisplayAffinity` behind the generic `setBlocking` contract, with app-owned serialized apply/release and fail-closed visual-obscuring fallback; runtime/device behavior and other-platform capture remain open. |
 | `LEGACY-GAP-2026-08-10-012` | `packages/peerdeal_native_bridges/`, `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T18 | RESOLVED | Added the generic app-support directory bridge and wired Android private no-backup storage plus Windows `LocalAppData` into the app-owned recovery factory, with explicit environment-root precedence and fail-closed fallback behavior. |
 | `LEGACY-GAP-2026-08-10-013` | `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T19 | RESOLVED | Production entrypoints now install the app-owned method-channel native readiness loader; unavailable host capabilities render as unavailable and cannot silently bypass readiness-gated routes. |
+| `LEGACY-GAP-2026-08-10-014` | `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T20 | RESOLVED | App-owned local-network bootstrap loaders now split documented `peer@host[:port]` discovery values, validate host/port shape, preserve bare peer IDs, and project safe endpoint metadata onto existing `BootstrapCandidate` fields. |
 
 ## Status Definitions
 

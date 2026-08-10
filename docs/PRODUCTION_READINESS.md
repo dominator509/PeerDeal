@@ -307,6 +307,10 @@ the gates below are satisfied.
   discovery warnings, bound native notes/interface hints, and normalize
   native-discovered endpoint ids before mounted table and join bootstrap paths
   pass candidates into `peerdeal_network`.
+- Mirrored app-owned local-network bootstrap loaders now preserve the documented
+  `peer@host[:port]` discovery shape as validated `BootstrapCandidate` host and
+  port metadata, while keeping bare peer IDs compatible and dropping malformed
+  or sensitive endpoint locations before network routing.
 - Generic local-network discovery payload decoding now drops malformed endpoint
   and interface-hint list entries instead of coercing arbitrary platform values
   into strings.

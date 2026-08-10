@@ -314,6 +314,9 @@ non-empty strings; malformed platform list entries are dropped rather than
 coerced into route inputs. Sensitive native peer endpoints must be dropped
 before candidate resolution, and sensitive table-bootstrap native notes must be
 replaced with stable unavailable text rather than exposed to app surfaces.
+The documented discovery form `peer@host[:port]` is split at the app boundary;
+validated host and optional port values populate existing `BootstrapCandidate`
+metadata, while bare peer IDs remain valid and malformed locations are dropped.
 
 ## Error Shape
 

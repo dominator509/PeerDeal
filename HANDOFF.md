@@ -6,8 +6,9 @@ Generated: 2026-08-09
 
 Trinity baseline retrofit T1 is complete, CI/dependency hardening is complete,
 the T4 Android plus Windows secure-key and capture-enforcement host slices are
-implemented, and T19 production entrypoint native-readiness activation is wired
-on branch `retrofit/baseline-v1` from backup tag
+implemented, T19 production entrypoint native-readiness activation is wired,
+and T20 local-network endpoint projection is implemented on branch
+`retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
 ## What Changed
@@ -30,6 +31,10 @@ on branch `retrofit/baseline-v1` from backup tag
 - Both production app entrypoints now install the app-owned method-channel native
   readiness loader. Missing host capabilities render as unavailable and do not
   silently bypass readiness-gated production routes.
+- Both app shells now preserve validated host and optional port metadata from
+  documented native `peer@host[:port]` discovery values on existing network
+  bootstrap candidates; malformed endpoint locations are dropped without
+  exposing raw values, and bare peer IDs remain supported.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -106,6 +111,8 @@ on branch `retrofit/baseline-v1` from backup tag
 - T19 mobile and desktop production-entrypoint focused tests: passed; the full
   repository `analyze`, `boundary-check`, `source-text`, `test`, and
   `dependency-audit` gates also passed.
+- T20 mobile and desktop native bootstrap endpoint projection tests: passed,
+  12 tests per app.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.

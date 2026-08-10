@@ -14,6 +14,40 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Native Bootstrap Endpoint Projection
+
+Summary:
+Closed the app-owned discovery metadata loss. Mirrored mobile and desktop
+bootstrap loaders now parse the documented `peer@host[:port]` shape, validate
+bounded host/port syntax, preserve bare peer IDs, and project safe metadata onto
+existing `BootstrapCandidate` fields. Malformed and sensitive locations are
+dropped before network routing.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- mirrored `native_bootstrap_candidate_loader_test.dart` files
+- `HANDOFF_QUEUE.md`
+- `HANDOFF.md`
+- `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+
+Tests run:
+- Mobile focused bootstrap endpoint suite: passed, 12 tests.
+- Desktop focused bootstrap endpoint suite: passed, 12 tests.
+
+Risks:
+This retains endpoint metadata for future platform transport provisioning; it
+does not implement live native peer transport, mDNS/service discovery, or
+runtime device validation.
+
+Next reviewer:
+Verify the full repository gates and preserve the generic native transport
+contract until endpoint/open/listener semantics are explicitly added.
+
+---
+
 ### 2026-08-10 - Codex - Production Entrypoint Native Readiness
 
 Summary:

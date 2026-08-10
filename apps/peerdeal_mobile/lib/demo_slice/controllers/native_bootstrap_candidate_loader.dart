@@ -111,11 +111,18 @@ class NativeBootstrapCandidateLoader {
       );
     }
 
-    final normalizedPeerIds = _normalizedUnique(discovery.foundEndpoints);
-    final peerIds = normalizedPeerIds.take(_maxPeerCandidates).toList();
+    final normalizedPeerEndpoints = _normalizedPeerEndpoints(
+      discovery.foundEndpoints,
+    );
+    final peerEndpoints = normalizedPeerEndpoints
+        .take(_maxPeerCandidates)
+        .toList(growable: false);
+    final peerIds = peerEndpoints
+        .map((endpoint) => endpoint.peerId)
+        .toList(growable: false);
     final peerWarnings = <String>[
       ...discoveryWarnings,
-      if (normalizedPeerIds.length > peerIds.length)
+      if (normalizedPeerEndpoints.length > peerIds.length)
         'Local network discovery peer candidate limit reached.',
     ];
     if (peerIds.isEmpty) {
@@ -140,7 +147,7 @@ class NativeBootstrapCandidateLoader {
       return NativeBootstrapCandidateLoadResult(
         discoveryAvailable: true,
         nativeNotes: _nativeNotes(capability, discovery),
-        candidates: candidates,
+        candidates: _projectEndpointMetadata(candidates, peerEndpoints),
         warnings: peerWarnings,
       );
     } catch (_) {
@@ -204,6 +211,118 @@ class NativeBootstrapCandidateLoader {
     return result;
   }
 
+  static List<_NativePeerEndpoint> _normalizedPeerEndpoints(
+    List<String> values,
+  ) {
+    final seen = <String>{};
+    final result = <_NativePeerEndpoint>[];
+    for (final value in values) {
+      final endpoint = _parsePeerEndpoint(value);
+      if (endpoint == null || !seen.add(endpoint.peerId)) continue;
+      result.add(endpoint);
+    }
+    return result;
+  }
+
+  static _NativePeerEndpoint? _parsePeerEndpoint(String value) {
+    final normalized = value
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (normalized.isEmpty || _looksSensitive(normalized)) return null;
+
+    final separator = normalized.indexOf('@');
+    if (separator < 0) {
+      final peerId = _safePeerId(normalized);
+      return peerId.isEmpty ? null : _NativePeerEndpoint(peerId: peerId);
+    }
+    if (separator == 0 || separator == normalized.length - 1) return null;
+
+    final peerId = _safePeerId(normalized.substring(0, separator));
+    final hostPort = _parseHostPort(normalized.substring(separator + 1));
+    if (peerId.isEmpty || hostPort == null) return null;
+    return _NativePeerEndpoint(
+      peerId: peerId,
+      host: hostPort.host,
+      port: hostPort.port,
+    );
+  }
+
+  static _NativeHostPort? _parseHostPort(String value) {
+    final location = value.trim();
+    if (location.isEmpty || location.length > 253) return null;
+
+    String host;
+    int? port;
+    if (location.startsWith('[')) {
+      final closingBracket = location.indexOf(']');
+      if (closingBracket <= 1) return null;
+      host = location.substring(1, closingBracket);
+      final suffix = location.substring(closingBracket + 1);
+      if (suffix.isNotEmpty) {
+        if (!suffix.startsWith(':')) return null;
+        port = _parsePort(suffix.substring(1));
+        if (port == null) return null;
+      }
+    } else {
+      final colonCount = ':'.allMatches(location).length;
+      if (colonCount == 1) {
+        final separator = location.lastIndexOf(':');
+        host = location.substring(0, separator);
+        port = _parsePort(location.substring(separator + 1));
+        if (port == null) return null;
+      } else {
+        host = location;
+      }
+    }
+
+    if (!_isSafeHost(host)) return null;
+    return _NativeHostPort(host: host, port: port);
+  }
+
+  static int? _parsePort(String value) {
+    final port = int.tryParse(value);
+    return port != null && port > 0 && port <= 65535 ? port : null;
+  }
+
+  static bool _isSafeHost(String host) {
+    if (host.isEmpty || host.length > 253 || _looksSensitive(host)) {
+      return false;
+    }
+    if (host.contains(':')) {
+      return RegExp(r'^[0-9A-Fa-f:]+$').hasMatch(host);
+    }
+    return RegExp(r'^[A-Za-z0-9.-]+$').hasMatch(host) &&
+        !host.startsWith('.') &&
+        !host.endsWith('.') &&
+        !host.startsWith('-') &&
+        !host.endsWith('-');
+  }
+
+  static List<BootstrapCandidate> _projectEndpointMetadata(
+    List<BootstrapCandidate> candidates,
+    List<_NativePeerEndpoint> endpoints,
+  ) {
+    final byPeerId = <String, _NativePeerEndpoint>{
+      for (final endpoint in endpoints) endpoint.peerId: endpoint,
+    };
+    return candidates
+        .map((candidate) {
+          final endpoint = byPeerId[candidate.peerId];
+          if (endpoint == null || endpoint.host == null) return candidate;
+          return BootstrapCandidate(
+            peerId: candidate.peerId,
+            routeClass: candidate.routeClass,
+            reachable: candidate.reachable,
+            priority: candidate.priority,
+            host: candidate.host ?? endpoint.host,
+            port: candidate.port ?? endpoint.port,
+            reason: candidate.reason,
+          );
+        })
+        .toList(growable: false);
+  }
+
   static String _safePeerId(String value) {
     final normalized = value
         .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
@@ -229,4 +348,19 @@ class NativeBootstrapCandidateLoader {
         lower.contains('password') ||
         value.contains('\\');
   }
+}
+
+class _NativePeerEndpoint {
+  const _NativePeerEndpoint({required this.peerId, this.host, this.port});
+
+  final String peerId;
+  final String? host;
+  final int? port;
+}
+
+class _NativeHostPort {
+  const _NativeHostPort({required this.host, this.port});
+
+  final String host;
+  final int? port;
 }

@@ -93,6 +93,17 @@ Generated: 2026-08-09
 - Explicit runtime/widget injection remains available for focused tests and
   host integrations; no native transport or platform implementation was added.
 
+## Recent T20 Changes
+
+- Both app-owned local-network bootstrap loaders now parse the documented
+  `peer@host[:port]` discovery shape and project validated host/port metadata
+  onto the existing `BootstrapCandidate` model.
+- Bare peer IDs remain valid, while malformed, sensitive, or out-of-range
+  endpoint locations are dropped before network bootstrap candidates are
+  exposed.
+- This retains discovery facts for future platform transport provisioning but
+  does not claim that native peer transport is implemented.
+
 ## Required Gates
 
 Run after each retrofit step:

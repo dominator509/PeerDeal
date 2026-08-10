@@ -36,6 +36,79 @@ void main() {
   });
 
   test(
+    'projects documented native endpoint locations into candidates',
+    () async {
+      final result = await NativeBootstrapCandidateLoader(
+        bridge: const _FakeLocalNetworkBridge(
+          capability: LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: true,
+            notes: 'local-network-ready',
+          ),
+          discovery: LocalNetworkDiscoverySnapshot(
+            permissionGranted: true,
+            foundEndpoints: <String>[
+              'peer_a@192.168.1.10',
+              'peer_b@10.0.0.2:4242',
+              'peer_c@[fe80::1]:4243',
+              'peer_bare',
+            ],
+            interfaceHints: <String>[],
+          ),
+        ),
+      ).load(sessionId: 'session-1', tableId: 'table-1');
+
+      expect(result.candidates.map((candidate) => candidate.peerId), <String>[
+        'peer_a',
+        'peer_b',
+        'peer_c',
+        'peer_bare',
+      ]);
+      expect(result.candidates[0].host, '192.168.1.10');
+      expect(result.candidates[0].port, isNull);
+      expect(result.candidates[1].host, '10.0.0.2');
+      expect(result.candidates[1].port, 4242);
+      expect(result.candidates[2].host, 'fe80::1');
+      expect(result.candidates[2].port, 4243);
+      expect(result.candidates[3].host, isNull);
+    },
+  );
+
+  test(
+    'drops malformed endpoint locations without exposing raw values',
+    () async {
+      final result = await NativeBootstrapCandidateLoader(
+        bridge: const _FakeLocalNetworkBridge(
+          capability: LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: true,
+            notes: 'local-network-ready',
+          ),
+          discovery: LocalNetworkDiscoverySnapshot(
+            permissionGranted: true,
+            foundEndpoints: <String>[
+              'peer_bad@not a host',
+              'peer_bad_port@10.0.0.2:70000',
+              r'peer_secret@C:\secret\peer.log',
+              'peer_safe',
+            ],
+            interfaceHints: <String>[],
+          ),
+        ),
+      ).load(sessionId: 'session-1', tableId: 'table-1');
+
+      expect(result.candidates.map((candidate) => candidate.peerId), <String>[
+        'peer_safe',
+      ]);
+      expect(result.candidates.single.host, isNull);
+      expect(result.warnings.join(' '), isNot(contains('secret')));
+      expect(result.warnings.join(' '), isNot(contains('peer.log')));
+    },
+  );
+
+  test(
     'caps normalized native discovery endpoints before resolution',
     () async {
       final provider = _RecordingBootstrapCandidateProvider();
