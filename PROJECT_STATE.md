@@ -55,6 +55,10 @@ Generated: 2026-08-09
   `SessionClosed` projection only after the retention adapter succeeds. Live
   transport/event-source mounting and durable database/platform persistence
   remain open.
+- Protocol now exposes a bounded canonical `EventEnvelopeCodec`; mirrored app
+  transport handlers use it behind `peerdeal_network` receiver validation,
+  enforce frame/event session identity, and reject runtime projection failures.
+  Native live transport implementation and source mounting remain open.
 
 ## Required Gates
 

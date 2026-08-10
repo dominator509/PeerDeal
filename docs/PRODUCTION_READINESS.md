@@ -66,8 +66,10 @@ the gates below are satisfied.
 - CI runs the same baseline commands as local development.
 
 ## Current highest-risk blockers
-- Live transport, capture enforcement on other platforms, durable platform
-  persistence, and other native implementations remain scaffold-level. Mobile
+- Native live transport, capture enforcement on other platforms, durable
+  platform persistence, and other native implementations remain scaffold-level.
+  Protocol event-byte decoding and app frame-to-runtime ingestion now exist,
+  but the native source and peer transport are still open. Mobile
   Android and Windows desktop now have generic secure-key and capture hosts,
   but runtime persistence/capture validation, Android release signing, and
   real-device/profile validation remain open.
@@ -243,6 +245,11 @@ the gates below are satisfied.
 - App-owned native transport drains now enforce a receive-frame batch limit
   before session handlers see platform frames, and invalid app batch limits
   fail closed before native receive calls.
+- `peerdeal_protocol` now exposes a bounded canonical `EventEnvelopeCodec` for
+  transport payload bytes. Mirrored app `AppTableSessionTransportHandler`s use
+  that codec behind network receiver validation, require frame/event session
+  identity agreement, and reject events that the app session runtime cannot
+  commit.
 - Mounted app table routes now load native local-network bootstrap snapshots
   through an app-owned factory, map normalized discovery facts into
   `peerdeal_network` bootstrap candidate resolution, and fail closed when
@@ -529,8 +536,10 @@ the gates below are satisfied.
   timestamps before mapping supported `SessionClosed.emitted_at` into that
   coordinator. Mirrored app table-session runtimes now bind the event stream
   to one table/session/protocol scope, delegate projection to `peerdeal_core`,
-  and refuse to commit a close when retention fails. Live transport/event-source
-  mounting and durable database/platform persistence remain integration work.
+  and refuse to commit a close when retention fails. Canonical event-byte
+  decoding and frame-to-runtime handlers are available, while native transport
+  source mounting and durable database/platform persistence remain integration
+  work.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is

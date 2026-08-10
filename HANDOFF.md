@@ -37,6 +37,10 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
   protocol scope, delegate event projection to `peerdeal_core`, and accept
   `SessionClosed` only after the app retention adapter succeeds. Failed close
   retention leaves the projected runtime state unchanged.
+- Added the protocol-owned bounded `EventEnvelopeCodec` and mirrored app
+  `AppTableSessionTransportHandler`s. Validating transport receivers can now
+  decode canonical event bytes, bind frame/session identity, and reject events
+  that the app runtime cannot commit.
 - Added the generic capture action contract and mirrored app coordinator
   lifecycle, including serialized native block/release and fail-closed visual
   obscuring when blocking cannot be confirmed.

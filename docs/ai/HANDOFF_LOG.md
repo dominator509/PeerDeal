@@ -14,6 +14,57 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Protocol Event Transport Ingress
+
+Summary:
+Added the protocol-owned bounded `EventEnvelopeCodec` for canonical JSON wire
+bytes and mirrored app `AppTableSessionTransportHandler`s. The handlers run
+behind `peerdeal_network` validating receivers, enforce frame/event session
+identity agreement, delegate to `AppTableSessionRuntime`, and fail the receive
+when projection or retention rejects the event.
+
+Files changed:
+- `packages/peerdeal_protocol/lib/src/serialization/event_envelope_codec.dart`
+- `packages/peerdeal_protocol/lib/peerdeal_protocol.dart`
+- `packages/peerdeal_protocol/test/event_envelope_codec_test.dart`
+- `apps/peerdeal_mobile/lib/transport/app_table_session_transport_handler.dart`
+- `apps/peerdeal_mobile/test/transport/app_table_session_transport_handler_test.dart`
+- `apps/peerdeal_desktop/lib/transport/app_table_session_transport_handler.dart`
+- `apps/peerdeal_desktop/test/transport/app_table_session_transport_handler_test.dart`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `dart test test/event_envelope_codec_test.dart` in `packages/peerdeal_protocol`
+- `flutter test --no-pub test/transport/app_table_session_transport_handler_test.dart`
+  in both app shells
+- `dart run melos run analyze`
+- `dart run melos run boundary-check`
+- `dart run melos run source-text`
+- `dart run melos run test`
+- `dart run melos run dependency-audit` (0 actionable upgrades)
+- `git diff --check`
+
+Risks:
+- Native peer transport implementation, source scheduling, platform runtime
+  validation, durable database/platform persistence, and final production UI
+  remain open readiness work.
+
+Next reviewer:
+Compose the handler with a real native transport source when that platform
+implementation exists; keep frame routing in app orchestration and generic
+transport facts in the native bridge package.
+
+---
+
 ### 2026-08-09 - Codex - App Table Session Runtime
 
 Summary:

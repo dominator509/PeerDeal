@@ -103,7 +103,9 @@ dart analyze .
   work. App-owned protocol event adapters now map supported `SessionClosed`
   envelopes and their `emitted_at` timestamps into that boundary. Mirrored
   `AppTableSessionRuntime` owners bind ordered protocol events to core state and
-  commit close state only after retention succeeds. Live transport/event-source
+  commit close state only after retention succeeds. The protocol exposes a
+  bounded canonical `EventEnvelopeCodec`, and mirrored app transport handlers
+  decode validated byte frames into that runtime. Native live transport/source
   mounting and durable platform persistence remain integration gaps.
 
 ## Do Not Touch Without Approval

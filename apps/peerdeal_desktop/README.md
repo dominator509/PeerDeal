@@ -28,6 +28,8 @@ Setup flow:
   `peerdeal_network` validating sender/receiver boundaries. Native transport
   remains platform-owned; app adapters and factories only compose package
   public APIs and fail closed when native transport capability is unavailable.
+  `AppTableSessionTransportHandler` decodes canonical protocol event bytes and
+  delegates them to the bound table-session runtime after frame validation.
 
 ## Windows Host
 

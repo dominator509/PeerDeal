@@ -224,6 +224,14 @@ handlers see platform frames, and invalid app batch limits must fail closed
 before native receive calls.
 App-owned native transport session factories must scrub native notes that look
 like secrets, tokens, passwords, or platform paths before exposing load results.
+`peerdeal_protocol.EventEnvelopeCodec` owns bounded canonical JSON bytes for
+`EventEnvelope` transport payloads. It rejects empty, malformed, non-object, or
+oversized payloads and is the only codec used by the mirrored app
+`AppTableSessionTransportHandler`s. Those handlers run behind the validating
+network receiver, require frame/session identity agreement, delegate to
+`AppTableSessionRuntime`, and fail the receive when projection or retention
+rejects the event. Native peer transport and source scheduling remain outside
+this contract.
 
 ## Recovery Persistence Boundary
 
