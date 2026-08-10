@@ -2802,6 +2802,49 @@ Run the full repository gates and commit if green.
 
 ---
 
+### 2026-08-09 - Codex - Exactly-Once Session-Close Retention
+
+Summary:
+Added mirrored app-owned `AppRecoverySessionCloseCoordinator` seams. Each
+coordinator binds one recovery scope and retention policy to one app session,
+delegates the first close signal to `AppRecoveryRetentionCoordinator`, and
+caches the first success or failure so later close signals cannot repeat policy
+evaluation or storage wipe work. It does not emit protocol events or claim that
+the real production session owner is wired.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_session_close_coordinator.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_session_close_coordinator_test.dart`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_session_close_coordinator.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_session_close_coordinator_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter test --no-pub test/recovery/app_recovery_session_close_coordinator_test.dart`
+  in `apps/peerdeal_mobile`
+- `flutter test --no-pub test/recovery/app_recovery_session_close_coordinator_test.dart`
+  in `apps/peerdeal_desktop`
+
+Risks:
+- The real session owner still must invoke the coordinator when `SessionClosed`
+  is committed; production database/platform persistence and runtime validation
+  remain open.
+
+Next reviewer:
+Run the full repository gates and wire this coordinator to the real session
+owner once that app/session integration surface exists.
+
+---
+
 ### 2026-08-09 - Codex - App Retention Wipe Orchestration
 
 Summary:

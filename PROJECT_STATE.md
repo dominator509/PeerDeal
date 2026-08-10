@@ -43,8 +43,10 @@ Generated: 2026-08-09
   primitive; the JSON store removes matching interrupted-write temp files while
   preserving other recovery scopes.
 - Mobile and desktop app shells now expose deterministic retention coordinators
-  that invoke the recovery wipe primitive only when the app-owned policy is due;
-  real session-close lifecycle scheduling remains open.
+  that invoke the recovery wipe primitive only when the app-owned policy is due,
+  plus per-session close coordinators that cache the first success or failure so
+  duplicate close signals cannot repeat policy or storage work. Wiring these
+  coordinators to the real session owner remains open.
 
 ## Required Gates
 

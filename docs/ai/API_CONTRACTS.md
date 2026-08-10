@@ -245,7 +245,11 @@ the sync package and decides when to invoke the wipe. Mobile and desktop app
 shells expose `AppRecoveryRetentionCoordinator.enforceAfterSessionClose`,
 which validates scope, evaluates the injected retention policy engine with
 explicit timestamps, and invokes the store wipe only when due. Policy or wipe
-exceptions become fatal scrub-safe persistence results.
+exceptions become fatal scrub-safe persistence results. The app-owned
+`AppRecoverySessionCloseCoordinator` binds scope and policy to one session,
+delegates the first close signal, and returns the cached result for every later
+signal, including failures; it does not emit protocol events or replace the
+real session owner.
 
 ## Local Network Bootstrap Boundary
 

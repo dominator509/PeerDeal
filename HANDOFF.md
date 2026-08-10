@@ -27,6 +27,9 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Added mirrored app retention coordinators that validate scope, evaluate
   close-time policy with explicit timestamps, invoke wipe only when due, and
   fail closed on policy or storage exceptions.
+- Added mirrored per-session close coordinators that bind scope and policy,
+  cache the first retention outcome, and prevent duplicate close signals from
+  repeating policy or storage work.
 - Added the generic capture action contract and mirrored app coordinator
   lifecycle, including serialized native block/release and fail-closed visual
   obscuring when blocking cannot be confirmed.
@@ -68,6 +71,8 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Full repository gate/test run after the recovery wipe contract extension:
   passed.
 - Mobile and desktop retention coordinator focused tests: passed.
+- Mobile and desktop exactly-once session-close coordinator focused tests:
+  passed.
 - Full repository gate/test run after retention wipe orchestration: passed.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume

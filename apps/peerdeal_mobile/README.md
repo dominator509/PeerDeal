@@ -51,7 +51,10 @@ Setup flow:
   persistence, and the remaining other-platform hooks are still open. The app
   shell exposes a deterministic retention coordinator that invokes recovery
   persistence wipe after a caller supplies a closed-session time and policy.
-  The desktop Windows host provides the same generic secure-key channel through
-  Windows Credential Manager.
+  `AppRecoverySessionCloseCoordinator` binds that policy and scope to one app
+  session, caches the first outcome, and prevents duplicate close signals from
+  repeating policy or wipe work. The real session owner must invoke it when
+  `SessionClosed` is committed. The desktop Windows host provides the same
+  generic secure-key channel through Windows Credential Manager.
 
 It does NOT introduce a new top-level package.

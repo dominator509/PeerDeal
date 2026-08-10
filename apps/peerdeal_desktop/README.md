@@ -52,6 +52,10 @@ Setup flow:
   profile/device validation.
 - The app shell exposes a deterministic retention coordinator that invokes
   recovery persistence wipe after a caller supplies a closed-session time and
-  policy; production session-close scheduling remains app-lifecycle work.
+  policy. `AppRecoverySessionCloseCoordinator` binds that policy and scope to
+  one app session, caches the first outcome, and prevents duplicate close
+  signals from repeating policy or wipe work. The real session owner must
+  invoke it when `SessionClosed` is committed; production session-close
+  scheduling remains app-lifecycle work.
 
 It does NOT introduce a new top-level package.

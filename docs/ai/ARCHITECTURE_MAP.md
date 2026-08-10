@@ -13,7 +13,7 @@ packages add policy without mutating universal core truth.
 
 | Layer | Packages / apps | Responsibility |
 | --- | --- | --- |
-| App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, setup/join flows, demo slices, app-owned presenters/controllers, native-to-package mapping, native transport composition, native readiness aggregation |
+| App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, setup/join flows, demo slices, app-owned presenters/controllers, recovery retention and exactly-once session-close coordination, native-to-package mapping, native transport composition, native readiness aggregation |
 | Shared UI | `peerdeal_ui_kit` | Safe-surface widgets and render models |
 | Native seams | `peerdeal_native_bridges` plus app hosts | Method-channel contracts for platform facts, generic byte transport, and secure key records; mobile Android and Windows desktop supply secure-key host implementations |
 | Network confidence | `peerdeal_network` | Route class, bootstrap/path/election peer-id gates, confidence, primary peer selection, transport frame send/receive gates |
@@ -88,7 +88,9 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   stores with exact recovery scope-identity validation plus app-owned durable
   store factories, validated
   exact `PEERDEAL_RECOVERY_ROOT` configuration, and mounted table-route
-  loading; platform/database persistence remains a production gap.
+  loading; app-owned retention and per-session exactly-once close seams now
+  connect policy decisions to scoped wipe; platform/database persistence and
+  real session-owner wiring remain production gaps.
 - Secure key storage has Dart/method-channel read/write seams plus app-owned
   receipt key-ring provisioning, namespace validation, mapping, and
   ambiguous-active-key and delete key-id rejection. Generic method-channel

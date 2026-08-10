@@ -520,8 +520,10 @@ the gates below are satisfied.
 - Mobile and desktop app shells now expose deterministic retention coordinators
   that validate recovery scope, evaluate policy with explicit close/current
   timestamps, invoke wipe only when due, and normalize policy/storage
-  exceptions to fatal persistence outcomes. Production session-close lifecycle
-  scheduling remains an integration responsibility.
+  exceptions to fatal persistence outcomes. Per-session app close coordinators
+  cache the first success or failure, preventing duplicate close signals from
+  repeating policy or storage work. Wiring the coordinator to the real
+  `SessionClosed` owner remains an integration responsibility.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is

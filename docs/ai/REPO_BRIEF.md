@@ -98,7 +98,9 @@ dart analyze .
   production platform persistence, and other platform implementations remain
   readiness gaps documented in `docs/PRODUCTION_READINESS.md`. App shells now
   expose deterministic retention coordinators that connect close-time policy
-  decisions to the scoped recovery-store wipe primitive.
+  decisions to the scoped recovery-store wipe primitive, plus per-session close
+  coordinators that cache the first result and prevent duplicate policy or wipe
+  work. Real session-owner wiring remains an integration gap.
 
 ## Do Not Touch Without Approval
 
