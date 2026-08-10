@@ -125,7 +125,10 @@ dart analyze .
   `AppHoldemTableSessionRoute` owners now compose the validated runtime with
   source lifecycle and accepted-event surface refresh; their route context can
   publish canonical projection frames and report partial sends. Native live
-  transport and actual product route/state wiring remain open.
+  transport and actual product route/state wiring remain open. Mirrored
+  `AppHoldemProductionRouteRegistration` owners now merge typed Hold'em routes
+  into the app route map and native-readiness gate; callers still provide the
+  validated session/state source and final surface.
 
 ## Do Not Touch Without Approval
 

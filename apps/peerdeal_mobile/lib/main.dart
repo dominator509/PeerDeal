@@ -21,6 +21,7 @@ import 'join_flow/join_flow_route.dart';
 import 'native_readiness/app_native_readiness_loader.dart';
 import 'navigation/app_route_fallback_screen.dart';
 import 'recovery/app_recovery_persistence_store_factory.dart';
+import 'session/app_holdem_production_route_registration.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
 import 'setup_flow/setup_flow_route.dart';
 import 'transport/app_table_session_transport_source.dart';
@@ -76,6 +77,7 @@ class PeerDealMobileRuntime {
     this.recoveryPersistenceStoreFactory,
     this.tableRuntimeScopeFactory,
     this.tableTransportSource,
+    this.holdemProductionRoute,
     this.enabledDemoRoutePaths,
     this.productionRoutes,
     this.productionNavigation,
@@ -100,6 +102,7 @@ class PeerDealMobileRuntime {
   final AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory;
   final AppTableSessionTransportSource? tableTransportSource;
+  final AppHoldemProductionRouteRegistration? holdemProductionRoute;
   final Set<String>? enabledDemoRoutePaths;
   final PeerDealAppRouteMap? productionRoutes;
   final List<PeerDealAppNavigationEntry>? productionNavigation;
@@ -124,6 +127,7 @@ class PeerDealMobileRuntime {
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     AppTableSessionTransportSource? tableTransportSource,
+    AppHoldemProductionRouteRegistration? holdemProductionRoute,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
@@ -161,6 +165,8 @@ class PeerDealMobileRuntime {
       tableRuntimeScopeFactory:
           tableRuntimeScopeFactory ?? this.tableRuntimeScopeFactory,
       tableTransportSource: tableTransportSource ?? this.tableTransportSource,
+      holdemProductionRoute:
+          holdemProductionRoute ?? this.holdemProductionRoute,
       enabledDemoRoutePaths:
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
       productionRoutes: productionRoutes ?? this.productionRoutes,
@@ -195,6 +201,7 @@ class PeerDealMobileApp extends StatefulWidget {
     AppRecoveryPersistenceStoreFactory? recoveryPersistenceStoreFactory,
     DemoTableRuntimeScopeFactory? tableRuntimeScopeFactory,
     AppTableSessionTransportSource? tableTransportSource,
+    AppHoldemProductionRouteRegistration? holdemProductionRoute,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
@@ -218,6 +225,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _recoveryPersistenceStoreFactory = recoveryPersistenceStoreFactory,
        _tableRuntimeScopeFactory = tableRuntimeScopeFactory,
        _tableTransportSource = tableTransportSource,
+       _holdemProductionRoute = holdemProductionRoute,
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
        _productionRoutes = productionRoutes,
        _productionNavigation = productionNavigation,
@@ -242,6 +250,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final AppRecoveryPersistenceStoreFactory? _recoveryPersistenceStoreFactory;
   final DemoTableRuntimeScopeFactory? _tableRuntimeScopeFactory;
   final AppTableSessionTransportSource? _tableTransportSource;
+  final AppHoldemProductionRouteRegistration? _holdemProductionRoute;
   final Set<String>? _enabledDemoRoutePaths;
   final PeerDealAppRouteMap? _productionRoutes;
   final List<PeerDealAppNavigationEntry>? _productionNavigation;
@@ -280,6 +289,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       recoveryPersistenceStoreFactory: widget._recoveryPersistenceStoreFactory,
       tableRuntimeScopeFactory: widget._tableRuntimeScopeFactory,
       tableTransportSource: widget._tableTransportSource,
+      holdemProductionRoute: widget._holdemProductionRoute,
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
       productionRoutes: widget._productionRoutes,
       productionNavigation: widget._productionNavigation,
@@ -312,14 +322,14 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     );
     final nativeReadinessRequiredRoutePaths =
         _validatedNativeReadinessRequiredRoutes(
-          _runtime.nativeReadinessRequiredRoutePaths,
+          _combinedNativeReadinessRequiredRoutes(),
         );
     final productionRoutes = _validatedProductionRoutes(
-      _runtime.productionRoutes,
+      _combinedProductionRoutes(),
       nativeReadinessRequiredRoutePaths: nativeReadinessRequiredRoutePaths,
     );
     final productionNavigation = _validatedProductionNavigation(
-      _runtime.productionNavigation,
+      _combinedProductionNavigation(),
       productionRoutes.keys.toSet(),
       demoNavigationLabels: demoNavigation.map((route) => route.label).toSet(),
       demoNavigationPaths: demoNavigation.map((route) => route.path).toSet(),
@@ -605,6 +615,40 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   void _selectScenario(String scenarioId) {
     if (!_controller.trySelectScenario(scenarioId)) return;
     setState(() {});
+  }
+
+  Set<String>? _combinedNativeReadinessRequiredRoutes() {
+    final route = _runtime.holdemProductionRoute;
+    final paths = _runtime.nativeReadinessRequiredRoutePaths;
+    if (route == null) return paths;
+    return <String>{...?paths, route.path};
+  }
+
+  PeerDealAppRouteMap? _combinedProductionRoutes() {
+    final route = _runtime.holdemProductionRoute;
+    final routes = _runtime.productionRoutes;
+    if (route == null) return routes;
+
+    final combined = <String, WidgetBuilder>{...?routes};
+    if (combined.containsKey(route.path)) {
+      throw StateError('Holdem production route collides with a route.');
+    }
+    combined[route.path] = route.builder;
+    return combined;
+  }
+
+  List<PeerDealAppNavigationEntry>? _combinedProductionNavigation() {
+    final route = _runtime.holdemProductionRoute;
+    final navigation = _runtime.productionNavigation;
+    if (route == null) return navigation;
+
+    return <PeerDealAppNavigationEntry>[
+      ...?navigation,
+      PeerDealAppNavigationEntry(
+        label: route.navigationLabel,
+        path: route.path,
+      ),
+    ];
   }
 
   PeerDealAppRouteMap _validatedProductionRoutes(

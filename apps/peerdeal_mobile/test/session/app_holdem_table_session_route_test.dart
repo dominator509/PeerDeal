@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_mobile/main.dart';
+import 'package:peerdeal_mobile/native_readiness/app_native_readiness_loader.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_retention_coordinator.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_coordinator.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_event_adapter.dart';
+import 'package:peerdeal_mobile/session/app_holdem_production_route_registration.dart';
 import 'package:peerdeal_mobile/session/app_holdem_table_session_route.dart';
 import 'package:peerdeal_mobile/session/app_holdem_table_session_runtime.dart';
 import 'package:peerdeal_mobile/session/app_table_session_runtime.dart';
@@ -17,6 +20,70 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
 void main() {
+  testWidgets('typed registration auto-registers route and navigation', (
+    tester,
+  ) async {
+    final registration = _registration();
+    var navigation = <PeerDealAppNavigationEntry>[];
+
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          holdemProductionRoute: registration,
+          nativeReadinessLoader: _readyReadinessLoader(),
+          homeSurfaceBuilder: (_, entries) {
+            navigation = entries;
+            return const Text('registered home');
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('registered home'), findsOneWidget);
+    expect(
+      navigation.any(
+        (entry) => entry.label == 'Live Holdem' && entry.path == '/holdem-live',
+      ),
+      isTrue,
+    );
+  });
+
+  testWidgets('typed registration mounts through native readiness gating', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          holdemProductionRoute: _registration(),
+          nativeReadinessLoader: _readyReadinessLoader(),
+          initialRoute: '/holdem-live',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('registered holdem route'), findsOneWidget);
+    expect(find.text('Route unavailable'), findsNothing);
+  });
+
+  testWidgets('typed registration fails closed without native readiness', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealMobileApp(
+        runtime: PeerDealMobileRuntime(
+          holdemProductionRoute: _registration(),
+          initialRoute: '/holdem-live',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.text('registered holdem route'), findsNothing);
+  });
+
   testWidgets('provisions transport and refreshes after an inbound event', (
     tester,
   ) async {
@@ -83,6 +150,55 @@ void main() {
     expect(find.text('unavailable'), findsOneWidget);
     expect(runtime.coreState.eventSequence, 1);
   });
+}
+
+AppHoldemProductionRouteRegistration _registration() {
+  final runtime = _runtime();
+  final projection = const HoldemCoreProjectionAdapter().startHand(
+    coreState: runtime.coreState,
+    handState: runtime.handState,
+    cursor: runtime.cursor,
+  );
+  return AppHoldemProductionRouteRegistration(
+    path: '/holdem-live',
+    navigationLabel: 'Live Holdem',
+    runtime: runtime,
+    peerId: 'peer_remote',
+    nativeSessionFactory: NativeTransportSessionFactory(
+      bridge: _FakeNativeTransportBridge(
+        receiveFrame: NativeTransportFrame(
+          sessionId: 'sess_001',
+          senderPeerId: 'peer_remote',
+          recipientPeerId: 'peer_local',
+          sequence: projection.events.single.eventSeq,
+          payloadBytes: const EventEnvelopeCodec().encode(
+            projection.events.single,
+          ),
+        ),
+      ),
+    ),
+    timerFactory: (interval, callback) =>
+        Timer(const Duration(hours: 1), () {}),
+    surfaceBuilder: (context, routeContext) =>
+        const Text('registered holdem route'),
+  );
+}
+
+AppNativeReadinessLoader _readyReadinessLoader() {
+  return AppNativeReadinessLoader(
+    captureProtectionBridge: const _ReadyCaptureProtectionBridge(),
+    localNetworkBridge: const _ReadyLocalNetworkBridge(),
+    nativeTransportBridge: _FakeNativeTransportBridge(
+      receiveFrame: const NativeTransportFrame(
+        sessionId: 'sess_001',
+        senderPeerId: 'peer_remote',
+        recipientPeerId: 'peer_local',
+        sequence: 1,
+        payloadBytes: <int>[],
+      ),
+    ),
+    secureKeyStorageBridge: const _ReadySecureKeyStorageBridge(),
+  );
 }
 
 AppHoldemTableSessionRuntime _runtime() {
@@ -282,5 +398,52 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
     NativeTransportFrame frame,
   ) async {
     return const NativeTransportSendResult(isSuccess: true);
+  }
+}
+
+class _ReadyCaptureProtectionBridge implements CaptureProtectionBridge {
+  const _ReadyCaptureProtectionBridge();
+
+  @override
+  Future<CaptureProtectionCapability> getCapability() async {
+    return const CaptureProtectionCapability(
+      blockingSupported: true,
+      obscuringSupported: true,
+      notes: 'ready',
+    );
+  }
+}
+
+class _ReadyLocalNetworkBridge implements LocalNetworkBridge {
+  const _ReadyLocalNetworkBridge();
+
+  @override
+  Future<LocalNetworkCapability> getCapability() async {
+    return const LocalNetworkCapability(
+      discoverySupported: true,
+      permissionPromptSupported: true,
+      broadcastSupported: true,
+      notes: 'ready',
+    );
+  }
+
+  @override
+  Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
+    return const LocalNetworkDiscoverySnapshot(
+      permissionGranted: true,
+      foundEndpoints: <String>[],
+      interfaceHints: <String>[],
+    );
+  }
+}
+
+class _ReadySecureKeyStorageBridge implements SecureKeyStorageBridge {
+  const _ReadySecureKeyStorageBridge();
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    return const SecureKeyStorageSnapshot(available: true, keys: []);
   }
 }

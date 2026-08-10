@@ -268,6 +268,14 @@ available. The publisher canonical-encodes accepted projection events into
 validated `TransportFrame`s and returns complete, rejected, or partial-send
 results without rerunning variant rules.
 
+`AppHoldemProductionRouteRegistration` is the mirrored app-shell registration
+contract. It binds a validated Hold'em runtime, peer identity, surface builder,
+and optional native transport factory to one route path and navigation label.
+Both app shells merge it into the existing validated production route map,
+automatically add its path to native-readiness-required routes, and fail closed
+to the existing route-unavailable surface when readiness is absent. Session and
+variant state construction remains the product caller's responsibility.
+
 ## Recovery Persistence Boundary
 
 `peerdeal_sync` owns recovery-window validation and JSON file store contracts.

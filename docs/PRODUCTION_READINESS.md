@@ -81,8 +81,10 @@ the gates below are satisfied.
   app-owned `AppHoldemTableSessionRoute` now composes a validated Hold'em
   runtime with transport provisioning, source lifecycle, and accepted-event
   surface refresh; its route context also exposes canonical projection
-  publishing. Platform source provisioning, live peer transport, actual
-  product route/state wiring, and final production UI remain open.
+  publishing. Typed `AppHoldemProductionRouteRegistration` now merges that
+  route into the validated app route map and native-readiness gate. Platform
+  source provisioning, live peer transport, actual product session/state
+  wiring, and final production UI remain open.
 - App UI is not production-polished.
 
 ## Covered hardening slices
@@ -139,6 +141,10 @@ the gates below are satisfied.
   events, and expose `AppHoldemProjectionTransportPublisher` for canonical
   outbound event frames. Publisher partial sends are reported for retry without
   rerunning variant rules.
+- Mirrored `AppHoldemProductionRouteRegistration` owners now provide the typed
+  app-shell registration boundary. The shells auto-merge its route and
+  navigation metadata, require native readiness, and render the existing
+  scrubbed route-unavailable surface when readiness is absent.
 - Hold'em action application now carries production raise sizing semantics:
   full opening bets and full raises update the next minimum raise amount, while
   short all-ins can increase the amount to call without claiming full-raise
@@ -876,8 +882,8 @@ the gates below are satisfied.
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are
   locked for those follow-up implementations. The app-owned Hold'em route and
-  publisher seam is also implemented; actual product navigation and UI
-  validation remain open.
+  publisher and typed registration seams are also implemented; actual product
+  session/state provisioning, navigation, and UI validation remain open.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
@@ -887,6 +893,7 @@ the gates below are satisfied.
    that satisfy the locked method-channel contracts, starting with other
    platform secure receipt key storage and capture enforcement behind the
    existing key-ring, cipher, signer, and app capture contracts.
-3. Connect `AppHoldemTableSessionRoute` to the real product route/state source
-   and complete final production navigation/UI validation; keep native
-   transport/device validation and durable database persistence separate.
+3. Supply `AppHoldemProductionRouteRegistration` from the real product
+   session/state source and final surface builder; complete production
+   navigation/UI validation while keeping native transport/device validation
+   and durable database persistence separate.

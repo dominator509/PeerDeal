@@ -11,8 +11,8 @@ and T20 local-network endpoint projection, T21 Android secure-storage bound
 hardening, T22 protocol-native command validation, T23 removal of the
 duplicate starter core API, T24 variant-to-core Hold'em event projection, and
 T25 app-owned Hold'em session adoption, T26 remote Hold'em event
-reconstruction, and T27 app-owned Hold'em route orchestration are implemented
-on branch
+reconstruction, T27 app-owned Hold'em route orchestration, and T28 typed
+Hold'em production-route registration are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -63,6 +63,9 @@ on branch
   surface refresh. Route contexts can create an
   `AppHoldemProjectionTransportPublisher` for canonical outbound frames; a
   partial send is reported without replaying variant rules.
+- Added mirrored typed `AppHoldemProductionRouteRegistration` owners. App
+  shells merge them into validated production route maps, auto-register
+  navigation metadata, and native-gate the route before mounting its surface.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -110,8 +113,9 @@ on branch
 - Bundle text copied under `spec/` is normalized for repository source-text gates; original hashes are recorded in the manifest.
 - Remaining production software gaps are tracked in `HANDOFF_QUEUE.md` and existing production-readiness docs.
 - Android and Windows host work is available for runtime persistence and
-  capture validation. The app-owned non-demo Hold'em route orchestration seam
-  is now implemented. Remaining native gaps are other-platform capture,
+  capture validation. The app-owned non-demo Hold'em route orchestration and
+  typed route-registration seams are now implemented. Remaining native gaps are
+  other-platform capture,
   local-network discovery, native peer transport implementation and platform
   source provisioning, production database persistence, other-platform
   storage, product route/state wiring, and final production navigation/UI.
@@ -194,6 +198,9 @@ on branch
 - T27 focused mobile and desktop route and projection-publisher tests: passed,
   including inbound accepted-event surface refresh, unavailable transport
   fallback, canonical outbound frames, and partial-send reporting.
+- T28 focused mobile and desktop route-registration tests: passed, including
+  automatic navigation registration, native-ready mounting, and fail-closed
+  mounting without readiness.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume
   exhausted during extraction. Flutter doctor itself is green; Kotlin/APK and

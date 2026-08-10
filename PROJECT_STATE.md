@@ -183,6 +183,16 @@ Generated: 2026-08-09
   accepted Hold'em projections into validated network frames and reports
   partial sends without rerunning variant rules.
 
+## Recent T28 Changes
+
+- Added mirrored `AppHoldemProductionRouteRegistration` owners. They bind a
+  validated Hold'em runtime, peer identity, surface builder, and optional
+  native transport seam into one typed app-shell registration.
+- Both app shells now merge that registration into the existing validated
+  production route map, auto-register its navigation entry, and require native
+  readiness for the route. Missing readiness fails closed before the route
+  surface mounts.
+
 ## Required Gates
 
 Run after each retrofit step:
@@ -201,8 +211,8 @@ Run after each retrofit step:
    signing.
 2. Add the remaining other-platform capture, local-network, and transport
    implementations behind the existing generic method-channel contracts.
-3. Connect `AppHoldemTableSessionRoute` to the product's real route map,
-   validated session-state source, and operator-owned event sink; native peer
-   transport implementation and device validation remain separate work.
+3. Supply `AppHoldemProductionRouteRegistration` from the product's real
+   session/state source and final surface builder; native peer transport
+   implementation and device validation remain separate work.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
    without crossing locked package boundaries.

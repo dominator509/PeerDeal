@@ -12,6 +12,33 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Typed Hold'em Production Route Registration
+
+Summary:
+- Added mirrored `AppHoldemProductionRouteRegistration` owners that bind the
+  validated runtime, peer identity, surface builder, and optional native
+  transport factory into one typed app-shell registration.
+- Both app shells now merge the registration into validated production routes,
+  auto-register navigation, and require native readiness before mounting.
+
+Files changed:
+- Mirrored app `main.dart`, registration files, and focused route tests.
+- `PROJECT_STATE.md`, `HANDOFF.md`, `HANDOFF_QUEUE.md`,
+  `docs/PRODUCTION_READINESS.md`, `docs/ARCHITECTURE.md`, and `docs/ai/` docs.
+
+Tests run:
+- Focused mobile and desktop route-registration suites: passed, 6 tests each.
+
+Risks:
+- Product session/state provisioning, final surface/UI, live native peer
+  transport, durable database persistence, and device validation remain open.
+
+Next reviewer:
+- Supply the registration from the real product session/state source and keep
+  native transport implementation behind the existing generic contract.
+
+---
+
 ### 2026-08-10 - Codex - App Hold'em Route Orchestration
 
 Summary:

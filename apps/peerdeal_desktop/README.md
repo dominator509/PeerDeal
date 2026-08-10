@@ -86,5 +86,9 @@ transport/source seam, refreshes the supplied surface after accepted inbound
 events, and exposes `createProjectionPublisher(...)` for canonical outbound
 events. Native live transport and the actual product route/state source remain
 platform/product integration work.
+`AppHoldemProductionRouteRegistration` is the typed app-shell registration for
+this route. It auto-merges the route and navigation entry, requires native
+readiness, and keeps validated session/state construction with the product
+caller.
 
 It does NOT introduce a new top-level package.

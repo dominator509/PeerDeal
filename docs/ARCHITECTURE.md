@@ -54,6 +54,10 @@ runtime with transport/source lifecycle and accepted-event surface refresh;
 its route context can publish canonical projection frames and report partial
 sends without rerunning variant rules. Native peer transport and product route
 integration remain outside this seam.
+Typed `AppHoldemProductionRouteRegistration` owners now merge that seam into
+the mobile and desktop production route maps, auto-register navigation, and
+require native readiness before mounting; product callers still own session
+state construction and the final surface.
 
 ## Forbidden patterns
 - UI mutating core state directly
