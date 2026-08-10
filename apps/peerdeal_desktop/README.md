@@ -29,4 +29,16 @@ Setup flow:
   remains platform-owned; app adapters and factories only compose package
   public APIs and fail closed when native transport capability is unavailable.
 
+## Windows Host
+
+- `windows/` is the generated desktop host for the existing app shell.
+- `windows/runner/windows_secure_key_storage.*` registers the generic
+  `peerdeal/native_bridges/secure_key_storage` channel with `loadKeyRing`,
+  `saveKey`, and `deleteKey`.
+- Records are validated and stored as a bounded versioned envelope in Windows
+  Credential Manager under a namespace-derived target. The host does not
+  interpret receipt purposes, algorithms, or rotation policy.
+- Build the host with `flutter build windows --no-pub`. Credential Manager
+  runtime persistence still requires an operator profile/device validation.
+
 It does NOT introduce a new top-level package.

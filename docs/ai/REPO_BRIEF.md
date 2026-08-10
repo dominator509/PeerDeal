@@ -91,9 +91,10 @@ dart analyze .
 - Source of truth is ordered protocol events.
 - Snapshots accelerate recovery but do not outrank verified events.
 - Receipts are opaque export artifacts, not a general database.
-- Android mobile now has a Keystore-backed generic secure-key host
-  implementation behind the existing method-channel contract. Desktop/native
-  transport, capture blocking, durable event storage, and other platform
+- Android mobile now has a Keystore-backed generic secure-key host, and the
+  Windows desktop host now uses Credential Manager, both behind the existing
+  method-channel contract. Native transport, capture blocking, durable event
+  storage, runtime key persistence validation, and other platform
   implementations remain readiness gaps documented in
   `docs/PRODUCTION_READINESS.md`.
 

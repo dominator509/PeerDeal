@@ -7,7 +7,7 @@ Generated: 2026-08-09
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
 - Current tier: T4 native host hardening following the T1 retrofit baseline and CI/dependency alignment
-- Scope: Additive Android host implementation behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
+- Scope: Additive Android and Windows host implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
 
 ## T1 Artifacts
 
@@ -30,6 +30,8 @@ Generated: 2026-08-09
 - Android secure-key records use Keystore AES-GCM encryption and durable
   namespace-bound storage; release signing is operator-configured and never
   defaults to debug keys.
+- `apps/peerdeal_desktop/windows/` now registers the generic secure-key channel
+  and stores bounded versioned records through Windows Credential Manager.
 
 ## Required Gates
 
@@ -44,9 +46,8 @@ Run after each retrofit step:
 
 ## Next Implementation Targets
 
-1. Validate the Android host on a real device and add the remaining native
-   capture/local-network/transport implementations behind the existing generic
-   method-channel contracts.
-2. Add desktop/other-platform secure receipt key storage behind the existing
-   receipt key-ring, cipher, and signer contracts.
+1. Validate Android and Windows secure-key persistence at runtime, including an
+   Android real-device pass and operator-owned release signing.
+2. Add the remaining native capture/local-network/transport implementations
+   behind the existing generic method-channel contracts.
 3. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md` without crossing locked package boundaries.

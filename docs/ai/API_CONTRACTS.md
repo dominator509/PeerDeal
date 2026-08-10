@@ -303,6 +303,11 @@ replaced with stable unavailable text rather than exposed to app surfaces.
 - Android release signing is operator-owned and requires all four
   `PEERDEAL_ANDROID_*` keystore variables; the host never uses debug signing
   for release output.
+- The Windows desktop host registers the same generic secure-key channel and
+  stores a bounded versioned record envelope in Windows Credential Manager.
+  Credential Manager target names are derived from the validated namespace;
+  the host returns only the generic snapshot/mutation maps and keeps receipt
+  policy in app/receipt code.
 - App orchestration should surface scrubbed diagnostics, not raw secrets,
   credentials, or platform exception payloads.
 

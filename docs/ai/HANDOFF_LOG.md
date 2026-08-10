@@ -14,6 +14,51 @@ Next reviewer:
 
 ---
 
+### 2026-08-09 - Codex - Windows Desktop Secure-Key Host
+
+Summary:
+Added the generated Windows host for `peerdeal_desktop` and registered the
+existing generic secure-key method channel. The host validates key records,
+stores a bounded versioned binary envelope in Windows Credential Manager under
+a namespace-derived target, and returns only the locked snapshot/mutation
+payloads. Receipt semantics remain in app and receipt packages.
+
+Files changed:
+- `apps/peerdeal_desktop/windows/`
+- `apps/peerdeal_desktop/.gitignore`
+- `apps/peerdeal_desktop/.metadata`
+- `apps/peerdeal_desktop/README.md`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `DECISIONS.log`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter build windows --debug --no-pub`: passed.
+- `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
+- Windows host smoke launch: stayed alive for five seconds and stopped cleanly.
+- Repository source-text and boundary checks: passed.
+- `melos run analyze`, `melos run test`, and `melos run dependency-audit`:
+  passed; dependency audit reports zero actionable upgrades.
+
+Risks:
+- Credential Manager persistence was compile-verified but not exercised by a
+  packaged runtime receipt provisioning test in this environment.
+- Android real-device key persistence, signing, capture, discovery, transport,
+  durable platform persistence, and other platform hosts remain open.
+
+Next reviewer:
+Run a Windows profile runtime test through the existing receipt key-ring
+provisioning and verification path, then validate Android persistence when the
+pinned NDK/device environment is available.
+
+---
+
 ### 2026-08-09 - Codex - Mobile Android Secure-Key Host
 
 Summary:
@@ -47,8 +92,8 @@ Risks:
 - Android source compilation and real-device Keystore persistence are not yet
   verified. The remaining external environment issue is disk capacity, not a
   known source error.
-- Desktop/other-platform secure storage, capture, discovery, transport, and
-  durable platform persistence remain open.
+- Other-platform secure storage, capture, discovery, transport, and durable
+  platform persistence remain open.
 
 Next reviewer:
 Free enough local disk for the pinned Android NDK, run the APK build and an

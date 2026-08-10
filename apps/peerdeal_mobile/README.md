@@ -44,6 +44,8 @@ Setup flow:
   `PEERDEAL_ANDROID_KEYSTORE`, `PEERDEAL_ANDROID_KEYSTORE_PASSWORD`,
   `PEERDEAL_ANDROID_KEY_ALIAS`, and `PEERDEAL_ANDROID_KEY_PASSWORD` together.
 - Live Android capture protection, local-network discovery, transport, and
-  platform recovery persistence remain separate native implementation gaps.
+  platform recovery persistence remain separate native implementation gaps;
+  the desktop Windows host now provides the same generic secure-key channel
+  through Windows Credential Manager.
 
 It does NOT introduce a new top-level package.
