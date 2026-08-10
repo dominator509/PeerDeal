@@ -15,7 +15,7 @@ packages add policy without mutating universal core truth.
 | --- | --- | --- |
 | App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, setup/join flows, demo slices, app-owned presenters/controllers, protocol SessionClosed-to-retention mapping, recovery retention and exactly-once session-close coordination, app-owned table-session runtime projection, native-to-package mapping, native transport composition, native readiness aggregation |
 | Shared UI | `peerdeal_ui_kit` | Safe-surface widgets and render models |
-| Native seams | `peerdeal_native_bridges` plus app hosts | Method-channel contracts for platform facts, generic byte transport, and secure key records; mobile Android and Windows desktop supply secure-key, capture, app-storage, and bounded multicast transport host implementations |
+| Native seams | `peerdeal_native_bridges` plus app hosts | Method-channel contracts for platform facts, generic byte transport, and secure key records; secure-key calls have a bounded default deadline; mobile Android and Windows desktop supply secure-key, capture, app-storage, and bounded multicast transport host implementations |
 | Network confidence | `peerdeal_network` | Route class, bootstrap/path/election peer-id gates, confidence, primary peer selection, transport frame send/receive gates |
 | Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, request ranges, anchors, snapshots, safe-close recovery |
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy |
@@ -104,7 +104,8 @@ Receipts:
    optional signing/encryption produces opaque artifacts.
 3. Import/scan verifies signatures, decrypts when configured, and authorizes
    session/user binding.
-4. Wiped or malformed receipts fail closed.
+4. Unavailable export artifacts stop at an app-owned rejection before native
+   key verification; wiped or malformed receipts fail closed.
 
 ## API Boundaries
 
@@ -149,7 +150,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   receipt key-ring provisioning, namespace validation, mapping, and
   ambiguous-active-key and delete key-id rejection. Generic method-channel
   requests reject malformed secure-key namespaces and records before platform
-  calls. The mobile Android host encrypts generic records with an Android
+  calls and apply a bounded five-second default response deadline. The mobile Android host encrypts generic records with an Android
   Keystore AES-GCM key, and the Windows desktop host persists a bounded
   versioned envelope in Credential Manager. Runtime persistence validation and
   other platform implementations remain production-readiness gaps.

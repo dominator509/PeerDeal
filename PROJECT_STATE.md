@@ -249,6 +249,21 @@ Generated: 2026-08-10
   device persistence, capture, and cross-device reachability remain runtime
   validation work.
 
+## Recent T34 Changes
+
+- Added a bounded five-second default deadline to generic secure-key
+  method-channel load, save, and delete calls, returning stable fail-closed
+  results when the native response does not arrive.
+- Added focused bridge coverage for load and save timeout behavior. Native
+  device persistence, key-store availability, and receipt runtime validation
+  remain external checks.
+- Mirrored receipt routes now reject unavailable export artifacts before native
+  key verification, preventing failed export paths from opening an unnecessary
+  secure-storage call.
+- Final T34 validation passed for the mobile and desktop full Flutter suites,
+  all serialized Melos gates, and `git diff --check`; dependency audit reports
+  zero actionable upgrades.
+
 ## Required Gates
 
 Run after each retrofit step:

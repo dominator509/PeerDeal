@@ -145,6 +145,16 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
   Future<DemoReceiptSurfaceVm> _presentArtifact(
     ReceiptExportArtifact artifact,
   ) {
+    if (artifact.artifactType == 'unavailable') {
+      return widget.presenter.present(
+        receipt: const ReceiptScanResult(
+          status: 'rejected',
+          message: 'Receipt artifact is unavailable.',
+        ),
+        recovery: widget.recovery,
+      );
+    }
+
     final verifier = widget.artifactVerifier;
     if (verifier == null) {
       return widget.presenter.present(

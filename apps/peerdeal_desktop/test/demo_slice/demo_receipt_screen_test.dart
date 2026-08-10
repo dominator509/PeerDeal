@@ -186,6 +186,37 @@ void main() {
     expect(find.text('receipt_id: r_1'), findsNothing);
   });
 
+  testWidgets('does not verify an unavailable export artifact', (tester) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final keyBridge = RecordingSecureKeyStorageBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DemoReceiptRoute(
+          snapshot: _fixtureSnapshot('verification_receipt_review.json'),
+          presenter: presenter,
+          exportArtifact: const ReceiptExportArtifact.unavailable(
+            reason: 'native key storage detail',
+          ),
+          artifactVerifier: DemoReceiptArtifactVerifier(
+            keyRingLoader: NativeReceiptKeyRingLoader(bridge: keyBridge),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(keyBridge.namespaces, isEmpty);
+    expect(captureBridge.requestCount, 1);
+    expect(find.text('Receipt content hidden'), findsOneWidget);
+    expect(find.textContaining('native key storage detail'), findsNothing);
+  });
+
   testWidgets('rejects conflicting receipt export sources', (tester) async {
     final captureBridge = RecordingCaptureProtectionBridge();
     final presenter = DemoReceiptSurfacePresenter(

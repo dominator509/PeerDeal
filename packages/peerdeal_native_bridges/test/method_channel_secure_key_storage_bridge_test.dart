@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -60,6 +62,22 @@ void main() {
     expect(snapshot.available, isFalse);
     expect(snapshot.keys, isEmpty);
     expect(snapshot.warning, contains('locked'));
+  });
+
+  test('returns unavailable snapshot when platform lookup times out', () async {
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) => pending.future);
+
+    final bridge = MethodChannelSecureKeyStorageBridge(
+      channel: channel,
+      timeout: const Duration(milliseconds: 1),
+    );
+    final snapshot = await bridge.loadKeyRing(namespace: 'peerdeal.receipts');
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.keys, isEmpty);
+    expect(snapshot.warning, 'Secure key storage call timed out.');
   });
 
   test('returns unavailable snapshot for malformed platform payload', () async {
@@ -174,6 +192,30 @@ void main() {
 
     expect(result.isSuccess, isFalse);
     expect(result.warning, contains('locked'));
+  });
+
+  test('fails closed when save platform call times out', () async {
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) => pending.future);
+
+    final bridge = MethodChannelSecureKeyStorageBridge(
+      channel: channel,
+      timeout: const Duration(milliseconds: 1),
+    );
+    final result = await bridge.saveKey(
+      namespace: 'peerdeal.receipts',
+      key: const SecureKeyRecord(
+        keyId: 'receipt_signing_1',
+        purpose: 'receipt-signing',
+        algorithm: 'HMAC-SHA256',
+        secret: 'signing_secret_1',
+        active: true,
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Secure key storage call timed out.');
   });
 
   test(

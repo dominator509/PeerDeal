@@ -387,6 +387,12 @@ the gates below are satisfied.
 - Native secure key storage method-channel wrappers now reject blank or padded
   namespaces, key ids, and key record fields before platform load/save/delete
   calls, keeping malformed generic secure-storage requests out of native code.
+- Generic secure-key method-channel load, save, and delete calls now use a
+  bounded five-second default deadline and return stable fail-closed timeout
+  results instead of leaving receipt key flows indefinitely pending.
+- Mirrored receipt routes reject unavailable export artifacts before invoking
+  native key verification, preventing failed export factories from opening an
+  unnecessary secure-storage call.
 - App demo receipt paths now map native secure key storage snapshots into
   receipt-owned key-ring providers before signed artifact verification.
 - App demo receipt presenters can consume a verifier boundary that loads native

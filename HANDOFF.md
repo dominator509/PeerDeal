@@ -15,7 +15,8 @@ reconstruction, T27 app-owned Hold'em route orchestration, T28 typed
 Hold'em production-route registration, T29 production Hold'em surface and
 resumable publication hardening, T30 bounded Android/Windows host transport,
 T31 app-owned production session composition, T32 resolved-invite production
-session source/bootstrap handoff, and T33 native transport lifecycle hardening
+session source/bootstrap handoff, T33 native transport lifecycle hardening, and
+T34 bounded secure-key method-channel calls
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -32,6 +33,12 @@ are implemented on branch
 - Removed the generated release debug-signing fallback; operator-owned Android signing is environment-driven and fail-closed.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
+- Generic secure-key method-channel load, save, and delete calls now use a
+  bounded five-second default deadline and return stable fail-closed timeout
+  results.
+- Mirrored receipt routes now stop at a stable unavailable-artifact rejection
+  before invoking native key verification, so failed export factories cannot
+  leave secure-storage calls pending.
 - Added the generic app-support directory method-channel contract. Android
   returns private no-backup app storage and Windows returns `LocalAppData`.
 - Both app shells now prefer `PEERDEAL_RECOVERY_ROOT` and otherwise use the
@@ -255,3 +262,9 @@ are implemented on branch
 - T33 focused native transport bridge tests: passed, 7 tests.
 - T33 native transport lifecycle hardening host builds: passed on Windows and
   Android debug targets.
+- T34 focused secure-key method-channel tests: passed, 12 tests; mirrored
+  receipt-route tests passed with unavailable-artifact coverage.
+- T34 mobile and desktop full Flutter test suites: passed.
+- T34 final `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `diff --check` gates: passed; dependency audit reported zero actionable
+  upgrades.

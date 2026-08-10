@@ -402,6 +402,8 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   into stable unavailable artifacts.
 - App receipt artifact verifiers must convert key-ring loader dependency
   exceptions into scrubbed rejected inspection results.
+- Mounted receipt routes must reject unavailable export artifacts before calling
+  artifact verifiers or native secure-key storage.
 - App receipt artifact verifiers must scrub and bound key-ring loader warning
   diagnostics before returning rejected inspection results.
 - App receipt artifact verifiers must scrub and bound decoder rejection
@@ -426,6 +428,10 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   receipt key ids before calling native delete methods.
 - Generic native secure key storage method-channel requests must reject blank
   or padded namespaces, key ids, and key record fields before platform calls.
+- Generic secure-key method-channel load, save, and delete calls use a bounded
+  five-second default deadline and return stable unavailable/failure results on
+  timeout; timeout handling remains generic and receipt policy stays in app
+  orchestration.
 - The mobile Android host registers
   `peerdeal/native_bridges/secure_key_storage` with `loadKeyRing`, `saveKey`,
   and `deleteKey`. It returns only the generic snapshot/mutation maps defined

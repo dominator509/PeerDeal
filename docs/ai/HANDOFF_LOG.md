@@ -12,6 +12,42 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Secure-Key Method-Channel Deadline
+
+Summary:
+- Added a bounded five-second default deadline to the generic secure-key
+  method-channel bridge for load, save, and delete operations.
+- Mirrored receipt routes now reject unavailable export artifacts before native
+  key verification, avoiding unnecessary pending secure-storage calls.
+- Timeout results are stable and fail closed; receipt semantics remain in the
+  app-owned key-ring and artifact layers.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/method_channel_secure_key_storage_bridge.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_secure_key_storage_bridge_test.dart`
+- `packages/peerdeal_native_bridges/README.md`
+- Mirrored `apps/peerdeal_mobile/` and `apps/peerdeal_desktop/` receipt routes
+  and focused screen tests
+- `PROJECT_STATE.md`, `HANDOFF.md`, `HANDOFF_QUEUE.md`,
+  `docs/PRODUCTION_READINESS.md`, `docs/ai/API_CONTRACTS.md`, and
+  `docs/ai/ARCHITECTURE_MAP.md`
+
+Tests run:
+- Focused secure-key method-channel suite: passed, 12 tests.
+- Mirrored mobile and desktop receipt-screen suites: passed, 12 tests each.
+- Mobile and desktop full Flutter test suites: passed.
+- Final analyze, boundary-check, source-text, serialized test, and diff-check
+  gates: passed; dependency audit reported zero actionable upgrades.
+
+Risks:
+- Native key-store persistence, Android device behavior, release signing, and
+  receipt runtime validation remain external readiness checks.
+
+Next reviewer:
+- Run the full repository gates and preserve the generic native/app boundary.
+
+---
+
 ### 2026-08-10 - Codex - Native Transport Lifecycle Hardening
 
 Summary:

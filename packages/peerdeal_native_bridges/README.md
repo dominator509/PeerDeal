@@ -48,6 +48,8 @@ to observe local device capabilities.
   capability facts instead of throwing through bridge consumers.
 - Malformed top-level method-channel payloads are caught at the bridge wrapper
   and returned as unavailable facts with decode warnings.
+- Secure-key method-channel load, save, and delete calls use a bounded
+  five-second default deadline and return fail-closed timeout results.
 
 ## Method-channel contracts
 - Capture protection channel: `peerdeal/native_bridges/capture_protection`

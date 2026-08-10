@@ -1,17 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 
 import 'secure_key_storage_bridge.dart';
 import 'secure_key_storage_bridge_models.dart';
 import 'secure_key_storage_channel_contract.dart';
 
+const _secureKeyStorageCallTimeout = Duration(seconds: 5);
+
 class MethodChannelSecureKeyStorageBridge
     implements SecureKeyStorageMutationBridge {
-  MethodChannelSecureKeyStorageBridge({MethodChannel? channel})
-    : _channel = channel ?? const MethodChannel(_channelName);
+  MethodChannelSecureKeyStorageBridge({
+    MethodChannel? channel,
+    Duration timeout = _secureKeyStorageCallTimeout,
+  }) : _channel = channel ?? const MethodChannel(_channelName),
+       _timeout = _validateTimeout(timeout);
 
   static const _channelName = SecureKeyStorageChannelContract.channelName;
 
   final MethodChannel _channel;
+  final Duration _timeout;
 
   @override
   Future<SecureKeyStorageSnapshot> loadKeyRing({
@@ -25,9 +33,15 @@ class MethodChannelSecureKeyStorageBridge
 
     final Map<String, Object?>? result;
     try {
-      result = await _channel.invokeMapMethod<String, Object?>(
-        SecureKeyStorageChannelContract.loadKeyRingMethod,
-        <String, Object?>{'namespace': namespace},
+      result = await _channel
+          .invokeMapMethod<String, Object?>(
+            SecureKeyStorageChannelContract.loadKeyRingMethod,
+            <String, Object?>{'namespace': namespace},
+          )
+          .timeout(_timeout);
+    } on TimeoutException {
+      return const SecureKeyStorageSnapshot.unavailable(
+        warning: 'Secure key storage call timed out.',
       );
     } on MissingPluginException catch (error) {
       return SecureKeyStorageSnapshot.unavailable(
@@ -59,12 +73,18 @@ class MethodChannelSecureKeyStorageBridge
 
     final Map<String, Object?>? result;
     try {
-      result = await _channel.invokeMapMethod<String, Object?>(
-        SecureKeyStorageChannelContract.saveKeyMethod,
-        <String, Object?>{
-          'namespace': namespace,
-          'key': SecureKeyStorageChannelContract.encodeKey(key),
-        },
+      result = await _channel
+          .invokeMapMethod<String, Object?>(
+            SecureKeyStorageChannelContract.saveKeyMethod,
+            <String, Object?>{
+              'namespace': namespace,
+              'key': SecureKeyStorageChannelContract.encodeKey(key),
+            },
+          )
+          .timeout(_timeout);
+    } on TimeoutException {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'Secure key storage call timed out.',
       );
     } on MissingPluginException catch (error) {
       return SecureKeyStorageMutationResult.failure(
@@ -99,9 +119,15 @@ class MethodChannelSecureKeyStorageBridge
 
     final Map<String, Object?>? result;
     try {
-      result = await _channel.invokeMapMethod<String, Object?>(
-        SecureKeyStorageChannelContract.deleteKeyMethod,
-        <String, Object?>{'namespace': namespace, 'keyId': keyId},
+      result = await _channel
+          .invokeMapMethod<String, Object?>(
+            SecureKeyStorageChannelContract.deleteKeyMethod,
+            <String, Object?>{'namespace': namespace, 'keyId': keyId},
+          )
+          .timeout(_timeout);
+    } on TimeoutException {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'Secure key storage call timed out.',
       );
     } on MissingPluginException catch (error) {
       return SecureKeyStorageMutationResult.failure(
@@ -128,6 +154,13 @@ class MethodChannelSecureKeyStorageBridge
 
   bool _isValidKeyId(String keyId) =>
       keyId.trim().isNotEmpty && keyId.trim() == keyId && !keyId.contains(':');
+
+  static Duration _validateTimeout(Duration timeout) {
+    if (timeout.compareTo(Duration.zero) <= 0) {
+      throw ArgumentError.value(timeout, 'timeout', 'must be positive');
+    }
+    return timeout;
+  }
 
   String _warning(String prefix, Object error) {
     if (error is PlatformException) {
