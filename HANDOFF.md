@@ -217,8 +217,12 @@ resumable publication hardening are implemented on branch
   upgrades; 11 newer versions remain blocked by the current toolchain.
 - T30 Windows `flutter build windows --debug --no-pub`: passed after adding the
   bounded native multicast transport host.
+- T30 Windows host smoke launch: stayed alive for five seconds and was stopped
+  cleanly.
 - T30 Android `flutter build apk --debug --no-pub`: passed after repairing the
   pinned NDK and fixing the existing Kotlin secure-key nullability errors.
+- T30 `adb devices`: no Android device or emulator attached; Android runtime
+  persistence, capture, and cross-device transport behavior remain unverified.
 - T30 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 toolchain-blocked newer versions.

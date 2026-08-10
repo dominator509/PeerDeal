@@ -891,9 +891,10 @@ the gates below are satisfied.
   diagnostics, scrubbed receipt secure-key diagnostics, and method-channel
   payload gates, plus relay fallback on join candidate resolution failure, are
   locked for those follow-up implementations. The app-owned Hold'em route,
-  publisher, typed registration, and default production-surface seams are also
-  implemented; actual product session/state provisioning, native transport,
-  navigation polish, and UI validation remain open.
+  publisher, typed registration, default production-surface seams, and bounded
+  Android/Windows native transport hosts are also implemented; actual product
+  session/state provisioning, device/network transport validation, navigation
+  polish, and UI validation remain open.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

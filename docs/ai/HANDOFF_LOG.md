@@ -69,7 +69,11 @@ Files changed:
 
 Tests run:
 - Windows `flutter build windows --debug --no-pub`: passed.
+- Windows host smoke launch: stayed alive for five seconds and was stopped
+  cleanly.
 - Android `flutter build apk --debug --no-pub`: passed.
+- `adb devices`: no Android device or emulator attached; device persistence,
+  capture, and cross-device transport behavior remain unverified.
 - Full `melos run analyze`, `boundary-check`, `source-text`, serialized
   `test`, and `dependency-audit` gates: passed; dependency audit reported
   0 actionable upgrades and 11 toolchain-blocked newer versions.
