@@ -47,6 +47,42 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Production Hold'em Session Composition
+
+Summary:
+- Added mirrored `AppHoldemProductionSessionFactory` owners that compose the
+  existing table-session runtime, Hold'em runtime, and default production
+  surface from injected canonical table/hand state, event cursor,
+  close-retention adapter, and local/remote peer identity.
+- Added fail-closed checks for route metadata, peer identity reuse, local seat,
+  transport polling bounds, and runtime cursor/session composition.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_factory.dart`
+- `apps/peerdeal_mobile/test/session/app_holdem_production_session_factory_test.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_factory.dart`
+- `apps/peerdeal_desktop/test/session/app_holdem_production_session_factory_test.dart`
+- Readiness, architecture, README, project state, queue, and handoff records.
+
+Tests run:
+- Focused mobile factory tests: passed, 2 tests.
+- Focused desktop factory tests: passed, 2 tests.
+- Full `melos run analyze`, `boundary-check`, `source-text`, serialized `test`,
+  and `dependency-audit` gates: passed.
+- Dependency audit: 0 actionable upgrades; 11 newer versions remain blocked by
+  the current Dart/Flutter toolchain.
+- `git diff --check`: passed.
+
+Risks:
+- The factory does not create product session/state truth; a real product
+  source, device/network validation, and final UX validation remain open.
+
+Next reviewer:
+- Supply the factory inputs from the actual validated product session source;
+  preserve the generic native transport and package boundaries.
+
+---
+
 ### 2026-08-10 - Codex - Native Android and Windows Peer Transport
 
 Summary:

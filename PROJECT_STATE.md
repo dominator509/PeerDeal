@@ -214,6 +214,17 @@ Generated: 2026-08-09
 - The pinned Android NDK was repaired and the mobile debug APK plus Windows
   debug host now compile through the native transport handlers.
 
+## Recent T31 Changes
+
+- Added mirrored app-owned `AppHoldemProductionSessionFactory` seams. They
+  compose the existing table-session runtime, Hold'em runtime, and default
+  production surface from injected canonical table state, hand state, event
+  cursor, close-retention adapter, and local/remote peer identity.
+- The factory rejects unsafe route metadata, peer identity reuse, missing local
+  seats, invalid transport polling intervals, and cursor/session composition
+  failures before a production route is exposed. It does not derive product
+  IDs, persistence, or game state.
+
 ## Required Gates
 
 Run after each retrofit step:
@@ -234,8 +245,8 @@ Run after each retrofit step:
    implementations behind the existing generic method-channel contracts; the
    Android/Windows transport is now host-backed but still needs device/network
    reachability validation.
-3. Supply `AppHoldemProductionRouteRegistration.withDefaultSurface` from the
-   product's real session/state source and local identity; native peer transport
-   device/network validation, and final UX validation remain separate.
+3. Invoke `AppHoldemProductionSessionFactory` from the product's real
+   session/state source and local identity; native peer transport device/network
+   validation, and final UX validation remain separate.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
    without crossing locked package boundaries.

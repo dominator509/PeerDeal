@@ -63,7 +63,11 @@ state construction and local identity. The app-owned
 `AppHoldemProductionTableSurface` renders bounded projection state and routes
 local actions through the runtime and canonical publisher; it never evaluates
 variant rules or becomes a second state store. Partial publication resumes from
-the publisher's reported event offset.
+the publisher's reported event offset. The mirrored
+`AppHoldemProductionSessionFactory` composes that existing route boundary from
+injected canonical table/hand state, event cursor, close-retention adapter, and
+peer identity. It validates app-owned route metadata and transport
+configuration without deriving product session truth.
 
 ## Forbidden patterns
 - UI mutating core state directly

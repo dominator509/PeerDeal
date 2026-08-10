@@ -74,6 +74,10 @@ Local Hold'em producer flow:
 6. `AppHoldemProductionRouteRegistration` merges the route into the app shell's
    validated production map and native-readiness gate; the product caller still
    supplies the validated session/state source and final surface builder.
+7. `AppHoldemProductionSessionFactory` can compose the existing table runtime,
+   Hold'em runtime, close-retention adapter, default surface, and peer identity
+   from those injected product inputs. It rejects unsafe app metadata and
+   cursor/session mismatches without creating product truth.
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session

@@ -12,8 +12,9 @@ hardening, T22 protocol-native command validation, T23 removal of the
 duplicate starter core API, T24 variant-to-core Hold'em event projection, and
 T25 app-owned Hold'em session adoption, T26 remote Hold'em event
 reconstruction, T27 app-owned Hold'em route orchestration, T28 typed
-Hold'em production-route registration, and T29 production Hold'em surface and
-resumable publication hardening are implemented on branch
+Hold'em production-route registration, T29 production Hold'em surface and
+resumable publication hardening, T30 bounded Android/Windows host transport,
+and T31 app-owned production session composition are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -71,6 +72,10 @@ resumable publication hardening are implemented on branch
   registration factories. They render bounded runtime projection state, expose
   local-seat controls only when transport-backed publication is ready, and
   resume partial projection sends from the first unsent event.
+- Added mirrored `AppHoldemProductionSessionFactory` owners. They compose the
+  existing table and Hold'em runtimes plus the default production surface from
+  injected canonical state, cursor, close-retention adapter, and peer identity;
+  they do not derive product IDs, persistence, or game state.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -117,23 +122,20 @@ resumable publication hardening are implemented on branch
 
 - Bundle text copied under `spec/` is normalized for repository source-text gates; original hashes are recorded in the manifest.
 - Remaining production software gaps are tracked in `HANDOFF_QUEUE.md` and existing production-readiness docs.
-- Android and Windows host work is available for runtime persistence and
-  capture validation. The app-owned non-demo Hold'em route orchestration and
-  typed route-registration and default production-surface seams are now
-  implemented. Remaining native gaps are other-platform capture,
-  local-network discovery, native peer transport implementation and platform
-  source provisioning, production database persistence, other-platform
-  storage, product session/state provisioning, and final production
-  navigation/UX validation.
+- Android and Windows host work is available for runtime persistence, capture,
+  and transport validation. The app-owned non-demo Hold'em route orchestration,
+  typed route registration, default production surface, and production session
+  composition seams are implemented. Remaining gaps are device/network
+  validation, endpoint/source provisioning, other-platform native work,
+  production database persistence, product session/state provisioning, and
+  final production navigation/UX validation.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
-- The Windows release host rebuild passed after T21. The Android release build
-  still stops during Gradle configuration because the configured NDK is missing
-  `source.properties`; no Android APK or host compile result is claimed.
-- The T18 Android Gradle compile could not configure the app because the
-  configured NDK is missing `source.properties`; no Android APK or host compile
-  result is claimed until that installation is repaired.
+- The T30 Windows debug host rebuild and five-second smoke launch passed. The
+  T30 Android debug APK build passed after the pinned NDK installation was
+  repaired. No Android device or emulator was attached, so runtime persistence,
+  capture, and cross-device transport remain unverified.
 
 ## Gate Results
 
@@ -226,3 +228,9 @@ resumable publication hardening are implemented on branch
 - T30 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 toolchain-blocked newer versions.
+- T31 focused mobile and desktop production-session factory tests: passed, 2
+  tests per app.
+- T31 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 toolchain-blocked newer versions.
+- T31 `git diff --check`: passed.

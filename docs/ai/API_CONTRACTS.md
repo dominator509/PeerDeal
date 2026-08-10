@@ -282,6 +282,16 @@ variant state construction remains the product caller's responsibility. Its
 surface while still requiring the caller's validated runtime, local peer id, and
 local seat.
 
+`AppHoldemProductionSessionFactory` is the mirrored app-owned composition
+contract for callers with a real product session source. Its `create(...)`
+method requires canonical `TableState`, `HoldemHandState`, `HoldemEventCursor`,
+and `AppRecoverySessionCloseEventAdapter` inputs plus route metadata and local /
+remote peer identity. It returns the composed table runtime, Hold'em runtime,
+and `AppHoldemProductionRouteRegistration`; it does not derive IDs, persistence,
+or game state. It fails closed on unsafe metadata, reused peer identities,
+missing local seats, invalid polling intervals, and runtime cursor/session
+composition errors.
+
 `AppHoldemProductionTableSurface` reads bounded state from the route context and
 dispatches local actions through `AppHoldemTableSessionRuntime`. It renders
 controls only for the configured local seat during a betting phase with a live

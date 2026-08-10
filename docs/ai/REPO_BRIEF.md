@@ -129,11 +129,14 @@ dart analyze .
   source lifecycle and accepted-event surface refresh; their route context can
   publish canonical projection frames and report partial sends. Native live
   transport and actual product route/state wiring remain open. Mirrored
-  `AppHoldemProductionRouteRegistration` owners now merge typed Hold'em routes
-  into the app route map and native-readiness gate. The
-  `withDefaultSurface(...)` factory mounts the app-owned bounded production
-  table surface; callers still provide the validated session/state source and
-  local identity. Projection retries resume from the publisher's event offset.
+`AppHoldemProductionRouteRegistration` owners now merge typed Hold'em routes
+into the app route map and native-readiness gate. The
+`withDefaultSurface(...)` factory mounts the app-owned bounded production
+table surface; callers still provide the validated session/state source and
+local identity. Mirrored `AppHoldemProductionSessionFactory` owners now bind
+those product inputs to the table/Hold'em runtimes and default surface with
+fail-closed metadata, seat, polling, and cursor/session checks. Projection
+retries resume from the publisher's event offset.
 
 ## Do Not Touch Without Approval
 

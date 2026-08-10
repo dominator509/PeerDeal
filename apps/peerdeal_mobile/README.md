@@ -98,4 +98,11 @@ caller. `withDefaultSurface(...)` mounts the app-owned production Hold'em
 surface, which renders runtime projection state and only enables local actions
 when transport-backed publication is available.
 
+`AppHoldemProductionSessionFactory` is the app-owned composition helper for
+callers that have a real product session source. It binds injected canonical
+table/hand state, event cursor, close-retention adapter, and peer identity to
+the existing runtimes and default surface, while rejecting unsafe metadata and
+composition mismatches. It does not create product IDs, persistence, or game
+state.
+
 It does NOT introduce a new top-level package.
