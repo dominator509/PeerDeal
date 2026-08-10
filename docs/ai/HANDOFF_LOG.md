@@ -12,6 +12,35 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Native Transport Lifecycle Hardening
+
+Summary:
+- Hardened Android native transport executor submission and teardown so calls
+  after close or rejected queued work resolve with bounded fail-closed payloads.
+- Hardened Windows native transport initialization cleanup for socket,
+  multicast membership, TTL, and Winsock failures.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `PROJECT_STATE.md`, `HANDOFF.md`, `HANDOFF_QUEUE.md`,
+  `docs/PRODUCTION_READINESS.md`, and `docs/ai/ARCHITECTURE_MAP.md`
+
+Tests run:
+- Focused native transport bridge suite: passed, 7 tests.
+- `flutter build windows --debug --no-pub`: passed.
+- `flutter build apk --debug --no-pub`: passed.
+
+Risks:
+- Android device behavior, Windows profile behavior, firewall/multicast
+  reachability, and product endpoint/session provisioning remain open.
+
+Next reviewer:
+- Run the existing host builds and validate the transport across real devices
+  or network profiles when available; keep the generic channel boundary.
+
+---
+
 ### 2026-08-10 - Codex - Production Hold'em Surface and Resumable Publication
 
 Summary:

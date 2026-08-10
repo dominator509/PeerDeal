@@ -265,6 +265,12 @@ the gates below are satisfied.
   receive decoder's fail-closed byte payload gate.
 - Native transport receive decoding now requires exact frame map field keys and
   drops frames whose platform keys only stringify to expected field names.
+- Android native transport method calls now resolve with bounded fail-closed
+  payloads when teardown closes or rejects the executor, and accepted work is
+  allowed to drain during handler shutdown.
+- Windows native transport initialization now cleans up socket, multicast
+  membership, TTL, and Winsock state on every partial setup failure before the
+  host can report transport availability.
 - App shells now include app-owned native transport adapters that compose the
   generic native byte-frame bridge with `peerdeal_network` validating
   sender/receiver boundaries, so app transport sends and inbound drains cannot

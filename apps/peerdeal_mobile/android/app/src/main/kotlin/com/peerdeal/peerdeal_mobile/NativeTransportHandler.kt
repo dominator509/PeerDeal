@@ -16,6 +16,7 @@ import java.nio.ByteOrder
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
 
 /**
  * Provides the generic byte-frame transport over a bounded local multicast
@@ -52,15 +53,14 @@ internal class NativeTransportHandler(
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            GET_CAPABILITY -> executor.execute {
-                val available = ensureReceiver()
-                postResult(result, capabilityPayload(available))
+            GET_CAPABILITY -> submit(result, { capabilityPayload(false) }) {
+                capabilityPayload(ensureReceiver())
             }
-            SEND_FRAME -> executor.execute {
-                postResult(result, send(call))
+            SEND_FRAME -> submit(result, { failure("Native transport is closed.") }) {
+                send(call)
             }
-            RECEIVE_FRAMES -> executor.execute {
-                postResult(result, receive(call))
+            RECEIVE_FRAMES -> submit(result, { receiveUnavailablePayload() }) {
+                receive(call)
             }
             else -> result.notImplemented()
         }
@@ -77,7 +77,30 @@ internal class NativeTransportHandler(
             }
         }
         multicastLock = null
-        executor.shutdownNow()
+        executor.shutdown()
+    }
+
+    private fun submit(
+        result: MethodChannel.Result,
+        fallback: () -> Map<String, Any?>,
+        operation: () -> Map<String, Any?>,
+    ) {
+        if (closed) {
+            postResult(result, fallback())
+            return
+        }
+        try {
+            executor.execute {
+                val payload = try {
+                    operation()
+                } catch (_: Exception) {
+                    fallback()
+                }
+                postResult(result, payload)
+            }
+        } catch (_: RejectedExecutionException) {
+            postResult(result, fallback())
+        }
     }
 
     private fun postResult(result: MethodChannel.Result, payload: Map<String, Any?>) {
@@ -126,11 +149,7 @@ internal class NativeTransportHandler(
 
     private fun receive(call: MethodCall): Map<String, Any?> {
         if (!ensureReceiver()) {
-            return mapOf(
-                "available" to false,
-                "frames" to emptyList<Map<String, Any?>>(),
-                "warning" to "Native transport receive socket is unavailable.",
-            )
+            return receiveUnavailablePayload()
         }
         val sessionId = safeString(call.argument<Any?>("sessionId"))
         val peerId = safeString(call.argument<Any?>("peerId"))
@@ -159,6 +178,12 @@ internal class NativeTransportHandler(
         retained.forEach(frames::offer)
         return mapOf("available" to true, "frames" to selected)
     }
+
+    private fun receiveUnavailablePayload(): Map<String, Any?> = mapOf(
+        "available" to false,
+        "frames" to emptyList<Map<String, Any?>>(),
+        "warning" to "Native transport receive socket is unavailable.",
+    )
 
     private fun ensureReceiver(): Boolean {
         if (closed) return false

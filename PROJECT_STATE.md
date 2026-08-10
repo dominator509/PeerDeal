@@ -237,6 +237,18 @@ Generated: 2026-08-10
   to the production session bootstrap without deriving IDs from demo or Game
   File data.
 
+## Recent T33 Changes
+
+- Hardened the Android native transport method-call executor so calls received
+  during or after teardown resolve with bounded fail-closed payloads instead of
+  throwing on a rejected executor or abandoning accepted work.
+- Hardened Windows native transport initialization so socket, multicast
+  membership, TTL, and Winsock state are cleaned up on every partial setup
+  failure before capability can report availability.
+- Rebuilt the Android debug APK and Windows debug host after the native changes;
+  device persistence, capture, and cross-device reachability remain runtime
+  validation work.
+
 ## Required Gates
 
 Run after each retrofit step:

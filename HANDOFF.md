@@ -14,8 +14,9 @@ T25 app-owned Hold'em session adoption, T26 remote Hold'em event
 reconstruction, T27 app-owned Hold'em route orchestration, T28 typed
 Hold'em production-route registration, T29 production Hold'em surface and
 resumable publication hardening, T30 bounded Android/Windows host transport,
-T31 app-owned production session composition, and T32 resolved-invite
-production session source/bootstrap handoff are implemented on branch
+T31 app-owned production session composition, T32 resolved-invite production
+session source/bootstrap handoff, and T33 native transport lifecycle hardening
+are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -125,6 +126,10 @@ production session source/bootstrap handoff are implemented on branch
 - Successful first-join and rejoin outcomes now retain their validated resolved
   invite for product session handoff. Demo and compiled Game File data remain
   non-authoritative and are not used to derive live session identity.
+- Hardened Android native transport teardown and executor rejection handling so
+  accepted method calls resolve with bounded fail-closed payloads.
+- Hardened Windows native transport setup cleanup so partial Winsock/socket
+  initialization cannot leave resources alive or advertise a broken host.
 
 ## Review Notes
 
@@ -233,6 +238,8 @@ production session source/bootstrap handoff are implemented on branch
   pinned NDK and fixing the existing Kotlin secure-key nullability errors.
 - T30 `adb devices`: no Android device or emulator attached; Android runtime
   persistence, capture, and cross-device transport behavior remain unverified.
+- T33 Windows `flutter build windows --debug --no-pub`: passed.
+- T33 Android `flutter build apk --debug --no-pub`: passed.
 - T30 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 toolchain-blocked newer versions.
@@ -245,3 +252,6 @@ production session source/bootstrap handoff are implemented on branch
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 toolchain-blocked newer versions.
 - T31 `git diff --check`: passed.
+- T33 focused native transport bridge tests: passed, 7 tests.
+- T33 native transport lifecycle hardening host builds: passed on Windows and
+  Android debug targets.

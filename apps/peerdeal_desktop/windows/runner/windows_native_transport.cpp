@@ -217,11 +217,26 @@ bool WindowsNativeTransport::InitializeSocket() {
   if (::WSAStartup(MAKEWORD(2, 2), &data) != 0) return false;
   wsa_started_ = true;
 
+  const auto fail_initialization = [this]() {
+    if (socket_ != INVALID_SOCKET) {
+      ::closesocket(socket_);
+      socket_ = INVALID_SOCKET;
+    }
+    if (wsa_started_) {
+      ::WSACleanup();
+      wsa_started_ = false;
+    }
+    return false;
+  };
+
   socket_ = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-  if (socket_ == INVALID_SOCKET) return false;
+  if (socket_ == INVALID_SOCKET) return fail_initialization();
   const BOOL reuse = TRUE;
-  ::setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
-               reinterpret_cast<const char*>(&reuse), sizeof(reuse));
+  if (::setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
+                   reinterpret_cast<const char*>(&reuse), sizeof(reuse)) ==
+      SOCKET_ERROR) {
+    return fail_initialization();
+  }
 
   sockaddr_in local{};
   local.sin_family = AF_INET;
@@ -229,23 +244,26 @@ bool WindowsNativeTransport::InitializeSocket() {
   local.sin_addr.s_addr = htonl(INADDR_ANY);
   if (::bind(socket_, reinterpret_cast<const sockaddr*>(&local), sizeof(local)) ==
       SOCKET_ERROR) {
-    return false;
+    return fail_initialization();
   }
 
   ip_mreq membership{};
   if (::InetPtonA(AF_INET, kMulticastAddress, &membership.imr_multiaddr) != 1) {
-    return false;
+    return fail_initialization();
   }
   membership.imr_interface.s_addr = htonl(INADDR_ANY);
   if (::setsockopt(socket_, IPPROTO_IP, IP_ADD_MEMBERSHIP,
                    reinterpret_cast<const char*>(&membership),
                    sizeof(membership)) == SOCKET_ERROR) {
-    return false;
+    return fail_initialization();
   }
 
   const unsigned char ttl = 1;
-  ::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_TTL,
-               reinterpret_cast<const char*>(&ttl), sizeof(ttl));
+  if (::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_TTL,
+                   reinterpret_cast<const char*>(&ttl), sizeof(ttl)) ==
+      SOCKET_ERROR) {
+    return fail_initialization();
+  }
   stopping_ = false;
   receive_thread_ = std::thread([this]() { ReceiveLoop(); });
   return true;

@@ -86,8 +86,9 @@ Local Hold'em producer flow:
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session
-and recipient peer. Device/network reachability and other-platform transport
-remain open.
+and recipient peer. Host lifecycle paths now fail closed and clean up partial
+socket/Winsock initialization; device/network reachability and other-platform
+transport remain open.
 
 Recovery:
 
