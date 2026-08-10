@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
@@ -50,10 +52,12 @@ class AppHoldemProductionSessionBootstrapRoute extends StatefulWidget {
 class _AppHoldemProductionSessionBootstrapRouteState
     extends State<AppHoldemProductionSessionBootstrapRoute> {
   late Future<AppHoldemProductionSessionComposition> _composition;
+  late Completer<void> _sourceCancellation;
 
   @override
   void initState() {
     super.initState();
+    _sourceCancellation = Completer<void>();
     _composition = _loadComposition();
   }
 
@@ -65,7 +69,15 @@ class _AppHoldemProductionSessionBootstrapRouteState
         oldWidget.routeName == widget.routeName) {
       return;
     }
+    _cancelSourceLoad();
+    _sourceCancellation = Completer<void>();
     _composition = _loadComposition();
+  }
+
+  @override
+  void dispose() {
+    _cancelSourceLoad();
+    super.dispose();
   }
 
   @override
@@ -97,6 +109,15 @@ class _AppHoldemProductionSessionBootstrapRouteState
   }
 
   Future<AppHoldemProductionSessionComposition> _loadComposition() {
-    return widget.bootstrap.createForInvite(widget.invite);
+    return widget.bootstrap.createForInvite(
+      widget.invite,
+      cancellation: _sourceCancellation.future,
+    );
+  }
+
+  void _cancelSourceLoad() {
+    if (!_sourceCancellation.isCompleted) {
+      _sourceCancellation.complete();
+    }
   }
 }

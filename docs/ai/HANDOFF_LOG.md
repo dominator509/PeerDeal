@@ -12,6 +12,42 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Cancellable Production Session Hydration
+
+Summary:
+- Added an optional `Future<void>? cancellation` signal to mirrored
+  `AppHoldemProductionSessionSource` and bootstrap contracts.
+- Route replacement and disposal now cancel stale source waits. Bootstrap
+  cleanup cancels its timeout timer on source completion, cancellation, timeout,
+  or failure.
+
+Files changed:
+- Mirrored app session bootstrap, route, and focused test files.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`.
+- `docs/PRODUCTION_READINESS.md`, `docs/ai/API_CONTRACTS.md`,
+  `docs/ai/ARCHITECTURE_MAP.md`, and this handoff log.
+
+Tests run:
+- Focused mobile bootstrap and bootstrap-route tests: passed, 13 tests.
+- Focused desktop bootstrap and bootstrap-route tests: passed, 13 tests.
+- Full `melos run analyze`, `boundary-check`, `source-text`, serialized
+  `test`, and `dependency-audit` gates: passed.
+- Dependency audit: 0 actionable upgrades; 11 newer versions remain blocked by
+  the current Dart/Flutter toolchain.
+- `git diff --check`: passed.
+
+Risks:
+- The signal stops app waiting and deadline timers but does not cancel
+  underlying product persistence or network work by itself. Concrete source
+  integration, local identity, native/device validation, durable database
+  persistence, and final UX remain open.
+
+Next reviewer:
+- Wire the signal into the concrete product source's cancellation mechanism;
+  preserve the app-owned handoff and generic native package boundaries.
+
+---
+
 ### 2026-08-10 - Codex - Bounded Production Session Hydration
 
 Summary:

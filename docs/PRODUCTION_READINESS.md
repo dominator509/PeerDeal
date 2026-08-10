@@ -960,6 +960,11 @@ the gates below are satisfied.
   hydration with a configurable positive timeout and a five-second default;
   mounted routes show a loading surface while pending and use the existing
   route-unavailable fallback after timeout or other failure.
+  Its optional cancellation signal is completed by the mounted route on
+  replacement or disposal, and the bootstrap cancels its own deadline timer
+  on source completion, cancellation, timeout, or failure. The concrete product
+  source remains responsible for canceling underlying persistence or network
+  work.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

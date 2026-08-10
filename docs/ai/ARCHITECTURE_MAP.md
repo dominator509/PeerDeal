@@ -83,9 +83,11 @@ Local Hold'em producer flow:
    and hydrated table/cursor scope before invoking the factory. Source loading
    has a positive configurable timeout with a five-second default; the mounted
    route stays in a loading state while pending and fails closed after timeout
-   or source failure. Successful join outcomes carry the resolved invite for
-   this handoff. Demo snapshots and compiled Game Files are not live session
-   identity sources.
+   or source failure. The source accepts an optional cancellation signal; route
+   replacement and disposal complete it, while bootstrap cleanup cancels the
+   deadline timer. Successful join outcomes carry the resolved invite for this
+   handoff. Demo snapshots and compiled Game Files are not live session identity
+   sources.
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session

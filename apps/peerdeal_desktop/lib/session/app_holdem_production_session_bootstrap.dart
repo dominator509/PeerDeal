@@ -13,7 +13,10 @@ import 'app_holdem_production_session_factory.dart';
 /// invite. This source owns persistence/network hydration; the app bootstrap
 /// only validates the correlation and composes the existing runtime.
 abstract interface class AppHoldemProductionSessionSource {
-  Future<AppHoldemProductionSessionInput> load(ResolvedInvite invite);
+  Future<AppHoldemProductionSessionInput> load(
+    ResolvedInvite invite, {
+    Future<void>? cancellation,
+  });
 }
 
 /// All product-owned inputs required by the app Hold'em composition boundary.
@@ -74,8 +77,9 @@ class AppHoldemProductionSessionBootstrap {
   final Duration sourceLoadTimeout;
 
   Future<AppHoldemProductionSessionComposition> createForInvite(
-    ResolvedInvite invite,
-  ) async {
+    ResolvedInvite invite, {
+    Future<void>? cancellation,
+  }) async {
     if (sourceLoadTimeout <= Duration.zero) {
       throw ArgumentError.value(
         sourceLoadTimeout,
@@ -84,13 +88,7 @@ class AppHoldemProductionSessionBootstrap {
       );
     }
     _validateInvite(invite);
-    final input = await _source
-        .load(invite)
-        .timeout(
-          sourceLoadTimeout,
-          onTimeout: () =>
-              throw TimeoutException('Production session source timed out.'),
-        );
+    final input = await _loadSource(invite, cancellation: cancellation);
     _validateInput(invite, input);
 
     return _factory.create(
@@ -111,6 +109,49 @@ class AppHoldemProductionSessionBootstrap {
       pollInterval: input.pollInterval,
       timerFactory: input.timerFactory,
     );
+  }
+
+  Future<AppHoldemProductionSessionInput> _loadSource(
+    ResolvedInvite invite, {
+    Future<void>? cancellation,
+  }) {
+    final result = Completer<AppHoldemProductionSessionInput>();
+    Timer? timeoutTimer;
+
+    void completeValue(AppHoldemProductionSessionInput input) {
+      if (result.isCompleted) return;
+      timeoutTimer?.cancel();
+      result.complete(input);
+    }
+
+    void completeError(Object error, [StackTrace? stackTrace]) {
+      if (result.isCompleted) return;
+      timeoutTimer?.cancel();
+      result.completeError(error, stackTrace);
+    }
+
+    final sourceFuture = _source.load(invite, cancellation: cancellation);
+    timeoutTimer = Timer(
+      sourceLoadTimeout,
+      () => completeError(
+        TimeoutException('Production session source timed out.'),
+      ),
+    );
+    sourceFuture.then<void>(
+      completeValue,
+      onError: (Object error, StackTrace stackTrace) {
+        completeError(error, stackTrace);
+      },
+    );
+    cancellation?.then<void>(
+      (_) => completeError(
+        StateError('Production session source load cancelled.'),
+      ),
+      onError: (Object error, StackTrace stackTrace) {
+        completeError(error, stackTrace);
+      },
+    );
+    return result.future;
   }
 
   static void _validateInvite(ResolvedInvite invite) {

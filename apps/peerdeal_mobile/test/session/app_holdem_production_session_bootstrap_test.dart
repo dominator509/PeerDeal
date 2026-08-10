@@ -84,6 +84,26 @@ void main() {
     );
   });
 
+  test(
+    'forwards cancellation and stops waiting for product source loading',
+    () async {
+      final cancellation = Completer<void>();
+      final source = _Source(
+        _input(),
+        loadFuture: Completer<AppHoldemProductionSessionInput>().future,
+      );
+      final loading = AppHoldemProductionSessionBootstrap(
+        source: source,
+        sourceLoadTimeout: const Duration(seconds: 5),
+      ).createForInvite(_invite(), cancellation: cancellation.future);
+
+      cancellation.complete();
+
+      await expectLater(loading, throwsStateError);
+      expect(source.loadedCancellation, same(cancellation.future));
+    },
+  );
+
   test('rejects a non-positive product source timeout', () async {
     await expectLater(
       AppHoldemProductionSessionBootstrap(
@@ -116,12 +136,18 @@ class _Source implements AppHoldemProductionSessionSource {
   ResolvedInvite? loadedInvite;
 
   @override
-  Future<AppHoldemProductionSessionInput> load(ResolvedInvite invite) async {
+  Future<AppHoldemProductionSessionInput> load(
+    ResolvedInvite invite, {
+    Future<void>? cancellation,
+  }) async {
     loadedInvite = invite;
+    loadedCancellation = cancellation;
     final pending = loadFuture;
     if (pending != null) return pending;
     return input;
   }
+
+  Future<void>? loadedCancellation;
 }
 
 AppHoldemProductionSessionInput _input({String tableId = 'table_001'}) {

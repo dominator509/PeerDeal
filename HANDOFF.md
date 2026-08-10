@@ -22,8 +22,8 @@ Android native transport receiver lifecycle hardening, T38 Windows native
 transport socket lifecycle hardening, T39 Android secure-key teardown
 hardening, T40 Windows native channel teardown hardening, T41 app-owned
 production session bootstrap-route mounting, and T42 app-shell route-argument
-handoff, T43 join-to-production session handoff, and T44 bounded
-production-session source loading
+handoff, T43 join-to-production session handoff, T44 bounded production-session
+source loading, and T45 cancellable production-session source loading
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -351,3 +351,9 @@ are implemented on branch
 - T42 focused mobile and desktop app-shell tests: passed, 74 tests each.
 - T43 focused mobile and desktop join-flow/app-shell suites: passed, 92 tests
   each.
+- T45 focused mobile and desktop production-session bootstrap and route suites:
+  passed, 13 tests each.
+- T45 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- T45 `git diff --check`: passed.

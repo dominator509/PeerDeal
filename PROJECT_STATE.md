@@ -336,6 +336,22 @@ Generated: 2026-08-10
 - Windows runtime/profile validation, Android device validation, release
   signing, and other-platform implementations remain open.
 
+## Recent T45 Changes
+
+- Mirrored `AppHoldemProductionSessionSource` contracts now accept an optional
+  cancellation signal. The bootstrap races source completion, cancellation,
+  and the positive five-second-default timeout, cleaning up its deadline timer
+  when any outcome wins.
+- Mounted bootstrap routes complete the cancellation signal when replaced or
+  disposed, so stale product hydration is no longer awaited by the UI. The
+  concrete product source still owns cancellation of its underlying persistence
+  or network operation.
+- Focused mobile and desktop bootstrap plus route tests passed with 13 tests
+  each. Full analyze, boundary, source-text, serialized test, dependency audit,
+  and diff-check gates passed; product source hydration, local identity,
+  native/device validation, durable database persistence, and final UX remain
+  open.
+
 ## Recent T44 Changes
 
 - Mirrored `AppHoldemProductionSessionBootstrap` owners now enforce a positive

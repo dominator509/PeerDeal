@@ -94,6 +94,71 @@ void main() {
     expect(find.text('Route unavailable'), findsOneWidget);
   });
 
+  testWidgets('cancels product source loading when the route is disposed', (
+    tester,
+  ) async {
+    final source = _Source(
+      _input(),
+      pending: Completer<AppHoldemProductionSessionInput>().future,
+    );
+    final bootstrap = AppHoldemProductionSessionBootstrap(
+      source: source,
+      sourceLoadTimeout: const Duration(seconds: 5),
+    );
+
+    await tester.pumpWidget(
+      _routeHost(
+        bootstrap: bootstrap,
+        settings: RouteSettings(name: '/holdem-live', arguments: _invite()),
+      ),
+    );
+    final cancellation = source.loadedCancellation;
+    expect(cancellation, isNotNull);
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+
+    await expectLater(cancellation!, completes);
+  });
+
+  testWidgets('cancels replaced product source loading', (tester) async {
+    final source = _Source(
+      _input(),
+      pending: Completer<AppHoldemProductionSessionInput>().future,
+    );
+    final bootstrap = AppHoldemProductionSessionBootstrap(
+      source: source,
+      sourceLoadTimeout: const Duration(seconds: 5),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AppHoldemProductionSessionBootstrapRoute(
+          bootstrap: bootstrap,
+          invite: _invite(),
+          routeName: '/holdem-live',
+        ),
+      ),
+    );
+    final cancellation = source.loadedCancellation;
+    expect(cancellation, isNotNull);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AppHoldemProductionSessionBootstrapRoute(
+          bootstrap: bootstrap,
+          invite: _invite(),
+          routeName: '/holdem-live-replacement',
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await expectLater(cancellation!, completes);
+  });
+
   testWidgets('fails closed when the bootstrapped route path differs', (
     tester,
   ) async {
@@ -152,13 +217,19 @@ class _Source implements AppHoldemProductionSessionSource {
   ResolvedInvite? loadedInvite;
 
   @override
-  Future<AppHoldemProductionSessionInput> load(ResolvedInvite invite) async {
+  Future<AppHoldemProductionSessionInput> load(
+    ResolvedInvite invite, {
+    Future<void>? cancellation,
+  }) async {
     loadedInvite = invite;
+    loadedCancellation = cancellation;
     if (fail) throw StateError('product source failed');
     final pending = this.pending;
     if (pending != null) return pending;
     return input;
   }
+
+  Future<void>? loadedCancellation;
 }
 
 AppHoldemProductionSessionInput _input({String path = '/holdem-live'}) {
