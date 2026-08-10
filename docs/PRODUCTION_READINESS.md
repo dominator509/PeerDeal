@@ -268,6 +268,10 @@ the gates below are satisfied.
 - Android native transport method calls now resolve with bounded fail-closed
   payloads when teardown closes or rejects the executor, and accepted work is
   allowed to drain during handler shutdown.
+- Android native transport receiver setup now publishes socket and multicast
+  resources atomically with teardown, releases partial setup resources on
+  failure, and clears queued frames during close so teardown cannot leak a
+  newly-created receiver or retain transport payloads.
 - Generic native transport method-channel capability, send, and receive calls
   now use a bounded five-second default deadline and return stable fail-closed
   timeout results instead of leaving app transport operations indefinitely

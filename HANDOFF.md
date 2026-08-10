@@ -17,7 +17,8 @@ resumable publication hardening, T30 bounded Android/Windows host transport,
 T31 app-owned production session composition, T32 resolved-invite production
 session source/bootstrap handoff, T33 native transport lifecycle hardening,
 T34 bounded secure-key method-channel calls, T35 bounded native transport
-method-channel calls, and T36 bounded local-network method-channel calls
+method-channel calls, T36 bounded local-network method-channel calls, and T37
+Android native transport receiver lifecycle hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -287,3 +288,5 @@ are implemented on branch
 - T36 full analyzer, boundary-check, source-text, serialized test, and
   dependency-audit gates: passed; dependency audit reported zero actionable
   upgrades.
+- T37 Android debug APK build: passed. Android receiver setup/teardown now
+  closes partial socket and multicast-lock resources and clears queued frames.

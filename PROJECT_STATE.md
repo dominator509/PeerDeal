@@ -290,6 +290,17 @@ Generated: 2026-08-10
   device/network reachability, and other-platform implementations remain
   external checks.
 
+## Recent T37 Changes
+
+- Hardened Android native multicast transport teardown against receiver-setup
+  races. Socket and multicast-lock publication is now serialized with close,
+  partial setup resources are released, and queued frames are cleared during
+  teardown.
+- `rtk flutter build apk --debug --no-pub` passed. The generic transport
+  channel payload and app/native package boundaries are unchanged.
+- Android device/network reachability, firewall behavior, runtime persistence,
+  release signing, and other-platform implementations remain open.
+
 ## Required Gates
 
 Run after each retrofit step:

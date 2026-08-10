@@ -47,6 +47,37 @@ Run the full repository gates, then continue with the next actionable gap in
 
 ---
 
+### 2026-08-10 - Codex - Android Native Transport Teardown Race
+
+Summary:
+- Hardened the Android native multicast transport host against teardown racing
+  with receiver setup.
+- Socket and multicast-lock resources are published only while the handler is
+  live; partial setup resources are released on failure, and queued transport
+  frames are cleared during close.
+- The generic method-channel payload and package boundaries are unchanged.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `docs/PRODUCTION_READINESS.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+
+Tests run:
+- `rtk flutter build apk --debug --no-pub`: passed.
+
+Risks:
+- Android device/network reachability, firewall behavior, runtime persistence,
+  release signing, and other-platform native hosts remain external readiness
+  checks.
+
+Next reviewer:
+- Run the full repository gates, then continue with runtime Android/Windows
+  validation or the next documented other-platform implementation gap.
+
+---
+
 ### 2026-08-10 - Codex - Local-Network Method-Channel Deadline
 
 Summary:

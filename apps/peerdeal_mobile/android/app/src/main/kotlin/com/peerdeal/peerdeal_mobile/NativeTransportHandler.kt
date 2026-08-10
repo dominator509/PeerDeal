@@ -46,6 +46,7 @@ internal class NativeTransportHandler(
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
     private val frames = ConcurrentLinkedQueue<TransportFrame>()
+    private val lifecycleLock = Any()
     private var receiveSocket: MulticastSocket? = null
     private var multicastLock: WifiManager.MulticastLock? = null
     @Volatile private var receiverAvailable = false
@@ -67,16 +68,19 @@ internal class NativeTransportHandler(
     }
 
     fun close() {
-        closed = true
-        receiveSocket?.close()
-        receiveSocket = null
-        receiverAvailable = false
-        multicastLock?.let { lock ->
-            if (lock.isHeld) {
-                lock.release()
-            }
+        var socket: MulticastSocket? = null
+        var lock: WifiManager.MulticastLock? = null
+        synchronized(lifecycleLock) {
+            closed = true
+            socket = receiveSocket
+            receiveSocket = null
+            receiverAvailable = false
+            lock = multicastLock
+            multicastLock = null
+            frames.clear()
         }
-        multicastLock = null
+        socket?.close()
+        releaseMulticastLock(lock)
         executor.shutdown()
     }
 
@@ -186,38 +190,66 @@ internal class NativeTransportHandler(
     )
 
     private fun ensureReceiver(): Boolean {
-        if (closed) return false
-        if (receiverAvailable && receiveSocket?.isClosed == false) return true
+        synchronized(lifecycleLock) {
+            if (closed) return false
+            if (receiverAvailable && receiveSocket?.isClosed == false) return true
+        }
+
+        var candidateSocket: MulticastSocket? = null
+        var candidateLock: WifiManager.MulticastLock? = null
         return try {
-            val socket = MulticastSocket(null).apply {
+            candidateSocket = MulticastSocket(null).apply {
                 reuseAddress = true
                 bind(InetSocketAddress(PORT))
                 timeToLive = 1
                 joinGroup(InetAddress.getByName(MULTICAST_ADDRESS))
             }
             val wifiManager = appContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-            val lock = wifiManager?.createMulticastLock("peerdeal-transport")
-            if (lock != null) {
-                lock.setReferenceCounted(false)
-                lock.acquire()
+            candidateLock = wifiManager?.createMulticastLock("peerdeal-transport")
+            if (candidateLock != null) {
+                candidateLock?.setReferenceCounted(false)
+                candidateLock?.acquire()
             }
-            receiveSocket = socket
-            multicastLock = lock
-            receiverAvailable = true
-            Thread({ receiveLoop(socket) }, "peerdeal-transport-receiver").apply {
+
+            var published = false
+            synchronized(lifecycleLock) {
+                if (!closed) {
+                    receiveSocket = candidateSocket
+                    multicastLock = candidateLock
+                    receiverAvailable = true
+                    published = true
+                }
+            }
+            if (!published) {
+                candidateSocket?.close()
+                releaseMulticastLock(candidateLock)
+                return false
+            }
+
+            val receiverSocket = candidateSocket
+                ?: return false
+            Thread({ receiveLoop(receiverSocket) }, "peerdeal-transport-receiver").apply {
                 isDaemon = true
                 start()
             }
             true
         } catch (_: Exception) {
-            receiveSocket?.close()
-            receiveSocket = null
-            multicastLock?.let { lock ->
-                if (lock.isHeld) lock.release()
+            synchronized(lifecycleLock) {
+                if (receiveSocket === candidateSocket) {
+                    receiveSocket = null
+                    multicastLock = null
+                    receiverAvailable = false
+                }
             }
-            multicastLock = null
-            receiverAvailable = false
+            candidateSocket?.close()
+            releaseMulticastLock(candidateLock)
             false
+        }
+    }
+
+    private fun releaseMulticastLock(lock: WifiManager.MulticastLock?) {
+        if (lock?.isHeld == true) {
+            lock.release()
         }
     }
 
@@ -227,9 +259,14 @@ internal class NativeTransportHandler(
             try {
                 val packet = DatagramPacket(buffer, buffer.size)
                 socket.receive(packet)
-                decode(packet.data, packet.length)?.let { frame ->
-                    while (frames.size >= MAX_QUEUE_SIZE) frames.poll()
-                    frames.offer(frame)
+                val frame = decode(packet.data, packet.length)
+                if (frame != null) {
+                    synchronized(lifecycleLock) {
+                        if (!closed && !socket.isClosed) {
+                            while (frames.size >= MAX_QUEUE_SIZE) frames.poll()
+                            frames.offer(frame)
+                        }
+                    }
                 }
             } catch (_: Exception) {
                 if (closed || socket.isClosed) return
