@@ -12,6 +12,43 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - App-Shell Route-Argument Handoff
+
+Summary:
+- Added an optional opaque `arguments` payload to mirrored
+  `PeerDealAppNavigationEntry` values.
+- Default app-home production navigation now forwards that payload through
+  `RouteSettings.arguments`, enabling a product caller to launch the T41
+  bootstrap-route adapter with a resolved invite while keeping session policy
+  and validation in the destination route.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused mobile app-shell tests: passed, 74 tests.
+- Focused desktop app-shell tests: passed, 74 tests.
+
+Risks:
+- Concrete product state hydration, local identity, native/device runtime
+  validation, durable persistence, other-platform hosts, and final product UX
+  remain open. This handoff only transports an opaque route payload.
+
+Next reviewer:
+- Use the new payload from the real product join/session flow once its source
+  and local identity providers exist; do not use demo or fixture state.
+
+---
+
 ### 2026-08-10 - Codex - Windows Native Channel Teardown
 
 Summary:

@@ -318,6 +318,13 @@ existing route builder. Missing arguments, source/bootstrap errors, and route
 path mismatches use the existing safe route fallback. It does not supply the
 product session source, persistence, or local identity.
 
+`PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
+The default app-shell home forwards that value through
+`RouteSettings.arguments`; it does not interpret, persist, or validate the
+payload. The destination route owns its type and fail-closed identity checks,
+which lets a product caller carry a validated `ResolvedInvite` into the T41
+bootstrap-route adapter without moving session policy into the shell.
+
 `AppHoldemProductionTableSurface` reads bounded state from the route context and
 dispatches local actions through `AppHoldemTableSessionRuntime`. It renders
 controls only for the configured local seat during a betting phase with a live

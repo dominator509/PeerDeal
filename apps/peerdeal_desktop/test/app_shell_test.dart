@@ -1275,6 +1275,49 @@ void main() {
     expect(find.text('Production table route'), findsOneWidget);
   });
 
+  testWidgets('forwards production navigation arguments to route settings', (
+    tester,
+  ) async {
+    const invite = ResolvedInvite(
+      inviteId: 'inv_001',
+      tableId: 'table_001',
+      sessionId: 'session_001',
+      modeType: 'open_table',
+      protocolVersion: '1.0.0',
+      requiresReceiptAck: true,
+      requiresRetentionAck: true,
+      requiresCaptureAck: true,
+    );
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{DemoSliceRoutes.home},
+          productionRoutes: <String, WidgetBuilder>{
+            '/table-live': (context) {
+              final arguments = ModalRoute.of(context)?.settings.arguments;
+              return Text(
+                arguments is ResolvedInvite ? arguments.inviteId : 'missing',
+              );
+            },
+          },
+          productionNavigation: const <PeerDealAppNavigationEntry>[
+            PeerDealAppNavigationEntry(
+              label: 'Live table',
+              path: '/table-live',
+              arguments: invite,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Live table'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('inv_001'), findsOneWidget);
+  });
+
   testWidgets('separates production and demo navigation on default home', (
     tester,
   ) async {

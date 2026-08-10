@@ -945,6 +945,12 @@ the gates below are satisfied.
   path correlation, and mount the existing validated route. Missing arguments,
   source failures, and path mismatches fail closed; this adapter does not
   create a product session source or local identity.
+  Mirrored app-shell `PeerDealAppNavigationEntry` values may now carry one
+  opaque route payload. Default production home navigation forwards that value
+  through `RouteSettings.arguments`, so a product caller can launch the
+  bootstrap-route adapter with its resolved invite. The shell does not inspect
+  or persist the payload; source hydration, local identity, and final product
+  navigation remain integration-owned.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

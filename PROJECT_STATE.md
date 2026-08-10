@@ -336,6 +336,17 @@ Generated: 2026-08-10
 - Windows runtime/profile validation, Android device validation, release
   signing, and other-platform implementations remain open.
 
+## Recent T42 Changes
+
+- Added an optional opaque route-argument payload to mirrored
+  `PeerDealAppNavigationEntry` values. Default app-home production navigation
+  now forwards that payload through `RouteSettings.arguments`; the shell does
+  not interpret or persist it, so the destination retains type and identity
+  validation.
+- Focused mobile and desktop app-shell tests passed with 74 tests each.
+  Concrete product source hydration, local identity, device/runtime
+  validation, and final product navigation/UX validation remain open.
+
 ## Recent T41 Changes
 
 - Added mirrored app-owned `AppHoldemProductionSessionBootstrapRoute` adapters.
@@ -347,7 +358,8 @@ Generated: 2026-08-10
   the existing route-unavailable surface.
 - Focused mobile and desktop bootstrap-route tests passed with four tests each.
   Durable state hydration, local identity, device/runtime validation, and
-  final product navigation remain open.
+  final product navigation/UX validation remained open after the route mount;
+  T42 now supplies only the generic app-shell argument handoff.
 
 ## Required Gates
 

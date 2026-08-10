@@ -41,10 +41,20 @@ const int _maxAppProductionRoutes = 24;
 const int _maxAppProductionNavigationEntries = 16;
 
 class PeerDealAppNavigationEntry {
-  const PeerDealAppNavigationEntry({required this.label, required this.path});
+  const PeerDealAppNavigationEntry({
+    required this.label,
+    required this.path,
+    this.arguments,
+  });
 
   final String label;
   final String path;
+
+  /// Optional opaque payload forwarded as [RouteSettings.arguments].
+  ///
+  /// The app shell does not interpret or persist this value. The destination
+  /// route owns its type, identity, and fail-closed validation.
+  final Object? arguments;
 }
 
 Future<void> main() async {
@@ -531,7 +541,9 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
           .map(
             (route) => DemoHomeNavigationAction(
               label: route.label,
-              onPressed: () => Navigator.of(context).pushNamed(route.path),
+              onPressed: () => Navigator.of(
+                context,
+              ).pushNamed(route.path, arguments: route.arguments),
             ),
           )
           .toList(growable: false),
@@ -539,7 +551,9 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
           .map(
             (route) => DemoHomeNavigationAction(
               label: route.label,
-              onPressed: () => Navigator.of(context).pushNamed(route.path),
+              onPressed: () => Navigator.of(
+                context,
+              ).pushNamed(route.path, arguments: route.arguments),
             ),
           )
           .toList(growable: false),

@@ -20,8 +20,9 @@ T34 bounded secure-key method-channel calls, T35 bounded native transport
 method-channel calls, T36 bounded local-network method-channel calls, T37
 Android native transport receiver lifecycle hardening, T38 Windows native
 transport socket lifecycle hardening, T39 Android secure-key teardown
-hardening, T40 Windows native channel teardown hardening, and T41 app-owned
-production session bootstrap-route mounting
+hardening, T40 Windows native channel teardown hardening, T41 app-owned
+production session bootstrap-route mounting, and T42 app-shell route-argument
+handoff
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -150,6 +151,10 @@ are implemented on branch
   callers can pass a resolved invite through route arguments, invoke the
   existing bootstrap, and mount its validated route; missing arguments, source
   failures, and route-path mismatches fail closed without exposing raw errors.
+- Added an optional opaque route-argument payload to mirrored
+  `PeerDealAppNavigationEntry` values. Default home navigation forwards the
+  payload through `RouteSettings.arguments`, allowing a product caller to
+  launch the T41 adapter without moving session semantics into the app shell.
 - Successful first-join and rejoin outcomes now retain their validated resolved
   invite for product session handoff. Demo and compiled Game File data remain
   non-authoritative and are not used to derive live session identity.
@@ -171,7 +176,9 @@ are implemented on branch
   composition and source/bootstrap seams are implemented. Remaining gaps are
   device/network validation, endpoint/source provisioning, other-platform
   native work, production database persistence, the concrete product source and
-  local identity wiring, and final production navigation/UX validation.
+  local identity wiring, and final product navigation/UX validation. The
+  generic app-shell route-argument handoff is implemented; it does not create
+  a product source or durable session state.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
@@ -329,3 +336,4 @@ are implemented on branch
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 newer versions remain blocked by the current toolchain.
 - T41 Dart format and `git diff --check`: passed.
+- T42 focused mobile and desktop app-shell tests: passed, 74 tests each.
