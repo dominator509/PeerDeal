@@ -1,6 +1,6 @@
 # Handoff
 
-Generated: 2026-08-09
+Generated: 2026-08-10
 
 ## Current Work
 
@@ -14,7 +14,8 @@ T25 app-owned Hold'em session adoption, T26 remote Hold'em event
 reconstruction, T27 app-owned Hold'em route orchestration, T28 typed
 Hold'em production-route registration, T29 production Hold'em surface and
 resumable publication hardening, T30 bounded Android/Windows host transport,
-and T31 app-owned production session composition are implemented on branch
+T31 app-owned production session composition, and T32 resolved-invite
+production session source/bootstrap handoff are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -117,6 +118,13 @@ and T31 app-owned production session composition are implemented on branch
   envelope decoding.
 - Receipt route disposal now releases native capture blocking.
 - Did not modify protocol/core package code, secrets, or locked package boundaries.
+- Added mirrored app-owned production session source/bootstrap contracts. A
+  resolved invite now reaches the bootstrap with product-loaded canonical state,
+  close-retention wiring, and local identity; table/session/protocol mismatches
+  fail before the production route is composed.
+- Successful first-join and rejoin outcomes now retain their validated resolved
+  invite for product session handoff. Demo and compiled Game File data remain
+  non-authoritative and are not used to derive live session identity.
 
 ## Review Notes
 
@@ -125,10 +133,10 @@ and T31 app-owned production session composition are implemented on branch
 - Android and Windows host work is available for runtime persistence, capture,
   and transport validation. The app-owned non-demo Hold'em route orchestration,
   typed route registration, default production surface, and production session
-  composition seams are implemented. Remaining gaps are device/network
-  validation, endpoint/source provisioning, other-platform native work,
-  production database persistence, product session/state provisioning, and
-  final production navigation/UX validation.
+  composition and source/bootstrap seams are implemented. Remaining gaps are
+  device/network validation, endpoint/source provisioning, other-platform
+  native work, production database persistence, the concrete product source and
+  local identity wiring, and final production navigation/UX validation.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
@@ -230,6 +238,9 @@ and T31 app-owned production session composition are implemented on branch
   upgrades and 11 toolchain-blocked newer versions.
 - T31 focused mobile and desktop production-session factory tests: passed, 2
   tests per app.
+- T32 focused mobile and desktop production-session bootstrap tests: passed, 3
+  tests per app; join orchestrator tests also passed with resolved-invite
+  propagation assertions.
 - T31 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 toolchain-blocked newer versions.

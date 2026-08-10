@@ -1,6 +1,6 @@
 # Project State
 
-Generated: 2026-08-09
+Generated: 2026-08-10
 
 ## Current Retrofit Position
 
@@ -225,6 +225,18 @@ Generated: 2026-08-09
   failures before a production route is exposed. It does not derive product
   IDs, persistence, or game state.
 
+## Recent T32 Changes
+
+- Added mirrored app-owned `AppHoldemProductionSessionSource` and
+  `AppHoldemProductionSessionBootstrap` contracts. A product source now loads
+  canonical table/hand state, event cursor, close-retention adapter, and local
+  identity for a resolved invite; the bootstrap validates table/session/
+  protocol correlation before invoking the T31 factory.
+- Successful first-join and rejoin outcomes now carry the validated
+  `ResolvedInvite`, allowing product orchestration to hand the joined identity
+  to the production session bootstrap without deriving IDs from demo or Game
+  File data.
+
 ## Required Gates
 
 Run after each retrofit step:
@@ -245,8 +257,10 @@ Run after each retrofit step:
    implementations behind the existing generic method-channel contracts; the
    Android/Windows transport is now host-backed but still needs device/network
    reachability validation.
-3. Invoke `AppHoldemProductionSessionFactory` from the product's real
-   session/state source and local identity; native peer transport device/network
-   validation, and final UX validation remain separate.
+3. Supply the concrete product implementation of
+   `AppHoldemProductionSessionSource` and invoke
+   `AppHoldemProductionSessionBootstrap` from the real session/state and local
+   identity flow; native peer transport device/network validation, and final UX
+   validation remain separate.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
    without crossing locked package boundaries.

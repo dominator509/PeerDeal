@@ -1,0 +1,182 @@
+import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_desktop/join_flow/join_flow_models.dart';
+import 'package:peerdeal_desktop/recovery/app_recovery_retention_coordinator.dart';
+import 'package:peerdeal_desktop/recovery/app_recovery_session_close_coordinator.dart';
+import 'package:peerdeal_desktop/recovery/app_recovery_session_close_event_adapter.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_bootstrap.dart';
+import 'package:peerdeal_privacy/peerdeal_privacy.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
+import 'package:peerdeal_variants/peerdeal_variants.dart';
+import 'package:test/test.dart';
+
+void main() {
+  test(
+    'loads resolved product state and composes the production route',
+    () async {
+      final invite = _invite();
+      final source = _Source(_input());
+
+      final composition = await AppHoldemProductionSessionBootstrap(
+        source: source,
+      ).createForInvite(invite);
+
+      expect(source.loadedInvite, same(invite));
+      expect(composition.sessionRuntime.state.tableId, invite.tableId);
+      expect(composition.sessionRuntime.state.sessionId, invite.sessionId);
+      expect(
+        composition.holdemRuntime.cursor.protocolVersion,
+        invite.protocolVersion,
+      );
+      expect(composition.route.path, '/holdem-live');
+    },
+  );
+
+  test(
+    'rejects hydrated state that does not match the resolved invite',
+    () async {
+      final source = _Source(_input(tableId: 'table_other'));
+
+      await expectLater(
+        AppHoldemProductionSessionBootstrap(
+          source: source,
+        ).createForInvite(_invite()),
+        throwsStateError,
+      );
+    },
+  );
+
+  test('rejects malformed invite before loading product state', () async {
+    final source = _Source(_input());
+
+    await expectLater(
+      AppHoldemProductionSessionBootstrap(source: source).createForInvite(
+        const ResolvedInvite(
+          inviteId: ' inv_001',
+          tableId: 'table_001',
+          sessionId: 'session_001',
+          modeType: 'open_table',
+          protocolVersion: '1.0.0',
+          requiresReceiptAck: true,
+          requiresRetentionAck: true,
+          requiresCaptureAck: true,
+        ),
+      ),
+      throwsArgumentError,
+    );
+    expect(source.loadedInvite, isNull);
+  });
+}
+
+ResolvedInvite _invite() {
+  return const ResolvedInvite(
+    inviteId: 'inv_001',
+    tableId: 'table_001',
+    sessionId: 'session_001',
+    modeType: 'open_table',
+    protocolVersion: '1.0.0',
+    requiresReceiptAck: true,
+    requiresRetentionAck: true,
+    requiresCaptureAck: true,
+  );
+}
+
+class _Source implements AppHoldemProductionSessionSource {
+  _Source(this.input);
+
+  final AppHoldemProductionSessionInput input;
+  ResolvedInvite? loadedInvite;
+
+  @override
+  Future<AppHoldemProductionSessionInput> load(ResolvedInvite invite) async {
+    loadedInvite = invite;
+    return input;
+  }
+}
+
+AppHoldemProductionSessionInput _input({String tableId = 'table_001'}) {
+  final tableState = TableState.initial(
+    tableId: tableId,
+    sessionId: 'session_001',
+    protocolVersion: '1.0.0',
+  );
+  return AppHoldemProductionSessionInput(
+    initialTableState: tableState,
+    initialHandState: const HoldemHandState(
+      handId: 'hand_001',
+      phase: HoldemHandPhase.bettingPreflop,
+      bettingRound: HoldemBettingRound.preflop,
+      currentActorSeat: 1,
+      buttonSeat: 1,
+      smallBlindSeat: 2,
+      bigBlindSeat: 3,
+      currentBetToCall: 100,
+      minimumRaiseAmount: 100,
+      seats: <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+        ),
+      ],
+    ),
+    initialCursor: HoldemEventCursor(
+      protocolVersion: '1.0.0',
+      tableId: tableId,
+      sessionId: 'session_001',
+      nextEventSeq: 1,
+      previousEventHash: genesisEventHash,
+      actorRef: 'peer_local',
+      eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
+      emittedAtFactory: () => '2026-08-10T00:00:00Z',
+    ),
+    closeEventAdapter: AppRecoverySessionCloseEventAdapter(
+      sessionCloseCoordinator: AppRecoverySessionCloseCoordinator(
+        retentionCoordinator: AppRecoveryRetentionCoordinator(
+          store: InMemoryRecoveryPersistenceStore(),
+        ),
+        scope: RecoveryPersistenceScope(
+          tableId: tableState.tableId,
+          sessionId: tableState.sessionId,
+          protocolVersion: tableState.protocolVersion,
+        ),
+        policy: _policy,
+      ),
+    ),
+    path: '/holdem-live',
+    navigationLabel: 'Live Holdem',
+    peerId: 'peer_remote',
+    localPeerId: 'peer_local',
+    localSeat: 1,
+  );
+}
+
+const _policy = RetentionPolicy(
+  mode: RetentionMode.timedSandbox,
+  wipeSchedule: WipeSchedule(
+    mode: 'timed_sandbox',
+    timedWipeSeconds: 0,
+    durableExportAllowed: true,
+    ephemeralExportOnly: false,
+  ),
+  manualWipeConfirmation: ManualWipeConfirmation(
+    requiresSecondConfirmation: true,
+    confirmationPhrase: 'WIPE RECEIPT',
+  ),
+  allowSessionRestore: true,
+  allowUserRestore: false,
+  disappearingPolicy: DisappearingPolicy(
+    disappearingChatEnabled: false,
+    disappearingSessionMode: false,
+    messageRetentionPolicy: MessageRetentionPolicy.standard,
+  ),
+  metadataProfile: MetadataMinimizationProfile(
+    minimizeMetadata: true,
+    exportMinimalIdentity: true,
+    allowDeviceIdentifiers: false,
+    allowIpAddressCapture: false,
+    allowPseudonymousAliases: true,
+  ),
+);

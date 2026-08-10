@@ -898,7 +898,10 @@ the gates below are satisfied.
   `AppHoldemProductionSessionFactory` seams now compose the existing route
   boundary from injected canonical session/variant state, close-retention
   adapter, and peer identity with fail-closed app metadata and cursor/session
-  checks; the real product source still owns those inputs.
+  checks; mirrored `AppHoldemProductionSessionSource` and
+  `AppHoldemProductionSessionBootstrap` seams now validate resolved-invite
+  correlation before invoking that factory. The real product source still
+  owns durable state hydration and local identity.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
@@ -908,7 +911,8 @@ the gates below are satisfied.
    that satisfy the locked method-channel contracts, starting with other
    platform secure receipt key storage and capture enforcement behind the
    existing key-ring, cipher, signer, and app capture contracts.
-3. Invoke `AppHoldemProductionSessionFactory` from the real product
-   session/state source and local identity; complete product navigation/UI
-   validation while keeping native transport/device validation and durable
-   database persistence separate.
+3. Supply the concrete `AppHoldemProductionSessionSource` and invoke
+   `AppHoldemProductionSessionBootstrap` from the real product session/state
+   source and local identity; complete product navigation/UI validation while
+   keeping native transport/device validation and durable database persistence
+   separate.

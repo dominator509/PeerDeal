@@ -83,6 +83,33 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Production Session Source Handoff
+
+Summary:
+- Added mirrored `AppHoldemProductionSessionSource` and
+  `AppHoldemProductionSessionBootstrap` contracts.
+- Successful first-join and rejoin outcomes now carry `ResolvedInvite` for
+  product session handoff.
+- Bootstrap validation rejects invite/table/cursor scope drift before route or
+  native transport composition and never derives identity from demo/Game File
+  data.
+
+Files changed:
+- Mirrored app session bootstrap source and focused tests.
+- Mirrored join outcome/orchestrator files and focused tests.
+- Readiness, queue, project-state, architecture, API, and AI handoff records.
+
+Tests run:
+- Focused mobile bootstrap and join orchestrator tests: passed, 14 tests.
+- Focused desktop bootstrap and join orchestrator tests: passed, 14 tests.
+
+Open integration work:
+- A concrete product source still owns durable state hydration, local identity,
+  and native/device/network provisioning. No demo or compiled Game File fallback
+  was added.
+
+---
+
 ### 2026-08-10 - Codex - Native Android and Windows Peer Transport
 
 Summary:

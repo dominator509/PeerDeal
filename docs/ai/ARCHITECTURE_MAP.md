@@ -78,6 +78,11 @@ Local Hold'em producer flow:
    Hold'em runtime, close-retention adapter, default surface, and peer identity
    from those injected product inputs. It rejects unsafe app metadata and
    cursor/session mismatches without creating product truth.
+8. `AppHoldemProductionSessionSource` loads those inputs for a validated
+   `ResolvedInvite`; `AppHoldemProductionSessionBootstrap` checks exact invite
+   and hydrated table/cursor scope before invoking the factory. Successful join
+   outcomes carry the resolved invite for this handoff. Demo snapshots and
+   compiled Game Files are not live session identity sources.
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session

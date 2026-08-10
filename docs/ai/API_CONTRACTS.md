@@ -292,6 +292,18 @@ or game state. It fails closed on unsafe metadata, reused peer identities,
 missing local seats, invalid polling intervals, and runtime cursor/session
 composition errors.
 
+`AppHoldemProductionSessionSource` and
+`AppHoldemProductionSessionBootstrap` are the app-owned handoff above that
+factory. The source loads product-owned canonical state, cursor, close-retention
+adapter, route metadata, and local/remote identity for a `ResolvedInvite`. The
+bootstrap validates invite identity and exact table/session/protocol correlation
+against the loaded table state and cursor, then invokes the existing factory.
+It never derives live identifiers from demo snapshots or compiled Game Files.
+Successful first-join and rejoin `JoinFlowOutcome` values carry their resolved
+invite so product orchestration can call this bootstrap after join governance
+acceptance. Concrete persistence hydration, local identity provisioning, and
+native/device reachability remain outside the app contract.
+
 `AppHoldemProductionTableSurface` reads bounded state from the route context and
 dispatches local actions through `AppHoldemTableSessionRuntime`. It renders
 controls only for the configured local seat during a betting phase with a live

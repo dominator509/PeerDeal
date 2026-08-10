@@ -222,10 +222,11 @@ class JoinFlowOrchestrator {
 
     await _safeEmitState(state: JoinFlowState.joined, resultCode: 'OK_JOINED');
 
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.joined,
       status: JoinDecisionStatus.okJoined,
       resultCode: 'OK_JOINED',
+      resolvedInvite: resolvedInvite,
     );
   }
 
@@ -303,10 +304,11 @@ class JoinFlowOrchestrator {
       resultCode: 'OK_REJOINED',
     );
 
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.rejoined,
       status: JoinDecisionStatus.okRejoined,
       resultCode: 'OK_REJOINED',
+      resolvedInvite: resolvedInvite,
     );
   }
 

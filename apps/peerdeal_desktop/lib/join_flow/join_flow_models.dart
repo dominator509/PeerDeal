@@ -126,6 +126,7 @@ class JoinFlowOutcome {
     required this.resultCode,
     this.diagnostics = const <ProtocolDiagnostic>[],
     this.message,
+    this.resolvedInvite,
   });
 
   final JoinFlowState state;
@@ -133,4 +134,5 @@ class JoinFlowOutcome {
   final String resultCode;
   final List<ProtocolDiagnostic> diagnostics;
   final String? message;
+  final ResolvedInvite? resolvedInvite;
 }

@@ -50,6 +50,8 @@ void main() {
 
     expect(result.resultCode, 'OK_JOINED');
     expect(result.state, JoinFlowState.joined);
+    expect(result.resolvedInvite?.tableId, 'tbl_001');
+    expect(result.resolvedInvite?.sessionId, 'sess_001');
   });
 
   test('returns joined when event sink throws', () async {
@@ -165,6 +167,8 @@ void main() {
 
     expect(result.resultCode, 'OK_REJOINED');
     expect(result.state, JoinFlowState.rejoined);
+    expect(result.resolvedInvite?.tableId, 'tbl_001');
+    expect(result.resolvedInvite?.sessionId, 'sess_001');
   });
 
   test('rejects first join when invite resolution throws', () async {
