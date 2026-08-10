@@ -2771,6 +2771,37 @@ Codex should run the full local gate set and commit if green.
 
 ---
 
+### 2026-08-09 - Codex - Windows Native Host Safety Hardening
+
+Summary:
+Hardened the Windows secure-key host against null output buffers and malformed
+Credential Manager blob shapes, including zero-length blobs. Capture capability
+and enablement now require Windows 10 build 19041 or newer, matching the
+availability of `WDA_EXCLUDEFROMCAPTURE`; unsupported hosts fail closed to the
+existing app-owned visual fallback.
+
+Files changed:
+- `apps/peerdeal_desktop/windows/runner/windows_secure_key_storage.cpp`
+- `apps/peerdeal_desktop/windows/runner/windows_capture_protection.cpp`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/REPO_BRIEF.md`
+- `docs/ai/API_CONTRACTS.md`
+- `HANDOFF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- `flutter build windows --debug --no-pub`
+
+Risks:
+- Native runtime persistence, OS capture behavior, Android signing/device
+  validation, and non-Windows implementations remain open.
+
+Next reviewer:
+Run the full repository gates and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Recovery Environment Root Padding Gate
 
 Summary:

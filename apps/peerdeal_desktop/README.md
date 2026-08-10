@@ -41,6 +41,12 @@ Setup flow:
 - Records are validated and stored as a bounded versioned envelope in Windows
   Credential Manager under a namespace-derived target. The host does not
   interpret receipt purposes, algorithms, or rotation policy.
+- The host rejects malformed Credential Manager records, including null
+  pointers paired with non-empty blobs, and lets the generic decoder reject
+  empty or schema-invalid envelopes.
+- Capture blocking is advertised and enabled only on Windows 10 build 19041
+  or newer; unsupported hosts return the existing fail-closed result so the
+  app can apply visual obscuring.
 - Build the host with `flutter build windows --no-pub`. Credential Manager
   runtime persistence and capture behavior still require an operator
   profile/device validation.

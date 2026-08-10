@@ -151,9 +151,13 @@ the gates below are satisfied.
   persists bounded versioned records through Windows Credential Manager without
   adding receipt semantics to the native bridge.
 - Android and Windows hosts now implement the generic capture action contract;
-  Android toggles `FLAG_SECURE`, Windows uses `SetWindowDisplayAffinity`, and
-  receipt route disposal releases blocking. Failed or unconfirmed native
-  actions downgrade to app-owned visual obscuring with a scrubbed warning.
+  Android toggles `FLAG_SECURE`, Windows uses `SetWindowDisplayAffinity` on
+  Windows 10 build 19041 or newer, and receipt route disposal releases
+  blocking. Unsupported, failed, or unconfirmed native actions downgrade to
+  app-owned visual obscuring with a scrubbed warning.
+- The Windows secure-key host now rejects malformed Credential Manager pointer
+  and blob combinations and avoids constructing ranges from null zero-length
+  blobs before the bounded envelope decoder applies schema validation.
 - App-owned capture surface coordinators now scrub sensitive native capture
   notes before UI projection, replacing token, secret, password, or platform
   path-like notes with stable unavailable text.

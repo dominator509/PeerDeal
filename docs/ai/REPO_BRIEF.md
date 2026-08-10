@@ -93,10 +93,10 @@ dart analyze .
 - Receipts are opaque export artifacts, not a general database.
 - Android mobile now has a Keystore-backed generic secure-key host, and the
   Windows desktop host now uses Credential Manager, both behind the existing
-  method-channel contract. Native transport, capture blocking, durable event
-  storage, runtime key persistence validation, and other platform
-  implementations remain readiness gaps documented in
-  `docs/PRODUCTION_READINESS.md`.
+  method-channel contract. Android and Windows capture enforcement is now
+  host-backed, with runtime/device validation still open. Native transport,
+  durable event storage, and other platform implementations remain readiness
+  gaps documented in `docs/PRODUCTION_READINESS.md`.
 
 ## Do Not Touch Without Approval
 

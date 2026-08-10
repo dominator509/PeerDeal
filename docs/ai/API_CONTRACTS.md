@@ -315,9 +315,10 @@ replaced with stable unavailable text rather than exposed to app surfaces.
   the host returns only the generic snapshot/mutation maps and keeps receipt
   policy in app/receipt code.
 - The Android capture host applies `setBlocking` through `FLAG_SECURE`, and the
-  Windows capture host applies it through `SetWindowDisplayAffinity`. App
-  capture policy remains in `peerdeal_capture`; host enforcement is additive,
-  fail-closed, and still requires runtime/device validation.
+  Windows capture host applies it through `SetWindowDisplayAffinity` only when
+  Windows capture exclusion support is available (Windows 10 build 19041 or
+  newer). App capture policy remains in `peerdeal_capture`; host enforcement is
+  additive, fail-closed, and still requires runtime/device validation.
 - App orchestration should surface scrubbed diagnostics, not raw secrets,
   credentials, or platform exception payloads.
 

@@ -399,6 +399,11 @@ WindowsSecureKeyStorage::ReadStatus
 WindowsSecureKeyStorage::ReadCredentialBlob(
     const std::wstring& target,
     std::vector<std::uint8_t>* blob) {
+  if (blob == nullptr) {
+    return ReadStatus::kFailure;
+  }
+  blob->clear();
+
   PCREDENTIALW raw_credential = nullptr;
   if (!::CredReadW(target.c_str(), CRED_TYPE_GENERIC, 0, &raw_credential)) {
     return ::GetLastError() == ERROR_NOT_FOUND ? ReadStatus::kNotFound
@@ -410,6 +415,9 @@ WindowsSecureKeyStorage::ReadCredentialBlob(
       (raw_credential->CredentialBlobSize != 0 &&
        raw_credential->CredentialBlob == nullptr)) {
     return ReadStatus::kFailure;
+  }
+  if (raw_credential->CredentialBlobSize == 0) {
+    return ReadStatus::kSuccess;
   }
   blob->assign(raw_credential->CredentialBlob,
                raw_credential->CredentialBlob +

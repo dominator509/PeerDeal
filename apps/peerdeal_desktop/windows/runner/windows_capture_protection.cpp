@@ -21,6 +21,7 @@ constexpr char kChannelName[] =
     "peerdeal/native_bridges/capture_protection";
 constexpr char kGetCapabilityMethod[] = "getCapability";
 constexpr char kSetBlockingMethod[] = "setBlocking";
+constexpr DWORD kCaptureExclusionMinimumBuild = 19041;
 
 using flutter::EncodableMap;
 using flutter::EncodableValue;
@@ -39,9 +40,33 @@ const EncodableValue* MapValue(const EncodableMap& map, const char* key) {
   return found == map.end() ? nullptr : &found->second;
 }
 
+bool IsWindowsBuildOrGreater(DWORD minimum_build) {
+  OSVERSIONINFOEXW version{};
+  version.dwOSVersionInfoSize = sizeof(version);
+  version.dwMajorVersion = 10;
+  version.dwMinorVersion = 0;
+  version.dwBuildNumber = minimum_build;
+
+  DWORDLONG condition_mask = 0;
+  condition_mask = ::VerSetConditionMask(
+      condition_mask, VER_MAJORVERSION, VER_GREATER_EQUAL);
+  condition_mask = ::VerSetConditionMask(
+      condition_mask, VER_MINORVERSION, VER_GREATER_EQUAL);
+  condition_mask = ::VerSetConditionMask(
+      condition_mask, VER_BUILDNUMBER, VER_GREATER_EQUAL);
+  return ::VerifyVersionInfoW(
+             &version, VER_MAJORVERSION | VER_MINORVERSION | VER_BUILDNUMBER,
+             condition_mask) != FALSE;
+}
+
+bool SupportsCaptureExclusion(HWND window) {
+  return window != nullptr && IsWindows10OrGreater() &&
+         IsWindowsBuildOrGreater(kCaptureExclusionMinimumBuild);
+}
+
 EncodableValue CapabilityPayload(HWND window) {
   EncodableMap payload;
-  const bool supported = window != nullptr && IsWindows10OrGreater();
+  const bool supported = SupportsCaptureExclusion(window);
   payload.emplace(EncodableValue("blockingSupported"),
                   EncodableValue(supported));
   payload.emplace(EncodableValue("obscuringSupported"),
@@ -109,7 +134,8 @@ void WindowsCaptureProtection::HandleMethodCall(
             ActionFailure("Capture protection request is invalid."));
         return;
       }
-      if (window_ == nullptr || (*enabled && !IsWindows10OrGreater())) {
+      if (window_ == nullptr ||
+          (*enabled && !SupportsCaptureExclusion(window_))) {
         result->Success(
             ActionFailure("Windows capture protection is unavailable."));
         return;

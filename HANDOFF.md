@@ -26,6 +26,9 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
   obscuring when blocking cannot be confirmed.
 - Added Android `FLAG_SECURE` and Windows `SetWindowDisplayAffinity` host
   implementations behind the existing capture channel.
+- Hardened the Windows host to gate capture exclusion on Windows 10 build
+  19041 or newer and to reject unsafe Credential Manager blob shapes before
+  envelope decoding.
 - Receipt route disposal now releases native capture blocking.
 - Did not modify protocol/core package code, secrets, or locked package boundaries.
 
@@ -38,6 +41,9 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
   local-network discovery, live transport, durable platform persistence, and
   non-Windows platform storage.
 
+- Windows native hardening was compiled and smoke-tested after the capture and
+  credential-shape checks; runtime OS/profile validation remains operator-owned.
+
 ## Gate Results
 
 - `rtk dart run melos run source-text`: passed.
@@ -49,6 +55,7 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.
+- Windows host rebuild after secure-key and capture hardening: passed.
 - Focused native bridge and mirrored capture coordinator tests: passed.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume
