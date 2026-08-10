@@ -15,5 +15,11 @@ abstract interface class RecoveryPersistenceStore {
     required List<EventEnvelope> events,
   });
 
+  /// Removes all persisted recovery data for [scope].
+  ///
+  /// Implementations must treat an already-empty scope as success and must
+  /// reject invalid scope identities before touching storage.
+  RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope});
+
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope);
 }

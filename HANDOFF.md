@@ -21,6 +21,9 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Removed the generated release debug-signing fallback; operator-owned Android signing is environment-driven and fail-closed.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
+- Added a scope-validated, idempotent recovery-persistence wipe operation for
+  in-memory and JSON stores, including cleanup of matching interrupted-write
+  temp files without crossing recovery scopes.
 - Added the generic capture action contract and mirrored app coordinator
   lifecycle, including serialized native block/release and fail-closed visual
   obscuring when blocking cannot be confirmed.
@@ -57,6 +60,10 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.
 - Windows host rebuild after secure-key and capture hardening: passed.
 - Focused native bridge and mirrored capture coordinator tests: passed.
+- Focused recovery persistence wipe tests and mirrored app-shell regression
+  tests: passed.
+- Full repository gate/test run after the recovery wipe contract extension:
+  passed.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume
   exhausted during extraction. Flutter doctor itself is green; Kotlin/APK and

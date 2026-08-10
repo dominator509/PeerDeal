@@ -43,3 +43,6 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
   data is corrupt.
 - File-backed recovery windows are written as canonical protocol JSON through
   a temporary file before replacing the durable window.
+- Recovery stores expose an idempotent, scope-validated `wipe` operation;
+  the JSON store removes the durable window and matching interrupted-write
+  temporary files without touching other recovery scopes.

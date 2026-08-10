@@ -2032,6 +2032,11 @@ class _OversizedRecoveryStore implements RecoveryPersistenceStore {
   }
 
   @override
+  RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) {
+    return const RecoveryPersistenceResult.success();
+  }
+
+  @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
     return PersistedRecoveryWindow(
       events: List<EventEnvelope>.generate(129, (index) {

@@ -39,6 +39,9 @@ Generated: 2026-08-09
 - Mirrored app capture coordinators serialize native blocking/release, downgrade
   to visual obscuring when blocking fails, and receipt routes release blocking
   on disposal.
+- Sync recovery persistence now exposes a scope-validated, idempotent wipe
+  primitive; the JSON store removes matching interrupted-write temp files while
+  preserving other recovery scopes.
 
 ## Required Gates
 

@@ -52,6 +52,37 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
   }
 
   @override
+  RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) {
+    final scopeResult = _validateScopeIdentity(scope);
+    if (!scopeResult.isSuccess) return scopeResult;
+
+    try {
+      final file = _fileFor(scope);
+      final files = <File>[
+        if (file.existsSync()) file,
+        ..._temporaryFilesFor(file),
+      ];
+      for (final candidate in files) {
+        if (candidate.existsSync()) {
+          candidate.deleteSync();
+        }
+      }
+      return const RecoveryPersistenceResult.success();
+    } on Object {
+      return const RecoveryPersistenceResult(
+        isSuccess: false,
+        conflicts: <SyncConflict>[
+          SyncConflict(
+            code: 'ERR_RECOVERY_PERSISTENCE_WIPE_FAILED',
+            message: 'Recovery persistence data could not be wiped.',
+            severity: SyncConflictSeverity.fatal,
+          ),
+        ],
+      );
+    }
+  }
+
+  @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
     if (!scope.hasValidStorageIdentity) {
       return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
@@ -214,6 +245,16 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     return File(
       '${_rootDirectory.path}${Platform.pathSeparator}$fileName.json',
     );
+  }
+
+  List<File> _temporaryFilesFor(File file) {
+    if (!_rootDirectory.existsSync()) return <File>[];
+    final prefix = '${file.path}.tmp.';
+    return _rootDirectory
+        .listSync(followLinks: false)
+        .whereType<File>()
+        .where((candidate) => candidate.path.startsWith(prefix))
+        .toList(growable: false);
   }
 }
 

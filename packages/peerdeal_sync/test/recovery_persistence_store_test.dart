@@ -32,6 +32,28 @@ void main() {
     );
   });
 
+  test('wipes an in-memory recovery window idempotently', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    store.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+      ],
+    );
+    store.saveSnapshot(
+      scope: scope,
+      snapshot: _snapshot(seq: 1, hash: 'snapshot_hash_1'),
+    );
+
+    final firstWipe = store.wipe(scope: scope);
+    final secondWipe = store.wipe(scope: scope);
+
+    expect(firstWipe.isSuccess, isTrue);
+    expect(secondWipe.isSuccess, isTrue);
+    expect(store.loadWindow(scope).events, isEmpty);
+    expect(store.loadWindow(scope).snapshot, isNull);
+  });
+
   test('rejects event append that would create a sequence gap', () {
     final store = InMemoryRecoveryPersistenceStore();
     store.appendEvents(
@@ -144,6 +166,7 @@ void main() {
       ),
       snapshot: _snapshot(seq: 0, hash: 'snapshot_hash_0'),
     );
+    final wipe = store.wipe(scope: invalidScope);
 
     expect(append.isSuccess, isFalse);
     expect(
@@ -153,6 +176,11 @@ void main() {
     expect(snapshot.isSuccess, isFalse);
     expect(
       snapshot.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+    );
+    expect(wipe.isSuccess, isFalse);
+    expect(
+      wipe.conflicts.single.code,
       'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
     );
     expect(store.loadWindow(invalidScope).events, isEmpty);
@@ -301,6 +329,72 @@ void main() {
     expect(window.events.map((event) => event.eventSeq), <int>[1, 2]);
     expect(window.snapshot?.snapshotHash, 'snapshot_hash_2');
   });
+
+  test(
+    'file store wipes one scope and interrupted writes without crossing scopes',
+    () {
+      final directory = Directory.systemTemp.createTempSync(
+        'peerdeal_recovery_store_',
+      );
+      addTearDown(() {
+        if (directory.existsSync()) {
+          directory.deleteSync(recursive: true);
+        }
+      });
+
+      final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+      expect(
+        writer
+            .appendEvents(
+              scope: scope,
+              events: <EventEnvelope>[
+                _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+              ],
+            )
+            .isSuccess,
+        isTrue,
+      );
+      final targetFile = directory.listSync().whereType<File>().single;
+      final interruptedWrite = File('${targetFile.path}.tmp.orphan');
+      interruptedWrite.writeAsStringSync('stale recovery data');
+
+      const otherScope = RecoveryPersistenceScope(
+        tableId: 'table_2',
+        sessionId: 'session_2',
+        protocolVersion: '1.0.0',
+      );
+      final otherWriter = JsonFileRecoveryPersistenceStore(
+        rootDirectory: directory,
+      );
+      expect(
+        otherWriter
+            .appendEvents(
+              scope: otherScope,
+              events: <EventEnvelope>[
+                _event(
+                  seq: 1,
+                  prevHash: genesisEventHash,
+                  hash: 'other_hash_1',
+                  tableId: 'table_2',
+                  sessionId: 'session_2',
+                ),
+              ],
+            )
+            .isSuccess,
+        isTrue,
+      );
+
+      final wipe = writer.wipe(scope: scope);
+      final repeatedWipe = writer.wipe(scope: scope);
+
+      expect(wipe.isSuccess, isTrue);
+      expect(repeatedWipe.isSuccess, isTrue);
+      expect(writer.loadWindow(scope).events, isEmpty);
+      expect(writer.loadWindow(scope).snapshot, isNull);
+      expect(otherWriter.loadWindow(otherScope).events, hasLength(1));
+      expect(directory.listSync().whereType<File>(), hasLength(1));
+    },
+  );
 
   test('file store writes canonical recovery window JSON', () {
     final directory = Directory.systemTemp.createTempSync(

@@ -513,6 +513,10 @@ the gates below are satisfied.
 - Sync recovery file persistence now writes canonical protocol JSON through a
   temporary file before replacing the durable recovery window, locking stable
   on-disk bytes for diagnostics and reducing direct-write corruption risk.
+- Sync recovery persistence now exposes an idempotent, scope-validated wipe
+  operation; the JSON store removes the durable recovery window and matching
+  interrupted-write temporary files without removing other scopes. Retention
+  policy remains app-owned and controls when the operation is invoked.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is

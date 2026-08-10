@@ -129,6 +129,20 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
   }
 
   @override
+  RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) {
+    final scopeConflicts = _validateScopeIdentity(scope);
+    if (scopeConflicts.isNotEmpty) {
+      return RecoveryPersistenceResult(
+        isSuccess: false,
+        conflicts: scopeConflicts,
+      );
+    }
+
+    _records.remove(scope.storageKey);
+    return const RecoveryPersistenceResult.success();
+  }
+
+  @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
     if (!scope.hasValidStorageIdentity) {
       return const PersistedRecoveryWindow(events: <EventEnvelope>[]);

@@ -237,7 +237,11 @@ default it from `PEERDEAL_RECOVERY_ROOT`. Blank, missing, or throwing roots fail
 closed before mounted table routes load recovery windows. App-provided roots
 and environment-provided roots must also be unpadded and free of control
 characters before a durable JSON store is constructed. Mounted table surfaces
-scrub bootstrap and recovery persistence warning text before rendering.
+scrub bootstrap and recovery persistence warning text before rendering. The
+`RecoveryPersistenceStore.wipe` operation is scope-validated and idempotent;
+the JSON implementation removes the target window and matching interrupted
+write files while preserving other scopes. Retention policy remains outside
+the sync package and decides when to invoke the wipe.
 
 ## Local Network Bootstrap Boundary
 

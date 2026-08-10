@@ -2802,6 +2802,43 @@ Run the full repository gates and commit if green.
 
 ---
 
+### 2026-08-09 - Codex - Recovery Persistence Wipe Hardening
+
+Summary:
+Extended the `peerdeal_sync` recovery persistence contract with a validated,
+idempotent `wipe` operation. In-memory storage removes the scoped recovery
+window; JSON storage removes the scoped durable file and matching interrupted
+write temp files while preserving other scopes. Retention policy remains
+outside the sync package and decides when to invoke the primitive.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/contracts/recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `packages/peerdeal_sync/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused sync persistence tests: passed.
+- Mobile and desktop app-shell tests: passed.
+- Full `melos run test`, analyze, boundary-check, source-text, and
+  dependency-audit gates: passed.
+
+Risks:
+- Retention-policy scheduling and production database/platform persistence
+  remain separate open work.
+
+Next reviewer:
+Run the full repository gates and commit if green.
+
+---
+
 ### 2026-06-08 - Codex - Recovery Environment Root Padding Gate
 
 Summary:
