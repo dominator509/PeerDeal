@@ -17,8 +17,9 @@ resumable publication hardening, T30 bounded Android/Windows host transport,
 T31 app-owned production session composition, T32 resolved-invite production
 session source/bootstrap handoff, T33 native transport lifecycle hardening,
 T34 bounded secure-key method-channel calls, T35 bounded native transport
-method-channel calls, T36 bounded local-network method-channel calls, and T37
-Android native transport receiver lifecycle hardening
+method-channel calls, T36 bounded local-network method-channel calls, T37
+Android native transport receiver lifecycle hardening, and T38 Windows native
+transport socket lifecycle hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -148,6 +149,9 @@ are implemented on branch
   accepted method calls resolve with bounded fail-closed payloads.
 - Hardened Windows native transport setup cleanup so partial Winsock/socket
   initialization cannot leave resources alive or advertise a broken host.
+- Hardened Windows native transport socket ownership across method calls, the
+  receive thread, and teardown; shutdown invalidates the handle before closing
+  and joining the receiver, then clears queued frames.
 
 ## Review Notes
 
@@ -290,3 +294,11 @@ are implemented on branch
   upgrades.
 - T37 Android debug APK build: passed. Android receiver setup/teardown now
   closes partial socket and multicast-lock resources and clears queued frames.
+- T38 focused desktop transport tests: passed, 45 tests.
+- T38 `flutter build windows --debug --no-pub`: passed.
+- T38 Windows host smoke launch: stayed alive for five seconds and stopped
+  cleanly.
+- T38 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- T38 `git diff --check`: passed.

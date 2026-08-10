@@ -301,6 +301,18 @@ Generated: 2026-08-10
 - Android device/network reachability, firewall behavior, runtime persistence,
   release signing, and other-platform implementations remain open.
 
+## Recent T38 Changes
+
+- Hardened Windows native multicast transport socket ownership across Flutter
+  method calls, receive-thread startup, and teardown. Shutdown now invalidates
+  the handle before closing and joining the receiver, and clears queued frames.
+- `rtk flutter test --no-pub test/transport` passed with 45 tests.
+- `rtk flutter build windows --debug --no-pub` passed, and the built host stayed
+  alive for the bounded five-second smoke launch before clean termination.
+- Windows profile/network reachability, Android device validation, runtime
+  persistence/capture, release signing, and other-platform implementations
+  remain open.
+
 ## Required Gates
 
 Run after each retrofit step:

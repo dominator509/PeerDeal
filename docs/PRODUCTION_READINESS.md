@@ -282,6 +282,9 @@ the gates below are satisfied.
 - Windows native transport initialization now cleans up socket, multicast
   membership, TTL, and Winsock state on every partial setup failure before the
   host can report transport availability.
+- Windows native transport now serializes socket-handle access across Flutter
+  method calls, the receive thread, and teardown; shutdown invalidates the
+  handle before closing and joining, then clears queued frames.
 - App shells now include app-owned native transport adapters that compose the
   generic native byte-frame bridge with `peerdeal_network` validating
   sender/receiver boundaries, so app transport sends and inbound drains cannot

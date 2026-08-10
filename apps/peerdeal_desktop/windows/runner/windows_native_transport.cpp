@@ -203,12 +203,21 @@ WindowsNativeTransport::WindowsNativeTransport(
 
 WindowsNativeTransport::~WindowsNativeTransport() {
   if (channel_) channel_->SetMethodCallHandler(nullptr);
-  stopping_ = true;
-  if (socket_ != INVALID_SOCKET) {
-    ::closesocket(socket_);
+  stopping_.store(true);
+  SOCKET socket = INVALID_SOCKET;
+  {
+    std::lock_guard<std::mutex> lock(lifecycle_mutex_);
+    socket = socket_;
     socket_ = INVALID_SOCKET;
   }
+  if (socket != INVALID_SOCKET) {
+    ::closesocket(socket);
+  }
   if (receive_thread_.joinable()) receive_thread_.join();
+  {
+    std::lock_guard<std::mutex> lock(queue_mutex_);
+    frames_.clear();
+  }
   if (wsa_started_) ::WSACleanup();
 }
 
@@ -271,11 +280,18 @@ bool WindowsNativeTransport::InitializeSocket() {
 
 void WindowsNativeTransport::ReceiveLoop() {
   std::array<uint8_t, kHeaderBytes + kMaxPayloadBytes> buffer{};
+  SOCKET receive_socket = INVALID_SOCKET;
+  {
+    std::lock_guard<std::mutex> lock(lifecycle_mutex_);
+    receive_socket = socket_;
+  }
+  if (receive_socket == INVALID_SOCKET) return;
+
   while (!stopping_) {
     sockaddr_storage source{};
     int source_length = sizeof(source);
     const int received = ::recvfrom(
-        socket_, reinterpret_cast<char*>(buffer.data()),
+        receive_socket, reinterpret_cast<char*>(buffer.data()),
         static_cast<int>(buffer.size()), 0,
         reinterpret_cast<sockaddr*>(&source), &source_length);
     if (received == SOCKET_ERROR) {
@@ -295,7 +311,12 @@ void WindowsNativeTransport::HandleMethodCall(
     std::unique_ptr<flutter::MethodResult<EncodableValue>> result) {
   try {
     if (method_call.method_name() == kGetCapabilityMethod) {
-      result->Success(CapabilityPayload(socket_ != INVALID_SOCKET));
+      bool available = false;
+      {
+        std::lock_guard<std::mutex> lock(lifecycle_mutex_);
+        available = socket_ != INVALID_SOCKET;
+      }
+      result->Success(CapabilityPayload(available));
       return;
     }
     if (method_call.method_name() == kSendFrameMethod) {
@@ -303,7 +324,7 @@ void WindowsNativeTransport::HandleMethodCall(
       const auto frame = arguments == nullptr
                              ? std::nullopt
                              : FrameFromArguments(*arguments);
-      if (!frame.has_value() || socket_ == INVALID_SOCKET) {
+      if (!frame.has_value()) {
         result->Success(Failure("Native transport frame is unavailable."));
         return;
       }
@@ -329,10 +350,23 @@ void WindowsNativeTransport::HandleMethodCall(
         result->Success(Failure("Native transport destination is invalid."));
         return;
       }
-      const int sent = ::sendto(
-          socket_, reinterpret_cast<const char*>(bytes.data()),
-          static_cast<int>(bytes.size()), 0,
-          reinterpret_cast<const sockaddr*>(&destination), sizeof(destination));
+      int sent = SOCKET_ERROR;
+      bool available = false;
+      {
+        std::lock_guard<std::mutex> lock(lifecycle_mutex_);
+        if (socket_ != INVALID_SOCKET) {
+          available = true;
+          sent = ::sendto(
+              socket_, reinterpret_cast<const char*>(bytes.data()),
+              static_cast<int>(bytes.size()), 0,
+              reinterpret_cast<const sockaddr*>(&destination),
+              sizeof(destination));
+        }
+      }
+      if (!available) {
+        result->Success(Failure("Native transport frame is unavailable."));
+        return;
+      }
       if (sent != static_cast<int>(bytes.size())) {
         result->Success(Failure("Native transport send failed."));
         return;
@@ -348,8 +382,12 @@ void WindowsNativeTransport::HandleMethodCall(
       const auto peer_id = arguments == nullptr
                                ? std::nullopt
                                : StringValue(MapValue(*arguments, "peerId"));
-      if (!session_id.has_value() || !peer_id.has_value() ||
-          socket_ == INVALID_SOCKET) {
+      bool available = false;
+      {
+        std::lock_guard<std::mutex> lock(lifecycle_mutex_);
+        available = socket_ != INVALID_SOCKET;
+      }
+      if (!session_id.has_value() || !peer_id.has_value() || !available) {
         result->Success(Failure("Native transport receive is unavailable."));
         return;
       }

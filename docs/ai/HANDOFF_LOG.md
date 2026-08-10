@@ -12,6 +12,45 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Windows Native Transport Socket Lifecycle
+
+Summary:
+- Hardened the Windows native multicast transport host against concurrent
+  socket access during Flutter method calls, receiver startup, and teardown.
+- Shutdown now invalidates the shared socket before closing and joining the
+  receive thread, and clears queued frames after the thread exits.
+- The generic channel payload and package boundaries are unchanged.
+
+Files changed:
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.h`
+- `docs/PRODUCTION_READINESS.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+
+Tests run:
+- `flutter test --no-pub test/transport` in `apps/peerdeal_desktop`: passed,
+  45 tests.
+- `flutter build windows --debug --no-pub`: passed.
+- Windows host smoke launch: stayed alive for five seconds and stopped
+  cleanly.
+- Full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 newer versions remain blocked by the current toolchain.
+- `git diff --check`: passed.
+
+Risks:
+- Windows profile/network reachability, Android device validation, runtime
+  persistence/capture, release signing, and other-platform native hosts remain
+  external readiness checks.
+
+Next reviewer:
+- Continue with the next documented production gap without inventing transport
+  endpoint semantics.
+
+---
+
 ### 2026-08-10 - Codex - Native Transport Method-Channel Deadline
 
 Summary:

@@ -50,6 +50,9 @@ class WindowsNativeTransport final {
   static flutter::EncodableValue Success();
 
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel_;
+  // Protects the socket handle across method calls, receive-thread startup,
+  // and teardown.
+  std::mutex lifecycle_mutex_;
   SOCKET socket_ = INVALID_SOCKET;
   bool wsa_started_ = false;
   std::thread receive_thread_;
