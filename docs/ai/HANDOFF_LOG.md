@@ -12,6 +12,49 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Remote Hold'em Event Reconstruction
+
+Summary:
+- Added `HoldemEventCursor.accept` with exact scope, sequence, hash-chain,
+  catalog, identity, and canonical event-hash validation.
+- Added public `HoldemEventReducer` in `peerdeal_variants` for adapter-produced
+  action/street events and public showdown/settlement lifecycle events.
+- Added atomic `applyRemoteEvent` to both app Hold'em runtimes and optional
+  `holdemRuntime` wiring through mirrored transport handlers/provisioners.
+- Added action board-deal breadcrumbs needed for deterministic street
+  reconstruction. Existing settlement payload contracts remain unchanged;
+  inbound lifecycle phases are derived from the validated event order. Private
+  showdown cards remain local.
+
+Files changed:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_core_projection_adapter.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_event_reducer.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_*_event_builder.dart`
+- Mirrored mobile/desktop Hold'em runtime, transport boundary, and tests
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`,
+  `docs/ARCHITECTURE.md`, `docs/PRODUCTION_READINESS.md`, and `docs/ai/*`
+
+Tests run:
+- Focused `peerdeal_variants` reducer and adapter tests: passed.
+- Focused mobile and desktop Hold'em runtime tests: passed.
+- Focused mobile and desktop transport-handler tests: passed.
+- Full `melos run analyze`, `boundary-check`, `source-text`, and serialized
+  `test` gates: passed.
+- `melos run dependency-audit`: passed with 0 actionable upgrades; 10 newer
+  versions remain toolchain-blocked.
+- `git diff --check`: passed.
+
+Risks:
+- Native live transport/platform source provisioning, Android/Windows runtime
+  validation, production persistence, and non-demo route orchestration remain
+  open. Public events do not contain private hole cards by design.
+
+Next reviewer:
+- Validate external native/runtime prerequisites when available; the remaining
+  software gaps are listed in the readiness documents.
+
+---
+
 ### 2026-08-10 - Codex - App Hold'em Session Adoption
 
 Summary:

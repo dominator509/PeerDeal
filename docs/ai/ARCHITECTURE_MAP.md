@@ -62,8 +62,9 @@ Local Hold'em producer flow:
 2. `HoldemCoreProjectionAdapter` emits catalog-approved events and projects them
    through `peerdeal_core`.
 3. The app runtime atomically commits the non-retention batch before advancing
-   variant state or the cursor. Remote inbound events remain core-only until a
-   variant event-reducer contract exists.
+   variant state or the cursor. For Hold'em inbound events, cursor acceptance
+   and the variant reducer run before the same app runtime commits the event
+   through core; generic core-only ingress remains available for other sessions.
 6. The app runtime can inject that source into the table route, whose mount
    owns source replacement and disposal.
 

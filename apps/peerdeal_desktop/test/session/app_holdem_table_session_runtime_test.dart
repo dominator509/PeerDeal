@@ -36,6 +36,76 @@ void main() {
     expect(runtime.cursor.nextEventSeq, 4);
   });
 
+  test('reconstructs adapter events through the inbound app boundary', () {
+    const adapter = HoldemCoreProjectionAdapter();
+    final initial = _preflopState();
+    final started = adapter.startHand(
+      coreState: _openCoreState(),
+      handState: initial,
+      cursor: _cursor(),
+    );
+    final acted = adapter.applyAction(
+      coreState: started.coreState,
+      handState: started.handState,
+      cursor: started.cursor,
+      action: const HoldemTableAction(
+        actorSeat: 1,
+        type: HoldemTableActionType.call,
+      ),
+      dealtBoardCards: const <String>['Ah', 'Kd', '2c'],
+      openNextBettingRound: true,
+    );
+    final runtime = _runtime(initial);
+
+    expect(runtime.applyRemoteEvent(started.events.single).isApplied, isTrue);
+    final applied = runtime.applyRemoteEvent(acted.events.single);
+
+    expect(applied.isApplied, isTrue);
+    expect(runtime.handState.phase, HoldemHandPhase.bettingFlop);
+    expect(runtime.handState.boardCards, <String>['Ah', 'Kd', '2c']);
+    expect(runtime.coreState.eventSequence, 3);
+    expect(runtime.cursor.nextEventSeq, 4);
+  });
+
+  test('keeps variant and cursor state unchanged when core rejects inbound event', () {
+    const adapter = HoldemCoreProjectionAdapter();
+    final initial = _preflopState();
+    final started = adapter.startHand(
+      coreState: _openCoreState(),
+      handState: initial,
+      cursor: _cursor(),
+    );
+    final action = adapter.applyAction(
+      coreState: started.coreState,
+      handState: started.handState,
+      cursor: started.cursor,
+      action: const HoldemTableAction(
+        actorSeat: 1,
+        type: HoldemTableActionType.call,
+      ),
+      dealtBoardCards: const <String>['Ah', 'Kd', '2c'],
+      openNextBettingRound: true,
+    );
+    final event = _cursor()
+        .issue(
+          eventType: action.events.single.eventType,
+          handId: initial.handId,
+          payload: action.events.single.payload,
+        )
+        .event;
+    final runtime = _runtime(initial);
+    final handBefore = runtime.handState;
+    final cursorBefore = runtime.cursor;
+
+    final result = runtime.applyRemoteEvent(event);
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HAND_EVENT_WITHOUT_ACTIVE_HAND');
+    expect(runtime.handState, same(handBefore));
+    expect(runtime.cursor, same(cursorBefore));
+    expect(runtime.coreState.eventSequence, 1);
+  });
+
   test('rejects invalid actions without advancing app or variant state', () {
     final runtime = _runtime(_preflopState());
     expect(runtime.startHand().isApplied, isTrue);

@@ -79,7 +79,9 @@ For local Hold'em lifecycle actions, construct the app-owned
 `AppHoldemTableSessionRuntime` with a validated `HoldemHandState` and
 `HoldemEventCursor`. It calls the variant projection adapter, commits the
 resulting non-retention event batch through `AppTableSessionRuntime`, and only
-then advances variant state and the cursor. Inbound transport remains a
-generic core projection until a variant event-reducer contract is available.
+then advances variant state and the cursor. For inbound Hold'em transport,
+pass that runtime as `holdemRuntime` to `AppTableSessionTransportHandler` or
+`AppTableSessionTransportProvisioner`; the handler validates the remote cursor
+and variant event before committing through the same app session boundary.
 
 It does NOT introduce a new top-level package.

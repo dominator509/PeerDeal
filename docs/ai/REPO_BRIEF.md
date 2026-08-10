@@ -118,9 +118,10 @@ dart analyze .
   gaps; Android/Windows app-private recovery-root selection is now wired.
   Mirrored `AppHoldemTableSessionRuntime` owners now compose local Hold'em
   lifecycle projection through the variant adapter and atomically commit its
-  non-retention event batches before advancing variant state/cursors. Inbound
-  transport remains generic core projection until a variant event-reducer
-  contract exists.
+  non-retention event batches before advancing variant state/cursors. The
+  public variant event reducer and cursor acceptance now reconstruct canonical
+  remote Hold'em events before the app commits them through core; generic
+  core-only transport remains available for non-variant sessions.
 
 ## Do Not Touch Without Approval
 

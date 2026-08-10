@@ -44,8 +44,11 @@ emitting catalog-approved protocol events and applying them through the core
 reducer transactionally; app/session code remains responsible for invoking it
 from a live table flow. Mirrored app-owned `AppHoldemTableSessionRuntime`
 owners now provide that invocation boundary and atomically commit the emitted
-non-retention batches before advancing variant state. Inbound transport still
-uses the generic core runtime until a variant event-reducer contract exists.
+non-retention batches before advancing variant state. Its inbound path accepts
+only contiguous, hash-valid envelopes, reduces Hold'em state in
+`peerdeal_variants`, and commits the same envelope through the app-owned core
+runtime before advancing the variant cursor. Generic core-only transport
+remains available for non-variant sessions.
 
 ## Forbidden patterns
 - UI mutating core state directly

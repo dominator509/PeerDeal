@@ -157,9 +157,20 @@ Generated: 2026-08-09
 - Added atomic non-retention event-batch preflight/commit to both
   `AppTableSessionRuntime` owners. App core state, Hold'em state, and the event
   cursor advance only after the full adapter-produced batch is accepted.
-- The existing generic transport ingress still projects inbound envelopes
-  through `AppTableSessionRuntime`; a variant event-reducer contract is still
-  required before remote Hold'em events can reconstruct local variant state.
+
+## Recent T26 Changes
+
+- `HoldemEventCursor.accept` now verifies remote event scope, sequence, hash
+  chain, catalog support, and canonical event hash before advancing.
+- Added the public variant-owned `HoldemEventReducer`. It reconstructs
+  adapter-produced action/street state and public showdown/settlement lifecycle
+  state without attempting to evaluate private showdown cards.
+- Both app-owned Hold'em runtimes now expose `applyRemoteEvent`, preflighting
+  cursor and variant state before committing through `AppTableSessionRuntime`;
+  rejected core projections leave all app and variant state unchanged.
+- Both transport handlers and provisioners can opt into the Hold'em runtime,
+  while the existing generic core-only path remains available for non-variant
+  sessions.
 
 ## Required Gates
 

@@ -127,8 +127,12 @@ the gates below are satisfied.
 - Mirrored app-owned `AppHoldemTableSessionRuntime` owners now invoke that
   adapter from app/session code and commit local non-retention event batches
   atomically through `AppTableSessionRuntime` before advancing Hold'em state or
-  its event cursor. Generic inbound transport remains core-only until a
-  variant event-reducer contract is added.
+  its event cursor. `HoldemEventCursor.accept` and the variant-owned
+  `HoldemEventReducer` now validate and reconstruct canonical remote action,
+  street, public showdown, and settlement events. Both app runtimes can apply
+  those events atomically, and transport handlers/provisioners can opt into the
+  variant path. Private showdown cards are intentionally not reconstructed from
+  public events.
 - Hold'em action application now carries production raise sizing semantics:
   full opening bets and full raises update the next minimum raise amount, while
   short all-ins can increase the amount to call without claiming full-raise

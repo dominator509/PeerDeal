@@ -82,6 +82,12 @@ continuity; callers supply event-id and timestamp policy. If core rejects any
 event in a batch, the returned core state, Hold'em state, cursor, and event list
 remain unchanged.
 
+`HoldemEventCursor.accept(...)` verifies a remote envelope's exact scope,
+sequence, hash link, catalog identity, and canonical hash before advancing.
+`HoldemEventReducer.apply(...)` reconstructs the adapter's action/street state
+and the public showdown/settlement lifecycle. It does not infer private hole
+cards from `ShowdownRevealed`; those remain local participant/session data.
+
 ## Hold'em street advancement
 `HoldemStateMachine.advanceAfterBettingRound(...)` advances from a completed
 betting round to the next deal/showdown phase. Callers must provide the exact

@@ -242,8 +242,21 @@ poll interval, serialized in-flight polls, explicit lifecycle state, and
   invalid peer identities before native lookup and normalizes native capability
   failures without exposing raw diagnostics. The provisioner does not create
   session policy or choose routes. App shells expose the source through runtime
-  injection, and `AppTableSessionTransportSourceMount` owns start, source
-  replacement, and disposal for a mounted table route.
+injection, and `AppTableSessionTransportSourceMount` owns start, source
+replacement, and disposal for a mounted table route.
+
+For Hold'em sessions, `HoldemEventCursor.accept(event)` is the remote stream
+gate. It requires matching protocol/table/session identity, the exact next
+event sequence, the previous hash, a supported catalog event, and a matching
+canonical event hash. `HoldemEventReducer.apply(state: ..., event: ...)` then
+reconstructs adapter-produced action/street state plus public showdown and
+settlement lifecycle transitions. It never derives private hole cards from a
+public `ShowdownRevealed` event. App-owned `AppHoldemTableSessionRuntime` uses
+both gates before calling `AppTableSessionRuntime.applyEvent`; failed variant
+or core projection leaves its hand state and cursor unchanged. The mirrored
+transport handler and provisioner accept an optional `holdemRuntime` to use
+this path; the generic runtime path remains the contract for non-variant
+sessions.
 
 ## Recovery Persistence Boundary
 

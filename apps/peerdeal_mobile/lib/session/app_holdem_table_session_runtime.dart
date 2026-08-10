@@ -44,6 +44,55 @@ class AppHoldemProjectionResult {
   List<EventEnvelope> get events => projection.events;
 }
 
+enum AppHoldemInboundEventDisposition { applied, rejected }
+
+class AppHoldemInboundEventResult {
+  const AppHoldemInboundEventResult._({
+    required this.disposition,
+    required this.handState,
+    required this.cursor,
+    this.sessionResult,
+    this.reasonCode,
+    this.warnings = const <String>[],
+  });
+
+  const AppHoldemInboundEventResult.applied({
+    required HoldemHandState handState,
+    required HoldemEventCursor cursor,
+    required AppTableSessionEventResult sessionResult,
+  }) : this._(
+         disposition: AppHoldemInboundEventDisposition.applied,
+         handState: handState,
+         cursor: cursor,
+         sessionResult: sessionResult,
+       );
+
+  const AppHoldemInboundEventResult.rejected({
+    required HoldemHandState handState,
+    required HoldemEventCursor cursor,
+    required String reasonCode,
+    AppTableSessionEventResult? sessionResult,
+    List<String> warnings = const <String>[],
+  }) : this._(
+         disposition: AppHoldemInboundEventDisposition.rejected,
+         handState: handState,
+         cursor: cursor,
+         sessionResult: sessionResult,
+         reasonCode: reasonCode,
+         warnings: warnings,
+       );
+
+  final AppHoldemInboundEventDisposition disposition;
+  final HoldemHandState handState;
+  final HoldemEventCursor cursor;
+  final AppTableSessionEventResult? sessionResult;
+  final String? reasonCode;
+  final List<String> warnings;
+
+  bool get isApplied => disposition == AppHoldemInboundEventDisposition.applied;
+  bool get isRejected => !isApplied;
+}
+
 /// App-owned composition of Hold'em rules, protocol events, and session truth.
 ///
 /// Hold'em remains responsible for producing variant-valid events. The app
@@ -57,15 +106,18 @@ class AppHoldemTableSessionRuntime {
     required HoldemEventCursor initialCursor,
     HoldemCoreProjectionAdapter projectionAdapter =
         const HoldemCoreProjectionAdapter(),
+    HoldemEventReducer eventReducer = const HoldemEventReducer(),
   }) : _sessionRuntime = sessionRuntime,
        _handState = initialHandState,
        _cursor = initialCursor,
-       _projectionAdapter = projectionAdapter {
+       _projectionAdapter = projectionAdapter,
+       _eventReducer = eventReducer {
     _validateInitialComposition();
   }
 
   final AppTableSessionRuntime _sessionRuntime;
   final HoldemCoreProjectionAdapter _projectionAdapter;
+  final HoldemEventReducer _eventReducer;
   HoldemHandState _handState;
   HoldemEventCursor _cursor;
   HoldemCoreProjectionResult? _lastProjection;
@@ -75,6 +127,54 @@ class AppHoldemTableSessionRuntime {
   HoldemHandState get handState => _handState;
   HoldemEventCursor get cursor => _cursor;
   HoldemCoreProjectionResult? get lastProjection => _lastProjection;
+
+  /// Accepts one remote event only after both variant and core projections
+  /// have passed preflight. State and cursor remain unchanged on rejection.
+  AppHoldemInboundEventResult applyRemoteEvent(
+    EventEnvelope event, {
+    DateTime? now,
+  }) {
+    final cursorResult = _cursor.accept(event);
+    if (cursorResult.isRejected) {
+      return AppHoldemInboundEventResult.rejected(
+        handState: _handState,
+        cursor: _cursor,
+        reasonCode:
+            cursorResult.reasonCode ?? 'ERR_HOLDEM_EVENT_CURSOR_REJECTED',
+      );
+    }
+
+    final reduction = _eventReducer.apply(state: _handState, event: event);
+    if (reduction.isRejected) {
+      return AppHoldemInboundEventResult.rejected(
+        handState: _handState,
+        cursor: _cursor,
+        reasonCode:
+            reduction.reasonCode ?? 'ERR_HOLDEM_EVENT_REDUCTION_REJECTED',
+        warnings: reduction.warnings,
+      );
+    }
+
+    final sessionResult = _sessionRuntime.applyEvent(event, now: now);
+    if (!sessionResult.isApplied) {
+      return AppHoldemInboundEventResult.rejected(
+        handState: _handState,
+        cursor: _cursor,
+        reasonCode:
+            sessionResult.reasonCode ?? 'ERR_HOLDEM_SESSION_EVENT_REJECTED',
+        sessionResult: sessionResult,
+        warnings: sessionResult.warnings,
+      );
+    }
+
+    _handState = reduction.state;
+    _cursor = cursorResult.cursor;
+    return AppHoldemInboundEventResult.applied(
+      handState: _handState,
+      cursor: _cursor,
+      sessionResult: sessionResult,
+    );
+  }
 
   AppHoldemProjectionResult startHand() {
     return _commit(

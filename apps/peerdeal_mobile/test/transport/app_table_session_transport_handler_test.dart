@@ -2,12 +2,14 @@ import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_retention_coordinator.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_coordinator.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_event_adapter.dart';
+import 'package:peerdeal_mobile/session/app_holdem_table_session_runtime.dart';
 import 'package:peerdeal_mobile/session/app_table_session_runtime.dart';
 import 'package:peerdeal_mobile/transport/app_table_session_transport_handler.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_privacy/peerdeal_privacy.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
+import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -22,6 +24,32 @@ void main() {
     expect(handler.lastResult!.isApplied, isTrue);
     expect(runtime.state.eventSequence, 1);
     expect(runtime.state.phase, TablePhase.openReady);
+  });
+
+  test('routes canonical Holdem frames through the variant runtime', () async {
+    final runtime = _runtime();
+    final holdemRuntime = AppHoldemTableSessionRuntime(
+      sessionRuntime: runtime,
+      initialHandState: _holdemState(),
+      initialCursor: _holdemCursor(),
+    );
+    final started = const HoldemCoreProjectionAdapter().startHand(
+      coreState: runtime.state,
+      handState: holdemRuntime.handState,
+      cursor: _holdemCursor(),
+    );
+    final handler = AppTableSessionTransportHandler(
+      runtime: runtime,
+      holdemRuntime: holdemRuntime,
+    );
+    final receiver = ValidatingTransportFrameReceiver(handler: handler);
+
+    final result = await receiver.receive(_frame(started.events.single));
+
+    expect(result.accepted, isTrue);
+    expect(handler.lastHoldemResult?.isApplied, isTrue);
+    expect(holdemRuntime.handState.handId, 'hand_001');
+    expect(runtime.state.activeHandId, 'hand_001');
   });
 
   test(
@@ -136,6 +164,61 @@ EventEnvelope _event({
     payload: const <String, Object?>{'mode_type': 'cash'},
     prevEventHash: prevEventHash,
     eventHash: 'hash_$seq',
+  );
+}
+
+HoldemEventCursor _holdemCursor() {
+  return HoldemEventCursor(
+    protocolVersion: '1.0.0',
+    tableId: 'table_1',
+    sessionId: 'session_1',
+    nextEventSeq: 1,
+    previousEventHash: genesisEventHash,
+    actorRef: 'actor_1',
+    eventIdFactory: (eventType, eventSeq) => 'holdem_${eventType}_$eventSeq',
+    emittedAtFactory: () => '2026-08-09T12:00:00.000Z',
+  );
+}
+
+HoldemHandState _holdemState() {
+  return const HoldemHandState(
+    handId: 'hand_001',
+    phase: HoldemHandPhase.bettingPreflop,
+    bettingRound: HoldemBettingRound.preflop,
+    currentActorSeat: 1,
+    buttonSeat: 1,
+    smallBlindSeat: 2,
+    bigBlindSeat: 3,
+    currentBetToCall: 100,
+    minimumRaiseAmount: 100,
+    pot: 200,
+    seats: <HoldemSeatState>[
+      HoldemSeatState(
+        seat: 1,
+        stack: 1000,
+        inHand: true,
+        folded: false,
+        allIn: false,
+      ),
+      HoldemSeatState(
+        seat: 2,
+        stack: 900,
+        inHand: true,
+        folded: false,
+        allIn: false,
+        committedThisRound: 100,
+        committedThisHand: 100,
+      ),
+      HoldemSeatState(
+        seat: 3,
+        stack: 900,
+        inHand: true,
+        folded: false,
+        allIn: false,
+        committedThisRound: 100,
+        committedThisHand: 100,
+      ),
+    ],
   );
 }
 

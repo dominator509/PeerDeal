@@ -1,3 +1,4 @@
+import '../session/app_holdem_table_session_runtime.dart';
 import '../session/app_table_session_runtime.dart';
 import 'app_table_session_transport_handler.dart';
 import 'app_table_session_transport_source.dart';
@@ -6,16 +7,19 @@ import 'native_transport_session_factory.dart';
 class AppTableSessionTransportProvisioner {
   AppTableSessionTransportProvisioner({
     required AppTableSessionRuntime runtime,
+    AppHoldemTableSessionRuntime? holdemRuntime,
     NativeTransportSessionFactory? nativeSessionFactory,
     Duration pollInterval = const Duration(seconds: 1),
     NativeTransportSourceTimerFactory? timerFactory,
   }) : _runtime = runtime,
+       _holdemRuntime = holdemRuntime,
        _nativeSessionFactory =
            nativeSessionFactory ?? NativeTransportSessionFactory(),
        _pollInterval = pollInterval,
        _timerFactory = timerFactory;
 
   final AppTableSessionRuntime _runtime;
+  final AppHoldemTableSessionRuntime? _holdemRuntime;
   final NativeTransportSessionFactory _nativeSessionFactory;
   final Duration _pollInterval;
   final NativeTransportSourceTimerFactory? _timerFactory;
@@ -29,7 +33,10 @@ class AppTableSessionTransportProvisioner {
       );
     }
 
-    final handler = AppTableSessionTransportHandler(runtime: _runtime);
+    final handler = AppTableSessionTransportHandler(
+      runtime: _runtime,
+      holdemRuntime: _holdemRuntime,
+    );
     NativeTransportSessionLoadResult loaded;
     try {
       loaded = await _nativeSessionFactory.loadSession(handler: handler);

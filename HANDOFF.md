@@ -10,7 +10,8 @@ implemented, T19 production entrypoint native-readiness activation is wired,
 and T20 local-network endpoint projection, T21 Android secure-storage bound
 hardening, T22 protocol-native command validation, T23 removal of the
 duplicate starter core API, T24 variant-to-core Hold'em event projection, and
-T25 app-owned Hold'em session adoption are implemented on branch
+T25 app-owned Hold'em session adoption plus T26 remote Hold'em event
+reconstruction are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -50,6 +51,11 @@ T25 app-owned Hold'em session adoption are implemented on branch
   then commit the resulting envelopes through the app session boundary.
 - Added atomic non-retention event-batch preflight to both app table runtimes;
   variant state and event cursors advance only after the complete batch commits.
+- Added exact remote `HoldemEventCursor` acceptance and the public
+  variant-owned `HoldemEventReducer`. Mirrored app runtimes now preflight
+  remote cursor and variant state before committing the event through core;
+  optional transport handlers/provisioners can use this path without changing
+  the generic non-variant route.
   protocol-native core models and reducer paths are now the sole package API.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
@@ -148,6 +154,10 @@ T25 app-owned Hold'em session adoption are implemented on branch
   rollback when core rejects an event.
 - T25 focused mobile and desktop Hold'em app-session suites: passed, including
   local action rejection, atomic batch preflight, and showdown/settlement.
+- T26 focused variant reducer, mobile/desktop Hold'em app-session, and
+  mobile/desktop transport-handler suites: passed, including cursor tamper
+  rejection, action/street parity, public showdown/settlement reconstruction,
+  core-rejection rollback, and canonical frame routing.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.
@@ -170,6 +180,10 @@ T25 app-owned Hold'em session adoption are implemented on branch
   focused tests: passed.
 - Full repository gate/test run after retention wipe orchestration: passed.
 - Full repository gate/test run after app session-runtime wiring: passed.
+- T26 full repository analyze, boundary, source-text, serialized test, and
+  dependency-audit gates: passed. Dependency audit reported 0 actionable
+  upgrades; 10 newer versions remain blocked by the current toolchain.
+- T26 `git diff --check`: passed.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume
   exhausted during extraction. Flutter doctor itself is green; Kotlin/APK and

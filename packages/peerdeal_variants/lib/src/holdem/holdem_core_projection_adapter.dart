@@ -137,6 +137,97 @@ class HoldemEventCursor {
       ),
     );
   }
+
+  /// Accepts one event from the same contiguous stream without issuing a new
+  /// event id or timestamp.
+  ///
+  /// Remote acceptance verifies the stream identity, sequence, hash link,
+  /// protocol catalog entry, and event hash before advancing the cursor.
+  HoldemEventCursorAcceptanceResult accept(EventEnvelope event) {
+    if (event.protocolVersion != protocolVersion ||
+        event.tableId != tableId ||
+        event.sessionId != sessionId) {
+      return HoldemEventCursorAcceptanceResult.rejected(
+        cursor: this,
+        reasonCode: 'ERR_HOLDEM_EVENT_CURSOR_SCOPE_MISMATCH',
+      );
+    }
+    if (event.eventSeq != nextEventSeq) {
+      return HoldemEventCursorAcceptanceResult.rejected(
+        cursor: this,
+        reasonCode: 'ERR_HOLDEM_EVENT_CURSOR_SEQUENCE_GAP',
+      );
+    }
+    if (event.prevEventHash != previousEventHash) {
+      return HoldemEventCursorAcceptanceResult.rejected(
+        cursor: this,
+        reasonCode: 'ERR_HOLDEM_EVENT_CURSOR_HASH_CHAIN_BREAK',
+      );
+    }
+
+    final compatibility = const ProtocolCatalog().checkEventEnvelope(event);
+    if (!compatibility.isSupported) {
+      return HoldemEventCursorAcceptanceResult.rejected(
+        cursor: this,
+        reasonCode: 'ERR_HOLDEM_EVENT_CURSOR_UNSUPPORTED_EVENT',
+      );
+    }
+
+    try {
+      _requireIdentity(event.eventId, 'eventId');
+      _requireIdentity(event.eventType, 'eventType');
+      _requireIdentity(event.eventVersion, 'eventVersion');
+      _requireIdentity(event.emittedAt, 'emittedAt');
+      _requireIdentity(event.actorRef, 'actorRef');
+      _requireIdentity(event.eventHash, 'eventHash');
+      final expectedHash = eventHashFactory(
+        Map<String, Object?>.unmodifiable(_canonicalEvent(event)),
+      );
+      if (expectedHash != event.eventHash) {
+        return HoldemEventCursorAcceptanceResult.rejected(
+          cursor: this,
+          reasonCode: 'ERR_HOLDEM_EVENT_CURSOR_HASH_INVALID',
+        );
+      }
+    } on Object {
+      return HoldemEventCursorAcceptanceResult.rejected(
+        cursor: this,
+        reasonCode: 'ERR_HOLDEM_EVENT_CURSOR_EVENT_INVALID',
+      );
+    }
+
+    return HoldemEventCursorAcceptanceResult.accepted(
+      cursor: HoldemEventCursor(
+        protocolVersion: protocolVersion,
+        tableId: tableId,
+        sessionId: sessionId,
+        nextEventSeq: nextEventSeq + 1,
+        previousEventHash: event.eventHash,
+        actorRef: actorRef,
+        eventIdFactory: eventIdFactory,
+        emittedAtFactory: emittedAtFactory,
+        eventHashFactory: eventHashFactory,
+        lastEventType: event.eventType,
+      ),
+    );
+  }
+
+  Map<String, Object?> _canonicalEvent(EventEnvelope event) {
+    return <String, Object?>{
+      'event_id': event.eventId,
+      'event_type': event.eventType,
+      'event_version': event.eventVersion,
+      'protocol_version': event.protocolVersion,
+      'event_seq': event.eventSeq,
+      'table_id': event.tableId,
+      'session_id': event.sessionId,
+      'hand_id': event.handId,
+      'emitted_at': event.emittedAt,
+      'actor_ref': event.actorRef,
+      'payload': Map<String, Object?>.unmodifiable(event.payload),
+      'prev_event_hash': event.prevEventHash,
+    };
+  }
 }
 
 @immutable
@@ -145,6 +236,30 @@ class HoldemEventCursorResult {
 
   final EventEnvelope event;
   final HoldemEventCursor cursor;
+}
+
+@immutable
+class HoldemEventCursorAcceptanceResult {
+  const HoldemEventCursorAcceptanceResult._({
+    required this.isAccepted,
+    required this.cursor,
+    this.reasonCode,
+  });
+
+  const HoldemEventCursorAcceptanceResult.accepted({
+    required HoldemEventCursor cursor,
+  }) : this._(isAccepted: true, cursor: cursor);
+
+  const HoldemEventCursorAcceptanceResult.rejected({
+    required HoldemEventCursor cursor,
+    required String reasonCode,
+  }) : this._(isAccepted: false, cursor: cursor, reasonCode: reasonCode);
+
+  final bool isAccepted;
+  final HoldemEventCursor cursor;
+  final String? reasonCode;
+
+  bool get isRejected => !isAccepted;
 }
 
 @immutable
@@ -300,6 +415,10 @@ class HoldemCoreProjectionAdapter {
           'action_type': action.type.name,
           'amount': action.amount,
           'contribution': contribution,
+          'dealt_board_cards': List<String>.unmodifiable(dealtBoardCards),
+          'board_cards': List<String>.unmodifiable(
+            actionResult.state.boardCards,
+          ),
           'phase': actionResult.state.phase.name,
           'betting_round': actionResult.state.bettingRound.name,
           'pot': actionResult.state.pot,
