@@ -51,9 +51,12 @@ Setup flow:
   app-owned blocking decision through Android `FLAG_SECURE`.
 - The Android host does not interpret receipt purposes, algorithms, rotation,
   or verification policy. Those remain in the app and receipt packages.
-- Release builds never fall back to debug signing. A signed release requires
+- Release builds fail closed before artifact assembly unless all four
+  operator-owned signing values are supplied together:
   `PEERDEAL_ANDROID_KEYSTORE`, `PEERDEAL_ANDROID_KEYSTORE_PASSWORD`,
-  `PEERDEAL_ANDROID_KEY_ALIAS`, and `PEERDEAL_ANDROID_KEY_PASSWORD` together.
+  `PEERDEAL_ANDROID_KEY_ALIAS`, and `PEERDEAL_ANDROID_KEY_PASSWORD`. They never
+  fall back to debug or silently produce an unsigned release; use a debug build
+  until signing is configured.
 - The release manifest declares `INTERNET` for the existing native-network
   boundary. The Android host now backs the generic live peer transport with a
   bounded UDP multicast envelope; local-network discovery, device reachability,

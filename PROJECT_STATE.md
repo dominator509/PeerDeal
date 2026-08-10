@@ -351,6 +351,18 @@ Generated: 2026-08-10
   Dependency audit reports 0 actionable upgrades and 11 newer versions below
   the current toolchain ceiling.
 
+## Recent T49 Changes
+
+- Android release Gradle tasks now fail closed before artifact assembly when
+  operator-owned signing values are missing, partial, padded, control-bearing,
+  or backed by a nonexistent keystore. Release output cannot silently fall back
+  to debug signing or remain unsigned; unsigned local validation uses debug
+  builds instead.
+- `flutter build apk --release --no-pub` was verified to stop with the stable
+  signing configuration error, while `flutter build apk --debug --no-pub`
+  passed. Operator signing credentials and Android device/profile validation
+  remain external.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

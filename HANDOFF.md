@@ -25,8 +25,8 @@ production session bootstrap-route mounting, and T42 app-shell route-argument
 handoff, T43 join-to-production session handoff, T44 bounded production-session
 source loading, T45 cancellable production-session source loading, T46
 app-shell bootstrap-route registration with default join-ready navigation,
-T47 source-backed bootstrap-route assembly, and T48 runtime-owned production
-session configuration
+T47 source-backed bootstrap-route assembly, T48 runtime-owned production
+session configuration, and T49 fail-closed Android release signing
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -186,6 +186,9 @@ are implemented on branch
   runtime configuration. Each shell derives one stable registration for route
   merging, readiness, and default join handoff; supplying both explicit and
   configured registrations fails closed with `StateError`.
+- Android release Gradle tasks now fail before artifact assembly when all four
+  operator-owned signing values are not present and valid; debug builds remain
+  the explicit unsigned validation path.
 - Hardened Android native transport teardown and executor rejection handling so
   accepted method calls resolve with bounded fail-closed payloads.
 - Hardened Windows native transport setup cleanup so partial Winsock/socket
@@ -394,3 +397,6 @@ are implemented on branch
   `dependency-audit` gates: passed; dependency audit reported 0 actionable
   upgrades and 11 newer versions below the current toolchain ceiling.
 - T48 Dart format and `git diff --check`: passed.
+- T49 Android release build without signing values: failed closed at Gradle
+  configuration with the expected stable signing error.
+- T49 Android debug `flutter build apk --debug --no-pub`: passed.

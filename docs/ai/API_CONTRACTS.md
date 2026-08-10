@@ -502,8 +502,10 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   Android Keystore master key and durably committed before a mutation reports
   success. Corrupt, oversized, unavailable, or malformed records fail closed.
 - Android release signing is operator-owned and requires all four
-  `PEERDEAL_ANDROID_*` keystore variables; the host never uses debug signing
-  for release output.
+  `PEERDEAL_ANDROID_*` keystore variables. Release Gradle tasks fail before
+  artifact assembly when signing is missing, padded, control-bearing, partial,
+  or points at a nonexistent keystore; the host never uses debug signing or
+  emits an unsigned release artifact.
 - The Windows desktop host registers the same generic secure-key channel and
   stores a bounded versioned record envelope in Windows Credential Manager.
   Credential Manager target names are derived from the validated namespace;

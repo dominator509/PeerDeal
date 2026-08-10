@@ -22,12 +22,33 @@ android {
         releaseKeyAlias,
         releaseKeyPassword,
     )
+    val releaseTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+        taskName.substringAfterLast(':').contains("release", ignoreCase = true)
+    }
     val hasReleaseSigning = releaseSigningValues.any { !it.isNullOrBlank() }
     if (hasReleaseSigning && releaseSigningValues.any { it.isNullOrBlank() }) {
         throw GradleException(
             "PEERDEAL_ANDROID_KEYSTORE, PEERDEAL_ANDROID_KEYSTORE_PASSWORD, " +
                 "PEERDEAL_ANDROID_KEY_ALIAS, and PEERDEAL_ANDROID_KEY_PASSWORD " +
                 "must be provided together.",
+        )
+    }
+    val hasUnsafeReleaseSigningValue = releaseSigningValues.any { value ->
+        value != null &&
+            (value != value.trim() ||
+                value.any { character ->
+                    character.code <= 0x20 || character.code == 0x7F
+                })
+    }
+    if (hasReleaseSigning && hasUnsafeReleaseSigningValue) {
+        throw GradleException(
+            "PEERDEAL_ANDROID_* signing values must be unpadded and control-free.",
+        )
+    }
+    if (releaseTaskRequested && !hasReleaseSigning) {
+        throw GradleException(
+            "Android release builds require all four PEERDEAL_ANDROID_* signing " +
+                "values; use a debug build until operator-owned signing is configured.",
         )
     }
     if (hasReleaseSigning && !file(releaseKeystorePath!!).isFile) {

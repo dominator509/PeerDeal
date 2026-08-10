@@ -12,6 +12,36 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Fail-Closed Android Release Signing
+
+Summary:
+- Android Gradle release tasks now fail before artifact assembly unless all four
+  operator-owned signing values are present, unpadded, control-free, and backed
+  by an existing keystore file.
+- Release output cannot silently use debug signing or remain unsigned; debug
+  builds remain the explicit unsigned validation path.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/build.gradle.kts`.
+- `apps/peerdeal_mobile/README.md`, `docs/PRODUCTION_READINESS.md`,
+  `docs/ai/API_CONTRACTS.md`.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, and `PROJECT_STATE.md`.
+
+Tests run:
+- Android release build without signing values: failed closed at Gradle
+  configuration with the expected stable signing error.
+- Android debug APK build: passed.
+
+Risks:
+- Operator-owned signing credentials, Android device/profile validation, and
+  release distribution verification remain external.
+
+Next reviewer:
+- Supply signing values only through the operator-controlled release pipeline
+  and validate the signed artifact on a real Android profile.
+
+---
+
 ### 2026-08-10 - Codex - Runtime Production Session Configuration
 
 Summary:

@@ -199,9 +199,11 @@ the gates below are satisfied.
 - The release Android manifest now declares the minimum `INTERNET` permission
   for the existing native-network boundary. This does not claim local-network
   discovery or live peer transport implementation.
-- The mobile Android release build no longer falls back to debug signing;
-  release signing is enabled only when all four operator-owned
-  `PEERDEAL_ANDROID_*` environment values are supplied together.
+- The mobile Android release build now fails closed before artifact assembly
+  unless all four operator-owned `PEERDEAL_ANDROID_*` signing values are
+  supplied together. It rejects padded/control-bearing values and invalid
+  keystore paths, never falls back to debug signing, and does not silently
+  produce an unsigned release artifact.
 - The Windows desktop host now registers the generic secure-key channel and
   persists bounded versioned records through Windows Credential Manager without
   adding receipt semantics to the native bridge.
