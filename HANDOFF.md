@@ -24,6 +24,9 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
+- Added mirrored app retention coordinators that validate scope, evaluate
+  close-time policy with explicit timestamps, invoke wipe only when due, and
+  fail closed on policy or storage exceptions.
 - Added the generic capture action contract and mirrored app coordinator
   lifecycle, including serialized native block/release and fail-closed visual
   obscuring when blocking cannot be confirmed.
@@ -64,6 +67,8 @@ are implemented on branch `retrofit/baseline-v1` from backup tag
   tests: passed.
 - Full repository gate/test run after the recovery wipe contract extension:
   passed.
+- Mobile and desktop retention coordinator focused tests: passed.
+- Full repository gate/test run after retention wipe orchestration: passed.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume
   exhausted during extraction. Flutter doctor itself is green; Kotlin/APK and

@@ -2802,6 +2802,45 @@ Run the full repository gates and commit if green.
 
 ---
 
+### 2026-08-09 - Codex - App Retention Wipe Orchestration
+
+Summary:
+Added mirrored mobile and desktop `AppRecoveryRetentionCoordinator` seams.
+They reject invalid recovery scopes, evaluate the existing privacy policy engine
+with caller-supplied timestamps, invoke `RecoveryPersistenceStore.wipe` only
+when due, and normalize policy/storage exceptions into fatal persistence
+outcomes. The coordinators are callable app APIs; production session-close
+scheduling is not claimed as complete.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/recovery/app_recovery_retention_coordinator.dart`
+- `apps/peerdeal_desktop/lib/recovery/app_recovery_retention_coordinator.dart`
+- `apps/peerdeal_mobile/test/recovery/app_recovery_retention_coordinator_test.dart`
+- `apps/peerdeal_desktop/test/recovery/app_recovery_retention_coordinator_test.dart`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/REPO_BRIEF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Mobile and desktop retention coordinator focused tests: passed.
+- Full `melos run test`, analyze, boundary-check, source-text, and
+  dependency-audit gates: passed.
+
+Risks:
+- Production session-close scheduling, runtime/device validation, and
+  production database/platform persistence remain open.
+
+Next reviewer:
+Run the full repository gates and commit if green.
+
+---
+
 ### 2026-08-09 - Codex - Recovery Persistence Wipe Hardening
 
 Summary:

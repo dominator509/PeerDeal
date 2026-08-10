@@ -95,8 +95,10 @@ dart analyze .
   Windows desktop host now uses Credential Manager, both behind the existing
   method-channel contract. Android and Windows capture enforcement is now
   host-backed, with runtime/device validation still open. Native transport,
-  durable event storage, and other platform implementations remain readiness
-  gaps documented in `docs/PRODUCTION_READINESS.md`.
+  production platform persistence, and other platform implementations remain
+  readiness gaps documented in `docs/PRODUCTION_READINESS.md`. App shells now
+  expose deterministic retention coordinators that connect close-time policy
+  decisions to the scoped recovery-store wipe primitive.
 
 ## Do Not Touch Without Approval
 

@@ -47,9 +47,11 @@ Setup flow:
   `PEERDEAL_ANDROID_KEYSTORE`, `PEERDEAL_ANDROID_KEYSTORE_PASSWORD`,
   `PEERDEAL_ANDROID_KEY_ALIAS`, and `PEERDEAL_ANDROID_KEY_PASSWORD` together.
 - Android capture blocking is implemented at the host level, but runtime/device
-  validation, local-network discovery, transport, platform recovery persistence,
-  and the remaining other-platform hooks are still open. The desktop Windows
-  host provides the same generic secure-key channel through Windows Credential
-  Manager.
+  validation, local-network discovery, transport, production platform recovery
+  persistence, and the remaining other-platform hooks are still open. The app
+  shell exposes a deterministic retention coordinator that invokes recovery
+  persistence wipe after a caller supplies a closed-session time and policy.
+  The desktop Windows host provides the same generic secure-key channel through
+  Windows Credential Manager.
 
 It does NOT introduce a new top-level package.

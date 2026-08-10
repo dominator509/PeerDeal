@@ -50,5 +50,8 @@ Setup flow:
 - Build the host with `flutter build windows --no-pub`. Credential Manager
   runtime persistence and capture behavior still require an operator
   profile/device validation.
+- The app shell exposes a deterministic retention coordinator that invokes
+  recovery persistence wipe after a caller supplies a closed-session time and
+  policy; production session-close scheduling remains app-lifecycle work.
 
 It does NOT introduce a new top-level package.

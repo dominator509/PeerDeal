@@ -241,7 +241,11 @@ scrub bootstrap and recovery persistence warning text before rendering. The
 `RecoveryPersistenceStore.wipe` operation is scope-validated and idempotent;
 the JSON implementation removes the target window and matching interrupted
 write files while preserving other scopes. Retention policy remains outside
-the sync package and decides when to invoke the wipe.
+the sync package and decides when to invoke the wipe. Mobile and desktop app
+shells expose `AppRecoveryRetentionCoordinator.enforceAfterSessionClose`,
+which validates scope, evaluates the injected retention policy engine with
+explicit timestamps, and invokes the store wipe only when due. Policy or wipe
+exceptions become fatal scrub-safe persistence results.
 
 ## Local Network Bootstrap Boundary
 

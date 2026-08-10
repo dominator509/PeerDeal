@@ -517,6 +517,11 @@ the gates below are satisfied.
   operation; the JSON store removes the durable recovery window and matching
   interrupted-write temporary files without removing other scopes. Retention
   policy remains app-owned and controls when the operation is invoked.
+- Mobile and desktop app shells now expose deterministic retention coordinators
+  that validate recovery scope, evaluate policy with explicit close/current
+  timestamps, invoke wipe only when due, and normalize policy/storage
+  exceptions to fatal persistence outcomes. Production session-close lifecycle
+  scheduling remains an integration responsibility.
 - App shells now expose app-owned recovery persistence store factories that
   construct durable JSON recovery stores only when the platform/app layer
   supplies a usable root directory and fail closed when that root is
