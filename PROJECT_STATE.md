@@ -83,6 +83,16 @@ Generated: 2026-08-09
   remain required; the current Android Gradle configuration also stops on an
   NDK installation missing `source.properties`.
 
+## Recent T19 Changes
+
+- Both production app entrypoints now construct the app with the existing
+  app-owned `AppNativeReadinessLoader.methodChannel()` boundary.
+- Missing or unavailable generic native capabilities now reach the default home
+  as an explicit unavailable readiness state instead of leaving production
+  entrypoint readiness inactive.
+- Explicit runtime/widget injection remains available for focused tests and
+  host integrations; no native transport or platform implementation was added.
+
 ## Required Gates
 
 Run after each retrofit step:

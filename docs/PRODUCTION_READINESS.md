@@ -708,6 +708,9 @@ the gates below are satisfied.
   loaders and default home surfaces render stable ready/unavailable native
   status without exposing native warning detail, while custom home builders
   remain app-owned.
+- Mobile and desktop production entrypoints now install the existing
+  app-owned method-channel readiness loaders, so missing host capabilities are
+  surfaced as unavailable instead of silently bypassing the readiness boundary.
 - App-owned native readiness loaders now reject padded, control-character, or
   delimiter-bearing secure-key namespaces before native secure storage lookup,
   preventing malformed readiness configuration from reaching platform storage.

@@ -14,6 +14,40 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Production Entrypoint Native Readiness
+
+Summary:
+Both production app entrypoints now install the existing app-owned
+`AppNativeReadinessLoader.methodChannel()` boundary. Generic host capability
+failures reach the default home as scrubbed unavailable readiness instead of
+silently leaving entrypoint readiness inactive.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- mirrored production-entrypoint focused tests
+- `HANDOFF_QUEUE.md`
+- `HANDOFF.md`
+- `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Tests run:
+- Mobile production-entrypoint focused test: passed.
+- Desktop production-entrypoint focused test: passed.
+- Full `melos run analyze`, `boundary-check`, `source-text`, `test`, and
+  `dependency-audit`: passed; dependency audit reports 0 actionable upgrades.
+- `git diff --check`: passed.
+
+Risks:
+Native transport, other-platform host implementations, runtime/device validation,
+production database persistence, and Android NDK repair remain open.
+
+Next reviewer:
+Verify full repository gates and confirm the host-specific readiness contracts
+remain unchanged.
+
+---
+
 ### 2026-08-10 - Codex - Native App-Support Recovery Persistence
 
 Summary:

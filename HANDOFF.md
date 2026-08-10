@@ -6,8 +6,8 @@ Generated: 2026-08-09
 
 Trinity baseline retrofit T1 is complete, CI/dependency hardening is complete,
 the T4 Android plus Windows secure-key and capture-enforcement host slices are
-implemented, and T18 app-private recovery persistence selection is wired on
-branch `retrofit/baseline-v1` from backup tag
+implemented, and T19 production entrypoint native-readiness activation is wired
+on branch `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
 ## What Changed
@@ -27,6 +27,9 @@ branch `retrofit/baseline-v1` from backup tag
 - Both app shells now prefer `PEERDEAL_RECOVERY_ROOT` and otherwise use the
   native app-support directory to construct their app-owned JSON recovery store.
   Native lookup and root validation fail closed.
+- Both production app entrypoints now install the app-owned method-channel native
+  readiness loader. Missing host capabilities render as unavailable and do not
+  silently bypass readiness-gated production routes.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -100,6 +103,9 @@ branch `retrofit/baseline-v1` from backup tag
 - T18 full repository `analyze`, `boundary-check`, `source-text`, `test`, and
   `dependency-audit` gates: passed; dependency audit reports 0 actionable
   upgrades.
+- T19 mobile and desktop production-entrypoint focused tests: passed; the full
+  repository `analyze`, `boundary-check`, `source-text`, `test`, and
+  `dependency-audit` gates also passed.
 - `flutter test --no-pub` in `apps/peerdeal_desktop`: passed.
 - `flutter build windows --debug --no-pub`: passed.
 - Windows host smoke launch: stayed alive for five seconds and stopped cleanly.

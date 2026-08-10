@@ -54,6 +54,7 @@ Future<void> main() async {
   runApp(
     PeerDealMobileApp(
       recoveryPersistenceStoreFactory: recoveryPersistenceStoreFactory,
+      nativeReadinessLoader: AppNativeReadinessLoader.methodChannel(),
     ),
   );
 }
