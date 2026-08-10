@@ -121,7 +121,11 @@ dart analyze .
   non-retention event batches before advancing variant state/cursors. The
   public variant event reducer and cursor acceptance now reconstruct canonical
   remote Hold'em events before the app commits them through core; generic
-  core-only transport remains available for non-variant sessions.
+  core-only transport remains available for non-variant sessions. Mirrored
+  `AppHoldemTableSessionRoute` owners now compose the validated runtime with
+  source lifecycle and accepted-event surface refresh; their route context can
+  publish canonical projection frames and report partial sends. Native live
+  transport and actual product route/state wiring remain open.
 
 ## Do Not Touch Without Approval
 

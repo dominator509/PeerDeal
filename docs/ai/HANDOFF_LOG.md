@@ -12,6 +12,38 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - App Hold'em Route Orchestration
+
+Summary:
+- Added mirrored `AppHoldemTableSessionRoute` composition around the validated
+  Hold'em runtime, transport provisioner, bounded source lifecycle, and
+  accepted-event surface refresh.
+- Added `AppHoldemProjectionTransportPublisher` for canonical outbound event
+  frames with explicit complete, rejected, and partial-send results.
+
+Files changed:
+- `apps/peerdeal_mobile/` and `apps/peerdeal_desktop/` session and transport
+  orchestration plus focused tests.
+- `PROJECT_STATE.md`, `HANDOFF.md`, `HANDOFF_QUEUE.md`,
+  `docs/PRODUCTION_READINESS.md`, and `docs/ai/` context docs.
+
+Tests run:
+- Focused mobile and desktop Hold'em runtime/publisher tests: passed.
+- Focused mobile and desktop route tests: passed.
+
+Risks:
+- Native live peer transport, platform source provisioning, actual product
+  route/state wiring, durable database persistence, and device validation remain
+  open. Partial outbound sends are reported for retry; variant rules are not
+  replayed by the publisher.
+
+Next reviewer:
+- Run the full repository gates, then connect the route to the real product
+  route map and validated session-state source without moving policy into
+  package boundaries.
+
+---
+
 ### 2026-08-10 - Codex - Remote Hold'em Event Reconstruction
 
 Summary:

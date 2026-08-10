@@ -3,7 +3,9 @@ import 'package:peerdeal_mobile/recovery/app_recovery_retention_coordinator.dart
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_coordinator.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_event_adapter.dart';
 import 'package:peerdeal_mobile/session/app_holdem_table_session_runtime.dart';
+import 'package:peerdeal_mobile/session/app_holdem_table_session_transport_publisher.dart';
 import 'package:peerdeal_mobile/session/app_table_session_runtime.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_privacy/peerdeal_privacy.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
@@ -34,6 +36,53 @@ void main() {
     expect(runtime.coreState.eventSequence, 3);
     expect(runtime.sessionRuntime.acceptedEventCount, 2);
     expect(runtime.cursor.nextEventSeq, 4);
+  });
+
+  test(
+    'publishes accepted projections as canonical transport frames',
+    () async {
+      final runtime = _runtime(_preflopState());
+      final projection = runtime.startHand();
+      final sender = _RecordingTransportSender();
+      final publisher = AppHoldemProjectionTransportPublisher(
+        sender: sender,
+        localPeerId: 'peer_local',
+        remotePeerId: 'peer_remote',
+      );
+
+      final result = await publisher.publish(projection);
+
+      expect(result.isComplete, isTrue);
+      expect(result.sentEventCount, 1);
+      expect(sender.frames.single.fromPeerId, 'peer_local');
+      expect(sender.frames.single.toPeerId, 'peer_remote');
+      expect(sender.frames.single.sequence, projection.events.single.eventSeq);
+      expect(
+        const EventEnvelopeCodec().decode(sender.frames.single.payload).eventId,
+        projection.events.single.eventId,
+      );
+    },
+  );
+
+  test('reports partial publication without replaying variant rules', () async {
+    final runtime = _runtime(_showdownState());
+    expect(runtime.startHand().isApplied, isTrue);
+    final projection = runtime.revealShowdown(input: _showdownInput);
+    final sender = _RecordingTransportSender(failAtSend: 2);
+    final publisher = AppHoldemProjectionTransportPublisher(
+      sender: sender,
+      localPeerId: 'peer_local',
+      remotePeerId: 'peer_remote',
+    );
+
+    final result = await publisher.publish(projection);
+
+    expect(result.isComplete, isFalse);
+    expect(result.isPartial, isTrue);
+    expect(result.sentEventCount, 1);
+    expect(result.totalEventCount, 2);
+    expect(sender.frames, hasLength(2));
+    expect(runtime.handState.phase, HoldemHandPhase.showdownReveal);
   });
 
   test('reconstructs adapter events through the inbound app boundary', () {
@@ -391,4 +440,22 @@ class _FakeRecoveryStore implements RecoveryPersistenceStore {
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) =>
       const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+}
+
+class _RecordingTransportSender implements TransportFrameSender {
+  _RecordingTransportSender({this.failAtSend});
+
+  final int? failAtSend;
+  final frames = <TransportFrame>[];
+
+  @override
+  Future<TransportFrameSendResult> send(TransportFrame frame) async {
+    frames.add(frame);
+    if (failAtSend == frames.length) {
+      return const TransportFrameSendResult.rejected(
+        reasonCode: 'ERR_TEST_TRANSPORT_SEND_FAILED',
+      );
+    }
+    return const TransportFrameSendResult.sent();
+  }
 }

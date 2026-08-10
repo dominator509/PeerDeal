@@ -8,11 +8,13 @@ class AppTableSessionTransportProvisioner {
   AppTableSessionTransportProvisioner({
     required AppTableSessionRuntime runtime,
     AppHoldemTableSessionRuntime? holdemRuntime,
+    AppTableSessionEventObserver? onEventAccepted,
     NativeTransportSessionFactory? nativeSessionFactory,
     Duration pollInterval = const Duration(seconds: 1),
     NativeTransportSourceTimerFactory? timerFactory,
   }) : _runtime = runtime,
        _holdemRuntime = holdemRuntime,
+       _onEventAccepted = onEventAccepted,
        _nativeSessionFactory =
            nativeSessionFactory ?? NativeTransportSessionFactory(),
        _pollInterval = pollInterval,
@@ -20,6 +22,7 @@ class AppTableSessionTransportProvisioner {
 
   final AppTableSessionRuntime _runtime;
   final AppHoldemTableSessionRuntime? _holdemRuntime;
+  final AppTableSessionEventObserver? _onEventAccepted;
   final NativeTransportSessionFactory _nativeSessionFactory;
   final Duration _pollInterval;
   final NativeTransportSourceTimerFactory? _timerFactory;
@@ -36,6 +39,7 @@ class AppTableSessionTransportProvisioner {
     final handler = AppTableSessionTransportHandler(
       runtime: _runtime,
       holdemRuntime: _holdemRuntime,
+      onEventAccepted: _onEventAccepted,
     );
     NativeTransportSessionLoadResult loaded;
     try {

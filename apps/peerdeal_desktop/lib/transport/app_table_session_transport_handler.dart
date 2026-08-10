@@ -4,14 +4,19 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import '../session/app_holdem_table_session_runtime.dart';
 import '../session/app_table_session_runtime.dart';
 
+typedef AppTableSessionEventObserver =
+    void Function(AppTableSessionEventResult result);
+
 class AppTableSessionTransportHandler implements TransportFrameHandler {
   AppTableSessionTransportHandler({
     required AppTableSessionRuntime runtime,
     AppHoldemTableSessionRuntime? holdemRuntime,
+    AppTableSessionEventObserver? onEventAccepted,
     EventEnvelopeCodec codec = const EventEnvelopeCodec(),
     TransportFrameValidator? validator,
   }) : _runtime = runtime,
        _holdemRuntime = holdemRuntime,
+       _onEventAccepted = onEventAccepted,
        _codec = codec,
        _validator =
            validator ??
@@ -26,6 +31,7 @@ class AppTableSessionTransportHandler implements TransportFrameHandler {
 
   final AppTableSessionRuntime _runtime;
   final AppHoldemTableSessionRuntime? _holdemRuntime;
+  final AppTableSessionEventObserver? _onEventAccepted;
   final EventEnvelopeCodec _codec;
   final TransportFrameValidator _validator;
   AppTableSessionEventResult? _lastResult;
@@ -62,6 +68,7 @@ class AppTableSessionTransportHandler implements TransportFrameHandler {
       if (!result.isApplied) {
         throw StateError('Transport event rejected by Holdem runtime.');
       }
+      _notifyAccepted(result.sessionResult);
       return;
     }
 
@@ -70,6 +77,18 @@ class AppTableSessionTransportHandler implements TransportFrameHandler {
     _lastResult = result;
     if (!result.isApplied) {
       throw StateError('Transport event rejected by session runtime.');
+    }
+    _notifyAccepted(result);
+  }
+
+  void _notifyAccepted(AppTableSessionEventResult? result) {
+    final observer = _onEventAccepted;
+    if (observer == null || result == null) return;
+    try {
+      observer(result);
+    } on Object {
+      // Observers must not turn an already-committed event into a transport
+      // rejection or roll back deterministic session state.
     }
   }
 }

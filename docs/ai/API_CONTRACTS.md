@@ -258,6 +258,16 @@ transport handler and provisioner accept an optional `holdemRuntime` to use
 this path; the generic runtime path remains the contract for non-variant
 sessions.
 
+`AppHoldemTableSessionRoute` is the app-owned non-demo composition boundary. It
+accepts an injected validated `AppHoldemTableSessionRuntime` and peer identity,
+provisions the existing `AppTableSessionTransportProvisioner`, mounts the
+resulting source, refreshes the supplied surface after an accepted inbound
+event, and disposes/replaces the source with route lifecycle. Its route context
+can create an `AppHoldemProjectionTransportPublisher` when transport is
+available. The publisher canonical-encodes accepted projection events into
+validated `TransportFrame`s and returns complete, rejected, or partial-send
+results without rerunning variant rules.
+
 ## Recovery Persistence Boundary
 
 `peerdeal_sync` owns recovery-window validation and JSON file store contracts.
@@ -298,8 +308,10 @@ projection or close retention fails. A `SessionClosed` event is committed only
 `AppHoldemTableSessionRuntime` is the app-owned local Hold'em composition seam:
 it invokes `HoldemCoreProjectionAdapter`, preflights the resulting non-retention
 batch through `AppTableSessionRuntime`, and advances Hold'em state/cursor only
-after the batch commits. Inbound transport remains generic core projection
-until a variant event-reducer contract is defined.
+after the batch commits. When supplied to the mirrored transport handler or
+provisioner, `HoldemEventCursor` and `HoldemEventReducer` reconstruct inbound
+variant state before the same core commit; the generic core-only path remains
+available for non-variant sessions.
 
 When no explicit recovery root is configured, the mobile and desktop app shells
 may call the generic `AppStorageDirectoryBridge.getAppSupportDirectory()`

@@ -10,8 +10,9 @@ implemented, T19 production entrypoint native-readiness activation is wired,
 and T20 local-network endpoint projection, T21 Android secure-storage bound
 hardening, T22 protocol-native command validation, T23 removal of the
 duplicate starter core API, T24 variant-to-core Hold'em event projection, and
-T25 app-owned Hold'em session adoption plus T26 remote Hold'em event
-reconstruction are implemented on branch
+T25 app-owned Hold'em session adoption, T26 remote Hold'em event
+reconstruction, and T27 app-owned Hold'em route orchestration are implemented
+on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -46,6 +47,7 @@ reconstruction are implemented on branch
   padded or control-character envelope identities before command acceptance.
 - The public `peerdeal_core` barrel no longer exports unused local `CoreCommand`
   or `CoreEvent` models, duplicate reducer contracts, or starter validators;
+  protocol-native core models and reducer paths are now the sole package API.
 - Added mirrored app-owned `AppHoldemTableSessionRuntime` owners. They project
   local start/action/showdown/settlement operations through the variant adapter,
   then commit the resulting envelopes through the app session boundary.
@@ -56,7 +58,11 @@ reconstruction are implemented on branch
   remote cursor and variant state before committing the event through core;
   optional transport handlers/provisioners can use this path without changing
   the generic non-variant route.
-  protocol-native core models and reducer paths are now the sole package API.
+- Added mirrored `AppHoldemTableSessionRoute` owners that compose the validated
+  runtime with transport provisioning, source lifecycle, and accepted-event
+  surface refresh. Route contexts can create an
+  `AppHoldemProjectionTransportPublisher` for canonical outbound frames; a
+  partial send is reported without replaying variant rules.
 - Added a scope-validated, idempotent recovery-persistence wipe operation for
   in-memory and JSON stores, including cleanup of matching interrupted-write
   temp files without crossing recovery scopes.
@@ -104,10 +110,11 @@ reconstruction are implemented on branch
 - Bundle text copied under `spec/` is normalized for repository source-text gates; original hashes are recorded in the manifest.
 - Remaining production software gaps are tracked in `HANDOFF_QUEUE.md` and existing production-readiness docs.
 - Android and Windows host work is available for runtime persistence and
-  capture validation. Remaining native gaps are other-platform capture,
+  capture validation. The app-owned non-demo Hold'em route orchestration seam
+  is now implemented. Remaining native gaps are other-platform capture,
   local-network discovery, native peer transport implementation and platform
   source provisioning, production database persistence, other-platform
-  storage, and non-demo production navigation/UI.
+  storage, product route/state wiring, and final production navigation/UI.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
@@ -184,6 +191,9 @@ reconstruction are implemented on branch
   dependency-audit gates: passed. Dependency audit reported 0 actionable
   upgrades; 10 newer versions remain blocked by the current toolchain.
 - T26 `git diff --check`: passed.
+- T27 focused mobile and desktop route and projection-publisher tests: passed,
+  including inbound accepted-event surface refresh, unavailable transport
+  fallback, canonical outbound frames, and partial-send reporting.
 - Android debug APK build: not completed; both the initial and post-cache-cleanup
   attempts failed while installing NDK `28.2.13676358` because the volume
   exhausted during extraction. Flutter doctor itself is green; Kotlin/APK and

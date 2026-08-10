@@ -28,6 +28,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-10-018` | `packages/peerdeal_variants/` | 4 | T24 | RESOLVED | Added the variant-owned `HoldemCoreProjectionAdapter` and immutable event cursor to connect action, showdown, and settlement state-machine output to catalog-approved protocol events and transactional `CoreReducer` projection without moving Hold'em rules into core. |
 | `LEGACY-GAP-2026-08-10-019` | `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T25 | RESOLVED | Added mirrored `AppHoldemTableSessionRuntime` owners and atomic non-retention event-batch commits so app-local Hold'em lifecycle output is accepted through the existing app session boundary before variant state/cursor advancement. |
 | `LEGACY-GAP-2026-08-10-020` | `packages/peerdeal_variants/`, `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T26 | RESOLVED | Added exact remote cursor acceptance, variant-owned Hold'em event reduction, atomic app inbound projection, and optional transport/provisioner wiring so canonical remote Hold'em events reconstruct local variant and core state without moving rules into core. |
+| `LEGACY-GAP-2026-08-10-021` | `apps/peerdeal_mobile/`, `apps/peerdeal_desktop/` | 4 | T27 | RESOLVED | Added mirrored app-owned Hold'em route composition, accepted inbound-event surface refresh, and canonical projection transport publishing with explicit partial-send results. Live native peer transport, actual product route/state wiring, and final production UI remain open. |
 
 ## Status Definitions
 

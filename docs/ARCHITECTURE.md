@@ -49,6 +49,11 @@ only contiguous, hash-valid envelopes, reduces Hold'em state in
 `peerdeal_variants`, and commits the same envelope through the app-owned core
 runtime before advancing the variant cursor. Generic core-only transport
 remains available for non-variant sessions.
+The mirrored app-owned `AppHoldemTableSessionRoute` now composes this validated
+runtime with transport/source lifecycle and accepted-event surface refresh;
+its route context can publish canonical projection frames and report partial
+sends without rerunning variant rules. Native peer transport and product route
+integration remain outside this seam.
 
 ## Forbidden patterns
 - UI mutating core state directly

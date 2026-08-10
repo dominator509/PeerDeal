@@ -84,4 +84,11 @@ pass that runtime as `holdemRuntime` to `AppTableSessionTransportHandler` or
 `AppTableSessionTransportProvisioner`; the handler validates the remote cursor
 and variant event before committing through the same app session boundary.
 
+`AppHoldemTableSessionRoute` is the app-owned non-demo composition boundary. It
+accepts the validated runtime and peer identity, provisions the existing
+transport/source seam, refreshes the supplied surface after accepted inbound
+events, and exposes `createProjectionPublisher(...)` for canonical outbound
+events. Native live transport and the actual product route/state source remain
+platform/product integration work.
+
 It does NOT introduce a new top-level package.

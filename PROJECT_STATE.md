@@ -146,8 +146,9 @@ Generated: 2026-08-09
   protocol events, and applies each batch transactionally through
   `peerdeal_core.CoreReducer`.
 - Invalid variant actions and core projection failures preserve the original
-  Hold'em state, core state, cursor, and event list. App/session callers still
-  need to adopt this adapter in production routes.
+  Hold'em state, core state, cursor, and event list. App/session callers now
+  have a mirrored app-owned route seam for adopting this adapter; the actual
+  product route and state source remain app-owned.
 
 ## Recent T25 Changes
 
@@ -172,6 +173,16 @@ Generated: 2026-08-09
   while the existing generic core-only path remains available for non-variant
   sessions.
 
+## Recent T27 Changes
+
+- Added mirrored app-owned `AppHoldemTableSessionRoute` composition. It accepts
+  a validated Hold'em runtime, provisions the existing transport/source seam,
+  owns source lifecycle, and refreshes the supplied surface after accepted
+  inbound events.
+- Added mirrored `AppHoldemProjectionTransportPublisher`, which canonicalizes
+  accepted Hold'em projections into validated network frames and reports
+  partial sends without rerunning variant rules.
+
 ## Required Gates
 
 Run after each retrofit step:
@@ -190,7 +201,8 @@ Run after each retrofit step:
    signing.
 2. Add the remaining other-platform capture, local-network, and transport
    implementations behind the existing generic method-channel contracts.
-3. Wire `AppHoldemTableSessionRuntime` into a real non-demo table route once the
-   production route supplies validated Hold'em hand state and event sinks.
+3. Connect `AppHoldemTableSessionRoute` to the product's real route map,
+   validated session-state source, and operator-owned event sink; native peer
+   transport implementation and device validation remain separate work.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
    without crossing locked package boundaries.
