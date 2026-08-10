@@ -76,6 +76,12 @@ Setup flow:
   Windows host provides the same generic secure-key channel through Windows
   Credential Manager.
 
+Accepted joined/rejoined outcomes from the mounted join route preserve an
+identity-safe `ResolvedInvite` and may invoke the injected
+`JoinFlowReadyHandler` after the frame. Product callers can push the existing
+production bootstrap route with that invite as `RouteSettings.arguments`; the
+handler does not create durable state or local identity.
+
 For local Hold'em lifecycle actions, construct the app-owned
 `AppHoldemTableSessionRuntime` with a validated `HoldemHandState` and
 `HoldemEventCursor`. It calls the variant projection adapter, commits the

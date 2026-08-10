@@ -49,6 +49,49 @@ Next reviewer:
 
 ---
 
+### 2026-08-10 - Codex - Join-to-Production Session Handoff
+
+Summary:
+- Preserved only identity-safe `ResolvedInvite` values through the mounted join
+  route for authoritative joined/rejoined outcomes.
+- Added mirrored post-frame `JoinFlowReadyHandler` wiring through both app
+  runtimes. Product callers can now push the T41 bootstrap route with the
+  resolved invite; rejected, stale, malformed, and callback-failure paths do
+  not trigger handoff.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `HANDOFF.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `apps/peerdeal_mobile/README.md`
+- `apps/peerdeal_desktop/README.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused mobile join-flow/app-shell suites: passed, 92 tests.
+- Focused desktop join-flow/app-shell suites: passed, 92 tests.
+
+Risks:
+- The callback only transports the validated invite. Concrete durable state
+  hydration, local identity, native/device runtime validation, and final UX
+  remain product or operator-owned.
+
+Next reviewer:
+- Supply the real product source and local identity to the existing bootstrap;
+  use this callback only after join governance acceptance.
+
+---
+
 ### 2026-08-10 - Codex - Windows Native Channel Teardown
 
 Summary:

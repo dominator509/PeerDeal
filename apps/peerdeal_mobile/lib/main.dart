@@ -80,6 +80,7 @@ class PeerDealMobileRuntime {
     this.joinFlowOrchestratorFactory,
     this.joinFlowInviteContextFactory,
     this.joinFlowEnabledModes,
+    this.joinFlowReadyHandler,
     this.setupFlowOrchestratorFactory,
     this.setupFlowIntentFactory,
     this.setupFlowEnabledModes,
@@ -105,6 +106,7 @@ class PeerDealMobileRuntime {
   final JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory;
   final JoinFlowInviteContextFactory? joinFlowInviteContextFactory;
   final Set<JoinFlowDemoMode>? joinFlowEnabledModes;
+  final JoinFlowReadyHandler? joinFlowReadyHandler;
   final SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory;
   final SetupFlowIntentFactory? setupFlowIntentFactory;
   final Set<SetupFlowDemoMode>? setupFlowEnabledModes;
@@ -130,6 +132,7 @@ class PeerDealMobileRuntime {
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
     Set<JoinFlowDemoMode>? joinFlowEnabledModes,
+    JoinFlowReadyHandler? joinFlowReadyHandler,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     SetupFlowIntentFactory? setupFlowIntentFactory,
     Set<SetupFlowDemoMode>? setupFlowEnabledModes,
@@ -160,6 +163,7 @@ class PeerDealMobileRuntime {
       joinFlowInviteContextFactory:
           joinFlowInviteContextFactory ?? this.joinFlowInviteContextFactory,
       joinFlowEnabledModes: joinFlowEnabledModes ?? this.joinFlowEnabledModes,
+      joinFlowReadyHandler: joinFlowReadyHandler ?? this.joinFlowReadyHandler,
       setupFlowOrchestratorFactory:
           setupFlowOrchestratorFactory ?? this.setupFlowOrchestratorFactory,
       setupFlowIntentFactory:
@@ -204,6 +208,7 @@ class PeerDealMobileApp extends StatefulWidget {
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
     Set<JoinFlowDemoMode>? joinFlowEnabledModes,
+    JoinFlowReadyHandler? joinFlowReadyHandler,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     SetupFlowIntentFactory? setupFlowIntentFactory,
     Set<SetupFlowDemoMode>? setupFlowEnabledModes,
@@ -228,6 +233,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
        _joinFlowInviteContextFactory = joinFlowInviteContextFactory,
        _joinFlowEnabledModes = joinFlowEnabledModes,
+       _joinFlowReadyHandler = joinFlowReadyHandler,
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
        _setupFlowIntentFactory = setupFlowIntentFactory,
        _setupFlowEnabledModes = setupFlowEnabledModes,
@@ -253,6 +259,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
   final JoinFlowInviteContextFactory? _joinFlowInviteContextFactory;
   final Set<JoinFlowDemoMode>? _joinFlowEnabledModes;
+  final JoinFlowReadyHandler? _joinFlowReadyHandler;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
   final SetupFlowIntentFactory? _setupFlowIntentFactory;
   final Set<SetupFlowDemoMode>? _setupFlowEnabledModes;
@@ -292,6 +299,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       joinFlowOrchestratorFactory: widget._joinFlowOrchestratorFactory,
       joinFlowInviteContextFactory: widget._joinFlowInviteContextFactory,
       joinFlowEnabledModes: widget._joinFlowEnabledModes,
+      joinFlowReadyHandler: widget._joinFlowReadyHandler,
       setupFlowOrchestratorFactory: widget._setupFlowOrchestratorFactory,
       setupFlowIntentFactory: widget._setupFlowIntentFactory,
       setupFlowEnabledModes: widget._setupFlowEnabledModes,
@@ -419,6 +427,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
               orchestratorFactory: _joinFlowOrchestratorFactory,
               inviteContextFactory: _runtime.joinFlowInviteContextFactory,
               enabledModes: _runtime.joinFlowEnabledModes,
+              onJoinReady: _runtime.joinFlowReadyHandler,
             ),
           if (enabledRoutePaths.contains(DemoSliceRoutes.setupRoute.path))
             DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(

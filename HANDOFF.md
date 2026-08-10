@@ -22,7 +22,7 @@ Android native transport receiver lifecycle hardening, T38 Windows native
 transport socket lifecycle hardening, T39 Android secure-key teardown
 hardening, T40 Windows native channel teardown hardening, T41 app-owned
 production session bootstrap-route mounting, and T42 app-shell route-argument
-handoff
+handoff, and T43 join-to-production session handoff
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -155,6 +155,11 @@ are implemented on branch
   `PeerDealAppNavigationEntry` values. Default home navigation forwards the
   payload through `RouteSettings.arguments`, allowing a product caller to
   launch the T41 adapter without moving session semantics into the app shell.
+- Mounted join routes now preserve only identity-safe invites from accepted
+  joined/rejoined outcomes and expose an optional post-frame
+  `JoinFlowReadyHandler` through both app runtimes. Product callers can use the
+  handler to push the T41 adapter; rejected outcomes, stale async outcomes, and
+  handler failures do not expose or navigate with unsafe data.
 - Successful first-join and rejoin outcomes now retain their validated resolved
   invite for product session handoff. Demo and compiled Game File data remain
   non-authoritative and are not used to derive live session identity.
@@ -178,7 +183,8 @@ are implemented on branch
   native work, production database persistence, the concrete product source and
   local identity wiring, and final product navigation/UX validation. The
   generic app-shell route-argument handoff is implemented; it does not create
-  a product source or durable session state.
+  a product source or durable session state. The join-ready callback now closes
+  the app-flow handoff into that generic route seam.
 
 - Windows native hardening was compiled and smoke-tested after the capture and
   credential-shape checks; runtime OS/profile validation remains operator-owned.
@@ -337,3 +343,5 @@ are implemented on branch
   upgrades and 11 newer versions remain blocked by the current toolchain.
 - T41 Dart format and `git diff --check`: passed.
 - T42 focused mobile and desktop app-shell tests: passed, 74 tests each.
+- T43 focused mobile and desktop join-flow/app-shell suites: passed, 92 tests
+  each.

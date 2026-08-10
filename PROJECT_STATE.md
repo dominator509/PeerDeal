@@ -336,6 +336,17 @@ Generated: 2026-08-10
 - Windows runtime/profile validation, Android device validation, release
   signing, and other-platform implementations remain open.
 
+## Recent T43 Changes
+
+- Mounted join routes now preserve an identity-safe `ResolvedInvite` only for
+  the authoritative joined/rejoined state and status pairs. An optional
+  `JoinFlowReadyHandler` runs post-frame after successful join/rejoin and is
+  wired through both app runtime objects, allowing product callers to push the
+  T41 route adapter with `RouteSettings.arguments`.
+- Rejected outcomes, malformed invite identities, stale async outcomes, and
+  handler exceptions do not trigger production handoff. Focused mobile and
+  desktop join/app-shell suites passed with 92 tests each.
+
 ## Recent T42 Changes
 
 - Added an optional opaque route-argument payload to mirrored

@@ -28,6 +28,45 @@ void main() {
     expect(find.text('Result: OK_JOINED'), findsOneWidget);
   });
 
+  testWidgets('forwards a successful resolved invite to product handoff', (
+    tester,
+  ) async {
+    ResolvedInvite? handedOffInvite;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: demoFactory.create,
+          onJoinReady: (_, invite) => handedOffInvite = invite,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(handedOffInvite?.inviteId, 'inv_001');
+    expect(handedOffInvite?.tableId, 'tbl_001');
+  });
+
+  testWidgets('does not hand off rejected join outcomes', (tester) async {
+    ResolvedInvite? handedOffInvite;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          initialMode: JoinFlowDemoMode.roleDenied,
+          orchestratorFactory: demoFactory.create,
+          onJoinReady: (_, invite) => handedOffInvite = invite,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(handedOffInvite, isNull);
+  });
+
   testWidgets('can switch to ack-required and rejoin outcomes', (tester) async {
     await tester.pumpWidget(
       Directionality(

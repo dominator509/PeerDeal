@@ -17,6 +17,8 @@ typedef JoinFlowOrchestratorFactory =
     JoinFlowOrchestrator Function(JoinFlowDemoMode mode);
 typedef JoinFlowInviteContextFactory =
     InviteContext Function(JoinFlowDemoMode mode);
+typedef JoinFlowReadyHandler =
+    void Function(BuildContext context, ResolvedInvite resolvedInvite);
 
 const int _maxJoinDiagnostics = 4;
 
@@ -27,6 +29,7 @@ class JoinFlowRoute extends StatefulWidget {
     Set<JoinFlowDemoMode>? enabledModes,
     required JoinFlowOrchestratorFactory orchestratorFactory,
     JoinFlowInviteContextFactory? inviteContextFactory,
+    this.onJoinReady,
   }) : _orchestratorFactory = orchestratorFactory,
        _inviteContextFactory = inviteContextFactory ?? _defaultInviteContextFor,
        _enabledModes =
@@ -43,6 +46,7 @@ class JoinFlowRoute extends StatefulWidget {
   final JoinFlowOrchestratorFactory _orchestratorFactory;
   final JoinFlowInviteContextFactory _inviteContextFactory;
   final Set<JoinFlowDemoMode> _enabledModes;
+  final JoinFlowReadyHandler? onJoinReady;
 
   @override
   State<JoinFlowRoute> createState() => _JoinFlowRouteState();
@@ -51,12 +55,14 @@ class JoinFlowRoute extends StatefulWidget {
 class _JoinFlowRouteState extends State<JoinFlowRoute> {
   late JoinFlowDemoMode _mode;
   late Future<JoinFlowOutcome> _outcome;
+  int _outcomeGeneration = 0;
 
   @override
   void initState() {
     super.initState();
     _mode = widget.initialMode;
     _outcome = _run(_mode);
+    _observeOutcome(_outcome);
   }
 
   @override
@@ -68,6 +74,9 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
         oldWidget._enabledModes != widget._enabledModes) {
       _mode = widget.initialMode;
       _outcome = _run(_mode);
+      _observeOutcome(_outcome);
+    } else if (oldWidget.onJoinReady != widget.onJoinReady) {
+      _observeOutcome(_outcome);
     }
   }
 
@@ -167,14 +176,38 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
 
   void _selectMode(JoinFlowDemoMode mode) {
     if (!_isModeEnabled(mode)) return;
+    final outcome = _run(mode);
     setState(() {
       _mode = mode;
-      _outcome = _run(mode);
+      _outcome = outcome;
     });
+    _observeOutcome(outcome);
   }
 
   bool _isModeEnabled(JoinFlowDemoMode mode) {
     return widget._enabledModes.contains(mode);
+  }
+
+  void _observeOutcome(Future<JoinFlowOutcome> outcome) {
+    final generation = ++_outcomeGeneration;
+    outcome.then((rawOutcome) {
+      if (!mounted || generation != _outcomeGeneration) return;
+
+      final safeOutcome = _safeJoinOutcome(rawOutcome);
+      final resolvedInvite = safeOutcome.resolvedInvite;
+      final handler = widget.onJoinReady;
+      if (handler == null || resolvedInvite == null) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || generation != _outcomeGeneration) return;
+        try {
+          handler(context, resolvedInvite);
+        } on Object {
+          // Product navigation is optional; a failed handoff must not expose
+          // raw callback errors through the join surface.
+        }
+      });
+    });
   }
 }
 
@@ -243,6 +276,34 @@ JoinFlowOutcome _safeJoinOutcome(JoinFlowOutcome outcome) {
     resultCode: outcome.resultCode,
     diagnostics: _safeJoinDiagnostics(outcome.diagnostics),
     message: _isSafeJoinMessage(outcome.message) ? outcome.message : null,
+    resolvedInvite: _safeResolvedInvite(outcome),
+  );
+}
+
+ResolvedInvite? _safeResolvedInvite(JoinFlowOutcome outcome) {
+  final isAccepted =
+      (outcome.state == JoinFlowState.joined &&
+          outcome.status == JoinDecisionStatus.okJoined) ||
+      (outcome.state == JoinFlowState.rejoined &&
+          outcome.status == JoinDecisionStatus.okRejoined);
+  final invite = outcome.resolvedInvite;
+  if (!isAccepted || invite == null) return null;
+  if (!_isSafeJoinIdentity(invite.inviteId) ||
+      !_isSafeJoinIdentity(invite.tableId) ||
+      !_isSafeJoinIdentity(invite.sessionId) ||
+      !_isSafeJoinIdentity(invite.modeType) ||
+      !_isSafeJoinIdentity(invite.protocolVersion)) {
+    return null;
+  }
+  return invite;
+}
+
+bool _isSafeJoinIdentity(String value) {
+  if (value.trim() != value || value.isEmpty || value.length > 160) {
+    return false;
+  }
+  return value.codeUnits.every(
+    (codeUnit) => codeUnit > 0x20 && codeUnit != 0x7F,
   );
 }
 

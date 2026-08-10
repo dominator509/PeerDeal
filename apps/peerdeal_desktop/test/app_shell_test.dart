@@ -1318,6 +1318,43 @@ void main() {
     expect(find.text('inv_001'), findsOneWidget);
   });
 
+  testWidgets('hands successful join into an injected production route', (
+    tester,
+  ) async {
+    var callbackCalled = false;
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.join,
+          },
+          joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+            bootstrapCoordinator: FakeBootstrapCoordinator(),
+          ).create,
+          productionRoutes: <String, WidgetBuilder>{
+            '/holdem-live': (context) {
+              final arguments = ModalRoute.of(context)?.settings.arguments;
+              return Text(
+                arguments is ResolvedInvite ? arguments.inviteId : 'missing',
+              );
+            },
+          },
+          joinFlowReadyHandler: (context, invite) {
+            callbackCalled = true;
+            Navigator.of(context).pushNamed('/holdem-live', arguments: invite);
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(callbackCalled, isTrue);
+    expect(find.text('inv_001'), findsOneWidget);
+  });
+
   testWidgets('separates production and demo navigation on default home', (
     tester,
   ) async {

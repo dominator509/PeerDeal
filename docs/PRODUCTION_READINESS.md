@@ -951,6 +951,11 @@ the gates below are satisfied.
   bootstrap-route adapter with its resolved invite. The shell does not inspect
   or persist the payload; source hydration, local identity, and final product
   navigation remain integration-owned.
+  Mounted join routes now preserve only identity-safe invites from accepted
+  joined/rejoined outcomes and expose an optional post-frame
+  `JoinFlowReadyHandler` through both app runtimes. Product callers can use it
+  to push the bootstrap-route adapter; rejected outcomes, stale async outcomes,
+  and handler failures do not trigger handoff.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
@@ -962,6 +967,7 @@ the gates below are satisfied.
    existing key-ring, cipher, signer, and app capture contracts.
 3. Supply the concrete `AppHoldemProductionSessionSource` and invoke
    `AppHoldemProductionSessionBootstrap` from the real product session/state
-   source and local identity; complete product navigation/UI validation while
+   source and local identity through the join-ready handoff; complete product
+   navigation/UI validation while
    keeping native transport/device validation and durable database persistence
    separate.

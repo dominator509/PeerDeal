@@ -181,6 +181,10 @@ codes and rejoin tokens before join dependencies, invite resolution, or
 governance commit adapters run. Join routes scrub app-owned join outcome result
 codes and diagnostics before rendering, and they must bound rendered
 diagnostic count with a stable truncation diagnostic.
+Accepted joined/rejoined outcomes retain only identity-safe `ResolvedInvite`
+values. An optional `JoinFlowReadyHandler` receives that invite in a post-frame
+callback through the app runtime; it is not invoked for rejected, stale, or
+malformed outcomes, and callback failures are contained by the route.
 Join routes must reload their async outcome when app-owned orchestrator,
 invite-context, initial-mode, or enabled-mode dependencies change.
 Setup routes and setup flow orchestration reject blank or padded app-owned
