@@ -219,3 +219,6 @@ resumable publication hardening are implemented on branch
   bounded native multicast transport host.
 - T30 Android `flutter build apk --debug --no-pub`: passed after repairing the
   pinned NDK and fixing the existing Kotlin secure-key nullability errors.
+- T30 full `analyze`, `boundary-check`, `source-text`, serialized `test`, and
+  `dependency-audit` gates: passed; dependency audit reported 0 actionable
+  upgrades and 11 toolchain-blocked newer versions.
