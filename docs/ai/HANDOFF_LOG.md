@@ -59,6 +59,59 @@ pinned NDK/device environment is available.
 
 ---
 
+### 2026-08-09 - Codex - Android and Windows Capture Enforcement
+
+Summary:
+Added the generic capture `setBlocking` action and mirrored app coordinator
+serialization for apply/release. Android applies `FLAG_SECURE`; Windows applies
+`SetWindowDisplayAffinity`. Sensitive receipt routes release native blocking on
+disposal, and failed or unconfirmed actions downgrade to visual obscuring with
+scrubbed warnings.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/capture_protection/`
+- `packages/peerdeal_native_bridges/fixtures/capture_protection_bridge_contract.json`
+- `packages/peerdeal_native_bridges/test/`
+- `apps/peerdeal_mobile/lib/safe_surface/capture_surface_coordinator.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/demo_receipt_surface_presenter.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/`
+- `apps/peerdeal_desktop/lib/safe_surface/capture_surface_coordinator.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/demo_receipt_surface_presenter.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_desktop/windows/runner/windows_capture_protection.*`
+- `apps/peerdeal_desktop/windows/runner/CMakeLists.txt`
+- `apps/peerdeal_desktop/windows/runner/flutter_window.*`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `DECISIONS.log`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused native bridge tests: passed.
+- Mirrored mobile and desktop capture coordinator tests: passed.
+- `flutter build windows --debug --no-pub`: passed.
+- Full repository gates passed: analyze, boundary-check, source-text,
+  dependency-audit, test, and `git diff --check`.
+- Windows host smoke launch: stayed alive for five seconds and stopped cleanly.
+
+Risks:
+- Android Kotlin/APK and real-device capture behavior remain unverified because
+  both NDK `28.2.13676358` installation attempts exhausted local disk capacity.
+- Windows capture action runtime was compile-verified but not directly invoked
+  against a packaged profile. Other-platform capture, discovery, transport, and
+  durable platform persistence remain open.
+
+Next reviewer:
+Perform Android device and Windows profile runtime checks for key persistence
+and capture enforcement.
+
+---
+
 ### 2026-08-09 - Codex - Mobile Android Secure-Key Host
 
 Summary:

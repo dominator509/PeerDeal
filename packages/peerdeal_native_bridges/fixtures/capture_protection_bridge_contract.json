@@ -6,6 +6,10 @@
       "obscuringSupported": true,
       "notes": "screen-protection-supported",
       "warning": "best-effort"
+    },
+    "setBlocking": {
+      "success": true,
+      "blockingEnabled": true
     }
   }
 }

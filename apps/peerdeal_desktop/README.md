@@ -35,10 +35,14 @@ Setup flow:
 - `windows/runner/windows_secure_key_storage.*` registers the generic
   `peerdeal/native_bridges/secure_key_storage` channel with `loadKeyRing`,
   `saveKey`, and `deleteKey`.
+- `windows/runner/windows_capture_protection.*` registers the generic
+  `peerdeal/native_bridges/capture_protection` channel and applies the
+  app-owned blocking decision through `SetWindowDisplayAffinity`.
 - Records are validated and stored as a bounded versioned envelope in Windows
   Credential Manager under a namespace-derived target. The host does not
   interpret receipt purposes, algorithms, or rotation policy.
 - Build the host with `flutter build windows --no-pub`. Credential Manager
-  runtime persistence still requires an operator profile/device validation.
+  runtime persistence and capture behavior still require an operator
+  profile/device validation.
 
 It does NOT introduce a new top-level package.

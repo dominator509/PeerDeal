@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "flutter/generated_plugin_registrant.h"
+#include "windows_capture_protection.h"
 #include "windows_secure_key_storage.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
@@ -27,6 +28,8 @@ bool FlutterWindow::OnCreate() {
   }
   secure_key_storage_ = std::make_unique<WindowsSecureKeyStorage>(
       flutter_controller_->engine()->messenger());
+  capture_protection_ = std::make_unique<WindowsCaptureProtection>(
+      flutter_controller_->engine()->messenger(), GetHandle());
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
@@ -43,6 +46,7 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  capture_protection_ = nullptr;
   secure_key_storage_ = nullptr;
   if (flutter_controller_) {
     flutter_controller_ = nullptr;

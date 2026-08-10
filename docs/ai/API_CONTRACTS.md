@@ -128,6 +128,12 @@ shareable fields and recovery diagnostics must be bounded with stable
 truncation lines.
 Capture surface coordinators must scrub native warning detail and replace
 sensitive native notes with stable unavailable text before UI projection.
+The capture protection bridge exposes `getCapability` and `setBlocking` on
+`peerdeal/native_bridges/capture_protection`. App coordinators serialize
+blocking and release actions, and a failed or unconfirmed blocking action
+downgrades the sensitive surface to visual obscuring with a scrubbed warning.
+The action result reports both `success` and `blockingEnabled`; native hosts
+must not expose receipt or capture policy semantics beyond this generic seam.
 Mobile and desktop app-native readiness loaders compose generic capture,
 local-network, transport, and secure-key storage bridge capability facts into
 stable readiness snapshots. Loader warnings must be app-owned stable strings;
@@ -308,6 +314,10 @@ replaced with stable unavailable text rather than exposed to app surfaces.
   Credential Manager target names are derived from the validated namespace;
   the host returns only the generic snapshot/mutation maps and keeps receipt
   policy in app/receipt code.
+- The Android capture host applies `setBlocking` through `FLAG_SECURE`, and the
+  Windows capture host applies it through `SetWindowDisplayAffinity`. App
+  capture policy remains in `peerdeal_capture`; host enforcement is additive,
+  fail-closed, and still requires runtime/device validation.
 - App orchestration should surface scrubbed diagnostics, not raw secrets,
   credentials, or platform exception payloads.
 

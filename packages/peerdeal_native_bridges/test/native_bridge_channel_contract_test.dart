@@ -22,6 +22,13 @@ void main() {
     expect(capability.obscuringSupported, isTrue);
     expect(capability.notes, 'screen-protection-supported');
     expect(capability.warning, 'best-effort');
+
+    final action = CaptureProtectionChannelContract.decodeActionResult(
+      methods[CaptureProtectionChannelContract.setBlockingMethod]
+          as Map<String, Object?>,
+    );
+    expect(action.isSuccess, isTrue);
+    expect(action.blockingEnabled, isTrue);
   });
 
   test('capture protection channel contract fails closed on null payload', () {
@@ -47,6 +54,17 @@ void main() {
     expect(capability.obscuringSupported, isFalse);
     expect(capability.notes, 'unavailable');
     expect(capability.warning, isNull);
+
+    final action = CaptureProtectionChannelContract.decodeActionResult(
+      const <String, Object?>{
+        'success': 'true',
+        'blockingEnabled': 1,
+        'warning': <String>['bad'],
+      },
+    );
+    expect(action.isSuccess, isFalse);
+    expect(action.blockingEnabled, isFalse);
+    expect(action.warning, isNull);
   });
 
   test('local network channel contract decodes fixture payloads', () {

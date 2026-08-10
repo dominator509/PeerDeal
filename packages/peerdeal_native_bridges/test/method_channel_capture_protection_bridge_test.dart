@@ -40,6 +40,45 @@ void main() {
     expect(log.single.method, 'getCapability');
   });
 
+  test('applies capture blocking over the method channel', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          if (call.method ==
+              CaptureProtectionChannelContract.setBlockingMethod) {
+            expect(call.arguments, {'enabled': true});
+            return {'success': true, 'blockingEnabled': true};
+          }
+          return null;
+        });
+
+    final bridge = MethodChannelCaptureProtectionBridge(channel: channel);
+    final action = await bridge.setBlocking(enabled: true);
+
+    expect(action.isSuccess, isTrue);
+    expect(action.blockingEnabled, isTrue);
+    expect(log.single.method, 'setBlocking');
+  });
+
+  test(
+    'fails closed when capture blocking action payload is malformed',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            log.add(call);
+            return <Object?>['not-a-map'];
+          });
+
+      final bridge = MethodChannelCaptureProtectionBridge(channel: channel);
+      final action = await bridge.setBlocking(enabled: true);
+
+      expect(action.isSuccess, isFalse);
+      expect(action.blockingEnabled, isFalse);
+      expect(action.warning, contains('decode failed'));
+      expect(log.single.method, 'setBlocking');
+    },
+  );
+
   test('returns unavailable capability for missing platform payload', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {

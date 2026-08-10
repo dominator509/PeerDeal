@@ -9,6 +9,7 @@
 #include "win32_window.h"
 
 class WindowsSecureKeyStorage;
+class WindowsCaptureProtection;
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
@@ -33,6 +34,9 @@ class FlutterWindow : public Win32Window {
 
   // The generic secure-key channel owned by this app host.
   std::unique_ptr<WindowsSecureKeyStorage> secure_key_storage_;
+
+  // The native capture policy action channel owned by this app host.
+  std::unique_ptr<WindowsCaptureProtection> capture_protection_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

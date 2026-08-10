@@ -53,3 +53,16 @@ Rationale: Windows is the available desktop target and provides an OS-managed
 per-user credential boundary without adding a package or persisting key
 material in app files. The host can satisfy the existing app key-ring seam
 while keeping runtime profile validation and other platform work explicit.
+
+## DEC-2026-08-09-008
+
+Decision: Add native capture blocking as a generic `setBlocking` action on the
+existing capture-protection channel. Keep capture policy and downgrade behavior
+in app/`peerdeal_capture` code, apply Android `FLAG_SECURE` and Windows
+`SetWindowDisplayAffinity` in their hosts, serialize coordinator apply/release,
+and release blocking when sensitive receipt routes are disposed.
+
+Rationale: The platform hosts can enforce the app-owned blocking decision
+without moving capture policy or receipt semantics into native bridges. A
+failed or unconfirmed native action must fail closed to visual obscuring, while
+runtime/device behavior remains an explicit validation requirement.

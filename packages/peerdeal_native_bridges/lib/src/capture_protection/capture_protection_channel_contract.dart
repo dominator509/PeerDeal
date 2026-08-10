@@ -5,6 +5,7 @@ class CaptureProtectionChannelContract {
 
   static const channelName = 'peerdeal/native_bridges/capture_protection';
   static const getCapabilityMethod = 'getCapability';
+  static const setBlockingMethod = 'setBlocking';
 
   static CaptureProtectionCapability decodeCapability(
     Map<String, Object?>? payload,
@@ -19,6 +20,27 @@ class CaptureProtectionChannelContract {
       blockingSupported: _boolValue(payload['blockingSupported']),
       obscuringSupported: _boolValue(payload['obscuringSupported']),
       notes: _stringValue(payload['notes']) ?? 'unavailable',
+      warning: _stringValue(payload['warning']),
+    );
+  }
+
+  static Map<String, Object?> encodeBlockingRequest({required bool enabled}) =>
+      <String, Object?>{'enabled': enabled};
+
+  static CaptureProtectionActionResult decodeActionResult(
+    Map<String, Object?>? payload,
+  ) {
+    if (payload == null) {
+      return const CaptureProtectionActionResult.failure(
+        warning: 'Capture protection action result is unavailable.',
+      );
+    }
+
+    final success = _boolValue(payload['success']);
+    final blockingEnabled = _boolValue(payload['blockingEnabled']);
+    return CaptureProtectionActionResult(
+      isSuccess: success,
+      blockingEnabled: blockingEnabled,
       warning: _stringValue(payload['warning']),
     );
   }

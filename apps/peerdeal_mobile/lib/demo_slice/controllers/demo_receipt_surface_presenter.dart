@@ -68,6 +68,9 @@ class DemoReceiptSurfacePresenter {
     );
   }
 
+  Future<CaptureProtectionActionResult?> releaseCaptureProtection() =>
+      _captureCoordinator.release();
+
   Future<DemoReceiptSurfaceVm> _presentReceiptScan({
     required ReceiptScanResult receipt,
     RecoveryResult<Object?>? recovery,

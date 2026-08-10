@@ -38,14 +38,18 @@ Setup flow:
   generic key records as namespace-bound AES-GCM ciphertext, with the master
   key held by Android Keystore and durable writes committed through app
   preferences.
+- `CaptureProtectionHandler` registers the generic
+  `peerdeal/native_bridges/capture_protection` channel and applies the
+  app-owned blocking decision through Android `FLAG_SECURE`.
 - The Android host does not interpret receipt purposes, algorithms, rotation,
   or verification policy. Those remain in the app and receipt packages.
 - Release builds never fall back to debug signing. A signed release requires
   `PEERDEAL_ANDROID_KEYSTORE`, `PEERDEAL_ANDROID_KEYSTORE_PASSWORD`,
   `PEERDEAL_ANDROID_KEY_ALIAS`, and `PEERDEAL_ANDROID_KEY_PASSWORD` together.
-- Live Android capture protection, local-network discovery, transport, and
-  platform recovery persistence remain separate native implementation gaps;
-  the desktop Windows host now provides the same generic secure-key channel
-  through Windows Credential Manager.
+- Android capture blocking is implemented at the host level, but runtime/device
+  validation, local-network discovery, transport, platform recovery persistence,
+  and the remaining other-platform hooks are still open. The desktop Windows
+  host provides the same generic secure-key channel through Windows Credential
+  Manager.
 
 It does NOT introduce a new top-level package.

@@ -27,8 +27,8 @@ to observe local device capabilities.
 - app shells own when native hooks are called.
 
 ## Hardened scaffold coverage
-- Method-channel capture capability lookup returns unavailable capability facts
-  when the platform payload is missing or throws.
+- Method-channel capture capability lookup and blocking actions return
+  unavailable or failure facts when the platform payload is missing or throws.
 - Method-channel local-network capability and discovery lookup return
   unavailable capability facts when the platform payload is missing or throws.
 - Method-channel secure key storage lookup returns normalized key-ring snapshots
@@ -51,7 +51,7 @@ to observe local device capabilities.
 
 ## Method-channel contracts
 - Capture protection channel: `peerdeal/native_bridges/capture_protection`
-  with `getCapability`.
+  with `getCapability` and `setBlocking`.
 - Local network channel: `peerdeal/native_bridges/local_network` with
   `getCapability` and `discoverPeers`.
 - Secure key storage channel: `peerdeal/native_bridges/secure_key_storage` with

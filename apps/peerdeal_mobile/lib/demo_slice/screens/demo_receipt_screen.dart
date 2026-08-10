@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_capture/peerdeal_capture.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
@@ -58,6 +60,12 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
         oldWidget.recovery != widget.recovery) {
       _surface = _present();
     }
+  }
+
+  @override
+  void dispose() {
+    unawaited(widget.presenter.releaseCaptureProtection());
+    super.dispose();
   }
 
   @override

@@ -4,7 +4,8 @@ import 'capture_protection_channel_contract.dart';
 import 'capture_protection_bridge.dart';
 import 'capture_protection_bridge_models.dart';
 
-class MethodChannelCaptureProtectionBridge implements CaptureProtectionBridge {
+class MethodChannelCaptureProtectionBridge
+    implements CaptureProtectionBridge, CaptureProtectionActionBridge {
   MethodChannelCaptureProtectionBridge({MethodChannel? channel})
     : _channel = channel ?? const MethodChannel(_channelName);
 
@@ -32,6 +33,35 @@ class MethodChannelCaptureProtectionBridge implements CaptureProtectionBridge {
     }
 
     return CaptureProtectionChannelContract.decodeCapability(result);
+  }
+
+  @override
+  Future<CaptureProtectionActionResult> setBlocking({
+    required bool enabled,
+  }) async {
+    final Map<String, Object?>? result;
+    try {
+      result = await _channel.invokeMapMethod<String, Object?>(
+        CaptureProtectionChannelContract.setBlockingMethod,
+        CaptureProtectionChannelContract.encodeBlockingRequest(
+          enabled: enabled,
+        ),
+      );
+    } on MissingPluginException catch (error) {
+      return CaptureProtectionActionResult.failure(
+        warning: _warning('Capture protection plugin is unavailable', error),
+      );
+    } on PlatformException catch (error) {
+      return CaptureProtectionActionResult.failure(
+        warning: _warning('Capture protection action failed', error),
+      );
+    } on Object catch (error) {
+      return CaptureProtectionActionResult.failure(
+        warning: _warning('Capture protection action decode failed', error),
+      );
+    }
+
+    return CaptureProtectionChannelContract.decodeActionResult(result);
   }
 
   String _warning(String prefix, Object error) {

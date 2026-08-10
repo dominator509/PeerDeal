@@ -7,7 +7,7 @@ Generated: 2026-08-09
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
 - Current tier: T4 native host hardening following the T1 retrofit baseline and CI/dependency alignment
-- Scope: Additive Android and Windows host implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
+- Scope: Additive Android and Windows secure-key and capture host implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
 
 ## T1 Artifacts
 
@@ -32,6 +32,13 @@ Generated: 2026-08-09
   defaults to debug keys.
 - `apps/peerdeal_desktop/windows/` now registers the generic secure-key channel
   and stores bounded versioned records through Windows Credential Manager.
+- `apps/peerdeal_mobile/android/` now registers the generic capture channel and
+  toggles `FLAG_SECURE` through the app-owned blocking action.
+- `apps/peerdeal_desktop/windows/` now registers the generic capture channel and
+  applies `SetWindowDisplayAffinity` through the app-owned blocking action.
+- Mirrored app capture coordinators serialize native blocking/release, downgrade
+  to visual obscuring when blocking fails, and receipt routes release blocking
+  on disposal.
 
 ## Required Gates
 
@@ -46,8 +53,9 @@ Run after each retrofit step:
 
 ## Next Implementation Targets
 
-1. Validate Android and Windows secure-key persistence at runtime, including an
-   Android real-device pass and operator-owned release signing.
-2. Add the remaining native capture/local-network/transport implementations
-   behind the existing generic method-channel contracts.
+1. Validate Android and Windows secure-key persistence and capture behavior at
+   runtime, including an Android real-device pass and operator-owned release
+   signing.
+2. Add the remaining other-platform capture, local-network, and transport
+   implementations behind the existing generic method-channel contracts.
 3. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md` without crossing locked package boundaries.

@@ -66,11 +66,11 @@ the gates below are satisfied.
 - CI runs the same baseline commands as local development.
 
 ## Current highest-risk blockers
-- Live transport, native capture blocking, durable platform persistence, and
-  other-platform native implementations remain scaffold-level. Mobile Android
-  and Windows desktop now have generic secure-key implementations, but runtime
-  persistence validation, Android release signing, and real-device/profile
-  validation remain open.
+- Live transport, capture enforcement on other platforms, durable platform
+  persistence, and other native implementations remain scaffold-level. Mobile
+  Android and Windows desktop now have generic secure-key and capture hosts,
+  but runtime persistence/capture validation, Android release signing, and
+  real-device/profile validation remain open.
 - App shells now mount demo, receipt, safe-surface, and join-flow routes, but
   runtime navigation still needs production UI and non-demo orchestration.
 - App UI is not production-polished.
@@ -150,6 +150,10 @@ the gates below are satisfied.
 - The Windows desktop host now registers the generic secure-key channel and
   persists bounded versioned records through Windows Credential Manager without
   adding receipt semantics to the native bridge.
+- Android and Windows hosts now implement the generic capture action contract;
+  Android toggles `FLAG_SECURE`, Windows uses `SetWindowDisplayAffinity`, and
+  receipt route disposal releases blocking. Failed or unconfirmed native
+  actions downgrade to app-owned visual obscuring with a scrubbed warning.
 - App-owned capture surface coordinators now scrub sensitive native capture
   notes before UI projection, replacing token, secret, password, or platform
   path-like notes with stable unavailable text.
@@ -687,7 +691,8 @@ the gates below are satisfied.
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
   checked-in markdown files were reviewed directly from source.
-- Native capture blocking, real local-network discovery, production transport,
+- Native capture blocking on other platforms, Android/Windows runtime and
+  device validation, real local-network discovery, production transport,
   other-platform secure storage, production database/platform
   persistence, and final production app UI cannot be completed inside the
   current ChatGPT
@@ -778,12 +783,11 @@ the gates below are satisfied.
   locked for those follow-up implementations.
 
 ## Next production hardening order
-1. Replace the remaining native bridge stubs with platform implementations
-   that satisfy the locked method-channel contracts and return the normalized
-   capability facts already covered by package tests; Android secure-key and
-   Windows desktop secure-key channels are now implemented.
-2. Validate Android and Windows key persistence at runtime, including Android
-   real-device persistence and operator-owned release signing, then add other
-   platform secure receipt key storage behind the existing key-ring, cipher,
-   and signer contracts.
+1. Validate Android and Windows secure-key and capture behavior at runtime,
+   including Android real-device persistence, `FLAG_SECURE`, Windows display
+   affinity, and operator-owned release signing.
+2. Replace the remaining native bridge stubs with platform implementations
+   that satisfy the locked method-channel contracts, starting with other
+   platform secure receipt key storage and capture enforcement behind the
+   existing key-ring, cipher, signer, and app capture contracts.
 3. Build app flows on top of the stable public package APIs.

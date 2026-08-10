@@ -25,6 +25,10 @@ Do not let screens decide capture policy directly. Future private ledger,
 receipt detail, verification drill-down, restore, or stats-history demo screens
 should reuse this fixture -> presenter -> safe screen shape.
 
+Sensitive receipt routes apply native blocking through the capture coordinator
+and release it when the route is disposed. If native blocking fails, the
+coordinator downgrades to visual obscuring and keeps the warning scrubbed.
+
 ## Receipt Verification Flow
 
 Demo receipt artifact verification should use

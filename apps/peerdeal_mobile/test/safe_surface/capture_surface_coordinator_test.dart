@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_capture/peerdeal_capture.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -47,6 +49,74 @@ void main() {
     expect(plan.shouldRequestNativeBlocking, isFalse);
     expect(plan.shouldObscure, isFalse);
     expect(plan.nativeNotes, 'screen-protection-supported');
+  });
+
+  test(
+    'applies and releases native blocking when an action bridge is present',
+    () async {
+      final actionBridge = _RecordingCaptureProtectionActionBridge();
+      final coordinator = CaptureSurfaceCoordinator(
+        bridge: _FakeCaptureProtectionBridge(
+          capability: const CaptureProtectionCapability(
+            blockingSupported: true,
+            obscuringSupported: true,
+            notes: 'screen-protection-supported',
+          ),
+        ),
+        actionBridge: actionBridge,
+      );
+
+      final plan = await coordinator.resolve(CaptureSurface.receiptDetail);
+      final release = await coordinator.release();
+
+      expect(plan.shouldRequestNativeBlocking, isTrue);
+      expect(release?.isSuccess, isTrue);
+      expect(actionBridge.enabledCalls, [true, false]);
+    },
+  );
+
+  test('downgrades to obscuring when native blocking action fails', () async {
+    final coordinator = CaptureSurfaceCoordinator(
+      bridge: _FakeCaptureProtectionBridge(
+        capability: const CaptureProtectionCapability(
+          blockingSupported: true,
+          obscuringSupported: true,
+          notes: 'screen-protection-supported',
+        ),
+      ),
+      actionBridge: _RecordingCaptureProtectionActionBridge(succeeds: false),
+    );
+
+    final plan = await coordinator.resolve(CaptureSurface.receiptDetail);
+
+    expect(plan.shouldRequestNativeBlocking, isFalse);
+    expect(plan.shouldObscure, isTrue);
+    expect(
+      plan.warning,
+      'Native capture protection reported a platform warning.',
+    );
+  });
+
+  test('release waits for an in-flight blocking resolution', () async {
+    final bridge = _DeferredCaptureProtectionBridge();
+    final actionBridge = _RecordingCaptureProtectionActionBridge();
+    final coordinator = CaptureSurfaceCoordinator(
+      bridge: bridge,
+      actionBridge: actionBridge,
+    );
+
+    final resolution = coordinator.resolve(CaptureSurface.receiptDetail);
+    final release = coordinator.release();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(actionBridge.enabledCalls, isEmpty);
+
+    bridge.complete();
+    await resolution;
+    final releaseResult = await release;
+
+    expect(releaseResult?.isSuccess, isTrue);
+    expect(actionBridge.enabledCalls, [true, false]);
   });
 
   test('fails closed when native capability lookup throws', () async {
@@ -104,5 +174,49 @@ class _ThrowingCaptureProtectionBridge implements CaptureProtectionBridge {
   @override
   Future<CaptureProtectionCapability> getCapability() async {
     throw StateError('platform channel unavailable');
+  }
+}
+
+class _DeferredCaptureProtectionBridge implements CaptureProtectionBridge {
+  _DeferredCaptureProtectionBridge();
+
+  final Completer<CaptureProtectionCapability> _completer =
+      Completer<CaptureProtectionCapability>();
+
+  void complete() {
+    _completer.complete(
+      const CaptureProtectionCapability(
+        blockingSupported: true,
+        obscuringSupported: true,
+        notes: 'screen-protection-supported',
+      ),
+    );
+  }
+
+  @override
+  Future<CaptureProtectionCapability> getCapability() => _completer.future;
+}
+
+class _RecordingCaptureProtectionActionBridge
+    implements CaptureProtectionActionBridge {
+  _RecordingCaptureProtectionActionBridge({this.succeeds = true});
+
+  final bool succeeds;
+  final List<bool> enabledCalls = <bool>[];
+
+  @override
+  Future<CaptureProtectionActionResult> setBlocking({
+    required bool enabled,
+  }) async {
+    enabledCalls.add(enabled);
+    if (!succeeds) {
+      return const CaptureProtectionActionResult.failure(
+        warning: 'platform action failed',
+      );
+    }
+    return CaptureProtectionActionResult(
+      isSuccess: true,
+      blockingEnabled: enabled,
+    );
   }
 }
