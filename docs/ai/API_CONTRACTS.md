@@ -222,6 +222,11 @@ whose keys merely stringify to expected field names are dropped.
 App-owned native transport drains must cap receive-frame batches before session
 handlers see platform frames, and invalid app batch limits must fail closed
 before native receive calls.
+Generic native transport method-channel capability, send, and receive calls use
+a bounded five-second default deadline and return stable unavailable or failed
+results on timeout. Callers may also provide a cancellation signal so app-owned
+lifecycles can stop in-flight calls and their local deadline timers; transport
+policy remains in app and network layers.
 App-owned native transport session factories must scrub native notes that look
 like secrets, tokens, passwords, or platform paths before exposing load results.
 `peerdeal_protocol.EventEnvelopeCodec` owns bounded canonical JSON bytes for

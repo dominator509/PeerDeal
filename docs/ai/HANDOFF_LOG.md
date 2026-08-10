@@ -12,6 +12,41 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Native Transport Method-Channel Deadline
+
+Summary:
+- Added a bounded five-second default deadline to the generic native transport
+  method-channel bridge for capability, send, and receive operations.
+- Added caller cancellation so app-owned table route replacement and disposal
+  cancel in-flight default transport calls and their local deadline timers.
+- Timeout and cancellation results are stable and fail closed; transport and
+  routing policy remain in the app and network layers.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/transport/method_channel_native_transport_bridge.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_native_transport_bridge_test.dart`
+- `packages/peerdeal_native_bridges/README.md`
+- `docs/PRODUCTION_READINESS.md`, `docs/ai/API_CONTRACTS.md`,
+  `docs/ai/ARCHITECTURE_MAP.md`
+- `PROJECT_STATE.md`, `HANDOFF.md`, and `HANDOFF_QUEUE.md`
+
+Tests run:
+- Focused native transport method-channel suite: passed, 13 tests.
+- Mobile and desktop full Flutter suites: passed.
+- Final analyze, boundary-check, source-text, serialized test, dependency-audit,
+  and diff-check gates: passed; dependency audit reported zero actionable
+  upgrades.
+
+Risks:
+- Runtime device, firewall, cross-device reachability, and other-platform
+  transport validation remain external readiness checks.
+
+Next reviewer:
+Run the full repository gates, then continue with the next actionable gap in
+`docs/PRODUCTION_READINESS.md` without inventing transport endpoint semantics.
+
+---
+
 ### 2026-08-10 - Codex - Secure-Key Method-Channel Deadline
 
 Summary:

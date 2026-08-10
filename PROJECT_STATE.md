@@ -264,6 +264,19 @@ Generated: 2026-08-10
   all serialized Melos gates, and `git diff --check`; dependency audit reports
   zero actionable upgrades.
 
+## Recent T35 Changes
+
+- Added a bounded five-second default deadline to generic native transport
+  method-channel capability, send, and receive calls, returning stable
+  fail-closed results when platform calls do not complete.
+- Added caller cancellation for default transport calls so app-owned table
+  route replacement and disposal cancel in-flight operations and their local
+  deadline timers.
+- Added focused timeout/cancellation coverage for all three transport
+  operations and non-positive timeout validation. Runtime device, firewall,
+  cross-device reachability, and other-platform transport remain external
+  checks.
+
 ## Required Gates
 
 Run after each retrofit step:

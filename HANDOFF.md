@@ -15,8 +15,9 @@ reconstruction, T27 app-owned Hold'em route orchestration, T28 typed
 Hold'em production-route registration, T29 production Hold'em surface and
 resumable publication hardening, T30 bounded Android/Windows host transport,
 T31 app-owned production session composition, T32 resolved-invite production
-session source/bootstrap handoff, T33 native transport lifecycle hardening, and
-T34 bounded secure-key method-channel calls
+session source/bootstrap handoff, T33 native transport lifecycle hardening,
+T34 bounded secure-key method-channel calls, and T35 bounded native transport
+method-channel calls
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -39,6 +40,11 @@ are implemented on branch
 - Mirrored receipt routes now stop at a stable unavailable-artifact rejection
   before invoking native key verification, so failed export factories cannot
   leave secure-storage calls pending.
+- Generic native transport capability, send, and receive method-channel calls
+  now use a bounded five-second default deadline and return stable fail-closed
+  timeout results.
+- App-owned table routes now pass lifecycle cancellation to the default native
+  transport bridge, canceling in-flight calls during replacement or disposal.
 - Added the generic app-support directory method-channel contract. Android
   returns private no-backup app storage and Windows returns `LocalAppData`.
 - Both app shells now prefer `PEERDEAL_RECOVERY_ROOT` and otherwise use the
@@ -268,3 +274,7 @@ are implemented on branch
 - T34 final `analyze`, `boundary-check`, `source-text`, serialized `test`, and
   `diff --check` gates: passed; dependency audit reported zero actionable
   upgrades.
+- T35 focused native transport method-channel tests: passed, 13 tests,
+  including capability, send, receive, timeout, cancellation, and validation.
+- T35 mobile and desktop full Flutter suites plus the final serialized Melos
+  test gate: passed.

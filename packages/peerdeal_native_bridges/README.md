@@ -39,6 +39,11 @@ to observe local device capabilities.
 - Method-channel native transport capability, send, and receive contracts
   normalize byte-frame payloads and fail closed on invalid requests, platform
   failures, or malformed payloads.
+- Native transport method-channel capability, send, and receive calls use a
+  bounded five-second default deadline and return stable fail-closed timeout
+  results.
+- Callers may provide a cancellation signal; cancellation completes the bridge
+  operation fail closed and cancels its local deadline timer.
 - Native bridge warnings are normalized for app-layer safe-surface and network
   routing policy.
 - Channel names, method names, fixture payloads, and decode behavior are locked

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -65,6 +67,43 @@ void main() {
     );
   });
 
+  test('returns unavailable capability when platform call times out', () async {
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) => pending.future);
+
+    final bridge = MethodChannelNativeTransportBridge(
+      channel: channel,
+      timeout: const Duration(milliseconds: 1),
+    );
+    final capability = await bridge.getCapability();
+
+    expect(capability.available, isFalse);
+    expect(capability.warning, 'Native transport call timed out.');
+  });
+
+  test(
+    'cancels an in-flight capability call without waiting for its deadline',
+    () async {
+      final pending = Completer<Object?>();
+      final cancellation = Completer<void>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) => pending.future);
+
+      final bridge = MethodChannelNativeTransportBridge(
+        channel: channel,
+        timeout: const Duration(seconds: 5),
+        cancellation: cancellation.future,
+      );
+      final capabilityFuture = bridge.getCapability();
+      cancellation.complete();
+      final capability = await capabilityFuture;
+
+      expect(capability.available, isFalse);
+      expect(capability.warning, 'Native transport call cancelled.');
+    },
+  );
+
   test('sends native transport frames over the method channel', () async {
     final bridge = MethodChannelNativeTransportBridge(channel: channel);
     final result = await bridge.sendFrame(_frame());
@@ -75,6 +114,21 @@ void main() {
     expect(log.single.arguments, {
       'frame': NativeTransportChannelContract.encodeFrame(_frame()),
     });
+  });
+
+  test('fails closed when send platform call times out', () async {
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) => pending.future);
+
+    final bridge = MethodChannelNativeTransportBridge(
+      channel: channel,
+      timeout: const Duration(milliseconds: 1),
+    );
+    final result = await bridge.sendFrame(_frame());
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Native transport call timed out.');
   });
 
   test('receives native transport frames over the method channel', () async {
@@ -91,6 +145,38 @@ void main() {
     expect(
       log.single.method,
       NativeTransportChannelContract.receiveFramesMethod,
+    );
+  });
+
+  test(
+    'returns unavailable snapshot when receive platform call times out',
+    () async {
+      final pending = Completer<Object?>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) => pending.future);
+
+      final bridge = MethodChannelNativeTransportBridge(
+        channel: channel,
+        timeout: const Duration(milliseconds: 1),
+      );
+      final snapshot = await bridge.receiveFrames(
+        sessionId: 'session_1',
+        peerId: 'peer_b',
+      );
+
+      expect(snapshot.available, isFalse);
+      expect(snapshot.frames, isEmpty);
+      expect(snapshot.warning, 'Native transport call timed out.');
+    },
+  );
+
+  test('rejects a non-positive call timeout', () {
+    expect(
+      () => MethodChannelNativeTransportBridge(
+        channel: channel,
+        timeout: Duration.zero,
+      ),
+      throwsArgumentError,
     );
   });
 

@@ -12,11 +12,13 @@ class AppTableSessionTransportProvisioner {
     NativeTransportSessionFactory? nativeSessionFactory,
     Duration pollInterval = const Duration(seconds: 1),
     NativeTransportSourceTimerFactory? timerFactory,
+    Future<void>? cancellation,
   }) : _runtime = runtime,
        _holdemRuntime = holdemRuntime,
        _onEventAccepted = onEventAccepted,
        _nativeSessionFactory =
-           nativeSessionFactory ?? NativeTransportSessionFactory(),
+           nativeSessionFactory ??
+           NativeTransportSessionFactory(cancellation: cancellation),
        _pollInterval = pollInterval,
        _timerFactory = timerFactory;
 

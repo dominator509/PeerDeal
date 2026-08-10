@@ -9,14 +9,17 @@ class NativeTransportSessionFactory {
     NativeTransportBridge? bridge,
     int maxPayloadBytes = 64 * 1024,
     TransportFrameValidator? validator,
+    Future<void>? cancellation,
   }) : _bridge = bridge,
        _maxPayloadBytes = maxPayloadBytes,
+       _cancellation = cancellation,
        _validator =
            validator ??
            BasicTransportFrameValidator(maxPayloadBytes: maxPayloadBytes);
 
   final NativeTransportBridge? _bridge;
   final int _maxPayloadBytes;
+  final Future<void>? _cancellation;
   final TransportFrameValidator _validator;
 
   Future<NativeTransportSessionLoadResult> loadSession({
@@ -122,7 +125,8 @@ class NativeTransportSessionFactory {
   }
 
   NativeTransportBridge get _resolvedBridge {
-    return _bridge ?? MethodChannelNativeTransportBridge();
+    return _bridge ??
+        MethodChannelNativeTransportBridge(cancellation: _cancellation);
   }
 
   static String _safeNativeWarning(

@@ -15,7 +15,7 @@ packages add policy without mutating universal core truth.
 | --- | --- | --- |
 | App orchestration | `apps/peerdeal_mobile`, `apps/peerdeal_desktop` | Routes, setup/join flows, demo slices, app-owned presenters/controllers, protocol SessionClosed-to-retention mapping, recovery retention and exactly-once session-close coordination, app-owned table-session runtime projection, native-to-package mapping, native transport composition, native readiness aggregation |
 | Shared UI | `peerdeal_ui_kit` | Safe-surface widgets and render models |
-| Native seams | `peerdeal_native_bridges` plus app hosts | Method-channel contracts for platform facts, generic byte transport, and secure key records; secure-key calls have a bounded default deadline; mobile Android and Windows desktop supply secure-key, capture, app-storage, and bounded multicast transport host implementations |
+| Native seams | `peerdeal_native_bridges` plus app hosts | Method-channel contracts for platform facts, generic byte transport, and secure key records; secure-key and transport calls have bounded default deadlines, with caller cancellation for transport lifecycle ownership; mobile Android and Windows desktop supply secure-key, capture, app-storage, and bounded multicast transport host implementations |
 | Network confidence | `peerdeal_network` | Route class, bootstrap/path/election peer-id gates, confidence, primary peer selection, transport frame send/receive gates |
 | Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, request ranges, anchors, snapshots, safe-close recovery |
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy |
@@ -87,8 +87,10 @@ Local Hold'em producer flow:
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session
 and recipient peer. Host lifecycle paths now fail closed and clean up partial
-socket/Winsock initialization; device/network reachability and other-platform
-transport remain open.
+socket/Winsock initialization. The generic method-channel capability, send, and
+receive calls use a bounded five-second default deadline and accept caller
+cancellation for route lifecycle teardown; device/network reachability and
+other-platform transport remain open.
 
 Recovery:
 

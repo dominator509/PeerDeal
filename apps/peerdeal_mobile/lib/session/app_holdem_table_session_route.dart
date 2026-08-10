@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../transport/app_table_session_transport_provisioner.dart';
@@ -66,11 +68,13 @@ class AppHoldemTableSessionRoute extends StatefulWidget {
 
 class _AppHoldemTableSessionRouteState
     extends State<AppHoldemTableSessionRoute> {
+  late Completer<void> _transportCancellation;
   late Future<AppTableSessionTransportProvisionResult> _transportFuture;
 
   @override
   void initState() {
     super.initState();
+    _transportCancellation = Completer<void>();
     _transportFuture = _loadTransport();
   }
 
@@ -84,7 +88,15 @@ class _AppHoldemTableSessionRouteState
         oldWidget.timerFactory == widget.timerFactory) {
       return;
     }
+    _cancelTransportLoad();
+    _transportCancellation = Completer<void>();
     _transportFuture = _loadTransport();
+  }
+
+  @override
+  void dispose() {
+    _cancelTransportLoad();
+    super.dispose();
   }
 
   @override
@@ -105,10 +117,17 @@ class _AppHoldemTableSessionRouteState
       nativeSessionFactory: widget.nativeSessionFactory,
       pollInterval: widget.pollInterval,
       timerFactory: widget.timerFactory,
+      cancellation: _transportCancellation.future,
       onEventAccepted: (_) {
         if (mounted) setState(() {});
       },
     ).load(peerId: widget.peerId);
+  }
+
+  void _cancelTransportLoad() {
+    if (!_transportCancellation.isCompleted) {
+      _transportCancellation.complete();
+    }
   }
 
   Widget _buildSurface(

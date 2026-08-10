@@ -268,6 +268,13 @@ the gates below are satisfied.
 - Android native transport method calls now resolve with bounded fail-closed
   payloads when teardown closes or rejects the executor, and accepted work is
   allowed to drain during handler shutdown.
+- Generic native transport method-channel capability, send, and receive calls
+  now use a bounded five-second default deadline and return stable fail-closed
+  timeout results instead of leaving app transport operations indefinitely
+  pending.
+- App-owned production table routes now cancel in-flight default native
+  transport calls during route replacement or disposal, preventing lifecycle
+  teardown from retaining transport deadline timers.
 - Windows native transport initialization now cleans up socket, multicast
   membership, TTL, and Winsock state on every partial setup failure before the
   host can report transport availability.
