@@ -12,6 +12,34 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Single-Flight Local Identity Provisioning
+
+Summary:
+- Hardened mirrored app-owned local identity provisioners against concurrent
+  first-use calls.
+- One in-flight load/generate/save operation is shared; failed operations clear
+  the guard and remain retryable.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/native_local_peer_identity_provisioner.dart`
+- `apps/peerdeal_desktop/lib/session/native_local_peer_identity_provisioner.dart`
+- Matching focused identity tests and durable handoff/readiness docs.
+
+Tests run:
+- Focused mobile and desktop identity suites: 6 passed each.
+- The new overlapping-call case asserts one load, one generated ID, and one
+  persisted save.
+
+Risks:
+- The guard is per app-process provisioner instance; cross-process locking and
+  real-device persistence remain external validation.
+
+Next reviewer:
+- Preserve the single-flight boundary when wiring the provisioner into a real
+  production source lifecycle.
+
+---
+
 ### 2026-08-10 - Codex - Provisioned Identity Persisted-Source Composition
 
 Summary:

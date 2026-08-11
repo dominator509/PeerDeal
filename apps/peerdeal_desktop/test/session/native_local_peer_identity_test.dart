@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_desktop/session/native_local_peer_identity_loader.dart';
 import 'package:peerdeal_desktop/session/native_local_peer_identity_provisioner.dart';
 import 'package:peerdeal_desktop/session/native_local_peer_identity_writer.dart';
@@ -92,22 +94,58 @@ void main() {
     expect(second.identity?.peerId, 'peer_generated');
     expect(bridge.savedKeys, hasLength(1));
   });
+
+  test('single-flights concurrent identity provisioning', () async {
+    final loadGate = Completer<void>();
+    final bridge = _MemorySecureKeyBridge(loadGate: loadGate);
+    var generated = 0;
+    final provisioner = NativeLocalPeerIdentityProvisioner(
+      loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+      writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+      identityFactory: () {
+        generated += 1;
+        return 'peer_concurrent';
+      },
+    );
+
+    final first = provisioner.ensureIdentity();
+    final second = provisioner.ensureIdentity();
+    loadGate.complete();
+    final results = await Future.wait(
+      <Future<AppLocalPeerIdentityProvisionResult>>[first, second],
+    );
+
+    expect(results, hasLength(2));
+    expect(results.every((result) => result.isSuccess), isTrue);
+    expect(results.map((result) => result.identity?.peerId), <String?>[
+      'peer_concurrent',
+      'peer_concurrent',
+    ]);
+    expect(generated, 1);
+    expect(bridge.loadCalls, 1);
+    expect(bridge.savedKeys, hasLength(1));
+  });
 }
 
 class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
   _MemorySecureKeyBridge({
     List<SecureKeyRecord> keys = const <SecureKeyRecord>[],
     this.available = true,
+    this.loadGate,
   }) : keys = List<SecureKeyRecord>.from(keys);
 
   final bool available;
+  final Completer<void>? loadGate;
   final List<SecureKeyRecord> keys;
   final List<SecureKeyRecord> savedKeys = <SecureKeyRecord>[];
   int loadCalls = 0;
 
   @override
-  Future<SecureKeyStorageSnapshot> loadKeyRing({required String namespace}) {
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
     loadCalls += 1;
+    await loadGate?.future;
     return Future<SecureKeyStorageSnapshot>.value(
       SecureKeyStorageSnapshot(
         available: available,

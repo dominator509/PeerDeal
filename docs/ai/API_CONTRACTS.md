@@ -381,6 +381,13 @@ inactive, or ambiguous records fail closed. These adapters do not decide route
 policy, remote peer selection, or product session state; the concrete source
 must compose those inputs.
 
+`NativeLocalPeerIdentityProvisioner.ensureIdentity()` is single-flight per
+provisioner instance. Concurrent first-use calls share one load/generate/save
+future, preventing competing generated IDs from overwriting the same app-owned
+record. The guard is released on both success and failure, so a failed native
+storage operation remains retryable. The contract does not claim cross-process
+locking or prove device persistence.
+
 `AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(...)`
 is the app-owned composition seam for that identity. It requires an existing
 `RecoveryPersistenceStore`, a `NativeLocalPeerIdentityProvisioner`, and an

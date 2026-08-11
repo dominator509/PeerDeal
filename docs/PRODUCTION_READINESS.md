@@ -1059,6 +1059,13 @@ implementation: concrete persistence selection, remote-peer discovery, native
 runtime validation, and operator-owned release credentials remain open outside
 the app factory.
 
+The T61 follow-up hardens first-use local identity provisioning in both app
+shells. Concurrent callers now share one in-flight load/generate/save operation,
+so the app cannot race itself into replacing a newly persisted peer ID. The
+guard is cleared after either outcome, preserving retry behavior after a
+transient native-storage failure. This is an in-process guarantee; multi-process
+and real-device persistence validation remain operator/runtime work.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

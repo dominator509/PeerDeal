@@ -50,36 +50,52 @@ class NativeLocalPeerIdentityProvisioner {
   final NativeLocalPeerIdentityLoader _loader;
   final NativeLocalPeerIdentityWriter _writer;
   final AppLocalPeerIdentityFactory _identityFactory;
+  Future<AppLocalPeerIdentityProvisionResult>? _inFlight;
 
-  Future<AppLocalPeerIdentityProvisionResult> ensureIdentity() async {
-    final loaded = await _loader.load();
-    if (loaded.warnings.isNotEmpty) {
-      return AppLocalPeerIdentityProvisionResult(warnings: loaded.warnings);
-    }
-    if (loaded.identity != null) {
-      return AppLocalPeerIdentityProvisionResult(identity: loaded.identity);
-    }
+  Future<AppLocalPeerIdentityProvisionResult> ensureIdentity() {
+    final inFlight = _inFlight;
+    if (inFlight != null) return inFlight;
 
-    final String peerId;
+    final operation = _ensureIdentity();
+    _inFlight = operation;
+    return operation;
+  }
+
+  Future<AppLocalPeerIdentityProvisionResult> _ensureIdentity() async {
     try {
-      peerId = _identityFactory();
-    } on Object {
-      return const AppLocalPeerIdentityProvisionResult(
-        warnings: <String>['Local peer identity generation failed.'],
-      );
-    }
+      final loaded = await _loader.load();
+      if (loaded.warnings.isNotEmpty) {
+        return AppLocalPeerIdentityProvisionResult(warnings: loaded.warnings);
+      }
+      if (loaded.identity != null) {
+        return AppLocalPeerIdentityProvisionResult(identity: loaded.identity);
+      }
 
-    final identity = AppLocalPeerIdentity(peerId: peerId);
-    final saved = await _writer.save(identity);
-    if (!saved.isSuccess) {
+      final String peerId;
+      try {
+        peerId = _identityFactory();
+      } on Object {
+        return const AppLocalPeerIdentityProvisionResult(
+          warnings: <String>['Local peer identity generation failed.'],
+        );
+      }
+
+      final identity = AppLocalPeerIdentity(peerId: peerId);
+      final saved = await _writer.save(identity);
+      if (!saved.isSuccess) {
+        return AppLocalPeerIdentityProvisionResult(
+          warnings: <String>[
+            saved.warning ?? 'Local peer identity save failed.',
+          ],
+        );
+      }
       return AppLocalPeerIdentityProvisionResult(
-        warnings: <String>[saved.warning ?? 'Local peer identity save failed.'],
+        identity: identity,
+        created: true,
       );
+    } finally {
+      _inFlight = null;
     }
-    return AppLocalPeerIdentityProvisionResult(
-      identity: identity,
-      created: true,
-    );
   }
 
   static String _securePeerId() {

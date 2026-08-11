@@ -471,6 +471,17 @@ Generated: 2026-08-10
   Concrete product database selection, remote-peer discovery, native runtime
   validation, and release credentials remain outside this app-owned factory.
 
+## Recent T61 Changes
+
+- Mirrored `NativeLocalPeerIdentityProvisioner` implementations now share one
+  in-flight load/generate/save operation across concurrent first-use callers.
+  This prevents two app tasks from generating and overwriting different local
+  peer IDs. The in-flight guard clears on success or failure so transient native
+  storage failures remain retryable.
+- Focused mobile and desktop identity suites passed with 6 tests each,
+  including overlapping provisioning calls. Cross-process identity locking and
+  Android/Windows runtime persistence validation remain external.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

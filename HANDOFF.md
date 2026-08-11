@@ -32,8 +32,8 @@ hardening, T52 action hit-target hardening, T53 local-seat action routing,
 T54 typed core table-state hydration, T55 typed Hold'em state hydration, and
 T56 typed Hold'em event-cursor hydration, T57 typed persisted Hold'em source
 hydration, T58 deterministic persisted recovery-suffix replay, T59 app-owned
-local peer identity persistence, and T60 provisioned-identity persisted-source
-composition
+local peer identity persistence, T60 provisioned-identity persisted-source
+composition, and T61 single-flight local identity provisioning
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -80,6 +80,10 @@ are implemented on branch
   local identity, map it into the existing persisted production-session input,
   and apply caller-owned route, remote-peer, local-seat, and close-event policy.
   They do not invent database selection or remote-peer discovery.
+- Hardened mirrored local identity provisioners with a single-flight guard so
+  concurrent first-use callers share one load/generation/save operation instead
+  of racing to overwrite the persisted identity. Failed operations clear the
+  guard so a later caller can retry.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -459,3 +463,5 @@ are implemented on branch
   desktop.
 - T60 focused persisted-source composition tests: passed, 6 tests each in
   mobile and desktop.
+- T61 focused local-identity tests: passed, 6 tests each in mobile and
+  desktop, including overlapping provisioning calls.
