@@ -92,7 +92,28 @@ void main() {
     expect(second.isSuccess, isTrue);
     expect(second.created, isFalse);
     expect(second.identity?.peerId, 'peer_generated');
+    expect(bridge.loadCalls, 3);
     expect(bridge.savedKeys, hasLength(1));
+  });
+
+  test('fails closed when native storage changes the saved identity', () async {
+    final bridge = _MemorySecureKeyBridge(
+      savedPeerIdOverride: 'peer_competing_writer',
+    );
+    final provisioner = NativeLocalPeerIdentityProvisioner(
+      loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+      writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+      identityFactory: () => 'peer_generated',
+    );
+
+    final result = await provisioner.ensureIdentity();
+
+    expect(result.isSuccess, isFalse);
+    expect(result.identity, isNull);
+    expect(result.warnings, <String>[
+      'Local peer identity persistence could not be verified.',
+    ]);
+    expect(bridge.loadCalls, 2);
   });
 
   test('single-flights concurrent identity provisioning', () async {
@@ -122,7 +143,7 @@ void main() {
       'peer_concurrent',
     ]);
     expect(generated, 1);
-    expect(bridge.loadCalls, 1);
+    expect(bridge.loadCalls, 2);
     expect(bridge.savedKeys, hasLength(1));
   });
 }
@@ -132,10 +153,12 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
     List<SecureKeyRecord> keys = const <SecureKeyRecord>[],
     this.available = true,
     this.loadGate,
+    this.savedPeerIdOverride,
   }) : keys = List<SecureKeyRecord>.from(keys);
 
   final bool available;
   final Completer<void>? loadGate;
+  final String? savedPeerIdOverride;
   final List<SecureKeyRecord> keys;
   final List<SecureKeyRecord> savedKeys = <SecureKeyRecord>[];
   int loadCalls = 0;
@@ -160,7 +183,15 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
     required SecureKeyRecord key,
   }) async {
     keys.removeWhere((record) => record.keyId == key.keyId);
-    keys.add(key);
+    keys.add(
+      SecureKeyRecord(
+        keyId: key.keyId,
+        purpose: key.purpose,
+        algorithm: key.algorithm,
+        secret: savedPeerIdOverride ?? key.secret,
+        active: key.active,
+      ),
+    );
     savedKeys.add(key);
     return const SecureKeyStorageMutationResult(isSuccess: true);
   }

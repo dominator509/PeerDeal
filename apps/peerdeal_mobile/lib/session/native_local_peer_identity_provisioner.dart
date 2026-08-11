@@ -89,6 +89,15 @@ class NativeLocalPeerIdentityProvisioner {
           ],
         );
       }
+      final verified = await _loader.load();
+      if (verified.warnings.isNotEmpty ||
+          verified.identity?.peerId != identity.peerId) {
+        return const AppLocalPeerIdentityProvisionResult(
+          warnings: <String>[
+            'Local peer identity persistence could not be verified.',
+          ],
+        );
+      }
       return AppLocalPeerIdentityProvisionResult(
         identity: identity,
         created: true,

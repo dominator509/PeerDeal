@@ -1066,6 +1066,13 @@ guard is cleared after either outcome, preserving retry behavior after a
 transient native-storage failure. This is an in-process guarantee; multi-process
 and real-device persistence validation remain operator/runtime work.
 
+The T62 follow-up adds a read-after-write integrity check to generated local
+identity provisioning. After native save succeeds, the app reloads the identity
+and returns success only when the exact generated peer ID is present and valid.
+Storage contention, replacement, malformed read-back, and unavailable
+verification fail closed. This detects, but does not eliminate, cross-process
+write races; OS/device persistence validation remains external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

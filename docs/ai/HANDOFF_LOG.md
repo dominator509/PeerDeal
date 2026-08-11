@@ -12,6 +12,34 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Local Identity Post-Save Verification
+
+Summary:
+- Added mirrored read-after-write verification for generated local peer IDs.
+- Provisioning now fails closed when native storage returns a different,
+  missing, ambiguous, malformed, or unavailable identity after save.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/native_local_peer_identity_provisioner.dart`
+- `apps/peerdeal_desktop/lib/session/native_local_peer_identity_provisioner.dart`
+- Matching focused identity tests and durable handoff/readiness docs.
+
+Tests run:
+- Focused mobile and desktop identity suites: 7 passed each.
+- Contention coverage asserts a mismatched native read-back cannot produce a
+  successful provision result.
+
+Risks:
+- Read-back detects persistence contention but does not provide cross-process
+  compare-and-swap. Real-device keystore/Credential Manager validation remains
+  external.
+
+Next reviewer:
+- Preserve the verification step when connecting the provisioner to a concrete
+  production source lifecycle.
+
+---
+
 ### 2026-08-10 - Codex - Single-Flight Local Identity Provisioning
 
 Summary:

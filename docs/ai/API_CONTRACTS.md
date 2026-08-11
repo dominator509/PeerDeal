@@ -388,6 +388,12 @@ record. The guard is released on both success and failure, so a failed native
 storage operation remains retryable. The contract does not claim cross-process
 locking or prove device persistence.
 
+When provisioning creates a new identity, it performs a second native load after
+the save and requires an exact peer-ID match. A missing, ambiguous, malformed,
+unavailable, or different read-back returns a failed provision result rather
+than exposing the newly generated ID to the session source. This is a
+read-after-write integrity check, not a cross-process compare-and-swap.
+
 `AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(...)`
 is the app-owned composition seam for that identity. It requires an existing
 `RecoveryPersistenceStore`, a `NativeLocalPeerIdentityProvisioner`, and an

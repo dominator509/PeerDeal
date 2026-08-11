@@ -102,6 +102,9 @@ Local Hold'em producer flow:
    Identity provisioning is single-flight within each app provisioner instance;
    this closes the in-process first-use race without claiming a cross-process
    lock or moving identity semantics into the native bridge.
+   Newly generated identities also require an exact native read-back match after
+   save before the app source can use them, keeping persistence integrity in the
+   app boundary while retaining generic native storage semantics.
 9. `AppHoldemProductionSessionBootstrapRouteRegistration` lets either app shell
    merge the existing bootstrap route into its production map and native-
    readiness gate. When no explicit `JoinFlowReadyHandler` is supplied, the

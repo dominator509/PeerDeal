@@ -482,6 +482,16 @@ Generated: 2026-08-10
   including overlapping provisioning calls. Cross-process identity locking and
   Android/Windows runtime persistence validation remain external.
 
+## Recent T62 Changes
+
+- Mirrored local identity provisioners now reload native storage after a
+  generated identity save and require the persisted peer ID to match exactly.
+  Save success without matching read-back fails closed, preventing the app from
+  continuing with an identity that was replaced or not durably visible.
+- Focused mobile and desktop identity suites passed with 7 tests each,
+  including competing-writer detection. Cross-process locking and real-device
+  persistence validation remain external.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`
