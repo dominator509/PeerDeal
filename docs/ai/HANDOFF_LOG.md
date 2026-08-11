@@ -8338,6 +8338,24 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - T103 Generic App Storage and Capture Payload Bounds
+
+Summary:
+- Capped generic app-storage directory paths at 4096 UTF-8 bytes.
+- Capped generic capture capability/action notes and warnings at 512 UTF-8
+  bytes before app orchestration receives them.
+- Added regression coverage for oversized paths and capture diagnostics.
+
+Validation:
+- Focused Flutter native-bridge suite passed: 41 tests.
+- Package analysis passed.
+
+Risks:
+- Native host/device behavior, cross-device network reachability, product
+  persistence, and release signing remain separate validation surfaces.
+
+---
+
 ### 2026-08-11 - Codex - T102 Generic Native Bridge Payload Bounds
 
 Summary:

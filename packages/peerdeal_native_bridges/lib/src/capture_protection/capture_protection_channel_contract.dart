@@ -1,4 +1,5 @@
 import 'capture_protection_bridge_models.dart';
+import '../native_bridge_payload_limits.dart';
 
 class CaptureProtectionChannelContract {
   const CaptureProtectionChannelContract._();
@@ -19,8 +20,16 @@ class CaptureProtectionChannelContract {
     return CaptureProtectionCapability(
       blockingSupported: _boolValue(payload['blockingSupported']),
       obscuringSupported: _boolValue(payload['obscuringSupported']),
-      notes: _stringValue(payload['notes']) ?? 'unavailable',
-      warning: _stringValue(payload['warning']),
+      notes:
+          _boundedStringValue(
+            payload['notes'],
+            NativeBridgePayloadLimits.maxDiagnosticBytes,
+          ) ??
+          'unavailable',
+      warning: _boundedStringValue(
+        payload['warning'],
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
     );
   }
 
@@ -41,11 +50,20 @@ class CaptureProtectionChannelContract {
     return CaptureProtectionActionResult(
       isSuccess: success,
       blockingEnabled: blockingEnabled,
-      warning: _stringValue(payload['warning']),
+      warning: _boundedStringValue(
+        payload['warning'],
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
     );
   }
 
   static bool _boolValue(Object? value) => value is bool ? value : false;
 
-  static String? _stringValue(Object? value) => value is String ? value : null;
+  static String? _boundedStringValue(Object? value, int maxBytes) {
+    if (value is! String ||
+        !NativeBridgePayloadLimits.isWithinUtf8Limit(value, maxBytes)) {
+      return null;
+    }
+    return value;
+  }
 }

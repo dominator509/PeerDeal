@@ -628,6 +628,10 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   collections, secure-key record lists, frame payloads, identities, discovery
   values, key fields, and diagnostics before iteration or model construction;
   oversized values fail closed through existing unavailable or empty results.
+- Generic app-storage directory decoding bounds paths to 4096 UTF-8 bytes, and
+  capture capability/action decoding bounds notes and warnings to 512 UTF-8
+  bytes before exposing them to app orchestration; oversized values fail
+  closed.
 - Receipt import/export/verification failures must fail closed.
 - Receipt export encoding/inspection and HMAC cipher operations share bounded
   encoded-body, decoded-body, payload, ciphertext, and nonce limits; oversized

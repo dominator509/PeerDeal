@@ -8,6 +8,7 @@ class NativeBridgePayloadLimits {
   static const maxTransportIdentityBytes = 256;
   static const maxDiscoveryEntries = 64;
   static const maxDiscoveryValueBytes = 512;
+  static const maxAppStoragePathBytes = 4096;
   static const maxSecureKeyRecords = 128;
   static const maxSecureKeyIdBytes = 256;
   static const maxSecureKeyPurposeBytes = 128;

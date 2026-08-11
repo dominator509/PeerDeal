@@ -1045,3 +1045,17 @@ Remaining:
 - This hardens the generic Dart bridge boundary only; native host behavior,
   device persistence, cross-device network reachability, product startup,
   database persistence, and release signing remain separate.
+
+## Recent T103 Changes
+
+- Generic app-storage channel decoding now bounds platform directory paths to
+  4096 UTF-8 bytes before exposing them as persistence roots.
+- Generic capture capability/action decoding now bounds notes and warnings to
+  512 UTF-8 bytes before exposing them to app orchestration.
+- Oversized values fail closed through the existing unavailable or empty
+  diagnostic paths, with focused regression coverage.
+
+Remaining:
+- Native host behavior, device persistence/capture enforcement, cross-device
+  network reachability, product startup/database integration, and release
+  signing remain separate.

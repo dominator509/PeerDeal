@@ -1003,6 +1003,15 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Receipt semantics remain app-owned, and native host/device, cross-device
   network, production database, and release-signing validation remain external.
 
+## T103 Generic App Storage and Capture Payload Bounds
+
+- Generic app-storage bridge decoding now caps platform directory paths at
+  4096 UTF-8 bytes before they can become persistence roots.
+- Generic capture capability and action decoding now caps notes and warnings at
+  512 UTF-8 bytes before app orchestration receives them.
+- Oversized values fail closed; native host/device behavior, cross-device
+  network, production database, and release-signing validation remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

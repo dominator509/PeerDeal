@@ -1395,6 +1395,13 @@ Oversized collections and fields fail closed through existing unavailable or
 empty results. This does not claim native host, device, cross-device network,
 production database, or release-signing validation.
 
+The T103 follow-up closes the remaining unbounded generic app-storage and
+capture strings. App-storage directory paths are capped at 4096 UTF-8 bytes,
+and capture capability/action notes and warnings are capped at 512 UTF-8 bytes
+before generic models reach app orchestration. Oversized values fail closed;
+native host behavior, device enforcement, cross-device reachability, database
+replacement, and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

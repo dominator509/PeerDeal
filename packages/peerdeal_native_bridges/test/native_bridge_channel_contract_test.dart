@@ -37,6 +37,34 @@ void main() {
     expect(missing.available, isFalse);
   });
 
+  test('app storage directory channel contract bounds paths and warnings', () {
+    final oversizedPath =
+        AppStorageDirectoryChannelContract.decodeAppSupportDirectory(
+          <String, Object?>{
+            'available': true,
+            'directoryPath': String.fromCharCodes(
+              List<int>.filled(
+                NativeBridgePayloadLimits.maxAppStoragePathBytes + 1,
+                97,
+              ),
+            ),
+            'warning': String.fromCharCodes(
+              List<int>.filled(
+                NativeBridgePayloadLimits.maxDiagnosticBytes + 1,
+                98,
+              ),
+            ),
+          },
+        );
+
+    expect(oversizedPath.available, isFalse);
+    expect(oversizedPath.directoryPath, isNull);
+    expect(
+      oversizedPath.warning,
+      'Native app storage directory is unavailable.',
+    );
+  });
+
   test('capture protection channel contract decodes fixture payload', () {
     final fixture = _loadFixture('capture_protection_bridge_contract.json');
     final methods = fixture['methods'] as Map<String, Object?>;
@@ -96,6 +124,30 @@ void main() {
     );
     expect(action.isSuccess, isFalse);
     expect(action.blockingEnabled, isFalse);
+    expect(action.warning, isNull);
+  });
+
+  test('capture protection channel contract bounds diagnostics', () {
+    final oversized = String.fromCharCodes(
+      List<int>.filled(NativeBridgePayloadLimits.maxDiagnosticBytes + 1, 97),
+    );
+    final capability =
+        CaptureProtectionChannelContract.decodeCapability(<String, Object?>{
+          'blockingSupported': true,
+          'obscuringSupported': true,
+          'notes': oversized,
+          'warning': oversized,
+        });
+    final action = CaptureProtectionChannelContract.decodeActionResult(
+      <String, Object?>{
+        'success': false,
+        'blockingEnabled': false,
+        'warning': oversized,
+      },
+    );
+
+    expect(capability.notes, 'unavailable');
+    expect(capability.warning, isNull);
     expect(action.warning, isNull);
   });
 
