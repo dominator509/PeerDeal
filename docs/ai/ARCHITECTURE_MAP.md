@@ -262,3 +262,11 @@ the mirrored app-owned composition entrypoint for recovery-backed sessions. It
 provisions local identity, creates the persisted source, and registers the
 existing validated bootstrap route. Product database/state selection, route
 policy, native reachability, and device validation remain outside this seam.
+
+`AppHoldemProductionSessionConfigurationFactory` is the mirrored app-owned
+composition wrapper for the startup edge. It creates the recovery store from
+the existing app factory, accepts a store-aware route-policy factory and
+deterministic event/replay dependencies, and returns an explicit fail-closed
+load result. It does not choose a table, write a product snapshot, or invent
+retention policy; the product session owner supplies those inputs and invokes
+the factory.

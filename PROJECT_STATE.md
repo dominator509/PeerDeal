@@ -902,6 +902,16 @@ signing, and concrete product state wiring remain external or integration-owned.
 - CI now builds and executes the Windows native host smoke target instead of
   stopping at compilation. Local execution passed all existing checkpoints.
 
+## Recent T93 Changes
+
+- Added mirrored app-owned `AppHoldemProductionSessionConfigurationFactory`
+  implementations. They compose the existing recovery root factory, lazy
+  native local identity provisioner, persisted Hold'em source, route policy,
+  and deterministic replay/event dependencies.
+- Composition fails closed with stable warnings when persistence or route policy
+  is unavailable and does not select product state or invent route policy.
+- Focused mirrored factory tests and all repository gates passed.
+
 ## Required Gates
 
 Run after each retrofit step:

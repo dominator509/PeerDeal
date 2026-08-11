@@ -85,9 +85,12 @@ Mounted table routes should receive recovery persistence through
 directly or default it in this order: `PEERDEAL_RECOVERY_ROOT` -> generic native
 app-support directory (`noBackupFilesDir` on Android) -> app-owned factory ->
 `peerdeal_sync` JSON recovery store. The app-owned
+`AppHoldemProductionSessionConfigurationFactory` composes that store with
+native local identity, caller-owned route policy, and deterministic event
+factories before the validated session route is mounted. Its result must be
+checked before passing the configuration into the runtime;
 `AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)`
-then composes that store with native local identity, caller-owned route policy,
-and event factories before the validated session route is mounted. Missing,
+remains the lower-level composition entrypoint. Missing,
 malformed, or throwing roots must fail closed before recovery windows are
 loaded. The native bridge supplies only a directory fact; recovery and
 retention policy remain app-owned. Route cancellation also propagates through

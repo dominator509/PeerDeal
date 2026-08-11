@@ -1313,6 +1313,16 @@ marker, rejects nonzero exits, and terminates timed-out hosts. This strengthens
 host regression coverage without claiming firewall, device, release-signing,
 or cross-device reachability validation.
 
+The T93 follow-up closes the remaining app-owned composition convenience gap.
+Both app shells now expose `AppHoldemProductionSessionConfigurationFactory`,
+which composes the existing recovery-root factory, lazy native local-identity
+provisioner, persisted Hold'em source, caller-owned route policy, and
+deterministic event/replay/session dependencies. It returns a stable
+available/unavailable result, preserves persistence warnings, and validates
+route policy before any identity work. This does not invent product state,
+route policy, or a startup invocation; the concrete product session owner still
+must supply authoritative snapshot persistence and call the factory.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
@@ -1321,10 +1331,10 @@ or cross-device reachability validation.
    that satisfy the locked method-channel contracts, starting with other
    platform secure receipt key storage and capture enforcement behind the
    existing key-ring, cipher, signer, and app capture contracts.
-3. Supply the concrete `AppHoldemProductionSessionSource` and invoke
-   `AppHoldemProductionSessionBootstrap` from the real product session/state
-   source and local identity through the typed first-join and rejoin handoff,
-   using the persisted configuration factory where its inputs are available;
+3. Supply the concrete `AppHoldemProductionSessionSource` and invoke the new
+   `AppHoldemProductionSessionConfigurationFactory` from the real product
+   session/state source and local identity through the typed first-join and
+   rejoin handoff, using authoritative snapshot persistence and route policy;
    complete product state/route provisioning and navigation/UI validation while
    keeping native transport/device validation and durable database persistence
    separate.

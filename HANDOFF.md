@@ -896,3 +896,20 @@ database or session-state wiring remain external or integration-owned.
 
 The smoke gate does not claim firewall, Android device, release-signing, or
 cross-device reachability validation; those remain external.
+
+## Recent T93 Changes
+
+- Added mirrored `AppHoldemProductionSessionConfigurationFactory` app
+  boundaries that compose the existing recovery-store factory with native local
+  identity provisioning and the persisted Hold'em configuration.
+- The factory returns an explicit available/unavailable result, preserves
+  recovery-root warnings, validates caller-owned route policy before identity
+  work, and forwards deterministic event/replay/session configuration.
+- Focused mobile and desktop factory suites passed. Full analyzer, boundary,
+  source-text, serialized test, dependency-audit, and diff gates passed.
+
+Remaining:
+- A real product session owner must supply the route policy, authoritative
+  snapshot writer/source, and invoke this factory from product startup. Native
+  reachability, Android device validation, release signing, and other-platform
+  implementations remain external or operator-owned.

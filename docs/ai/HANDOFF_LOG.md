@@ -12,6 +12,42 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-11 - Codex - App-Owned Persisted Session Configuration Factory
+
+Summary:
+- Added mirrored `AppHoldemProductionSessionConfigurationFactory` boundaries
+  for the app startup edge.
+- The factory composes the existing recovery-store factory, lazy native local
+  identity provisioner, persisted Hold'em source, caller-owned route policy,
+  and deterministic event/replay/session dependencies.
+- It returns an explicit available/unavailable result, preserves recovery
+  warnings, validates route policy before identity work, and fails closed on
+  invalid composition.
+
+Files changed:
+- Mirrored app session configuration factory files and focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, both demo-slice READMEs, and stable AI
+  context docs.
+
+Tests run:
+- Focused mobile and desktop Flutter factory suites: 3 tests each passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Dependency audit reports zero actionable upgrades and 11 newer versions
+  below the current toolchain ceiling.
+
+Risks:
+- Product snapshot selection/writing, startup invocation, route/retention
+  policy, native reachability, Android device validation, other-platform
+  implementations, and release signing remain integration or operator work.
+
+Next reviewer:
+- Invoke the factory from the real product session owner once authoritative
+  snapshot persistence and route policy are available.
+
+---
+
 ### 2026-08-10 - Codex - Local Identity Post-Save Verification
 
 Summary:

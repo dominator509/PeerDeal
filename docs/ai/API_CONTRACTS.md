@@ -413,6 +413,15 @@ with `ArgumentError` and cannot mutate secure-key storage.
 It does not select a product database, invent route policy, or move persistence
 semantics into a native bridge.
 
+`AppHoldemProductionSessionConfigurationFactory` is the mirrored app-edge
+wrapper around that persisted configuration. Its `create()` method returns an
+explicit available/unavailable result, carries recovery-root warnings, builds a
+store-aware caller-owned route policy, forwards deterministic event/replay and
+session dependencies, and fails closed on invalid policy or composition
+errors. The factory does not create product snapshots, select peers/seats, or
+own retention policy. Native identity provisioning remains lazy until a valid
+invite-scoped snapshot load reaches the source.
+
 `fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
 callers that require pre-provisioned identity. The lazy production adapter is
 the default configuration path so missing, malformed, or rejected persisted
