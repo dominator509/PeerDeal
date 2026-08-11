@@ -84,9 +84,28 @@ void main() {
       second,
     ]);
 
+    expect(bridge.loadCalls, 2);
     expect(results[0], same(results[1]));
     expect(bridge.savedKeys, hasLength(2));
   });
+
+  test(
+    'fails closed when native key read-back does not match writes',
+    () async {
+      final bridge = _ProvisioningBridge(persistSavedKeys: false);
+      final provisioner = _provisioner(bridge);
+
+      final result = await provisioner.ensureActiveKeys();
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warnings, <String>[
+        'Receipt key persistence could not be verified.',
+      ]);
+      expect(result.keysCreated, 2);
+      expect(result.keyRing.activeSigningKey(), isNull);
+      expect(result.keyRing.activeEncryptionKey(), isNull);
+    },
+  );
 
   test('creates only the missing active encryption key', () async {
     final bridge = _ProvisioningBridge(
@@ -248,13 +267,16 @@ class _ProvisioningBridge implements SecureKeyStorageMutationBridge {
     this.snapshot = const SecureKeyStorageSnapshot(available: true, keys: []),
     this.saveResult = const SecureKeyStorageMutationResult(isSuccess: true),
     this.loadGate,
-  });
+    this.persistSavedKeys = true,
+  }) : _currentSnapshot = snapshot;
 
   final SecureKeyStorageSnapshot snapshot;
   final SecureKeyStorageMutationResult saveResult;
   final Completer<void>? loadGate;
+  final bool persistSavedKeys;
   final List<_SavedKey> savedKeys = <_SavedKey>[];
   int loadCalls = 0;
+  SecureKeyStorageSnapshot _currentSnapshot;
 
   @override
   Future<SecureKeyStorageSnapshot> loadKeyRing({
@@ -263,7 +285,7 @@ class _ProvisioningBridge implements SecureKeyStorageMutationBridge {
     loadCalls += 1;
     final loadGate = this.loadGate;
     if (loadGate != null) await loadGate.future;
-    return snapshot;
+    return _currentSnapshot;
   }
 
   @override
@@ -272,6 +294,15 @@ class _ProvisioningBridge implements SecureKeyStorageMutationBridge {
     required SecureKeyRecord key,
   }) async {
     savedKeys.add(_SavedKey(namespace: namespace, key: key));
+    if (persistSavedKeys && saveResult.isSuccess) {
+      _currentSnapshot = SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[
+          ..._currentSnapshot.keys.where((record) => record.keyId != key.keyId),
+          key,
+        ],
+      );
+    }
     return saveResult;
   }
 

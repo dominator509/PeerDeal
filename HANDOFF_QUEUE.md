@@ -85,6 +85,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-10-075` | Android signing CI check accepted arbitrary failures | 4 | T81 | RESOLVED | The release-signing CI check now blanks all four signing variables and requires the exact Gradle signing diagnostic, preventing unrelated Android build failures from satisfying the negative guard. |
 | `LEGACY-GAP-2026-08-10-076` | Mounted join-flow teardown did not cancel active orchestration | 4 | T82 | RESOLVED | Mirrored join routes now cancel replaced/disposed outcomes, orchestrators stop between pre-commit stages, and native bootstrap forwards the signal to cancellable local-network bridges. Already-dispatched adapter or governance calls remain owner-hosted; runtime/device validation remains external. |
 | `LEGACY-GAP-2026-08-11-077` | Concurrent receipt key provisioning raced native writes | 4 | T83 | RESOLVED | Mirrored app receipt key-ring provisioners now single-flight concurrent ensure calls, preventing duplicate key generation and divergent in-memory rings while preserving retry behavior after completion. |
+| `LEGACY-GAP-2026-08-11-078` | Receipt key writes were trusted without read-back verification | 4 | T84 | RESOLVED | Mirrored receipt key-ring provisioners now reload native storage after successful key creation and fail closed unless both active signing and encryption keys match exactly. |
 
 ## Status Definitions
 

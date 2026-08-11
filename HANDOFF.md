@@ -750,3 +750,22 @@ Remaining:
 - Cross-process/native storage atomicity, runtime persistence validation,
   signed release output, credentials, and product database/state wiring remain
   external or integration-owned.
+
+## Recent T84 Changes
+
+- Mirrored receipt key-ring provisioners now reload native storage after any
+  successful key creation.
+- Provisioning returns a stable failure and an empty key ring unless the
+  persisted active signing and encryption key IDs and secrets match the keys
+  that were provisioned.
+- Existing active rings avoid an unnecessary write or verification reload;
+  transient verification failures remain retryable because the single-flight
+  guard still clears on every outcome.
+
+Focused mobile and desktop provisioner tests passed, including read-back
+mismatch fail-closed coverage.
+
+Remaining:
+- Cross-process/native storage atomicity, runtime persistence validation,
+  signed release output, credentials, and product database/state wiring remain
+  external or integration-owned.

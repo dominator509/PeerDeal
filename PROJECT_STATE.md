@@ -805,6 +805,16 @@ output, operator credentials, and runtime/device validation remain external.
 Cross-process storage atomicity and runtime/native persistence validation remain
 external or integration-owned.
 
+## Recent T84 Changes
+
+- Mirrored receipt key-ring provisioning now performs a native read-back after
+  successful key creation and compares both active key IDs and secrets.
+- Any mismatch or unavailable read-back returns an empty key ring and a stable
+  failure, preventing exports from relying on unverified persistence.
+
+Cross-process storage atomicity and runtime/device validation remain external
+or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

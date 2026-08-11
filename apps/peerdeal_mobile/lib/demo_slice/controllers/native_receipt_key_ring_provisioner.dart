@@ -141,6 +141,21 @@ class NativeReceiptKeyRingProvisioner {
         }
       }
 
+      if (warnings.isEmpty && keysCreated > 0) {
+        final verified = await _loader.load();
+        if (verified.warnings.isNotEmpty ||
+            !_activeKeysMatch(keyRing, verified.keyRing)) {
+          return ReceiptKeyRingProvisionResult(
+            keyRing: const ReceiptKeyRingSnapshot(),
+            warnings: const <String>[
+              'Receipt key persistence could not be verified.',
+            ],
+            keysCreated: keysCreated,
+          );
+        }
+        keyRing = verified.keyRing;
+      }
+
       return ReceiptKeyRingProvisionResult(
         keyRing: keyRing,
         warnings: warnings,
@@ -149,6 +164,20 @@ class NativeReceiptKeyRingProvisioner {
     } finally {
       _inFlight = null;
     }
+  }
+
+  bool _activeKeysMatch(
+    ReceiptKeyRingSnapshot expected,
+    ReceiptKeyRingSnapshot actual,
+  ) {
+    final expectedSigning = expected.activeSigningKey();
+    final actualSigning = actual.activeSigningKey();
+    final expectedEncryption = expected.activeEncryptionKey();
+    final actualEncryption = actual.activeEncryptionKey();
+    return expectedSigning?.keyId == actualSigning?.keyId &&
+        expectedSigning?.secret == actualSigning?.secret &&
+        expectedEncryption?.keyId == actualEncryption?.keyId &&
+        expectedEncryption?.secret == actualEncryption?.secret;
   }
 
   static String _secureSecret() {

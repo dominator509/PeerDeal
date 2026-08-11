@@ -1244,6 +1244,13 @@ of generating competing active keys or returning divergent in-memory rings. The
 guard clears after success or failure, preserving retry behavior. Cross-process
 storage atomicity and native/device persistence validation remain external.
 
+The T84 follow-up closes the receipt key write-integrity gap. After creating any
+missing active key, mirrored app provisioners reload native storage and compare
+both active key IDs and secrets with the provisioned ring. A missing, malformed,
+or mismatched read-back returns an empty key ring and fails closed; existing
+complete rings do not incur a write. Cross-process atomicity and runtime/device
+validation remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

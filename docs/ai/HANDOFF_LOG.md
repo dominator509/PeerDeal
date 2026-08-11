@@ -8168,3 +8168,28 @@ Risks:
 - Cross-process/native storage atomicity, runtime/device persistence,
   operator-owned release signing, and product database/state wiring remain
   external or integration-owned.
+
+---
+
+### 2026-08-11 - Codex - Receipt Key Persistence Read-Back Verification
+
+Summary:
+- Mirrored receipt key-ring provisioners now reload native storage after
+  successful creation of any missing active key.
+- Provisioning fails closed with an empty key ring unless the persisted active
+  signing and encryption key IDs and secrets match the provisioned ring.
+
+Files changed:
+- Mirrored `native_receipt_key_ring_provisioner.dart` implementations and
+  focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Mobile and desktop focused provisioner suites passed.
+- Workspace analyze passed.
+
+Risks:
+- Cross-process/native storage atomicity, runtime/device persistence,
+  operator-owned release signing, and product database/state wiring remain
+  external or integration-owned.

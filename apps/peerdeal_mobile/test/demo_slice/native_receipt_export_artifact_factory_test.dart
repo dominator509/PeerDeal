@@ -154,17 +154,18 @@ class _ExportBridge implements SecureKeyStorageMutationBridge {
   _ExportBridge({
     this.snapshot = const SecureKeyStorageSnapshot(available: true, keys: []),
     this.saveResult = const SecureKeyStorageMutationResult(isSuccess: true),
-  });
+  }) : _currentSnapshot = snapshot;
 
   final SecureKeyStorageSnapshot snapshot;
   final SecureKeyStorageMutationResult saveResult;
   final List<_SavedKey> savedKeys = <_SavedKey>[];
+  SecureKeyStorageSnapshot _currentSnapshot;
 
   @override
   Future<SecureKeyStorageSnapshot> loadKeyRing({
     required String namespace,
   }) async {
-    return snapshot;
+    return _currentSnapshot;
   }
 
   @override
@@ -173,6 +174,15 @@ class _ExportBridge implements SecureKeyStorageMutationBridge {
     required SecureKeyRecord key,
   }) async {
     savedKeys.add(_SavedKey(namespace: namespace, key: key));
+    if (saveResult.isSuccess) {
+      _currentSnapshot = SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[
+          ..._currentSnapshot.keys.where((record) => record.keyId != key.keyId),
+          key,
+        ],
+      );
+    }
     return saveResult;
   }
 
