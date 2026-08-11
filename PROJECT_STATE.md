@@ -382,6 +382,13 @@ Generated: 2026-08-10
   width so keyboard navigation does not shift layout. The focused UI-kit suite
   passed with 4 tests; final device/accessibility validation remains external.
 
+## Recent T52 Changes
+
+- Shared app-shell action controls now enforce a 48 logical-pixel minimum
+  interactive height without changing their public API or focus outline
+  footprint. The focused UI-kit suite passed with 4 tests; device, text-scale,
+  and final accessibility validation remain external.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

@@ -47,6 +47,10 @@ void main() {
         hasTapAction: true,
       ),
     );
+    expect(
+      tester.getSize(find.bySemanticsLabel('Open')).height,
+      greaterThanOrEqualTo(48),
+    );
   });
 
   testWidgets('action button activates from keyboard focus', (tester) async {

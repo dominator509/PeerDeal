@@ -12,6 +12,32 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Shared Action Hit Target Hardening
+
+Summary:
+- Shared action controls now enforce a 48 logical-pixel minimum interactive
+  height while preserving the existing focus behavior and public API.
+
+Files changed:
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_action_button.dart`.
+- `packages/peerdeal_ui_kit/test/app_shell_widgets_test.dart`.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused UI-kit widget suite: passed, 4 tests.
+- Shared UI-kit analyzer: passed.
+
+Risks:
+- Device, text-scale, screen-reader, and final visual validation remain
+  external.
+
+Next reviewer:
+- Validate action targets and text scaling on production Android and Windows
+  profiles.
+
+---
+
 ### 2026-08-10 - Codex - Shared Action Keyboard Focus Hardening
 
 Summary:

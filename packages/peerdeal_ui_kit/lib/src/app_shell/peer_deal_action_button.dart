@@ -70,20 +70,26 @@ class _PeerDealActionButtonState extends State<PeerDealActionButton> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _activate,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: const Color(0xFF143D34),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: _showFocusHighlight
-                    ? const Color(0xFF9ED6C5)
-                    : const Color(0xFF2C6B5D),
-                width: 2,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: const Color(0xFF143D34),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _showFocusHighlight
+                      ? const Color(0xFF9ED6C5)
+                      : const Color(0xFF2C6B5D),
+                  width: 2,
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              child: Text(label),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                child: Text(label),
+              ),
             ),
           ),
         ),

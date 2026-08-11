@@ -998,6 +998,11 @@ activation bound to the same action callback. The focus outline keeps a stable
 layout footprint; device keyboard, screen-reader, and text-scale validation
 remain external.
 
+The T52 follow-up enforces a 48 logical-pixel minimum interactive height on the
+same shared action controls, keeping touch and pointer targets usable without
+changing the public control API. Device, text-scale, screen-reader, and final
+visual validation remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
