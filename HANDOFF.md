@@ -612,3 +612,24 @@ Remaining:
   Device/network reachability, runtime capture/key validation, release signing,
   other-platform hosts, and product database/state wiring remain external or
   integration-owned.
+
+## Recent T76 Changes
+
+- Added additive cancellable capture capability and action bridge interfaces;
+  existing non-cancellable bridge implementations remain compatible.
+- Generic capture method-channel capability and blocking calls now race the
+  existing five-second deadline against caller cancellation and fail closed
+  with stable results.
+- Mirrored capture coordinators and receipt presenters forward route
+  cancellation into native capture calls, while release remains uncancelled
+  so route teardown can still disable native blocking.
+
+Focused verification passed:
+- Native capture bridge: 11 tests.
+- Mirrored mobile and desktop capture coordinators: 8 tests each.
+- Mirrored mobile and desktop receipt presenters: 4 tests each.
+
+Remaining:
+- Already-dispatched native calls remain host-owned. Android/Windows runtime
+  capture validation, release signing, other-platform hosts, and product
+  database/state wiring remain external or integration-owned.

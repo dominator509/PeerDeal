@@ -119,6 +119,28 @@ void main() {
     expect(actionBridge.enabledCalls, [true, false]);
   });
 
+  test(
+    'passes route cancellation to cancellable native capture calls',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _CancellableCaptureProtectionBridge();
+      final actionBridge = _CancellableCaptureProtectionActionBridge();
+      final coordinator = CaptureSurfaceCoordinator(
+        bridge: bridge,
+        actionBridge: actionBridge,
+      );
+
+      final plan = await coordinator.resolve(
+        CaptureSurface.receiptDetail,
+        cancellation: cancellation.future,
+      );
+
+      expect(plan.shouldRequestNativeBlocking, isTrue);
+      expect(bridge.cancellations.single, same(cancellation.future));
+      expect(actionBridge.cancellations.single, same(cancellation.future));
+    },
+  );
+
   test('fails closed when native capability lookup throws', () async {
     final coordinator = CaptureSurfaceCoordinator(
       bridge: const _ThrowingCaptureProtectionBridge(),
@@ -214,6 +236,42 @@ class _RecordingCaptureProtectionActionBridge
         warning: 'platform action failed',
       );
     }
+    return CaptureProtectionActionResult(
+      isSuccess: true,
+      blockingEnabled: enabled,
+    );
+  }
+}
+
+class _CancellableCaptureProtectionBridge
+    implements CaptureProtectionBridge, CancellableCaptureProtectionBridge {
+  final List<Future<void>?> cancellations = <Future<void>?>[];
+
+  @override
+  Future<CaptureProtectionCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
+    cancellations.add(cancellation);
+    return const CaptureProtectionCapability(
+      blockingSupported: true,
+      obscuringSupported: true,
+      notes: 'screen-protection-supported',
+    );
+  }
+}
+
+class _CancellableCaptureProtectionActionBridge
+    implements
+        CaptureProtectionActionBridge,
+        CancellableCaptureProtectionActionBridge {
+  final List<Future<void>?> cancellations = <Future<void>?>[];
+
+  @override
+  Future<CaptureProtectionActionResult> setBlocking({
+    required bool enabled,
+    Future<void>? cancellation,
+  }) async {
+    cancellations.add(cancellation);
     return CaptureProtectionActionResult(
       isSuccess: true,
       blockingEnabled: enabled,

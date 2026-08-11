@@ -131,11 +131,13 @@ host-private bounded UDP multicast envelope and filter receive queues by session
 and recipient peer. Host decoders require strict UTF-8 and reject malformed,
 padded, or control-bearing identity fields before queueing or sending. Host lifecycle paths now fail closed and clean up partial
 socket/Winsock initialization. The generic method-channel capability, send, and
-receive calls use a bounded five-second default deadline and accept caller
-cancellation for route lifecycle teardown. Local-network capability and
-discovery calls use the same bounded default deadline; app-owned bootstrap
-loaders cancel them on route replacement or disposal. Capture capability and
-blocking calls use the same bounded default deadline and fail closed on timeout.
+  receive calls use a bounded five-second default deadline and accept caller
+  cancellation for route lifecycle teardown. Local-network capability and
+  discovery calls use the same bounded default deadline; app-owned bootstrap
+  loaders cancel them on route replacement or disposal. Capture capability and
+  blocking calls use the same bounded default deadline, accept additive caller
+  cancellation, and fail closed on timeout; receipt-route teardown leaves the
+  release action uncancelled so native blocking can be disabled.
 Device/network
 reachability, real platform discovery, and other-platform transport remain open.
 

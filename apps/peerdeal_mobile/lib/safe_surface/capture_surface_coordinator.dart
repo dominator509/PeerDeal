@@ -42,8 +42,11 @@ class CaptureSurfaceCoordinator {
   Future<void> _lastResolution = Future<void>.value();
   Future<void> _lastBlockingAction = Future<void>.value();
 
-  Future<CaptureSurfacePlan> resolve(CaptureSurface surface) {
-    final operation = _resolve(surface);
+  Future<CaptureSurfacePlan> resolve(
+    CaptureSurface surface, {
+    Future<void>? cancellation,
+  }) {
+    final operation = _resolve(surface, cancellation: cancellation);
     final tracked = operation.then<void>((_) {}, onError: (_) {});
     _lastResolution = Future.wait<void>(<Future<void>>[
       _lastResolution,
@@ -52,8 +55,13 @@ class CaptureSurfaceCoordinator {
     return operation;
   }
 
-  Future<CaptureSurfacePlan> _resolve(CaptureSurface surface) async {
-    final nativeCapability = await _loadNativeCapability();
+  Future<CaptureSurfacePlan> _resolve(
+    CaptureSurface surface, {
+    Future<void>? cancellation,
+  }) async {
+    final nativeCapability = await _loadNativeCapability(
+      cancellation: cancellation,
+    );
     var decision = _policyResolver.resolve(
       surface: surface,
       capability: CapturePlatformCapability(
@@ -64,7 +72,7 @@ class CaptureSurfaceCoordinator {
     );
 
     if (decision.asksNativeBridgeToBlock && _actionBridge != null) {
-      final action = await _queueBlocking(true);
+      final action = await _queueBlocking(true, cancellation: cancellation);
       if (action == null || !action.isSuccess || !action.blockingEnabled) {
         decision = CapturePolicyDecision(
           action: CapturePolicyAction.obscureOnly,
@@ -93,8 +101,14 @@ class CaptureSurfaceCoordinator {
     return _queueBlocking(false);
   }
 
-  Future<CaptureProtectionCapability> _loadNativeCapability() async {
+  Future<CaptureProtectionCapability> _loadNativeCapability({
+    Future<void>? cancellation,
+  }) async {
     try {
+      if (_bridge is CancellableCaptureProtectionBridge) {
+        return await (_bridge as CancellableCaptureProtectionBridge)
+            .getCapability(cancellation: cancellation);
+      }
       return await _bridge.getCapability();
     } catch (_) {
       return const CaptureProtectionCapability.unavailable(
@@ -104,17 +118,27 @@ class CaptureSurfaceCoordinator {
     }
   }
 
-  Future<CaptureProtectionActionResult?> _queueBlocking(bool enabled) {
+  Future<CaptureProtectionActionResult?> _queueBlocking(
+    bool enabled, {
+    Future<void>? cancellation,
+  }) {
     final operation = _lastBlockingAction.then(
-      (_) => _safeSetBlocking(enabled),
-      onError: (_) => _safeSetBlocking(enabled),
+      (_) => _safeSetBlocking(enabled, cancellation: cancellation),
+      onError: (_) => _safeSetBlocking(enabled, cancellation: cancellation),
     );
     _lastBlockingAction = operation.then<void>((_) {}, onError: (_) {});
     return operation;
   }
 
-  Future<CaptureProtectionActionResult?> _safeSetBlocking(bool enabled) async {
+  Future<CaptureProtectionActionResult?> _safeSetBlocking(
+    bool enabled, {
+    Future<void>? cancellation,
+  }) async {
     try {
+      if (_actionBridge is CancellableCaptureProtectionActionBridge) {
+        return await (_actionBridge as CancellableCaptureProtectionActionBridge)
+            .setBlocking(enabled: enabled, cancellation: cancellation);
+      }
       return await _actionBridge!.setBlocking(enabled: enabled);
     } catch (_) {
       return const CaptureProtectionActionResult.failure(

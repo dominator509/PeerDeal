@@ -135,6 +135,10 @@ downgrades the sensitive surface to visual obscuring with a scrubbed warning.
 Both method-channel calls use a bounded five-second default deadline and return
 stable unavailable or failed results on timeout; non-positive timeout values
 are rejected before platform calls.
+Callers may also provide an optional cancellation signal through the additive
+capture bridge capabilities; mounted receipt routes use it for capability and
+blocking calls during replacement or disposal. Release is intentionally
+uncancelled so teardown can disable native blocking.
 The action result reports both `success` and `blockingEnabled`; native hosts
 must not expose receipt or capture policy semantics beyond this generic seam.
 Mobile and desktop app-native readiness loaders compose generic capture,

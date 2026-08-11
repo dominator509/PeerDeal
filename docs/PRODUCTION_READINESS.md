@@ -1184,6 +1184,15 @@ peer identities or introducing an unowned wire format would cross the protocol
 and app boundaries. Android APK and Windows debug builds pass for this host
 registration slice.
 
+The T76 follow-up adds additive cancellation capabilities to the generic
+capture bridge. Capture capability and blocking calls now race the existing
+five-second deadline against mounted-route cancellation, and mirrored receipt
+presenters/coordinators forward that signal during route replacement or
+disposal. Teardown release remains uncancelled so native blocking can still be
+disabled. Focused native bridge, coordinator, and receipt presenter suites
+pass; already-dispatched host calls and runtime/device capture validation
+remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

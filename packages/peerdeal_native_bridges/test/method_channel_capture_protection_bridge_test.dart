@@ -153,6 +153,29 @@ void main() {
     },
   );
 
+  test('cancels an in-flight capture capability lookup', () async {
+    final pending = Completer<Object?>();
+    final cancellation = Completer<void>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) {
+          log.add(call);
+          return pending.future;
+        });
+
+    final bridge = MethodChannelCaptureProtectionBridge(channel: channel);
+    final resultFuture = bridge.getCapability(
+      cancellation: cancellation.future,
+    );
+    cancellation.complete();
+    final capability = await resultFuture;
+
+    expect(capability.blockingSupported, isFalse);
+    expect(capability.obscuringSupported, isFalse);
+    expect(capability.notes, 'unavailable');
+    expect(capability.warning, 'Capture protection call cancelled.');
+    expect(log.single.method, 'getCapability');
+  });
+
   test(
     'returns unavailable capability for malformed platform payload',
     () async {
@@ -190,6 +213,29 @@ void main() {
     expect(action.isSuccess, isFalse);
     expect(action.blockingEnabled, isFalse);
     expect(action.warning, 'Capture protection call timed out.');
+    expect(log.single.method, 'setBlocking');
+  });
+
+  test('cancels an in-flight capture blocking action', () async {
+    final pending = Completer<Object?>();
+    final cancellation = Completer<void>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) {
+          log.add(call);
+          return pending.future;
+        });
+
+    final bridge = MethodChannelCaptureProtectionBridge(channel: channel);
+    final resultFuture = bridge.setBlocking(
+      enabled: true,
+      cancellation: cancellation.future,
+    );
+    cancellation.complete();
+    final action = await resultFuture;
+
+    expect(action.isSuccess, isFalse);
+    expect(action.blockingEnabled, isFalse);
+    expect(action.warning, 'Capture protection call cancelled.');
     expect(log.single.method, 'setBlocking');
   });
 }

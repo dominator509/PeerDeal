@@ -513,6 +513,7 @@ class _ThrowingReceiptPresenter extends DemoReceiptSurfacePresenter {
   Future<DemoReceiptSurfaceVm> present({
     required ReceiptScanResult receipt,
     RecoveryResult<Object?>? recovery,
+    Future<void>? cancellation,
   }) async {
     throw StateError('receipt presentation unavailable');
   }

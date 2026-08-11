@@ -7956,3 +7956,33 @@ Risks:
 Next reviewer:
 Continue with runtime Android/Windows validation or define the missing
 protocol-owned discovery advertisement before populating `foundEndpoints`.
+
+---
+
+### 2026-08-11 - Codex - Capture Route Cancellation
+
+Summary:
+- Added additive cancellable capture capability and action interfaces without
+  changing the existing base bridge contracts.
+- Generic capture method-channel calls now race caller cancellation against
+  their existing five-second deadline and fail closed with stable results.
+- Mirrored receipt presenters and capture coordinators forward route
+  cancellation; teardown release remains uncancelled so native blocking can be
+  disabled.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/capture_protection/`
+- Mirrored app capture coordinators, receipt presenters, receipt routes, and
+  focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused native capture bridge suite: passed, 11 tests.
+- Mirrored mobile and desktop capture coordinator suites: passed, 8 tests each.
+- Mirrored mobile and desktop receipt presenter suites: passed, 4 tests each.
+
+Risks:
+- Already-dispatched native calls remain host-owned. Android/Windows runtime
+  capture validation, release signing, other-platform hosts, and product
+  database/state wiring remain external or integration-owned.

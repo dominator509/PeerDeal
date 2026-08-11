@@ -711,6 +711,21 @@ Generated: 2026-08-10
   contract.
 - Android APK and Windows debug host builds passed.
 
+## Recent T76 Changes
+
+- Added additive cancellable capture capability/action bridge interfaces while
+  preserving the existing base interfaces.
+- Generic capture method-channel capability and blocking calls now race the
+  five-second deadline against caller cancellation and fail closed.
+- Mirrored receipt presenters and capture coordinators forward mounted-route
+  cancellation; teardown release remains uncancelled so native blocking can be
+  disabled.
+- Focused native bridge, coordinator, and receipt presenter suites passed.
+
+Already-dispatched native calls remain host-owned. Runtime/device capture
+validation, release signing, other-platform hosts, and product database/state
+provisioning remain external or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

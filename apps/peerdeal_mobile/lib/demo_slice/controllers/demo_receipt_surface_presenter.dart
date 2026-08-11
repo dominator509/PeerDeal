@@ -42,18 +42,25 @@ class DemoReceiptSurfacePresenter {
   Future<DemoReceiptSurfaceVm> present({
     required ReceiptScanResult receipt,
     RecoveryResult<Object?>? recovery,
+    Future<void>? cancellation,
   }) async {
-    return _presentReceiptScan(receipt: receipt, recovery: recovery);
+    return _presentReceiptScan(
+      receipt: receipt,
+      recovery: recovery,
+      cancellation: cancellation,
+    );
   }
 
   Future<DemoReceiptSurfaceVm> presentExportArtifact({
     required ReceiptExportArtifact artifact,
     required OpaqueExportDecoder decoder,
     RecoveryResult<Object?>? recovery,
+    Future<void>? cancellation,
   }) {
     return _presentReceiptScan(
       receipt: _scanFromInspection(decoder.inspect(artifact)),
       recovery: recovery,
+      cancellation: cancellation,
     );
   }
 
@@ -70,6 +77,7 @@ class DemoReceiptSurfacePresenter {
     return _presentReceiptScan(
       receipt: _scanFromInspection(inspection),
       recovery: recovery,
+      cancellation: cancellation,
     );
   }
 
@@ -79,13 +87,18 @@ class DemoReceiptSurfacePresenter {
   Future<DemoReceiptSurfaceVm> _presentReceiptScan({
     required ReceiptScanResult receipt,
     RecoveryResult<Object?>? recovery,
+    Future<void>? cancellation,
   }) async {
     final receiptCapturePlan = await _captureCoordinator.resolve(
       CaptureSurface.receiptDetail,
+      cancellation: cancellation,
     );
     final recoveryCapturePlan = recovery == null
         ? null
-        : await _captureCoordinator.resolve(CaptureSurface.restore);
+        : await _captureCoordinator.resolve(
+            CaptureSurface.restore,
+            cancellation: cancellation,
+          );
 
     return DemoReceiptSurfaceVm(
       receipt: _projection.projectReceiptScan(receipt),

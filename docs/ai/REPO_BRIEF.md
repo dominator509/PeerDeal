@@ -94,7 +94,9 @@ dart analyze .
 - Android mobile now has a Keystore-backed generic secure-key host, and the
   Windows desktop host now uses Credential Manager, both behind the existing
   method-channel contract. Android and Windows capture enforcement is now
-  host-backed, with runtime/device validation still open. App shells prefer
+  host-backed, and mounted receipt routes cancel in-flight capture capability
+  or blocking calls while keeping teardown release uncancelled; runtime/device
+  validation is still open. App shells prefer
   explicit `PEERDEAL_RECOVERY_ROOT` and otherwise use the generic app-support
   directory bridge: Android private no-backup storage or Windows `LocalAppData`.
   Android and Windows now also provide bounded host-backed native peer

@@ -116,6 +116,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
           message: 'Receipt export source configuration is invalid.',
         ),
         recovery: widget.recovery,
+        cancellation: cancellation,
       );
     }
 
@@ -132,6 +133,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
           message: 'Receipt export path is unavailable.',
         ),
         recovery: widget.recovery,
+        cancellation: cancellation,
       );
     }
 
@@ -142,6 +144,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
           message: 'Receipt export input is unavailable.',
         ),
         recovery: widget.recovery,
+        cancellation: cancellation,
       );
     }
 
@@ -155,6 +158,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     return widget.presenter.present(
       receipt: _receiptScanResult(widget.snapshot),
       recovery: widget.recovery,
+      cancellation: cancellation,
     );
   }
 
@@ -169,6 +173,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
           message: 'Receipt artifact is unavailable.',
         ),
         recovery: widget.recovery,
+        cancellation: cancellation,
       );
     }
 
@@ -180,6 +185,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
           message: 'Receipt artifact verifier is unavailable.',
         ),
         recovery: widget.recovery,
+        cancellation: cancellation,
       );
     }
 
