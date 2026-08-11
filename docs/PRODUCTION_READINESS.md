@@ -1353,6 +1353,14 @@ preserves the bootstrap's fail-closed metadata boundary for direct source
 consumers without selecting product state, changing route policy ownership, or
 replacing durable database/runtime validation.
 
+The T98 follow-up closes an avoidable partial-write path in the app-owned
+event-log-plus-checkpoint seam. Mirrored persistence writers now preflight
+snapshot identity, snapshot metadata, scope/cursor/hash consistency, and typed
+Hold'em state before appending an event suffix. Genuine checkpoint persistence
+failures still retain the deliberate durable-suffix-for-replay behavior. This
+does not select product state, event or snapshot identity, retention policy, or
+replace durable database/runtime validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

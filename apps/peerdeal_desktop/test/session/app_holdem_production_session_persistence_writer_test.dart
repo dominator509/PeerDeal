@@ -62,6 +62,24 @@ void main() {
     expect(store.loadWindow(_scope()).snapshot, isNull);
   });
 
+  test('preflights snapshot identity before appending an event suffix', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    final state = _typedSnapshotAfterEvent();
+    final result = AppHoldemProductionSessionPersistenceWriter(store: store)
+        .persist(
+          snapshotId: ' snapshot_001',
+          tableState: state.tableState,
+          handState: state.handState,
+          eventCursor: state.eventCursor,
+          events: <EventEnvelope>[_event()],
+        );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warnings, contains('Holdem snapshot identity is invalid.'));
+    expect(store.loadWindow(_scope()).events, isEmpty);
+    expect(store.loadWindow(_scope()).snapshot, isNull);
+  });
+
   test('rejects retention events before event-log persistence', () {
     final store = InMemoryRecoveryPersistenceStore();
     final state = _typedSnapshotAfterEvent();

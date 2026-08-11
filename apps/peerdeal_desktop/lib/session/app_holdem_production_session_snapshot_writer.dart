@@ -15,7 +15,11 @@ class AppHoldemProductionSessionSnapshotWriter {
 
   final RecoveryPersistenceStore _store;
 
-  RecoveryPersistenceResult save({
+  /// Validates all snapshot inputs without touching persistence.
+  ///
+  /// Combined event-and-snapshot writes use this as a preflight so malformed
+  /// checkpoint input cannot leave a durable event suffix behind.
+  RecoveryPersistenceResult? validate({
     required String snapshotId,
     required TableState tableState,
     required HoldemHandState handState,
@@ -76,6 +80,52 @@ class AppHoldemProductionSessionSnapshotWriter {
         warnings: <String>['Holdem snapshot event hash is inconsistent.'],
       );
     }
+
+    try {
+      HoldemStateSnapshot(
+        tableState: tableState,
+        handState: handState,
+        eventCursor: eventCursor,
+      );
+    } on Object {
+      return const RecoveryPersistenceResult(
+        isSuccess: false,
+        warnings: <String>['Holdem snapshot state is invalid.'],
+      );
+    }
+    return null;
+  }
+
+  RecoveryPersistenceResult save({
+    required String snapshotId,
+    required TableState tableState,
+    required HoldemHandState handState,
+    required HoldemEventCursor eventCursor,
+    String snapshotType = 'HoldemStateSnapshot',
+    String snapshotVersion = '1.0',
+  }) {
+    final validation = validate(
+      snapshotId: snapshotId,
+      tableState: tableState,
+      handState: handState,
+      eventCursor: eventCursor,
+      snapshotType: snapshotType,
+      snapshotVersion: snapshotVersion,
+    );
+    if (validation != null) return validation;
+
+    final scope = RecoveryPersistenceScope(
+      tableId: tableState.tableId,
+      sessionId: tableState.sessionId,
+      protocolVersion: tableState.protocolVersion,
+    );
+    if (!scope.hasValidStorageIdentity) {
+      return const RecoveryPersistenceResult(
+        isSuccess: false,
+        warnings: <String>['Holdem snapshot persistence scope is invalid.'],
+      );
+    }
+    final snapshotBaseEventSeq = eventCursor.nextEventSeq - 1;
 
     final HoldemStateSnapshot typedSnapshot;
     try {

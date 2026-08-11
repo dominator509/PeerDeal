@@ -292,3 +292,6 @@ event suffix before checkpointing the typed snapshot, preserving a durable
 suffix for replay if the checkpoint fails. It remains an app orchestration edge
 over `peerdeal_sync`; it does not move state truth out of `peerdeal_core` or
 invent product startup, identity, route, or retention policy.
+Before the append, the mirrored writer preflights snapshot identity, metadata,
+scope/cursor/hash consistency, and typed Hold'em state so malformed checkpoint
+input cannot create a durable partial suffix.

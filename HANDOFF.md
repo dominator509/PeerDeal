@@ -973,3 +973,17 @@ Remaining:
 Remaining:
 - Product startup, authoritative state, event identity, snapshot IDs, database
   persistence, native/device validation, and release signing remain separate.
+
+## Recent T98 Changes
+
+- Mirrored app persistence writers now preflight snapshot identity, metadata,
+  scope/cursor/hash consistency, and typed Hold'em state before appending an
+  event suffix.
+- Invalid checkpoint input therefore cannot leave a durable event suffix behind;
+  genuine checkpoint storage failures still report the durable suffix for
+  replay.
+- Focused mobile and desktop persistence suites plus all repository gates passed.
+
+Remaining:
+- Product startup, authoritative state, event identity, snapshot IDs, database
+  persistence, native/device validation, and release signing remain separate.

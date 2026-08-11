@@ -954,6 +954,15 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Product state, route policy ownership, database replacement, and runtime
   validation remain separate.
 
+## Recent T98 Changes
+
+- Mirrored app persistence writers now preflight snapshot identity, metadata,
+  scope/cursor/hash consistency, and typed Hold'em state before appending an
+  event suffix.
+- Invalid checkpoint input cannot leave a durable event suffix behind; genuine
+  checkpoint storage failures still retain the durable suffix for replay.
+- Focused mobile and desktop persistence suites and all repository gates pass.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -443,7 +443,10 @@ snapshot writer; append failure prevents checkpointing, while checkpoint
 failure reports that the event log is durable for recovery replay. It does not
 select state, generate event or snapshot identities, invoke retention, or
 replace a production database. The configuration-factory result exposes this
-writer over the same validated recovery store.
+writer over the same validated recovery store. Snapshot identity, metadata,
+scope/cursor/hash consistency, and typed Hold'em state are preflighted before
+the suffix append; malformed checkpoint input therefore cannot create a
+durable partial suffix.
 
 `fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
 callers that require pre-provisioned identity. The lazy production adapter is

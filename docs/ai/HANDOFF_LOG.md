@@ -8338,6 +8338,35 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Persistence Checkpoint Preflight
+
+Summary:
+- Mirrored app persistence writers now preflight snapshot identity, snapshot
+  metadata, scope/cursor/hash consistency, and typed Hold'em state before
+  appending an event suffix.
+- Invalid checkpoint input cannot leave a durable event suffix behind, while
+  genuine checkpoint storage failures retain the intentional durable-suffix
+  replay behavior.
+
+Files changed:
+- Mirrored app `AppHoldemProductionSessionSnapshotWriter` and
+  `AppHoldemProductionSessionPersistenceWriter` implementations.
+- Mirrored persistence-writer regression tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Verification:
+- Focused mobile and desktop persistence-writer suites: passed, 6 tests each.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates: passed.
+
+Risks:
+- Product state selection, event/snapshot identity, durable database wiring,
+  native/device validation, cross-device reachability, and release signing
+  remain external or integration-owned.
+
+---
+
 ### 2026-08-11 - Codex - Windows Native Host Smoke CI Enforcement
 
 Summary:

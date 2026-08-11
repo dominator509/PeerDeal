@@ -34,6 +34,15 @@ class AppHoldemProductionSessionPersistenceWriter {
       events: events,
     );
     if (validation != null) return validation;
+    final snapshotValidation = _snapshotWriter.validate(
+      snapshotId: snapshotId,
+      tableState: tableState,
+      handState: handState,
+      eventCursor: eventCursor,
+      snapshotType: snapshotType,
+      snapshotVersion: snapshotVersion,
+    );
+    if (snapshotValidation != null) return snapshotValidation;
 
     RecoveryPersistenceResult eventResult =
         const RecoveryPersistenceResult.success();
