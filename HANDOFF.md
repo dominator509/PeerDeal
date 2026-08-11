@@ -95,6 +95,10 @@ are implemented on branch
   available for legacy sources. Accepted rejoin governance can now provide the
   remote peer binding and assigned seat for the same context path; missing
   governance peer data still fails closed.
+- Added mirrored async `AppHoldemProductionSessionConfiguration
+  .fromPersistedLocalIdentity(...)` composition. It provisions the app-owned
+  local identity, connects the existing recovery store to the validated
+  bootstrap route, and retains caller-owned route policy and event factories.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -258,8 +262,8 @@ are implemented on branch
   typed route registration, default production surface, and production session
   composition and source/bootstrap seams are implemented. Remaining gaps are
   device/network validation, endpoint/source provisioning, other-platform
-  native work, production database persistence, the concrete product source and
-  local identity wiring, and final product navigation/UX validation. The
+  native work, production database persistence, concrete product route-policy
+  and state provisioning, and final product navigation/UX validation. The
   generic app-shell route-argument handoff is implemented; it does not create
   a product source or durable session state. The registered route now closes the
   default app-flow handoff while preserving explicit callback overrides. T48
@@ -484,3 +488,6 @@ are implemented on branch
 - T64 focused mobile and desktop join-flow suites passed, including
   governance-bound rejoin peer propagation and fail-closed missing-peer
   handoff.
+- T65 focused mobile and desktop persisted-session suites passed, including
+  configuration construction from persisted state and native local identity;
+  both app analyzers passed.

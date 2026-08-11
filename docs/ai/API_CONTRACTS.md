@@ -359,6 +359,14 @@ configuration and the explicit registration is rejected with `StateError`;
 the configuration still does not own source, state, identity, persistence, or
 native transport.
 
+Mobile and desktop also expose async
+`AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)`. It
+provisions or reuses the app-owned local peer identity, constructs the existing
+`AppPersistedHoldemProductionSessionSource` over an injected recovery store, and
+passes its caller-owned route policy and event factories into `fromSource(...)`.
+It does not select a product database, invent route policy, or move persistence
+semantics into a native bridge.
+
 `AppPersistedHoldemProductionSessionSource` is the concrete app-owned adapter
 for the existing `RecoveryPersistenceStore` snapshot boundary. It decodes a
 `HoldemStateSnapshot` from a versioned `SnapshotEnvelope`, verifies exact

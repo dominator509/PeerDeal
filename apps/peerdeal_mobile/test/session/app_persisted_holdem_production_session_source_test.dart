@@ -4,6 +4,7 @@ import 'package:peerdeal_mobile/recovery/app_recovery_retention_coordinator.dart
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_coordinator.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_event_adapter.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_session_bootstrap.dart';
+import 'package:peerdeal_mobile/session/app_holdem_production_session_configuration.dart';
 import 'package:peerdeal_mobile/session/app_persisted_holdem_production_session_source.dart';
 import 'package:peerdeal_mobile/session/native_local_peer_identity_loader.dart';
 import 'package:peerdeal_mobile/session/native_local_peer_identity_provisioner.dart';
@@ -88,6 +89,72 @@ void main() {
     expect(input.path, '/holdem-live');
     expect(identityBridge.savedKeys, hasLength(1));
   });
+
+  test(
+    'builds a stable production configuration from persisted identity',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      final snapshot = _typedSnapshot();
+      _persist(
+        store,
+        HoldemStateSnapshot(
+          tableState: snapshot.tableState,
+          handState: snapshot.handState.copyWith(
+            seats: const <HoldemSeatState>[
+              HoldemSeatState(
+                seat: 1,
+                stack: 100,
+                inHand: false,
+                folded: false,
+                allIn: false,
+              ),
+            ],
+          ),
+          eventCursor: snapshot.eventCursor,
+        ),
+      );
+      final identityBridge = _IdentityBridge();
+      final configuration =
+          await AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(
+            store: store,
+            identityProvisioner: NativeLocalPeerIdentityProvisioner(
+              loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+              writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+              identityFactory: () => 'peer_local',
+            ),
+            routePolicy: AppPersistedHoldemProductionSessionRoutePolicy(
+              path: '/holdem-live',
+              navigationLabel: 'Live Holdem',
+              remotePeerId: 'peer_default',
+              localSeat: 1,
+              closeEventAdapterFactory: (scope) => _closeAdapter(
+                TableState.initial(
+                  tableId: scope.tableId,
+                  sessionId: scope.sessionId,
+                  protocolVersion: scope.protocolVersion,
+                ),
+              ),
+            ),
+            eventIdFactory: (eventType, eventSeq) =>
+                'evt_${eventType}_$eventSeq',
+            emittedAtFactory: () => '2026-08-10T00:00:00Z',
+            eventHashFactory: computeCanonicalHash,
+          );
+
+      final composition = await configuration.routeRegistration.bootstrap
+          .createForSessionContext(
+            JoinFlowSessionContext(
+              invite: _invite(),
+              remotePeerId: 'peer_selected',
+              localSeat: 1,
+            ),
+          );
+
+      expect(composition.route.path, '/holdem-live');
+      expect(composition.route.peerId, 'peer_selected');
+      expect(identityBridge.savedKeys, hasLength(1));
+    },
+  );
 
   test('applies verified join peer and seat to context-aware input', () async {
     final store = InMemoryRecoveryPersistenceStore();

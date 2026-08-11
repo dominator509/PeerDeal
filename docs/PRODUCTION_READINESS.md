@@ -1089,6 +1089,16 @@ production session handoff. Concrete product database/source provisioning,
 native transport reachability, and device validation remain integration or
 operator work.
 
+The T65 follow-up closes the app-owned persisted-source composition gap. Both
+app shells now expose an async
+`AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)`
+factory that provisions or reuses native local identity, composes the existing
+JSON recovery store with the persisted Hold'em source, and registers the
+validated bootstrap route while retaining caller-owned route policy and event
+factories. This is a recovery-backed integration seam, not production database
+provisioning; product state selection, route policy, native reachability, and
+device validation remain separate.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
@@ -1099,7 +1109,8 @@ operator work.
    existing key-ring, cipher, signer, and app capture contracts.
 3. Supply the concrete `AppHoldemProductionSessionSource` and invoke
    `AppHoldemProductionSessionBootstrap` from the real product session/state
-   source and local identity through the typed first-join and rejoin handoff;
-   complete product navigation/UI validation while
+   source and local identity through the typed first-join and rejoin handoff,
+   using the persisted configuration factory where its inputs are available;
+   complete product state/route provisioning and navigation/UI validation while
    keeping native transport/device validation and durable database persistence
    separate.

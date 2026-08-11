@@ -7692,3 +7692,18 @@ Codex should run the full local gate set and commit if green.
 Remaining:
 - Concrete product source/database provisioning, native transport reachability,
   and runtime/device validation remain outside this local contract seam.
+
+### T65: persisted production-session configuration
+
+- Added mirrored async
+  `AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)`.
+- The factory composes native local identity provisioning, the existing JSON
+  recovery store, persisted Hold'em source hydration, caller-owned route policy,
+  and event factories into the validated bootstrap route.
+- Focused mobile and desktop persisted-session suites passed with 8 tests each;
+  both app analyzers passed.
+
+Remaining:
+- This closes app-owned recovery-backed composition only. Product database and
+  state selection, native transport reachability, and runtime/device validation
+  remain integration or operator work.

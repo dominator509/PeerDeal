@@ -177,7 +177,10 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   connect policy decisions to scoped wipe, and app event adapters validate and
   map supported `SessionClosed` envelopes, and app-owned table-session runtimes
   bind ordered events to core projection and close retention; platform/database
-  persistence and platform source provisioning remain production gaps. The
+  persistence and platform source provisioning remain production gaps. The app
+  shells also expose a persisted-session configuration factory that composes
+  this recovery store with native local identity and caller-owned route/event
+  policy; it does not provide a product database. The
   app shells now use a generic app-support directory bridge as a fallback root:
   Android supplies private no-backup storage and Windows supplies `LocalAppData`;
   explicit environment configuration still wins. The bounded app scheduler,
@@ -227,3 +230,9 @@ seat because there is no bootstrap discovery phase. The context-aware
 production bootstrap validates it and the persisted app source maps it into
 route input. Missing governance peer data fails closed. Core state truth,
 protocol schemas, native bridge semantics, and variant rules remain unchanged.
+
+`AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)` is
+the mirrored app-owned composition entrypoint for recovery-backed sessions. It
+provisions local identity, creates the persisted source, and registers the
+existing validated bootstrap route. Product database/state selection, route
+policy, native reachability, and device validation remain outside this seam.

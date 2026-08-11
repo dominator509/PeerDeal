@@ -515,6 +515,17 @@ Generated: 2026-08-10
 - Mirrored orchestrator and route tests prove accepted rejoin handoff and
   fail-closed behavior when governance does not return a peer.
 
+## Recent T65 Changes
+
+- Added mirrored async
+  `AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)`.
+  It composes the existing persisted Hold'em source, native local identity
+  provisioner, recovery store, route policy, and event factories into one
+  stable bootstrap-route configuration.
+- Focused mobile and desktop persisted-session suites passed with 8 tests each;
+  app analyzers reported no issues. This remains recovery-backed composition,
+  not a claim that a product database or product route policy exists.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`
@@ -632,7 +643,9 @@ Run after each retrofit step:
 3. Supply the concrete product implementation of
    `AppHoldemProductionSessionSource` and invoke
    `AppHoldemProductionSessionBootstrap` from the real session/state and local
-   identity flow through the typed first-join and rejoin handoff; add native
-   peer transport device/network validation and final UX validation separately.
+   identity flow through the typed first-join and rejoin handoff, using the
+   persisted configuration factory where its recovery-backed inputs are valid;
+   add native peer transport device/network validation and final UX validation
+   separately.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
    without crossing locked package boundaries.
