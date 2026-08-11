@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_desktop/recovery/app_recovery_persistence_store_factory.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_configuration_factory.dart';
 import 'package:peerdeal_desktop/session/app_persisted_holdem_production_session_source.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
+import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -32,6 +35,49 @@ void main() {
     expect(result.configuration!.routeRegistration.path, '/holdem-live');
   });
 
+  test('fails closed for an invalid recovery event limit', () async {
+    final result = await _create(maxRecoveryEvents: 0);
+
+    expect(result.isAvailable, isFalse);
+    expect(
+      result.warnings,
+      contains('Holdem production session configuration is unavailable.'),
+    );
+  });
+
+  test(
+    'propagates the recovery event limit into the persistence writer',
+    () async {
+      final result = await _create(maxRecoveryEvents: 1);
+      final writer = result.persistenceWriter!;
+      final tableState = TableState.initial(
+        tableId: 'table_001',
+        sessionId: 'session_001',
+        protocolVersion: '1.0.0',
+      );
+      final events = <EventEnvelope>[
+        _event(eventSeq: 1),
+        _event(eventSeq: 2, prevEventHash: 'hash_1'),
+      ];
+
+      final persisted = writer.persist(
+        snapshotId: 'snapshot_001',
+        tableState: tableState,
+        handState: _handState(),
+        eventCursor: _cursor(nextEventSeq: 3, previousEventHash: 'hash_2'),
+        events: events,
+      );
+
+      expect(persisted.isSuccess, isFalse);
+      expect(
+        persisted.warnings,
+        contains(
+          'Holdem event-log suffix exceeds the configured recovery event limit.',
+        ),
+      );
+    },
+  );
+
   test(
     'fails closed for an invalid route policy before native identity work',
     () async {
@@ -58,6 +104,7 @@ void main() {
 Future<AppHoldemProductionSessionConfigurationLoadResult> _create({
   RecoveryPersistenceRootDirectoryFactory? rootDirectoryFactory,
   AppHoldemProductionSessionRoutePolicyFactory? routePolicyFactory,
+  int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
 }) {
   final factory = AppHoldemProductionSessionConfigurationFactory(
     recoveryStoreFactory: AppRecoveryPersistenceStoreFactory(
@@ -67,6 +114,7 @@ Future<AppHoldemProductionSessionConfigurationLoadResult> _create({
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-11T00:00:00Z',
     eventHashFactory: (_) => 'hash',
+    maxRecoveryEvents: maxRecoveryEvents,
   );
   return factory.create();
 }
@@ -80,3 +128,53 @@ AppPersistedHoldemProductionSessionRoutePolicy _routePolicy() {
     closeEventAdapterFactory: (_) => throw StateError('unused'),
   );
 }
+
+HoldemHandState _handState() => const HoldemHandState(
+  handId: 'hand_001',
+  phase: HoldemHandPhase.handIdle,
+  bettingRound: HoldemBettingRound.none,
+  seats: <HoldemSeatState>[],
+  currentActorSeat: 0,
+  buttonSeat: 0,
+  smallBlindSeat: 0,
+  bigBlindSeat: 1,
+  currentBetToCall: 0,
+  minimumRaiseAmount: 1,
+);
+
+HoldemEventCursor _cursor({
+  int nextEventSeq = 1,
+  String previousEventHash = genesisEventHash,
+}) => HoldemEventCursor(
+  protocolVersion: '1.0.0',
+  tableId: 'table_001',
+  sessionId: 'session_001',
+  nextEventSeq: nextEventSeq,
+  previousEventHash: previousEventHash,
+  actorRef: 'peer_local',
+  eventIdFactory: _eventId,
+  emittedAtFactory: _eventTimestamp,
+);
+
+EventEnvelope _event({
+  required int eventSeq,
+  String prevEventHash = genesisEventHash,
+}) => EventEnvelope(
+  eventId: 'evt_$eventSeq',
+  eventType: 'HoldemActionApplied',
+  eventVersion: '1.0',
+  protocolVersion: '1.0.0',
+  eventSeq: eventSeq,
+  tableId: 'table_001',
+  sessionId: 'session_001',
+  handId: null,
+  emittedAt: _eventTimestamp(),
+  actorRef: 'peer_local',
+  payload: const <String, Object?>{},
+  prevEventHash: prevEventHash,
+  eventHash: 'hash_$eventSeq',
+);
+
+String _eventId(String eventType, int eventSeq) => 'evt_${eventType}_$eventSeq';
+
+String _eventTimestamp() => '2026-08-11T00:00:00Z';

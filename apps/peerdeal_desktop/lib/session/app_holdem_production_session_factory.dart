@@ -1,4 +1,5 @@
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
 import '../recovery/app_recovery_session_close_event_adapter.dart';
@@ -50,6 +51,7 @@ class AppHoldemProductionSessionFactory {
     NativeTransportSessionFactory? nativeSessionFactory,
     Duration pollInterval = const Duration(seconds: 1),
     NativeTransportSourceTimerFactory? timerFactory,
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) {
     _validateRouteMetadata(path: path, navigationLabel: navigationLabel);
     _validatePeerIdentity(peerId, 'peerId');
@@ -78,6 +80,7 @@ class AppHoldemProductionSessionFactory {
       closeEventAdapter: closeEventAdapter,
       reducer: reducer,
       clock: clock,
+      maxRecoveryEvents: maxRecoveryEvents,
     );
     final holdemRuntime = AppHoldemTableSessionRuntime(
       sessionRuntime: sessionRuntime,

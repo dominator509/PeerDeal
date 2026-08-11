@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 import 'app_holdem_production_session_bootstrap.dart';
 import 'app_holdem_production_session_bootstrap_route.dart';
@@ -26,6 +27,7 @@ class AppHoldemProductionSessionBootstrapRouteRegistration {
     AppHoldemProductionSessionFactory sessionFactory =
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) {
     return AppHoldemProductionSessionBootstrapRouteRegistration(
       path: path,
@@ -36,6 +38,7 @@ class AppHoldemProductionSessionBootstrapRouteRegistration {
             : null,
         factory: sessionFactory,
         sourceLoadTimeout: sourceLoadTimeout,
+        maxRecoveryEvents: maxRecoveryEvents,
       ),
     );
   }

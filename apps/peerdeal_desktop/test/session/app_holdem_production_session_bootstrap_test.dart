@@ -130,6 +130,16 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('rejects a non-positive recovery event limit before loading', () {
+    expect(
+      () => AppHoldemProductionSessionBootstrap(
+        source: _Source(_input()),
+        maxRecoveryEvents: 0,
+      ),
+      throwsArgumentError,
+    );
+  });
 }
 
 ResolvedInvite _invite() {

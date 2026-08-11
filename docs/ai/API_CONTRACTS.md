@@ -663,6 +663,9 @@ projection or close retention fails. A `SessionClosed` event is committed only
   recovery limit, or a smaller positive caller limit, before copying or reducer
   traversal; oversized batches fail closed with
   `ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE`.
+  The production bootstrap, route registration, and configuration factory carry
+  one validated `maxRecoveryEvents` value into that runtime; persisted composition
+  reuses it for source hydration and the app persistence writer.
 `AppHoldemTableSessionRuntime` is the app-owned local Hold'em composition seam:
 it invokes `HoldemCoreProjectionAdapter`, preflights the resulting non-retention
 batch through `AppTableSessionRuntime`, and advances Hold'em state/cursor only

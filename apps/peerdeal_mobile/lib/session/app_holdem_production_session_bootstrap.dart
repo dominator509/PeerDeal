@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
 import '../join_flow/join_flow_models.dart';
@@ -73,20 +74,23 @@ class AppHoldemProductionSessionInput {
 /// derived here. A mismatch between the resolved invite and hydrated state is
 /// rejected before a route or native transport can be exposed.
 class AppHoldemProductionSessionBootstrap {
-  const AppHoldemProductionSessionBootstrap({
+  AppHoldemProductionSessionBootstrap({
     required AppHoldemProductionSessionSource source,
     AppHoldemProductionSessionContextSource? contextSource,
     AppHoldemProductionSessionFactory factory =
         const AppHoldemProductionSessionFactory(),
     this.sourceLoadTimeout = const Duration(seconds: 5),
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : _source = source,
        _contextSource = contextSource,
-       _factory = factory;
+       _factory = factory,
+       maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents);
 
   final AppHoldemProductionSessionSource _source;
   final AppHoldemProductionSessionContextSource? _contextSource;
   final AppHoldemProductionSessionFactory _factory;
   final Duration sourceLoadTimeout;
+  final int maxRecoveryEvents;
 
   Future<AppHoldemProductionSessionComposition> createForInvite(
     ResolvedInvite invite, {
@@ -164,6 +168,7 @@ class AppHoldemProductionSessionBootstrap {
       nativeSessionFactory: input.nativeSessionFactory,
       pollInterval: input.pollInterval,
       timerFactory: input.timerFactory,
+      maxRecoveryEvents: maxRecoveryEvents,
     );
   }
 
@@ -262,4 +267,15 @@ class AppHoldemProductionSessionBootstrap {
       );
     }
   }
+}
+
+int _validateMaxRecoveryEvents(int value) {
+  if (value <= 0) {
+    throw ArgumentError.value(
+      value,
+      'maxRecoveryEvents',
+      'Recovery event limit must be positive.',
+    );
+  }
+  return value;
 }

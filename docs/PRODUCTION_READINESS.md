@@ -1608,6 +1608,13 @@ default, with a positive caller-owned override, before copying or reducing a
 caller-supplied non-retention batch. Oversized input fails closed with
 `ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE` without mutating app state.
 
+The T131 follow-up closes the production-composition limit propagation gap.
+Mirrored bootstrap, route-registration, configuration, and session-factory
+seams now carry one validated `maxRecoveryEvents` value into the app session
+runtime. Persisted configuration reuses that value for source hydration and the
+app persistence writer, so recovery paths do not silently diverge back to the
+default.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

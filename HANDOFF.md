@@ -1178,6 +1178,23 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T131 Production Recovery-Limit Propagation
+
+- Mirrored production bootstrap, route-registration, configuration, and
+  session-factory seams now carry one validated `maxRecoveryEvents` value into
+  the app session runtime.
+- Persisted configuration also passes the same value to the persisted source
+  and app persistence writer, preventing default-limit drift across recovery
+  paths.
+- Focused mobile and desktop production-session tests cover runtime
+  propagation, bootstrap early rejection, and configuration fail-closed
+  behavior.
+
+Remaining:
+- Concrete product session/state wiring, native platform validation,
+  other-platform hosts, database replacement, and release signing remain
+  separate.
+
 ## Recent T130 App Session Event-Batch Bound
 
 - Mirrored `AppTableSessionRuntime` owners now enforce the shared

@@ -1152,6 +1152,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   without mutating app state; focused mobile and desktop runtime suites cover
   overflow and invalid limits.
 
+## T131 Production Recovery-Limit Propagation
+
+- Mirrored production bootstrap and configuration composition now carry one
+  validated recovery-event limit into the app session runtime.
+- Persisted configuration passes that same limit to the persisted source and
+  persistence writer, avoiding default-limit drift between hydration, runtime
+  ingestion, and checkpoint writes.
+- Focused mobile and desktop production-session tests cover propagation and
+  invalid-limit fail-closed behavior.
+
 ## T129 Persisted Session Writer Event Bound
 
 - Mirrored `AppHoldemProductionSessionPersistenceWriter` instances now enforce

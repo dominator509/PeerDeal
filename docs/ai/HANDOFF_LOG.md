@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T131 Production Recovery-Limit Propagation
+
+Summary:
+- Mirrored production bootstrap, route-registration, configuration, and
+  session-factory seams now carry one validated `maxRecoveryEvents` value into
+  the app session runtime.
+- Persisted configuration reuses the value for source hydration and the app
+  persistence writer, preventing default-limit drift across recovery paths.
+
+Tests run:
+- Focused mobile and desktop production-session suites passed (15 each).
+- Focused mobile and desktop Flutter analysis passed.
+
+Risks:
+- This closes configuration drift in the app-owned recovery boundary; concrete
+  product state wiring, native/device validation, database replacement, and
+  release signing remain separate.
+
+Next reviewer:
+- Run the full local gate set and commit if green.
+
+---
+
 ### 2026-08-11 - Codex - T130 App Session Event-Batch Bound
 
 Summary:

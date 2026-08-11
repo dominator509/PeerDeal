@@ -54,6 +54,7 @@ class AppHoldemProductionSessionConfigurationFactory {
     AppHoldemProductionSessionFactory sessionFactory =
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : _recoveryStoreFactory = recoveryStoreFactory,
        _routePolicyFactory = routePolicyFactory,
        _eventIdFactory = eventIdFactory,
@@ -65,7 +66,8 @@ class AppHoldemProductionSessionConfigurationFactory {
        _snapshotType = snapshotType,
        _snapshotVersion = snapshotVersion,
        _sessionFactory = sessionFactory,
-       _sourceLoadTimeout = sourceLoadTimeout;
+       _sourceLoadTimeout = sourceLoadTimeout,
+       _maxRecoveryEvents = maxRecoveryEvents;
 
   final AppRecoveryPersistenceStoreFactory _recoveryStoreFactory;
   final AppHoldemProductionSessionRoutePolicyFactory _routePolicyFactory;
@@ -79,6 +81,7 @@ class AppHoldemProductionSessionConfigurationFactory {
   final String _snapshotVersion;
   final AppHoldemProductionSessionFactory _sessionFactory;
   final Duration _sourceLoadTimeout;
+  final int _maxRecoveryEvents;
 
   Future<AppHoldemProductionSessionConfigurationLoadResult> create() async {
     final persistence = _recoveryStoreFactory.create();
@@ -108,11 +111,13 @@ class AppHoldemProductionSessionConfigurationFactory {
             snapshotVersion: _snapshotVersion,
             sessionFactory: _sessionFactory,
             sourceLoadTimeout: _sourceLoadTimeout,
+            maxRecoveryEvents: _maxRecoveryEvents,
           );
       return AppHoldemProductionSessionConfigurationLoadResult.available(
         configuration: configuration,
         persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
           store: store,
+          maxRecoveryEvents: _maxRecoveryEvents,
         ),
         snapshotWriter: AppHoldemProductionSessionSnapshotWriter(store: store),
         warnings: persistence.warnings,

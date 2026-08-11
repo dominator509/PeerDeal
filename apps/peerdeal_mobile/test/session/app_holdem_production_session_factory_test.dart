@@ -35,6 +35,18 @@ void main() {
     expect(composition.route.pollInterval, const Duration(seconds: 1));
   });
 
+  test('propagates the recovery event limit into the session runtime', () {
+    final composition = _create(maxRecoveryEvents: 1);
+    final result = composition.sessionRuntime.applyEventBatch(<EventEnvelope>[
+      _event(seq: 1),
+      _event(seq: 2, prevHash: 'hash_1'),
+    ]);
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE');
+    expect(composition.sessionRuntime.acceptedEventCount, 0);
+  });
+
   test('rejects unsafe identity and runtime composition inputs', () {
     expect(() => _create(peerId: 'peer_local'), throwsArgumentError);
     expect(() => _create(localSeat: 4), throwsArgumentError);
@@ -60,6 +72,7 @@ AppHoldemProductionSessionComposition _create({
   String localPeerId = 'peer_local',
   int localSeat = 1,
   Duration pollInterval = const Duration(seconds: 1),
+  int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
 }) {
   final tableState = initialTableState ?? _initialTableState();
   return const AppHoldemProductionSessionFactory().create(
@@ -73,6 +86,25 @@ AppHoldemProductionSessionComposition _create({
     localPeerId: localPeerId,
     localSeat: localSeat,
     pollInterval: pollInterval,
+    maxRecoveryEvents: maxRecoveryEvents,
+  );
+}
+
+EventEnvelope _event({required int seq, String prevHash = ''}) {
+  return EventEnvelope(
+    eventId: 'event_$seq',
+    eventType: 'OpenTableSessionOpened',
+    eventVersion: '1.0',
+    protocolVersion: '1.0.0',
+    eventSeq: seq,
+    tableId: 'table_001',
+    sessionId: 'session_001',
+    handId: 'hand_001',
+    emittedAt: '2026-08-11T00:00:00Z',
+    actorRef: 'peer_remote',
+    payload: const <String, Object?>{},
+    prevEventHash: prevHash,
+    eventHash: 'hash_$seq',
   );
 }
 

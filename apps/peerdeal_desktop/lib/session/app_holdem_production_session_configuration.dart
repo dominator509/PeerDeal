@@ -36,6 +36,7 @@ class AppHoldemProductionSessionConfiguration {
     AppHoldemProductionSessionFactory sessionFactory =
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     _validateSourceLoadTimeout(sourceLoadTimeout);
     final source =
@@ -50,12 +51,14 @@ class AppHoldemProductionSessionConfiguration {
           eventReducer: eventReducer,
           snapshotType: snapshotType,
           snapshotVersion: snapshotVersion,
+          maxRecoveryEvents: maxRecoveryEvents,
         );
     return AppHoldemProductionSessionConfiguration.fromSource(
       path: routePolicy.path,
       source: source,
       sessionFactory: sessionFactory,
       sourceLoadTimeout: sourceLoadTimeout,
+      maxRecoveryEvents: maxRecoveryEvents,
     );
   }
 
@@ -65,6 +68,7 @@ class AppHoldemProductionSessionConfiguration {
     AppHoldemProductionSessionFactory sessionFactory =
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) {
     _validateSourceLoadTimeout(sourceLoadTimeout);
     return AppHoldemProductionSessionConfiguration._(
@@ -74,6 +78,7 @@ class AppHoldemProductionSessionConfiguration {
             source: source,
             sessionFactory: sessionFactory,
             sourceLoadTimeout: sourceLoadTimeout,
+            maxRecoveryEvents: maxRecoveryEvents,
           ),
     );
   }
