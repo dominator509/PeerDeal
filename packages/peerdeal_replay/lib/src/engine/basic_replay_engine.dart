@@ -2,6 +2,7 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/replay_engine.dart';
 import '../contracts/replay_state_projector.dart';
+import '../models/anchor_hash.dart';
 import '../models/replay_request.dart';
 import '../models/replay_result.dart';
 import '../models/replay_mismatch.dart';
@@ -16,11 +17,10 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     EventWindowValidator? eventWindowValidator,
     SnapshotSuffixReplayer? snapshotSuffixReplayer,
     this.protocolCatalog = const ProtocolCatalog(),
-  }) : anchorHashCalculator =
-           anchorHashCalculator ?? const AnchorHashCalculator(),
+  }) : anchorHashCalculator = anchorHashCalculator ?? AnchorHashCalculator(),
        eventWindowValidator = eventWindowValidator ?? EventWindowValidator(),
        snapshotSuffixReplayer =
-           snapshotSuffixReplayer ?? const SnapshotSuffixReplayer();
+           snapshotSuffixReplayer ?? SnapshotSuffixReplayer();
 
   final ReplayStateProjector<TState> projector;
   final AnchorHashCalculator anchorHashCalculator;
@@ -30,8 +30,20 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
 
   @override
   ReplayResult<TState> replay(ReplayRequest request) {
+    final eventCountMismatches = eventWindowValidator.validateEventCount(
+      request.events,
+    );
+    if (eventCountMismatches.isNotEmpty) {
+      return ReplayResult<TState>(
+        isSuccess: false,
+        state: null,
+        finalAppliedEventSeq: null,
+        reconstructedAnchor: null,
+        mismatches: eventCountMismatches,
+      );
+    }
+
     final mismatches = <ReplayMismatch>[
-      ...eventWindowValidator.validateEventCount(request.events),
       ..._validateProtocolVersions(request),
       ..._validateReplayScope(request),
       ..._validateReplayRange(request),
@@ -47,7 +59,25 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       );
     }
 
-    final selectedEvents = _selectEvents(request);
+    late final List<EventEnvelope> selectedEvents;
+    try {
+      selectedEvents = _selectEvents(request);
+    } on Object catch (error) {
+      return ReplayResult<TState>(
+        isSuccess: false,
+        state: null,
+        finalAppliedEventSeq: null,
+        reconstructedAnchor: null,
+        mismatches: <ReplayMismatch>[
+          ReplayMismatch(
+            code: 'ERR_REPLAY_SELECTION_FAILURE',
+            message: 'Replay event selection failed.',
+            actual: error.runtimeType.toString(),
+          ),
+        ],
+      );
+    }
+
     mismatches.addAll(
       eventWindowValidator.validate(
         selectedEvents,
@@ -92,10 +122,27 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       );
     }
 
-    final reconstructedAnchor = anchorHashCalculator.calculate(
-      scope: request.scope,
-      events: selectedEvents,
-    );
+    late final AnchorHash reconstructedAnchor;
+    try {
+      reconstructedAnchor = anchorHashCalculator.calculate(
+        scope: request.scope,
+        events: selectedEvents,
+      );
+    } on Object catch (error) {
+      return ReplayResult<TState>(
+        isSuccess: false,
+        state: null,
+        finalAppliedEventSeq: null,
+        reconstructedAnchor: null,
+        mismatches: <ReplayMismatch>[
+          ReplayMismatch(
+            code: 'ERR_REPLAY_ANCHOR_CALCULATION_FAILURE',
+            message: 'Replay anchor calculation failed.',
+            actual: error.runtimeType.toString(),
+          ),
+        ],
+      );
+    }
 
     if (request.expectedAnchor != null &&
         request.expectedAnchor != reconstructedAnchor) {

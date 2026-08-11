@@ -29,6 +29,10 @@ as the first package drop for Sprint 7. It is not yet a production reconstructio
 - Replay requests reject event windows above the configurable `EventWindowValidator`
   limit before protocol, scope, range, or projector traversal; the default is
   4,096 events and the failure code is `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE`.
+- Anchor hashing and snapshot-suffix planning apply the same default event
+  bound. Canonical anchor hashing raises its configured input limit explicitly,
+  while the replay engine converts selection and anchor failures into
+  `ERR_REPLAY_SELECTION_FAILURE` and `ERR_REPLAY_ANCHOR_CALCULATION_FAILURE`.
 - Replay request ranges reject non-positive or inverted event sequence bounds
   before filtering events or invoking reconstruction projectors.
 - Replay now rejects event or snapshot table/session scope mismatches against

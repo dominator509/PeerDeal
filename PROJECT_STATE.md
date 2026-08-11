@@ -1108,6 +1108,17 @@ signing, and concrete product state wiring remain external or integration-owned.
   validated after filtering and snapshot-suffix planning. Focused replay tests
   and package analysis pass.
 
+## T114 Replay Anchor And Selection Fail-Closed Bounds
+
+- Oversized replay requests now return immediately before protocol, scope, range,
+  or event traversal; the prior eager validation list could otherwise continue
+  processing after the count mismatch was found.
+- `AnchorHashCalculator` and `SnapshotSuffixReplayer` enforce the same default
+  4,096-event bound. Anchor hashing passes explicit canonical list/node limits,
+  and `BasicReplayEngine` converts selection and anchor failures into stable
+  `ERR_REPLAY_SELECTION_FAILURE` and `ERR_REPLAY_ANCHOR_CALCULATION_FAILURE`
+  mismatches. Focused replay/protocol tests and package analysis pass.
+
 ## Required Gates
 
 Run after each retrofit step:

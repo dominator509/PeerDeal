@@ -1165,6 +1165,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T114 Changes
+
+- Oversized replay requests now return immediately before secondary protocol,
+  scope, range, or event traversal.
+- `AnchorHashCalculator` and `SnapshotSuffixReplayer` enforce the same default
+  4,096-event bound. Anchor hashing uses explicit canonical list/node limits,
+  and `BasicReplayEngine` returns stable selection or anchor failure mismatches
+  instead of allowing helper exceptions to escape.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T113 Changes
 
 - `EventWindowValidator` now applies a configurable positive event-count limit,

@@ -1486,6 +1486,15 @@ after filtering. This is a Dart replay-boundary hardening change and does not
 claim product persistence, device/network reachability, other-platform hosts,
 or release signing.
 
+The T114 follow-up closes the remaining replay materialization and exception
+gaps. Oversized requests now short-circuit before secondary validation; anchor
+hashing and snapshot-suffix planning enforce the same default 4,096-event bound;
+anchor hashing raises canonical list/node limits explicitly for that bounded
+window; and `BasicReplayEngine` returns stable selection and anchor calculation
+failure mismatches instead of allowing helper exceptions to escape. Protocol
+hashing remains in `peerdeal_protocol`; product persistence, device/network
+reachability, other-platform hosts, and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -65,6 +65,10 @@ execution.
 or projector traversal. The default is 4,096 events and the structured failure
 code is `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE`. The selected event window remains
 subject to the same validator after range and snapshot-suffix selection.
+`AnchorHashCalculator` and `SnapshotSuffixReplayer` use the same default event
+bound for direct callers. `BasicReplayEngine` fails closed with
+`ERR_REPLAY_SELECTION_FAILURE` or `ERR_REPLAY_ANCHOR_CALCULATION_FAILURE` if an
+injected helper rejects input or canonical anchor materialization fails.
 
 ## App Route Surface
 

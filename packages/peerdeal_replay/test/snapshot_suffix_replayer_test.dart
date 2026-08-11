@@ -3,7 +3,7 @@ import 'package:peerdeal_replay/peerdeal_replay.dart';
 import 'package:test/test.dart';
 
 void main() {
-  const replayer = SnapshotSuffixReplayer();
+  final replayer = SnapshotSuffixReplayer();
 
   test('filters suffix events after snapshot base sequence', () {
     final snapshot = SnapshotEnvelope(
@@ -68,5 +68,39 @@ void main() {
 
     expect(result.snapshotBaseEventSeq, 2);
     expect(result.eventsToApply.map((e) => e.eventSeq).toList(), [3]);
+  });
+
+  test('rejects suffix windows above the configured limit', () {
+    final snapshot = SnapshotEnvelope(
+      snapshotId: 'snap_1',
+      protocolVersion: '1.0.0',
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      snapshotBaseEventSeq: 1,
+      snapshotHash: 'snap_hash',
+      payload: const <String, Object?>{},
+    );
+    final event = EventEnvelope(
+      eventId: 'evt_1',
+      eventType: 'OpenTableSessionOpened',
+      eventVersion: '1.0',
+      protocolVersion: '1.0.0',
+      eventSeq: 2,
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      handId: null,
+      emittedAt: '2026-04-25T00:00:00Z',
+      actorRef: 'system',
+      payload: const <String, Object?>{},
+      prevEventHash: genesisEventHash,
+      eventHash: 'hash_1',
+    );
+
+    expect(
+      () => SnapshotSuffixReplayer(
+        maxEvents: 2,
+      ).plan(snapshot: snapshot, events: List<EventEnvelope>.filled(3, event)),
+      throwsArgumentError,
+    );
   });
 }

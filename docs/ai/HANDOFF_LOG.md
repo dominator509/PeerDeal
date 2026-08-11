@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T114 Replay Anchor And Selection Bounds
+
+Summary:
+- Oversized replay requests now return before any secondary protocol, scope,
+  range, or event traversal.
+- Anchor hashing and snapshot-suffix planning enforce the shared default bound
+  of 4,096 events; anchor hashing supplies canonical list/node limits for that
+  window.
+- `BasicReplayEngine` converts helper failures into
+  `ERR_REPLAY_SELECTION_FAILURE` or
+  `ERR_REPLAY_ANCHOR_CALCULATION_FAILURE` mismatches.
+
+Tests run:
+- Focused replay suite: 33 tests passed.
+- Focused protocol envelope/hash suite: 53 tests passed.
+- Focused replay and protocol analysis passed.
+
+Risks:
+- This hardens replay and protocol hashing boundaries only. Product persistence,
+  platform/runtime validation, other-platform hosts, and release signing remain
+  separate.
+
+Next reviewer:
+- Preserve the shared replay bound and structured helper-failure mapping when
+  adding replay transports or product session sources.
+
+---
+
 ### 2026-08-11 - Codex - T113 Replay Event Window Bounds
 
 Summary:

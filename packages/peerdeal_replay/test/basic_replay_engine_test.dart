@@ -176,7 +176,7 @@ void main() {
       eventId: 'evt_1',
       eventType: 'OpenTableSessionOpened',
       eventVersion: '1.0',
-      protocolVersion: currentProtocolVersion.toWire(),
+      protocolVersion: '9.9.9',
       eventSeq: 1,
       tableId: 'table_1',
       sessionId: 'session_1',
@@ -203,6 +203,45 @@ void main() {
     expect(result.mismatches.single.code, 'ERR_REPLAY_EVENT_WINDOW_TOO_LARGE');
     expect(result.mismatches.single.expected, 2);
     expect(result.mismatches.single.actual, 3);
+  });
+
+  test('fails closed when replay anchor calculation throws', () {
+    final event = EventEnvelope(
+      eventId: 'evt_1',
+      eventType: 'OpenTableSessionOpened',
+      eventVersion: '1.0',
+      protocolVersion: currentProtocolVersion.toWire(),
+      eventSeq: 1,
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      handId: null,
+      emittedAt: '2026-04-25T00:00:00Z',
+      actorRef: 'system',
+      payload: const <String, Object?>{},
+      prevEventHash: genesisEventHash,
+      eventHash: List<String>.filled(4097, 'h').join(),
+    );
+
+    final result =
+        BasicReplayEngine<FakeTableProjection>(
+          projector: FakeTableProjector(),
+        ).replay(
+          ReplayRequest(
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            protocolVersion: currentProtocolVersion.toWire(),
+            scope: ReplayScope.session,
+            events: <EventEnvelope>[event],
+          ),
+        );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.reconstructedAnchor, isNull);
+    expect(
+      result.mismatches.single.code,
+      'ERR_REPLAY_ANCHOR_CALCULATION_FAILURE',
+    );
   });
 
   test('rejects inverted replay event range before projection', () {
@@ -336,6 +375,41 @@ void main() {
       'SettlementProjected',
       'HandSettled',
     ]);
+  });
+
+  test('fails closed when snapshot suffix selection exceeds its limit', () {
+    final events = _loadHoldemShowdownSettlementEvents();
+    final first = events.first;
+    final limitedEngine = BasicReplayEngine<FakeTableProjection>(
+      projector: FakeTableProjector(),
+      snapshotSuffixReplayer: SnapshotSuffixReplayer(maxEvents: 1),
+    );
+
+    final result = limitedEngine.replay(
+      ReplayRequest(
+        tableId: first.tableId,
+        sessionId: first.sessionId,
+        protocolVersion: first.protocolVersion,
+        scope: ReplayScope.hand,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_holdem_showdown_revealed',
+          protocolVersion: first.protocolVersion,
+          tableId: first.tableId,
+          sessionId: first.sessionId,
+          snapshotBaseEventSeq: 3,
+          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          payload: const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          },
+        ),
+        events: events,
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_SELECTION_FAILURE');
   });
 
   test('replays fixture-backed Holdem blocked settlement path', () {
