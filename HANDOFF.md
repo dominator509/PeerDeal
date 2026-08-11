@@ -751,24 +751,6 @@ Remaining:
   signed release output, credentials, and product database/state wiring remain
   external or integration-owned.
 
-## Recent T85 Changes
-
-- Mirrored app shells now carry an additive cancellable receipt export callback
-  from runtime configuration into the mounted receipt route.
-- Route replacement or disposal forwards its signal through export key
-  provisioning, secure key writes, and the existing cancellable native bridge.
-- The legacy one-argument export callback remains supported; conflicting export
-  sources fail closed.
-
-Focused mobile and desktop export-factory and route tests passed, including
-pending native export cancellation on route disposal.
-
-Remaining:
-- Already-dispatched native mutations remain host-owned. Cross-process/native
-  storage atomicity, runtime/device validation, signed release output,
-  credentials, and product database/state wiring remain external or
-  integration-owned.
-
 ## Recent T84 Changes
 
 - Mirrored receipt key-ring provisioners now reload native storage after any
@@ -787,3 +769,33 @@ Remaining:
 - Cross-process/native storage atomicity, runtime persistence validation,
   signed release output, credentials, and product database/state wiring remain
   external or integration-owned.
+
+## Recent T85 Changes
+
+- Mirrored app shells now carry an additive cancellable receipt export callback
+  from runtime configuration into the mounted receipt route.
+- Route replacement or disposal forwards its signal through export key
+  provisioning, secure key writes, and the existing cancellable native bridge.
+- The legacy one-argument export callback remains supported; conflicting export
+  sources fail closed.
+
+Focused mobile and desktop export-factory and route tests passed, including
+pending native export cancellation on route disposal.
+
+Remaining:
+- Already-dispatched native mutations remain host-owned. Cross-process/native
+  storage atomicity, runtime/device validation, signed release output,
+  credentials, and product database/state wiring remain external or
+  integration-owned.
+
+## Recent T86 Changes
+
+- The Windows secure-key host now serializes each namespace with a Local named
+  mutex across PeerDeal app processes for load/save/delete operations.
+- Mutex acquisition is bounded at five seconds and fails closed, matching the
+  generic native secure-storage deadline instead of allowing an unbounded host
+  wait.
+
+Windows host compilation passed. Android multi-process storage semantics,
+compare-and-swap behavior, runtime/device validation, signing, and product
+state wiring remain external or integration-owned.

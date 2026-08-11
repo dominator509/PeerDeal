@@ -32,6 +32,7 @@ constexpr std::size_t kMaxAlgorithmBytes = 128;
 constexpr std::size_t kMaxSecretBytes = 4096;
 constexpr std::size_t kMaxBlobBytes = 512 * 1024;
 constexpr std::size_t kSha256Bytes = 32;
+constexpr DWORD kStorageMutexWaitMs = 5000;
 constexpr std::array<std::uint8_t, 4> kStorageMagic = {'P', 'D', 'K', '1'};
 
 using flutter::EncodableMap;
@@ -45,6 +46,50 @@ struct CredentialGuard final {
       ::CredFree(credential);
     }
   }
+};
+
+class ScopedStorageMutex final {
+ public:
+  explicit ScopedStorageMutex(const std::wstring& target) {
+    if (target.empty()) {
+      return;
+    }
+
+    std::wstring mutex_name = L"Local\\";
+    mutex_name.append(target);
+    mutex_name.append(L".lock");
+    handle_ = ::CreateMutexW(nullptr, FALSE, mutex_name.c_str());
+    if (handle_ == nullptr) {
+      return;
+    }
+
+    const auto wait_result =
+        ::WaitForSingleObject(handle_, kStorageMutexWaitMs);
+    acquired_ = wait_result == WAIT_OBJECT_0 || wait_result == WAIT_ABANDONED;
+    if (!acquired_) {
+      ::CloseHandle(handle_);
+      handle_ = nullptr;
+    }
+  }
+
+  ~ScopedStorageMutex() {
+    if (handle_ == nullptr) {
+      return;
+    }
+    if (acquired_) {
+      ::ReleaseMutex(handle_);
+    }
+    ::CloseHandle(handle_);
+  }
+
+  ScopedStorageMutex(const ScopedStorageMutex&) = delete;
+  ScopedStorageMutex& operator=(const ScopedStorageMutex&) = delete;
+
+  bool acquired() const { return acquired_; }
+
+ private:
+  HANDLE handle_ = nullptr;
+  bool acquired_ = false;
 };
 
 const EncodableMap* ArgumentsMap(
@@ -222,6 +267,12 @@ void WindowsSecureKeyStorage::HandleMethodCall(
       }
 
       std::lock_guard<std::mutex> lock(storage_mutex_);
+      ScopedStorageMutex cross_process_lock(CredentialTarget(*namespace_name));
+      if (!cross_process_lock.acquired()) {
+        result->Success(
+            SnapshotFailure("Secure key storage is unavailable."));
+        return;
+      }
       std::vector<StoredKey> records;
       const auto status = ReadRecords(*namespace_name, &records);
       if (status == ReadStatus::kFailure) {
@@ -245,6 +296,12 @@ void WindowsSecureKeyStorage::HandleMethodCall(
       }
 
       std::lock_guard<std::mutex> lock(storage_mutex_);
+      ScopedStorageMutex cross_process_lock(CredentialTarget(*namespace_name));
+      if (!cross_process_lock.acquired()) {
+        result->Success(
+            MutationFailure("Secure key storage is unavailable."));
+        return;
+      }
       std::vector<StoredKey> records;
       const auto status = ReadRecords(*namespace_name, &records);
       if (status == ReadStatus::kFailure) {
@@ -281,6 +338,12 @@ void WindowsSecureKeyStorage::HandleMethodCall(
       }
 
       std::lock_guard<std::mutex> lock(storage_mutex_);
+      ScopedStorageMutex cross_process_lock(CredentialTarget(*namespace_name));
+      if (!cross_process_lock.acquired()) {
+        result->Success(
+            MutationFailure("Secure key storage is unavailable."));
+        return;
+      }
       std::vector<StoredKey> records;
       const auto status = ReadRecords(*namespace_name, &records);
       if (status == ReadStatus::kFailure) {

@@ -828,6 +828,17 @@ Already-dispatched native mutations, cross-process atomicity, runtime/device
 validation, and concrete product state wiring remain external or
 integration-owned.
 
+## Recent T86 Changes
+
+- Windows secure-key load/save/delete now use a per-namespace Local named
+  mutex, closing the PeerDeal cross-process read-modify-write race.
+- Mutex acquisition is bounded at five seconds and returns the existing stable
+  unavailable/failure result when the host lock cannot be acquired.
+
+Android multi-process behavior, compare-and-swap semantics, runtime/device
+validation, and concrete product state wiring remain external or
+integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

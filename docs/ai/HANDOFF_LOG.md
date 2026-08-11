@@ -8171,6 +8171,30 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Windows Secure-Key Process Serialization
+
+Summary:
+- Added a per-namespace Local named mutex to the Windows secure-key host.
+- Load, save, and delete now serialize PeerDeal process access and fail closed
+  after a bounded five-second lock wait.
+
+Files changed:
+- `apps/peerdeal_desktop/windows/runner/windows_secure_key_storage.cpp`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Verification:
+- `flutter build windows --no-pub`: passed.
+- Full Dart/Flutter repository gates remain required after the documentation
+  update.
+
+Risks:
+- This closes the PeerDeal Windows host read-modify-write race but does not
+  add compare-and-swap/version semantics or prove Android multi-process,
+  runtime/device, signing, or product persistence behavior.
+
+---
+
 ### 2026-08-11 - Codex - Mounted Receipt Export Cancellation
 
 Summary:

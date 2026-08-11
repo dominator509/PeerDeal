@@ -629,6 +629,11 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   and `deleteKey`. It returns only the generic snapshot/mutation maps defined
   by `SecureKeyStorageChannelContract`; receipt purpose and rotation policy
   stay in app/receipt code.
+- The Windows host serializes generic secure-key load/save/delete access per
+  namespace with a `Local` named mutex and a bounded five-second acquisition
+  wait. This closes the PeerDeal cross-process read-modify-write race on that
+  host; it is not compare-and-swap and does not define Android multi-process or
+  runtime/device semantics.
 - Android host records are encrypted with AES-GCM using a namespace-bound
   Android Keystore master key and durably committed before a mutation reports
   success. Corrupt, oversized, unavailable, or malformed records fail closed.

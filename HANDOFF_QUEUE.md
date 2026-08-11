@@ -87,6 +87,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-11-077` | Concurrent receipt key provisioning raced native writes | 4 | T83 | RESOLVED | Mirrored app receipt key-ring provisioners now single-flight concurrent ensure calls, preventing duplicate key generation and divergent in-memory rings while preserving retry behavior after completion. |
 | `LEGACY-GAP-2026-08-11-078` | Receipt key writes were trusted without read-back verification | 4 | T84 | RESOLVED | Mirrored receipt key-ring provisioners now reload native storage after successful key creation and fail closed unless both active signing and encryption keys match exactly. |
 | `LEGACY-GAP-2026-08-11-079` | Mounted receipt export provisioning ignored route cancellation | 4 | T85 | RESOLVED | Mirrored app shells now expose a cancellation-aware receipt export callback; route teardown propagates through export, key provisioning, key writes, and cancellable native secure storage while the legacy callback remains compatible. |
+| `LEGACY-GAP-2026-08-11-080` | Windows secure-key host read-modify-write race across app processes | 4 | T86 | RESOLVED | Windows secure-key load/save/delete now acquire a per-namespace Local named mutex with a bounded five-second wait, serializing PeerDeal host access while preserving generic credential storage and fail-closed results. Android multi-process behavior, compare-and-swap semantics, and runtime/device validation remain external. |
 
 ## Status Definitions
 

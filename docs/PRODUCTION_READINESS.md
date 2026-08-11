@@ -1259,6 +1259,14 @@ The legacy one-argument callback and generic native bridge contracts remain
 valid. Already-dispatched native mutations, cross-process atomicity, and
 runtime/device validation remain external.
 
+The T86 follow-up hardens the Windows native secure-key host against concurrent
+PeerDeal app processes. Load, save, and delete now acquire a per-namespace
+`Local` named mutex with a bounded five-second wait, so Windows read-modify-write
+operations are serialized across host processes and fail closed on lock
+failure. This does not create compare-and-swap/version semantics, change the
+generic credential contract, or prove Android multi-process, device, or runtime
+behavior.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
