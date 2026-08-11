@@ -58,6 +58,35 @@ void main() {
     expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_INVALID');
   });
 
+  test('rejects an unencodable direct snapshot before snapshot projection', () {
+    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+      projector: FakeSnapshotProjector(),
+    );
+
+    final result = applier.apply(
+      SnapshotApplyRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 1,
+          snapshotHash: 'snap_hash',
+          payload: <String, Object?>{'unsupported': Object()},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.appliedEventCount, 0);
+    expect(result.state.snapshotApplied, isFalse);
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_SNAPSHOT_INVALID');
+  });
+
   test('applies snapshot first and only replays suffix events', () {
     final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),

@@ -98,6 +98,33 @@ void main() {
     expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_INVALID');
   });
 
+  test('rejects an oversized direct snapshot before protocol inspection', () {
+    final result =
+        const BasicConflictDetector(
+          snapshotLimits: CanonicalJsonLimits(maxEncodedBytes: 256),
+        ).detect(
+          RecoveryRequest(
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            protocolVersion: '2.0.0',
+            mode: RecoveryMode.reconnect,
+            snapshot: SnapshotEnvelope(
+              snapshotId: 'snap_1',
+              protocolVersion: '1.0.0',
+              tableId: 'table_1',
+              sessionId: 'session_1',
+              snapshotBaseEventSeq: 1,
+              snapshotHash: 'snap_hash',
+              payload: <String, Object?>{'oversized': 'x' * 4096},
+            ),
+            events: const <EventEnvelope>[],
+          ),
+        );
+
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_SNAPSHOT_TOO_LARGE');
+    expect(result.conflicts.single.expected, '256');
+  });
+
   test(
     'flags fatal mismatch when final event hash differs from expected baseline',
     () {

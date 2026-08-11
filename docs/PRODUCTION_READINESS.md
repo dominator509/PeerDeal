@@ -1512,6 +1512,15 @@ closed with `ERR_RECOVERY_EVENT_TOO_LARGE` or `ERR_RECOVERY_EVENT_INVALID`.
 This reuses protocol serialization and does not move sync policy into the
 protocol package.
 
+The T117 follow-up closes the direct sync snapshot-materialization gap.
+`BasicConflictDetector` and `BasicSnapshotApplier` now validate supplied
+`SnapshotEnvelope` values through bounded canonical JSON before protocol,
+scope, or snapshot/suffix projection work. The shared default is 4 MiB with
+the protocol map/list/depth/text/node limits; oversized or unencodable
+snapshots fail closed with `ERR_RECOVERY_SNAPSHOT_TOO_LARGE` or
+`ERR_RECOVERY_SNAPSHOT_INVALID`. The file-backed recovery default shares this
+same snapshot limit constant.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

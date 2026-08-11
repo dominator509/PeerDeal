@@ -15,6 +15,9 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     this.eventCodec = const EventEnvelopeCodec(
       maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
     ),
+    this.snapshotLimits = const CanonicalJsonLimits(
+      maxEncodedBytes: RecoveryEventWindowLimits.defaultMaxSnapshotBytes,
+    ),
   }) {
     if (maxEvents <= 0) {
       throw ArgumentError.value(
@@ -28,6 +31,7 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
   final SnapshotStateProjector<TState> projector;
   final int maxEvents;
   final EventEnvelopeCodec eventCodec;
+  final CanonicalJsonLimits snapshotLimits;
 
   @override
   SnapshotApplyResult<TState> apply(SnapshotApplyRequest request) {
@@ -133,6 +137,13 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
           actual: '${request.events.length}',
         ),
       ];
+    }
+
+    if (snapshot != null) {
+      final snapshotEncodingConflict = _snapshotEncodingConflict(snapshot);
+      if (snapshotEncodingConflict != null) {
+        return <SyncConflict>[snapshotEncodingConflict];
+      }
     }
 
     if (snapshot == null && request.events.isEmpty) {
@@ -311,6 +322,26 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
             : 'Recovery event could not be encoded as a protocol envelope.',
         severity: SyncConflictSeverity.fatal,
         expected: isTooLarge ? '${eventCodec.maxBytes}' : null,
+      );
+    }
+  }
+
+  SyncConflict? _snapshotEncodingConflict(SnapshotEnvelope snapshot) {
+    try {
+      canonicalJsonEncode(snapshot.toJson(), limits: snapshotLimits);
+      return null;
+    } on FormatException catch (error) {
+      final isTooLarge =
+          error.message == 'Canonical JSON payload is too large.';
+      return SyncConflict(
+        code: isTooLarge
+            ? 'ERR_RECOVERY_SNAPSHOT_TOO_LARGE'
+            : 'ERR_RECOVERY_SNAPSHOT_INVALID',
+        message: isTooLarge
+            ? 'Recovery snapshot exceeds the configured canonical limit.'
+            : 'Recovery snapshot could not be encoded as canonical protocol JSON.',
+        severity: SyncConflictSeverity.fatal,
+        expected: isTooLarge ? '${snapshotLimits.maxEncodedBytes}' : null,
       );
     }
   }

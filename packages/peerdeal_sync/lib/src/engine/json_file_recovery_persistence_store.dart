@@ -7,6 +7,7 @@ import '../contracts/recovery_persistence_store.dart';
 import '../models/persisted_recovery_window.dart';
 import '../models/recovery_persistence_result.dart';
 import '../models/recovery_persistence_scope.dart';
+import '../models/recovery_event_window_limits.dart';
 import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 import 'in_memory_recovery_persistence_store.dart';
@@ -44,7 +45,8 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     }
   }
 
-  static const defaultMaxFileBytes = 4 * 1024 * 1024;
+  static const defaultMaxFileBytes =
+      RecoveryEventWindowLimits.defaultMaxSnapshotBytes;
 
   final Directory _rootDirectory;
   final int _maxFileBytes;

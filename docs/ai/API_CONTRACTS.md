@@ -557,6 +557,10 @@ Each direct event is also encoded through the injected `EventEnvelopeCodec`
 before those checks. The default codec uses a 64 KiB event wire-size cap and
 the protocol canonical structure limits; failures map to fatal
 `ERR_RECOVERY_EVENT_TOO_LARGE` or `ERR_RECOVERY_EVENT_INVALID` conflicts.
+Each supplied snapshot is encoded through the injected bounded canonical JSON
+limits before protocol, scope, or projection work. The default encoded-byte
+limit is 4 MiB with the protocol structure limits; failures map to fatal
+`ERR_RECOVERY_SNAPSHOT_TOO_LARGE` or `ERR_RECOVERY_SNAPSHOT_INVALID`.
 Recovery persistence scopes must use exact, non-empty protocol, table, and
 session identities without padding, control characters, or the internal `::`
 storage-key delimiter.

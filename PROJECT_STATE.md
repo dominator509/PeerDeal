@@ -1108,6 +1108,19 @@ signing, and concrete product state wiring remain external or integration-owned.
   validated after filtering and snapshot-suffix planning. Focused replay tests
   and package analysis pass.
 
+## T117 Direct Sync Snapshot Bounds
+
+- `BasicConflictDetector` and `BasicSnapshotApplier` now validate supplied
+  `SnapshotEnvelope` values through bounded canonical JSON before protocol,
+  scope, or snapshot/suffix projection work.
+- The shared default is 4 MiB with the protocol map/list/depth/text/node
+  limits; oversized or unencodable snapshots return fatal
+  `ERR_RECOVERY_SNAPSHOT_TOO_LARGE` or `ERR_RECOVERY_SNAPSHOT_INVALID`
+  conflicts.
+- `JsonFileRecoveryPersistenceStore.defaultMaxFileBytes` now shares the same
+  recovery snapshot limit constant. Focused `peerdeal_sync` tests (66) and
+  package analysis pass.
+
 ## T116 Direct Sync Event Codec Bounds
 
 - `BasicConflictDetector` and `BasicSnapshotApplier` now run each direct

@@ -1165,6 +1165,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T117 Changes
+
+- Direct sync conflict detection and snapshot application now validate supplied
+  `SnapshotEnvelope` values through bounded canonical JSON before protocol,
+  scope, or snapshot/suffix projection work.
+- The shared default is 4 MiB with the protocol map/list/depth/text/node
+  limits; oversized or unencodable snapshots fail closed with
+  `ERR_RECOVERY_SNAPSHOT_TOO_LARGE` or `ERR_RECOVERY_SNAPSHOT_INVALID`.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T116 Changes
 
 - Direct sync conflict detection and snapshot application now run each

@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T117 Direct Sync Snapshot Bounds
+
+Summary:
+- `BasicConflictDetector` and `BasicSnapshotApplier` now validate supplied
+  snapshots through bounded canonical JSON before protocol, scope, or
+  snapshot/suffix projection work.
+- The shared default is 4 MiB with protocol structure limits; failures return
+  `ERR_RECOVERY_SNAPSHOT_TOO_LARGE` or `ERR_RECOVERY_SNAPSHOT_INVALID`.
+- The JSON recovery store's default file limit now shares the same snapshot
+  limit constant.
+
+Tests run:
+- Focused `peerdeal_sync` suite: 66 tests passed.
+- Focused `peerdeal_sync` analysis passed.
+
+Risks:
+- This bounds direct Dart sync processors only. Product database persistence,
+  platform/runtime validation, other-platform hosts, and release signing
+  remain separate.
+
+Next reviewer:
+- Preserve event-count, event-codec, and snapshot canonical validation before
+  adding transport or product session callers around recovery.
+
+---
+
 ### 2026-08-11 - Codex - T116 Direct Sync Event Codec Bounds
 
 Summary:

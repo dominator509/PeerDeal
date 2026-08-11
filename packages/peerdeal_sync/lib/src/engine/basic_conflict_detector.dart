@@ -14,11 +14,15 @@ class BasicConflictDetector implements ConflictDetector {
     this.eventCodec = const EventEnvelopeCodec(
       maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
     ),
+    this.snapshotLimits = const CanonicalJsonLimits(
+      maxEncodedBytes: RecoveryEventWindowLimits.defaultMaxSnapshotBytes,
+    ),
   }) : assert(maxEvents > 0, 'maxEvents must be positive');
 
   final ProtocolCatalog protocolCatalog;
   final int maxEvents;
   final EventEnvelopeCodec eventCodec;
+  final CanonicalJsonLimits snapshotLimits;
 
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
@@ -36,6 +40,17 @@ class BasicConflictDetector implements ConflictDetector {
           ),
         ],
       );
+    }
+
+    if (request.snapshot != null) {
+      final snapshotEncodingConflict = _snapshotEncodingConflict(
+        request.snapshot!,
+      );
+      if (snapshotEncodingConflict != null) {
+        return ConflictDetectionResult(
+          conflicts: <SyncConflict>[snapshotEncodingConflict],
+        );
+      }
     }
 
     for (final event in request.events) {
@@ -319,6 +334,26 @@ class BasicConflictDetector implements ConflictDetector {
             : 'Recovery event could not be encoded as a protocol envelope.',
         severity: SyncConflictSeverity.fatal,
         expected: isTooLarge ? '${eventCodec.maxBytes}' : null,
+      );
+    }
+  }
+
+  SyncConflict? _snapshotEncodingConflict(SnapshotEnvelope snapshot) {
+    try {
+      canonicalJsonEncode(snapshot.toJson(), limits: snapshotLimits);
+      return null;
+    } on FormatException catch (error) {
+      final isTooLarge =
+          error.message == 'Canonical JSON payload is too large.';
+      return SyncConflict(
+        code: isTooLarge
+            ? 'ERR_RECOVERY_SNAPSHOT_TOO_LARGE'
+            : 'ERR_RECOVERY_SNAPSHOT_INVALID',
+        message: isTooLarge
+            ? 'Recovery snapshot exceeds the configured canonical limit.'
+            : 'Recovery snapshot could not be encoded as canonical protocol JSON.',
+        severity: SyncConflictSeverity.fatal,
+        expected: isTooLarge ? '${snapshotLimits.maxEncodedBytes}' : null,
       );
     }
   }
