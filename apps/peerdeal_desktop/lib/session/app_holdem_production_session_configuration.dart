@@ -4,6 +4,7 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'app_holdem_production_session_bootstrap.dart';
 import 'app_holdem_production_session_bootstrap_route_registration.dart';
 import 'app_holdem_production_session_factory.dart';
+import 'app_holdem_production_session_snapshot_coordinator.dart';
 import 'app_persisted_holdem_production_session_source.dart';
 import 'native_local_peer_identity_provisioner.dart';
 
@@ -36,6 +37,7 @@ class AppHoldemProductionSessionConfiguration {
     AppHoldemProductionSessionFactory sessionFactory =
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
+    AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     _validateSourceLoadTimeout(sourceLoadTimeout);
@@ -51,6 +53,7 @@ class AppHoldemProductionSessionConfiguration {
           eventReducer: eventReducer,
           snapshotType: snapshotType,
           snapshotVersion: snapshotVersion,
+          snapshotCoordinator: snapshotCoordinator,
           maxRecoveryEvents: maxRecoveryEvents,
         );
     return AppHoldemProductionSessionConfiguration.fromSource(

@@ -1642,6 +1642,17 @@ accepted context through the existing bootstrap route. Product state/source
 selection, route policy, database persistence, and native/device validation
 remain caller-owned or external.
 
+The T135 follow-up closes the codable persistence-discard gap in that route.
+Both factories now share the existing typed snapshot writer with the existing
+event-plus-snapshot persistence writer and a serialized route coordinator.
+Accepted local projection suffixes and accepted remote events append through
+the existing event-log policy before typed snapshot checkpointing. Failed
+checkpoints remain ordered and visible as a retryable persistence-pending UI
+state; accepted close/wipe retention clears pending checkpoint state so old
+snapshots cannot be recreated after retention. This does not claim a product
+session source, database, real-device storage, other-platform host, or release
+signing implementation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
@@ -1654,9 +1665,9 @@ remain caller-owned or external.
    `AppHoldemProductionSessionConfigurationFactory` from the real product
    session/state source and local identity through the app-owned typed loader
    after first-join and rejoin handoff, using `snapshotWriter` for authoritative typed snapshot
-   persistence where product inputs are available through
-   `persistenceWriter`, supplying event identity and snapshot IDs, and defining
-   event-log policy and route policy;
+   persistence where product inputs are available through the now-wired
+   event-plus-snapshot coordinator and `persistenceWriter`, supplying event
+   identity and snapshot IDs, and defining event-log policy and route policy;
    complete product state/route provisioning and navigation/UI validation while
    keeping native transport/device validation and durable database persistence
    separate.

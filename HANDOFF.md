@@ -1178,6 +1178,28 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T135 Production Snapshot Checkpoint Wiring
+
+- Mirrored mobile and desktop production session factories now create one
+  shared typed snapshot writer, event-plus-snapshot persistence writer, and
+  serialized snapshot coordinator for the mounted route.
+- The coordinator receives accepted local projection event suffixes and
+  accepted remote events, appends non-retention events before the typed
+  snapshot, retains failed checkpoints for ordered retry, and discards pending
+  state behind accepted close or wipe retention events.
+- The production surface exposes a bounded persistence-pending state and retry
+  action; sync retry remains gated until a pending durable checkpoint succeeds.
+
+Tests and gates:
+- Focused mobile and desktop coordinator, persistence-writer, route, factory,
+  bootstrap, and app-shell Flutter suites pass.
+- Full repository gates remain required before commit and push.
+
+Remaining:
+- Product-owned concrete session source/state invocation, real device and
+  cross-device validation, other-platform hosts, database persistence, and
+  release signing remain separate.
+
 ## Recent T134 Production Session Factory Loader Wiring
 
 - Mirrored mobile and desktop app shells now accept an optional configured

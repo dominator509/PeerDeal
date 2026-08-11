@@ -6,6 +6,7 @@ import '../recovery/app_recovery_session_close_event_adapter.dart';
 import '../transport/app_table_session_transport_source.dart';
 import '../transport/native_transport_session_factory.dart';
 import 'app_holdem_production_route_registration.dart';
+import 'app_holdem_production_session_snapshot_coordinator.dart';
 import 'app_holdem_table_session_runtime.dart';
 import 'app_table_session_runtime.dart';
 
@@ -51,6 +52,7 @@ class AppHoldemProductionSessionFactory {
     NativeTransportSessionFactory? nativeSessionFactory,
     Duration pollInterval = const Duration(seconds: 1),
     NativeTransportSourceTimerFactory? timerFactory,
+    AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) {
     _validateRouteMetadata(path: path, navigationLabel: navigationLabel);
@@ -99,6 +101,7 @@ class AppHoldemProductionSessionFactory {
       nativeSessionFactory: nativeSessionFactory,
       pollInterval: pollInterval,
       timerFactory: timerFactory,
+      snapshotCoordinator: snapshotCoordinator,
     );
 
     return AppHoldemProductionSessionComposition(

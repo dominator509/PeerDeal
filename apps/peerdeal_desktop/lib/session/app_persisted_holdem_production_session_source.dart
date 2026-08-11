@@ -4,6 +4,7 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 import '../join_flow/join_flow_models.dart';
 import '../recovery/app_recovery_session_close_event_adapter.dart';
 import 'app_holdem_production_session_bootstrap.dart';
+import 'app_holdem_production_session_snapshot_coordinator.dart';
 import 'native_local_peer_identity_loader.dart';
 import 'native_local_peer_identity_provisioner.dart';
 
@@ -78,6 +79,7 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
     required String localPeerId,
     String? remotePeerId,
     int? localSeat,
+    AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
   }) {
     final selectedRemotePeerId = remotePeerId ?? this.remotePeerId;
     final selectedLocalSeat = localSeat ?? this.localSeat;
@@ -100,6 +102,7 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
       peerId: selectedRemotePeerId,
       localPeerId: localPeerId,
       localSeat: selectedLocalSeat,
+      snapshotCoordinator: snapshotCoordinator,
     );
   }
 
@@ -154,6 +157,7 @@ class AppPersistedHoldemProductionSessionSource
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
     String snapshotType = 'HoldemStateSnapshot',
     String snapshotVersion = '1.0',
+    AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     routePolicy.validate();
@@ -169,12 +173,14 @@ class AppPersistedHoldemProductionSessionSource
       inputFactory: (_, snapshot) => routePolicy.buildInput(
         snapshot: snapshot,
         localPeerId: identity.peerId,
+        snapshotCoordinator: snapshotCoordinator,
       ),
       contextInputFactory: (sessionContext, snapshot) => routePolicy.buildInput(
         snapshot: snapshot,
         localPeerId: identity.peerId,
         remotePeerId: sessionContext.remotePeerId,
         localSeat: sessionContext.localSeat,
+        snapshotCoordinator: snapshotCoordinator,
       ),
       eventIdFactory: eventIdFactory,
       emittedAtFactory: emittedAtFactory,
@@ -183,6 +189,7 @@ class AppPersistedHoldemProductionSessionSource
       eventReducer: eventReducer,
       snapshotType: snapshotType,
       snapshotVersion: snapshotVersion,
+      snapshotCoordinator: snapshotCoordinator,
       maxRecoveryEvents: maxRecoveryEvents,
     );
   }
@@ -205,6 +212,7 @@ class AppPersistedHoldemProductionSessionSource
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
     String snapshotType = 'HoldemStateSnapshot',
     String snapshotVersion = '1.0',
+    AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     routePolicy.validate();
@@ -237,12 +245,14 @@ class AppPersistedHoldemProductionSessionSource
       inputFactory: (_, snapshot) => routePolicy.buildInput(
         snapshot: snapshot,
         localPeerId: requireIdentity().peerId,
+        snapshotCoordinator: snapshotCoordinator,
       ),
       contextInputFactory: (sessionContext, snapshot) => routePolicy.buildInput(
         snapshot: snapshot,
         localPeerId: requireIdentity().peerId,
         remotePeerId: sessionContext.remotePeerId,
         localSeat: sessionContext.localSeat,
+        snapshotCoordinator: snapshotCoordinator,
       ),
       eventIdFactory: eventIdFactory,
       emittedAtFactory: emittedAtFactory,
@@ -251,6 +261,7 @@ class AppPersistedHoldemProductionSessionSource
       eventReducer: eventReducer,
       snapshotType: snapshotType,
       snapshotVersion: snapshotVersion,
+      snapshotCoordinator: snapshotCoordinator,
       maxRecoveryEvents: maxRecoveryEvents,
     );
   }
@@ -268,6 +279,7 @@ class AppPersistedHoldemProductionSessionSource
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
     this.snapshotType = 'HoldemStateSnapshot',
     this.snapshotVersion = '1.0',
+    AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
        _store = store,

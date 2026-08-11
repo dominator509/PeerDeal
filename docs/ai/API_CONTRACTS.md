@@ -400,7 +400,8 @@ results without rerunning variant rules.
 
 `AppHoldemProductionRouteRegistration` is the mirrored app-shell registration
 contract. It binds a validated Hold'em runtime, peer identity, surface builder,
-and optional native transport factory to one route path and navigation label.
+optional native transport factory, and optional serialized snapshot coordinator
+to one route path and navigation label.
 Both app shells merge it into the existing validated production route map,
 automatically add its path to native-readiness-required routes, and fail closed
 to the existing route-unavailable surface when readiness is absent. Session and
@@ -517,6 +518,15 @@ invokes `create()` for the accepted typed handoff. The accepted
 loaders, handlers, and prebuilt routes retain precedence. The adapter does not
 select product state, route policy, persistence, or a database.
 
+When the configuration factory creates the route, it shares one typed snapshot
+writer with its event-plus-snapshot persistence writer and serialized snapshot
+coordinator. The coordinator receives accepted local projection suffixes and
+accepted remote events, appends non-retention events before checkpointing, and
+retains failed checkpoints for ordered retry. Accepted close/wipe retention
+events discard pending checkpoint state after the retention operation. The
+route surface exposes this as a persistence-pending state and retry action; it
+does not turn recovery persistence into a product database.
+
 `AppHoldemProductionSessionSnapshotWriter.save(...)` is the app-owned typed
 snapshot persistence seam. It requires a caller-selected snapshot ID, current
 `TableState`, `HoldemHandState`, and matching `HoldemEventCursor`; it rejects
@@ -526,8 +536,10 @@ last-event hash input before writing. It creates a versioned
 to the injected `RecoveryPersistenceStore`, and returns its
 `RecoveryPersistenceResult`, failing closed on invalid state or store errors.
 The configuration-factory result exposes this writer over the same validated
-store. It does not select product state, append the event log, own a database
-or retention policy, or invoke startup.
+store. The mounted production coordinator uses the event-plus-snapshot writer
+for accepted route events; direct snapshot-writer callers still do not select
+product state, append the event log, own a database or retention policy, or
+invoke startup.
 
 `AppHoldemProductionSessionPersistenceWriter.persist(...)` is the app-owned
 event-log-plus-checkpoint seam. It requires caller-supplied typed state, cursor,
@@ -543,7 +555,9 @@ scope/cursor/hash consistency, and typed Hold'em state are preflighted before
 the suffix append; the writer also enforces the shared 4,096-event recovery
 window bound, or a smaller positive caller limit, before suffix traversal.
 Malformed or oversized checkpoint input therefore cannot create a durable
-partial suffix.
+partial suffix. The mounted coordinator records when an event suffix is
+already durable after a checkpoint failure and retries only the snapshot, so a
+transient snapshot failure cannot append the same event sequence twice.
 
 `fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
 callers that require pre-provisioned identity. The lazy production adapter is

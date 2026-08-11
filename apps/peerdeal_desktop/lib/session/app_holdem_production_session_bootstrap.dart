@@ -9,6 +9,7 @@ import '../recovery/app_recovery_session_close_event_adapter.dart';
 import '../transport/app_table_session_transport_source.dart';
 import '../transport/native_transport_session_factory.dart';
 import 'app_holdem_production_session_factory.dart';
+import 'app_holdem_production_session_snapshot_coordinator.dart';
 
 /// Supplies the canonical product state and local identity for one resolved
 /// invite. This source owns persistence/network hydration; the app bootstrap
@@ -48,6 +49,7 @@ class AppHoldemProductionSessionInput {
     this.nativeSessionFactory,
     this.pollInterval = const Duration(seconds: 1),
     this.timerFactory,
+    this.snapshotCoordinator,
   });
 
   final TableState initialTableState;
@@ -66,6 +68,7 @@ class AppHoldemProductionSessionInput {
   final NativeTransportSessionFactory? nativeSessionFactory;
   final Duration pollInterval;
   final NativeTransportSourceTimerFactory? timerFactory;
+  final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
 }
 
 /// Converts a product-owned resolved invite into the mounted production route.
@@ -168,6 +171,7 @@ class AppHoldemProductionSessionBootstrap {
       nativeSessionFactory: input.nativeSessionFactory,
       pollInterval: input.pollInterval,
       timerFactory: input.timerFactory,
+      snapshotCoordinator: input.snapshotCoordinator,
       maxRecoveryEvents: maxRecoveryEvents,
     );
   }

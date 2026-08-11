@@ -5,6 +5,7 @@ import '../recovery/app_recovery_persistence_store_factory.dart';
 import 'app_holdem_production_session_configuration.dart';
 import 'app_holdem_production_session_factory.dart';
 import 'app_holdem_production_session_persistence_writer.dart';
+import 'app_holdem_production_session_snapshot_coordinator.dart';
 import 'app_holdem_production_session_snapshot_writer.dart';
 import 'app_persisted_holdem_production_session_source.dart';
 import 'native_local_peer_identity_provisioner.dart';
@@ -95,6 +96,17 @@ class AppHoldemProductionSessionConfigurationFactory {
     try {
       final routePolicy = _routePolicyFactory(store);
       routePolicy.validate();
+      final snapshotWriter = AppHoldemProductionSessionSnapshotWriter(
+        store: store,
+      );
+      final persistenceWriter = AppHoldemProductionSessionPersistenceWriter(
+        store: store,
+        maxRecoveryEvents: _maxRecoveryEvents,
+        snapshotWriter: snapshotWriter,
+      );
+      final snapshotCoordinator = AppHoldemProductionSessionSnapshotCoordinator(
+        persistenceWriter: persistenceWriter,
+      );
       final configuration =
           await AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(
             store: store,
@@ -111,15 +123,13 @@ class AppHoldemProductionSessionConfigurationFactory {
             snapshotVersion: _snapshotVersion,
             sessionFactory: _sessionFactory,
             sourceLoadTimeout: _sourceLoadTimeout,
+            snapshotCoordinator: snapshotCoordinator,
             maxRecoveryEvents: _maxRecoveryEvents,
           );
       return AppHoldemProductionSessionConfigurationLoadResult.available(
         configuration: configuration,
-        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
-          store: store,
-          maxRecoveryEvents: _maxRecoveryEvents,
-        ),
-        snapshotWriter: AppHoldemProductionSessionSnapshotWriter(store: store),
+        persistenceWriter: persistenceWriter,
+        snapshotWriter: snapshotWriter,
         warnings: persistence.warnings,
       );
     } on Object {

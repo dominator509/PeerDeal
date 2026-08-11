@@ -53,8 +53,15 @@ class _AppHoldemProductionTableSurfaceState
           ? 'Live peer session'
           : 'Peer session unavailable',
       actions: <Widget>[
-        if (_pendingProjection != null && publisher != null)
+        if (_pendingProjection != null &&
+            publisher != null &&
+            !(routeContext.snapshotCoordinator?.hasPending ?? false))
           PeerDealActionButton(label: 'Retry sync', onPressed: _retryPending),
+        if (routeContext.snapshotCoordinator?.hasPending ?? false)
+          PeerDealActionButton(
+            label: 'Retry persistence',
+            onPressed: _retryPersistence,
+          ),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,6 +105,11 @@ class _AppHoldemProductionTableSurfaceState
             label: 'Transport',
             value: transportReady ? 'Connected' : 'Unavailable',
           ),
+          if (routeContext.snapshotCoordinator?.hasPending ?? false)
+            const PeerDealInfoRow(
+              label: 'Persistence',
+              value: 'Checkpoint pending',
+            ),
           if (_statusMessage != null)
             PeerDealInfoRow(label: 'Status', value: _statusMessage!),
           const SizedBox(height: 12),
@@ -241,6 +253,9 @@ class _AppHoldemProductionTableSurfaceState
 
   String _statusLabel(HoldemHandState hand, bool transportReady, bool canAct) {
     if (_busy) return 'Synchronizing';
+    if (widget.routeContext.snapshotCoordinator?.hasPending ?? false) {
+      return 'Persistence pending';
+    }
     if (_pendingProjection != null) return 'Sync pending';
     if (!transportReady) return 'Transport unavailable';
     if (canAct) return 'Your turn';
@@ -253,7 +268,11 @@ class _AppHoldemProductionTableSurfaceState
     bool transportReady,
     bool canAct,
   ) {
-    if (!transportReady || _pendingProjection != null) return 'warning';
+    if (!transportReady ||
+        _pendingProjection != null ||
+        (widget.routeContext.snapshotCoordinator?.hasPending ?? false)) {
+      return 'warning';
+    }
     if (canAct) return 'success';
     return _isBettingPhase(hand.phase) ? 'info' : 'neutral';
   }
@@ -336,6 +355,26 @@ class _AppHoldemProductionTableSurfaceState
     final publisher = widget.routeContext.createProjectionPublisher(
       localPeerId: widget.localPeerId,
     );
+
+    final coordinator = widget.routeContext.snapshotCoordinator;
+    if (coordinator != null) {
+      final persistenceResult = await coordinator.persist(
+        tableState: widget.routeContext.runtime.coreState,
+        handState: widget.routeContext.runtime.handState,
+        eventCursor: widget.routeContext.runtime.cursor,
+        events: projection.events,
+      );
+      if (!mounted) return;
+      if (!persistenceResult.isSuccess) {
+        _setPendingProjection(
+          projection,
+          nextEventIndex: 0,
+          message: '$acceptedLabel accepted locally; persistence is pending',
+        );
+        return;
+      }
+    }
+
     if (publisher == null) {
       _setPendingProjection(
         projection,
@@ -380,20 +419,35 @@ class _AppHoldemProductionTableSurfaceState
   Future<void> _retryPending() async {
     final projection = _pendingProjection;
     if (projection == null || _busy) return;
-    final publisher = widget.routeContext.createProjectionPublisher(
-      localPeerId: widget.localPeerId,
-    );
-    if (publisher == null) {
-      setState(() {
-        _statusMessage = 'Transport is unavailable; synchronization is pending';
-      });
-      return;
-    }
     setState(() {
       _busy = true;
       _statusMessage = null;
     });
     try {
+      final coordinator = widget.routeContext.snapshotCoordinator;
+      if (coordinator != null && coordinator.hasPending) {
+        final persistenceResult = await coordinator.retryPending();
+        if (!mounted) return;
+        if (!persistenceResult.isSuccess) {
+          setState(() {
+            _busy = false;
+            _statusMessage = 'Persistence is still pending';
+          });
+          return;
+        }
+      }
+
+      final publisher = widget.routeContext.createProjectionPublisher(
+        localPeerId: widget.localPeerId,
+      );
+      if (publisher == null) {
+        setState(() {
+          _busy = false;
+          _statusMessage =
+              'Transport is unavailable; synchronization is pending';
+        });
+        return;
+      }
       final result = await publisher.publish(
         projection,
         startEventIndex: _pendingEventIndex,
@@ -418,6 +472,24 @@ class _AppHoldemProductionTableSurfaceState
         });
       }
     }
+  }
+
+  Future<void> _retryPersistence() async {
+    final coordinator = widget.routeContext.snapshotCoordinator;
+    if (coordinator == null || !coordinator.hasPending || _busy) return;
+    setState(() {
+      _busy = true;
+      _statusMessage = null;
+    });
+    final result = await coordinator.retryPending();
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _statusMessage = result.isSuccess
+          ? 'Persistence synchronized'
+          : 'Persistence is still pending';
+    });
+    widget.routeContext.refresh();
   }
 
   void _setPendingProjection(

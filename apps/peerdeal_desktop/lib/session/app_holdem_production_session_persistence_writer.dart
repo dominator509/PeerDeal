@@ -14,20 +14,28 @@ class AppHoldemProductionSessionPersistenceWriter {
   AppHoldemProductionSessionPersistenceWriter({
     required RecoveryPersistenceStore store,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    AppHoldemProductionSessionSnapshotWriter? snapshotWriter,
   }) : _store = store,
-       _snapshotWriter = AppHoldemProductionSessionSnapshotWriter(store: store),
+       _snapshotWriter =
+           snapshotWriter ??
+           AppHoldemProductionSessionSnapshotWriter(store: store),
        _maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents);
 
   final RecoveryPersistenceStore _store;
   final AppHoldemProductionSessionSnapshotWriter _snapshotWriter;
   final int _maxRecoveryEvents;
 
+  /// Persists an event suffix and its resulting snapshot.
+  ///
+  /// [eventsAlreadyPersisted] is reserved for ordered coordinator retries
+  /// after the event append succeeded but snapshot checkpointing failed.
   RecoveryPersistenceResult persist({
     required String snapshotId,
     required TableState tableState,
     required HoldemHandState handState,
     required HoldemEventCursor eventCursor,
     List<EventEnvelope> events = const <EventEnvelope>[],
+    bool eventsAlreadyPersisted = false,
     String snapshotType = 'HoldemStateSnapshot',
     String snapshotVersion = '1.0',
   }) {
@@ -49,7 +57,7 @@ class AppHoldemProductionSessionPersistenceWriter {
 
     RecoveryPersistenceResult eventResult =
         const RecoveryPersistenceResult.success();
-    if (events.isNotEmpty) {
+    if (events.isNotEmpty && !eventsAlreadyPersisted) {
       final scope = RecoveryPersistenceScope(
         tableId: tableState.tableId,
         sessionId: tableState.sessionId,
@@ -76,7 +84,9 @@ class AppHoldemProductionSessionPersistenceWriter {
     );
     final extraWarnings = <String>[
       ...eventResult.warnings,
-      if (events.isNotEmpty && !snapshotResult.isSuccess)
+      if (events.isNotEmpty &&
+          !eventsAlreadyPersisted &&
+          !snapshotResult.isSuccess)
         'Holdem snapshot checkpoint failed after event-log persistence.',
     ];
     if (extraWarnings.isEmpty) return snapshotResult;

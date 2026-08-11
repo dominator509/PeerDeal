@@ -2,6 +2,40 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T135 Production Snapshot Checkpoint Wiring
+
+Summary:
+- Mirrored production session factories now share one typed snapshot writer,
+  event-plus-snapshot persistence writer, and serialized route coordinator.
+- Accepted local projection suffixes and accepted remote events append through
+  the existing event-log policy before typed snapshot checkpointing. Failed
+  checkpoints remain ordered and retryable; accepted close/wipe retention
+  clears pending checkpoint state.
+- The default production surface exposes persistence-pending status and a
+  retry action, while sync retry remains gated until durable checkpointing
+  succeeds.
+
+Files changed:
+- Mirrored app production session configuration/factory, route registration,
+  route, surface, source, persistence writer, and coordinator files.
+- Mirrored coordinator tests.
+- `HANDOFF.md`, `PROJECT_STATE.md`, `HANDOFF_QUEUE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable `docs/ai/` records.
+
+Tests and gates:
+- Focused mobile and desktop coordinator, persistence-writer, route,
+  bootstrap, factory, and app-shell Flutter suites pass.
+- Full repository gates are required before commit and push.
+
+Risks and remaining boundaries:
+- Product-owned concrete session/state source invocation, database persistence,
+  real-device and cross-device validation, other-platform hosts, and release
+  signing remain open.
+
+Next reviewer:
+- Continue with the next external/native or product-source boundary in
+  `docs/PRODUCTION_READINESS.md` after full gates pass.
+
 ### 2026-08-11 - Codex - T134 Production Session Factory Loader Wiring
 
 Summary:

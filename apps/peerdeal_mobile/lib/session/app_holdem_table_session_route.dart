@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../transport/app_table_session_transport_provisioner.dart';
 import '../transport/app_table_session_transport_source.dart';
 import '../transport/app_table_session_transport_source_mount.dart';
 import '../transport/native_transport_session_factory.dart';
+import 'app_holdem_production_session_snapshot_coordinator.dart';
 import 'app_holdem_table_session_runtime.dart';
 import 'app_holdem_table_session_transport_publisher.dart';
 
@@ -21,12 +23,14 @@ class AppHoldemTableSessionRouteContext {
     required this.transport,
     required this.peerId,
     required this.refresh,
+    this.snapshotCoordinator,
   });
 
   final AppHoldemTableSessionRuntime runtime;
   final AppTableSessionTransportProvisionResult transport;
   final String peerId;
   final VoidCallback refresh;
+  final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
 
   AppHoldemProjectionTransportPublisher? createProjectionPublisher({
     required String localPeerId,
@@ -50,6 +54,7 @@ class AppHoldemTableSessionRoute extends StatefulWidget {
     required this.peerId,
     required this.surfaceBuilder,
     this.nativeSessionFactory,
+    this.snapshotCoordinator,
     this.pollInterval = const Duration(seconds: 1),
     this.timerFactory,
   });
@@ -58,6 +63,7 @@ class AppHoldemTableSessionRoute extends StatefulWidget {
   final String peerId;
   final AppHoldemTableSessionSurfaceBuilder surfaceBuilder;
   final NativeTransportSessionFactory? nativeSessionFactory;
+  final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
   final Duration pollInterval;
   final NativeTransportSourceTimerFactory? timerFactory;
 
@@ -84,6 +90,7 @@ class _AppHoldemTableSessionRouteState
     if (oldWidget.runtime == widget.runtime &&
         oldWidget.peerId == widget.peerId &&
         oldWidget.nativeSessionFactory == widget.nativeSessionFactory &&
+        oldWidget.snapshotCoordinator == widget.snapshotCoordinator &&
         oldWidget.pollInterval == widget.pollInterval &&
         oldWidget.timerFactory == widget.timerFactory) {
       return;
@@ -119,9 +126,30 @@ class _AppHoldemTableSessionRouteState
       timerFactory: widget.timerFactory,
       cancellation: _transportCancellation.future,
       onEventAccepted: (_) {
+        unawaited(_checkpointAcceptedEvent());
         if (mounted) setState(() {});
       },
     ).load(peerId: widget.peerId);
+  }
+
+  Future<void> _checkpointAcceptedEvent() async {
+    final coordinator = widget.snapshotCoordinator;
+    if (coordinator == null) return;
+    final acceptedEvent = widget.runtime.sessionRuntime.lastAcceptedEvent;
+    if (acceptedEvent == null) return;
+
+    if (acceptedEvent.eventType == 'SessionClosed' ||
+        acceptedEvent.eventType == 'SessionWiped') {
+      await coordinator.discardPending();
+    } else {
+      await coordinator.persist(
+        tableState: widget.runtime.coreState,
+        handState: widget.runtime.handState,
+        eventCursor: widget.runtime.cursor,
+        events: <EventEnvelope>[acceptedEvent],
+      );
+    }
+    if (mounted) setState(() {});
   }
 
   void _cancelTransportLoad() {
@@ -138,6 +166,7 @@ class _AppHoldemTableSessionRouteState
       runtime: widget.runtime,
       transport: transport,
       peerId: widget.peerId,
+      snapshotCoordinator: widget.snapshotCoordinator,
       refresh: () {
         if (mounted) setState(() {});
       },

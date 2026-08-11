@@ -1152,6 +1152,20 @@ signing, and concrete product state wiring remain external or integration-owned.
   without mutating app state; focused mobile and desktop runtime suites cover
   overflow and invalid limits.
 
+## T135 Production Snapshot Checkpoint Wiring
+
+- Mirrored production session factories now share the existing typed snapshot
+  writer with the existing event-plus-snapshot persistence writer and a
+  serialized route snapshot coordinator.
+- Accepted local projection suffixes and accepted remote events are persisted
+  through the existing event-log policy before snapshot checkpointing; failed
+  checkpoints remain ordered and retryable, while accepted close/wipe events
+  clear pending snapshot state after retention.
+- The default production surface exposes persistence-pending status and retry
+  without claiming event-log, database, device, or platform implementation.
+- Focused mobile and desktop coordinator, persistence, route, bootstrap, and
+  factory suites pass.
+
 ## T134 Production Session Factory Loader Wiring
 
 - Mirrored mobile and desktop runtimes now accept a configured

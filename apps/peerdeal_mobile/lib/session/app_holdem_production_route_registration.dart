@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../transport/app_table_session_transport_source.dart';
 import '../transport/native_transport_session_factory.dart';
+import 'app_holdem_production_session_snapshot_coordinator.dart';
 import 'app_holdem_production_table_surface.dart';
 import 'app_holdem_table_session_route.dart';
 import 'app_holdem_table_session_runtime.dart';
@@ -19,6 +20,7 @@ class AppHoldemProductionRouteRegistration {
     required this.peerId,
     required this.surfaceBuilder,
     this.nativeSessionFactory,
+    this.snapshotCoordinator,
     this.pollInterval = const Duration(seconds: 1),
     this.timerFactory,
   });
@@ -37,6 +39,7 @@ class AppHoldemProductionRouteRegistration {
     NativeTransportSessionFactory? nativeSessionFactory,
     Duration pollInterval = const Duration(seconds: 1),
     NativeTransportSourceTimerFactory? timerFactory,
+    AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
   }) : this(
          path: path,
          navigationLabel: navigationLabel,
@@ -48,6 +51,7 @@ class AppHoldemProductionRouteRegistration {
            localSeat: localSeat,
          ),
          nativeSessionFactory: nativeSessionFactory,
+         snapshotCoordinator: snapshotCoordinator,
          pollInterval: pollInterval,
          timerFactory: timerFactory,
        );
@@ -58,6 +62,7 @@ class AppHoldemProductionRouteRegistration {
   final String peerId;
   final AppHoldemTableSessionSurfaceBuilder surfaceBuilder;
   final NativeTransportSessionFactory? nativeSessionFactory;
+  final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
   final Duration pollInterval;
   final NativeTransportSourceTimerFactory? timerFactory;
 
@@ -67,6 +72,7 @@ class AppHoldemProductionRouteRegistration {
       peerId: peerId,
       surfaceBuilder: surfaceBuilder,
       nativeSessionFactory: nativeSessionFactory,
+      snapshotCoordinator: snapshotCoordinator,
       pollInterval: pollInterval,
       timerFactory: timerFactory,
     );
