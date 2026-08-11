@@ -1143,6 +1143,14 @@ signing, and concrete product state wiring remain external or integration-owned.
   `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` through blocked settlement projection;
   focused variant projection tests (52) and analysis pass.
 
+## T124 Core Pot Settlement Bounds
+
+- `SidePotBuilder` and `PotEngine` now apply variant-agnostic core limits of 64
+  commitments, 64 winning slice-map entries, and 64 winners per slice before
+  side-pot or award traversal.
+- Overflow fails closed with explicit core settlement warnings; focused core pot
+  tests (10) and package analysis pass.
+
 ## T119 Direct Sync Request Scope Validation
 
 - `BasicConflictDetector` and `BasicSnapshotApplier` now validate direct

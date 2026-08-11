@@ -20,7 +20,7 @@ packages add policy without mutating universal core truth.
 | Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, request ranges, anchors, snapshots, safe-close recovery; file-backed recovery uses bounded protocol envelope hydration before importing persisted state |
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy; `DefaultDiagnosticsScrubber` bounds recursive map/list materialization, depth, text, and protocol diagnostic collections before app rendering; `OpaqueExportDecoder` bounds decoded artifact/payload JSON structure before receipt shape inspection |
 | Mode/variant policy | `peerdeal_modes`, `peerdeal_variants` | Session mode policy and poker variant rules |
-| Deterministic truth | `peerdeal_core` | Table state, reducer, invariants, pot/settlement primitives; `TableState.fromJson` bounds materialized JSON through protocol canonical limits before typed hydration |
+| Deterministic truth | `peerdeal_core` | Table state, reducer, invariants, pot/settlement primitives; core pot settlement bounds commitments and winner collections before traversal, while `TableState.fromJson` bounds materialized JSON through protocol canonical limits before typed hydration |
 | Protocol | `peerdeal_protocol` | Envelopes, catalog, fixtures, diagnostics, bounded deterministic canonical JSON; direct event/snapshot hydration validates full materialized trees |
 
 ## Package Boundary Rules

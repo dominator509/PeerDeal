@@ -1165,6 +1165,17 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T124 Changes
+
+- `peerdeal_core` now bounds direct pot commitments to 64, winning slice-map
+  entries to 64, and winners per slice to 64 before side-pot or award traversal.
+- Overflow fails closed with explicit core settlement warnings; the tighter
+  nine-entry Hold'em projector bound remains enforced upstream.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T123 Changes
 
 - Direct Hold'em showdown projection now bounds result collections, pot-slice

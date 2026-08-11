@@ -1,3 +1,4 @@
+import '../models/core_input_limits.dart';
 import 'ledger_delta_hook.dart';
 import 'pot_commitment.dart';
 import 'pot_slice.dart';
@@ -9,16 +10,40 @@ class PotEngine {
   const PotEngine({
     this.sidePotBuilder = const SidePotBuilder(),
     this.ledgerDeltaHook = const DefaultLedgerDeltaHook(),
-  });
+    this.maxCommitments = CoreInputLimits.defaultMaxCommitments,
+    this.maxWinningSliceEntries = CoreInputLimits.defaultMaxWinningSliceEntries,
+    this.maxWinnersPerSlice = CoreInputLimits.defaultMaxWinnersPerSlice,
+  }) : assert(maxCommitments > 0, 'maxCommitments must be positive'),
+       assert(
+         maxWinningSliceEntries > 0,
+         'maxWinningSliceEntries must be positive',
+       ),
+       assert(maxWinnersPerSlice > 0, 'maxWinnersPerSlice must be positive');
 
   final SidePotBuilder sidePotBuilder;
   final LedgerDeltaHook ledgerDeltaHook;
+  final int maxCommitments;
+  final int maxWinningSliceEntries;
+  final int maxWinnersPerSlice;
 
   SettlementResult settle({
     required List<PotCommitment> commitments,
     required Map<int, List<String>> winningSeatIdsBySliceIndex,
     SettlementPolicy policy = const SettlementPolicy(),
   }) {
+    final inputWarning = _inputLimitWarning(
+      commitments: commitments,
+      winningSeatIdsBySliceIndex: winningSeatIdsBySliceIndex,
+    );
+    if (inputWarning != null) {
+      return SettlementResult(
+        slices: const <PotSlice>[],
+        awards: const <PotAward>[],
+        ledgerDeltas: const <LedgerDelta>[],
+        warnings: <String>[inputWarning],
+      );
+    }
+
     final slices = sidePotBuilder.build(commitments);
     final warnings = _validateWinnersBySlice(
       slices: slices,
@@ -116,5 +141,23 @@ class PotEngine {
     }
 
     return List<String>.unmodifiable(warnings);
+  }
+
+  String? _inputLimitWarning({
+    required List<PotCommitment> commitments,
+    required Map<int, List<String>> winningSeatIdsBySliceIndex,
+  }) {
+    if (commitments.length > maxCommitments) {
+      return 'ERR_CORE_SETTLEMENT_COMMITMENT_COUNT';
+    }
+    if (winningSeatIdsBySliceIndex.length > maxWinningSliceEntries) {
+      return 'ERR_CORE_SETTLEMENT_WINNER_SLICE_COUNT';
+    }
+    if (winningSeatIdsBySliceIndex.values.any(
+      (winners) => winners.length > maxWinnersPerSlice,
+    )) {
+      return 'ERR_CORE_SETTLEMENT_WINNER_COUNT';
+    }
+    return null;
   }
 }

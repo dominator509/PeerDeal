@@ -1,6 +1,7 @@
 export 'src/contracts/invariant_guard.dart';
 export 'src/invariants/baseline_invariant_guards.dart';
 export 'src/models/core_invariant_codes.dart';
+export 'src/models/core_input_limits.dart';
 export 'src/models/invariant_violation.dart';
 export 'src/models/table_phase.dart';
 export 'src/models/table_state.dart';

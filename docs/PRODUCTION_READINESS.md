@@ -1561,6 +1561,14 @@ Overflow carries explicit `ERR_HOLDEM_SHOWDOWN_RESULT_COUNT`,
 `ERR_HOLDEM_SHOWDOWN_SLICE_COUNT`, or
 `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` warnings into blocked settlement.
 
+The T124 follow-up closes the direct core pot-materialization gap.
+`SidePotBuilder` and `PotEngine` now apply variant-agnostic bounds of 64
+commitments, 64 winning slice-map entries, and 64 winners per slice before
+side-pot or award traversal. Overflow fails closed with
+`ERR_CORE_SETTLEMENT_COMMITMENT_COUNT`,
+`ERR_CORE_SETTLEMENT_WINNER_SLICE_COUNT`, or
+`ERR_CORE_SETTLEMENT_WINNER_COUNT`.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

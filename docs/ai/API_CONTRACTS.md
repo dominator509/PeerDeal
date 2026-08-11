@@ -347,6 +347,13 @@ limits. Overflow returns projection warnings
 `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT`; settlement propagates those warnings as
 a blocked result.
 
+`peerdeal_core` applies variant-agnostic settlement bounds before side-pot or
+award traversal: 64 commitments, 64 winning slice-map entries, and 64 winners
+per slice by default. Overflow returns blocked `SettlementResult` warnings
+`ERR_CORE_SETTLEMENT_COMMITMENT_COUNT`,
+`ERR_CORE_SETTLEMENT_WINNER_SLICE_COUNT`, or
+`ERR_CORE_SETTLEMENT_WINNER_COUNT`.
+
 `HoldemEventCursor.toJson/fromJson` persist and restore the cursor's exact
 scope, next sequence, previous hash, actor, and last-event state. Hydration
 requires caller-owned event-id and timestamp factories and accepts an optional

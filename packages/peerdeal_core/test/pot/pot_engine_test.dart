@@ -125,6 +125,79 @@ void main() {
     expect(result.ledgerDeltas, isEmpty);
     expect(result.warnings, <String>['ERR_CORE_SETTLEMENT_UNKNOWN_SLICE']);
   });
+
+  test(
+    'fails closed before side-pot construction on oversized commitments',
+    () {
+      const engine = PotEngine();
+      final result = engine.settle(
+        commitments: List<PotCommitment>.generate(
+          CoreInputLimits.defaultMaxCommitments + 1,
+          (index) => PotCommitment(
+            seatId: 'seat-${index + 1}',
+            committed: index + 1,
+            isEligibleForShowdown: true,
+          ),
+          growable: false,
+        ),
+        winningSeatIdsBySliceIndex: const <int, List<String>>{},
+      );
+
+      expect(result.isBlocked, isTrue);
+      expect(result.slices, isEmpty);
+      expect(result.warnings, <String>['ERR_CORE_SETTLEMENT_COMMITMENT_COUNT']);
+    },
+  );
+
+  test(
+    'fails closed before side-pot construction on oversized winner maps',
+    () {
+      const engine = PotEngine();
+      final result = engine.settle(
+        commitments: const <PotCommitment>[
+          PotCommitment(
+            seatId: 'A',
+            committed: 100,
+            isEligibleForShowdown: true,
+          ),
+        ],
+        winningSeatIdsBySliceIndex: <int, List<String>>{
+          for (
+            var index = 0;
+            index < CoreInputLimits.defaultMaxWinningSliceEntries + 1;
+            index++
+          )
+            index: <String>['A'],
+        },
+      );
+
+      expect(result.isBlocked, isTrue);
+      expect(result.slices, isEmpty);
+      expect(result.warnings, <String>[
+        'ERR_CORE_SETTLEMENT_WINNER_SLICE_COUNT',
+      ]);
+    },
+  );
+
+  test('fails closed on oversized winner lists within a slice', () {
+    const engine = PotEngine();
+    final result = engine.settle(
+      commitments: const <PotCommitment>[
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: <int, List<String>>{
+        0: List<String>.generate(
+          CoreInputLimits.defaultMaxWinnersPerSlice + 1,
+          (index) => 'seat-${index + 1}',
+          growable: false,
+        ),
+      },
+    );
+
+    expect(result.isBlocked, isTrue);
+    expect(result.slices, isEmpty);
+    expect(result.warnings, <String>['ERR_CORE_SETTLEMENT_WINNER_COUNT']);
+  });
 }
 
 List<String> _awardTriples(SettlementResult settlement) {

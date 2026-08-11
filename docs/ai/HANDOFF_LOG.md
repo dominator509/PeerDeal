@@ -2,6 +2,25 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T124 Core Pot Settlement Bounds
+
+Summary:
+- `peerdeal_core` now bounds direct commitments to 64, winning slice-map
+  entries to 64, and winners per slice to 64 before pot or award traversal.
+- `SidePotBuilder` and `PotEngine` fail closed with explicit core settlement
+  warnings; Hold'em retains its tighter nine-entry upstream bound.
+
+Tests run:
+- Focused `peerdeal_core` pot suite: 10 tests passed.
+- Focused `peerdeal_core` analysis passed.
+
+Risks:
+- This hardens the variant-agnostic core boundary while product source wiring,
+  native reachability, durable database policy, and release inputs remain
+  separate.
+
+---
+
 ### 2026-08-11 - Codex - T123 Hold'em Showdown Projection Bounds
 
 Summary:
