@@ -5,7 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_capture/peerdeal_capture.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_verifier.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_surface_presenter.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_export_artifact_factory.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_loader.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_provisioner.dart';
+import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_writer.dart';
 import 'package:peerdeal_mobile/demo_slice/models/demo_scenario_snapshot.dart';
 import 'package:peerdeal_mobile/demo_slice/screens/demo_receipt_screen.dart';
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
@@ -218,6 +221,46 @@ void main() {
 
     expect(keyBridge.cancellationObserved.isCompleted, isTrue);
   });
+
+  testWidgets(
+    'cancels pending native export provisioning when route is disposed',
+    (tester) async {
+      final captureBridge = RecordingCaptureProtectionBridge();
+      final keyBridge = _PendingCancellableSecureKeyStorageBridge();
+      final presenter = DemoReceiptSurfacePresenter(
+        captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+      );
+      final factory = NativeReceiptExportArtifactFactory(
+        keyRingProvisioner: NativeReceiptKeyRingProvisioner(
+          loader: NativeReceiptKeyRingLoader(bridge: keyBridge),
+          writer: NativeReceiptKeyRingWriter(bridge: keyBridge),
+        ),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: DemoReceiptRoute(
+            snapshot: _fixtureSnapshot('verification_receipt_review.json'),
+            presenter: presenter,
+            receipt: _receipt,
+            cancellableExportArtifactFactory: (receipt, {cancellation}) =>
+                factory.exportSignedEncrypted(
+                  receipt,
+                  cancellation: cancellation,
+                ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(keyBridge.cancellationObserved.isCompleted, isFalse);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+
+      expect(keyBridge.cancellationObserved.isCompleted, isTrue);
+    },
+  );
 
   testWidgets('does not verify an unavailable export artifact', (tester) async {
     final captureBridge = RecordingCaptureProtectionBridge();
@@ -475,7 +518,9 @@ class RecordingSecureKeyStorageBridge implements SecureKeyStorageBridge {
 }
 
 class _PendingCancellableSecureKeyStorageBridge
-    implements SecureKeyStorageBridge, CancellableSecureKeyStorageBridge {
+    implements
+        SecureKeyStorageMutationBridge,
+        CancellableSecureKeyStorageMutationBridge {
   final Completer<void> cancellationObserved = Completer<void>();
   final Completer<SecureKeyStorageSnapshot> response =
       Completer<SecureKeyStorageSnapshot>();
@@ -491,13 +536,33 @@ class _PendingCancellableSecureKeyStorageBridge
       }
       if (!response.isCompleted) {
         response.complete(
-          const SecureKeyStorageSnapshot.unavailable(
-            warning: 'cancelled',
-          ),
+          const SecureKeyStorageSnapshot.unavailable(warning: 'cancelled'),
         );
       }
     });
     return response.future;
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKey({
+    required String namespace,
+    required SecureKeyRecord key,
+    Future<void>? cancellation,
+  }) async {
+    return const SecureKeyStorageMutationResult.failure(
+      warning: 'save not reached',
+    );
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKey({
+    required String namespace,
+    required String keyId,
+    Future<void>? cancellation,
+  }) async {
+    return const SecureKeyStorageMutationResult.failure(
+      warning: 'delete not reached',
+    );
   }
 }
 

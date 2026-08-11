@@ -55,18 +55,28 @@ class NativeReceiptKeyRingProvisioner {
 
   Future<ReceiptKeyRingProvisionResult>? _inFlight;
 
-  Future<ReceiptKeyRingProvisionResult> ensureActiveKeys() {
+  Future<ReceiptKeyRingProvisionResult> ensureActiveKeys({
+    Future<void>? cancellation,
+  }) {
     final inFlight = _inFlight;
-    if (inFlight != null) return inFlight;
+    if (inFlight != null && cancellation == null) return inFlight;
 
-    final operation = _ensureActiveKeys();
-    _inFlight = operation;
+    final operation = _ensureActiveKeys(
+      cancellation: cancellation,
+      ownsInFlight: cancellation == null,
+    );
+    if (cancellation == null) _inFlight = operation;
     return operation;
   }
 
-  Future<ReceiptKeyRingProvisionResult> _ensureActiveKeys() async {
+  Future<ReceiptKeyRingProvisionResult> _ensureActiveKeys({
+    Future<void>? cancellation,
+    required bool ownsInFlight,
+  }) async {
     try {
-      final loadResult = await _loader.load();
+      final loadResult = cancellation == null
+          ? await _loader.load()
+          : await _loader.loadCancellable(cancellation: cancellation);
       if (loadResult.warnings.isNotEmpty) {
         return ReceiptKeyRingProvisionResult(
           keyRing: loadResult.keyRing,
@@ -93,7 +103,11 @@ class NativeReceiptKeyRingProvisioner {
             ],
           );
         }
-        final result = await _writer.saveSigningKey(key, active: true);
+        final result = await _writer.saveSigningKey(
+          key,
+          active: true,
+          cancellation: cancellation,
+        );
         if (!result.isSuccess) {
           warnings.add(
             result.warning ?? 'Receipt signing key provisioning failed.',
@@ -125,7 +139,11 @@ class NativeReceiptKeyRingProvisioner {
             keysCreated: keysCreated,
           );
         }
-        final result = await _writer.saveEncryptionKey(key, active: true);
+        final result = await _writer.saveEncryptionKey(
+          key,
+          active: true,
+          cancellation: cancellation,
+        );
         if (!result.isSuccess) {
           warnings.add(
             result.warning ?? 'Receipt encryption key provisioning failed.',
@@ -142,7 +160,9 @@ class NativeReceiptKeyRingProvisioner {
       }
 
       if (warnings.isEmpty && keysCreated > 0) {
-        final verified = await _loader.load();
+        final verified = cancellation == null
+            ? await _loader.load()
+            : await _loader.loadCancellable(cancellation: cancellation);
         if (verified.warnings.isNotEmpty ||
             !_activeKeysMatch(keyRing, verified.keyRing)) {
           return ReceiptKeyRingProvisionResult(
@@ -162,7 +182,7 @@ class NativeReceiptKeyRingProvisioner {
         keysCreated: keysCreated,
       );
     } finally {
-      _inFlight = null;
+      if (ownsInFlight) _inFlight = null;
     }
   }
 

@@ -815,6 +815,19 @@ external or integration-owned.
 Cross-process storage atomicity and runtime/device validation remain external
 or integration-owned.
 
+## Recent T85 Changes
+
+- Mirrored receipt routes now pass their lifecycle cancellation signal through
+  the optional export callback and app-owned native key provisioning path.
+- Key-ring loaders, writers, and provisioners forward cancellation to the
+  additive native secure-storage capabilities when available.
+- Existing one-argument export callbacks and generic native bridge contracts
+  remain compatible; conflicting receipt export sources fail closed.
+
+Already-dispatched native mutations, cross-process atomicity, runtime/device
+validation, and concrete product state wiring remain external or
+integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

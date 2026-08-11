@@ -1251,6 +1251,14 @@ or mismatched read-back returns an empty key ring and fails closed; existing
 complete rings do not incur a write. Cross-process atomicity and runtime/device
 validation remain external.
 
+The T85 follow-up closes the mounted receipt export lifecycle gap. Mirrored app
+shells now expose an additive cancellation-aware export callback, and receipt
+route replacement or disposal forwards the signal through key provisioning,
+secure key writes, and the existing cancellable native secure-storage bridge.
+The legacy one-argument callback and generic native bridge contracts remain
+valid. Already-dispatched native mutations, cross-process atomicity, and
+runtime/device validation remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

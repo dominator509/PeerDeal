@@ -619,6 +619,11 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   additive cancellable verification entry points. Mounted receipt routes
   complete their signal on replacement or disposal so pending native-backed
   verification fails closed instead of outliving the route.
+- App receipt export factories expose the legacy one-argument builder plus an
+  additive cancellable builder. Mounted receipt routes pass their lifecycle
+  signal through export key provisioning and key-ring writes to cancellable
+  secure-key bridges when available; already-dispatched native mutations remain
+  host-owned.
 - The mobile Android host registers
   `peerdeal/native_bridges/secure_key_storage` with `loadKeyRing`, `saveKey`,
   and `deleteKey`. It returns only the generic snapshot/mutation maps defined

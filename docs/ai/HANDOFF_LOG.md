@@ -8171,6 +8171,35 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Mounted Receipt Export Cancellation
+
+Summary:
+- Added an additive cancellable receipt export callback through both app-shell
+  runtime configurations and mounted receipt routes.
+- Forwarded route teardown cancellation through app key provisioning, secure
+  key writes, and cancellable native secure-storage capabilities.
+- Preserved the legacy one-argument export callback and failed closed on
+  conflicting export sources.
+
+Files changed:
+- Mirrored app receipt export factories, key-ring writers/provisioners, receipt
+  routes, app runtimes, and focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Verification:
+- Focused mobile and desktop receipt writer/provisioner/export/route suites:
+  passed.
+- Full analyze, boundary-check, source-text, test, dependency-audit, and
+  `git diff --check` gates: passed.
+
+Risks:
+- Already-dispatched native mutations remain host-owned. Android/Windows
+  runtime validation, release signing, other-platform storage, and product
+  database/state wiring remain external or integration-owned.
+
+---
+
 ### 2026-08-11 - Codex - Receipt Key Persistence Read-Back Verification
 
 Summary:

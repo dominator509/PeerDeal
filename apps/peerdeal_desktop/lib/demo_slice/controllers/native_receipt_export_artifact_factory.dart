@@ -7,6 +7,11 @@ import 'native_receipt_key_ring_writer.dart';
 
 typedef ReceiptExportArtifactBuilder =
     Future<ReceiptExportArtifact> Function(PeerDealReceipt receipt);
+typedef CancellableReceiptExportArtifactBuilder =
+    Future<ReceiptExportArtifact> Function(
+      PeerDealReceipt receipt, {
+      Future<void>? cancellation,
+    });
 
 class NativeReceiptExportArtifactFactory {
   const NativeReceiptExportArtifactFactory({
@@ -37,11 +42,14 @@ class NativeReceiptExportArtifactFactory {
   final ReceiptCipherNonceFactory? _nonceFactory;
 
   Future<ReceiptExportArtifact> exportSignedEncrypted(
-    PeerDealReceipt receipt,
-  ) async {
+    PeerDealReceipt receipt, {
+    Future<void>? cancellation,
+  }) async {
     final ReceiptKeyRingProvisionResult provisionResult;
     try {
-      provisionResult = await _keyRingProvisioner.ensureActiveKeys();
+      provisionResult = await _keyRingProvisioner.ensureActiveKeys(
+        cancellation: cancellation,
+      );
     } catch (_) {
       return const ReceiptExportArtifact.unavailable(
         reason: 'Receipt key provisioning failed.',

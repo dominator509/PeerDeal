@@ -23,6 +23,7 @@ class DemoReceiptRoute extends StatefulWidget {
     this.exportArtifact,
     this.receipt,
     this.exportArtifactFactory,
+    this.cancellableExportArtifactFactory,
     this.artifactVerifier,
     this.recovery,
   });
@@ -32,6 +33,8 @@ class DemoReceiptRoute extends StatefulWidget {
   final ReceiptExportArtifact? exportArtifact;
   final PeerDealReceipt? receipt;
   final ReceiptExportArtifactBuilder? exportArtifactFactory;
+  final CancellableReceiptExportArtifactBuilder?
+  cancellableExportArtifactFactory;
   final DemoReceiptArtifactVerifier? artifactVerifier;
   final RecoveryResult<Object?>? recovery;
 
@@ -58,6 +61,8 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
         oldWidget.exportArtifact != widget.exportArtifact ||
         oldWidget.receipt != widget.receipt ||
         oldWidget.exportArtifactFactory != widget.exportArtifactFactory ||
+        oldWidget.cancellableExportArtifactFactory !=
+            widget.cancellableExportArtifactFactory ||
         oldWidget.artifactVerifier != widget.artifactVerifier ||
         oldWidget.recovery != widget.recovery) {
       _cancelPresentation();
@@ -109,7 +114,11 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     Future<void>? cancellation,
   }) async {
     final artifact = widget.exportArtifact;
-    if (artifact != null && widget.exportArtifactFactory != null) {
+    final exportFactory = widget.exportArtifactFactory;
+    final cancellableExportFactory = widget.cancellableExportArtifactFactory;
+    final hasExportFactory =
+        exportFactory != null || cancellableExportFactory != null;
+    if (artifact != null && hasExportFactory) {
       return widget.presenter.present(
         receipt: const ReceiptScanResult(
           status: 'rejected',
@@ -124,9 +133,8 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
       return _presentArtifact(artifact, cancellation: cancellation);
     }
 
-    final exportFactory = widget.exportArtifactFactory;
     final receipt = widget.receipt;
-    if (exportFactory == null && receipt != null) {
+    if (!hasExportFactory && receipt != null) {
       return widget.presenter.present(
         receipt: const ReceiptScanResult(
           status: 'rejected',
@@ -137,7 +145,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
       );
     }
 
-    if (exportFactory != null && receipt == null) {
+    if (hasExportFactory && receipt == null) {
       return widget.presenter.present(
         receipt: const ReceiptScanResult(
           status: 'rejected',
@@ -148,9 +156,24 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
       );
     }
 
-    if (exportFactory != null && receipt != null) {
+    if (hasExportFactory && receipt != null) {
+      if (exportFactory != null && cancellableExportFactory != null) {
+        return widget.presenter.present(
+          receipt: const ReceiptScanResult(
+            status: 'rejected',
+            message: 'Receipt export source configuration is invalid.',
+          ),
+          recovery: widget.recovery,
+          cancellation: cancellation,
+        );
+      }
       return _presentArtifact(
-        await exportFactory(receipt),
+        cancellableExportFactory != null
+            ? await cancellableExportFactory(
+                receipt,
+                cancellation: cancellation,
+              )
+            : await exportFactory!(receipt),
         cancellation: cancellation,
       );
     }

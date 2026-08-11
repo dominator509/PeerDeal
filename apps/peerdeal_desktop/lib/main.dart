@@ -80,6 +80,7 @@ class PeerDealDesktopRuntime {
     this.receiptArtifactVerifierFactory,
     this.receiptExportArtifact,
     this.receiptExportArtifactFactory,
+    this.cancellableReceiptExportArtifactFactory,
     this.receiptFactory,
     this.joinFlowOrchestratorFactory,
     this.joinFlowInviteContextFactory,
@@ -109,6 +110,8 @@ class PeerDealDesktopRuntime {
   final DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? receiptExportArtifact;
   final ReceiptExportArtifactBuilder? receiptExportArtifactFactory;
+  final CancellableReceiptExportArtifactBuilder?
+  cancellableReceiptExportArtifactFactory;
   final DemoReceiptFactory? receiptFactory;
   final JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory;
   final JoinFlowInviteContextFactory? joinFlowInviteContextFactory;
@@ -139,6 +142,8 @@ class PeerDealDesktopRuntime {
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
     ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
+    CancellableReceiptExportArtifactBuilder?
+    cancellableReceiptExportArtifactFactory,
     DemoReceiptFactory? receiptFactory,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
@@ -172,6 +177,9 @@ class PeerDealDesktopRuntime {
           receiptExportArtifact ?? this.receiptExportArtifact,
       receiptExportArtifactFactory:
           receiptExportArtifactFactory ?? this.receiptExportArtifactFactory,
+      cancellableReceiptExportArtifactFactory:
+          cancellableReceiptExportArtifactFactory ??
+          this.cancellableReceiptExportArtifactFactory,
       receiptFactory: receiptFactory ?? this.receiptFactory,
       joinFlowOrchestratorFactory:
           joinFlowOrchestratorFactory ?? this.joinFlowOrchestratorFactory,
@@ -226,6 +234,8 @@ class PeerDealDesktopApp extends StatefulWidget {
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
     ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
+    CancellableReceiptExportArtifactBuilder?
+    cancellableReceiptExportArtifactFactory,
     DemoReceiptFactory? receiptFactory,
     JoinFlowOrchestratorFactory? joinFlowOrchestratorFactory,
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
@@ -255,6 +265,8 @@ class PeerDealDesktopApp extends StatefulWidget {
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
        _receiptExportArtifactFactory = receiptExportArtifactFactory,
+       _cancellableReceiptExportArtifactFactory =
+           cancellableReceiptExportArtifactFactory,
        _receiptFactory = receiptFactory,
        _joinFlowOrchestratorFactory = joinFlowOrchestratorFactory,
        _joinFlowInviteContextFactory = joinFlowInviteContextFactory,
@@ -285,6 +297,8 @@ class PeerDealDesktopApp extends StatefulWidget {
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? _receiptExportArtifact;
   final ReceiptExportArtifactBuilder? _receiptExportArtifactFactory;
+  final CancellableReceiptExportArtifactBuilder?
+  _cancellableReceiptExportArtifactFactory;
   final DemoReceiptFactory? _receiptFactory;
   final JoinFlowOrchestratorFactory? _joinFlowOrchestratorFactory;
   final JoinFlowInviteContextFactory? _joinFlowInviteContextFactory;
@@ -334,6 +348,8 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       receiptArtifactVerifierFactory: widget._receiptArtifactVerifierFactory,
       receiptExportArtifact: widget._receiptExportArtifact,
       receiptExportArtifactFactory: widget._receiptExportArtifactFactory,
+      cancellableReceiptExportArtifactFactory:
+          widget._cancellableReceiptExportArtifactFactory,
       receiptFactory: widget._receiptFactory,
       joinFlowOrchestratorFactory: widget._joinFlowOrchestratorFactory,
       joinFlowInviteContextFactory: widget._joinFlowInviteContextFactory,
@@ -458,9 +474,12 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
               exportArtifact: _runtime.receiptExportArtifact,
               receipt: _receiptInputFor(_activeSnapshot),
               exportArtifactFactory: _runtime.receiptExportArtifactFactory,
+              cancellableExportArtifactFactory:
+                  _runtime.cancellableReceiptExportArtifactFactory,
               artifactVerifier:
                   _runtime.receiptExportArtifact == null &&
-                      _runtime.receiptExportArtifactFactory == null
+                      _runtime.receiptExportArtifactFactory == null &&
+                      _runtime.cancellableReceiptExportArtifactFactory == null
                   ? null
                   : _createReceiptArtifactVerifier(),
               recovery: _recoveryResultFactory.createFor(_activeSnapshot),
@@ -1059,7 +1078,8 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
 
   PeerDealReceipt? _receiptInputFor(DemoScenarioSnapshot snapshot) {
     if (_runtime.receiptFactory == null &&
-        _runtime.receiptExportArtifactFactory == null) {
+        _runtime.receiptExportArtifactFactory == null &&
+        _runtime.cancellableReceiptExportArtifactFactory == null) {
       return null;
     }
 

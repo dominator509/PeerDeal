@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_export_artifact_factory.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_provisioner.dart';
@@ -121,6 +123,26 @@ void main() {
     expect(artifact.reason, 'Receipt key provisioning failed.');
     expect(artifact.reason, isNot(contains('native exception')));
   });
+
+  test('forwards route cancellation into key provisioning', () async {
+    final cancellation = Completer<void>();
+    final provisioner = _CancellationRecordingProvisioner();
+    final factory = NativeReceiptExportArtifactFactory(
+      keyRingProvisioner: provisioner,
+    );
+
+    final artifactFuture = factory.exportSignedEncrypted(
+      _receipt,
+      cancellation: cancellation.future,
+    );
+
+    expect(provisioner.receivedCancellation, same(cancellation.future));
+    cancellation.complete();
+    final artifact = await artifactFuture;
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt key provisioning failed.');
+  });
 }
 
 const _receipt = PeerDealReceipt(
@@ -204,7 +226,26 @@ class _SavedKey {
 
 class _ThrowingProvisioner implements NativeReceiptKeyRingProvisioner {
   @override
-  Future<ReceiptKeyRingProvisionResult> ensureActiveKeys() async {
+  Future<ReceiptKeyRingProvisionResult> ensureActiveKeys({
+    Future<void>? cancellation,
+  }) async {
     throw StateError('native exception');
+  }
+}
+
+class _CancellationRecordingProvisioner
+    implements NativeReceiptKeyRingProvisioner {
+  Future<void>? receivedCancellation;
+
+  @override
+  Future<ReceiptKeyRingProvisionResult> ensureActiveKeys({
+    Future<void>? cancellation,
+  }) async {
+    receivedCancellation = cancellation;
+    if (cancellation != null) await cancellation;
+    return const ReceiptKeyRingProvisionResult(
+      keyRing: ReceiptKeyRingSnapshot(),
+      warnings: <String>['cancelled'],
+    );
   }
 }

@@ -158,9 +158,10 @@ Receipts:
 4. Unavailable export artifacts stop at an app-owned rejection before native
    key verification; wiped or malformed receipts fail closed.
 5. Mounted receipt routes propagate an additive cancellation signal through the
-   app key-ring loader, artifact verifier, and presenter, completing it when
-   the route is replaced or disposed. Native secure-key bridge compatibility
-   remains unchanged.
+   app export factory, key-ring provisioner/loader/writer, artifact verifier,
+   and presenter, completing it when the route is replaced or disposed. Native
+   secure-key bridge compatibility remains unchanged; dispatched mutations stay
+   host-owned.
 
 ## API Boundaries
 

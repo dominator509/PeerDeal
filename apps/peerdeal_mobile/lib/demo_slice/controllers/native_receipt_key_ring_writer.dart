@@ -31,6 +31,7 @@ class NativeReceiptKeyRingWriter {
   Future<ReceiptKeyRingWriteResult> saveSigningKey(
     ReceiptSigningKey key, {
     required bool active,
+    Future<void>? cancellation,
   }) {
     return _save(
       SecureKeyRecord(
@@ -40,12 +41,14 @@ class NativeReceiptKeyRingWriter {
         secret: key.secret,
         active: active,
       ),
+      cancellation: cancellation,
     );
   }
 
   Future<ReceiptKeyRingWriteResult> saveEncryptionKey(
     ReceiptEncryptionKey key, {
     required bool active,
+    Future<void>? cancellation,
   }) {
     return _save(
       SecureKeyRecord(
@@ -55,10 +58,14 @@ class NativeReceiptKeyRingWriter {
         secret: key.secret,
         active: active,
       ),
+      cancellation: cancellation,
     );
   }
 
-  Future<ReceiptKeyRingWriteResult> deleteKey(String keyId) async {
+  Future<ReceiptKeyRingWriteResult> deleteKey(
+    String keyId, {
+    Future<void>? cancellation,
+  }) async {
     if (!_isValidNamespace(namespace)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Secure receipt key namespace is invalid.',
@@ -72,7 +79,14 @@ class NativeReceiptKeyRingWriter {
 
     final SecureKeyStorageMutationResult result;
     try {
-      result = await _bridge.deleteKey(namespace: namespace, keyId: keyId);
+      result = _bridge is CancellableSecureKeyStorageMutationBridge
+          ? await (_bridge as CancellableSecureKeyStorageMutationBridge)
+                .deleteKey(
+                  namespace: namespace,
+                  keyId: keyId,
+                  cancellation: cancellation,
+                )
+          : await _bridge.deleteKey(namespace: namespace, keyId: keyId);
     } on Object {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Secure receipt key delete failed.',
@@ -82,7 +96,10 @@ class NativeReceiptKeyRingWriter {
     return _fromNativeMutation(result);
   }
 
-  Future<ReceiptKeyRingWriteResult> _save(SecureKeyRecord record) async {
+  Future<ReceiptKeyRingWriteResult> _save(
+    SecureKeyRecord record, {
+    Future<void>? cancellation,
+  }) async {
     if (!_isValidNamespace(namespace)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Secure receipt key namespace is invalid.',
@@ -98,7 +115,14 @@ class NativeReceiptKeyRingWriter {
 
     final SecureKeyStorageMutationResult result;
     try {
-      result = await _bridge.saveKey(namespace: namespace, key: record);
+      result = _bridge is CancellableSecureKeyStorageMutationBridge
+          ? await (_bridge as CancellableSecureKeyStorageMutationBridge)
+                .saveKey(
+                  namespace: namespace,
+                  key: record,
+                  cancellation: cancellation,
+                )
+          : await _bridge.saveKey(namespace: namespace, key: record);
     } on Object {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Secure receipt key save failed.',
