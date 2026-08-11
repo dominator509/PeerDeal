@@ -6,17 +6,25 @@ class AppLocalPeerIdentityWriteResult {
   const AppLocalPeerIdentityWriteResult({
     required this.isSuccess,
     this.warning,
+    this.revision,
+    this.isConflict = false,
   });
 
-  const AppLocalPeerIdentityWriteResult.success()
+  const AppLocalPeerIdentityWriteResult.success({this.revision})
     : isSuccess = true,
-      warning = null;
+      warning = null,
+      isConflict = false;
 
-  const AppLocalPeerIdentityWriteResult.failure({required this.warning})
-    : isSuccess = false;
+  const AppLocalPeerIdentityWriteResult.failure({
+    required this.warning,
+    this.revision,
+    this.isConflict = false,
+  }) : isSuccess = false;
 
   final bool isSuccess;
   final String? warning;
+  final int? revision;
+  final bool isConflict;
 }
 
 class NativeLocalPeerIdentityWriter {
@@ -38,6 +46,7 @@ class NativeLocalPeerIdentityWriter {
 
   Future<AppLocalPeerIdentityWriteResult> save(
     AppLocalPeerIdentity identity, {
+    int? expectedRevision,
     Future<void>? cancellation,
   }) async {
     if (!_isValidNamespace(namespace) ||
@@ -60,7 +69,25 @@ class NativeLocalPeerIdentityWriter {
         secret: identity.peerId,
         active: true,
       );
-      if (bridge is CancellableSecureKeyStorageMutationBridge) {
+      if (expectedRevision != null &&
+          bridge is CancellableConditionalSecureKeyStorageMutationBridge) {
+        result = await (bridge
+                  as CancellableConditionalSecureKeyStorageMutationBridge)
+            .saveKeyIfRevision(
+              namespace: namespace,
+              key: key,
+              expectedRevision: expectedRevision,
+              cancellation: cancellation,
+            );
+      } else if (expectedRevision != null &&
+          bridge is ConditionalSecureKeyStorageMutationBridge) {
+        result = await (bridge as ConditionalSecureKeyStorageMutationBridge)
+            .saveKeyIfRevision(
+              namespace: namespace,
+              key: key,
+              expectedRevision: expectedRevision,
+            );
+      } else if (bridge is CancellableSecureKeyStorageMutationBridge) {
         result = await (bridge as CancellableSecureKeyStorageMutationBridge)
             .saveKey(
               namespace: namespace,
@@ -77,10 +104,14 @@ class NativeLocalPeerIdentityWriter {
     }
 
     if (result.isSuccess) {
-      return const AppLocalPeerIdentityWriteResult.success();
+      return AppLocalPeerIdentityWriteResult.success(
+        revision: result.revision,
+      );
     }
-    return const AppLocalPeerIdentityWriteResult.failure(
+    return AppLocalPeerIdentityWriteResult.failure(
       warning: 'Local peer identity save failed.',
+      revision: result.revision,
+      isConflict: result.isConflict,
     );
   }
 

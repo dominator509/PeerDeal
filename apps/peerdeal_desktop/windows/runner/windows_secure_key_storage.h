@@ -41,6 +41,8 @@ class WindowsSecureKeyStorage final {
   static const std::string* StringValue(
       const flutter::EncodableMap& map,
       const char* key);
+  static std::optional<std::uint64_t> RevisionValue(
+      const flutter::EncodableMap& map);
   static std::optional<StoredKey> DecodeKey(
       const flutter::EncodableMap& map);
 
@@ -50,21 +52,27 @@ class WindowsSecureKeyStorage final {
 
   static std::wstring CredentialTarget(const std::string& namespace_name);
   static ReadStatus ReadRecords(const std::string& namespace_name,
-                                std::vector<StoredKey>* records);
+                                std::vector<StoredKey>* records,
+                                std::uint64_t* revision);
   static bool WriteRecords(const std::string& namespace_name,
-                           const std::vector<StoredKey>& records);
+                           const std::vector<StoredKey>& records,
+                           std::uint64_t revision);
   static ReadStatus ReadCredentialBlob(const std::wstring& target,
                                        std::vector<std::uint8_t>* blob);
   static bool SerializeRecords(const std::vector<StoredKey>& records,
+                               std::uint64_t revision,
                                std::vector<std::uint8_t>* blob);
   static bool DeserializeRecords(const std::vector<std::uint8_t>& blob,
-                                 std::vector<StoredKey>* records);
+                                 std::vector<StoredKey>* records,
+                                 std::uint64_t* revision);
 
   static flutter::EncodableValue SnapshotFailure(const char* warning);
   static flutter::EncodableValue SnapshotSuccess(
-      const std::vector<StoredKey>& records);
-  static flutter::EncodableValue MutationFailure(const char* warning);
-  static flutter::EncodableValue MutationSuccess();
+      const std::vector<StoredKey>& records,
+      std::uint64_t revision);
+  static flutter::EncodableValue MutationFailure(const char* warning,
+                                                 bool conflict = false);
+  static flutter::EncodableValue MutationSuccess(std::uint64_t revision);
 
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> channel_;
   std::mutex storage_mutex_;

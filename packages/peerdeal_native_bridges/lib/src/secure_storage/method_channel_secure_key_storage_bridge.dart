@@ -11,7 +11,9 @@ const _secureKeyStorageCallTimeout = Duration(seconds: 5);
 class MethodChannelSecureKeyStorageBridge
     implements
         SecureKeyStorageMutationBridge,
-        CancellableSecureKeyStorageMutationBridge {
+        CancellableSecureKeyStorageMutationBridge,
+        ConditionalSecureKeyStorageMutationBridge,
+        CancellableConditionalSecureKeyStorageMutationBridge {
   MethodChannelSecureKeyStorageBridge({
     MethodChannel? channel,
     Duration timeout = _secureKeyStorageCallTimeout,
@@ -73,22 +75,69 @@ class MethodChannelSecureKeyStorageBridge
     required String namespace,
     required SecureKeyRecord key,
     Future<void>? cancellation,
+  }) {
+    return _saveKey(
+      method: SecureKeyStorageChannelContract.saveKeyMethod,
+      namespace: namespace,
+      key: key,
+      cancellation: cancellation,
+    );
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKeyIfRevision({
+    required String namespace,
+    required SecureKeyRecord key,
+    required int expectedRevision,
+    Future<void>? cancellation,
+  }) {
+    if (!_isValidRevision(expectedRevision)) {
+      return Future<SecureKeyStorageMutationResult>.value(
+        const SecureKeyStorageMutationResult.failure(
+          warning: 'Secure key storage revision is invalid.',
+        ),
+      );
+    }
+    return _saveKey(
+      method: SecureKeyStorageChannelContract.saveKeyIfRevisionMethod,
+      namespace: namespace,
+      key: key,
+      expectedRevision: expectedRevision,
+      cancellation: cancellation,
+    );
+  }
+
+  Future<SecureKeyStorageMutationResult> _saveKey({
+    required String method,
+    required String namespace,
+    required SecureKeyRecord key,
+    int? expectedRevision,
+    Future<void>? cancellation,
   }) async {
     if (!_isValidNamespace(namespace) || !key.isUsable) {
       return const SecureKeyStorageMutationResult.failure(
         warning: 'Secure key storage save request is invalid.',
       );
     }
+    if (expectedRevision != null && !_isValidRevision(expectedRevision)) {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'Secure key storage revision is invalid.',
+      );
+    }
 
+    final arguments = <String, Object?>{
+      'namespace': namespace,
+      'key': SecureKeyStorageChannelContract.encodeKey(key),
+      ...?expectedRevision == null
+          ? null
+          : <String, Object?>{'expectedRevision': expectedRevision},
+    };
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
         _channel.invokeMapMethod<String, Object?>(
-          SecureKeyStorageChannelContract.saveKeyMethod,
-          <String, Object?>{
-            'namespace': namespace,
-            'key': SecureKeyStorageChannelContract.encodeKey(key),
-          },
+          method,
+          arguments,
         ),
         cancellation: cancellation,
       );
@@ -125,19 +174,69 @@ class MethodChannelSecureKeyStorageBridge
     required String namespace,
     required String keyId,
     Future<void>? cancellation,
+  }) {
+    return _deleteKey(
+      method: SecureKeyStorageChannelContract.deleteKeyMethod,
+      namespace: namespace,
+      keyId: keyId,
+      cancellation: cancellation,
+    );
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKeyIfRevision({
+    required String namespace,
+    required String keyId,
+    required int expectedRevision,
+    Future<void>? cancellation,
+  }) {
+    if (!_isValidRevision(expectedRevision)) {
+      return Future<SecureKeyStorageMutationResult>.value(
+        const SecureKeyStorageMutationResult.failure(
+          warning: 'Secure key storage revision is invalid.',
+        ),
+      );
+    }
+    return _deleteKey(
+      method: SecureKeyStorageChannelContract.deleteKeyIfRevisionMethod,
+      namespace: namespace,
+      keyId: keyId,
+      expectedRevision: expectedRevision,
+      cancellation: cancellation,
+    );
+  }
+
+  Future<SecureKeyStorageMutationResult> _deleteKey({
+    required String method,
+    required String namespace,
+    required String keyId,
+    int? expectedRevision,
+    Future<void>? cancellation,
   }) async {
     if (!_isValidNamespace(namespace) || !_isValidKeyId(keyId)) {
       return const SecureKeyStorageMutationResult.failure(
         warning: 'Secure key storage delete request is invalid.',
       );
     }
+    if (expectedRevision != null && !_isValidRevision(expectedRevision)) {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'Secure key storage revision is invalid.',
+      );
+    }
 
+    final arguments = <String, Object?>{
+      'namespace': namespace,
+      'keyId': keyId,
+      ...?expectedRevision == null
+          ? null
+          : <String, Object?>{'expectedRevision': expectedRevision},
+    };
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
         _channel.invokeMapMethod<String, Object?>(
-          SecureKeyStorageChannelContract.deleteKeyMethod,
-          <String, Object?>{'namespace': namespace, 'keyId': keyId},
+          method,
+          arguments,
         ),
         cancellation: cancellation,
       );
@@ -174,6 +273,8 @@ class MethodChannelSecureKeyStorageBridge
 
   bool _isValidKeyId(String keyId) =>
       keyId.trim().isNotEmpty && keyId.trim() == keyId && !keyId.contains(':');
+
+  bool _isValidRevision(int revision) => revision >= 0;
 
   static Duration _validateTimeout(Duration timeout) {
     if (timeout.compareTo(Duration.zero) <= 0) {

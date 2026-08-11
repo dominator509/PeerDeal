@@ -34,6 +34,8 @@ internal class SecureKeyStorageHandler(context: Context) :
         private const val LOAD_KEY_RING = "loadKeyRing"
         private const val SAVE_KEY = "saveKey"
         private const val DELETE_KEY = "deleteKey"
+        private const val SAVE_KEY_IF_REVISION = "saveKeyIfRevision"
+        private const val DELETE_KEY_IF_REVISION = "deleteKeyIfRevision"
         private const val KEYSTORE = "AndroidKeyStore"
         private const val PREFERENCES_NAME = "peerdeal_secure_key_storage"
         private const val STORAGE_VERSION = 1
@@ -55,6 +57,13 @@ internal class SecureKeyStorageHandler(context: Context) :
                 "available" to false,
                 "keys" to emptyList<Any?>(),
                 "warning" to warning,
+            )
+
+        private fun mutationConflict(): Map<String, Any?> =
+            mapOf(
+                "success" to false,
+                "conflict" to true,
+                "warning" to "Secure key storage revision is stale.",
             )
 
         private fun mutationFailure(warning: String): Map<String, Any?> =
@@ -80,8 +89,10 @@ internal class SecureKeyStorageHandler(context: Context) :
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             LOAD_KEY_RING -> loadKeyRing(call, result)
-            SAVE_KEY -> saveKey(call, result)
-            DELETE_KEY -> deleteKey(call, result)
+            SAVE_KEY -> saveKey(call, result, conditional = false)
+            SAVE_KEY_IF_REVISION -> saveKey(call, result, conditional = true)
+            DELETE_KEY -> deleteKey(call, result, conditional = false)
+            DELETE_KEY_IF_REVISION -> deleteKey(call, result, conditional = true)
             else -> result.notImplemented()
         }
     }
@@ -108,13 +119,17 @@ internal class SecureKeyStorageHandler(context: Context) :
             failurePayload = { unavailablePayload("Secure key storage is unavailable.") },
         ) {
             when (val read = readRecords(namespace)) {
-                is ReadResult.Success -> snapshotPayload(read.records)
+                is ReadResult.Success -> snapshotPayload(read.records, read.revision)
                 ReadResult.Failure -> unavailablePayload("Secure key storage is unavailable.")
             }
         }
     }
 
-    private fun saveKey(call: MethodCall, result: MethodChannel.Result) {
+    private fun saveKey(
+        call: MethodCall,
+        result: MethodChannel.Result,
+        conditional: Boolean,
+    ) {
         val namespace = call.argument<Any?>("namespace") as? String
             ?: run {
                 result.success(mutationFailure("Secure key storage request is invalid."))
@@ -122,7 +137,10 @@ internal class SecureKeyStorageHandler(context: Context) :
             }
         val keyPayload = call.argument<Any?>("key") as? Map<*, *>
         val key = keyPayload?.let(::decodeIncomingKey)
-        if (!isValidNamespace(namespace) || key == null) {
+        val expectedRevision = if (conditional) expectedRevision(call) else null
+        if (!isValidNamespace(namespace) || key == null ||
+            (conditional && expectedRevision == null)
+        ) {
             result.success(mutationFailure("Secure key storage request is invalid."))
             return
         }
@@ -134,15 +152,22 @@ internal class SecureKeyStorageHandler(context: Context) :
         ) {
             when (val read = readRecords(namespace)) {
                 is ReadResult.Success -> {
+                    if (expectedRevision != null &&
+                        read.revision != expectedRevision
+                    ) {
+                        return@submit mutationConflict()
+                    }
                     val validatedKey = key ?: return@submit mutationFailure(
                         "Secure key storage request is invalid.",
                     )
                     val nextRecords =
                         read.records.filterNot { it.keyId == validatedKey.keyId } + validatedKey
-                    if (nextRecords.size > MAX_RECORDS || !writeRecords(namespace, nextRecords)) {
+                    if (nextRecords.size > MAX_RECORDS ||
+                        !writeRecords(namespace, nextRecords, read.revision + 1)
+                    ) {
                         mutationFailure("Secure key storage mutation failed.")
                     } else {
-                        mapOf("success" to true)
+                        mapOf("success" to true, "revision" to read.revision + 1)
                     }
                 }
                 ReadResult.Failure -> mutationFailure("Secure key storage is unavailable.")
@@ -150,7 +175,11 @@ internal class SecureKeyStorageHandler(context: Context) :
         }
     }
 
-    private fun deleteKey(call: MethodCall, result: MethodChannel.Result) {
+    private fun deleteKey(
+        call: MethodCall,
+        result: MethodChannel.Result,
+        conditional: Boolean,
+    ) {
         val namespace = call.argument<Any?>("namespace") as? String
             ?: run {
                 result.success(mutationFailure("Secure key storage request is invalid."))
@@ -161,7 +190,10 @@ internal class SecureKeyStorageHandler(context: Context) :
                 result.success(mutationFailure("Secure key storage request is invalid."))
                 return
             }
-        if (!isValidNamespace(namespace) || !isValidKeyId(keyId)) {
+        val expectedRevision = if (conditional) expectedRevision(call) else null
+        if (!isValidNamespace(namespace) || !isValidKeyId(keyId) ||
+            (conditional && expectedRevision == null)
+        ) {
             result.success(mutationFailure("Secure key storage request is invalid."))
             return
         }
@@ -173,9 +205,16 @@ internal class SecureKeyStorageHandler(context: Context) :
         ) {
             when (val read = readRecords(namespace)) {
                 is ReadResult.Success -> {
+                    if (expectedRevision != null &&
+                        read.revision != expectedRevision
+                    ) {
+                        return@submit mutationConflict()
+                    }
                     val nextRecords = read.records.filterNot { it.keyId == keyId }
-                    if (nextRecords.size == read.records.size || writeRecords(namespace, nextRecords)) {
-                        mapOf("success" to true)
+                    if (nextRecords.size == read.records.size) {
+                        mapOf("success" to true, "revision" to read.revision)
+                    } else if (writeRecords(namespace, nextRecords, read.revision + 1)) {
+                        mapOf("success" to true, "revision" to read.revision + 1)
                     } else {
                         mutationFailure("Secure key storage mutation failed.")
                     }
@@ -254,7 +293,7 @@ internal class SecureKeyStorageHandler(context: Context) :
     private fun readRecords(namespace: String): ReadResult {
         val masterKey = loadOrCreateMasterKey(namespace) ?: return ReadResult.Failure
         val stored = when (val result = readStoredEnvelope(namespace)) {
-            StoredEnvelope.Missing -> return ReadResult.Success(emptyList())
+            StoredEnvelope.Missing -> return ReadResult.Success(emptyList(), 0)
             StoredEnvelope.Failure -> return ReadResult.Failure
             is StoredEnvelope.Present -> result
         }
@@ -277,6 +316,12 @@ internal class SecureKeyStorageHandler(context: Context) :
 
         val root = JSONObject(String(plaintext, StandardCharsets.UTF_8))
         if (root.optInt("version", -1) != STORAGE_VERSION) return ReadResult.Failure
+        val revision = try {
+            if (root.has("revision")) root.getLong("revision") else 0L
+        } catch (_: Exception) {
+            return ReadResult.Failure
+        }
+        if (revision < 0) return ReadResult.Failure
         val keyArray = root.getJSONArray("keys")
         if (keyArray.length() > MAX_RECORDS) return ReadResult.Failure
 
@@ -294,18 +339,20 @@ internal class SecureKeyStorageHandler(context: Context) :
                 return ReadResult.Failure
             }
         }
-        return ReadResult.Success(records)
+        return ReadResult.Success(records, revision)
     }
 
-    private fun writeRecords(namespace: String, records: List<StoredKey>): Boolean {
+    private fun writeRecords(
+        namespace: String,
+        records: List<StoredKey>,
+        revision: Long,
+    ): Boolean {
         if (records.size > MAX_RECORDS || records.any { !it.isValid() }) return false
-        if (records.isEmpty()) {
-            if (!removeLegacyEnvelope(namespace)) return false
-            val storageFile = storageFile(namespace)
-            return !storageFile.exists() || storageFile.delete()
-        }
+        if (revision < 0) return false
 
-        val root = JSONObject().put("version", STORAGE_VERSION)
+        val root = JSONObject()
+            .put("version", STORAGE_VERSION)
+            .put("revision", revision)
         val keyArray = JSONArray()
         records.forEach { keyArray.put(encodeKey(it)) }
         root.put("keys", keyArray)
@@ -449,9 +496,13 @@ internal class SecureKeyStorageHandler(context: Context) :
             .put("secret", key.secret)
             .put("active", key.active)
 
-    private fun snapshotPayload(records: List<StoredKey>): Map<String, Any?> =
+    private fun snapshotPayload(
+        records: List<StoredKey>,
+        revision: Long,
+    ): Map<String, Any?> =
         mapOf(
             "available" to true,
+            "revision" to revision,
             "keys" to records.map { key ->
                 mapOf(
                     "keyId" to key.keyId,
@@ -462,6 +513,14 @@ internal class SecureKeyStorageHandler(context: Context) :
                 )
             },
         )
+
+    private fun expectedRevision(call: MethodCall): Long? {
+        return when (val value = call.argument<Any?>("expectedRevision")) {
+            is Int -> value.toLong().takeIf { it >= 0 }
+            is Long -> value.takeIf { it >= 0 }
+            else -> null
+        }
+    }
 
     private fun isValidNamespace(namespace: String?): Boolean =
         namespace != null && isValidText(namespace, MAX_NAMESPACE_LENGTH)
@@ -526,7 +585,7 @@ internal class SecureKeyStorageHandler(context: Context) :
     }
 
     private sealed class ReadResult {
-        data class Success(val records: List<StoredKey>) : ReadResult()
+        data class Success(val records: List<StoredKey>, val revision: Long) : ReadResult()
 
         data object Failure : ReadResult()
     }

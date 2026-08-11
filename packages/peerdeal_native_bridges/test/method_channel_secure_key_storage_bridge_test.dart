@@ -47,6 +47,23 @@ void main() {
     expect(log.single.arguments, {'namespace': 'peerdeal.receipts'});
   });
 
+  test('loads a secure key ring revision when the host provides one', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          return <String, Object?>{
+            'available': true,
+            'revision': 7,
+            'keys': <Object?>[],
+          };
+        });
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final snapshot = await bridge.loadKeyRing(namespace: 'peerdeal.receipts');
+
+    expect(snapshot.available, isTrue);
+    expect(snapshot.revision, 7);
+  });
+
   test('returns unavailable snapshot when platform lookup throws', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
@@ -189,6 +206,71 @@ void main() {
       'namespace': 'peerdeal.receipts',
       'keyId': 'receipt_signing_1',
     });
+  });
+
+  test('conditionally saves against a revision and decodes the new revision',
+      () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          if (call.method ==
+              SecureKeyStorageChannelContract.saveKeyIfRevisionMethod) {
+            return <String, Object?>{'success': true, 'revision': 8};
+          }
+          return null;
+        });
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final result = await bridge.saveKeyIfRevision(
+      namespace: 'peerdeal.receipts',
+      expectedRevision: 7,
+      key: const SecureKeyRecord(
+        keyId: 'receipt_signing_1',
+        purpose: 'receipt_signing',
+        algorithm: 'hmac-sha256',
+        secret: 'signing_secret_1',
+        active: true,
+      ),
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(result.revision, 8);
+    expect(log.single.method, 'saveKeyIfRevision');
+    expect(log.single.arguments, {
+      'namespace': 'peerdeal.receipts',
+      'expectedRevision': 7,
+      'key': {
+        'keyId': 'receipt_signing_1',
+        'purpose': 'receipt_signing',
+        'algorithm': 'hmac-sha256',
+        'secret': 'signing_secret_1',
+        'active': true,
+      },
+    });
+  });
+
+  test('surfaces a conditional mutation conflict', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          return <String, Object?>{
+            'success': false,
+            'conflict': true,
+            'revision': 8,
+            'warning': 'stale',
+          };
+        });
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final result = await bridge.deleteKeyIfRevision(
+      namespace: 'peerdeal.receipts',
+      keyId: 'receipt_signing_1',
+      expectedRevision: 7,
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.isConflict, isTrue);
+    expect(result.revision, 8);
+    expect(result.warning, 'stale');
   });
 
   test('fails closed when save platform call throws', () async {

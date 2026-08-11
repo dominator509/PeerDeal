@@ -85,6 +85,7 @@ class NativeReceiptKeyRingProvisioner {
       }
 
       var keyRing = loadResult.keyRing;
+      var revision = loadResult.revision;
       var keysCreated = 0;
       final warnings = <String>[];
 
@@ -106,14 +107,31 @@ class NativeReceiptKeyRingProvisioner {
         final result = await _writer.saveSigningKey(
           key,
           active: true,
+          expectedRevision: revision,
           cancellation: cancellation,
         );
         if (!result.isSuccess) {
-          warnings.add(
-            result.warning ?? 'Receipt signing key provisioning failed.',
-          );
+          if (result.isConflict) {
+            final latest = cancellation == null
+                ? await _loader.load()
+                : await _loader.loadCancellable(cancellation: cancellation);
+            if (latest.warnings.isEmpty &&
+                latest.keyRing.activeSigningKey() != null) {
+              keyRing = latest.keyRing;
+              revision = latest.revision;
+            } else {
+              warnings.add(
+                result.warning ?? 'Receipt signing key provisioning failed.',
+              );
+            }
+          } else {
+            warnings.add(
+              result.warning ?? 'Receipt signing key provisioning failed.',
+            );
+          }
         } else {
           keysCreated += 1;
+          revision = result.revision ?? revision;
           keyRing = ReceiptKeyRingSnapshot(
             activeSigning: key,
             verificationSigningKeys: keyRing.verificationSigningKeys,
@@ -142,14 +160,31 @@ class NativeReceiptKeyRingProvisioner {
         final result = await _writer.saveEncryptionKey(
           key,
           active: true,
+          expectedRevision: revision,
           cancellation: cancellation,
         );
         if (!result.isSuccess) {
-          warnings.add(
-            result.warning ?? 'Receipt encryption key provisioning failed.',
-          );
+          if (result.isConflict) {
+            final latest = cancellation == null
+                ? await _loader.load()
+                : await _loader.loadCancellable(cancellation: cancellation);
+            if (latest.warnings.isEmpty &&
+                latest.keyRing.activeEncryptionKey() != null) {
+              keyRing = latest.keyRing;
+              revision = latest.revision;
+            } else {
+              warnings.add(
+                result.warning ?? 'Receipt encryption key provisioning failed.',
+              );
+            }
+          } else {
+            warnings.add(
+              result.warning ?? 'Receipt encryption key provisioning failed.',
+            );
+          }
         } else {
           keysCreated += 1;
+          revision = result.revision ?? revision;
           keyRing = ReceiptKeyRingSnapshot(
             activeSigning: keyRing.activeSigning,
             verificationSigningKeys: keyRing.verificationSigningKeys,

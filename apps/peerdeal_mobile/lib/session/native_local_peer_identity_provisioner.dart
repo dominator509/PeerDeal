@@ -87,8 +87,20 @@ class NativeLocalPeerIdentityProvisioner {
       }
 
       final identity = AppLocalPeerIdentity(peerId: peerId);
-      final saved = await _writer.save(identity, cancellation: cancellation);
+      final saved = await _writer.save(
+        identity,
+        expectedRevision: loaded.revision,
+        cancellation: cancellation,
+      );
       if (!saved.isSuccess) {
+        if (saved.isConflict) {
+          final competing = await _loader.load(cancellation: cancellation);
+          if (competing.isAvailable) {
+            return AppLocalPeerIdentityProvisionResult(
+              identity: competing.identity,
+            );
+          }
+        }
         return AppLocalPeerIdentityProvisionResult(
           warnings: <String>[
             saved.warning ?? 'Local peer identity save failed.',

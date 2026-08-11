@@ -48,6 +48,8 @@ Setup flow:
   `noBackupFilesDir` files. Load/save/delete operations use a bounded private
   per-namespace file lock, with legacy preference records migrated under that
   lock, so concurrent PeerDeal processes cannot race a read-modify-write.
+  Envelopes persist namespace revisions, and conditional save/delete operations
+  reject stale expected revisions without overwriting newer records.
 - `CaptureProtectionHandler` registers the generic
   `peerdeal/native_bridges/capture_protection` channel and applies the
   app-owned blocking decision through Android `FLAG_SECURE`.

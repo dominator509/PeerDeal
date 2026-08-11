@@ -4,15 +4,28 @@ import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'native_receipt_key_ring_loader.dart';
 
 class ReceiptKeyRingWriteResult {
-  const ReceiptKeyRingWriteResult({required this.isSuccess, this.warning});
+  const ReceiptKeyRingWriteResult({
+    required this.isSuccess,
+    this.warning,
+    this.revision,
+    this.isConflict = false,
+  });
 
-  const ReceiptKeyRingWriteResult.success() : isSuccess = true, warning = null;
+  const ReceiptKeyRingWriteResult.success({this.revision})
+    : isSuccess = true,
+      warning = null,
+      isConflict = false;
 
-  const ReceiptKeyRingWriteResult.failure({required this.warning})
-    : isSuccess = false;
+  const ReceiptKeyRingWriteResult.failure({
+    required this.warning,
+    this.revision,
+    this.isConflict = false,
+  }) : isSuccess = false;
 
   final bool isSuccess;
   final String? warning;
+  final int? revision;
+  final bool isConflict;
 }
 
 class NativeReceiptKeyRingWriter {
@@ -31,6 +44,7 @@ class NativeReceiptKeyRingWriter {
   Future<ReceiptKeyRingWriteResult> saveSigningKey(
     ReceiptSigningKey key, {
     required bool active,
+    int? expectedRevision,
     Future<void>? cancellation,
   }) {
     return _save(
@@ -41,6 +55,7 @@ class NativeReceiptKeyRingWriter {
         secret: key.secret,
         active: active,
       ),
+      expectedRevision: expectedRevision,
       cancellation: cancellation,
     );
   }
@@ -48,6 +63,7 @@ class NativeReceiptKeyRingWriter {
   Future<ReceiptKeyRingWriteResult> saveEncryptionKey(
     ReceiptEncryptionKey key, {
     required bool active,
+    int? expectedRevision,
     Future<void>? cancellation,
   }) {
     return _save(
@@ -58,12 +74,14 @@ class NativeReceiptKeyRingWriter {
         secret: key.secret,
         active: active,
       ),
+      expectedRevision: expectedRevision,
       cancellation: cancellation,
     );
   }
 
   Future<ReceiptKeyRingWriteResult> deleteKey(
     String keyId, {
+    int? expectedRevision,
     Future<void>? cancellation,
   }) async {
     if (!_isValidNamespace(namespace)) {
@@ -79,7 +97,25 @@ class NativeReceiptKeyRingWriter {
 
     final SecureKeyStorageMutationResult result;
     try {
-      result = _bridge is CancellableSecureKeyStorageMutationBridge
+      result = expectedRevision != null &&
+              _bridge is CancellableConditionalSecureKeyStorageMutationBridge
+          ? await (_bridge
+                    as CancellableConditionalSecureKeyStorageMutationBridge)
+                .deleteKeyIfRevision(
+                  namespace: namespace,
+                  keyId: keyId,
+                  expectedRevision: expectedRevision,
+                  cancellation: cancellation,
+                )
+          : expectedRevision != null &&
+                _bridge is ConditionalSecureKeyStorageMutationBridge
+          ? await (_bridge as ConditionalSecureKeyStorageMutationBridge)
+                .deleteKeyIfRevision(
+                  namespace: namespace,
+                  keyId: keyId,
+                  expectedRevision: expectedRevision,
+                )
+          : _bridge is CancellableSecureKeyStorageMutationBridge
           ? await (_bridge as CancellableSecureKeyStorageMutationBridge)
                 .deleteKey(
                   namespace: namespace,
@@ -98,6 +134,7 @@ class NativeReceiptKeyRingWriter {
 
   Future<ReceiptKeyRingWriteResult> _save(
     SecureKeyRecord record, {
+    int? expectedRevision,
     Future<void>? cancellation,
   }) async {
     if (!_isValidNamespace(namespace)) {
@@ -115,7 +152,25 @@ class NativeReceiptKeyRingWriter {
 
     final SecureKeyStorageMutationResult result;
     try {
-      result = _bridge is CancellableSecureKeyStorageMutationBridge
+      result = expectedRevision != null &&
+              _bridge is CancellableConditionalSecureKeyStorageMutationBridge
+          ? await (_bridge
+                    as CancellableConditionalSecureKeyStorageMutationBridge)
+                .saveKeyIfRevision(
+                  namespace: namespace,
+                  key: record,
+                  expectedRevision: expectedRevision,
+                  cancellation: cancellation,
+                )
+          : expectedRevision != null &&
+                _bridge is ConditionalSecureKeyStorageMutationBridge
+          ? await (_bridge as ConditionalSecureKeyStorageMutationBridge)
+                .saveKeyIfRevision(
+                  namespace: namespace,
+                  key: record,
+                  expectedRevision: expectedRevision,
+                )
+          : _bridge is CancellableSecureKeyStorageMutationBridge
           ? await (_bridge as CancellableSecureKeyStorageMutationBridge)
                 .saveKey(
                   namespace: namespace,
@@ -135,12 +190,16 @@ class NativeReceiptKeyRingWriter {
   ReceiptKeyRingWriteResult _fromNativeMutation(
     SecureKeyStorageMutationResult result,
   ) {
-    if (result.isSuccess) return const ReceiptKeyRingWriteResult.success();
+    if (result.isSuccess) {
+      return ReceiptKeyRingWriteResult.success(revision: result.revision);
+    }
     return ReceiptKeyRingWriteResult.failure(
       warning: _safeNativeWarning(
         result.warning,
         fallback: 'Secure receipt key mutation failed.',
       ),
+      revision: result.revision,
+      isConflict: result.isConflict,
     );
   }
 

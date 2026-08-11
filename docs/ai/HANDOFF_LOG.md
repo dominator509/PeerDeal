@@ -8171,6 +8171,40 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Secure-Key Revision Compare-and-Swap
+
+Summary:
+- Added additive namespace revisions to generic secure-key snapshots and
+  conditional save/delete method-channel operations with explicit conflicts.
+- Mirrored receipt key-ring and local-identity provisioners now pass expected
+  revisions, refresh after conflicts, and fail closed when no valid competing
+  record is available.
+- Android encrypted file envelopes and Windows Credential Manager v2 envelopes
+  persist revisions, including empty-namespace tombstones, while legacy formats
+  remain readable with revision zero.
+
+Files changed:
+- Generic secure-key bridge contracts, models, channel bridge, and focused tests.
+- Mirrored mobile and desktop receipt/identity adapters and tests.
+- Android `SecureKeyStorageHandler` and Windows secure-key host.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Verification:
+- Focused bridge and mirrored identity tests passed.
+- Android debug APK and Windows debug host builds passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed. Dependency audit
+  reports zero actionable upgrades and 11 newer versions below the current
+  toolchain ceiling.
+
+Risks:
+- Runtime/device persistence and capture validation, other-platform native
+  implementations, operator-owned release signing, and concrete product
+  database/state wiring remain external or integration-owned.
+
+---
+
 ### 2026-08-11 - Codex - Android Secure-Key Process Serialization
 
 Summary:

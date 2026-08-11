@@ -813,3 +813,25 @@ state wiring remain external or integration-owned.
 Android debug APK compilation passed. Compare-and-swap semantics, runtime/device
 validation, signing, and product state wiring remain external or
 integration-owned.
+
+## Recent T88 Changes
+
+- Generic secure-key snapshots now carry a nonnegative namespace revision, and
+  the method-channel seam exposes additive conditional save/delete operations
+  that return explicit stale-writer conflicts while preserving legacy methods.
+- Mirrored receipt key-ring and local peer-identity writers pass the loaded
+  revision into conditional mutations when supported, refresh on conflicts, and
+  fail closed when no competing valid record can be recovered.
+- Android encrypted private-file envelopes and Windows Credential Manager v2
+  envelopes persist revisions, preserve tombstone revisions for empty namespaces,
+  and accept legacy storage formats with revision zero.
+- Focused bridge and app identity tests passed, and Android debug APK plus
+  Windows debug host builds passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed. Dependency audit
+  reports zero actionable upgrades and 11 newer versions below the current
+  toolchain ceiling.
+
+Runtime/device persistence and capture validation, other-platform native
+implementations, operator-owned release signing, and concrete product database
+or session-state wiring remain external or integration-owned.

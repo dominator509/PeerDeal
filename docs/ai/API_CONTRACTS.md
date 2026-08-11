@@ -629,11 +629,16 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   and `deleteKey`. It returns only the generic snapshot/mutation maps defined
   by `SecureKeyStorageChannelContract`; receipt purpose and rotation policy
   stay in app/receipt code.
+- Secure-key snapshots expose a nonnegative namespace `revision`. Android and
+  Windows hosts implement additive `saveKeyIfRevision` and
+  `deleteKeyIfRevision` methods that compare an optional expected revision under
+  the existing namespace lock or mutex and return an explicit conflict without
+  overwriting newer records. Legacy save/delete methods remain valid for older
+  bridge implementations.
 - The Windows host serializes generic secure-key load/save/delete access per
   namespace with a `Local` named mutex and a bounded five-second acquisition
-  wait. This closes the PeerDeal cross-process read-modify-write race on that
-  host; it is not compare-and-swap and does not define Android multi-process or
-  runtime/device semantics.
+  wait. Conditional mutations use that same lock, and Credential Manager v2
+  envelopes persist revisions while legacy v1 envelopes load as revision zero.
 - Android host records are encrypted with AES-GCM using a namespace-bound
   Android Keystore master key and durably committed to private
   `noBackupFilesDir` files before a mutation reports success. Writes flush and
@@ -642,8 +647,13 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   records fail closed.
 - Android secure-key load/save/delete operations serialize PeerDeal process
   access with a hash-named private file lock under `noBackupFilesDir`; bounded
-  five-second `tryLock` retries fail closed. This is host serialization, not
-  compare-and-swap/versioning or a runtime/device guarantee.
+  five-second `tryLock` retries fail closed. Conditional mutations use that same
+  lock, and encrypted envelopes persist revisions, including empty-namespace
+  tombstones. Legacy preference-backed envelopes load as revision zero.
+- Mirrored app receipt key-ring and local-identity provisioners pass the loaded
+  revision to conditional mutations when supported, refresh after conflicts, and
+  fail closed when a valid competing record cannot be recovered. Receipt policy
+  and identity semantics remain app-owned.
 - Android release signing is operator-owned and requires all four
   `PEERDEAL_ANDROID_*` keystore variables. Release Gradle tasks fail before
   artifact assembly when signing is missing, padded, control-bearing, partial,

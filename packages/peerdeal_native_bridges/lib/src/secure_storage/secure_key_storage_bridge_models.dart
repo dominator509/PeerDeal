@@ -29,24 +29,36 @@ class SecureKeyStorageSnapshot {
   const SecureKeyStorageSnapshot({
     required this.available,
     required this.keys,
+    this.revision = 0,
     this.warning,
   });
 
-  const SecureKeyStorageSnapshot.unavailable({this.warning})
+  const SecureKeyStorageSnapshot.unavailable({this.warning, this.revision = 0})
     : available = false,
       keys = const <SecureKeyRecord>[];
 
   final bool available;
   final List<SecureKeyRecord> keys;
+  final int revision;
   final String? warning;
 }
 
 class SecureKeyStorageMutationResult {
-  const SecureKeyStorageMutationResult({required this.isSuccess, this.warning});
+  const SecureKeyStorageMutationResult({
+    required this.isSuccess,
+    this.warning,
+    this.revision,
+    this.isConflict = false,
+  });
 
-  const SecureKeyStorageMutationResult.failure({required this.warning})
-    : isSuccess = false;
+  const SecureKeyStorageMutationResult.failure({
+    required this.warning,
+    this.revision,
+    this.isConflict = false,
+  }) : isSuccess = false;
 
   final bool isSuccess;
   final String? warning;
+  final int? revision;
+  final bool isConflict;
 }

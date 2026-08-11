@@ -1278,6 +1278,18 @@ shape are unchanged. This closes the PeerDeal Android host process race but
 does not add compare-and-swap/version semantics or prove runtime/device
 behavior.
 
+The T88 follow-up closes the remaining app/native stale-writer gap for the
+implemented Android and Windows hosts. Generic secure-key snapshots now carry a
+nonnegative namespace revision, and additive conditional save/delete methods
+compare an expected revision under the host's existing namespace lock or mutex,
+returning a stable conflict instead of overwriting a newer record. Android
+encrypted file envelopes and Windows Credential Manager v2 envelopes persist the
+revision, preserve empty-namespace tombstones, and accept legacy storage with
+revision zero. Mirrored receipt key-ring and local-identity provisioners pass the
+revision and refresh on a conflict while retaining legacy bridge compatibility.
+This closes the coded CAS/version gap; runtime/device validation, other-platform
+storage, release signing, and product state/database wiring remain separate.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

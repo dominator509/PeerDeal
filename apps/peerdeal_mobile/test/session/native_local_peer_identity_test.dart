@@ -96,6 +96,23 @@ void main() {
     expect(bridge.savedKeys, hasLength(1));
   });
 
+  test('uses a conditional native mutation when a storage revision is present',
+      () async {
+    final bridge = _ConditionalMemorySecureKeyBridge();
+    final provisioner = NativeLocalPeerIdentityProvisioner(
+      loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+      writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+      identityFactory: () => 'peer_revision_aware',
+    );
+
+    final result = await provisioner.ensureIdentity();
+
+    expect(result.isSuccess, isTrue);
+    expect(result.identity?.peerId, 'peer_revision_aware');
+    expect(bridge.expectedSaveRevision, 0);
+    expect(bridge.revision, 1);
+  });
+
   test('fails closed when native storage changes the saved identity', () async {
     final bridge = _MemorySecureKeyBridge(
       savedPeerIdOverride: 'peer_competing_writer',
@@ -255,5 +272,59 @@ class _CancellableMemorySecureKeyBridge extends _MemorySecureKeyBridge
     Future<void>? cancellation,
   }) {
     return super.deleteKey(namespace: namespace, keyId: keyId);
+  }
+}
+
+class _ConditionalMemorySecureKeyBridge extends _MemorySecureKeyBridge
+    implements ConditionalSecureKeyStorageMutationBridge {
+  int revision = 0;
+  int? expectedSaveRevision;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    loadCalls += 1;
+    await loadGate?.future;
+    return SecureKeyStorageSnapshot(
+      available: available,
+      keys: List<SecureKeyRecord>.unmodifiable(keys),
+      revision: revision,
+    );
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKeyIfRevision({
+    required String namespace,
+    required SecureKeyRecord key,
+    required int expectedRevision,
+  }) async {
+    expectedSaveRevision = expectedRevision;
+    if (expectedRevision != revision) {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'stale',
+        isConflict: true,
+      );
+    }
+    await super.saveKey(namespace: namespace, key: key);
+    revision += 1;
+    return SecureKeyStorageMutationResult(isSuccess: true, revision: revision);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKeyIfRevision({
+    required String namespace,
+    required String keyId,
+    required int expectedRevision,
+  }) async {
+    if (expectedRevision != revision) {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'stale',
+        isConflict: true,
+      );
+    }
+    await super.deleteKey(namespace: namespace, keyId: keyId);
+    revision += 1;
+    return SecureKeyStorageMutationResult(isSuccess: true, revision: revision);
   }
 }

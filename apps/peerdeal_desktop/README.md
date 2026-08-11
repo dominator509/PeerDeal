@@ -57,7 +57,10 @@ Setup flow:
   unsupported until a protocol-owned advertisement contract exists.
 - Records are validated and stored as a bounded versioned envelope in Windows
   Credential Manager under a namespace-derived target. The host does not
-  interpret receipt purposes, algorithms, or rotation policy.
+  interpret receipt purposes, algorithms, or rotation policy. Credential
+  Manager v2 envelopes persist namespace revisions, conditional save/delete
+  operations reject stale expected revisions, and legacy v1 envelopes remain
+  readable with revision zero.
 - The host rejects malformed Credential Manager records, including null
   pointers paired with non-empty blobs, and lets the generic decoder reject
   empty or schema-invalid envelopes.

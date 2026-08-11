@@ -9,10 +9,12 @@ class AppLocalPeerIdentity {
 class AppLocalPeerIdentityLoadResult {
   const AppLocalPeerIdentityLoadResult({
     this.identity,
+    this.revision = 0,
     this.warnings = const <String>[],
   });
 
   final AppLocalPeerIdentity? identity;
+  final int revision;
   final List<String> warnings;
 
   bool get isAvailable => identity != null && warnings.isEmpty;
@@ -85,7 +87,7 @@ class NativeLocalPeerIdentityLoader {
         )
         .toList(growable: false);
     if (matches.isEmpty) {
-      return const AppLocalPeerIdentityLoadResult();
+      return AppLocalPeerIdentityLoadResult(revision: snapshot.revision);
     }
     if (matches.length != 1 || !matches.single.active) {
       return const AppLocalPeerIdentityLoadResult(
@@ -102,6 +104,7 @@ class NativeLocalPeerIdentityLoader {
 
     return AppLocalPeerIdentityLoadResult(
       identity: AppLocalPeerIdentity(peerId: peerId),
+      revision: snapshot.revision,
     );
   }
 

@@ -74,7 +74,10 @@ to observe local device capabilities.
 - Local network channel: `peerdeal/native_bridges/local_network` with
   `getCapability` and `discoverPeers`.
 - Secure key storage channel: `peerdeal/native_bridges/secure_key_storage` with
-  `loadKeyRing`, `saveKey`, and `deleteKey`.
+  `loadKeyRing`, `saveKey`, `deleteKey`, and additive revision-aware
+  `saveKeyIfRevision`/`deleteKeyIfRevision` operations. The generic snapshot
+  carries a namespace revision and conditional mutations report conflicts;
+  receipt and identity policy remains in app-owned packages.
 - Native transport channel: `peerdeal/native_bridges/transport` with
   `getCapability`, `sendFrame`, and `receiveFrames`.
 - App-support directory channel: `peerdeal/native_bridges/app_storage` with

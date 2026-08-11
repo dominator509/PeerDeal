@@ -850,6 +850,25 @@ integration-owned.
 Compare-and-swap semantics, runtime/device validation, and concrete product
 state wiring remain external or integration-owned.
 
+## Recent T88 Changes
+
+- Generic secure-key snapshots now expose a nonnegative namespace revision, with
+  additive conditional save/delete channel methods and explicit conflict results.
+- Mirrored receipt and local-identity provisioners pass expected revisions when
+  supported, refresh after a conflict, and fail closed if no valid competing
+  record is available. Existing bridge implementations remain compatible.
+- Android encrypted private-file envelopes and Windows Credential Manager v2
+  envelopes persist revisions, including empty-namespace tombstones; legacy
+  storage formats remain readable with revision zero.
+- Focused bridge and mirrored identity tests passed. Android and Windows debug
+  host builds passed, as did the full analyze, boundary-check, source-text,
+  serialized test, dependency-audit, and `git diff --check` gates. Dependency
+  audit reports zero actionable upgrades and 11 newer versions below the
+  current toolchain ceiling.
+
+Runtime/device validation, other-platform native storage and capture, release
+signing, and concrete product state wiring remain external or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

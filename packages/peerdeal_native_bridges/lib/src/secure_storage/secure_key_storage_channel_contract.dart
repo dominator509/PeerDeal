@@ -7,6 +7,8 @@ class SecureKeyStorageChannelContract {
   static const loadKeyRingMethod = 'loadKeyRing';
   static const saveKeyMethod = 'saveKey';
   static const deleteKeyMethod = 'deleteKey';
+  static const saveKeyIfRevisionMethod = 'saveKeyIfRevision';
+  static const deleteKeyIfRevisionMethod = 'deleteKeyIfRevision';
 
   static SecureKeyStorageSnapshot decodeSnapshot(
     Map<String, Object?>? payload,
@@ -18,12 +20,14 @@ class SecureKeyStorageChannelContract {
     }
 
     final available = _boolValue(payload['available']);
+    final revision = _revisionValue(payload['revision']);
     final keyPayloads = payload['keys'];
-    if (!available || keyPayloads is! List<dynamic>) {
+    if (!available || keyPayloads is! List<dynamic> || revision == null) {
       return SecureKeyStorageSnapshot.unavailable(
         warning:
             _stringValue(payload['warning']) ??
             'Secure key storage snapshot is unavailable.',
+        revision: revision ?? 0,
       );
     }
 
@@ -38,6 +42,7 @@ class SecureKeyStorageChannelContract {
     return SecureKeyStorageSnapshot(
       available: true,
       keys: List<SecureKeyRecord>.unmodifiable(keys),
+      revision: revision,
       warning: _stringValue(payload['warning']),
     );
   }
@@ -87,21 +92,32 @@ class SecureKeyStorageChannelContract {
     }
 
     final success = _boolValue(payload['success']);
+    final revision = _revisionValue(payload['revision']);
+    final isConflict = _boolValue(payload['conflict']);
     if (!success) {
       return SecureKeyStorageMutationResult.failure(
         warning:
             _stringValue(payload['warning']) ??
             'Secure key storage mutation failed.',
+        revision: revision,
+        isConflict: isConflict,
       );
     }
 
     return SecureKeyStorageMutationResult(
       isSuccess: true,
       warning: _stringValue(payload['warning']),
+      revision: revision,
     );
   }
 
   static bool _boolValue(Object? value) => value is bool ? value : false;
 
   static String? _stringValue(Object? value) => value is String ? value : null;
+
+  static int? _revisionValue(Object? value) {
+    if (value == null) return 0;
+    if (value is! int || value < 0) return null;
+    return value;
+  }
 }

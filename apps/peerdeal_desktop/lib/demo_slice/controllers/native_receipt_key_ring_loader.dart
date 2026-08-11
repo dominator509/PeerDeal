@@ -4,10 +4,12 @@ import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 class ReceiptKeyRingLoadResult {
   const ReceiptKeyRingLoadResult({
     required this.keyRing,
+    this.revision = 0,
     this.warnings = const <String>[],
   });
 
   final ReceiptKeyRingSnapshot keyRing;
+  final int revision;
   final List<String> warnings;
 
   bool get hasSigningKey => keyRing.activeSigningKey() != null;
@@ -152,6 +154,7 @@ class NativeReceiptKeyRingLoader
         activeEncryption: _activeEncryptionKey(encryptionRecords),
         decryptionKeys: _rotatedEncryptionKeys(encryptionRecords),
       ),
+      revision: snapshot.revision,
     );
   }
 

@@ -42,3 +42,43 @@ abstract interface class CancellableSecureKeyStorageMutationBridge
     Future<void>? cancellation,
   });
 }
+
+/// Optional compare-and-swap capability for mutations based on a previously
+/// loaded namespace revision.
+///
+/// The base mutation bridge remains unchanged for older platform hosts and
+/// test doubles. Production hosts that persist revisions implement this seam
+/// so a read-then-write cannot silently overwrite another process's update.
+abstract interface class ConditionalSecureKeyStorageMutationBridge {
+  Future<SecureKeyStorageMutationResult> saveKeyIfRevision({
+    required String namespace,
+    required SecureKeyRecord key,
+    required int expectedRevision,
+  });
+
+  Future<SecureKeyStorageMutationResult> deleteKeyIfRevision({
+    required String namespace,
+    required String keyId,
+    required int expectedRevision,
+  });
+}
+
+/// Cancellable form of [ConditionalSecureKeyStorageMutationBridge].
+abstract interface class CancellableConditionalSecureKeyStorageMutationBridge
+    implements ConditionalSecureKeyStorageMutationBridge {
+  @override
+  Future<SecureKeyStorageMutationResult> saveKeyIfRevision({
+    required String namespace,
+    required SecureKeyRecord key,
+    required int expectedRevision,
+    Future<void>? cancellation,
+  });
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKeyIfRevision({
+    required String namespace,
+    required String keyId,
+    required int expectedRevision,
+    Future<void>? cancellation,
+  });
+}

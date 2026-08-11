@@ -22,8 +22,11 @@ constexpr char kChannelName[] =
 constexpr char kLoadKeyRingMethod[] = "loadKeyRing";
 constexpr char kSaveKeyMethod[] = "saveKey";
 constexpr char kDeleteKeyMethod[] = "deleteKey";
+constexpr char kSaveKeyIfRevisionMethod[] = "saveKeyIfRevision";
+constexpr char kDeleteKeyIfRevisionMethod[] = "deleteKeyIfRevision";
 
-constexpr std::uint32_t kStorageVersion = 1;
+constexpr std::uint32_t kStorageVersion = 2;
+constexpr std::uint32_t kLegacyStorageVersion = 1;
 constexpr std::size_t kMaxNamespaceBytes = 128;
 constexpr std::size_t kMaxRecords = 128;
 constexpr std::size_t kMaxKeyIdBytes = 256;
@@ -142,6 +145,12 @@ void AppendUint32(std::uint32_t value, std::vector<std::uint8_t>* output) {
   output->push_back(static_cast<std::uint8_t>((value >> 24) & 0xff));
 }
 
+void AppendUint64(std::uint64_t value, std::vector<std::uint8_t>* output) {
+  for (std::size_t index = 0; index < 8; ++index) {
+    output->push_back(static_cast<std::uint8_t>((value >> (index * 8)) & 0xff));
+  }
+}
+
 bool ReadUint32(const std::vector<std::uint8_t>& input,
                 std::size_t* offset,
                 std::uint32_t* value) {
@@ -153,6 +162,21 @@ bool ReadUint32(const std::vector<std::uint8_t>& input,
            (static_cast<std::uint32_t>(input[*offset + 2]) << 16) |
            (static_cast<std::uint32_t>(input[*offset + 3]) << 24);
   *offset += 4;
+  return true;
+}
+
+bool ReadUint64(const std::vector<std::uint8_t>& input,
+                std::size_t* offset,
+                std::uint64_t* value) {
+  if (*offset > input.size() || input.size() - *offset < 8) {
+    return false;
+  }
+  *value = 0;
+  for (std::size_t index = 0; index < 8; ++index) {
+    *value |= static_cast<std::uint64_t>(input[*offset + index])
+              << (index * 8);
+  }
+  *offset += 8;
   return true;
 }
 
@@ -274,22 +298,29 @@ void WindowsSecureKeyStorage::HandleMethodCall(
         return;
       }
       std::vector<StoredKey> records;
-      const auto status = ReadRecords(*namespace_name, &records);
+      std::uint64_t revision = 0;
+      const auto status = ReadRecords(*namespace_name, &records, &revision);
       if (status == ReadStatus::kFailure) {
         result->Success(SnapshotFailure(
             "Secure key storage is unavailable."));
         return;
       }
-      result->Success(SnapshotSuccess(records));
+      result->Success(SnapshotSuccess(records, revision));
       return;
     }
 
-    if (method_call.method_name() == kSaveKeyMethod) {
+    if (method_call.method_name() == kSaveKeyMethod ||
+        method_call.method_name() == kSaveKeyIfRevisionMethod) {
+      const bool conditional =
+          method_call.method_name() == kSaveKeyIfRevisionMethod;
       const auto* namespace_name =
           arguments == nullptr ? nullptr : StringValue(*arguments, "namespace");
       const auto key = arguments == nullptr ? std::nullopt : DecodeKey(*arguments);
+      const auto expected_revision =
+          conditional && arguments != nullptr ? RevisionValue(*arguments)
+                                               : std::optional<std::uint64_t>{};
       if (namespace_name == nullptr || !IsValidNamespace(*namespace_name) ||
-          !key.has_value()) {
+          !key.has_value() || (conditional && !expected_revision.has_value())) {
         result->Success(
             MutationFailure("Secure key storage request is invalid."));
         return;
@@ -303,10 +334,21 @@ void WindowsSecureKeyStorage::HandleMethodCall(
         return;
       }
       std::vector<StoredKey> records;
-      const auto status = ReadRecords(*namespace_name, &records);
+      std::uint64_t revision = 0;
+      const auto status = ReadRecords(*namespace_name, &records, &revision);
       if (status == ReadStatus::kFailure) {
         result->Success(
             MutationFailure("Secure key storage is unavailable."));
+        return;
+      }
+      if (conditional && *expected_revision != revision) {
+        result->Success(MutationFailure(
+            "Secure key storage revision is stale.", true));
+        return;
+      }
+      if (revision == std::numeric_limits<std::uint64_t>::max()) {
+        result->Success(
+            MutationFailure("Secure key storage revision exhausted."));
         return;
       }
       records.erase(std::remove_if(records.begin(), records.end(),
@@ -316,22 +358,29 @@ void WindowsSecureKeyStorage::HandleMethodCall(
                     records.end());
       records.push_back(*key);
       if (records.size() > kMaxRecords ||
-          !WriteRecords(*namespace_name, records)) {
+          !WriteRecords(*namespace_name, records, revision + 1)) {
         result->Success(
             MutationFailure("Secure key storage mutation failed."));
         return;
       }
-      result->Success(MutationSuccess());
+      result->Success(MutationSuccess(revision + 1));
       return;
     }
 
-    if (method_call.method_name() == kDeleteKeyMethod) {
+    if (method_call.method_name() == kDeleteKeyMethod ||
+        method_call.method_name() == kDeleteKeyIfRevisionMethod) {
+      const bool conditional =
+          method_call.method_name() == kDeleteKeyIfRevisionMethod;
       const auto* namespace_name =
           arguments == nullptr ? nullptr : StringValue(*arguments, "namespace");
       const auto* key_id =
           arguments == nullptr ? nullptr : StringValue(*arguments, "keyId");
+      const auto expected_revision =
+          conditional && arguments != nullptr ? RevisionValue(*arguments)
+                                               : std::optional<std::uint64_t>{};
       if (namespace_name == nullptr || !IsValidNamespace(*namespace_name) ||
-          key_id == nullptr || !IsValidKeyId(*key_id)) {
+          key_id == nullptr || !IsValidKeyId(*key_id) ||
+          (conditional && !expected_revision.has_value())) {
         result->Success(
             MutationFailure("Secure key storage request is invalid."));
         return;
@@ -345,23 +394,35 @@ void WindowsSecureKeyStorage::HandleMethodCall(
         return;
       }
       std::vector<StoredKey> records;
-      const auto status = ReadRecords(*namespace_name, &records);
+      std::uint64_t revision = 0;
+      const auto status = ReadRecords(*namespace_name, &records, &revision);
       if (status == ReadStatus::kFailure) {
         result->Success(
             MutationFailure("Secure key storage is unavailable."));
         return;
       }
+      if (conditional && *expected_revision != revision) {
+        result->Success(MutationFailure(
+            "Secure key storage revision is stale.", true));
+        return;
+      }
+      const auto original_record_count = records.size();
       records.erase(std::remove_if(records.begin(), records.end(),
                                    [&key_id](const StoredKey& current) {
                                      return current.key_id == *key_id;
                                    }),
                     records.end());
-      if (!WriteRecords(*namespace_name, records)) {
+      if (records.size() == original_record_count) {
+        result->Success(MutationSuccess(revision));
+        return;
+      }
+      if (revision == std::numeric_limits<std::uint64_t>::max() ||
+          !WriteRecords(*namespace_name, records, revision + 1)) {
         result->Success(
             MutationFailure("Secure key storage mutation failed."));
         return;
       }
-      result->Success(MutationSuccess());
+      result->Success(MutationSuccess(revision + 1));
       return;
     }
 
@@ -387,6 +448,25 @@ const std::string* WindowsSecureKeyStorage::StringValue(
     const char* key) {
   const auto* value = MapValue(map, key);
   return value == nullptr ? nullptr : std::get_if<std::string>(value);
+}
+
+std::optional<std::uint64_t> WindowsSecureKeyStorage::RevisionValue(
+    const EncodableMap& map) {
+  const auto* value = MapValue(map, "expectedRevision");
+  if (value == nullptr) {
+    return std::nullopt;
+  }
+  if (const auto* int32_value = std::get_if<std::int32_t>(value)) {
+    return *int32_value < 0
+               ? std::nullopt
+               : std::optional<std::uint64_t>(*int32_value);
+  }
+  if (const auto* int64_value = std::get_if<std::int64_t>(value)) {
+    return *int64_value < 0
+               ? std::nullopt
+               : std::optional<std::uint64_t>(*int64_value);
+  }
+  return std::nullopt;
 }
 
 std::optional<WindowsSecureKeyStorage::StoredKey>
@@ -448,7 +528,12 @@ std::wstring WindowsSecureKeyStorage::CredentialTarget(
 
 WindowsSecureKeyStorage::ReadStatus WindowsSecureKeyStorage::ReadRecords(
     const std::string& namespace_name,
-    std::vector<StoredKey>* records) {
+    std::vector<StoredKey>* records,
+    std::uint64_t* revision) {
+  if (records == nullptr || revision == nullptr) {
+    return ReadStatus::kFailure;
+  }
+  *revision = 0;
   const auto target = CredentialTarget(namespace_name);
   if (target.empty()) {
     return ReadStatus::kFailure;
@@ -458,8 +543,8 @@ WindowsSecureKeyStorage::ReadStatus WindowsSecureKeyStorage::ReadRecords(
   if (status != ReadStatus::kSuccess) {
     return status;
   }
-  return DeserializeRecords(blob, records) ? ReadStatus::kSuccess
-                                            : ReadStatus::kFailure;
+  return DeserializeRecords(blob, records, revision) ? ReadStatus::kSuccess
+                                                       : ReadStatus::kFailure;
 }
 
 WindowsSecureKeyStorage::ReadStatus
@@ -494,18 +579,17 @@ WindowsSecureKeyStorage::ReadCredentialBlob(
 
 bool WindowsSecureKeyStorage::WriteRecords(
     const std::string& namespace_name,
-    const std::vector<StoredKey>& records) {
+    const std::vector<StoredKey>& records,
+    std::uint64_t revision) {
   const auto target = CredentialTarget(namespace_name);
-  if (target.empty() || records.size() > kMaxRecords) {
+  if (target.empty() || records.size() > kMaxRecords ||
+      revision > static_cast<std::uint64_t>(
+                     std::numeric_limits<std::int64_t>::max())) {
     return false;
-  }
-  if (records.empty()) {
-    return ::CredDeleteW(target.c_str(), CRED_TYPE_GENERIC, 0) ||
-           ::GetLastError() == ERROR_NOT_FOUND;
   }
 
   std::vector<std::uint8_t> blob;
-  if (!SerializeRecords(records, &blob) || blob.empty() ||
+  if (!SerializeRecords(records, revision, &blob) || blob.empty() ||
       blob.size() > std::numeric_limits<DWORD>::max()) {
     return false;
   }
@@ -520,14 +604,16 @@ bool WindowsSecureKeyStorage::WriteRecords(
 
 bool WindowsSecureKeyStorage::SerializeRecords(
     const std::vector<StoredKey>& records,
+    std::uint64_t revision,
     std::vector<std::uint8_t>* blob) {
-  if (records.empty() || records.size() > kMaxRecords) {
+  if (blob == nullptr || records.size() > kMaxRecords) {
     return false;
   }
   blob->clear();
-  blob->reserve(16);
+  blob->reserve(24);
   blob->insert(blob->end(), kStorageMagic.begin(), kStorageMagic.end());
   AppendUint32(kStorageVersion, blob);
+  AppendUint64(revision, blob);
   AppendUint32(static_cast<std::uint32_t>(records.size()), blob);
   for (const auto& record : records) {
     if (!IsValidKeyId(record.key_id) ||
@@ -551,17 +637,34 @@ bool WindowsSecureKeyStorage::SerializeRecords(
 
 bool WindowsSecureKeyStorage::DeserializeRecords(
     const std::vector<std::uint8_t>& blob,
-    std::vector<StoredKey>* records) {
+    std::vector<StoredKey>* records,
+    std::uint64_t* revision) {
   if (blob.size() < kStorageMagic.size() + 8 ||
       blob.size() > kMaxBlobBytes ||
+      records == nullptr || revision == nullptr ||
       !std::equal(kStorageMagic.begin(), kStorageMagic.end(), blob.begin())) {
     return false;
   }
   std::size_t offset = kStorageMagic.size();
   std::uint32_t version = 0;
   std::uint32_t record_count = 0;
-  if (!ReadUint32(blob, &offset, &version) || version != kStorageVersion ||
-      !ReadUint32(blob, &offset, &record_count) ||
+  if (!ReadUint32(blob, &offset, &version)) {
+    return false;
+  }
+  if (version == kStorageVersion) {
+    if (!ReadUint64(blob, &offset, revision)) {
+      return false;
+    }
+    if (*revision > static_cast<std::uint64_t>(
+                        std::numeric_limits<std::int64_t>::max())) {
+      return false;
+    }
+  } else if (version == kLegacyStorageVersion) {
+    *revision = 0;
+  } else {
+    return false;
+  }
+  if (!ReadUint32(blob, &offset, &record_count) ||
       record_count > kMaxRecords) {
     return false;
   }
@@ -597,7 +700,8 @@ flutter::EncodableValue WindowsSecureKeyStorage::SnapshotFailure(
 }
 
 flutter::EncodableValue WindowsSecureKeyStorage::SnapshotSuccess(
-    const std::vector<StoredKey>& records) {
+    const std::vector<StoredKey>& records,
+    std::uint64_t revision) {
   flutter::EncodableList keys;
   keys.reserve(records.size());
   for (const auto& record : records) {
@@ -612,20 +716,29 @@ flutter::EncodableValue WindowsSecureKeyStorage::SnapshotSuccess(
   }
   EncodableMap payload;
   payload.emplace(EncodableValue("available"), EncodableValue(true));
+  payload.emplace(EncodableValue("revision"),
+                  EncodableValue(static_cast<std::int64_t>(revision)));
   payload.emplace(EncodableValue("keys"), EncodableValue(std::move(keys)));
   return EncodableValue(std::move(payload));
 }
 
 flutter::EncodableValue WindowsSecureKeyStorage::MutationFailure(
-    const char* warning) {
+    const char* warning,
+    bool conflict) {
   EncodableMap payload;
   payload.emplace(EncodableValue("success"), EncodableValue(false));
+  if (conflict) {
+    payload.emplace(EncodableValue("conflict"), EncodableValue(true));
+  }
   payload.emplace(EncodableValue("warning"), EncodableValue(warning));
   return EncodableValue(std::move(payload));
 }
 
-flutter::EncodableValue WindowsSecureKeyStorage::MutationSuccess() {
+flutter::EncodableValue WindowsSecureKeyStorage::MutationSuccess(
+    std::uint64_t revision) {
   EncodableMap payload;
   payload.emplace(EncodableValue("success"), EncodableValue(true));
+  payload.emplace(EncodableValue("revision"),
+                  EncodableValue(static_cast<std::int64_t>(revision)));
   return EncodableValue(std::move(payload));
 }
