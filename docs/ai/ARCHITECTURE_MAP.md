@@ -195,7 +195,8 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 - Snapshots are recovery accelerators only.
 - Receipts are export/restore artifacts, not general persistence.
 - Sync recovery has in-memory and canonical JSON file-backed recovery-window
-  stores with exact recovery scope-identity validation plus app-owned durable
+  stores with exact recovery scope-identity validation and a shared 180-byte
+  UTF-8 storage-key bound before indexing or filename generation, plus app-owned durable
   store factories, validated
   exact `PEERDEAL_RECOVERY_ROOT` configuration, and mounted table-route
   loading; app-owned retention and per-session exactly-once close seams now

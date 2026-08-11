@@ -1108,6 +1108,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   validated after filtering and snapshot-suffix planning. Focused replay tests
   and package analysis pass.
 
+## T118 Recovery Scope Storage-Key Bound
+
+- `RecoveryPersistenceScope` now rejects storage keys above the shared 180-byte
+  UTF-8 limit before in-memory indexing or base64url filename generation.
+- In-memory and JSON recovery stores return the existing fatal
+  `ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID` conflict without mutating state or
+  creating files for oversized scopes. Focused `peerdeal_sync` tests (68) and
+  package analysis pass.
+
 ## T117 Direct Sync Snapshot Bounds
 
 - `BasicConflictDetector` and `BasicSnapshotApplier` now validate supplied

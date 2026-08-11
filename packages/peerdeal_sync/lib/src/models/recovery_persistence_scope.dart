@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
+
+import 'recovery_persistence_limits.dart';
 
 @immutable
 class RecoveryPersistenceScope {
@@ -14,10 +18,14 @@ class RecoveryPersistenceScope {
 
   String get storageKey => '$protocolVersion::$tableId::$sessionId';
 
-  bool get hasValidStorageIdentity =>
-      _isValidStoragePart(protocolVersion) &&
-      _isValidStoragePart(tableId) &&
-      _isValidStoragePart(sessionId);
+  bool get hasValidStorageIdentity {
+    final key = storageKey;
+    return _isValidStoragePart(protocolVersion) &&
+        _isValidStoragePart(tableId) &&
+        _isValidStoragePart(sessionId) &&
+        utf8.encode(key).length <=
+            RecoveryPersistenceLimits.defaultMaxStorageKeyBytes;
+  }
 
   static bool _isValidStoragePart(String value) {
     if (value.isEmpty || value.trim() != value) return false;

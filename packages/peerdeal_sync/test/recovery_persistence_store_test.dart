@@ -270,6 +270,30 @@ void main() {
     expect(store.loadWindow(invalidScope).events, isEmpty);
   });
 
+  test('rejects an oversized recovery scope before mutating store', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    final oversizedScope = RecoveryPersistenceScope(
+      tableId: 'table_1',
+      sessionId: 'x' * RecoveryPersistenceLimits.defaultMaxStorageKeyBytes,
+      protocolVersion: '1.0.0',
+    );
+
+    expect(oversizedScope.hasValidStorageIdentity, isFalse);
+    final append = store.appendEvents(
+      scope: oversizedScope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+      ],
+    );
+
+    expect(append.isSuccess, isFalse);
+    expect(
+      append.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+    );
+    expect(store.loadWindow(oversizedScope).events, isEmpty);
+  });
+
   test('stores snapshot only when scope matches persisted recovery stream', () {
     final store = InMemoryRecoveryPersistenceStore();
     store.appendEvents(
@@ -898,6 +922,39 @@ void main() {
     );
     expect(directory.listSync(), isEmpty);
   });
+
+  test(
+    'file store rejects an oversized scope before writing recovery files',
+    () {
+      final directory = Directory.systemTemp.createTempSync(
+        'peerdeal-recovery-oversized-scope-test-',
+      );
+      addTearDown(() {
+        if (directory.existsSync()) {
+          directory.deleteSync(recursive: true);
+        }
+      });
+
+      final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+      final result = writer.appendEvents(
+        scope: RecoveryPersistenceScope(
+          tableId: 'table_1',
+          sessionId: 'x' * RecoveryPersistenceLimits.defaultMaxStorageKeyBytes,
+          protocolVersion: '1.0.0',
+        ),
+        events: <EventEnvelope>[
+          _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+        ],
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(
+        result.conflicts.single.code,
+        'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+      );
+      expect(directory.listSync(), isEmpty);
+    },
+  );
 }
 
 EventEnvelope _event({

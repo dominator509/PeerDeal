@@ -563,7 +563,9 @@ limit is 4 MiB with the protocol structure limits; failures map to fatal
 `ERR_RECOVERY_SNAPSHOT_TOO_LARGE` or `ERR_RECOVERY_SNAPSHOT_INVALID`.
 Recovery persistence scopes must use exact, non-empty protocol, table, and
 session identities without padding, control characters, or the internal `::`
-storage-key delimiter.
+storage-key delimiter. The complete UTF-8 storage key is capped at 180 bytes
+before in-memory indexing or base64url filename generation; oversized scopes
+fail closed with `ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID`.
 App shells own durable root selection. `AppRecoveryPersistenceStoreFactory`
 accepts an injected root directory factory, and the mobile/desktop shells may
 default it from `PEERDEAL_RECOVERY_ROOT`. Blank, missing, or throwing roots fail

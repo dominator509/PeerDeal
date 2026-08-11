@@ -1521,6 +1521,13 @@ snapshots fail closed with `ERR_RECOVERY_SNAPSHOT_TOO_LARGE` or
 `ERR_RECOVERY_SNAPSHOT_INVALID`. The file-backed recovery default shares this
 same snapshot limit constant.
 
+The T118 follow-up closes the recovery-scope storage-key materialization gap.
+`RecoveryPersistenceScope` now bounds the complete UTF-8 storage key to 180
+bytes before in-memory indexing or the existing base64url filename path. Both
+in-memory and JSON recovery stores reject oversized scopes with the existing
+`ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID` conflict before mutation or file
+creation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

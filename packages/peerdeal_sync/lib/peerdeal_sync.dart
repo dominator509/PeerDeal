@@ -13,6 +13,7 @@ export 'src/models/persisted_recovery_window.dart';
 export 'src/models/reconciliation_result.dart';
 export 'src/models/recovery_mode.dart';
 export 'src/models/recovery_event_window_limits.dart';
+export 'src/models/recovery_persistence_limits.dart';
 export 'src/models/recovery_persistence_result.dart';
 export 'src/models/recovery_persistence_scope.dart';
 export 'src/models/recovery_request.dart';

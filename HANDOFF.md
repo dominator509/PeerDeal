@@ -1165,6 +1165,18 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T118 Changes
+
+- `RecoveryPersistenceScope` now rejects storage keys above the shared 180-byte
+  UTF-8 limit before in-memory indexing or base64url filename generation.
+- In-memory and JSON recovery stores fail closed with the existing
+  `ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID` code and do not mutate files or
+  stored windows for oversized scopes.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T117 Changes
 
 - Direct sync conflict detection and snapshot application now validate supplied

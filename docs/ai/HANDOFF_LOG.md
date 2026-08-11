@@ -2,6 +2,24 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T118 Recovery Scope Storage-Key Bound
+
+Summary:
+- `RecoveryPersistenceScope` now bounds the complete UTF-8 storage key to 180
+  bytes before in-memory indexing or base64url filename generation.
+- In-memory and JSON recovery stores reject oversized scopes with
+  `ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID` before mutation or file creation.
+
+Tests run:
+- Focused `peerdeal_sync` suite: 68 tests passed.
+- Focused `peerdeal_sync` analysis passed.
+
+Risks:
+- The bound hardens the existing JSON fallback and does not replace the
+  product database or define product identity policy.
+
+---
+
 ### 2026-08-11 - Codex - T117 Direct Sync Snapshot Bounds
 
 Summary:
