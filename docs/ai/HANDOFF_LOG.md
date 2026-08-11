@@ -12,6 +12,38 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-11 - Codex - Recovery Store Process Serialization
+
+Summary:
+- Hardened `JsonFileRecoveryPersistenceStore` with a stable per-scope OS file
+  lock around hydrate-modify-write transactions, reads, and wipes.
+- Lock handles close on all paths so process termination releases the advisory
+  lock; lock acquisition failures return a fatal persistence result.
+- The public `RecoveryPersistenceStore` contract and package boundaries remain
+  unchanged.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- Readiness ledgers and stable AI context docs.
+
+Tests run:
+- Focused `peerdeal_sync` recovery persistence suite: 16 tests passed.
+- Full analyzer, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Dependency audit reports zero actionable upgrades and 11 newer versions below
+  the current toolchain ceiling.
+
+Risks:
+- This hardens the JSON recovery fallback but does not replace a production
+  database or prove platform filesystem, device, or cross-device behavior.
+
+Next reviewer:
+- Preserve the per-scope lock when replacing the fallback with a database or
+  adding additional recovery-store implementations.
+
+---
+
 ### 2026-08-11 - Codex - Typed Hold'em Snapshot Persistence
 
 Summary:

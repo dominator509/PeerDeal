@@ -330,6 +330,52 @@ void main() {
     expect(window.snapshot?.snapshotHash, 'snapshot_hash_2');
   });
 
+  test('file store fails closed when the scope lock cannot be opened', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    expect(
+      writer
+          .appendEvents(
+            scope: scope,
+            events: <EventEnvelope>[
+              _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+            ],
+          )
+          .isSuccess,
+      isTrue,
+    );
+
+    final lockFile = directory.listSync().whereType<File>().singleWhere(
+      (candidate) => candidate.path.endsWith('.lock'),
+    );
+    lockFile.deleteSync();
+    Directory(lockFile.path).createSync();
+
+    final result = writer.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_LOCK_FAILED',
+    );
+
+    Directory(lockFile.path).deleteSync(recursive: true);
+    expect(writer.loadWindow(scope).events.map((event) => event.eventSeq), [1]);
+  });
+
   test(
     'file store wipes one scope and interrupted writes without crossing scopes',
     () {
@@ -354,7 +400,9 @@ void main() {
             .isSuccess,
         isTrue,
       );
-      final targetFile = directory.listSync().whereType<File>().single;
+      final targetFile = directory.listSync().whereType<File>().singleWhere(
+        (candidate) => candidate.path.endsWith('.json'),
+      );
       final interruptedWrite = File('${targetFile.path}.tmp.orphan');
       interruptedWrite.writeAsStringSync('stale recovery data');
 
@@ -392,7 +440,18 @@ void main() {
       expect(writer.loadWindow(scope).events, isEmpty);
       expect(writer.loadWindow(scope).snapshot, isNull);
       expect(otherWriter.loadWindow(otherScope).events, hasLength(1));
-      expect(directory.listSync().whereType<File>(), hasLength(1));
+      expect(
+        directory.listSync().whereType<File>().where(
+          (candidate) => candidate.path.endsWith('.json'),
+        ),
+        hasLength(1),
+      );
+      expect(
+        directory.listSync().whereType<File>().where(
+          (candidate) => candidate.path.endsWith('.lock'),
+        ),
+        hasLength(2),
+      );
     },
   );
 
@@ -414,7 +473,9 @@ void main() {
       ],
     );
 
-    final persisted = directory.listSync().whereType<File>().single;
+    final persisted = directory.listSync().whereType<File>().singleWhere(
+      (candidate) => candidate.path.endsWith('.json'),
+    );
     final rawJson = persisted.readAsStringSync();
 
     expect(result.isSuccess, isTrue);
@@ -453,7 +514,11 @@ void main() {
       isTrue,
     );
 
-    directory.listSync().whereType<File>().single.writeAsStringSync('{bad');
+    directory
+        .listSync()
+        .whereType<File>()
+        .singleWhere((candidate) => candidate.path.endsWith('.json'))
+        .writeAsStringSync('{bad');
 
     final result = writer.appendEvents(
       scope: scope,

@@ -529,6 +529,13 @@ protocol mapping seam: it ignores non-`SessionClosed` events, requires the
 locked catalog version and exact recovery scope, parses `emitted_at`, and only
 then delegates to the close coordinator. Invalid event versions, scopes, or
 timestamps are rejected before retention or storage work.
+`JsonFileRecoveryPersistenceStore` serializes each valid scope's complete
+hydrate-modify-write transaction, read, and wipe through a stable per-scope
+operating-system file lock. The lock is held by an open file handle and is
+released when that handle closes, including after process termination. Lock
+acquisition failures return a fatal `RecoveryPersistenceResult`; the store
+does not change the public `RecoveryPersistenceStore` contract or claim to be
+a production database.
 `AppTableSessionRuntime` is the app-owned session owner seam: it binds the
 initial table/session/protocol identity, delegates ordered `EventEnvelope`
 projection to `peerdeal_core.CoreReducer`, and leaves state unchanged when

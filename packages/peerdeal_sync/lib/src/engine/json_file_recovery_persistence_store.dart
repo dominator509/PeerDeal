@@ -25,13 +25,22 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     final scopeResult = _validateScopeIdentity(scope);
     if (!scopeResult.isSuccess) return scopeResult;
 
-    final hydrate = _hydrate(scope);
-    if (!hydrate.result.isSuccess) return hydrate.result;
+    try {
+      return _withScopeLock(scope, () {
+        final hydrate = _hydrate(scope);
+        if (!hydrate.result.isSuccess) return hydrate.result;
 
-    final result = hydrate.store.saveSnapshot(scope: scope, snapshot: snapshot);
-    if (!result.isSuccess) return result;
+        final result = hydrate.store.saveSnapshot(
+          scope: scope,
+          snapshot: snapshot,
+        );
+        if (!result.isSuccess) return result;
 
-    return _write(scope, hydrate.store.loadWindow(scope));
+        return _write(scope, hydrate.store.loadWindow(scope));
+      });
+    } on _RecoveryPersistenceLockException {
+      return _lockFailure();
+    }
   }
 
   @override
@@ -42,13 +51,19 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     final scopeResult = _validateScopeIdentity(scope);
     if (!scopeResult.isSuccess) return scopeResult;
 
-    final hydrate = _hydrate(scope);
-    if (!hydrate.result.isSuccess) return hydrate.result;
+    try {
+      return _withScopeLock(scope, () {
+        final hydrate = _hydrate(scope);
+        if (!hydrate.result.isSuccess) return hydrate.result;
 
-    final result = hydrate.store.appendEvents(scope: scope, events: events);
-    if (!result.isSuccess) return result;
+        final result = hydrate.store.appendEvents(scope: scope, events: events);
+        if (!result.isSuccess) return result;
 
-    return _write(scope, hydrate.store.loadWindow(scope));
+        return _write(scope, hydrate.store.loadWindow(scope));
+      });
+    } on _RecoveryPersistenceLockException {
+      return _lockFailure();
+    }
   }
 
   @override
@@ -57,17 +72,19 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     if (!scopeResult.isSuccess) return scopeResult;
 
     try {
-      final file = _fileFor(scope);
-      final files = <File>[
-        if (file.existsSync()) file,
-        ..._temporaryFilesFor(file),
-      ];
-      for (final candidate in files) {
-        if (candidate.existsSync()) {
-          candidate.deleteSync();
+      return _withScopeLock(scope, () {
+        final file = _fileFor(scope);
+        final files = <File>[
+          if (file.existsSync()) file,
+          ..._temporaryFilesFor(file),
+        ];
+        for (final candidate in files) {
+          if (candidate.existsSync()) {
+            candidate.deleteSync();
+          }
         }
-      }
-      return const RecoveryPersistenceResult.success();
+        return const RecoveryPersistenceResult.success();
+      });
     } on Object {
       return const RecoveryPersistenceResult(
         isSuccess: false,
@@ -88,11 +105,62 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
       return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
     }
 
-    final hydrate = _hydrate(scope);
-    if (!hydrate.result.isSuccess) {
+    try {
+      return _withScopeLock(scope, () {
+        final hydrate = _hydrate(scope);
+        if (!hydrate.result.isSuccess) {
+          return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+        }
+        return hydrate.store.loadWindow(scope);
+      }, createRoot: false);
+    } on Object {
       return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
     }
-    return hydrate.store.loadWindow(scope);
+  }
+
+  /// Serializes the complete hydrate-modify-write transaction per scope.
+  ///
+  /// The operating system releases this advisory lock when the owning process
+  /// exits, including an abnormal exit, so interrupted writers do not leave a
+  /// permanent application-level lock record.
+  T _withScopeLock<T>(
+    RecoveryPersistenceScope scope,
+    T Function() operation, {
+    bool createRoot = true,
+  }) {
+    if (!_rootDirectory.existsSync()) {
+      if (!createRoot) return operation();
+      _rootDirectory.createSync(recursive: true);
+    }
+
+    final lockFile = _lockFileFor(scope);
+    RandomAccessFile? handle;
+    try {
+      handle = lockFile.openSync(mode: FileMode.append);
+      handle.lockSync(FileLock.exclusive);
+    } on Object {
+      try {
+        handle?.closeSync();
+      } on Object {
+        // Preserve the lock failure as the authoritative result.
+      }
+      throw const _RecoveryPersistenceLockException();
+    }
+
+    var locked = false;
+    try {
+      locked = true;
+      return operation();
+    } finally {
+      if (locked) {
+        try {
+          handle.unlockSync();
+        } on Object {
+          // Closing the handle still releases the OS lock on supported hosts.
+        }
+      }
+      handle.closeSync();
+    }
   }
 
   _HydratedRecoveryStore _hydrate(RecoveryPersistenceScope scope) {
@@ -193,6 +261,19 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     );
   }
 
+  RecoveryPersistenceResult _lockFailure() {
+    return const RecoveryPersistenceResult(
+      isSuccess: false,
+      conflicts: <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_LOCK_FAILED',
+          message: 'Recovery persistence scope could not be locked.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ],
+    );
+  }
+
   _HydratedRecoveryStore _corruptStore(InMemoryRecoveryPersistenceStore store) {
     return _HydratedRecoveryStore(
       store: store,
@@ -241,11 +322,21 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
   }
 
   File _fileFor(RecoveryPersistenceScope scope) {
-    final fileName = base64Url.encode(utf8.encode(scope.storageKey));
+    final fileName = _encodedScopeKey(scope);
     return File(
       '${_rootDirectory.path}${Platform.pathSeparator}$fileName.json',
     );
   }
+
+  File _lockFileFor(RecoveryPersistenceScope scope) {
+    final fileName = _encodedScopeKey(scope);
+    return File(
+      '${_rootDirectory.path}${Platform.pathSeparator}$fileName.lock',
+    );
+  }
+
+  String _encodedScopeKey(RecoveryPersistenceScope scope) =>
+      base64Url.encode(utf8.encode(scope.storageKey));
 
   List<File> _temporaryFilesFor(File file) {
     if (!_rootDirectory.existsSync()) return <File>[];
@@ -263,4 +354,8 @@ class _HydratedRecoveryStore {
 
   final InMemoryRecoveryPersistenceStore store;
   final RecoveryPersistenceResult result;
+}
+
+class _RecoveryPersistenceLockException implements Exception {
+  const _RecoveryPersistenceLockException();
 }

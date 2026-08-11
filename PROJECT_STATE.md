@@ -923,6 +923,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   store; product state selection, event-log policy, database persistence,
   startup invocation, and native/device validation remain separate.
 
+## Recent T95 Changes
+
+- Hardened `JsonFileRecoveryPersistenceStore` with a stable per-scope OS file
+  lock around hydrate-modify-write transactions, reads, and wipes.
+- The lock is released by the closed OS file handle, including after process
+  termination, and lock failures return stable fatal persistence results.
+- The public recovery-store contract and package boundaries remain unchanged;
+  production database replacement and platform/runtime validation remain open.
+
 ## Required Gates
 
 Run after each retrofit step:

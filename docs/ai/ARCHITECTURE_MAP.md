@@ -205,6 +205,11 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   explicit environment configuration still wins. The bounded app scheduler,
   app transport provisioner, and route lifecycle mount now exist around loaded
   native drains.
+- `JsonFileRecoveryPersistenceStore` serializes each recovery scope's complete
+  hydrate-modify-write transaction, read, and wipe with a stable operating-
+  system file lock whose handle release also covers process termination. This
+  hardens the JSON fallback against cross-process lost updates without turning
+  it into a product database.
 - App-native readiness aggregation accepts an app-owned cancellation signal and
   forwards it to additive cancellable capability bridges. Mirrored app states
   cancel stale readiness work when the loader changes or the state disposes;

@@ -638,6 +638,10 @@ the gates below are satisfied.
 - Sync recovery file persistence now writes canonical protocol JSON through a
   temporary file before replacing the durable recovery window, locking stable
   on-disk bytes for diagnostics and reducing direct-write corruption risk.
+- Sync recovery file persistence now serializes each scope's hydrate-modify-write
+  transaction, read, and wipe through an operating-system file lock. The lock
+  handle is closed on every path so process termination releases it, and lock
+  failures fail closed without changing the public recovery-store contract.
 - Sync recovery persistence now exposes an idempotent, scope-validated wipe
   operation; the JSON store removes the durable recovery window and matching
   interrupted-write temporary files without removing other scopes. Retention

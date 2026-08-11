@@ -930,3 +930,18 @@ Remaining:
   choose snapshot IDs, define event-log policy, and invoke the writer. The
   writer does not own product state selection, a database, retention, startup,
   native reachability, device validation, or release signing.
+
+## Recent T95 Changes
+
+- Hardened `JsonFileRecoveryPersistenceStore` with a stable per-scope OS file
+  lock around hydrate-modify-write transactions, reads, and wipes.
+- Lock handles are closed in all paths so the operating system releases the
+  advisory lock after process failure; lock acquisition failures return a
+  stable fatal persistence result.
+- Updated file-store coverage for durable lock records without changing the
+  public recovery-store contract or package boundaries.
+
+Remaining:
+- This strengthens the JSON recovery fallback but does not replace it with a
+  production database or prove platform filesystem, device, or cross-device
+  runtime behavior.
