@@ -87,7 +87,10 @@ Local Hold'em producer flow:
    replacement and disposal complete it, while bootstrap cleanup cancels the
    deadline timer. Successful join outcomes carry the resolved invite for this
    handoff. Demo snapshots and compiled Game Files are not live session identity
-   sources.
+   sources. `AppPersistedHoldemProductionSessionSource` can hydrate a typed
+   `HoldemStateSnapshot` from the existing recovery store at this boundary, but
+   leaves input mapping, identity, close policy, database choice, and recovery
+   suffix replay to the product caller.
 9. `AppHoldemProductionSessionBootstrapRouteRegistration` lets either app shell
    merge the existing bootstrap route into its production map and native-
    readiness gate. When no explicit `JoinFlowReadyHandler` is supplied, the

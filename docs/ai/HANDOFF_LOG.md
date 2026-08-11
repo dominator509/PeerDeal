@@ -12,6 +12,38 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Typed Persisted Hold'em Production Source
+
+Summary:
+- Added `HoldemStateSnapshot` to compose strict table, Hold'em hand, and event
+  cursor hydration with exact scope and snapshot sequence checks.
+- Added mirrored mobile and desktop persisted-session source adapters over the
+  existing recovery store. They invoke a caller-owned input factory and fail
+  closed on missing, unsupported, mismatched, or unreplayed snapshot data.
+
+Files changed:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_state_snapshot.dart` and
+  its public export/test.
+- Mirrored app `session/` source adapters and focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Tests run:
+- Focused mobile persisted-source suite: passed, 4 tests.
+- Focused desktop persisted-source suite: passed, 4 tests.
+- Package and mirrored app analyzers: passed.
+
+Risks:
+- Product database wiring, local identity, recovery suffix replay,
+  native/device validation, and release signing remain integration or
+  operator-owned.
+
+Next reviewer:
+- Supply the real product source and identity mapping, or continue with the
+  documented native/device runtime validation gates.
+
+---
+
 ### 2026-08-10 - Codex - Hold'em Event-Cursor Persistence Parser
 
 Summary:

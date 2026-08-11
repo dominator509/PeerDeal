@@ -359,6 +359,15 @@ configuration and the explicit registration is rejected with `StateError`;
 the configuration still does not own source, state, identity, persistence, or
 native transport.
 
+`AppPersistedHoldemProductionSessionSource` is the concrete app-owned adapter
+for the existing `RecoveryPersistenceStore` snapshot boundary. It decodes a
+`HoldemStateSnapshot` from a versioned `SnapshotEnvelope`, verifies exact
+invite scope and snapshot/cursor sequence continuity, and invokes a caller-
+owned input factory. Missing snapshots, unsupported versions, scope mismatch,
+and recovery suffix events beyond the snapshot base fail closed. The adapter
+does not select a database, create local identity, own route/close policy, or
+replay suffix events; those remain product integration responsibilities.
+
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through
 `RouteSettings.arguments`; it does not interpret, persist, or validate the

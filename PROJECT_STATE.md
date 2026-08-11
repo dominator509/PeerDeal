@@ -420,6 +420,18 @@ Generated: 2026-08-10
   focused cursor persistence tests passed with 3 tests. Product persistence and
   local identity wiring remain integration-owned.
 
+## Recent T57 Changes
+
+- `peerdeal_variants` now provides `HoldemStateSnapshot`, composing strict
+  table, hand, and cursor JSON hydration with matching scope and snapshot
+  sequence checks.
+- Mirrored mobile and desktop `AppPersistedHoldemProductionSessionSource`
+  adapters load that typed snapshot from the existing recovery store and pass
+  it through a caller-owned input factory. Missing, unsupported, mismatched,
+  or unreplayed suffix data fails closed; product database wiring, local
+  identity, and event replay remain integration-owned. Focused mobile and
+  desktop tests passed with 4 tests each.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

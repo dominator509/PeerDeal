@@ -30,7 +30,8 @@ session configuration, T49 fail-closed Android release signing, T50 production
 table UI accessibility/responsive hardening, T51 keyboard/focus control
 hardening, T52 action hit-target hardening, T53 local-seat action routing,
 T54 typed core table-state hydration, T55 typed Hold'em state hydration, and
-T56 typed Hold'em event-cursor hydration
+T56 typed Hold'em event-cursor hydration, and T57 typed persisted Hold'em
+source hydration
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -62,6 +63,10 @@ are implemented on branch
   serialization and hydration for durable source integrations.
 - Variant-owned `HoldemEventCursor` now has strict JSON serialization and
   hydration while requiring caller-owned event policy factories.
+- Added `HoldemStateSnapshot` plus mirrored app-owned persisted production
+  session sources. They hydrate the typed table, Hold'em hand, and event
+  cursor state from the existing recovery store and fail closed on missing,
+  unsupported, mismatched, or unreplayed snapshot data.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -432,3 +437,5 @@ are implemented on branch
 - T54 focused core invariant/model tests: passed, 13 tests.
 - T55 focused variant state persistence tests: passed, 3 tests.
 - T56 focused event-cursor persistence tests: passed, 3 tests.
+- T57 focused persisted-source tests: passed, 4 tests each in mobile and
+  desktop.

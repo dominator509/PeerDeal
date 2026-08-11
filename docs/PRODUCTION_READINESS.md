@@ -1025,6 +1025,15 @@ last-event state. Hydration requires caller-owned event-id, timestamp, and
 optional hash factories, preserving event policy ownership at the product edge.
 Product persistence and local identity wiring remain integration-owned.
 
+The T57 follow-up composes those parsers into a typed `HoldemStateSnapshot` and
+mirrored mobile/desktop `AppPersistedHoldemProductionSessionSource` adapters
+over the existing recovery persistence store. The adapters validate snapshot
+type, version, invite scope, base sequence, and cursor continuity, and fail
+closed when recovery suffix events would require product-owned replay. The
+caller still supplies local identity, route/close policy, event factories, and
+the product input mapping; concrete database wiring and suffix replay remain
+open integration work.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
