@@ -12,6 +12,35 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Shared Action Keyboard Focus Hardening
+
+Summary:
+- Shared action controls now own a focus node, expose focusable semantics,
+  request focus on pointer activation, and bind Enter, numpad Enter, and Space
+  to the same action callback.
+- The focus outline uses a stable border width so keyboard navigation does not
+  shift surrounding layout.
+
+Files changed:
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_action_button.dart`.
+- `packages/peerdeal_ui_kit/test/app_shell_widgets_test.dart`.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused UI-kit widget suite: passed, 4 tests.
+- Shared UI-kit analyzer: passed.
+
+Risks:
+- Device keyboard, screen-reader, text-scale, and final visual validation
+  remain external.
+
+Next reviewer:
+- Validate keyboard and assistive-technology behavior on production Android
+  and Windows profiles.
+
+---
+
 ### 2026-08-10 - Codex - Production Hold'em UI Hardening
 
 Summary:

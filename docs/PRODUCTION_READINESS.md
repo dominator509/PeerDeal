@@ -992,6 +992,12 @@ with user-facing labels. This closes the codable presentation/accessibility
 gap; final visual design review, text-scale/device validation, and end-to-end
 product navigation remain external validation work.
 
+The T51 follow-up makes shared action controls keyboard-focusable with explicit
+focus semantics, pointer-to-focus behavior, and local Enter/numpad-Enter/Space
+activation bound to the same action callback. The focus outline keeps a stable
+layout footprint; device keyboard, screen-reader, and text-scale validation
+remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

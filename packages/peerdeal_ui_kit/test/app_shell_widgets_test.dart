@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
@@ -40,11 +41,34 @@ void main() {
       matchesSemantics(
         label: 'Open',
         isButton: true,
+        isFocusable: true,
         hasEnabledState: true,
         isEnabled: true,
         hasTapAction: true,
       ),
     );
+  });
+
+  testWidgets('action button activates from keyboard focus', (tester) async {
+    var tapped = false;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PeerDealActionButton(
+          label: 'Open',
+          onPressed: () {
+            tapped = true;
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    tapped = false;
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+
+    expect(tapped, isTrue);
   });
 
   testWidgets('status pill and info row render compact operational facts', (

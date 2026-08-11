@@ -27,7 +27,8 @@ source loading, T45 cancellable production-session source loading, T46
 app-shell bootstrap-route registration with default join-ready navigation,
 T47 source-backed bootstrap-route assembly, T48 runtime-owned production
 session configuration, T49 fail-closed Android release signing, and T50
-production table UI accessibility/responsive hardening
+production table UI accessibility/responsive hardening, and T51 keyboard/focus
+control hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -47,6 +48,8 @@ are implemented on branch
 - Hardened the shared app-shell action/fact semantics and narrow-layout behavior;
   mirrored production Hold'em surfaces now render human-readable phase, round,
   actor, and seats state without exposing enum internals.
+- Shared action controls now own pointer/keyboard focus and bind Enter, numpad
+  Enter, and Space to the same visible action without layout shift.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -410,3 +413,4 @@ are implemented on branch
 - T50 Android `flutter build apk --debug --no-pub`: passed.
 - T50 Windows `flutter build windows --debug --no-pub`: passed.
 - T50 Dart format and `rtk git diff --check`: passed.
+- T51 focused UI-kit widget tests: passed, 4 tests.

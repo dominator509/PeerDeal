@@ -374,6 +374,14 @@ Generated: 2026-08-10
   production-table suites passed; Android debug APK and Windows debug host
   builds also passed. Final visual/device UX validation remains external.
 
+## Recent T51 Changes
+
+- Shared app-shell action controls now own a focus node, expose focusable
+  semantics, request focus on pointer activation, and bind Enter, numpad Enter,
+  and Space to the same action callback. The focus outline uses a stable border
+  width so keyboard navigation does not shift layout. The focused UI-kit suite
+  passed with 4 tests; final device/accessibility validation remains external.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`
