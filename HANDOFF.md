@@ -1114,3 +1114,16 @@ Remaining:
 - App rendering, production database replacement, platform/runtime validation,
   other-platform hosts, product startup integration, and release signing
   remain separate.
+
+## Recent T108 Changes
+
+- Added public `DealProofLimits` defaults for provider identity/reference text,
+  maps, lists, nesting, node count, and canonical UTF-8 proof bytes.
+- `DefaultProviderProofNormalizer` now accepts only bounded JSON-safe proofs,
+  rejects unsupported/non-finite values and overflow before bundle creation,
+  and shares one immutable bounded payload between normalized and raw views.
+
+Remaining:
+- Provider-specific proof semantics, product verification wiring, platform/
+  device validation, production persistence, and release signing remain
+  separate.

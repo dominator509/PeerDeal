@@ -235,7 +235,9 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 - No central auth service exists in the current repo.
 - Governance/roles live in mode policy.
 - Receipt authorization checks pseudonymous user/session binding.
-- Provider-proof verification lives in `peerdeal_crypto`.
+- Provider-proof verification lives in `peerdeal_crypto`; its default
+  normalizer bounds JSON-safe proof structure and canonical UTF-8 size before
+  creating a proof bundle.
 
 ## Risk Areas
 

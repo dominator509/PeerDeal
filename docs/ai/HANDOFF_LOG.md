@@ -12,6 +12,34 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-11 - Codex - T108 Provider-Proof Normalization Bounds
+
+Summary:
+- Added public `DealProofLimits` defaults for provider identity/reference text,
+  maps, lists, nesting, node count, and canonical UTF-8 proof bytes.
+- `DefaultProviderProofNormalizer` now rejects unsupported/non-finite values,
+  non-string keys, and overflow before bundle construction, while normalized and
+  raw views share one immutable bounded payload.
+
+Files changed:
+- Crypto limits model, normalizer, barrel, README, and focused regression tests.
+- Readiness ledger, handoff queue, project state, and stable AI context docs.
+
+Tests run:
+- Focused provider-proof normalization suite: 6 tests passed.
+- Focused `peerdeal_crypto` analysis passed.
+
+Risks:
+- Provider-specific proof semantics, product verification wiring,
+  platform/runtime validation, other-platform hosts, production persistence,
+  and release signing remain separate.
+
+Next reviewer:
+- Preserve `DealProofLimits` when adding provider adapters; do not move proof
+  semantics into protocol, app orchestration, or generic native bridges.
+
+---
+
 ### 2026-08-11 - Codex - T107 Privacy Diagnostics Bounds
 
 Summary:

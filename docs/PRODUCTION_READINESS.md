@@ -1434,6 +1434,15 @@ remains intact. This hardens the shared privacy boundary; app rendering,
 production database replacement, and platform/runtime validation remain
 separate.
 
+The T108 follow-up closes the provider-proof normalization materialization gap.
+`DefaultProviderProofNormalizer` now applies `DealProofLimits` to provider
+identity/reference text, JSON maps/lists, nesting, node count, and canonical
+UTF-8 proof bytes. Unsupported values, non-finite numbers, non-string keys, and
+overflow fail closed before verification bundle construction; normalized and
+raw views share one immutable bounded payload. Provider-specific proof
+semantics, product verification wiring, and platform/runtime validation remain
+separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

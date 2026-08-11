@@ -760,7 +760,9 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 
 - No central auth token/session contract exists in the scaffold.
 - Receipt authorization is based on session/user binding.
-- Provider-proof verification belongs to `peerdeal_crypto`.
+- Provider-proof verification belongs to `peerdeal_crypto`. Its default
+  normalizer accepts bounded JSON-safe proof maps through `DealProofLimits` and
+  fails closed with `FormatException` for unsupported values or limit overflow.
 - Mode governance owns role and seat authority.
 
 ## Frontend Expectations

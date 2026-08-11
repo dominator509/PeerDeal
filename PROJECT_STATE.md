@@ -1051,6 +1051,16 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Overflow emits stable truncation markers while existing sensitive-field
   redaction remains intact. Focused privacy tests and package analysis pass.
 
+## T108 Provider-Proof Normalization Bounds
+
+- `DefaultProviderProofNormalizer` now uses public `DealProofLimits` defaults
+  for provider identity/reference text, maps, lists, nesting, nodes, and
+  canonical UTF-8 proof bytes.
+- Unsupported values, non-finite numbers, non-string object keys, and every
+  limit overflow fail closed before `DealProofBundle` construction. The raw
+  and normalized views share one immutable bounded payload; focused crypto
+  tests and package analysis pass.
+
 ## Required Gates
 
 Run after each retrofit step:

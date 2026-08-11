@@ -1,5 +1,6 @@
 export 'src/models/deal_provider_descriptor.dart';
 export 'src/models/deal_proof_bundle.dart';
+export 'src/models/deal_proof_limits.dart';
 export 'src/models/verification_scope.dart';
 export 'src/models/verification_state.dart';
 export 'src/models/verification_reason_code.dart';

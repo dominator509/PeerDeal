@@ -7,6 +7,7 @@ Starter package for PeerDeal fair-deal provider normalization and fairness / ver
 - verification request/result models
 - verification engine contract
 - provider normalization boundary
+- bounded, fail-closed JSON provider-proof normalization
 - baseline verification service
 
 ## Must not own
