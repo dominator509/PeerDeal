@@ -92,8 +92,10 @@ Local Hold'em producer flow:
    deadline timer. Successful join outcomes carry the resolved invite for this
    handoff. Demo snapshots and compiled Game Files are not live session identity
    sources. `AppPersistedHoldemProductionSessionSource` hydrates a typed
-   `HoldemStateSnapshot` and replays its suffix through the variant-owned
-   atomic recovery transaction. It honors route cancellation before recovery
+  `HoldemStateSnapshot` and replays its suffix through the variant-owned
+  atomic recovery transaction. It enforces the shared 4,096-event recovery
+  window default before snapshot decoding or suffix materialization, and it
+  honors route cancellation before recovery
    access and around lazy identity provisioning. It leaves input mapping,
    identity, close policy, and database choice to the product caller.
    Mirrored app shells also expose local peer identity adapters over generic

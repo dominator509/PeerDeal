@@ -1590,6 +1590,12 @@ retained verification/decryption collections to 128 entries by default before
 lookup traversal. Oversized collections fail closed while active usable keys
 remain available through the direct active-key path.
 
+The T128 follow-up closes the app persisted-session recovery-window gap.
+Mirrored `AppPersistedHoldemProductionSessionSource` adapters now enforce the
+shared 4,096-event default, with a positive caller-owned override, immediately
+after a recovery store returns a window. Oversized windows fail closed before
+snapshot decoding, suffix materialization, identity provisioning, or replay.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -342,6 +342,54 @@ void main() {
   });
 
   test(
+    'rejects an oversized recovery window before snapshot processing',
+    () async {
+      final source = _source(_OversizedRecoveryStore(), maxRecoveryEvents: 1);
+
+      await expectLater(
+        source.load(_invite()),
+        throwsA(
+          predicate(
+            (error) =>
+                error is StateError &&
+                error.message ==
+                    'Persisted Holdem recovery event window exceeds the configured limit.',
+          ),
+        ),
+      );
+    },
+  );
+
+  test('rejects a non-positive recovery event limit', () {
+    expect(
+      () => _source(_OversizedRecoveryStore(), maxRecoveryEvents: 0),
+      throwsArgumentError,
+    );
+  });
+
+  test('rejects an invalid eager limit before identity provisioning', () async {
+    final identityBridge = _IdentityBridge();
+
+    await expectLater(
+      AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(
+        store: InMemoryRecoveryPersistenceStore(),
+        identityProvisioner: NativeLocalPeerIdentityProvisioner(
+          loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+          writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+          identityFactory: () => 'peer_local',
+        ),
+        routePolicy: _routePolicy(),
+        eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
+        emittedAtFactory: () => '2026-08-10T00:00:00Z',
+        eventHashFactory: computeCanonicalHash,
+        maxRecoveryEvents: 0,
+      ),
+      throwsArgumentError,
+    );
+    expect(identityBridge.savedKeys, isEmpty);
+  });
+
+  test(
     'replays a valid recovery suffix before invoking the input factory',
     () async {
       final store = InMemoryRecoveryPersistenceStore();
@@ -478,6 +526,7 @@ AppPersistedHoldemProductionSessionSource _source(
   RecoveryPersistenceStore store, {
   AppHoldemProductionSessionInputFactory? inputFactory,
   AppHoldemProductionSessionContextInputFactory? contextInputFactory,
+  int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
 }) {
   return AppPersistedHoldemProductionSessionSource(
     store: store,
@@ -498,6 +547,47 @@ AppPersistedHoldemProductionSessionSource _source(
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-10T00:00:00Z',
     eventHashFactory: computeCanonicalHash,
+    maxRecoveryEvents: maxRecoveryEvents,
+  );
+}
+
+class _OversizedRecoveryStore implements RecoveryPersistenceStore {
+  @override
+  RecoveryPersistenceResult saveSnapshot({
+    required RecoveryPersistenceScope scope,
+    required SnapshotEnvelope snapshot,
+  }) => const RecoveryPersistenceResult.success();
+
+  @override
+  RecoveryPersistenceResult appendEvents({
+    required RecoveryPersistenceScope scope,
+    required List<EventEnvelope> events,
+  }) => const RecoveryPersistenceResult.success();
+
+  @override
+  RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) =>
+      const RecoveryPersistenceResult.success();
+
+  @override
+  PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) =>
+      PersistedRecoveryWindow(events: <EventEnvelope>[_event(1), _event(2)]);
+}
+
+EventEnvelope _event(int eventSeq) {
+  return EventEnvelope(
+    eventId: 'evt_$eventSeq',
+    eventType: 'RecoveryEventPersisted',
+    eventVersion: '1.0',
+    protocolVersion: '1.0.0',
+    eventSeq: eventSeq,
+    tableId: 'table_001',
+    sessionId: 'session_001',
+    handId: null,
+    emittedAt: '2026-08-10T00:00:00Z',
+    actorRef: 'system',
+    payload: const <String, Object?>{},
+    prevEventHash: eventSeq == 1 ? genesisEventHash : 'hash_${eventSeq - 1}',
+    eventHash: 'hash_$eventSeq',
   );
 }
 

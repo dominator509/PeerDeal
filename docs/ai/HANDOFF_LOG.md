@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T128 Persisted Session Recovery Window Bound
+
+Summary:
+- Mirrored app persisted Hold'em session sources now enforce the shared
+  `RecoveryEventWindowLimits.defaultMaxEvents` bound immediately after a store
+  returns a recovery window; callers can provide a smaller positive limit.
+- Oversized windows fail closed before snapshot decoding, suffix allocation,
+  lazy identity provisioning, or deterministic replay.
+
+Tests run:
+- Focused mobile and desktop persisted-session source suites passed (16 each).
+- Focused mobile and desktop Flutter analysis passed.
+
+Risks:
+- This hardens the app adapter boundary; concrete product session/state wiring,
+  native runtime validation, other-platform implementations, and release
+  signing remain separate.
+
+Next reviewer:
+- Run the full local gate set and commit if green.
+
+---
+
 ### 2026-08-11 - Codex - T127 Receipt Key-Ring Collection Bounds
 
 Summary:

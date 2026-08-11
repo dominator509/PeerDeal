@@ -1143,6 +1143,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` through blocked settlement projection;
   focused variant projection tests (52) and analysis pass.
 
+## T128 Persisted Session Recovery Window Bound
+
+- Mirrored `AppPersistedHoldemProductionSessionSource` adapters now enforce
+  the shared 4,096-event recovery-window default, with a positive caller-owned
+  override, before snapshot decoding, suffix materialization, identity
+  provisioning, or deterministic replay.
+- Oversized windows fail closed at the app store boundary; focused mobile and
+  desktop source suites cover overflow and invalid limits.
+
 ## T127 Receipt Key-Ring Collection Bounds
 
 - `ReceiptKeyRingSnapshot` and `StaticReceiptSigningKeyProvider` now bound

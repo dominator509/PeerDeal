@@ -536,6 +536,9 @@ caller-owned input factory. Missing snapshots, unsupported versions, scope
 mismatch, bad hashes, unsupported events, or reducer rejection fail closed.
 Replay is atomic and never returns partial state; lazy identity provisioning
 occurs only after those checks pass. The adapter does not select a
+product-owned recovery store and enforces the shared 4,096-event recovery
+window bound, or a smaller positive caller limit, before snapshot decoding,
+suffix materialization, identity provisioning, or replay.
 database, create local identity, or own route/close policy; those remain
 product integration responsibilities.
 

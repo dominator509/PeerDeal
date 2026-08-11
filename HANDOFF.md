@@ -1178,6 +1178,20 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T128 Persisted Session Recovery Window Bound
+
+- Mirrored `AppPersistedHoldemProductionSessionSource` adapters now enforce
+  the shared `RecoveryEventWindowLimits.defaultMaxEvents` bound, configurable
+  per source, immediately after loading a recovery window and before snapshot
+  decoding, suffix materialization, identity provisioning, or replay.
+- Oversized windows and non-positive limits fail closed; focused mobile and
+  desktop source tests cover both paths.
+
+Remaining:
+- Concrete product session/state wiring, native platform key storage,
+  runtime/device validation, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T127 Receipt Key-Ring Bounds
 
 - `ReceiptKeyRingSnapshot` and `StaticReceiptSigningKeyProvider` now apply

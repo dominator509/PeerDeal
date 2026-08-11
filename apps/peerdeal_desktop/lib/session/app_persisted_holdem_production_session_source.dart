@@ -154,8 +154,10 @@ class AppPersistedHoldemProductionSessionSource
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
     String snapshotType = 'HoldemStateSnapshot',
     String snapshotVersion = '1.0',
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     routePolicy.validate();
+    _validateMaxRecoveryEvents(maxRecoveryEvents);
     final provisioned = await identityProvisioner.ensureIdentity();
     final identity = provisioned.identity;
     if (!provisioned.isSuccess || identity == null) {
@@ -181,6 +183,7 @@ class AppPersistedHoldemProductionSessionSource
       eventReducer: eventReducer,
       snapshotType: snapshotType,
       snapshotVersion: snapshotVersion,
+      maxRecoveryEvents: maxRecoveryEvents,
     );
   }
 
@@ -202,8 +205,10 @@ class AppPersistedHoldemProductionSessionSource
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
     String snapshotType = 'HoldemStateSnapshot',
     String snapshotVersion = '1.0',
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     routePolicy.validate();
+    _validateMaxRecoveryEvents(maxRecoveryEvents);
     AppLocalPeerIdentity? localIdentity;
 
     Future<void> ensureIdentity({Future<void>? cancellation}) async {
@@ -246,10 +251,11 @@ class AppPersistedHoldemProductionSessionSource
       eventReducer: eventReducer,
       snapshotType: snapshotType,
       snapshotVersion: snapshotVersion,
+      maxRecoveryEvents: maxRecoveryEvents,
     );
   }
 
-  const AppPersistedHoldemProductionSessionSource({
+  AppPersistedHoldemProductionSessionSource({
     required RecoveryPersistenceStore store,
     required AppHoldemProductionSessionInputFactory inputFactory,
     AppHoldemProductionSessionContextInputFactory? contextInputFactory,
@@ -262,7 +268,9 @@ class AppPersistedHoldemProductionSessionSource
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
     this.snapshotType = 'HoldemStateSnapshot',
     this.snapshotVersion = '1.0',
-  }) : _store = store,
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+  }) : maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
+       _store = store,
        _inputFactory = inputFactory,
        _contextInputFactory = contextInputFactory,
        _identityLoader = identityLoader,
@@ -283,6 +291,7 @@ class AppPersistedHoldemProductionSessionSource
   final HoldemEventReducer _eventReducer;
   final String snapshotType;
   final String snapshotVersion;
+  final int maxRecoveryEvents;
 
   @override
   Future<AppHoldemProductionSessionInput> load(
@@ -340,6 +349,11 @@ class AppPersistedHoldemProductionSessionSource
       window = _store.loadWindow(scope);
     } on Object {
       throw StateError('Resolved invite persistence window is unavailable.');
+    }
+    if (window.events.length > maxRecoveryEvents) {
+      throw StateError(
+        'Persisted Holdem recovery event window exceeds the configured limit.',
+      );
     }
 
     final envelope = window.snapshot;
@@ -425,4 +439,15 @@ class AppPersistedHoldemProductionSessionSource
       throw StateError('Persisted session load cancelled.');
     }
   }
+}
+
+int _validateMaxRecoveryEvents(int value) {
+  if (value <= 0) {
+    throw ArgumentError.value(
+      value,
+      'maxRecoveryEvents',
+      'Recovery event limit must be positive.',
+    );
+  }
+  return value;
 }
