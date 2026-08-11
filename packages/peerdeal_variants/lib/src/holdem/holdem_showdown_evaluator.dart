@@ -1,13 +1,25 @@
 import '../contracts/showdown_models.dart';
 import 'holdem_card_identity.dart';
 import 'holdem_hand_evaluator.dart';
+import 'holdem_input_limits.dart';
 
 class HoldemShowdownEvaluator {
-  const HoldemShowdownEvaluator({this.evaluator = const HoldemHandEvaluator()});
+  const HoldemShowdownEvaluator({
+    this.evaluator = const HoldemHandEvaluator(),
+    this.maxSeats = HoldemInputLimits.defaultMaxSeats,
+  }) : assert(maxSeats > 0, 'maxSeats must be positive');
 
   final HoldemHandEvaluator evaluator;
+  final int maxSeats;
 
   ShowdownEvaluationResult evaluate(ShowdownEvaluationInput input) {
+    if (input.seats.length > maxSeats) {
+      return const ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[],
+        warnings: <String>['ERR_HOLDEM_SHOWDOWN_SEAT_COUNT'],
+      );
+    }
+
     final warnings = <String>[];
     if (input.boardCards.length != 5) {
       warnings.add('ERR_HOLDEM_SHOWDOWN_BOARD_CARD_COUNT');

@@ -2,6 +2,25 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T121 Hold'em Showdown Seat Bound
+
+Summary:
+- `peerdeal_variants` now bounds direct Hold'em showdown seat collections to
+  the shared nine-seat launch invariant before sorting, card expansion, or
+  hand evaluation.
+- Oversized input fails closed with `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`; adapter
+  identity and configuration validation reuse the same limit.
+
+Tests run:
+- Focused `peerdeal_variants` suite: 147 tests passed.
+- Focused `peerdeal_variants` analysis passed.
+
+Risks:
+- This hardens direct variant callers while product source wiring, native
+  reachability, durable database policy, and release inputs remain separate.
+
+---
+
 ### 2026-08-11 - Codex - T120 Network Collection Bounds
 
 Summary:

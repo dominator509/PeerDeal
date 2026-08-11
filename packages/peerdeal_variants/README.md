@@ -29,6 +29,11 @@ This starter scaffold provides only enough structure to begin Sprint 4:
 
 It does **not** yet implement a full production poker engine.
 
+Direct Hold'em showdown inputs are bounded by the locked nine-seat launch
+invariant before seat sorting, card expansion, or hand evaluation. Oversized
+inputs fail closed with `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`; the adapter identity
+and configuration validation use the same variant-owned limit.
+
 ## Hold'em showdown to settlement
 The intended app/session call order is:
 1. Build a `ShowdownEvaluationInput` from the final board and active seat hole

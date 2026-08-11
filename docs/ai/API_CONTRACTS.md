@@ -329,6 +329,12 @@ transport handler and provisioner accept an optional `holdemRuntime` to use
 this path; the generic runtime path remains the contract for non-variant
 sessions.
 
+`HoldemShowdownEvaluator` rejects direct `ShowdownEvaluationInput` values with
+more than the shared nine-seat Hold'em launch limit before sorting seats,
+expanding hole cards, or evaluating hands. It returns an empty result with
+`ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`; `HoldemAdapter` identity and configuration
+validation reuse that same variant-owned limit.
+
 `HoldemEventCursor.toJson/fromJson` persist and restore the cursor's exact
 scope, next sequence, previous hash, actor, and last-event state. Hydration
 requires caller-owned event-id and timestamp factories and accepts an optional

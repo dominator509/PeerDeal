@@ -1,5 +1,6 @@
 import '../contracts/showdown_models.dart';
 import '../contracts/variant_adapter.dart';
+import 'holdem_input_limits.dart';
 import 'holdem_showdown_evaluator.dart';
 
 class HoldemAdapter implements VariantAdapter {
@@ -21,7 +22,7 @@ class HoldemAdapter implements VariantAdapter {
       displayName: "Texas Hold'em",
       adapterVersion: '0.1.0',
       seatCountMin: 2,
-      seatCountMax: 9,
+      seatCountMax: HoldemInputLimits.defaultMaxSeats,
       holeCardCount: 2,
       boardCardCount: 5,
       bettingStructureType: 'no_limit',
@@ -48,8 +49,11 @@ class HoldemAdapter implements VariantAdapter {
     final errors = <String>[];
     final warnings = <String>[];
 
-    if (seatCount < 2 || seatCount > 9) {
-      errors.add('Hold\'em seat count must be between 2 and 9.');
+    if (seatCount < 2 || seatCount > HoldemInputLimits.defaultMaxSeats) {
+      errors.add(
+        'Hold\'em seat count must be between 2 and '
+        '${HoldemInputLimits.defaultMaxSeats}.',
+      );
     }
 
     if (bettingStructureType != 'no_limit') {

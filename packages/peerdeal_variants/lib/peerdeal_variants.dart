@@ -15,6 +15,7 @@ export 'src/holdem/holdem_hand_evaluator.dart';
 export 'src/holdem/holdem_hand_phase.dart';
 export 'src/holdem/holdem_hand_settled_event_builder.dart';
 export 'src/holdem/holdem_hand_state.dart';
+export 'src/holdem/holdem_input_limits.dart';
 export 'src/holdem/holdem_state_snapshot.dart';
 export 'src/holdem/holdem_showdown_coordinator.dart';
 export 'src/holdem/holdem_showdown_evaluator.dart';

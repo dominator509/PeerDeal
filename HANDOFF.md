@@ -1165,6 +1165,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T121 Changes
+
+- `peerdeal_variants` now bounds direct Hold'em showdown seat collections to
+  the locked nine-seat launch invariant before sorting, card expansion, or
+  hand evaluation.
+- Oversized showdown input fails closed with
+  `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`; the shared Hold'em input limit is reused by
+  adapter identity and configuration validation.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T120 Changes
 
 - `peerdeal_network` now bounds direct peer-id, bootstrap-candidate, and

@@ -1542,6 +1542,12 @@ Overflow fails closed as empty bootstrap candidates, unresolved path selection,
 unsafe confidence, or unsafe primary election without traversing an unbounded
 caller collection.
 
+The T121 follow-up closes the direct Hold'em showdown seat-materialization gap.
+`HoldemShowdownEvaluator` now applies the shared nine-seat launch invariant
+before sorting seats, expanding cards, or evaluating hands. Oversized input
+fails closed with `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`, and the same limit is reused
+by `HoldemAdapter` identity and configuration validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

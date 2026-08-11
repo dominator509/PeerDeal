@@ -33,6 +33,26 @@ void main() {
       expect(result.errors, isNotEmpty);
     });
 
+    test('showdown fails closed before materializing too many seats', () {
+      final result = adapter.evaluate(
+        ShowdownEvaluationInput(
+          boardCards: const <String>[],
+          seats: List<ShowdownSeatInput>.generate(
+            HoldemInputLimits.defaultMaxSeats + 1,
+            (index) => ShowdownSeatInput(
+              seat: index + 1,
+              holeCards: const <String>[],
+              isFolded: true,
+            ),
+            growable: false,
+          ),
+        ),
+      );
+
+      expect(result.results, isEmpty);
+      expect(result.warnings, <String>['ERR_HOLDEM_SHOWDOWN_SEAT_COUNT']);
+    });
+
     test('showdown ranks active seats by best five-card hand', () {
       final result = adapter.evaluate(
         const ShowdownEvaluationInput(

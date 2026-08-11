@@ -1117,6 +1117,14 @@ signing, and concrete product state wiring remain external or integration-owned.
   selection, unsafe confidence, or unsafe primary election. Focused network
   tests (42) and package analysis pass.
 
+## T121 Hold'em Showdown Seat Bound
+
+- `HoldemShowdownEvaluator` now rejects caller-provided seat collections above
+  the shared nine-seat Hold'em launch invariant before sorting, card expansion,
+  or hand evaluation with `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`.
+- `HoldemAdapter` identity and configuration validation reuse the same limit;
+  focused variant tests (147) and package analysis pass.
+
 ## T119 Direct Sync Request Scope Validation
 
 - `BasicConflictDetector` and `BasicSnapshotApplier` now validate direct
