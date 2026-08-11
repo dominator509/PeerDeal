@@ -1059,3 +1059,18 @@ Remaining:
 - Native host behavior, device persistence/capture enforcement, cross-device
   network reachability, product startup/database integration, and release
   signing remain separate.
+
+## Recent T104 Changes
+
+- Android local-network discovery now caps `NetworkInterface` enumeration at
+  64 entries before filtering active interfaces.
+- Windows local-network discovery now rejects adapter buffers above 1 MiB,
+  caps adapter traversal at 64 entries, and caps each unicast-address scan at
+  256 entries.
+- Android and Windows debug host builds passed; the direct Windows native-host
+  smoke passed all registered channel checks.
+
+Remaining:
+- Real-device behavior, cross-device network reachability, other-platform
+  hosts, product startup/database integration, and release signing remain
+  separate.

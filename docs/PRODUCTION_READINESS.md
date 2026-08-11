@@ -1402,6 +1402,13 @@ before generic models reach app orchestration. Oversized values fail closed;
 native host behavior, device enforcement, cross-device reachability, database
 replacement, and release signing remain separate.
 
+The T104 follow-up bounds native local-network enumeration before channel
+serialization. Android caps interface enumeration at 64 entries. Windows
+rejects adapter buffers above 1 MiB and caps adapter traversal at 64 entries and
+unicast-address scans at 256 entries. Android and Windows host builds and the
+direct Windows native-host smoke pass; device behavior and cross-device
+reachability remain external.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

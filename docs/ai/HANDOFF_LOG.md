@@ -8338,6 +8338,21 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - T104 Native Local-Network Enumeration Bounds
+
+Summary:
+- Android local-network enumeration now caps interfaces at 64 entries.
+- Windows rejects adapter address buffers above 1 MiB, caps adapters at 64, and
+  caps each unicast-address scan at 256 entries.
+- Android and Windows debug host builds passed; direct Windows native-host
+  smoke passed all channel checks.
+
+Risks:
+- Device behavior, cross-device network reachability, other-platform hosts,
+  product persistence, and release signing remain separate.
+
+---
+
 ### 2026-08-11 - Codex - T103 Generic App Storage and Capture Payload Bounds
 
 Summary:

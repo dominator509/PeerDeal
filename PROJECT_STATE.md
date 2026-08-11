@@ -1012,6 +1012,16 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Oversized values fail closed; native host/device behavior, cross-device
   network, production database, and release-signing validation remain external.
 
+## T104 Native Local-Network Enumeration Bounds
+
+- Android local-network host enumeration now stops at 64 interfaces before
+  active-state and hint projection.
+- Windows local-network host enumeration rejects address buffers above 1 MiB,
+  caps adapters at 64, and caps each adapter's unicast-address scan at 256.
+- Android and Windows debug builds plus the direct Windows native-host smoke
+  pass. Device behavior, cross-device reachability, other-platform hosts,
+  production persistence, and release signing remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

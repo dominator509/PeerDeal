@@ -632,6 +632,9 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   capture capability/action decoding bounds notes and warnings to 512 UTF-8
   bytes before exposing them to app orchestration; oversized values fail
   closed.
+- Android and Windows local-network hosts bound interface/adapter enumeration
+  before serializing `interfaceHints`; Windows also bounds the adapter address
+  buffer and each unicast-address scan. Host-side overflow fails closed.
 - Receipt import/export/verification failures must fail closed.
 - Receipt export encoding/inspection and HMAC cipher operations share bounded
   encoded-body, decoded-body, payload, ciphertext, and nonce limits; oversized

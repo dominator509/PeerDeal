@@ -20,6 +20,10 @@ constexpr char kGetCapabilityMethod[] = "getCapability";
 constexpr char kDiscoverPeersMethod[] = "discoverPeers";
 constexpr char kDiscoveryWarning[] =
     "Native local-network peer discovery is not configured.";
+constexpr ULONG kInitialAddressBufferBytes = 16 * 1024;
+constexpr ULONG kMaxAddressBufferBytes = 1024 * 1024;
+constexpr std::size_t kMaxAdapterCount = 64;
+constexpr std::size_t kMaxUnicastAddressCount = 256;
 
 using flutter::EncodableList;
 using flutter::EncodableMap;
@@ -76,13 +80,16 @@ void WindowsLocalNetwork::HandleMethodCall(
 
 WindowsLocalNetwork::NetworkSnapshot
 WindowsLocalNetwork::ReadNetworkSnapshot() {
-  ULONG buffer_size = 16 * 1024;
+  ULONG buffer_size = kInitialAddressBufferBytes;
   std::vector<std::uint8_t> buffer(buffer_size);
   ULONG flags = GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_DNS_SERVER;
   ULONG status = ::GetAdaptersAddresses(
       AF_UNSPEC, flags, nullptr,
       reinterpret_cast<PIP_ADAPTER_ADDRESSES>(buffer.data()), &buffer_size);
   if (status == ERROR_BUFFER_OVERFLOW) {
+    if (buffer_size > kMaxAddressBufferBytes) {
+      return {};
+    }
     buffer.resize(buffer_size);
     status = ::GetAdaptersAddresses(
         AF_UNSPEC, flags, nullptr,
@@ -94,16 +101,20 @@ WindowsLocalNetwork::ReadNetworkSnapshot() {
 
   NetworkSnapshot snapshot;
   const auto* adapters = reinterpret_cast<PIP_ADAPTER_ADDRESSES>(buffer.data());
-  for (const auto* adapter = adapters; adapter != nullptr;
-       adapter = adapter->Next) {
+  std::size_t adapter_count = 0;
+  for (const auto* adapter = adapters;
+       adapter != nullptr && adapter_count < kMaxAdapterCount;
+       adapter = adapter->Next, ++adapter_count) {
     if (adapter->OperStatus != IfOperStatusUp ||
         adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK) {
       continue;
     }
 
     bool has_ipv4_address = false;
+    std::size_t address_count = 0;
     for (const auto* address = adapter->FirstUnicastAddress;
-         address != nullptr; address = address->Next) {
+         address != nullptr && address_count < kMaxUnicastAddressCount;
+         address = address->Next, ++address_count) {
       const auto* socket_address = address->Address.lpSockaddr;
       if (socket_address == nullptr || socket_address->sa_family != AF_INET) {
         continue;

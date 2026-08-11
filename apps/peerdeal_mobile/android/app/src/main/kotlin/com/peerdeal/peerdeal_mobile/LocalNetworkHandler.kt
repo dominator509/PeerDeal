@@ -12,6 +12,7 @@ internal class LocalNetworkHandler : MethodChannel.MethodCallHandler {
 
         private const val GET_CAPABILITY = "getCapability"
         private const val DISCOVER_PEERS = "discoverPeers"
+        private const val MAX_INTERFACE_COUNT = 64
         private const val DISCOVERY_WARNING =
             "Native local-network peer discovery is not configured."
     }
@@ -59,7 +60,15 @@ internal class LocalNetworkHandler : MethodChannel.MethodCallHandler {
 
     private fun networkSnapshot(): NetworkSnapshot {
         val interfaces = try {
-            NetworkInterface.getNetworkInterfaces()?.toList().orEmpty()
+            val enumeration = NetworkInterface.getNetworkInterfaces()
+                ?: return NetworkSnapshot.unavailable()
+            val bounded = ArrayList<NetworkInterface>(MAX_INTERFACE_COUNT)
+            while (enumeration.hasMoreElements() &&
+                bounded.size < MAX_INTERFACE_COUNT
+            ) {
+                bounded.add(enumeration.nextElement())
+            }
+            bounded
         } catch (_: Exception) {
             return NetworkSnapshot.unavailable()
         }
