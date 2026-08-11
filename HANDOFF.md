@@ -1014,3 +1014,18 @@ Remaining:
 Remaining:
 - Native key storage, Android/device and cross-device validation, product
   startup/database integration, and release signing remain separate.
+
+## Recent T101 Changes
+
+- `JsonFileRecoveryPersistenceStore` now enforces a positive configurable
+  `maxFileBytes` limit, defaulting to 4 MiB.
+- Oversized persisted files are rejected before JSON decoding, and oversized
+  canonical recovery windows are rejected before temporary-file replacement.
+- Both paths return the stable fatal
+  `ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE` conflict without hydrating or
+  writing the oversized state.
+
+Remaining:
+- This bounds the JSON fallback only; production database replacement,
+  platform filesystem/runtime validation, product startup, and release signing
+  remain separate.

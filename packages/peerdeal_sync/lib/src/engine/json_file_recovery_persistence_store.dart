@@ -12,10 +12,24 @@ import '../models/sync_conflict_severity.dart';
 import 'in_memory_recovery_persistence_store.dart';
 
 class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
-  JsonFileRecoveryPersistenceStore({required Directory rootDirectory})
-    : _rootDirectory = rootDirectory;
+  JsonFileRecoveryPersistenceStore({
+    required Directory rootDirectory,
+    int maxFileBytes = defaultMaxFileBytes,
+  }) : _rootDirectory = rootDirectory,
+       _maxFileBytes = maxFileBytes {
+    if (maxFileBytes <= 0) {
+      throw ArgumentError.value(
+        maxFileBytes,
+        'maxFileBytes',
+        'Recovery persistence file limit must be positive.',
+      );
+    }
+  }
+
+  static const defaultMaxFileBytes = 4 * 1024 * 1024;
 
   final Directory _rootDirectory;
+  final int _maxFileBytes;
 
   @override
   RecoveryPersistenceResult saveSnapshot({
@@ -175,6 +189,9 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
 
     final PersistedRecoveryWindow window;
     try {
+      if (file.lengthSync() > _maxFileBytes) {
+        return _fileTooLarge(store);
+      }
       final decoded = jsonDecode(file.readAsStringSync());
       if (decoded is! Map<String, Object?>) {
         return _corruptStore(store);
@@ -216,10 +233,11 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
       tempFile = File(
         '${file.path}.tmp.${DateTime.now().microsecondsSinceEpoch}',
       );
-      tempFile.writeAsStringSync(
-        canonicalJsonEncode(_encodeWindow(window)),
-        flush: true,
-      );
+      final encodedWindow = canonicalJsonEncode(_encodeWindow(window));
+      if (utf8.encode(encodedWindow).length > _maxFileBytes) {
+        return _fileTooLargeResult();
+      }
+      tempFile.writeAsStringSync(encodedWindow, flush: true);
       tempFile.renameSync(file.path);
       return const RecoveryPersistenceResult.success();
     } on Object {
@@ -287,6 +305,23 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
           ),
         ],
       ),
+    );
+  }
+
+  _HydratedRecoveryStore _fileTooLarge(InMemoryRecoveryPersistenceStore store) {
+    return _HydratedRecoveryStore(store: store, result: _fileTooLargeResult());
+  }
+
+  RecoveryPersistenceResult _fileTooLargeResult() {
+    return const RecoveryPersistenceResult(
+      isSuccess: false,
+      conflicts: <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE',
+          message: 'Recovery persistence file exceeds the configured limit.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ],
     );
   }
 

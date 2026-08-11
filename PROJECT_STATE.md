@@ -982,6 +982,17 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Native key storage, device/runtime validation, product persistence, and
   release signing remain external.
 
+## T101 Recovery File Size Bounds
+
+- `JsonFileRecoveryPersistenceStore` now applies a positive configurable
+  `maxFileBytes` cap, defaulting to 4 MiB.
+- Persisted files are size-checked before JSON decoding, and serialized windows
+  are size-checked before temporary-file replacement.
+- Oversized input/output returns
+  `ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE` and does not hydrate or write state.
+- Production database replacement and platform filesystem/runtime validation
+  remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

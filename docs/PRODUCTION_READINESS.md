@@ -1378,6 +1378,15 @@ not replace the existing receipt format or signing/key-ring ownership, and it
 does not claim native key-storage, device, network, database, or release-signing
 validation.
 
+The T101 follow-up closes the JSON recovery file-size gap. The
+`JsonFileRecoveryPersistenceStore` now enforces a positive configurable
+`maxFileBytes` limit with a 4 MiB default, rejects oversized durable files
+before JSON decoding, and rejects oversized canonical windows before temporary
+file replacement. Both paths fail closed with
+`ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE`. This bounds the JSON fallback only;
+it does not claim production database replacement or platform filesystem/
+runtime validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

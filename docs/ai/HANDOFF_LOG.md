@@ -8338,6 +8338,40 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - T101 Recovery File Size Bounds
+
+Summary:
+- Added a positive configurable file-size cap to
+  `JsonFileRecoveryPersistenceStore`, defaulting to 4 MiB.
+- Oversized durable recovery files are rejected before JSON decoding, and
+  oversized canonical windows are rejected before temporary-file replacement.
+- Both paths return `ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE` without hydrating
+  or writing the oversized state.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+  and its focused persistence tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Tests run:
+- Focused recovery persistence suite: 21 tests passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Dependency audit reports zero actionable upgrades and 11 newer versions below
+  the current toolchain ceiling.
+
+Risks:
+- This bounds the JSON recovery fallback only. Production database replacement,
+  platform filesystem/runtime validation, product startup, and release signing
+  remain separate boundaries.
+
+Next reviewer:
+- Preserve the file cap when adding recovery-window writers and keep database
+  selection outside `peerdeal_sync`.
+
+---
+
 ### 2026-08-11 - Codex - T100 Receipt Processing Bounds
 
 Summary:

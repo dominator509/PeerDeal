@@ -330,6 +330,105 @@ void main() {
     expect(window.snapshot?.snapshotHash, 'snapshot_hash_2');
   });
 
+  test('file store rejects non-positive file limits', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    expect(
+      () => JsonFileRecoveryPersistenceStore(
+        rootDirectory: directory,
+        maxFileBytes: 0,
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test('file store rejects oversized persisted windows before decoding', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    expect(
+      writer
+          .appendEvents(
+            scope: scope,
+            events: <EventEnvelope>[
+              _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+            ],
+          )
+          .isSuccess,
+      isTrue,
+    );
+    final file = directory.listSync().whereType<File>().singleWhere(
+      (candidate) => candidate.path.endsWith('.json'),
+    );
+    file.writeAsBytesSync(List<int>.filled(32, 0x20));
+
+    final limited = JsonFileRecoveryPersistenceStore(
+      rootDirectory: directory,
+      maxFileBytes: 8,
+    );
+    final result = limited.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE',
+    );
+    expect(limited.loadWindow(scope).events, isEmpty);
+  });
+
+  test('file store refuses to write a window above its configured limit', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final limited = JsonFileRecoveryPersistenceStore(
+      rootDirectory: directory,
+      maxFileBytes: 8,
+    );
+    final result = limited.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE',
+    );
+    expect(
+      directory.listSync().whereType<File>().where(
+        (candidate) => candidate.path.endsWith('.json'),
+      ),
+      isEmpty,
+    );
+  });
+
   test('file store fails closed when the scope lock cannot be opened', () {
     final directory = Directory.systemTemp.createTempSync(
       'peerdeal_recovery_store_',

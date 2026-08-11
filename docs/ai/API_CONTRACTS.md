@@ -619,6 +619,11 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 
 - Protocol failures use `ProtocolDiagnostic`.
 - Sync/replay failures expose structured mismatch/conflict codes.
+- `JsonFileRecoveryPersistenceStore` applies a positive configurable file-size
+  cap (4 MiB by default) before JSON decode and before durable replacement;
+  oversized input/output returns the fatal
+  `ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE` conflict without hydrating or
+  writing state.
 - Receipt import/export/verification failures must fail closed.
 - Receipt export encoding/inspection and HMAC cipher operations share bounded
   encoded-body, decoded-body, payload, ciphertext, and nonce limits; oversized
