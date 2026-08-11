@@ -13,11 +13,14 @@ import 'app_holdem_production_session_snapshot_writer.dart';
 class AppHoldemProductionSessionPersistenceWriter {
   AppHoldemProductionSessionPersistenceWriter({
     required RecoveryPersistenceStore store,
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : _store = store,
-       _snapshotWriter = AppHoldemProductionSessionSnapshotWriter(store: store);
+       _snapshotWriter = AppHoldemProductionSessionSnapshotWriter(store: store),
+       _maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents);
 
   final RecoveryPersistenceStore _store;
   final AppHoldemProductionSessionSnapshotWriter _snapshotWriter;
+  final int _maxRecoveryEvents;
 
   RecoveryPersistenceResult persist({
     required String snapshotId,
@@ -90,6 +93,14 @@ class AppHoldemProductionSessionPersistenceWriter {
     required List<EventEnvelope> events,
   }) {
     if (events.isEmpty) return null;
+    if (events.length > _maxRecoveryEvents) {
+      return const RecoveryPersistenceResult(
+        isSuccess: false,
+        warnings: <String>[
+          'Holdem event-log suffix exceeds the configured recovery event limit.',
+        ],
+      );
+    }
 
     EventEnvelope? previous;
     for (final event in events) {
@@ -142,4 +153,15 @@ class AppHoldemProductionSessionPersistenceWriter {
     }
     return null;
   }
+}
+
+int _validateMaxRecoveryEvents(int value) {
+  if (value <= 0) {
+    throw ArgumentError.value(
+      value,
+      'maxRecoveryEvents',
+      'Recovery event limit must be positive.',
+    );
+  }
+  return value;
 }

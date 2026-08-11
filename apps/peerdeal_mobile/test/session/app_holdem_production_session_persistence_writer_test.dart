@@ -41,6 +41,42 @@ void main() {
     expect(window.snapshot?.snapshotBaseEventSeq, 0);
   });
 
+  test('rejects an oversized event suffix before traversal or append', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    final state = _typedSnapshotAfterEvent();
+    final result =
+        AppHoldemProductionSessionPersistenceWriter(
+          store: store,
+          maxRecoveryEvents: 1,
+        ).persist(
+          snapshotId: 'snapshot_001',
+          tableState: state.tableState,
+          handState: state.handState,
+          eventCursor: state.eventCursor,
+          events: <EventEnvelope>[_event(), _event()],
+        );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.warnings,
+      contains(
+        'Holdem event-log suffix exceeds the configured recovery event limit.',
+      ),
+    );
+    expect(store.loadWindow(_scope()).events, isEmpty);
+    expect(store.loadWindow(_scope()).snapshot, isNull);
+  });
+
+  test('rejects a non-positive recovery event limit', () {
+    expect(
+      () => AppHoldemProductionSessionPersistenceWriter(
+        store: InMemoryRecoveryPersistenceStore(),
+        maxRecoveryEvents: 0,
+      ),
+      throwsArgumentError,
+    );
+  });
+
   test('rejects an event suffix that does not match resulting state', () {
     final store = InMemoryRecoveryPersistenceStore();
     final state = _typedSnapshot();

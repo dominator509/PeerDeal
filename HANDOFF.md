@@ -1178,6 +1178,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T129 Persisted Session Writer Event Bound
+
+- Mirrored `AppHoldemProductionSessionPersistenceWriter` instances now enforce
+  the shared `RecoveryEventWindowLimits.defaultMaxEvents` bound, configurable
+  per writer, before event traversal, snapshot validation, or `appendEvents`.
+- Oversized suffixes and non-positive limits fail closed without writing event
+  or snapshot data; focused mobile and desktop writer tests cover both paths.
+
+Remaining:
+- Concrete product session/state wiring, native platform key storage,
+  runtime/device validation, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T128 Persisted Session Recovery Window Bound
 
 - Mirrored `AppPersistedHoldemProductionSessionSource` adapters now enforce

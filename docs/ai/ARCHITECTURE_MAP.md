@@ -313,7 +313,9 @@ over `peerdeal_sync`; it does not move state truth out of `peerdeal_core` or
 invent product startup, identity, route, or retention policy.
 Before the append, the mirrored writer preflights snapshot identity, metadata,
 scope/cursor/hash consistency, and typed Hold'em state so malformed checkpoint
-input cannot create a durable partial suffix.
+input cannot create a durable partial suffix. It also enforces the shared
+4,096-event recovery window bound before traversing or appending a caller
+suffix, keeping oversized writer input outside the persistence store boundary.
 
 The mirrored local-peer identity provisioners share only non-cancellable
 operations and clear the in-flight slot by exact Future identity. This protects

@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T129 Persisted Session Writer Event Bound
+
+Summary:
+- Mirrored app production persistence writers now enforce the shared
+  `RecoveryEventWindowLimits.defaultMaxEvents` bound before traversing or
+  appending caller-supplied event suffixes; callers can provide a smaller
+  positive limit.
+- Oversized suffixes fail closed before snapshot validation and cannot create
+  durable event or snapshot data.
+
+Tests run:
+- Focused mobile and desktop persistence-writer suites passed (8 each).
+- Focused mobile and desktop Flutter analysis passed.
+
+Risks:
+- This hardens the app persistence boundary; concrete product session/state
+  wiring, native runtime validation, other-platform implementations, and
+  release signing remain separate.
+
+Next reviewer:
+- Run the full local gate set and commit if green.
+
+---
+
 ### 2026-08-11 - Codex - T128 Persisted Session Recovery Window Bound
 
 Summary:

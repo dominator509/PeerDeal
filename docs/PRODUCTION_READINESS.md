@@ -1596,6 +1596,12 @@ shared 4,096-event default, with a positive caller-owned override, immediately
 after a recovery store returns a window. Oversized windows fail closed before
 snapshot decoding, suffix materialization, identity provisioning, or replay.
 
+The T129 follow-up closes the mirrored persistence-writer input gap.
+`AppHoldemProductionSessionPersistenceWriter` now enforces the same shared
+4,096-event default, with a positive caller-owned override, before traversing
+or appending a caller-supplied suffix. Oversized suffixes fail closed without
+creating durable event or snapshot data.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

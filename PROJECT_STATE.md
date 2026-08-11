@@ -1143,6 +1143,14 @@ signing, and concrete product state wiring remain external or integration-owned.
   `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` through blocked settlement projection;
   focused variant projection tests (52) and analysis pass.
 
+## T129 Persisted Session Writer Event Bound
+
+- Mirrored `AppHoldemProductionSessionPersistenceWriter` instances now enforce
+  the shared 4,096-event default, with a positive caller-owned override, before
+  event traversal, snapshot validation, or store append.
+- Oversized suffixes fail closed without creating a durable event or snapshot;
+  focused mobile and desktop writer suites cover overflow and invalid limits.
+
 ## T128 Persisted Session Recovery Window Bound
 
 - Mirrored `AppPersistedHoldemProductionSessionSource` adapters now enforce
