@@ -620,6 +620,9 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - Protocol failures use `ProtocolDiagnostic`.
 - Sync/replay failures expose structured mismatch/conflict codes.
 - Receipt import/export/verification failures must fail closed.
+- Receipt export encoding/inspection and HMAC cipher operations share bounded
+  encoded-body, decoded-body, payload, ciphertext, and nonce limits; oversized
+  values fail closed before base64, JSON, or keystream processing.
 - App receipt export factories must not copy provisioning warning detail into
   unavailable artifact reasons.
 - App receipt export factories must convert provisioning dependency exceptions

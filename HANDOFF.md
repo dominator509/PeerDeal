@@ -1000,3 +1000,17 @@ Remaining:
 Remaining:
 - Cross-process/native/device persistence validation, product startup,
   database persistence, and release signing remain separate.
+
+## Recent T100 Changes
+
+- `peerdeal_receipts` now exposes one shared `ReceiptExportLimits` contract for
+  opaque export encoding/inspection and HMAC receipt encryption/decryption.
+- Encoded bodies, decoded bodies, plaintext payloads, ciphertext strings, and
+  nonces are bounded before base64, JSON, or keystream work; oversized values
+  fail closed through the existing unavailable/rejected/format-error paths.
+- Existing receipt format, signing, key-ring ownership, and package boundaries
+  remain unchanged.
+
+Remaining:
+- Native key storage, Android/device and cross-device validation, product
+  startup/database integration, and release signing remain separate.

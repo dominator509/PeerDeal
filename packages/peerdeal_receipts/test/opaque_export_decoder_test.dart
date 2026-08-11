@@ -103,6 +103,45 @@ void main() {
     expect(result.message, 'Receipt artifact body is malformed.');
   });
 
+  test('rejects oversized encoded artifact bodies before decoding', () {
+    final artifact = encoder.encode(receipt);
+    final limitedDecoder = OpaqueExportDecoder(
+      signer: signer,
+      limits: const ReceiptExportLimits(maxEncodedBodyLength: 8),
+    );
+
+    final result = limitedDecoder.inspect(artifact);
+
+    expect(result.isAccepted, isFalse);
+    expect(result.message, 'Receipt artifact body is malformed.');
+  });
+
+  test('rejects oversized decoded artifact bodies before parsing JSON', () {
+    final artifact = encoder.encode(receipt);
+    final limitedDecoder = OpaqueExportDecoder(
+      signer: signer,
+      limits: const ReceiptExportLimits(maxDecodedBodyBytes: 8),
+    );
+
+    final result = limitedDecoder.inspect(artifact);
+
+    expect(result.isAccepted, isFalse);
+    expect(result.message, 'Receipt artifact body is malformed.');
+  });
+
+  test('rejects oversized payloads before signature verification', () {
+    final artifact = encoder.encode(receipt);
+    final limitedDecoder = OpaqueExportDecoder(
+      signer: signer,
+      limits: const ReceiptExportLimits(maxPayloadBytes: 8),
+    );
+
+    final result = limitedDecoder.inspect(artifact);
+
+    expect(result.isAccepted, isFalse);
+    expect(result.message, 'Receipt artifact payload is malformed.');
+  });
+
   test('rejects encrypted artifact when cipher is unavailable', () {
     final encryptedEncoder = OpaqueExportEncoder(
       cipher: HmacSha256ReceiptCipher(

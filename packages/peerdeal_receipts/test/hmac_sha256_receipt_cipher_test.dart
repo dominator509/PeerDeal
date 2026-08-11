@@ -83,4 +83,39 @@ void main() {
       throwsA(isA<FormatException>()),
     );
   });
+
+  test('rejects oversized plaintext before keystream generation', () {
+    final cipher = HmacSha256ReceiptCipher(
+      keyProvider: keyRing,
+      limits: const ReceiptExportLimits(maxPayloadBytes: 4),
+    );
+
+    expect(() => cipher.encrypt('too-large'), throwsA(isA<StateError>()));
+  });
+
+  test('rejects oversized ciphertext before key lookup', () {
+    final cipher = HmacSha256ReceiptCipher(
+      keyProvider: keyRing,
+      limits: const ReceiptExportLimits(maxCiphertextLength: 8),
+    );
+
+    expect(() => cipher.decrypt('x' * 9), throwsA(isA<FormatException>()));
+  });
+
+  test('rejects oversized nonces after authentication', () {
+    final source = HmacSha256ReceiptCipher(
+      keyProvider: keyRing,
+      nonceFactory: () => List<int>.filled(32, 7),
+    );
+    final ciphertext = source.encrypt('receipt-payload');
+    final limitedCipher = HmacSha256ReceiptCipher(
+      keyProvider: keyRing,
+      limits: const ReceiptExportLimits(maxNonceBytes: 8),
+    );
+
+    expect(
+      () => limitedCipher.decrypt(ciphertext),
+      throwsA(isA<FormatException>()),
+    );
+  });
 }

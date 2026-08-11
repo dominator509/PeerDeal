@@ -37,6 +37,28 @@ void main() {
     expect(artifact.minimalMetadata, isEmpty);
     expect(artifact.reason, 'Receipt export failed.');
   });
+
+  test('fails closed when the encoded artifact exceeds its limit', () {
+    const encoder = OpaqueExportEncoder(
+      limits: ReceiptExportLimits(maxEncodedBodyLength: 8),
+    );
+
+    final artifact = encoder.encode(receipt);
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt export failed.');
+  });
+
+  test('fails closed when the receipt payload exceeds its limit', () {
+    const encoder = OpaqueExportEncoder(
+      limits: ReceiptExportLimits(maxPayloadBytes: 8),
+    );
+
+    final artifact = encoder.encode(receipt);
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt export failed.');
+  });
 }
 
 class _ThrowingReceiptSigner implements ReceiptSigner {

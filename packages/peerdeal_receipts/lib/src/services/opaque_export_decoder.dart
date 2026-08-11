@@ -4,19 +4,23 @@ import '../contracts/receipt_cipher.dart';
 import '../contracts/receipt_signer.dart';
 import '../models/receipt_export_artifact.dart';
 import '../models/receipt_export_inspection_result.dart';
+import '../models/receipt_export_limits.dart';
 
 class OpaqueExportDecoder {
   const OpaqueExportDecoder({
     ReceiptCipher? cipher,
     ReceiptSigner? signer,
     bool requireSignature = true,
+    ReceiptExportLimits limits = const ReceiptExportLimits(),
   }) : _cipher = cipher,
        _signer = signer,
-       _requireSignature = requireSignature;
+       _requireSignature = requireSignature,
+       _limits = limits;
 
   final ReceiptCipher? _cipher;
   final ReceiptSigner? _signer;
   final bool _requireSignature;
+  final ReceiptExportLimits _limits;
 
   ReceiptExportInspectionResult inspect(ReceiptExportArtifact artifact) {
     if (artifact.artifactType == 'unavailable') {
@@ -41,6 +45,15 @@ class OpaqueExportDecoder {
 
     final payload = body['payload'];
     if (payload is! String || payload.isEmpty) {
+      return const ReceiptExportInspectionResult.rejected(
+        message: 'Receipt artifact payload is malformed.',
+      );
+    }
+    final payloadBytes = utf8.encode(payload).length;
+    final payloadLimit = body['cipher'] == 'external'
+        ? _limits.maxCiphertextLength
+        : _limits.maxPayloadBytes;
+    if (payloadBytes > payloadLimit) {
       return const ReceiptExportInspectionResult.rejected(
         message: 'Receipt artifact payload is malformed.',
       );
@@ -98,9 +111,13 @@ class OpaqueExportDecoder {
 
   Map<String, Object?>? _decodeArtifactBody(String encodedBody) {
     try {
-      final decoded = jsonDecode(utf8.decode(base64Decode(encodedBody)));
+      _limits.validate();
+      if (encodedBody.length > _limits.maxEncodedBodyLength) return null;
+      final decodedBytes = base64Decode(encodedBody);
+      if (decodedBytes.length > _limits.maxDecodedBodyBytes) return null;
+      final decoded = jsonDecode(utf8.decode(decodedBytes));
       return decoded is Map<String, Object?> ? decoded : null;
-    } on FormatException {
+    } on Object {
       return null;
     }
   }
@@ -136,9 +153,10 @@ class OpaqueExportDecoder {
 
   Map<String, Object?>? _decodePayloadShape(String payload) {
     try {
+      if (utf8.encode(payload).length > _limits.maxPayloadBytes) return null;
       final decoded = jsonDecode(payload);
       return decoded is Map<String, Object?> ? decoded : null;
-    } on FormatException {
+    } on Object {
       return null;
     }
   }

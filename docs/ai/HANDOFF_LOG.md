@@ -8338,6 +8338,40 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - T100 Receipt Processing Bounds
+
+Summary:
+- Added the shared `ReceiptExportLimits` contract to `peerdeal_receipts`.
+- Opaque export encoding and inspection now bound encoded bodies, decoded
+  bodies, and payloads before base64 or JSON work.
+- The HMAC receipt cipher now bounds plaintext, ciphertext, and nonce sizes
+  before keystream work and fails closed for oversized input.
+
+Files changed:
+- `packages/peerdeal_receipts/lib/src/models/receipt_export_limits.dart` and
+  the receipt package barrel.
+- Opaque export encoder/decoder, HMAC cipher, and focused regression tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Tests run:
+- Focused receipt export and cipher suite: 24 tests passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Dependency audit reports zero actionable upgrades and 11 newer versions below
+  the current toolchain ceiling.
+
+Risks:
+- This bounds Dart-side receipt processing only. Native key storage,
+  device/network validation, product persistence, and release signing remain
+  separate external boundaries.
+
+Next reviewer:
+- Preserve the shared limits when adding future receipt formats or native
+  adapters; do not move receipt semantics into generic native bridges.
+
+---
+
 ### 2026-08-11 - Codex - T99 Identity Single-Flight Cleanup Race
 
 Summary:

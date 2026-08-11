@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import '../contracts/receipt_cipher.dart';
 import '../contracts/receipt_encryption_key_provider.dart';
 import '../models/receipt_encryption_key.dart';
+import '../models/receipt_export_limits.dart';
 
 typedef ReceiptCipherNonceFactory = List<int> Function();
 
@@ -14,17 +15,21 @@ class HmacSha256ReceiptCipher implements ReceiptCipher {
   HmacSha256ReceiptCipher({
     required ReceiptEncryptionKeyProvider keyProvider,
     ReceiptCipherNonceFactory? nonceFactory,
+    ReceiptExportLimits limits = const ReceiptExportLimits(),
   }) : _keyProvider = keyProvider,
-       _nonceFactory = nonceFactory ?? _secureNonce;
+       _nonceFactory = nonceFactory ?? _secureNonce,
+       _limits = limits;
 
   static const formatVersion = 'pdrc-v1';
   static const algorithm = 'hmac-sha256-stream';
 
   final ReceiptEncryptionKeyProvider _keyProvider;
   final ReceiptCipherNonceFactory _nonceFactory;
+  final ReceiptExportLimits _limits;
 
   @override
   String encrypt(String plaintext) {
+    _limits.validate();
     final key = _keyProvider.activeEncryptionKey();
     if (key == null) {
       throw StateError('No usable receipt encryption key is available.');
@@ -34,9 +39,19 @@ class HmacSha256ReceiptCipher implements ReceiptCipher {
     if (nonce.isEmpty) {
       throw StateError('Receipt encryption nonce is unavailable.');
     }
+    if (nonce.length > _limits.maxNonceBytes) {
+      throw StateError(
+        'Receipt encryption nonce exceeds the configured limit.',
+      );
+    }
+
+    final plaintextBytes = utf8.encode(plaintext);
+    if (plaintextBytes.length > _limits.maxPayloadBytes) {
+      throw StateError('Receipt payload exceeds the configured limit.');
+    }
 
     final payload = _xorWithKeystream(
-      data: utf8.encode(plaintext),
+      data: plaintextBytes,
       key: key,
       nonce: nonce,
     );
@@ -49,7 +64,7 @@ class HmacSha256ReceiptCipher implements ReceiptCipher {
       payloadText: payloadText,
     );
 
-    return [
+    final ciphertext = [
       formatVersion,
       algorithm,
       key.keyId,
@@ -57,10 +72,18 @@ class HmacSha256ReceiptCipher implements ReceiptCipher {
       payloadText,
       mac,
     ].join(':');
+    if (ciphertext.length > _limits.maxCiphertextLength) {
+      throw StateError('Receipt ciphertext exceeds the configured limit.');
+    }
+    return ciphertext;
   }
 
   @override
   String decrypt(String ciphertext) {
+    _limits.validate();
+    if (ciphertext.length > _limits.maxCiphertextLength) {
+      throw const FormatException('Receipt cipher payload is malformed.');
+    }
     final parts = ciphertext.split(':');
     if (parts.length != 6 ||
         parts[0] != formatVersion ||
@@ -90,13 +113,19 @@ class HmacSha256ReceiptCipher implements ReceiptCipher {
     try {
       final nonce = base64Decode(nonceText);
       final payload = base64Decode(payloadText);
+      if (nonce.isEmpty || nonce.length > _limits.maxNonceBytes) {
+        throw const FormatException('Receipt cipher payload is malformed.');
+      }
+      if (payload.length > _limits.maxPayloadBytes) {
+        throw const FormatException('Receipt cipher payload is malformed.');
+      }
       final plaintext = _xorWithKeystream(
         data: payload,
         key: key,
         nonce: nonce,
       );
       return utf8.decode(plaintext);
-    } on FormatException {
+    } on Object {
       throw const FormatException('Receipt cipher payload is malformed.');
     }
   }

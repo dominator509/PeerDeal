@@ -972,6 +972,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   identity suites pass.
 - Cross-process/native/device persistence validation remains external.
 
+## T100 Receipt Processing Bounds
+
+- `peerdeal_receipts` now exposes shared `ReceiptExportLimits` across opaque
+  export encoding, inspection, and the HMAC receipt cipher.
+- Encoded body, decoded body, payload, ciphertext, and nonce sizes are checked
+  before base64, JSON, or keystream processing; oversized values fail closed.
+- Existing receipt formats and package boundaries remain unchanged.
+- Native key storage, device/runtime validation, product persistence, and
+  release signing remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

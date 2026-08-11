@@ -1369,6 +1369,15 @@ callers still propagate their own cancellation into native secure-key calls.
 This remains an in-process guarantee; native multi-process/device persistence
 validation remains external.
 
+The T100 follow-up closes the receipt resource-bounding gap. The shared
+`ReceiptExportLimits` contract now bounds encoded artifact bodies, decoded JSON
+bodies, plaintext payloads, HMAC ciphertext strings, and encryption nonces
+across receipt export encoding, inspection, and cipher operations. Oversized
+values fail closed before unbounded base64, JSON, or keystream work. This does
+not replace the existing receipt format or signing/key-ring ownership, and it
+does not claim native key-storage, device, network, database, or release-signing
+validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
