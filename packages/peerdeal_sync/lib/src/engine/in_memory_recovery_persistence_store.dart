@@ -31,7 +31,8 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
   }
 
   static const defaultMaxEvents = RecoveryEventWindowLimits.defaultMaxEvents;
-  static const defaultMaxEventBytes = 64 * 1024;
+  static const defaultMaxEventBytes =
+      RecoveryEventWindowLimits.defaultMaxEventBytes;
 
   final int _maxEvents;
   final EventEnvelopeCodec _eventCodec;

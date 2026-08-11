@@ -1165,6 +1165,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T116 Changes
+
+- Direct sync conflict detection and snapshot application now run each
+  caller-provided event through the existing `EventEnvelopeCodec` before
+  protocol, scope, sequence, or projector work.
+- The shared default is 64 KiB per event with the protocol canonical structure
+  limits; oversized or unencodable events fail closed with
+  `ERR_RECOVERY_EVENT_TOO_LARGE` or `ERR_RECOVERY_EVENT_INVALID`.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T115 Changes
 
 - Direct sync conflict detection and snapshot application now reject recovery

@@ -1108,6 +1108,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   validated after filtering and snapshot-suffix planning. Focused replay tests
   and package analysis pass.
 
+## T116 Direct Sync Event Codec Bounds
+
+- `BasicConflictDetector` and `BasicSnapshotApplier` now run each direct
+  caller-provided event through the existing `EventEnvelopeCodec` before
+  protocol, scope, sequence, or projector traversal.
+- The shared default is 64 KiB per event with the protocol canonical structure
+  limits; oversized or unencodable events return fatal
+  `ERR_RECOVERY_EVENT_TOO_LARGE` or `ERR_RECOVERY_EVENT_INVALID` conflicts.
+- Focused `peerdeal_sync` tests (64) and package analysis pass.
+
 ## T115 Direct Sync Event Window Bounds
 
 - `BasicConflictDetector` and `BasicSnapshotApplier` now enforce the shared

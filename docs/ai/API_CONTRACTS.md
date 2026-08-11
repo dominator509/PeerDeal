@@ -553,6 +553,10 @@ event lists above `RecoveryEventWindowLimits.defaultMaxEvents` (4,096 by
 default) before protocol, scope, sequence, or projector traversal. The fatal
 conflict code is `ERR_RECOVERY_EVENT_COUNT_TOO_LARGE`; durable stores retain
 their persistence-specific count and byte-limit codes.
+Each direct event is also encoded through the injected `EventEnvelopeCodec`
+before those checks. The default codec uses a 64 KiB event wire-size cap and
+the protocol canonical structure limits; failures map to fatal
+`ERR_RECOVERY_EVENT_TOO_LARGE` or `ERR_RECOVERY_EVENT_INVALID` conflicts.
 Recovery persistence scopes must use exact, non-empty protocol, table, and
 session identities without padding, control characters, or the internal `::`
 storage-key delimiter.

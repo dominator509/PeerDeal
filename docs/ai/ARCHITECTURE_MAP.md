@@ -149,8 +149,8 @@ Recovery:
    windows, gaps, anchors, and unsupported versions before projection; anchor
    hashing and snapshot suffix planning share the same event bound.
 3. Sync bounds direct caller-provided event lists before conflict detection or
-   snapshot/suffix projection, then detects conflicts and applies snapshot plus
-   suffix events.
+   snapshot/suffix projection, validates each event through the protocol codec,
+   then detects conflicts and applies snapshot plus suffix events.
 4. Fatal conflicts recommend safe close instead of unsafe resume.
 
 Receipts:

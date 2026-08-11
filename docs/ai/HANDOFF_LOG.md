@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T116 Direct Sync Event Codec Bounds
+
+Summary:
+- `BasicConflictDetector` and `BasicSnapshotApplier` now validate each direct
+  caller-provided event through the existing `EventEnvelopeCodec` before
+  protocol, scope, sequence, or projector work.
+- The shared default is 64 KiB per event with protocol canonical structure
+  limits; failures return `ERR_RECOVERY_EVENT_TOO_LARGE` or
+  `ERR_RECOVERY_EVENT_INVALID`.
+
+Tests run:
+- Focused `peerdeal_sync` suite: 64 tests passed.
+- Focused `peerdeal_sync` analysis passed.
+
+Risks:
+- This bounds direct Dart sync processors only. Product database persistence,
+  platform/runtime validation, other-platform hosts, and release signing
+  remain separate.
+
+Next reviewer:
+- Preserve event-count and codec validation before adding transport or product
+  session callers around conflict detection and snapshot application.
+
+---
+
 ### 2026-08-11 - Codex - T115 Direct Sync Event Window Bounds
 
 Summary:

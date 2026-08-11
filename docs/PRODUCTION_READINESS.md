@@ -1503,6 +1503,15 @@ or projector traversal, returning the fatal
 behind its existing store-specific validation and codes; product database
 persistence and runtime/device validation remain separate.
 
+The T116 follow-up closes the direct sync event-materialization gap.
+`BasicConflictDetector` and `BasicSnapshotApplier` now validate each direct
+event through the existing `EventEnvelopeCodec` before protocol, scope,
+sequence, or projector work. The shared default is 64 KiB per event with the
+protocol canonical structure limits; oversized or unencodable events fail
+closed with `ERR_RECOVERY_EVENT_TOO_LARGE` or `ERR_RECOVERY_EVENT_INVALID`.
+This reuses protocol serialization and does not move sync policy into the
+protocol package.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

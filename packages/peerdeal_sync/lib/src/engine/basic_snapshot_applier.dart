@@ -12,6 +12,9 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
   BasicSnapshotApplier({
     required this.projector,
     this.maxEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    this.eventCodec = const EventEnvelopeCodec(
+      maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
+    ),
   }) {
     if (maxEvents <= 0) {
       throw ArgumentError.value(
@@ -24,16 +27,17 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
 
   final SnapshotStateProjector<TState> projector;
   final int maxEvents;
+  final EventEnvelopeCodec eventCodec;
 
   @override
   SnapshotApplyResult<TState> apply(SnapshotApplyRequest request) {
+    final conflicts = _validate(request);
     var state = projector.createBaseState(
       tableId: request.tableId,
       sessionId: request.sessionId,
       protocolVersion: request.protocolVersion,
     );
 
-    final conflicts = _validate(request);
     if (conflicts.isNotEmpty) {
       return SnapshotApplyResult<TState>(
         state: state,
@@ -169,6 +173,11 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     }
 
     for (final event in request.events) {
+      final eventEncodingConflict = _eventEncodingConflict(event);
+      if (eventEncodingConflict != null) {
+        return <SyncConflict>[eventEncodingConflict];
+      }
+
       if (event.tableId != request.tableId ||
           event.sessionId != request.sessionId) {
         conflicts.add(
@@ -284,6 +293,26 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     }
 
     return conflicts;
+  }
+
+  SyncConflict? _eventEncodingConflict(EventEnvelope event) {
+    try {
+      eventCodec.encode(event);
+      return null;
+    } on FormatException catch (error) {
+      final isTooLarge =
+          error.message == 'Event envelope wire payload is too large.';
+      return SyncConflict(
+        code: isTooLarge
+            ? 'ERR_RECOVERY_EVENT_TOO_LARGE'
+            : 'ERR_RECOVERY_EVENT_INVALID',
+        message: isTooLarge
+            ? 'Recovery event exceeds the configured wire-size limit.'
+            : 'Recovery event could not be encoded as a protocol envelope.',
+        severity: SyncConflictSeverity.fatal,
+        expected: isTooLarge ? '${eventCodec.maxBytes}' : null,
+      );
+    }
   }
 
   SyncConflict _projectorFailureConflict({

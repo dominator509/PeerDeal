@@ -49,6 +49,11 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
 - Direct conflict detection and snapshot application also reject oversized
   in-memory recovery event windows before protocol, sequence, or projector
   traversal, using the same configurable 4,096-event default.
+- Direct conflict detection and snapshot application validate each event with
+  the existing protocol `EventEnvelopeCodec` before scope, protocol, sequence,
+  or projector work; the shared 64 KiB default and canonical structure limits
+  fail closed as `ERR_RECOVERY_EVENT_TOO_LARGE` or
+  `ERR_RECOVERY_EVENT_INVALID`.
 - File-backed recovery windows are written as canonical protocol JSON through
   a temporary file before replacing the durable window.
 - Recovery stores expose an idempotent, scope-validated `wipe` operation;

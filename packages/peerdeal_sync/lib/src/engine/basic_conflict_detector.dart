@@ -11,10 +11,14 @@ class BasicConflictDetector implements ConflictDetector {
   const BasicConflictDetector({
     this.protocolCatalog = const ProtocolCatalog(),
     this.maxEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    this.eventCodec = const EventEnvelopeCodec(
+      maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
+    ),
   }) : assert(maxEvents > 0, 'maxEvents must be positive');
 
   final ProtocolCatalog protocolCatalog;
   final int maxEvents;
+  final EventEnvelopeCodec eventCodec;
 
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
@@ -32,6 +36,15 @@ class BasicConflictDetector implements ConflictDetector {
           ),
         ],
       );
+    }
+
+    for (final event in request.events) {
+      final eventEncodingConflict = _eventEncodingConflict(event);
+      if (eventEncodingConflict != null) {
+        return ConflictDetectionResult(
+          conflicts: <SyncConflict>[eventEncodingConflict],
+        );
+      }
     }
 
     if (!protocolCatalog.supportsProtocolVersion(request.protocolVersion)) {
@@ -288,5 +301,25 @@ class BasicConflictDetector implements ConflictDetector {
     }
 
     return ConflictDetectionResult(conflicts: conflicts);
+  }
+
+  SyncConflict? _eventEncodingConflict(EventEnvelope event) {
+    try {
+      eventCodec.encode(event);
+      return null;
+    } on FormatException catch (error) {
+      final isTooLarge =
+          error.message == 'Event envelope wire payload is too large.';
+      return SyncConflict(
+        code: isTooLarge
+            ? 'ERR_RECOVERY_EVENT_TOO_LARGE'
+            : 'ERR_RECOVERY_EVENT_INVALID',
+        message: isTooLarge
+            ? 'Recovery event exceeds the configured wire-size limit.'
+            : 'Recovery event could not be encoded as a protocol envelope.',
+        severity: SyncConflictSeverity.fatal,
+        expected: isTooLarge ? '${eventCodec.maxBytes}' : null,
+      );
+    }
   }
 }

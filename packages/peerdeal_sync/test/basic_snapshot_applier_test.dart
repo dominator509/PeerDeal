@@ -31,6 +31,33 @@ void main() {
     expect(result.conflicts.single.actual, '2');
   });
 
+  test('rejects an unencodable direct event before projector access', () {
+    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+      projector: _ThrowingEventProjector(),
+    );
+
+    final result = applier.apply(
+      SnapshotApplyRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        events: <EventEnvelope>[
+          _event(
+            1,
+            prevEventHash: genesisEventHash,
+            eventHash: 'hash_1',
+            payload: <String, Object?>{'unsupported': Object()},
+          ),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.appliedEventCount, 0);
+    expect(result.state.appliedEventTypes, isEmpty);
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_INVALID');
+  });
+
   test('applies snapshot first and only replays suffix events', () {
     final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
@@ -299,6 +326,7 @@ EventEnvelope _event(
   int eventSeq, {
   required String prevEventHash,
   required String eventHash,
+  Map<String, Object?> payload = const <String, Object?>{},
 }) {
   return EventEnvelope(
     eventId: 'evt_$eventSeq',
@@ -311,7 +339,7 @@ EventEnvelope _event(
     handId: null,
     emittedAt: '2026-04-25T00:00:00Z',
     actorRef: 'system',
-    payload: const <String, Object?>{},
+    payload: payload,
     prevEventHash: prevEventHash,
     eventHash: eventHash,
   );

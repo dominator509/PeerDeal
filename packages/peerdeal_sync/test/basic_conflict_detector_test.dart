@@ -52,6 +52,52 @@ void main() {
     expect(result.conflicts.single.actual, '2');
   });
 
+  test('rejects an oversized direct event before protocol inspection', () {
+    final result =
+        const BasicConflictDetector(
+          eventCodec: EventEnvelopeCodec(maxBytes: 256),
+        ).detect(
+          RecoveryRequest(
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            protocolVersion: '2.0.0',
+            mode: RecoveryMode.reconnect,
+            events: <EventEnvelope>[
+              _event(
+                1,
+                prevEventHash: genesisEventHash,
+                eventHash: 'hash_1',
+                payload: <String, Object?>{'oversized': 'x' * 1024},
+              ),
+            ],
+          ),
+        );
+
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_TOO_LARGE');
+    expect(result.conflicts.single.expected, '256');
+  });
+
+  test('rejects a direct event with an unencodable payload', () {
+    final result = detector.detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          _event(
+            1,
+            prevEventHash: genesisEventHash,
+            eventHash: 'hash_1',
+            payload: <String, Object?>{'unsupported': Object()},
+          ),
+        ],
+      ),
+    );
+
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_INVALID');
+  });
+
   test(
     'flags fatal mismatch when final event hash differs from expected baseline',
     () {
@@ -435,6 +481,7 @@ EventEnvelope _event(
   int eventSeq, {
   required String prevEventHash,
   required String eventHash,
+  Map<String, Object?> payload = const <String, Object?>{},
 }) {
   return EventEnvelope(
     eventId: 'evt_$eventSeq',
@@ -447,7 +494,7 @@ EventEnvelope _event(
     handId: null,
     emittedAt: '2026-04-25T00:00:00Z',
     actorRef: 'system',
-    payload: const <String, Object?>{},
+    payload: payload,
     prevEventHash: prevEventHash,
     eventHash: eventHash,
   );
