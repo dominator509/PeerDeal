@@ -201,6 +201,11 @@ callback through the app runtime; it is not invoked for rejected, stale, or
 malformed outcomes, and callback failures are contained by the route.
 Join routes must reload their async outcome when app-owned orchestrator,
 invite-context, initial-mode, or enabled-mode dependencies change.
+Each active outcome owns an app-level cancellation signal that completes on
+replacement or route disposal. Concrete join orchestration checks it between
+pre-commit stages and native join bootstrap forwards it to
+`CancellableLocalNetworkBridge` when available; the legacy bridge and bootstrap
+contracts remain valid, and already-dispatched calls remain owner-hosted.
 Setup routes and setup flow orchestration reject blank or padded app-owned
 setup intent and host identities before wizard/setup dependencies run. Setup
 routes also scrub app-owned setup outcome result codes, errors, warnings, and

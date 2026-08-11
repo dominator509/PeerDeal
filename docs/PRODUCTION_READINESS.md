@@ -1230,6 +1230,13 @@ The T81 follow-up makes that negative check deterministic: CI explicitly clears
 all four Android signing variables and requires the exact Gradle signing
 diagnostic. An unrelated release-build failure cannot satisfy the guard.
 
+The T82 follow-up closes the mounted join-flow lifecycle gap in both app shells.
+Route replacement and disposal now cancel the active outcome; orchestration
+checks that signal between pre-commit stages and will not advance into
+governance after a cancelled bootstrap. Native join bootstrap forwards the same
+signal to cancellable local-network bridges, while legacy bridge contracts remain
+valid. Calls already dispatched to adapters or governance remain owner-hosted.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

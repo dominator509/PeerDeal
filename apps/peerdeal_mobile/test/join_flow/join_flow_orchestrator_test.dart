@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_mobile/join_flow/fakes.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_adapters.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
@@ -54,6 +56,37 @@ void main() {
     expect(result.resolvedInvite?.sessionId, 'sess_001');
     expect(result.sessionContext?.remotePeerId, 'peer_a');
     expect(result.sessionContext?.localSeat, 1);
+  });
+
+  test('cancels before governance when bootstrap is cancelled', () async {
+    final cancellation = Completer<void>();
+    final bootstrap = _BlockingCancellableBootstrapCoordinator();
+    final committer = _CountingGovernanceCommitter();
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: FakeInviteResolver(),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(allAccepted: true),
+      roleAuthorizer: FakeRoleAuthorizer(allow: true),
+      bootstrapCoordinator: bootstrap,
+      governanceCommitter: committer,
+      eventSink: RecordingJoinEventSink(),
+    );
+
+    final resultFuture = orchestrator.runFirstJoin(
+      const InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+      ),
+      cancellation: cancellation.future,
+    );
+    await bootstrap.started.future;
+    cancellation.complete();
+
+    final result = await resultFuture;
+
+    expect(result.resultCode, 'ERR_JOIN_FLOW_CANCELLED');
+    expect(result.state, JoinFlowState.joinRejected);
+    expect(committer.joinCalls, 0);
   });
 
   test('returns joined when event sink throws', () async {
@@ -365,5 +398,44 @@ class _ThrowingJoinEventSink implements JoinEventSink {
     String? message,
   }) {
     throw StateError('event sink unavailable');
+  }
+}
+
+class _BlockingCancellableBootstrapCoordinator
+    implements BootstrapCoordinator, CancellableBootstrapCoordinator {
+  final Completer<void> started = Completer<void>();
+
+  @override
+  Future<BootstrapPlan> buildPlan({
+    required ResolvedInvite resolvedInvite,
+    required RoleGrant roleGrant,
+    Future<void>? cancellation,
+  }) async {
+    started.complete();
+    if (cancellation != null) await cancellation;
+    return const BootstrapPlan(
+      requiresBootstrap: true,
+      peerCandidates: <String>['peer_a'],
+      relayFallbackAllowed: true,
+      selectedPeerId: 'peer_a',
+    );
+  }
+}
+
+class _CountingGovernanceCommitter extends FakeGovernanceCommitter {
+  int joinCalls = 0;
+
+  @override
+  Future<GovernanceCommitResult> commitJoin({
+    required ResolvedInvite resolvedInvite,
+    required RoleGrant roleGrant,
+    required BootstrapPlan bootstrapPlan,
+  }) async {
+    joinCalls += 1;
+    return super.commitJoin(
+      resolvedInvite: resolvedInvite,
+      roleGrant: roleGrant,
+      bootstrapPlan: bootstrapPlan,
+    );
   }
 }

@@ -36,14 +36,26 @@ class JoinFlowOrchestrator {
   final DiagnosticsScrubber _diagnosticsScrubber;
   final ProtocolCatalog _protocolCatalog;
 
-  Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
+  Future<JoinFlowOutcome> runFirstJoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) async {
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
     final invalidContext = await _invalidInviteContextOutcome(context);
     if (invalidContext != null) return invalidContext;
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     await _safeEmitState(
       state: JoinFlowState.inviteUnresolved,
       resultCode: 'JOIN_STARTED',
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     final ResolvedInvite resolvedInvite;
     try {
@@ -55,10 +67,16 @@ class JoinFlowOrchestrator {
         message: 'Invite resolution failed.',
       );
     }
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
     await _safeEmitState(
       state: JoinFlowState.inviteResolved,
       resultCode: 'INVITE_RESOLVED',
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     if (!_protocolCatalog.supportsProtocolVersion(
       resolvedInvite.protocolVersion,
@@ -83,6 +101,9 @@ class JoinFlowOrchestrator {
       state: JoinFlowState.preflightPending,
       resultCode: 'PREFLIGHT_PENDING',
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     final NegotiationResult negotiation;
     try {
@@ -96,6 +117,9 @@ class JoinFlowOrchestrator {
         status: JoinDecisionStatus.negotiationFailed,
         message: 'Join negotiation failed.',
       );
+    }
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
     }
 
     if (!negotiation.compatible) {
@@ -114,6 +138,9 @@ class JoinFlowOrchestrator {
       state: JoinFlowState.negotiating,
       resultCode: 'NEGOTIATION_OK',
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     final DisclosureAcks acks;
     try {
@@ -127,6 +154,9 @@ class JoinFlowOrchestrator {
         status: JoinDecisionStatus.rejected,
         message: 'Disclosure acknowledgement failed.',
       );
+    }
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
     }
 
     if (!acks.allRequiredAccepted) {
@@ -145,6 +175,9 @@ class JoinFlowOrchestrator {
       state: JoinFlowState.rolePending,
       resultCode: 'DISCLOSURES_ACCEPTED',
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     final RoleGrant? roleGrant;
     try {
@@ -158,6 +191,9 @@ class JoinFlowOrchestrator {
         status: JoinDecisionStatus.roleDenied,
         message: 'Role authorization failed.',
       );
+    }
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
     }
 
     if (roleGrant == null) {
@@ -174,16 +210,30 @@ class JoinFlowOrchestrator {
 
     final BootstrapPlan bootstrapPlan;
     try {
-      bootstrapPlan = await _bootstrapCoordinator.buildPlan(
-        resolvedInvite: resolvedInvite,
-        roleGrant: roleGrant,
-      );
+      final coordinator = _bootstrapCoordinator;
+      if (coordinator is CancellableBootstrapCoordinator) {
+        final cancellableCoordinator =
+            coordinator as CancellableBootstrapCoordinator;
+        bootstrapPlan = await cancellableCoordinator.buildPlan(
+          resolvedInvite: resolvedInvite,
+          roleGrant: roleGrant,
+          cancellation: cancellation,
+        );
+      } else {
+        bootstrapPlan = await coordinator.buildPlan(
+          resolvedInvite: resolvedInvite,
+          roleGrant: roleGrant,
+        );
+      }
     } on Object {
       return _adapterFailureOutcome(
         resultCode: 'ERR_BOOTSTRAP_FAILED',
         status: JoinDecisionStatus.bootstrapRequired,
         message: 'Bootstrap planning failed.',
       );
+    }
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
     }
 
     await _safeEmitState(
@@ -192,8 +242,14 @@ class JoinFlowOrchestrator {
           ? 'BOOTSTRAP_REQUIRED'
           : 'BOOTSTRAP_SKIPPED',
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     final GovernanceCommitResult commit;
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
     try {
       commit = await _governanceCommitter.commitJoin(
         resolvedInvite: resolvedInvite,
@@ -235,12 +291,21 @@ class JoinFlowOrchestrator {
     );
   }
 
-  Future<JoinFlowOutcome> runRejoin(InviteContext context) async {
+  Future<JoinFlowOutcome> runRejoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) async {
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
     final invalidContext = await _invalidInviteContextOutcome(
       context,
       rejoinRequired: true,
     );
     if (invalidContext != null) return invalidContext;
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     final rejoinToken = context.rejoinToken;
 
@@ -248,6 +313,9 @@ class JoinFlowOrchestrator {
       state: JoinFlowState.rejoinPending,
       resultCode: 'REJOIN_STARTED',
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
 
     final ResolvedInvite resolvedInvite;
     try {
@@ -258,6 +326,9 @@ class JoinFlowOrchestrator {
         status: JoinDecisionStatus.rejoinRejected,
         message: 'Invite resolution failed.',
       );
+    }
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
     }
     if (!_protocolCatalog.supportsProtocolVersion(
       resolvedInvite.protocolVersion,
@@ -279,6 +350,9 @@ class JoinFlowOrchestrator {
     }
 
     final GovernanceCommitResult commit;
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledOutcome();
+    }
     try {
       commit = await _governanceCommitter.commitRejoin(
         resolvedInvite: resolvedInvite,
@@ -426,6 +500,32 @@ class JoinFlowOrchestrator {
       diagnostics: diagnostics,
       message: message,
     );
+  }
+
+  JoinFlowOutcome _cancelledOutcome() {
+    return const JoinFlowOutcome(
+      state: JoinFlowState.joinRejected,
+      status: JoinDecisionStatus.rejected,
+      resultCode: 'ERR_JOIN_FLOW_CANCELLED',
+      diagnostics: <ProtocolDiagnostic>[
+        ProtocolDiagnostic(
+          code: 'ERR_JOIN_FLOW_CANCELLED',
+          message: 'Join flow was cancelled.',
+        ),
+      ],
+      message: 'Join flow was cancelled.',
+    );
+  }
+
+  Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+    if (cancellation == null) return false;
+    var requested = false;
+    cancellation.then<void>(
+      (_) => requested = true,
+      onError: (Object _, StackTrace _) => requested = true,
+    );
+    await Future<void>.value();
+    return requested;
   }
 
   Future<void> _safeEmitState({

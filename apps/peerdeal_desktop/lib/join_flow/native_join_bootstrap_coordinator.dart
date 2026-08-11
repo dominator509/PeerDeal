@@ -4,7 +4,8 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'join_flow_adapters.dart';
 import 'join_flow_models.dart';
 
-class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
+class NativeJoinBootstrapCoordinator
+    implements BootstrapCoordinator, CancellableBootstrapCoordinator {
   const NativeJoinBootstrapCoordinator({
     required LocalNetworkBridge bridge,
     BootstrapCandidateProvider provider =
@@ -28,6 +29,7 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
   Future<BootstrapPlan> buildPlan({
     required ResolvedInvite resolvedInvite,
     required RoleGrant roleGrant,
+    Future<void>? cancellation,
   }) async {
     if (!_isValidScope(resolvedInvite.sessionId) ||
         !_isValidScope(resolvedInvite.tableId)) {
@@ -46,7 +48,7 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
       );
     }
 
-    final capability = await _safeCapability();
+    final capability = await _safeCapability(cancellation: cancellation);
     if (!capability.discoverySupported) {
       return const BootstrapPlan(
         requiresBootstrap: true,
@@ -55,7 +57,7 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
       );
     }
 
-    final discovery = await _safeDiscovery();
+    final discovery = await _safeDiscovery(cancellation: cancellation);
     if (!discovery.permissionGranted) {
       return const BootstrapPlan(
         requiresBootstrap: true,
@@ -106,8 +108,15 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     );
   }
 
-  Future<LocalNetworkCapability> _safeCapability() async {
+  Future<LocalNetworkCapability> _safeCapability({
+    Future<void>? cancellation,
+  }) async {
     try {
+      final cancellableBridge = _bridge;
+      if (cancellableBridge is CancellableLocalNetworkBridge) {
+        final bridge = cancellableBridge as CancellableLocalNetworkBridge;
+        return await bridge.getCapability(cancellation: cancellation);
+      }
       return await _bridge.getCapability();
     } on Object {
       return const LocalNetworkCapability.unavailable(
@@ -116,8 +125,15 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
     }
   }
 
-  Future<LocalNetworkDiscoverySnapshot> _safeDiscovery() async {
+  Future<LocalNetworkDiscoverySnapshot> _safeDiscovery({
+    Future<void>? cancellation,
+  }) async {
     try {
+      final cancellableBridge = _bridge;
+      if (cancellableBridge is CancellableLocalNetworkBridge) {
+        final bridge = cancellableBridge as CancellableLocalNetworkBridge;
+        return await bridge.discoverPeers(cancellation: cancellation);
+      }
       return await _bridge.discoverPeers();
     } on Object {
       return const LocalNetworkDiscoverySnapshot.unavailable(

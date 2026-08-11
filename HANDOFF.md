@@ -716,3 +716,19 @@ Remaining:
 Remaining:
 - Signed release output, operator credential validation, and runtime/device
   release validation remain external.
+
+## Recent T82 Changes
+
+- Mounted mobile and desktop join routes now cancel the active outcome when a
+  mode/dependency replacement or route disposal supersedes it.
+- Join orchestration checks cancellation between pre-commit stages and refuses
+  to advance into governance after a cancelled bootstrap.
+- Native join bootstrap forwards the app-owned signal to cancellable local-network
+  bridges while retaining the legacy bridge contract.
+
+Focused mobile and desktop join-flow tests passed, including route disposal,
+bootstrap forwarding, and no-governance-after-cancellation coverage.
+
+Remaining:
+- Already-dispatched adapter or governance calls remain owner-hosted; signed
+  release output, credentials, and runtime/device validation remain external.

@@ -783,6 +783,17 @@ or integration-owned.
 Signed release output, operator credentials, and runtime/device validation
 remain external or integration-owned.
 
+## Recent T82 Changes
+
+- Mounted join routes now complete an app-owned cancellation signal on outcome
+  replacement or disposal.
+- Both orchestrators stop between pre-commit stages, and native bootstrap passes
+  cancellation to cancellable local-network bridges.
+- Mirrored focused tests prove route teardown and governance protection.
+
+Already-dispatched host or governance calls remain owner-hosted. Signed release
+output, operator credentials, and runtime/device validation remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

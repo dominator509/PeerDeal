@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
@@ -59,13 +61,14 @@ class JoinFlowRoute extends StatefulWidget {
 class _JoinFlowRouteState extends State<JoinFlowRoute> {
   late JoinFlowDemoMode _mode;
   late Future<JoinFlowOutcome> _outcome;
+  Completer<void>? _cancellation;
   int _outcomeGeneration = 0;
 
   @override
   void initState() {
     super.initState();
     _mode = widget.initialMode;
-    _outcome = _run(_mode);
+    _outcome = _startOutcome(_mode);
     _observeOutcome(_outcome);
   }
 
@@ -77,12 +80,19 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
         oldWidget._inviteContextFactory != widget._inviteContextFactory ||
         oldWidget._enabledModes != widget._enabledModes) {
       _mode = widget.initialMode;
-      _outcome = _run(_mode);
+      _outcome = _startOutcome(_mode);
       _observeOutcome(_outcome);
     } else if (oldWidget.onJoinReady != widget.onJoinReady ||
         oldWidget.onSessionReady != widget.onSessionReady) {
       _observeOutcome(_outcome);
     }
+  }
+
+  @override
+  void dispose() {
+    _cancelActiveRun();
+    _outcomeGeneration += 1;
+    super.dispose();
   }
 
   @override
@@ -138,7 +148,10 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
     );
   }
 
-  Future<JoinFlowOutcome> _run(JoinFlowDemoMode mode) async {
+  Future<JoinFlowOutcome> _run(
+    JoinFlowDemoMode mode, {
+    required Future<void> cancellation,
+  }) async {
     if (!_isModeEnabled(mode)) {
       return const JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
@@ -161,8 +174,11 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
 
       final orchestrator = widget._orchestratorFactory(mode);
       return mode == JoinFlowDemoMode.rejoin
-          ? await orchestrator.runRejoin(context)
-          : await orchestrator.runFirstJoin(context);
+          ? await orchestrator.runRejoin(context, cancellation: cancellation)
+          : await orchestrator.runFirstJoin(
+              context,
+              cancellation: cancellation,
+            );
     } on Object {
       return const JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
@@ -181,12 +197,26 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
 
   void _selectMode(JoinFlowDemoMode mode) {
     if (!_isModeEnabled(mode)) return;
-    final outcome = _run(mode);
+    final outcome = _startOutcome(mode);
     setState(() {
       _mode = mode;
       _outcome = outcome;
     });
     _observeOutcome(outcome);
+  }
+
+  Future<JoinFlowOutcome> _startOutcome(JoinFlowDemoMode mode) {
+    _cancelActiveRun();
+    final cancellation = Completer<void>();
+    _cancellation = cancellation;
+    return _run(mode, cancellation: cancellation.future);
+  }
+
+  void _cancelActiveRun() {
+    final cancellation = _cancellation;
+    if (cancellation != null && !cancellation.isCompleted) {
+      cancellation.complete();
+    }
   }
 
   bool _isModeEnabled(JoinFlowDemoMode mode) {

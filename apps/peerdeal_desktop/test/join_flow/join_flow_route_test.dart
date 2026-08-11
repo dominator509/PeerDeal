@@ -28,6 +28,26 @@ void main() {
     expect(find.text('Result: OK_JOINED'), findsOneWidget);
   });
 
+  testWidgets('cancels the active orchestrator when the route is disposed', (
+    tester,
+  ) async {
+    final orchestrator = _CancellableRouteOrchestrator();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(orchestratorFactory: (_) => orchestrator),
+      ),
+    );
+    await tester.pump();
+
+    final cancellation = orchestrator.cancellation;
+    expect(cancellation, isNotNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await expectLater(cancellation!, completes);
+  });
+
   testWidgets('forwards a successful resolved invite to product handoff', (
     tester,
   ) async {
@@ -489,7 +509,10 @@ class _LeakyJoinFlowOrchestrator implements JoinFlowOrchestrator {
   const _LeakyJoinFlowOrchestrator();
 
   @override
-  Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
+  Future<JoinFlowOutcome> runFirstJoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) async {
     return const JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.roleDenied,
@@ -504,15 +527,44 @@ class _LeakyJoinFlowOrchestrator implements JoinFlowOrchestrator {
   }
 
   @override
-  Future<JoinFlowOutcome> runRejoin(InviteContext context) =>
-      runFirstJoin(context);
+  Future<JoinFlowOutcome> runRejoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) => runFirstJoin(context, cancellation: cancellation);
+}
+
+class _CancellableRouteOrchestrator implements JoinFlowOrchestrator {
+  Future<void>? cancellation;
+
+  @override
+  Future<JoinFlowOutcome> runFirstJoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) async {
+    this.cancellation = cancellation;
+    if (cancellation != null) await cancellation;
+    return const JoinFlowOutcome(
+      state: JoinFlowState.joinRejected,
+      status: JoinDecisionStatus.rejected,
+      resultCode: 'ERR_JOIN_FLOW_CANCELLED',
+    );
+  }
+
+  @override
+  Future<JoinFlowOutcome> runRejoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) => runFirstJoin(context, cancellation: cancellation);
 }
 
 class _UnsafeResultJoinFlowOrchestrator implements JoinFlowOrchestrator {
   const _UnsafeResultJoinFlowOrchestrator();
 
   @override
-  Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
+  Future<JoinFlowOutcome> runFirstJoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) async {
     return const JoinFlowOutcome(
       state: JoinFlowState.joinReady,
       status: JoinDecisionStatus.okJoinReady,
@@ -527,15 +579,20 @@ class _UnsafeResultJoinFlowOrchestrator implements JoinFlowOrchestrator {
   }
 
   @override
-  Future<JoinFlowOutcome> runRejoin(InviteContext context) =>
-      runFirstJoin(context);
+  Future<JoinFlowOutcome> runRejoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) => runFirstJoin(context, cancellation: cancellation);
 }
 
 class _VerboseJoinFlowOrchestrator implements JoinFlowOrchestrator {
   const _VerboseJoinFlowOrchestrator();
 
   @override
-  Future<JoinFlowOutcome> runFirstJoin(InviteContext context) async {
+  Future<JoinFlowOutcome> runFirstJoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) async {
     return JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.rejected,
@@ -551,6 +608,8 @@ class _VerboseJoinFlowOrchestrator implements JoinFlowOrchestrator {
   }
 
   @override
-  Future<JoinFlowOutcome> runRejoin(InviteContext context) =>
-      runFirstJoin(context);
+  Future<JoinFlowOutcome> runRejoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) => runFirstJoin(context, cancellation: cancellation);
 }

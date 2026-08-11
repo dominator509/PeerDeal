@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
 import 'package:peerdeal_mobile/join_flow/native_join_bootstrap_coordinator.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -5,6 +7,21 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('forwards per-run cancellation to cancellable native bridge', () async {
+    final cancellation = Completer<void>();
+    final bridge = _RecordingCancellableLocalNetworkBridge();
+    final coordinator = NativeJoinBootstrapCoordinator(bridge: bridge);
+
+    await coordinator.buildPlan(
+      resolvedInvite: _resolvedInvite,
+      roleGrant: _roleGrant,
+      cancellation: cancellation.future,
+    );
+
+    expect(bridge.capabilityCancellation, same(cancellation.future));
+    expect(bridge.discoveryCancellation, same(cancellation.future));
+  });
+
   test('maps native discovery endpoints into join bootstrap plan', () async {
     final provider = _RecordingBootstrapCandidateProvider();
     final coordinator = NativeJoinBootstrapCoordinator(
@@ -302,6 +319,37 @@ class _CountingLocalNetworkBridge implements LocalNetworkBridge {
   @override
   Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
     discoveryLookups += 1;
+    return const LocalNetworkDiscoverySnapshot(
+      permissionGranted: true,
+      foundEndpoints: <String>['peer-a'],
+      interfaceHints: <String>[],
+    );
+  }
+}
+
+class _RecordingCancellableLocalNetworkBridge
+    implements LocalNetworkBridge, CancellableLocalNetworkBridge {
+  Future<void>? capabilityCancellation;
+  Future<void>? discoveryCancellation;
+
+  @override
+  Future<LocalNetworkCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
+    capabilityCancellation = cancellation;
+    return const LocalNetworkCapability(
+      discoverySupported: true,
+      permissionPromptSupported: true,
+      broadcastSupported: true,
+      notes: 'local-network-ready',
+    );
+  }
+
+  @override
+  Future<LocalNetworkDiscoverySnapshot> discoverPeers({
+    Future<void>? cancellation,
+  }) async {
+    discoveryCancellation = cancellation;
     return const LocalNetworkDiscoverySnapshot(
       permissionGranted: true,
       foundEndpoints: <String>['peer-a'],

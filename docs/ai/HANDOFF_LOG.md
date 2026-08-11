@@ -8117,3 +8117,29 @@ Verification:
 Risks:
 - This remains a negative guard only; signed release, operator credential,
   profile, and device validation remain external.
+
+---
+
+### 2026-08-11 - Codex - Mounted Join-Flow Cancellation Propagation
+
+Summary:
+- Added mirrored route-owned cancellation on join outcome replacement and
+  disposal.
+- Added pre-commit cancellation checks to first-join and rejoin orchestration,
+  preventing cancelled bootstrap work from reaching governance.
+- Forwarded cancellation through native join bootstrap to cancellable local
+  network bridges without changing legacy bridge contracts.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/join_flow/*` and mirrored desktop join-flow files.
+- Mirrored join-flow route, orchestrator, and native bootstrap tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Focused mobile and desktop join-flow tests passed, including route disposal,
+  cancellation forwarding, and governance protection.
+
+Risks:
+- Already-dispatched adapter or governance calls remain owner-hosted; native
+  runtime/device validation and signed release validation remain external.

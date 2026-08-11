@@ -34,6 +34,15 @@ abstract class BootstrapCoordinator {
   });
 }
 
+/// Optional per-run cancellation capability for app-owned lifecycles.
+abstract interface class CancellableBootstrapCoordinator {
+  Future<BootstrapPlan> buildPlan({
+    required ResolvedInvite resolvedInvite,
+    required RoleGrant roleGrant,
+    Future<void>? cancellation,
+  });
+}
+
 abstract class GovernanceCommitter {
   Future<GovernanceCommitResult> commitJoin({
     required ResolvedInvite resolvedInvite,
