@@ -1178,6 +1178,30 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T132 Typed Production Session Handoff Loader
+
+- Mirrored mobile and desktop app shells now accept an optional
+  `AppHoldemProductionSessionConfigurationLoader` for successful typed
+  first-join and rejoin handoffs.
+- The loader receives `JoinFlowSessionContext` and returns the existing
+  available/unavailable configuration-factory result. Available results must
+  include the configuration, persistence writer, and snapshot writer.
+- Loaded routes reuse app route validation, the existing bootstrap adapter, and
+  native readiness gating. Explicit join handlers and prebuilt production
+  routes retain precedence; loader errors or unavailable results fail closed.
+
+Tests and gates:
+- Focused mobile and desktop app-shell Flutter tests passed (80 each).
+- Focused mobile and desktop Flutter analysis passed.
+- Full analyze, boundary-check, source-text, serialized test, dependency-audit,
+  and `git diff --check` gates passed; dependency audit reports zero actionable
+  upgrades.
+
+Remaining:
+- A real product owner must supply the loader, concrete source/state/route
+  policy, platform implementations, database persistence, device validation,
+  and release signing.
+
 ## Recent T131 Production Recovery-Limit Propagation
 
 - Mirrored production bootstrap, route-registration, configuration, and

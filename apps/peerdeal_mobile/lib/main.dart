@@ -19,6 +19,7 @@ import 'demo_slice/screens/demo_home_screen.dart';
 import 'demo_slice/screens/demo_receipt_screen.dart';
 import 'demo_slice/screens/demo_table_screen.dart';
 import 'join_flow/demo_join_flow_orchestrator_factory.dart';
+import 'join_flow/join_flow_models.dart';
 import 'join_flow/join_flow_route.dart';
 import 'native_readiness/app_native_readiness_loader.dart';
 import 'navigation/app_route_fallback_screen.dart';
@@ -26,6 +27,8 @@ import 'recovery/app_recovery_persistence_store_factory.dart';
 import 'session/app_holdem_production_route_registration.dart';
 import 'session/app_holdem_production_session_bootstrap_route_registration.dart';
 import 'session/app_holdem_production_session_configuration.dart';
+import 'session/app_holdem_production_session_configuration_factory.dart';
+import 'session/app_holdem_production_session_configuration_loader.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
 import 'setup_flow/setup_flow_route.dart';
 import 'transport/app_table_session_transport_source.dart';
@@ -97,6 +100,7 @@ class PeerDealMobileRuntime {
     this.holdemProductionRoute,
     this.holdemProductionSessionBootstrapRoute,
     this.holdemProductionSession,
+    this.holdemProductionSessionConfigurationLoader,
     this.enabledDemoRoutePaths,
     this.productionRoutes,
     this.productionNavigation,
@@ -129,6 +133,8 @@ class PeerDealMobileRuntime {
   final AppHoldemProductionSessionBootstrapRouteRegistration?
   holdemProductionSessionBootstrapRoute;
   final AppHoldemProductionSessionConfiguration? holdemProductionSession;
+  final AppHoldemProductionSessionConfigurationLoader?
+  holdemProductionSessionConfigurationLoader;
   final Set<String>? enabledDemoRoutePaths;
   final PeerDealAppRouteMap? productionRoutes;
   final List<PeerDealAppNavigationEntry>? productionNavigation;
@@ -161,6 +167,8 @@ class PeerDealMobileRuntime {
     AppHoldemProductionSessionBootstrapRouteRegistration?
     holdemProductionSessionBootstrapRoute,
     AppHoldemProductionSessionConfiguration? holdemProductionSession,
+    AppHoldemProductionSessionConfigurationLoader?
+    holdemProductionSessionConfigurationLoader,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
@@ -211,6 +219,9 @@ class PeerDealMobileRuntime {
           this.holdemProductionSessionBootstrapRoute,
       holdemProductionSession:
           holdemProductionSession ?? this.holdemProductionSession,
+      holdemProductionSessionConfigurationLoader:
+          holdemProductionSessionConfigurationLoader ??
+          this.holdemProductionSessionConfigurationLoader,
       enabledDemoRoutePaths:
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
       productionRoutes: productionRoutes ?? this.productionRoutes,
@@ -253,6 +264,8 @@ class PeerDealMobileApp extends StatefulWidget {
     AppHoldemProductionSessionBootstrapRouteRegistration?
     holdemProductionSessionBootstrapRoute,
     AppHoldemProductionSessionConfiguration? holdemProductionSession,
+    AppHoldemProductionSessionConfigurationLoader?
+    holdemProductionSessionConfigurationLoader,
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
@@ -284,6 +297,8 @@ class PeerDealMobileApp extends StatefulWidget {
        _holdemProductionSessionBootstrapRoute =
            holdemProductionSessionBootstrapRoute,
        _holdemProductionSession = holdemProductionSession,
+       _holdemProductionSessionConfigurationLoader =
+           holdemProductionSessionConfigurationLoader,
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
        _productionRoutes = productionRoutes,
        _productionNavigation = productionNavigation,
@@ -316,6 +331,8 @@ class PeerDealMobileApp extends StatefulWidget {
   final AppHoldemProductionSessionBootstrapRouteRegistration?
   _holdemProductionSessionBootstrapRoute;
   final AppHoldemProductionSessionConfiguration? _holdemProductionSession;
+  final AppHoldemProductionSessionConfigurationLoader?
+  _holdemProductionSessionConfigurationLoader;
   final Set<String>? _enabledDemoRoutePaths;
   final PeerDealAppRouteMap? _productionRoutes;
   final List<PeerDealAppNavigationEntry>? _productionNavigation;
@@ -341,6 +358,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   _defaultJoinFlowReadyRegistration;
   JoinFlowReadyHandler? _defaultJoinFlowReadyHandler;
   JoinFlowSessionReadyHandler? _defaultJoinFlowSessionReadyHandler;
+  AppHoldemProductionSessionConfigurationLoader?
+  _defaultJoinFlowSessionConfigurationLoader;
 
   PeerDealMobileRuntime get _runtime {
     return (widget._runtime ?? const PeerDealMobileRuntime()).withOverrides(
@@ -367,6 +386,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       holdemProductionSessionBootstrapRoute:
           widget._holdemProductionSessionBootstrapRoute,
       holdemProductionSession: widget._holdemProductionSession,
+      holdemProductionSessionConfigurationLoader:
+          widget._holdemProductionSessionConfigurationLoader,
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
       productionRoutes: widget._productionRoutes,
       productionNavigation: widget._productionNavigation,
@@ -1041,16 +1062,123 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     if (configured != null) return configured;
     if (_runtime.joinFlowReadyHandler != null) return null;
     final registration = _productionSessionRouteRegistration();
-    if (registration == null) return null;
-    if (!identical(_defaultJoinFlowReadyRegistration, registration)) {
-      _defaultJoinFlowReadyRegistration = registration;
+    if (registration != null) {
+      if (!identical(_defaultJoinFlowReadyRegistration, registration)) {
+        _defaultJoinFlowReadyRegistration = registration;
+        _defaultJoinFlowSessionReadyHandler = (context, sessionContext) {
+          Navigator.of(
+            context,
+          ).pushNamed(registration.path, arguments: sessionContext);
+        };
+      }
+      return _defaultJoinFlowSessionReadyHandler;
+    }
+
+    final loader = _runtime.holdemProductionSessionConfigurationLoader;
+    if (loader == null) return null;
+    if (!identical(_defaultJoinFlowSessionConfigurationLoader, loader)) {
+      _defaultJoinFlowSessionConfigurationLoader = loader;
       _defaultJoinFlowSessionReadyHandler = (context, sessionContext) {
-        Navigator.of(
-          context,
-        ).pushNamed(registration.path, arguments: sessionContext);
+        unawaited(
+          _openLoadedProductionSession(context, loader, sessionContext),
+        );
       };
     }
     return _defaultJoinFlowSessionReadyHandler;
+  }
+
+  Future<void> _openLoadedProductionSession(
+    BuildContext context,
+    AppHoldemProductionSessionConfigurationLoader loader,
+    JoinFlowSessionContext sessionContext,
+  ) async {
+    late AppHoldemProductionSessionConfigurationLoadResult result;
+    try {
+      result = await loader(sessionContext);
+    } on Object {
+      if (mounted) _pushRouteFallback(context);
+      return;
+    }
+    if (!mounted) return;
+
+    final configuration = result.configuration;
+    if (!result.isAvailable ||
+        configuration == null ||
+        result.persistenceWriter == null ||
+        result.snapshotWriter == null) {
+      _pushRouteFallback(context);
+      return;
+    }
+
+    final registration = configuration.routeRegistration;
+    if (!_canMountLoadedProductionRoute(registration.path)) {
+      _pushRouteFallback(context);
+      return;
+    }
+
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        settings: RouteSettings(
+          name: registration.path,
+          arguments: sessionContext,
+        ),
+        pageBuilder: (routeContext, animation, secondaryAnimation) {
+          return _buildNativeReadyProductionRoute(
+            context: routeContext,
+            path: registration.path,
+            builder: registration.builder,
+          );
+        },
+      ),
+    );
+  }
+
+  bool _canMountLoadedProductionRoute(String path) {
+    final trimmed = path.trim();
+    final lowerPath = trimmed.toLowerCase();
+    if (trimmed != path ||
+        path.isEmpty ||
+        !path.startsWith('/') ||
+        path == Navigator.defaultRouteName ||
+        path.length > _maxAppRoutePathLength ||
+        lowerPath.startsWith('/demo') ||
+        path.endsWith('/') ||
+        path.contains('?') ||
+        path.contains('#') ||
+        path.contains('//') ||
+        path.contains(r'\') ||
+        _containsUnsafeRoutePathCharacter(path)) {
+      return false;
+    }
+    if (_productionSessionRouteRegistration() != null) return false;
+    final mountedDemoPaths = DemoSliceRoutes.mountedRoutes
+        .map((route) => route.path.toLowerCase())
+        .toSet();
+    if (mountedDemoPaths.contains(lowerPath)) return false;
+    final holdemRoute = _runtime.holdemProductionRoute;
+    if (holdemRoute != null && holdemRoute.path.toLowerCase() == lowerPath) {
+      return false;
+    }
+    final productionRoutes = _runtime.productionRoutes;
+    if (productionRoutes != null) {
+      if (productionRoutes.length >= _maxAppProductionRoutes) return false;
+      if (productionRoutes.keys.any(
+        (candidate) => candidate.toLowerCase() == lowerPath,
+      )) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void _pushRouteFallback(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        pageBuilder: (routeContext, animation, secondaryAnimation) {
+          return const AppRouteFallbackScreen();
+        },
+      ),
+    );
   }
 
   SetupFlowOrchestratorFactory get _setupFlowOrchestratorFactory {

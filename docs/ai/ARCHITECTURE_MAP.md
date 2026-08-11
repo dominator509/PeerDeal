@@ -302,6 +302,17 @@ load result. It does not choose a table, write a product snapshot, or invent
 retention policy; the product session owner supplies those inputs and invokes
 the factory.
 
+Both app shells expose an optional
+`AppHoldemProductionSessionConfigurationLoader` at the join handoff. After
+first-join or rejoin produces a validated `JoinFlowSessionContext`, the
+product-owned loader can invoke the configuration factory with that context.
+When no explicit handler or prebuilt session route exists, the shell validates
+the returned configuration/writers and route path, rejects collisions, passes
+the context through the existing bootstrap route, and applies native readiness
+before mounting. Loader failure or unavailable composition reaches the safe
+route surface; product state, database selection, and route policy remain at
+the app product edge.
+
 The factory result also exposes the app-owned
 `AppHoldemProductionSessionSnapshotWriter`. This edge consumes caller-supplied
 typed variant state and event cursor data, validates the recovery scope, and

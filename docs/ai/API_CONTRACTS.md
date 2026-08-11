@@ -496,6 +496,18 @@ errors. The factory does not create product snapshots, select peers/seats, or
 own retention policy. Native identity provisioning remains lazy until a valid
 invite-scoped snapshot load reaches the source.
 
+Both app shells expose an optional
+`AppHoldemProductionSessionConfigurationLoader` callback for the successful
+`JoinFlowSessionContext` handoff. The callback is product-owned and may invoke
+the configuration factory with context-aware route policy and source/state
+inputs. When no explicit join handler or prebuilt production session route is
+configured, the shell accepts only an available result with configuration,
+persistence writer, and snapshot writer; it rejects unsafe or colliding dynamic
+paths, passes the existing bootstrap route through native readiness gating, and
+renders the safe fallback for loader errors or unavailable results. The shell
+does not interpret warnings, select product state, or move this contract into a
+shared package.
+
 `AppHoldemProductionSessionSnapshotWriter.save(...)` is the app-owned typed
 snapshot persistence seam. It requires a caller-selected snapshot ID, current
 `TableState`, `HoldemHandState`, and matching `HoldemEventCursor`; it rejects

@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T132 Typed Production Session Handoff Loader
+
+Summary:
+- Mirrored mobile and desktop shells now accept an optional
+  `AppHoldemProductionSessionConfigurationLoader` from successful typed first
+  join or rejoin context into the existing configuration-factory result.
+- Dynamic routes reuse route validation, the bootstrap adapter, and native
+  readiness gating; explicit handlers and prebuilt routes retain precedence.
+- Unavailable, malformed, unsafe, colliding, or throwing loader results fail
+  closed without exposing diagnostics.
+
+Tests and gates:
+- Focused mobile and desktop app-shell suites passed (80 each).
+- Focused mobile and desktop Flutter analysis passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and diff-check gates passed; actionable upgrades: 0.
+
+Remaining:
+- Product source/state/route-policy wiring, platform/device validation,
+  database persistence, and release signing remain separate owner work.
+
+Next reviewer:
+- Commit and publish the green T132 change after reviewing the mirrored diff.
+
+---
+
 ### 2026-08-11 - Codex - T131 Production Recovery-Limit Propagation
 
 Summary:

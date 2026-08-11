@@ -1152,6 +1152,19 @@ signing, and concrete product state wiring remain external or integration-owned.
   without mutating app state; focused mobile and desktop runtime suites cover
   overflow and invalid limits.
 
+## T132 Typed Production Session Handoff Loader
+
+- Mirrored mobile and desktop app shells now expose an optional typed loader
+  from accepted `JoinFlowSessionContext` into the existing production
+  configuration-factory result.
+- Available loader results are mounted only after route collision/path checks
+  and through the existing native readiness-gated bootstrap route; explicit
+  handlers and prebuilt routes remain unchanged.
+- Loader failures, unavailable results, invalid writer/configuration output,
+  and unsafe or colliding dynamic paths fail closed to the safe route surface.
+- Focused app-shell tests and the full local gate set pass. This does not claim
+  concrete product state/database wiring or real-device/platform readiness.
+
 ## T131 Production Recovery-Limit Propagation
 
 - Mirrored production bootstrap and configuration composition now carry one
@@ -1299,9 +1312,10 @@ Run after each retrofit step:
    reachability validation.
 3. Supply the concrete product implementation of
    `AppHoldemProductionSessionSource` and invoke
-   `AppHoldemProductionSessionBootstrap` from the real session/state and local
-   identity flow through the typed first-join and rejoin handoff, using the
-   persisted configuration factory where its recovery-backed inputs are valid;
+   `AppHoldemProductionSessionConfigurationFactory` from the real
+   session/state and local identity flow through the app-owned typed loader
+   after first-join and rejoin handoff, using the persisted configuration
+   factory where its recovery-backed inputs are valid;
    add native peer transport device/network validation and final UX validation
    separately.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`

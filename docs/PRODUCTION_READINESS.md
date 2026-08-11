@@ -1615,6 +1615,17 @@ runtime. Persisted configuration reuses that value for source hydration and the
 app persistence writer, so recovery paths do not silently diverge back to the
 default.
 
+The T132 follow-up closes the codable app-shell production handoff gap. Both
+shells now accept an optional `AppHoldemProductionSessionConfigurationLoader`
+that receives the accepted `JoinFlowSessionContext` from first join or rejoin
+and returns the existing configuration-factory result. Available results must
+carry configuration, persistence, and snapshot writers; the shell validates
+dynamic route paths and collisions, mounts the existing bootstrap adapter behind
+the native readiness gate, and fails closed on loader errors or unavailable
+results. The product still owns the concrete source, state, route policy, and
+factory invocation; device, platform, database, and signing validation remain
+external.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
@@ -1625,8 +1636,8 @@ default.
    existing key-ring, cipher, signer, and app capture contracts.
 3. Supply the concrete `AppHoldemProductionSessionSource` and invoke the new
    `AppHoldemProductionSessionConfigurationFactory` from the real product
-   session/state source and local identity through the typed first-join and
-   rejoin handoff, using `snapshotWriter` for authoritative typed snapshot
+   session/state source and local identity through the app-owned typed loader
+   after first-join and rejoin handoff, using `snapshotWriter` for authoritative typed snapshot
    persistence where product inputs are available through
    `persistenceWriter`, supplying event identity and snapshot IDs, and defining
    event-log policy and route policy;

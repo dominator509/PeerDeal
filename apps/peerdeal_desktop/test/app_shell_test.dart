@@ -23,6 +23,9 @@ import 'package:peerdeal_desktop/safe_surface/safe_surface.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_bootstrap.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_bootstrap_route_registration.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_configuration.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_configuration_factory.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_persistence_writer.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_snapshot_writer.dart';
 import 'package:peerdeal_desktop/setup_flow/setup_flow_route.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
@@ -1415,6 +1418,82 @@ void main() {
     },
   );
 
+  testWidgets('hands successful join through typed configuration loader', (
+    tester,
+  ) async {
+    final store = InMemoryRecoveryPersistenceStore();
+    final configuration = AppHoldemProductionSessionConfiguration.fromSource(
+      path: '/holdem-loaded',
+      source: _FailingProductionSessionSource(),
+    );
+    final loadResult =
+        AppHoldemProductionSessionConfigurationLoadResult.available(
+          configuration: configuration,
+          persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+            store: store,
+          ),
+          snapshotWriter: AppHoldemProductionSessionSnapshotWriter(
+            store: store,
+          ),
+        );
+    JoinFlowSessionContext? handedOffContext;
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.join,
+          },
+          joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+            bootstrapCoordinator: FakeBootstrapCoordinator(),
+          ).create,
+          nativeReadinessLoader: _readyNativeReadinessLoader(),
+          holdemProductionSessionConfigurationLoader: (sessionContext) async {
+            handedOffContext = sessionContext;
+            return loadResult;
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(handedOffContext, isNotNull);
+    expect(handedOffContext!.invite.inviteId, 'inv_001');
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.text('Route: /holdem-loaded'), findsOneWidget);
+  });
+
+  testWidgets('fails closed when typed configuration loader is unavailable', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.join,
+          },
+          joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+            bootstrapCoordinator: FakeBootstrapCoordinator(),
+          ).create,
+          holdemProductionSessionConfigurationLoader: (_) async =>
+              const AppHoldemProductionSessionConfigurationLoadResult.unavailable(
+                warnings: <String>['secret loader detail'],
+              ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.textContaining('secret'), findsNothing);
+  });
+
   testWidgets('rejects a bootstrap route that collides with a route', (
     tester,
   ) async {
@@ -2046,6 +2125,31 @@ class _ThrowingVerifierFactory extends DemoReceiptArtifactVerifierFactory {
   DemoReceiptArtifactVerifier create() {
     throw StateError('verifier factory unavailable');
   }
+}
+
+AppNativeReadinessLoader _readyNativeReadinessLoader() {
+  return AppNativeReadinessLoader(
+    captureProtectionBridge: const _StaticCaptureProtectionBridge(
+      capability: CaptureProtectionCapability(
+        blockingSupported: true,
+        obscuringSupported: true,
+        notes: 'ready',
+      ),
+    ),
+    localNetworkBridge: const _StaticLocalNetworkBridge(),
+    nativeTransportBridge: const _StaticNativeTransportBridge(
+      capability: NativeTransportCapability(
+        available: true,
+        sendSupported: true,
+        receiveSupported: true,
+        maxPayloadBytes: 1024,
+        notes: 'ready',
+      ),
+    ),
+    secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+      snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
+    ),
+  );
 }
 
 class _StaticCaptureProtectionBridge implements CaptureProtectionBridge {
