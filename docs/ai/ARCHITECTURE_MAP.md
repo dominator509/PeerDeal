@@ -204,6 +204,11 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   explicit environment configuration still wins. The bounded app scheduler,
   app transport provisioner, and route lifecycle mount now exist around loaded
   native drains.
+- App-native readiness aggregation accepts an app-owned cancellation signal and
+  forwards it to additive cancellable capability bridges. Mirrored app states
+  cancel stale readiness work when the loader changes or the state disposes;
+  existing base bridges remain compatible and already-dispatched host calls
+  remain host-owned.
 - Secure key storage has Dart/method-channel read/write seams plus app-owned
   receipt key-ring provisioning, namespace validation, mapping, and
   ambiguous-active-key and delete key-id rejection. Generic method-channel

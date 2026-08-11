@@ -739,6 +739,19 @@ Runtime persistence validation, product database/state provisioning,
 other-platform storage, and already-dispatched native call semantics remain
 external or integration-owned.
 
+## Recent T78 Changes
+
+- Added optional per-call cancellation to generic local-network and native
+  transport capability bridges while preserving base integrations.
+- Mirrored readiness loaders now pass cancellation through all supported native
+  capability lookups and continue to return stable fail-closed readiness facts.
+- Mobile and desktop app states cancel the prior readiness operation on loader
+  replacement and cancel the active operation during disposal.
+
+Already-dispatched host calls remain host-owned; runtime/device validation,
+network reachability, other-platform native implementations, and product
+database/state provisioning remain external or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

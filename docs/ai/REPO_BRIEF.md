@@ -102,6 +102,9 @@ dart analyze .
   The app-support lookup has a bounded five-second deadline and an additive
   cancellation capability; unavailable or cancelled lookup fails closed before
   a recovery factory is created.
+  Native-readiness aggregation also accepts an app-owned cancellation signal;
+  mirrored app shells cancel stale capability aggregation on loader replacement
+  and disposal, with stable unavailable readiness on cancellation.
   Android and Windows now also provide bounded host-backed native peer
   transport through the existing channel, but device/network reachability,
   production database persistence, other-platform storage, and other platform

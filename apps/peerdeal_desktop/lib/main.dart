@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
@@ -320,6 +322,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       const DemoRecoveryResultFactory();
   AppNativeReadinessLoader? _nativeReadinessLoaderForFuture;
   Future<AppNativeReadinessSnapshot>? _nativeReadinessFuture;
+  Completer<void>? _nativeReadinessCancellation;
   AppHoldemProductionSessionBootstrapRouteRegistration?
   _defaultJoinFlowReadyRegistration;
   JoinFlowReadyHandler? _defaultJoinFlowReadyHandler;
@@ -488,6 +491,12 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     );
   }
 
+  @override
+  void dispose() {
+    _cancelNativeReadiness();
+    super.dispose();
+  }
+
   Route<void> _unknownRoute(RouteSettings settings) {
     return PageRouteBuilder<void>(
       settings: settings,
@@ -630,18 +639,31 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     AppNativeReadinessLoader loader,
   ) {
     if (!identical(_nativeReadinessLoaderForFuture, loader)) {
+      _cancelNativeReadiness();
       _nativeReadinessLoaderForFuture = loader;
-      _nativeReadinessFuture = loader.load().catchError(
-        (_) => const AppNativeReadinessSnapshot(
-          captureProtectionReady: false,
-          localNetworkDiscoveryReady: false,
-          nativeTransportReady: false,
-          secureKeyStorageReady: false,
-          warnings: <String>['native readiness unavailable'],
-        ),
-      );
+      final cancellation = Completer<void>();
+      _nativeReadinessCancellation = cancellation;
+      _nativeReadinessFuture = loader
+          .load(cancellation: cancellation.future)
+          .catchError(
+            (_) => const AppNativeReadinessSnapshot(
+              captureProtectionReady: false,
+              localNetworkDiscoveryReady: false,
+              nativeTransportReady: false,
+              secureKeyStorageReady: false,
+              warnings: <String>['native readiness unavailable'],
+            ),
+          );
     }
     return _nativeReadinessFuture!;
+  }
+
+  void _cancelNativeReadiness() {
+    final cancellation = _nativeReadinessCancellation;
+    if (cancellation != null && !cancellation.isCompleted) {
+      cancellation.complete();
+    }
+    _nativeReadinessCancellation = null;
   }
 
   List<PeerDealAppNavigationEntry> _homeNavigationEntries({

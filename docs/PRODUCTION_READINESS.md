@@ -1202,6 +1202,16 @@ fail closed without constructing a factory when native directory lookup is
 unavailable. Runtime persistence validation and product database/state
 provisioning remain external.
 
+The T78 follow-up closes the app-shell native-readiness lifecycle gap. Generic
+local-network and native-transport capability bridges now expose additive
+per-call cancellation, and mirrored readiness loaders forward the route signal
+to compatible capture, local-network, transport, and secure-key bridges. Mobile
+and desktop app states cancel stale readiness work on loader replacement and
+dispose. The readiness result remains stable and fail-closed when cancellation
+wins. Already-dispatched host calls, runtime/device validation, network
+reachability, other-platform native implementations, and product database/state
+provisioning remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

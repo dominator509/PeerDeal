@@ -8,7 +8,8 @@ import 'native_transport_channel_contract.dart';
 
 const _nativeTransportCallTimeout = Duration(seconds: 5);
 
-class MethodChannelNativeTransportBridge implements NativeTransportBridge {
+class MethodChannelNativeTransportBridge
+    implements NativeTransportBridge, CancellableNativeTransportBridge {
   MethodChannelNativeTransportBridge({
     MethodChannel? channel,
     Duration timeout = _nativeTransportCallTimeout,
@@ -24,13 +25,16 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
   final Future<void>? _cancellation;
 
   @override
-  Future<NativeTransportCapability> getCapability() async {
+  Future<NativeTransportCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
         _channel.invokeMapMethod<String, Object?>(
           NativeTransportChannelContract.getCapabilityMethod,
         ),
+        cancellation: cancellation,
       );
     } on _NativeTransportCallCancelled {
       return const NativeTransportCapability.unavailable(
@@ -62,8 +66,9 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
 
   @override
   Future<NativeTransportSendResult> sendFrame(
-    NativeTransportFrame frame,
-  ) async {
+    NativeTransportFrame frame, {
+    Future<void>? cancellation,
+  }) async {
     if (!frame.isUsable) {
       return const NativeTransportSendResult.failure(
         warning: 'Native transport send frame request is invalid.',
@@ -79,6 +84,7 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
             'frame': NativeTransportChannelContract.encodeFrame(frame),
           },
         ),
+        cancellation: cancellation,
       );
     } on _NativeTransportCallCancelled {
       return const NativeTransportSendResult.failure(
@@ -109,6 +115,7 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
   Future<NativeTransportReceiveSnapshot> receiveFrames({
     required String sessionId,
     required String peerId,
+    Future<void>? cancellation,
   }) async {
     if (!_isValidReceiveScope(sessionId) || !_isValidReceiveScope(peerId)) {
       return const NativeTransportReceiveSnapshot.unavailable(
@@ -123,6 +130,7 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
           NativeTransportChannelContract.receiveFramesMethod,
           <String, Object?>{'sessionId': sessionId, 'peerId': peerId},
         ),
+        cancellation: cancellation,
       );
     } on _NativeTransportCallCancelled {
       return const NativeTransportReceiveSnapshot.unavailable(
@@ -162,7 +170,10 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
     return timeout;
   }
 
-  Future<T> _invokeWithDeadline<T>(Future<T> operation) {
+  Future<T> _invokeWithDeadline<T>(
+    Future<T> operation, {
+    Future<void>? cancellation,
+  }) {
     final completer = Completer<T>();
     Timer? timer;
     var completed = false;
@@ -197,10 +208,16 @@ class MethodChannelNativeTransportBridge implements NativeTransportBridge {
       ),
     );
 
-    final cancellation = _cancellation;
-    if (cancellation != null) {
+    final cancellationSignals = <Future<void>>[];
+    if (_cancellation case final cancellationSignal?) {
+      cancellationSignals.add(cancellationSignal);
+    }
+    if (cancellation case final cancellationSignal?) {
+      cancellationSignals.add(cancellationSignal);
+    }
+    for (final cancellationSignal in cancellationSignals) {
       unawaited(
-        cancellation.then<void>(
+        cancellationSignal.then<void>(
           (_) => completeError(
             const _NativeTransportCallCancelled(),
             StackTrace.current,

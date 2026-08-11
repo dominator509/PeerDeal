@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_mobile/native_readiness/app_native_readiness_loader.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:test/test.dart';
@@ -40,6 +42,28 @@ void main() {
     expect(snapshot.allCapabilitiesReady, isTrue);
     expect(snapshot.warnings, isEmpty);
     expect(secureStorage.namespaces, <String>['peerdeal.receipts']);
+  });
+
+  test('cancels cancellable readiness capability lookups', () async {
+    final cancellation = Completer<void>();
+    final loader = AppNativeReadinessLoader(
+      captureProtectionBridge: _CancellableCaptureProtectionBridge(),
+      localNetworkBridge: _CancellableLocalNetworkBridge(),
+      nativeTransportBridge: _CancellableNativeTransportBridge(),
+      secureKeyStorageBridge: _CancellableSecureKeyStorageBridge(),
+    );
+
+    final readiness = loader.load(cancellation: cancellation.future);
+    cancellation.complete();
+    final snapshot = await readiness;
+
+    expect(snapshot.allCapabilitiesReady, isFalse);
+    expect(snapshot.warnings, <String>[
+      'native capture protection unavailable',
+      'native local-network discovery unavailable',
+      'native transport unavailable',
+      'native secure-key storage unavailable',
+    ]);
   });
 
   test(
@@ -303,6 +327,78 @@ class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
   }) async {
     namespaces.add(namespace);
     return snapshot;
+  }
+}
+
+class _CancellableCaptureProtectionBridge
+    implements CaptureProtectionBridge, CancellableCaptureProtectionBridge {
+  @override
+  Future<CaptureProtectionCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
+    if (cancellation != null) await cancellation;
+    return const CaptureProtectionCapability.unavailable();
+  }
+}
+
+class _CancellableLocalNetworkBridge
+    implements LocalNetworkBridge, CancellableLocalNetworkBridge {
+  @override
+  Future<LocalNetworkCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
+    if (cancellation != null) await cancellation;
+    return const LocalNetworkCapability.unavailable();
+  }
+
+  @override
+  Future<LocalNetworkDiscoverySnapshot> discoverPeers({
+    Future<void>? cancellation,
+  }) async {
+    if (cancellation != null) await cancellation;
+    return const LocalNetworkDiscoverySnapshot.unavailable();
+  }
+}
+
+class _CancellableNativeTransportBridge
+    implements NativeTransportBridge, CancellableNativeTransportBridge {
+  @override
+  Future<NativeTransportCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
+    if (cancellation != null) await cancellation;
+    return const NativeTransportCapability.unavailable();
+  }
+
+  @override
+  Future<NativeTransportSendResult> sendFrame(
+    NativeTransportFrame frame, {
+    Future<void>? cancellation,
+  }) async {
+    if (cancellation != null) await cancellation;
+    return const NativeTransportSendResult.failure(warning: 'cancelled');
+  }
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+    Future<void>? cancellation,
+  }) async {
+    if (cancellation != null) await cancellation;
+    return const NativeTransportReceiveSnapshot.unavailable();
+  }
+}
+
+class _CancellableSecureKeyStorageBridge
+    implements SecureKeyStorageBridge, CancellableSecureKeyStorageBridge {
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+    Future<void>? cancellation,
+  }) async {
+    if (cancellation != null) await cancellation;
+    return const SecureKeyStorageSnapshot.unavailable();
   }
 }
 

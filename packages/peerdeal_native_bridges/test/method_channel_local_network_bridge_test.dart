@@ -205,6 +205,30 @@ void main() {
     pending.complete(null);
   });
 
+  test(
+    'cancels an in-flight capability lookup through per-call signal',
+    () async {
+      final pending = Completer<Object?>();
+      final cancellation = Completer<void>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            log.add(call);
+            return pending.future;
+          });
+
+      final lookup = MethodChannelLocalNetworkBridge(
+        channel: channel,
+      ).getCapability(cancellation: cancellation.future);
+      cancellation.complete();
+
+      final capability = await lookup;
+
+      expect(capability.warning, 'Local network call cancelled.');
+      expect(log.single.method, 'getCapability');
+      pending.complete(null);
+    },
+  );
+
   test('rejects a non-positive call timeout', () {
     expect(
       () => MethodChannelLocalNetworkBridge(

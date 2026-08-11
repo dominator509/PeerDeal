@@ -104,6 +104,27 @@ void main() {
     },
   );
 
+  test(
+    'cancels an in-flight capability call through per-call signal',
+    () async {
+      final pending = Completer<Object?>();
+      final cancellation = Completer<void>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) => pending.future);
+
+      final capabilityFuture = MethodChannelNativeTransportBridge(
+        channel: channel,
+      ).getCapability(cancellation: cancellation.future);
+      cancellation.complete();
+
+      final capability = await capabilityFuture;
+
+      expect(capability.available, isFalse);
+      expect(capability.warning, 'Native transport call cancelled.');
+      pending.complete(null);
+    },
+  );
+
   test('sends native transport frames over the method channel', () async {
     final bridge = MethodChannelNativeTransportBridge(channel: channel);
     final result = await bridge.sendFrame(_frame());

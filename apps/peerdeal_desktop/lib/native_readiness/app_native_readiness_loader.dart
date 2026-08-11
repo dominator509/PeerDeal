@@ -61,13 +61,25 @@ class AppNativeReadinessLoader {
   final String _secureKeyNamespace;
   final int _nativeTransportMaxPayloadBytes;
 
-  Future<AppNativeReadinessSnapshot> load() async {
+  Future<AppNativeReadinessSnapshot> load({Future<void>? cancellation}) async {
     final warnings = <String>[];
 
-    final captureProtectionReady = await _loadCaptureProtection(warnings);
-    final localNetworkDiscoveryReady = await _loadLocalNetwork(warnings);
-    final nativeTransportReady = await _loadNativeTransport(warnings);
-    final secureKeyStorageReady = await _loadSecureKeyStorage(warnings);
+    final captureProtectionReady = await _loadCaptureProtection(
+      warnings,
+      cancellation: cancellation,
+    );
+    final localNetworkDiscoveryReady = await _loadLocalNetwork(
+      warnings,
+      cancellation: cancellation,
+    );
+    final nativeTransportReady = await _loadNativeTransport(
+      warnings,
+      cancellation: cancellation,
+    );
+    final secureKeyStorageReady = await _loadSecureKeyStorage(
+      warnings,
+      cancellation: cancellation,
+    );
 
     return AppNativeReadinessSnapshot(
       captureProtectionReady: captureProtectionReady,
@@ -78,9 +90,17 @@ class AppNativeReadinessLoader {
     );
   }
 
-  Future<bool> _loadCaptureProtection(List<String> warnings) async {
+  Future<bool> _loadCaptureProtection(
+    List<String> warnings, {
+    Future<void>? cancellation,
+  }) async {
     try {
-      final capability = await _captureProtectionBridge.getCapability();
+      final capability =
+          _captureProtectionBridge is CancellableCaptureProtectionBridge
+          ? await (_captureProtectionBridge
+                    as CancellableCaptureProtectionBridge)
+                .getCapability(cancellation: cancellation)
+          : await _captureProtectionBridge.getCapability();
       final ready =
           capability.blockingSupported && capability.obscuringSupported;
       if (!ready) warnings.add('native capture protection unavailable');
@@ -91,9 +111,15 @@ class AppNativeReadinessLoader {
     }
   }
 
-  Future<bool> _loadLocalNetwork(List<String> warnings) async {
+  Future<bool> _loadLocalNetwork(
+    List<String> warnings, {
+    Future<void>? cancellation,
+  }) async {
     try {
-      final capability = await _localNetworkBridge.getCapability();
+      final capability = _localNetworkBridge is CancellableLocalNetworkBridge
+          ? await (_localNetworkBridge as CancellableLocalNetworkBridge)
+                .getCapability(cancellation: cancellation)
+          : await _localNetworkBridge.getCapability();
       if (!capability.discoverySupported) {
         warnings.add('native local-network discovery unavailable');
         return false;
@@ -105,13 +131,20 @@ class AppNativeReadinessLoader {
     }
   }
 
-  Future<bool> _loadNativeTransport(List<String> warnings) async {
+  Future<bool> _loadNativeTransport(
+    List<String> warnings, {
+    Future<void>? cancellation,
+  }) async {
     if (_nativeTransportMaxPayloadBytes < 1) {
       warnings.add('native transport unavailable');
       return false;
     }
     try {
-      final capability = await _nativeTransportBridge.getCapability();
+      final capability =
+          _nativeTransportBridge is CancellableNativeTransportBridge
+          ? await (_nativeTransportBridge as CancellableNativeTransportBridge)
+                .getCapability(cancellation: cancellation)
+          : await _nativeTransportBridge.getCapability();
       final ready =
           capability.available &&
           capability.sendSupported &&
@@ -126,15 +159,25 @@ class AppNativeReadinessLoader {
     }
   }
 
-  Future<bool> _loadSecureKeyStorage(List<String> warnings) async {
+  Future<bool> _loadSecureKeyStorage(
+    List<String> warnings, {
+    Future<void>? cancellation,
+  }) async {
     if (!_isValidSecureKeyNamespace(_secureKeyNamespace)) {
       warnings.add('native secure-key storage unavailable');
       return false;
     }
     try {
-      final snapshot = await _secureKeyStorageBridge.loadKeyRing(
-        namespace: _secureKeyNamespace,
-      );
+      final snapshot =
+          _secureKeyStorageBridge is CancellableSecureKeyStorageBridge
+          ? await (_secureKeyStorageBridge as CancellableSecureKeyStorageBridge)
+                .loadKeyRing(
+                  namespace: _secureKeyNamespace,
+                  cancellation: cancellation,
+                )
+          : await _secureKeyStorageBridge.loadKeyRing(
+              namespace: _secureKeyNamespace,
+            );
       if (!snapshot.available) {
         warnings.add('native secure-key storage unavailable');
         return false;

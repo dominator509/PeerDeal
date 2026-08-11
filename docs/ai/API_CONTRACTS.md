@@ -145,6 +145,13 @@ Mobile and desktop app-native readiness loaders compose generic capture,
 local-network, transport, and secure-key storage bridge capability facts into
 stable readiness snapshots. Loader warnings must be app-owned stable strings;
 native warning detail and exceptions must not be exposed.
+`AppNativeReadinessLoader.load({Future<void>? cancellation})` accepts an
+app-owned lifecycle signal. When a bridge implements its additive cancellable
+capability, the loader forwards the signal to that capability lookup; legacy
+base bridges remain valid and are called without the optional argument.
+Mirrored app shells cancel the active readiness signal when its loader is
+replaced or the app state is disposed. Cancellation returns stable unavailable
+readiness rather than exposing native cancellation details.
 Native-readiness secure-key namespaces must be exact nonblank strings without
 padding, control characters, or the `::` storage delimiter before app loaders
 call platform secure storage.

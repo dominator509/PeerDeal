@@ -8013,3 +8013,34 @@ Risks:
 - Already-dispatched native calls remain host-owned. Runtime persistence
   validation, product database/state provisioning, other-platform storage,
   and release/operator validation remain external or integration-owned.
+
+---
+
+### 2026-08-11 - Codex - Native Readiness Lifecycle Cancellation
+
+Summary:
+- Added additive per-call cancellation capabilities for generic local-network
+  and native-transport capability calls without changing base interfaces.
+- Mirrored app-native readiness loaders forward route cancellation to compatible
+  capture, local-network, transport, and secure-key bridges.
+- App states cancel stale readiness work when the loader changes and when the
+  app state disposes; cancellation remains a stable fail-closed readiness fact.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/local_network/` and
+  `packages/peerdeal_native_bridges/lib/src/transport/` plus focused tests.
+- Mirrored app readiness loaders, app-state lifecycle code, and focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and compact AI context docs.
+
+Tests run:
+- Focused local-network bridge: passed, 11 tests.
+- Focused native transport bridge: passed, 13 tests.
+- Mirrored mobile and desktop readiness-loader suites: passed, 7 tests each.
+- Analyze, boundary-check, source-text, dependency-audit, and full test gates:
+  passed. Dependency audit reports zero actionable upgrades.
+
+Risks:
+- Already-dispatched native calls remain host-owned. Runtime/device readiness,
+  network reachability, other-platform native implementations, release signing,
+  and product database/state wiring remain external or integration-owned.

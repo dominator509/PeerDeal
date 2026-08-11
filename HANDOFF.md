@@ -652,3 +652,25 @@ Remaining:
 - Native directory calls already dispatched remain host-owned. Runtime
   persistence validation, product database/state provisioning, other-platform
   storage, and release/operator validation remain external or integration-owned.
+
+## Recent T78 Changes
+
+- Added additive cancellable local-network and native-transport capability
+  interfaces without changing the existing base bridge contracts.
+- Mirrored app-native readiness loaders now forward optional cancellation to
+  compatible capture, local-network, transport, and secure-key bridges.
+- App shells cancel stale readiness aggregation when the injected loader changes
+  and when the app state disposes, preventing old route work from surviving its
+  owner lifecycle.
+
+Focused verification passed:
+- Native local-network bridge: 11 tests.
+- Native transport bridge: 13 tests.
+- Mirrored mobile and desktop readiness-loader suites: 7 tests each.
+- Full repository test gate passed.
+
+Remaining:
+- Already-dispatched native calls remain host-owned. Android/Windows runtime
+  readiness, device/network reachability, release signing, other-platform
+  implementations, and product database/state wiring remain external or
+  integration-owned.

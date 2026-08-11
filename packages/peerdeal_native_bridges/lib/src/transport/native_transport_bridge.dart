@@ -10,3 +10,19 @@ abstract interface class NativeTransportBridge {
     required String peerId,
   });
 }
+
+/// Optional per-call cancellation capability for app-owned lifecycles.
+abstract interface class CancellableNativeTransportBridge {
+  Future<NativeTransportCapability> getCapability({Future<void>? cancellation});
+
+  Future<NativeTransportSendResult> sendFrame(
+    NativeTransportFrame frame, {
+    Future<void>? cancellation,
+  });
+
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+    Future<void>? cancellation,
+  });
+}

@@ -8,7 +8,8 @@ import 'local_network_bridge_models.dart';
 
 const _localNetworkCallTimeout = Duration(seconds: 5);
 
-class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
+class MethodChannelLocalNetworkBridge
+    implements LocalNetworkBridge, CancellableLocalNetworkBridge {
   MethodChannelLocalNetworkBridge({
     MethodChannel? channel,
     Duration timeout = _localNetworkCallTimeout,
@@ -24,11 +25,14 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
   final Future<void>? _cancellation;
 
   @override
-  Future<LocalNetworkCapability> getCapability() async {
+  Future<LocalNetworkCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
         _channel.invokeMapMethod<String, Object?>('getCapability'),
+        cancellation: cancellation,
       );
     } on _LocalNetworkCallCancelled {
       return const LocalNetworkCapability.unavailable(
@@ -59,11 +63,14 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
   }
 
   @override
-  Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
+  Future<LocalNetworkDiscoverySnapshot> discoverPeers({
+    Future<void>? cancellation,
+  }) async {
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
         _channel.invokeMapMethod<String, Object?>('discoverPeers'),
+        cancellation: cancellation,
       );
     } on _LocalNetworkCallCancelled {
       return const LocalNetworkDiscoverySnapshot.unavailable(
@@ -100,7 +107,10 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
     return timeout;
   }
 
-  Future<T> _invokeWithDeadline<T>(Future<T> operation) {
+  Future<T> _invokeWithDeadline<T>(
+    Future<T> operation, {
+    Future<void>? cancellation,
+  }) {
     final completer = Completer<T>();
     Timer? timer;
     var completed = false;
@@ -135,10 +145,16 @@ class MethodChannelLocalNetworkBridge implements LocalNetworkBridge {
       ),
     );
 
-    final cancellation = _cancellation;
-    if (cancellation != null) {
+    final cancellationSignals = <Future<void>>[];
+    if (_cancellation case final cancellationSignal?) {
+      cancellationSignals.add(cancellationSignal);
+    }
+    if (cancellation case final cancellationSignal?) {
+      cancellationSignals.add(cancellationSignal);
+    }
+    for (final cancellationSignal in cancellationSignals) {
       unawaited(
-        cancellation.then<void>(
+        cancellationSignal.then<void>(
           (_) => completeError(
             const _LocalNetworkCallCancelled(),
             StackTrace.current,
