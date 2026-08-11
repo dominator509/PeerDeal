@@ -381,6 +381,16 @@ inactive, or ambiguous records fail closed. These adapters do not decide route
 policy, remote peer selection, or product session state; the concrete source
 must compose those inputs.
 
+`AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(...)`
+is the app-owned composition seam for that identity. It requires an existing
+`RecoveryPersistenceStore`, a `NativeLocalPeerIdentityProvisioner`, and an
+`AppPersistedHoldemProductionSessionRoutePolicy`. The factory provisions or
+loads the local ID once, maps it to `localPeerId`, and builds the existing
+typed persisted-source input with caller-owned route, remote `peerId`, local
+seat, and close-event policy. It fails closed when identity provisioning does
+not return a valid identity. It does not choose a database, discover a remote
+peer, or validate native runtime/device readiness.
+
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through
 `RouteSettings.arguments`; it does not interpret, persist, or validate the

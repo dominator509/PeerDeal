@@ -12,6 +12,34 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Provisioned Identity Persisted-Source Composition
+
+Summary:
+- Added mirrored app-owned composition factories for the existing typed
+  persisted Hold'em production source.
+- The factory provisions or reuses the local secure identity, maps it to
+  `localPeerId`, and accepts caller-owned route, remote-peer, local-seat, and
+  close-event policy.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_persisted_holdem_production_session_source.dart`
+- `apps/peerdeal_desktop/lib/session/app_persisted_holdem_production_session_source.dart`
+- Matching focused source tests and durable handoff/readiness docs.
+
+Tests run:
+- Focused mobile and desktop source tests: 6 passed each.
+- Focused mobile and desktop analyzers: passed.
+
+Risks:
+- Database selection, remote-peer discovery, native runtime validation, and
+  release credentials remain caller/operator-owned.
+
+Next reviewer:
+- Wire this factory at a real product route only when the product persistence
+  store and remote-peer policy are available.
+
+---
+
 ### 2026-08-10 - Codex - App-Owned Local Peer Identity Persistence
 
 Summary:

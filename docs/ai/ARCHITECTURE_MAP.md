@@ -94,6 +94,11 @@ Local Hold'em producer flow:
    Mirrored app shells also expose local peer identity adapters over generic
    secure-key storage; they persist the local ID but do not choose remote
    peers or create product session state.
+   The app-owned `fromProvisionedLocalIdentity(...)` composition factory can
+   now provision or reuse that ID and map it into the persisted source while a
+   caller supplies route, remote-peer, local-seat, and close-event policy. It
+   still leaves database selection, peer discovery, and native runtime checks
+   outside the shared source boundary.
 9. `AppHoldemProductionSessionBootstrapRouteRegistration` lets either app shell
    merge the existing bootstrap route into its production map and native-
    readiness gate. When no explicit `JoinFlowReadyHandler` is supplied, the

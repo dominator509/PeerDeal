@@ -459,6 +459,18 @@ Generated: 2026-08-10
   5 tests each. Wiring the identity into the concrete production source and
   route policy remains integration-owned.
 
+## Recent T60 Changes
+
+- Mirrored app shells now expose
+  `AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(...)`
+  and `AppPersistedHoldemProductionSessionRoutePolicy`. The composition edge
+  provisions or reuses the local identity, maps it to `localPeerId`, and passes
+  caller-owned route, remote-peer, local-seat, and close-event policy into the
+  existing typed persisted source.
+- Focused mobile and desktop persisted-source tests passed with 6 tests each.
+  Concrete product database selection, remote-peer discovery, native runtime
+  validation, and release credentials remain outside this app-owned factory.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

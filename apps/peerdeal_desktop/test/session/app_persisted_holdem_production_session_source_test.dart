@@ -5,6 +5,10 @@ import 'package:peerdeal_desktop/recovery/app_recovery_session_close_coordinator
 import 'package:peerdeal_desktop/recovery/app_recovery_session_close_event_adapter.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_bootstrap.dart';
 import 'package:peerdeal_desktop/session/app_persisted_holdem_production_session_source.dart';
+import 'package:peerdeal_desktop/session/native_local_peer_identity_loader.dart';
+import 'package:peerdeal_desktop/session/native_local_peer_identity_provisioner.dart';
+import 'package:peerdeal_desktop/session/native_local_peer_identity_writer.dart';
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_privacy/peerdeal_privacy.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
@@ -46,6 +50,44 @@ void main() {
       expect(input.initialCursor.toJson(), persisted.eventCursor.toJson());
     },
   );
+
+  test('composes provisioned local identity into the production input', () async {
+    final store = InMemoryRecoveryPersistenceStore();
+    _persist(store, _typedSnapshot());
+    final identityBridge = _IdentityBridge();
+    final source =
+        await AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(
+          store: store,
+          identityProvisioner: NativeLocalPeerIdentityProvisioner(
+            loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+            writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+            identityFactory: () => 'peer_local',
+          ),
+          routePolicy: AppPersistedHoldemProductionSessionRoutePolicy(
+            path: '/holdem-live',
+            navigationLabel: 'Live Holdem',
+            remotePeerId: 'peer_remote',
+            localSeat: 1,
+            closeEventAdapterFactory: (scope) => _closeAdapter(
+              TableState.initial(
+                tableId: scope.tableId,
+                sessionId: scope.sessionId,
+                protocolVersion: scope.protocolVersion,
+              ),
+            ),
+          ),
+          eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
+          emittedAtFactory: () => '2026-08-10T00:00:00Z',
+          eventHashFactory: computeCanonicalHash,
+        );
+
+    final input = await source.load(_invite());
+
+    expect(input.localPeerId, 'peer_local');
+    expect(input.peerId, 'peer_remote');
+    expect(input.path, '/holdem-live');
+    expect(identityBridge.savedKeys, hasLength(1));
+  });
 
   test('fails closed when no typed snapshot is persisted', () {
     final source = _source(InMemoryRecoveryPersistenceStore());
@@ -292,3 +334,38 @@ const _policy = RetentionPolicy(
     allowIpAddressCapture: false,
   ),
 );
+
+class _IdentityBridge implements SecureKeyStorageMutationBridge {
+  final List<SecureKeyRecord> keys = <SecureKeyRecord>[];
+  final List<SecureKeyRecord> savedKeys = <SecureKeyRecord>[];
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({required String namespace}) {
+    return Future<SecureKeyStorageSnapshot>.value(
+      SecureKeyStorageSnapshot(
+        available: true,
+        keys: List<SecureKeyRecord>.unmodifiable(keys),
+      ),
+    );
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKey({
+    required String namespace,
+    required SecureKeyRecord key,
+  }) async {
+    keys.removeWhere((record) => record.keyId == key.keyId);
+    keys.add(key);
+    savedKeys.add(key);
+    return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKey({
+    required String namespace,
+    required String keyId,
+  }) async {
+    keys.removeWhere((record) => record.keyId == keyId);
+    return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+}

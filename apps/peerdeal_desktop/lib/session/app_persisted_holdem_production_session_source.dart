@@ -2,13 +2,59 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
 import '../join_flow/join_flow_models.dart';
+import '../recovery/app_recovery_session_close_event_adapter.dart';
 import 'app_holdem_production_session_bootstrap.dart';
+import 'native_local_peer_identity_provisioner.dart';
 
 typedef AppHoldemProductionSessionInputFactory =
     AppHoldemProductionSessionInput Function(
       ResolvedInvite invite,
       HoldemStateSnapshot snapshot,
     );
+
+typedef AppHoldemProductionCloseEventAdapterFactory =
+    AppRecoverySessionCloseEventAdapter Function(
+      RecoveryPersistenceScope scope,
+    );
+
+class AppPersistedHoldemProductionSessionRoutePolicy {
+  const AppPersistedHoldemProductionSessionRoutePolicy({
+    required this.path,
+    required this.navigationLabel,
+    required this.remotePeerId,
+    required this.localSeat,
+    required this.closeEventAdapterFactory,
+  });
+
+  final String path;
+  final String navigationLabel;
+  final String remotePeerId;
+  final int localSeat;
+  final AppHoldemProductionCloseEventAdapterFactory closeEventAdapterFactory;
+
+  AppHoldemProductionSessionInput buildInput({
+    required HoldemStateSnapshot snapshot,
+    required String localPeerId,
+  }) {
+    return AppHoldemProductionSessionInput(
+      initialTableState: snapshot.tableState,
+      initialHandState: snapshot.handState,
+      initialCursor: snapshot.eventCursor,
+      closeEventAdapter: closeEventAdapterFactory(
+        RecoveryPersistenceScope(
+          tableId: snapshot.tableState.tableId,
+          sessionId: snapshot.tableState.sessionId,
+          protocolVersion: snapshot.tableState.protocolVersion,
+        ),
+      ),
+      path: path,
+      navigationLabel: navigationLabel,
+      peerId: remotePeerId,
+      localPeerId: localPeerId,
+      localSeat: localSeat,
+    );
+  }
+}
 
 /// Loads a typed Hold'em production state from the existing recovery store.
 ///
@@ -17,6 +63,42 @@ typedef AppHoldemProductionSessionInputFactory =
 /// for local identity, route metadata, close policy, and platform dependencies.
 class AppPersistedHoldemProductionSessionSource
     implements AppHoldemProductionSessionSource {
+  static Future<AppPersistedHoldemProductionSessionSource>
+  fromProvisionedLocalIdentity({
+    required RecoveryPersistenceStore store,
+    required NativeLocalPeerIdentityProvisioner identityProvisioner,
+    required AppPersistedHoldemProductionSessionRoutePolicy routePolicy,
+    required HoldemEventIdFactory eventIdFactory,
+    required HoldemEventTimestampFactory emittedAtFactory,
+    required HoldemEventHashFactory eventHashFactory,
+    HoldemCoreProjectionAdapter replayAdapter =
+        const HoldemCoreProjectionAdapter(),
+    HoldemEventReducer eventReducer = const HoldemEventReducer(),
+    String snapshotType = 'HoldemStateSnapshot',
+    String snapshotVersion = '1.0',
+  }) async {
+    final provisioned = await identityProvisioner.ensureIdentity();
+    final identity = provisioned.identity;
+    if (!provisioned.isSuccess || identity == null) {
+      throw StateError('Local peer identity is unavailable.');
+    }
+
+    return AppPersistedHoldemProductionSessionSource(
+      store: store,
+      inputFactory: (_, snapshot) => routePolicy.buildInput(
+        snapshot: snapshot,
+        localPeerId: identity.peerId,
+      ),
+      eventIdFactory: eventIdFactory,
+      emittedAtFactory: emittedAtFactory,
+      eventHashFactory: eventHashFactory,
+      replayAdapter: replayAdapter,
+      eventReducer: eventReducer,
+      snapshotType: snapshotType,
+      snapshotVersion: snapshotVersion,
+    );
+  }
+
   const AppPersistedHoldemProductionSessionSource({
     required RecoveryPersistenceStore store,
     required AppHoldemProductionSessionInputFactory inputFactory,

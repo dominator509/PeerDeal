@@ -1050,6 +1050,15 @@ fails closed on unavailable, invalid, inactive, or ambiguous storage. The
 concrete production source still needs to compose this identity with real
 route policy, remote peer selection, and product state/database wiring.
 
+The T60 follow-up closes the app-owned composition portion of that boundary.
+Both app shells can now provision or reuse the local identity and construct the
+existing persisted production source with `localPeerId`, caller-supplied route
+and navigation policy, remote peer ID, local seat, and close-event adapter.
+This is a deterministic composition seam, not a database or peer-discovery
+implementation: concrete persistence selection, remote-peer discovery, native
+runtime validation, and operator-owned release credentials remain open outside
+the app factory.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
