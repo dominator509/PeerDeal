@@ -132,6 +132,9 @@ The capture protection bridge exposes `getCapability` and `setBlocking` on
 `peerdeal/native_bridges/capture_protection`. App coordinators serialize
 blocking and release actions, and a failed or unconfirmed blocking action
 downgrades the sensitive surface to visual obscuring with a scrubbed warning.
+Both method-channel calls use a bounded five-second default deadline and return
+stable unavailable or failed results on timeout; non-positive timeout values
+are rejected before platform calls.
 The action result reports both `success` and `blockingEnabled`; native hosts
 must not expose receipt or capture policy semantics beyond this generic seam.
 Mobile and desktop app-native readiness loaders compose generic capture,

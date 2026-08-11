@@ -7734,6 +7734,37 @@ Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
 
+### T70: bounded capture bridge calls
+
+- Generic capture protection method-channel capability and blocking calls now
+  use a bounded five-second default deadline.
+- Timeout results are stable and fail closed; non-positive timeout configuration
+  is rejected before a platform call.
+- Mirrored app receipt tests inject the existing recording capture fake when no
+  native platform channel is intentionally configured, avoiding fake-clock
+  deadline residue while preserving real timeout coverage in the bridge suite.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/capture_protection/method_channel_capture_protection_bridge.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_capture_protection_bridge_test.dart`
+- `apps/peerdeal_mobile/test/app_shell_test.dart`
+- `apps/peerdeal_mobile/test/demo_slice/demo_receipt_screen_test.dart`
+- `apps/peerdeal_desktop/test/app_shell_test.dart`
+- `apps/peerdeal_desktop/test/demo_slice/demo_receipt_screen_test.dart`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused capture method-channel suite: passed, 9 tests.
+
+Remaining:
+- Runtime Android/Windows capture behavior, operator release signing, and
+  other-platform capture implementations remain external.
+
 ### T68: lazy persisted-session identity provisioning
 
 - Mirrored production configuration now composes

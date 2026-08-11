@@ -442,6 +442,13 @@ class RecordingSecureKeyStorageBridge implements SecureKeyStorageBridge {
 }
 
 class _ThrowingReceiptPresenter extends DemoReceiptSurfacePresenter {
+  _ThrowingReceiptPresenter()
+    : super(
+        captureCoordinator: CaptureSurfaceCoordinator(
+          bridge: RecordingCaptureProtectionBridge(),
+        ),
+      );
+
   @override
   Future<DemoReceiptSurfaceVm> present({
     required ReceiptScanResult receipt,

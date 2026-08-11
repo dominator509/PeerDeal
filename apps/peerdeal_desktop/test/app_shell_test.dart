@@ -258,6 +258,11 @@ void main() {
 
     await tester.pumpWidget(
       PeerDealDesktopApp(
+        presenter: DemoReceiptSurfacePresenter(
+          captureCoordinator: CaptureSurfaceCoordinator(
+            bridge: RecordingCaptureProtectionBridge(),
+          ),
+        ),
         receiptFactory: (snapshot) =>
             _receiptForSnapshot(snapshot, pseudonymousUserId: 'user_injected'),
         receiptExportArtifactFactory: (receipt) async {

@@ -128,7 +128,9 @@ socket/Winsock initialization. The generic method-channel capability, send, and
 receive calls use a bounded five-second default deadline and accept caller
 cancellation for route lifecycle teardown. Local-network capability and
 discovery calls use the same bounded default deadline; app-owned bootstrap
-loaders cancel them on route replacement or disposal. Device/network
+loaders cancel them on route replacement or disposal. Capture capability and
+blocking calls use the same bounded default deadline and fail closed on timeout.
+Device/network
 reachability, real platform discovery, and other-platform transport remain open.
 
 Recovery:

@@ -350,6 +350,11 @@ the gates below are satisfied.
   calls when table routes are replaced or disposed. Real platform discovery,
   permission behavior, reachability, and other-platform implementations remain
   external validation and implementation work.
+- Generic capture capability and blocking method-channel calls now have a
+  bounded five-second default deadline with stable fail-closed timeout results;
+  non-positive timeout configuration is rejected before platform calls. Runtime
+  device behavior, capture enforcement, and other-platform implementations
+  remain external validation and implementation work.
 - Mounted join-flow factories now use an app-owned native bootstrap coordinator
   instead of hard-coded fake peer candidates, mapping normalized local-network
   discovery into join `BootstrapPlan` inputs while preserving relay fallback
@@ -1127,6 +1132,13 @@ recovery access and immediately before and after lazy identity provisioning.
 Cancelled loads fail closed with a stable error and do not mutate secure-key
 storage when cancellation is already signaled; underlying native calls remain
 bounded by their existing bridge deadlines.
+
+The T70 follow-up closes the remaining unbounded generic capture bridge call
+path. Capability and blocking method-channel calls now reject non-positive
+timeouts and return stable fail-closed timeout results after the same
+five-second default used by secure storage, transport, and local-network
+bridges. Runtime Android/Windows capture validation and other-platform capture
+implementations remain external.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

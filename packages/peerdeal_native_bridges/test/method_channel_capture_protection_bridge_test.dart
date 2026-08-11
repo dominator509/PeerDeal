@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -12,6 +14,16 @@ void main() {
     log.clear();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
+  });
+
+  test('rejects a non-positive method-channel timeout', () {
+    expect(
+      () => MethodChannelCaptureProtectionBridge(
+        channel: channel,
+        timeout: Duration.zero,
+      ),
+      throwsArgumentError,
+    );
   });
 
   test('reads capture capability over the method channel', () async {
@@ -118,6 +130,30 @@ void main() {
   });
 
   test(
+    'returns unavailable capability when platform lookup times out',
+    () async {
+      final pending = Completer<Object?>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) {
+            log.add(call);
+            return pending.future;
+          });
+
+      final bridge = MethodChannelCaptureProtectionBridge(
+        channel: channel,
+        timeout: const Duration(milliseconds: 1),
+      );
+      final capability = await bridge.getCapability();
+
+      expect(capability.blockingSupported, isFalse);
+      expect(capability.obscuringSupported, isFalse);
+      expect(capability.notes, 'unavailable');
+      expect(capability.warning, 'Capture protection call timed out.');
+      expect(log.single.method, 'getCapability');
+    },
+  );
+
+  test(
     'returns unavailable capability for malformed platform payload',
     () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -136,4 +172,24 @@ void main() {
       expect(log.single.method, 'getCapability');
     },
   );
+
+  test('fails closed when capture blocking action times out', () async {
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) {
+          log.add(call);
+          return pending.future;
+        });
+
+    final bridge = MethodChannelCaptureProtectionBridge(
+      channel: channel,
+      timeout: const Duration(milliseconds: 1),
+    );
+    final action = await bridge.setBlocking(enabled: true);
+
+    expect(action.isSuccess, isFalse);
+    expect(action.blockingEnabled, isFalse);
+    expect(action.warning, 'Capture protection call timed out.');
+    expect(log.single.method, 'setBlocking');
+  });
 }

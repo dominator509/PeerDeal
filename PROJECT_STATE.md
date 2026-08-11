@@ -654,6 +654,15 @@ Generated: 2026-08-10
   final product navigation/UX validation remained open after the route mount;
   T42 now supplies only the generic app-shell argument handoff.
 
+## Recent T70 Changes
+
+- Generic capture protection method-channel capability and blocking calls now
+  use a bounded five-second default deadline and return stable fail-closed
+  timeout results.
+- Non-positive capture bridge timeout configuration is rejected before any
+  platform call. Runtime Android/Windows capture behavior and other-platform
+  implementations remain external validation work.
+
 ## Required Gates
 
 Run after each retrofit step:

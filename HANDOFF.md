@@ -116,6 +116,9 @@ are implemented on branch
   bounded five-second default deadline and stable fail-closed timeout results.
   Default app bootstrap loaders carry caller cancellation, and table routes
   cancel them during replacement or disposal.
+- Generic capture capability and blocking method-channel calls now use a
+  bounded five-second default deadline and stable fail-closed timeout results;
+  non-positive timeout configuration is rejected before platform calls.
 - Added the generic app-support directory method-channel contract. Android
   returns private no-backup app storage and Windows returns `LocalAppData`.
 - Both app shells now prefer `PEERDEAL_RECOVERY_ROOT` and otherwise use the
@@ -526,3 +529,11 @@ are implemented on branch
 - Cancelled loads fail closed with a stable `StateError`; focused mobile and
   desktop persisted-session suites passed with 13 tests each, including the
   no-side-effect pre-cancel regression.
+
+## Recent T70 Changes
+
+- Generic capture capability and blocking method-channel calls now fail closed
+  after the bounded five-second default deadline instead of remaining pending
+  indefinitely on a torn-down or unresponsive plugin.
+- Focused capture bridge tests passed, including timeout and non-positive
+  timeout validation coverage.
