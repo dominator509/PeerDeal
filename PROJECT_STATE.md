@@ -402,7 +402,15 @@ Generated: 2026-08-10
   mirrors the existing `toJson()` fields, rejects unknown phases and malformed
   primitive values, and preserves only string-keyed metadata. The focused core
   invariant/model suite passed with 13 tests; full product source and
-  variant-state persistence remain integration-owned.
+  durable product persistence wiring remain integration-owned.
+
+## Recent T55 Changes
+
+- `peerdeal_variants` now provides strict `HoldemHandState.toJson/fromJson` and
+  `HoldemSeatState.toJson/fromJson` coverage for enum, nested seat, collection,
+  nullable, and primitive fields. The focused variant persistence suite passed
+  with 3 tests; product source, database wiring, and local identity remain
+  integration-owned.
 
 ## Recent T47 Changes
 

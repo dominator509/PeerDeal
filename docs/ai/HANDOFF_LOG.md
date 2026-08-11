@@ -12,6 +12,35 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Hold'em State Persistence Parser
+
+Summary:
+- Added strict `HoldemHandState` and `HoldemSeatState` JSON serialization and
+  hydration in the variant package.
+- Enum names, nested seat objects, collections, nullable fields, and primitive
+  types fail closed when malformed.
+
+Files changed:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_hand_state.dart`.
+- `packages/peerdeal_variants/test/holdem_hand_state_persistence_test.dart`.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused variant persistence suite: passed, 3 tests.
+- Real JSON encode/decode round-trip: passed.
+- Package analyzer: passed.
+
+Risks:
+- Product source provisioning, durable database wiring, local identity, and
+  native/device runtime validation remain integration or operator-owned.
+
+Next reviewer:
+- Use the typed variant parser from a product-owned source once its persistence
+  and identity contracts are supplied.
+
+---
+
 ### 2026-08-10 - Codex - Core Table-State Hydration Parser
 
 Summary:
@@ -31,8 +60,8 @@ Tests run:
 - Real JSON encode/decode round-trip: passed.
 
 Risks:
-- Full product source, variant-state serialization, durable database wiring,
-  and local identity provisioning remain integration-owned.
+- Full product source, durable database wiring, and local identity provisioning
+  remain integration-owned.
 
 Next reviewer:
 - Use this typed table-state parser from an authoritative product persistence

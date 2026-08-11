@@ -1012,7 +1012,12 @@ The T54 follow-up adds strict `peerdeal_core` `TableState.fromJson(...)`
 hydration matching the existing `toJson()` shape. It rejects malformed field
 types, unknown phases, and non-string metadata keys before typed state is
 rehydrated. This advances persistence safety without inventing the still-open
-product source or variant-state serialization schema.
+product source or database wiring.
+
+The T55 follow-up adds strict variant-owned JSON serialization and hydration for
+`HoldemHandState` and `HoldemSeatState`, including enum, nested-seat, collection,
+nullable, and primitive validation. Product source provisioning, database
+wiring, and local identity remain integration-owned.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
