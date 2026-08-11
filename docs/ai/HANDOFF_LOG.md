@@ -8171,6 +8171,35 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Native Transport Send Contract Alignment
+
+Summary:
+- Fixed the Android and Windows native transport handlers to unwrap the nested
+  `frame` map emitted by the locked Dart `sendFrame` channel contract.
+- Windows now selects an operational IPv4 multicast interface by adapter metric
+  and uses it for multicast membership and outbound sends.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, `docs/ai/API_CONTRACTS.md`, and
+  `docs/ai/ARCHITECTURE_MAP.md`.
+
+Verification:
+- Direct Windows native host smoke passed transport capability/send/receive,
+  secure-key CAS/tombstone checks, capture lifecycle, and app/local-network
+  checks with exit code 0.
+- Android debug APK compilation passed.
+
+Risks:
+- Android device runtime, cross-device multicast reachability, release signing,
+  other-platform native implementations, and product database/session-state
+  wiring remain external or integration-owned.
+
+---
+
 ### 2026-08-11 - Codex - Secure-Key Revision Compare-and-Swap
 
 Summary:

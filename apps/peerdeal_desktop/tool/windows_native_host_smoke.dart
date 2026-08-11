@@ -103,7 +103,10 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
   if (sendResult.isSuccess) {
     _pass('transport.send');
   } else {
-    _warn('transport.send', 'host network send unavailable');
+    _warn(
+      'transport.send',
+      sendResult.warning ?? 'host network send unavailable',
+    );
   }
   final receiveSnapshot = await transport.receiveFrames(
     sessionId: 'windows_runtime_smoke',

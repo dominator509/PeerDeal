@@ -884,6 +884,14 @@ signing, and concrete product state wiring remain external or integration-owned.
   and `git diff --check` gates passed. Dependency audit reports zero actionable
   upgrades and 11 newer versions below the current toolchain ceiling.
 
+## Recent T90 Changes
+
+- Fixed the nested `frame` payload contract mismatch in the Android and Windows
+  native transport handlers.
+- Windows now selects an operational IPv4 multicast interface for membership
+  and sends. Direct host smoke passed transport send and receive, and Android
+  debug APK compilation passed.
+
 ## Required Gates
 
 Run after each retrofit step:
@@ -897,9 +905,9 @@ Run after each retrofit step:
 
 ## Next Implementation Targets
 
-1. Validate Android and Windows secure-key persistence and capture behavior at
-   runtime, including an Android real-device pass and operator-owned release
-   signing.
+1. Validate Android secure-key/capture behavior on a real device and validate
+   cross-device Android/Windows multicast reachability, including
+   operator-owned release signing.
 2. Add the remaining other-platform capture, local-network, and transport
    implementations behind the existing generic method-channel contracts; the
    Android/Windows transport is now host-backed but still needs device/network

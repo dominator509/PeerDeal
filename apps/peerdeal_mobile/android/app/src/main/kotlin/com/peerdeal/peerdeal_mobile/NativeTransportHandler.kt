@@ -277,13 +277,14 @@ internal class NativeTransportHandler(
     }
 
     private fun frameFromCall(call: MethodCall): TransportFrame? {
-        val sessionId = safeString(call.argument<Any?>("sessionId")) ?: return null
-        val senderPeerId = safeString(call.argument<Any?>("senderPeerId")) ?: return null
-        val recipientPeerId = safeString(call.argument<Any?>("recipientPeerId")) ?: return null
+        val frame = call.argument<Any?>("frame") as? Map<*, *> ?: return null
+        val sessionId = safeString(frame["sessionId"]) ?: return null
+        val senderPeerId = safeString(frame["senderPeerId"]) ?: return null
+        val recipientPeerId = safeString(frame["recipientPeerId"]) ?: return null
         if (senderPeerId == recipientPeerId) return null
-        val sequence = (call.argument<Any?>("sequence") as? Number)?.toLong()
+        val sequence = (frame["sequence"] as? Number)?.toLong()
             ?.takeIf { it in 1..Int.MAX_VALUE }?.toInt() ?: return null
-        val values = call.argument<Any?>("payloadBytes") as? List<*> ?: return null
+        val values = frame["payloadBytes"] as? List<*> ?: return null
         if (values.isEmpty() || values.size > MAX_PAYLOAD_BYTES) return null
         val payload = ByteArray(values.size)
         values.forEachIndexed { index, value ->

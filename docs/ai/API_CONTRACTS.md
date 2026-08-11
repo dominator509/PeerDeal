@@ -250,6 +250,9 @@ a bounded five-second default deadline and return stable unavailable or failed
 results on timeout. Callers may also provide a cancellation signal so app-owned
 lifecycles can stop in-flight calls and their local deadline timers; transport
 policy remains in app and network layers.
+The `sendFrame` method-channel arguments carry the encoded transport fields under
+one nested `frame` map. Android and Windows native hosts must unwrap that map
+before validating or encoding the host-private datagram envelope.
 The Android and Windows host implementations require strict UTF-8 for native
 session and peer identity fields and reject C1/control-bearing or padded values
 before queueing received frames or sending datagrams. Host input normalization

@@ -856,3 +856,18 @@ available for the corresponding Android runtime pass.
 Full analyze, boundary-check, source-text, serialized test, dependency-audit,
 and `git diff --check` gates passed. Dependency audit reports zero actionable
 upgrades and 11 newer versions below the current toolchain ceiling.
+
+## Recent T90 Changes
+
+- Fixed the native transport contract mismatch in both locked platform hosts:
+  Dart sends `sendFrame` arguments as a nested `frame` map, and Android and
+  Windows now unwrap that map before validation and encoding.
+- Windows native transport now selects an operational IPv4 multicast interface
+  by adapter metric and applies it to multicast membership and outbound sends.
+- Direct Windows host smoke passed app storage, capture, local-network,
+  transport capability/send/receive, and secure-key CAS/tombstone checks with
+  exit code 0. Android debug APK compilation passed.
+
+Runtime/device validation, cross-device multicast reachability, operator-owned
+release signing, other-platform native implementations, and concrete product
+database or session-state wiring remain external or integration-owned.

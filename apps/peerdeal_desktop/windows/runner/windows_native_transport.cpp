@@ -1,6 +1,7 @@
 // Winsock must be included before Windows headers.
 #include "windows_native_transport.h"
 
+#include <iphlpapi.h>
 #include <ws2tcpip.h>
 
 #include <algorithm>
@@ -32,6 +33,66 @@ constexpr std::array<uint8_t, 4> kMagic = {'P', 'D', 'L', '1'};
 using flutter::EncodableList;
 using flutter::EncodableMap;
 using flutter::EncodableValue;
+
+const char* SendFailureWarning(int error) {
+  switch (error) {
+    case WSAEACCES:
+      return "Native transport multicast send is blocked by host policy.";
+    case WSAEADDRNOTAVAIL:
+      return "Native transport multicast interface is unavailable.";
+    case WSAENETUNREACH:
+    case WSAEHOSTUNREACH:
+      return "Native transport multicast route is unavailable.";
+    default:
+      return "Native transport send failed.";
+  }
+}
+
+std::optional<in_addr> SelectMulticastInterface() {
+  ULONG buffer_size = 16 * 1024;
+  std::vector<uint8_t> buffer(buffer_size);
+  const ULONG flags = GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_DNS_SERVER;
+  ULONG status = ::GetAdaptersAddresses(
+      AF_INET, flags, nullptr,
+      reinterpret_cast<PIP_ADAPTER_ADDRESSES>(buffer.data()), &buffer_size);
+  if (status == ERROR_BUFFER_OVERFLOW) {
+    buffer.resize(buffer_size);
+    status = ::GetAdaptersAddresses(
+        AF_INET, flags, nullptr,
+        reinterpret_cast<PIP_ADAPTER_ADDRESSES>(buffer.data()), &buffer_size);
+  }
+  if (status != NO_ERROR) return std::nullopt;
+
+  std::optional<in_addr> selected;
+  ULONG selected_metric = std::numeric_limits<ULONG>::max();
+  const auto* adapters =
+      reinterpret_cast<PIP_ADAPTER_ADDRESSES>(buffer.data());
+  for (const auto* adapter = adapters; adapter != nullptr;
+       adapter = adapter->Next) {
+    if (adapter->OperStatus != IfOperStatusUp ||
+        adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK) {
+      continue;
+    }
+    for (const auto* address = adapter->FirstUnicastAddress;
+         address != nullptr; address = address->Next) {
+      const auto* socket_address = address->Address.lpSockaddr;
+      if (socket_address == nullptr || socket_address->sa_family != AF_INET) {
+        continue;
+      }
+      const auto* ipv4 = reinterpret_cast<const sockaddr_in*>(socket_address);
+      const uint32_t host_address = ntohl(ipv4->sin_addr.s_addr);
+      const bool is_loopback = host_address == INADDR_LOOPBACK;
+      const bool is_apipa = (host_address & 0xffff0000u) == 0xa9fe0000u;
+      if (is_loopback || is_apipa) continue;
+      if (!selected.has_value() || adapter->Ipv4Metric < selected_metric) {
+        selected = ipv4->sin_addr;
+        selected_metric = adapter->Ipv4Metric;
+      }
+      break;
+    }
+  }
+  return selected;
+}
 
 const EncodableMap* ArgumentsMap(
     const flutter::MethodCall<EncodableValue>& method_call) {
@@ -261,6 +322,14 @@ bool WindowsNativeTransport::InitializeSocket() {
 
   socket_ = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
   if (socket_ == INVALID_SOCKET) return fail_initialization();
+  const auto multicast_interface = SelectMulticastInterface();
+  if (!multicast_interface.has_value()) return fail_initialization();
+  if (::setsockopt(
+          socket_, IPPROTO_IP, IP_MULTICAST_IF,
+          reinterpret_cast<const char*>(&multicast_interface.value()),
+          sizeof(multicast_interface.value())) == SOCKET_ERROR) {
+    return fail_initialization();
+  }
   const BOOL reuse = TRUE;
   if (::setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
                    reinterpret_cast<const char*>(&reuse), sizeof(reuse)) ==
@@ -281,7 +350,7 @@ bool WindowsNativeTransport::InitializeSocket() {
   if (::InetPtonA(AF_INET, kMulticastAddress, &membership.imr_multiaddr) != 1) {
     return fail_initialization();
   }
-  membership.imr_interface.s_addr = htonl(INADDR_ANY);
+  membership.imr_interface = multicast_interface.value();
   if (::setsockopt(socket_, IPPROTO_IP, IP_ADD_MEMBERSHIP,
                    reinterpret_cast<const char*>(&membership),
                    sizeof(membership)) == SOCKET_ERROR) {
@@ -342,9 +411,14 @@ void WindowsNativeTransport::HandleMethodCall(
     }
     if (method_call.method_name() == kSendFrameMethod) {
       const auto* arguments = ArgumentsMap(method_call);
-      const auto frame = arguments == nullptr
+      const auto* frame_value =
+          arguments == nullptr ? nullptr : MapValue(*arguments, "frame");
+      const auto* frame_arguments =
+          frame_value == nullptr ? nullptr
+                                 : std::get_if<EncodableMap>(frame_value);
+      const auto frame = frame_arguments == nullptr
                              ? std::nullopt
-                             : FrameFromArguments(*arguments);
+                             : FrameFromArguments(*frame_arguments);
       if (!frame.has_value()) {
         result->Success(Failure("Native transport frame is unavailable."));
         return;
@@ -372,6 +446,7 @@ void WindowsNativeTransport::HandleMethodCall(
         return;
       }
       int sent = SOCKET_ERROR;
+      int send_error = 0;
       bool available = false;
       {
         std::lock_guard<std::mutex> lock(lifecycle_mutex_);
@@ -382,6 +457,7 @@ void WindowsNativeTransport::HandleMethodCall(
               static_cast<int>(bytes.size()), 0,
               reinterpret_cast<const sockaddr*>(&destination),
               sizeof(destination));
+          if (sent == SOCKET_ERROR) send_error = ::WSAGetLastError();
         }
       }
       if (!available) {
@@ -389,7 +465,7 @@ void WindowsNativeTransport::HandleMethodCall(
         return;
       }
       if (sent != static_cast<int>(bytes.size())) {
-        result->Success(Failure("Native transport send failed."));
+        result->Success(Failure(SendFailureWarning(send_error)));
         return;
       }
       result->Success(Success());
