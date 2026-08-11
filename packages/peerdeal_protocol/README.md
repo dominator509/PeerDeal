@@ -12,7 +12,8 @@ Owns:
 - protocol versions
 - supported artifact catalog
 - envelope-level compatibility checks
-- bounded deterministic canonical JSON serialization
+- bounded deterministic canonical JSON serialization, including direct
+  `EventEnvelope` and `SnapshotEnvelope` hydration before typed field access
 - Game File public schema contract
 - invite payload public schema contract
 - accepted and rejected protocol fixtures

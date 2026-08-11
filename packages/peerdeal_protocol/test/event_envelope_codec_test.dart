@@ -77,4 +77,16 @@ void main() {
       );
     },
   );
+
+  test('rejects structurally oversized direct event hydration', () {
+    final oversized = event.toJson()
+      ..['payload'] = <String, Object?>{
+        for (var index = 0; index < 257; index += 1) 'key_$index': index,
+      };
+
+    expect(
+      () => EventEnvelope.fromJson(oversized),
+      throwsA(isA<FormatException>()),
+    );
+  });
 }

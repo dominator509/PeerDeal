@@ -1,3 +1,5 @@
+import '../serialization/canonical_json.dart';
+
 class EventEnvelope {
   const EventEnvelope({
     required this.eventId,
@@ -30,6 +32,7 @@ class EventEnvelope {
   final String eventHash;
 
   factory EventEnvelope.fromJson(Map<String, Object?> json) {
+    canonicalJsonEncode(json);
     return EventEnvelope(
       eventId: _string(json, 'event_id'),
       eventType: _string(json, 'event_type'),

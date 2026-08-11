@@ -1164,3 +1164,15 @@ Remaining:
 Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
+
+## Recent T112 Changes
+
+- `EventEnvelope.fromJson` and `SnapshotEnvelope.fromJson` now validate their
+  complete materialized JSON trees through bounded canonical protocol
+  serialization before typed field access.
+- File-backed recovery now fails closed on structurally oversized persisted
+  snapshot payloads before importing them into the in-memory recovery store.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.

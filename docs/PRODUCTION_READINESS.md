@@ -1469,6 +1469,14 @@ deterministic truth remains in `peerdeal_core` and Hold'em rules remain in
 `peerdeal_variants`. Product persistence/source wiring and platform/runtime
 validation remain separate.
 
+The T112 follow-up closes the direct protocol envelope hydration gap.
+`EventEnvelope.fromJson` and `SnapshotEnvelope.fromJson` now validate their
+complete materialized JSON trees through the bounded canonical protocol writer
+before typed field access. The file-backed recovery store therefore fails
+closed on structurally oversized persisted snapshot payloads before importing
+them into in-memory recovery state. Protocol schema and sync ownership remain
+unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

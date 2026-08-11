@@ -300,6 +300,12 @@ observes the route cancellation signal when a factory is injected, preserving
 fail-closed route teardown even when the injected factory cannot cancel its
 underlying operation.
 
+Direct `EventEnvelope.fromJson` and `SnapshotEnvelope.fromJson` calls also
+validate their full materialized JSON trees through the same bounded canonical
+protocol limits before typed field access. The JSON file-backed recovery store
+uses these constructors and fails closed on structurally oversized persisted
+snapshot payloads before importing recovery state.
+
 For Hold'em sessions, `HoldemEventCursor.accept(event)` is the remote stream
 gate. It requires matching protocol/table/session identity, the exact next
 event sequence, the previous hash, a supported catalog event, and a matching

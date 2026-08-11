@@ -40,6 +40,31 @@ Next reviewer:
 
 ---
 
+### 2026-08-11 - Codex - T112 Protocol Envelope Hydration Bounds
+
+Summary:
+- `EventEnvelope.fromJson` and `SnapshotEnvelope.fromJson` now validate full
+  materialized JSON trees through bounded canonical protocol serialization
+  before typed field access.
+- File-backed recovery fails closed on structurally oversized persisted
+  snapshot payloads before importing them into in-memory recovery state.
+
+Tests run:
+- Focused protocol envelope/fixture suite: 54 tests passed.
+- Focused file-backed recovery suite: 26 tests passed.
+- Focused protocol and sync analysis passed.
+
+Risks:
+- This hardens Dart protocol and recovery hydration only. Product database
+  selection, source wiring, platform/runtime validation, other-platform hosts,
+  and release signing remain separate.
+
+Next reviewer:
+- Preserve bounded canonical validation for any new direct protocol model
+  hydration path and keep sync persistence policy outside protocol models.
+
+---
+
 ### 2026-08-11 - Codex - T111 Typed State Hydration Bounds
 
 Summary:

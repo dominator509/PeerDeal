@@ -1089,6 +1089,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   deterministic truth out of `peerdeal_core` or variant rules out of
   `peerdeal_variants`. Focused core/variant tests and package analysis pass.
 
+## T112 Protocol Envelope Hydration Bounds
+
+- `EventEnvelope.fromJson` and `SnapshotEnvelope.fromJson` now validate the
+  complete materialized JSON tree through the bounded canonical protocol
+  serializer before typed field access.
+- The file-backed recovery store now fails closed when persisted snapshot
+  payload structure exceeds the protocol limits. Focused protocol and recovery
+  tests and package analysis pass.
+
 ## Required Gates
 
 Run after each retrofit step:

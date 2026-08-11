@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
@@ -773,6 +774,55 @@ void main() {
         ],
       }),
     );
+  });
+
+  test('file store rejects structurally oversized persisted snapshots', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    expect(
+      writer
+          .appendEvents(
+            scope: scope,
+            events: <EventEnvelope>[
+              _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+            ],
+          )
+          .isSuccess,
+      isTrue,
+    );
+    final persisted = directory.listSync().whereType<File>().singleWhere(
+      (candidate) => candidate.path.endsWith('.json'),
+    );
+    final oversizedSnapshot = _snapshot(seq: 0, hash: 'snapshot_hash').toJson()
+      ..['payload'] = <String, Object?>{
+        for (var index = 0; index < 257; index += 1) 'key_$index': index,
+      };
+    persisted.writeAsStringSync(
+      jsonEncode(<String, Object?>{
+        'snapshot': oversizedSnapshot,
+        'events': const <Object?>[],
+      }),
+    );
+
+    final result = writer.appendEvents(
+      scope: scope,
+      events: const <EventEnvelope>[],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_FILE_CORRUPT',
+    );
+    expect(writer.loadWindow(scope).events, isEmpty);
   });
 
   test('file store fails closed on corrupt persisted data', () {

@@ -1,3 +1,5 @@
+import '../serialization/canonical_json.dart';
+
 class SnapshotEnvelope {
   const SnapshotEnvelope({
     required this.snapshotId,
@@ -22,6 +24,7 @@ class SnapshotEnvelope {
   final Map<String, Object?> payload;
 
   factory SnapshotEnvelope.fromJson(Map<String, Object?> json) {
+    canonicalJsonEncode(json);
     return SnapshotEnvelope(
       snapshotId: _string(json, 'snapshot_id'),
       snapshotType: _stringWithDefault(json, 'snapshot_type', 'TableSnapshot'),

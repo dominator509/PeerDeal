@@ -724,6 +724,27 @@ void main() {
     expect(snapshot.payload['kind'], 'table');
   });
 
+  test('rejects structurally oversized direct snapshot hydration', () {
+    final oversized =
+        const SnapshotEnvelope(
+            snapshotId: 'snap_1',
+            protocolVersion: '1.0.0',
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            snapshotBaseEventSeq: 1,
+            snapshotHash: 'snap_hash',
+            payload: <String, Object?>{},
+          ).toJson()
+          ..['payload'] = <String, Object?>{
+            for (var index = 0; index < 257; index += 1) 'key_$index': index,
+          };
+
+    expect(
+      () => SnapshotEnvelope.fromJson(oversized),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('protocol catalog accepts supported snapshot envelope', () {
     final decoded = fixtureJson('fixtures/snapshots/table_snapshot_v1.json');
     final result = ProtocolCatalog().checkSnapshotEnvelopeJson(decoded);
