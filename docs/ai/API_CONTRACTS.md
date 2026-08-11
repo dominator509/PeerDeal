@@ -270,6 +270,12 @@ transport handler and provisioner accept an optional `holdemRuntime` to use
 this path; the generic runtime path remains the contract for non-variant
 sessions.
 
+`HoldemEventCursor.toJson/fromJson` persist and restore the cursor's exact
+scope, next sequence, previous hash, actor, and last-event state. Hydration
+requires caller-owned event-id and timestamp factories and accepts an optional
+event-hash factory, so persistence cannot silently replace product event
+policy.
+
 `AppHoldemTableSessionRoute` is the app-owned non-demo composition boundary. It
 accepts an injected validated `AppHoldemTableSessionRuntime` and peer identity,
 provisions the existing `AppTableSessionTransportProvisioner`, mounts the

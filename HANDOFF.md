@@ -29,7 +29,8 @@ T47 source-backed bootstrap-route assembly, T48 runtime-owned production
 session configuration, T49 fail-closed Android release signing, T50 production
 table UI accessibility/responsive hardening, T51 keyboard/focus control
 hardening, T52 action hit-target hardening, T53 local-seat action routing,
-T54 typed core table-state hydration, and T55 typed Hold'em state hydration
+T54 typed core table-state hydration, T55 typed Hold'em state hydration, and
+T56 typed Hold'em event-cursor hydration
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -59,6 +60,8 @@ are implemented on branch
   persistence shape, including phase and metadata-key validation.
 - Variant-owned `HoldemHandState` and `HoldemSeatState` now have strict JSON
   serialization and hydration for durable source integrations.
+- Variant-owned `HoldemEventCursor` now has strict JSON serialization and
+  hydration while requiring caller-owned event policy factories.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -428,3 +431,4 @@ are implemented on branch
   each, including canonical non-zero local-seat event attribution.
 - T54 focused core invariant/model tests: passed, 13 tests.
 - T55 focused variant state persistence tests: passed, 3 tests.
+- T56 focused event-cursor persistence tests: passed, 3 tests.

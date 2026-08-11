@@ -12,6 +12,35 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Hold'em Event-Cursor Persistence Parser
+
+Summary:
+- Added strict `HoldemEventCursor.toJson/fromJson` coverage for scope,
+  sequence, hash-chain predecessor, actor, and last-event state.
+- Hydration requires caller-owned event-id and timestamp factories and accepts
+  an optional caller-owned hash factory; no runtime policy is invented.
+
+Files changed:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_core_projection_adapter.dart`.
+- `packages/peerdeal_variants/test/holdem_event_cursor_persistence_test.dart`.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused cursor persistence suite: passed, 3 tests.
+- Real JSON encode/decode round-trip: passed.
+- Package analyzer: passed.
+
+Risks:
+- Product persistence wiring, local identity, native/device validation, and
+  release signing remain integration or operator-owned.
+
+Next reviewer:
+- Compose this cursor with the typed table and Hold'em state parsers from the
+  product-owned session source.
+
+---
+
 ### 2026-08-10 - Codex - Hold'em State Persistence Parser
 
 Summary:

@@ -49,6 +49,26 @@ class HoldemEventCursor {
     }
   }
 
+  factory HoldemEventCursor.fromJson(
+    Map<String, Object?> json, {
+    required HoldemEventIdFactory eventIdFactory,
+    required HoldemEventTimestampFactory emittedAtFactory,
+    HoldemEventHashFactory eventHashFactory = _defaultEventHash,
+  }) {
+    return HoldemEventCursor(
+      protocolVersion: _cursorRequiredString(json, 'protocol_version'),
+      tableId: _cursorRequiredString(json, 'table_id'),
+      sessionId: _cursorRequiredString(json, 'session_id'),
+      nextEventSeq: _cursorRequiredInt(json, 'next_event_seq'),
+      previousEventHash: _cursorRequiredString(json, 'previous_event_hash'),
+      actorRef: _cursorRequiredString(json, 'actor_ref'),
+      eventIdFactory: eventIdFactory,
+      emittedAtFactory: emittedAtFactory,
+      eventHashFactory: eventHashFactory,
+      lastEventType: _cursorNullableString(json, 'last_event_type'),
+    );
+  }
+
   final String protocolVersion;
   final String tableId;
   final String sessionId;
@@ -59,6 +79,16 @@ class HoldemEventCursor {
   final HoldemEventTimestampFactory emittedAtFactory;
   final HoldemEventHashFactory eventHashFactory;
   final String? lastEventType;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'protocol_version': protocolVersion,
+    'table_id': tableId,
+    'session_id': sessionId,
+    'next_event_seq': nextEventSeq,
+    'previous_event_hash': previousEventHash,
+    'actor_ref': actorRef,
+    'last_event_type': lastEventType,
+  };
 
   HoldemEventCursorResult issue({
     required String eventType,
@@ -744,6 +774,30 @@ class HoldemCoreProjectionAdapter {
       HoldemTableActionType.allIn => 'PlayerAllIn',
     };
   }
+}
+
+String _cursorRequiredString(Map<String, Object?> json, String key) {
+  final value = json[key];
+  if (value is! String) {
+    throw FormatException('Holdem cursor $key must be a string.');
+  }
+  return value;
+}
+
+String? _cursorNullableString(Map<String, Object?> json, String key) {
+  final value = json[key];
+  if (value != null && value is! String) {
+    throw FormatException('Holdem cursor $key must be a string or null.');
+  }
+  return value as String?;
+}
+
+int _cursorRequiredInt(Map<String, Object?> json, String key) {
+  final value = json[key];
+  if (value is! int) {
+    throw FormatException('Holdem cursor $key must be an integer.');
+  }
+  return value;
 }
 
 String _defaultEventHash(Map<String, Object?> canonicalEvent) {

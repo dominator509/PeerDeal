@@ -1019,6 +1019,12 @@ The T55 follow-up adds strict variant-owned JSON serialization and hydration for
 nullable, and primitive validation. Product source provisioning, database
 wiring, and local identity remain integration-owned.
 
+The T56 follow-up adds strict `HoldemEventCursor` JSON serialization and
+hydration for event scope, sequence, hash-chain predecessor, actor, and
+last-event state. Hydration requires caller-owned event-id, timestamp, and
+optional hash factories, preserving event policy ownership at the product edge.
+Product persistence and local identity wiring remain integration-owned.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

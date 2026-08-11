@@ -412,6 +412,14 @@ Generated: 2026-08-10
   with 3 tests; product source, database wiring, and local identity remain
   integration-owned.
 
+## Recent T56 Changes
+
+- `peerdeal_variants` now provides strict `HoldemEventCursor.toJson/fromJson`
+  coverage for scope, sequence, hash-chain, actor, and last-event state. The
+  parser requires caller-owned event-id, timestamp, and optional hash factories;
+  focused cursor persistence tests passed with 3 tests. Product persistence and
+  local identity wiring remain integration-owned.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`
