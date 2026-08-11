@@ -839,6 +839,17 @@ Android multi-process behavior, compare-and-swap semantics, runtime/device
 validation, and concrete product state wiring remain external or
 integration-owned.
 
+## Recent T87 Changes
+
+- Android secure-key load/save/delete now use a hash-named private file lock per
+  namespace and encrypted private files, closing the PeerDeal cross-process
+  read-modify-write race. Legacy preference records migrate under that lock.
+- Lock acquisition retries `tryLock` for at most five seconds and returns the
+  existing stable unavailable/failure result when it cannot acquire the lock.
+
+Compare-and-swap semantics, runtime/device validation, and concrete product
+state wiring remain external or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

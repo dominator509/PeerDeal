@@ -7,7 +7,12 @@ import android.security.keystore.KeyProperties
 import android.util.Base64
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
+import java.io.FileOutputStream
+import java.io.RandomAccessFile
 import java.nio.charset.StandardCharsets
+import java.nio.channels.FileLock
+import java.nio.channels.OverlappingFileLockException
 import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -42,6 +47,8 @@ internal class SecureKeyStorageHandler(context: Context) :
         private const val MAX_ENCODED_BYTES = 768 * 1024
         private const val GCM_TAG_BITS = 128
         private const val GCM_NONCE_BYTES = 12
+        private const val STORAGE_LOCK_WAIT_NANOS = 5_000_000_000L
+        private const val STORAGE_LOCK_RETRY_MILLIS = 10L
 
         private fun unavailablePayload(warning: String): Map<String, Any?> =
             mapOf(
@@ -58,8 +65,10 @@ internal class SecureKeyStorageHandler(context: Context) :
     }
 
     private val applicationContext = context.applicationContext
-    private val preferences: SharedPreferences =
-        applicationContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+    private val storageDirectory =
+        File(applicationContext.noBackupFilesDir, "peerdeal_secure_key_storage")
+    private val lockDirectory =
+        File(applicationContext.noBackupFilesDir, "peerdeal_secure_key_storage_locks")
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private val worker = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "peerdeal-secure-key-storage").apply { isDaemon = true }
@@ -95,6 +104,7 @@ internal class SecureKeyStorageHandler(context: Context) :
 
         submit(
             result,
+            namespace,
             failurePayload = { unavailablePayload("Secure key storage is unavailable.") },
         ) {
             when (val read = readRecords(namespace)) {
@@ -119,6 +129,7 @@ internal class SecureKeyStorageHandler(context: Context) :
 
         submit(
             result,
+            namespace,
             failurePayload = { mutationFailure("Secure key storage is unavailable.") },
         ) {
             when (val read = readRecords(namespace)) {
@@ -157,6 +168,7 @@ internal class SecureKeyStorageHandler(context: Context) :
 
         submit(
             result,
+            namespace,
             failurePayload = { mutationFailure("Secure key storage is unavailable.") },
         ) {
             when (val read = readRecords(namespace)) {
@@ -175,6 +187,7 @@ internal class SecureKeyStorageHandler(context: Context) :
 
     private fun submit(
         result: MethodChannel.Result,
+        namespace: String,
         failurePayload: () -> Map<String, Any?>,
         operation: () -> Map<String, Any?>,
     ) {
@@ -190,7 +203,7 @@ internal class SecureKeyStorageHandler(context: Context) :
                     failurePayload()
                 } else {
                     try {
-                        operation()
+                        withStorageLock(namespace, operation) ?: failurePayload()
                     } catch (_: Exception) {
                         failurePayload()
                     }
@@ -206,13 +219,49 @@ internal class SecureKeyStorageHandler(context: Context) :
         }
     }
 
+    private fun <T> withStorageLock(namespace: String, operation: () -> T): T? {
+        if (!lockDirectory.exists() && !lockDirectory.mkdirs() && !lockDirectory.isDirectory) {
+            return null
+        }
+
+        val lockFile = File(
+            lockDirectory,
+            "${digestHex(namespace.toByteArray(StandardCharsets.UTF_8))}.lock",
+        )
+        RandomAccessFile(lockFile, "rw").use { accessFile ->
+            val channel = accessFile.channel
+            val deadline = System.nanoTime() + STORAGE_LOCK_WAIT_NANOS
+            while (System.nanoTime() < deadline) {
+                val lock: FileLock? = try {
+                    channel.tryLock()
+                } catch (_: OverlappingFileLockException) {
+                    null
+                }
+                if (lock != null) {
+                    return lock.use { operation() }
+                }
+                try {
+                    Thread.sleep(STORAGE_LOCK_RETRY_MILLIS)
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    return null
+                }
+            }
+        }
+        return null
+    }
+
     private fun readRecords(namespace: String): ReadResult {
         val masterKey = loadOrCreateMasterKey(namespace) ?: return ReadResult.Failure
-        val stored = preferences.getString(preferenceKey(namespace), null)
-            ?: return ReadResult.Success(emptyList())
-        if (!isWithinEncodedLimit(stored)) return ReadResult.Failure
+        val stored = when (val result = readStoredEnvelope(namespace)) {
+            StoredEnvelope.Missing -> return ReadResult.Success(emptyList())
+            StoredEnvelope.Failure -> return ReadResult.Failure
+            is StoredEnvelope.Present -> result
+        }
+        val encodedEnvelope = stored.value
+        if (!isWithinEncodedLimit(encodedEnvelope)) return ReadResult.Failure
 
-        val envelope = JSONObject(stored)
+        val envelope = JSONObject(encodedEnvelope)
         if (envelope.optInt("version", -1) != STORAGE_VERSION) return ReadResult.Failure
         val iv = decodeBase64(envelope.getString("iv")) ?: return ReadResult.Failure
         val ciphertext = decodeBase64(envelope.getString("ciphertext")) ?: return ReadResult.Failure
@@ -238,13 +287,22 @@ internal class SecureKeyStorageHandler(context: Context) :
             if (!keyIds.add(record.keyId)) return ReadResult.Failure
             records.add(record)
         }
+        if (stored.legacy) {
+            if (!writeStoredEnvelope(namespace, encodedEnvelope) ||
+                !removeLegacyEnvelope(namespace)
+            ) {
+                return ReadResult.Failure
+            }
+        }
         return ReadResult.Success(records)
     }
 
     private fun writeRecords(namespace: String, records: List<StoredKey>): Boolean {
         if (records.size > MAX_RECORDS || records.any { !it.isValid() }) return false
         if (records.isEmpty()) {
-            return preferences.edit().remove(preferenceKey(namespace)).commit()
+            if (!removeLegacyEnvelope(namespace)) return false
+            val storageFile = storageFile(namespace)
+            return !storageFile.exists() || storageFile.delete()
         }
 
         val root = JSONObject().put("version", STORAGE_VERSION)
@@ -268,10 +326,74 @@ internal class SecureKeyStorageHandler(context: Context) :
             .toString()
         if (!isWithinEncodedLimit(envelope)) return false
 
-        return preferences.edit()
-            .putString(preferenceKey(namespace), envelope)
-            .commit()
+        if (!writeStoredEnvelope(namespace, envelope)) return false
+        return removeLegacyEnvelope(namespace)
     }
+
+    private fun readStoredEnvelope(namespace: String): StoredEnvelope {
+        val storageFile = storageFile(namespace)
+        if (storageFile.exists()) {
+            if (!storageFile.isFile || storageFile.length() > MAX_ENCODED_BYTES) {
+                return StoredEnvelope.Failure
+            }
+            return try {
+                StoredEnvelope.Present(
+                    String(storageFile.readBytes(), StandardCharsets.UTF_8),
+                    legacy = false,
+                )
+            } catch (_: Exception) {
+                StoredEnvelope.Failure
+            }
+        }
+
+        val legacy = legacyPreferences().getString(preferenceKey(namespace), null)
+            ?: return StoredEnvelope.Missing
+        return StoredEnvelope.Present(legacy, legacy = true)
+    }
+
+    private fun writeStoredEnvelope(namespace: String, envelope: String): Boolean {
+        if (!isWithinEncodedLimit(envelope)) return false
+        if (!storageDirectory.exists() &&
+            !storageDirectory.mkdirs() &&
+            !storageDirectory.isDirectory
+        ) {
+            return false
+        }
+
+        val storageFile = storageFile(namespace)
+        val temporaryFile = File(storageDirectory, "${storageFile.name}.tmp")
+        return try {
+            FileOutputStream(temporaryFile).use { output ->
+                output.write(envelope.toByteArray(StandardCharsets.UTF_8))
+                output.flush()
+                output.fd.sync()
+            }
+            temporaryFile.renameTo(storageFile)
+        } catch (_: Exception) {
+            false
+        } finally {
+            if (temporaryFile.exists()) temporaryFile.delete()
+        }
+    }
+
+    private fun removeLegacyEnvelope(namespace: String): Boolean = try {
+        legacyPreferences().edit().remove(preferenceKey(namespace)).commit()
+    } catch (_: Exception) {
+        false
+    }
+
+    @Suppress("DEPRECATION")
+    private fun legacyPreferences(): SharedPreferences =
+        applicationContext.getSharedPreferences(
+            PREFERENCES_NAME,
+            Context.MODE_PRIVATE or Context.MODE_MULTI_PROCESS,
+        )
+
+    private fun storageFile(namespace: String): File =
+        File(
+            storageDirectory,
+            "namespace_${digestHex(namespace.toByteArray(StandardCharsets.UTF_8))}.dat",
+        )
 
     private fun isWithinEncodedLimit(value: String): Boolean =
         value.length <= MAX_ENCODED_BYTES &&
@@ -407,5 +529,13 @@ internal class SecureKeyStorageHandler(context: Context) :
         data class Success(val records: List<StoredKey>) : ReadResult()
 
         data object Failure : ReadResult()
+    }
+
+    private sealed class StoredEnvelope {
+        data object Missing : StoredEnvelope()
+
+        data object Failure : StoredEnvelope()
+
+        data class Present(val value: String, val legacy: Boolean) : StoredEnvelope()
     }
 }

@@ -635,8 +635,15 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   host; it is not compare-and-swap and does not define Android multi-process or
   runtime/device semantics.
 - Android host records are encrypted with AES-GCM using a namespace-bound
-  Android Keystore master key and durably committed before a mutation reports
-  success. Corrupt, oversized, unavailable, or malformed records fail closed.
+  Android Keystore master key and durably committed to private
+  `noBackupFilesDir` files before a mutation reports success. Writes flush and
+  sync a temporary file before replacement; legacy preference records migrate
+  under the namespace lock. Corrupt, oversized, unavailable, or malformed
+  records fail closed.
+- Android secure-key load/save/delete operations serialize PeerDeal process
+  access with a hash-named private file lock under `noBackupFilesDir`; bounded
+  five-second `tryLock` retries fail closed. This is host serialization, not
+  compare-and-swap/versioning or a runtime/device guarantee.
 - Android release signing is operator-owned and requires all four
   `PEERDEAL_ANDROID_*` keystore variables. Release Gradle tasks fail before
   artifact assembly when signing is missing, padded, control-bearing, partial,

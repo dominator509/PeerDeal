@@ -1267,6 +1267,17 @@ failure. This does not create compare-and-swap/version semantics, change the
 generic credential contract, or prove Android multi-process, device, or runtime
 behavior.
 
+The T87 follow-up applies the same host-level serialization to Android. The
+secure-key handler now stores encrypted envelopes in private files under the
+app's `noBackupFilesDir`; load, save, and delete use a hash-named private lock
+file with at most five seconds of `tryLock` retries and fail closed if the lock
+is unavailable. Writes flush and sync a temporary file before replacing the
+namespace file. Existing preference-backed envelopes migrate under the lock.
+The AES-GCM payload, Android Keystore master-key contract, and generic channel
+shape are unchanged. This closes the PeerDeal Android host process race but
+does not add compare-and-swap/version semantics or prove runtime/device
+behavior.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

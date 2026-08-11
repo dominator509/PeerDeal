@@ -8171,6 +8171,31 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Android Secure-Key Process Serialization
+
+Summary:
+- Added a hash-named private file lock under Android `noBackupFilesDir` for
+  generic secure-key load/save/delete operations.
+- Moved the encrypted envelope to a private file with flushed/synced temporary
+  replacement and migrate legacy preference records under the same lock.
+- Bounded `tryLock` retries to five seconds and fail closed on lock failure,
+  preserving the encrypted storage and method-channel contracts.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- Android README plus T87 handoff/readiness and stable AI context docs.
+
+Verification:
+- `flutter build apk --debug --no-pub`: passed.
+- Full Dart/Flutter repository gates: passed.
+
+Risks:
+- This closes the PeerDeal Android host read-modify-write race but does not
+  add compare-and-swap/version semantics or prove runtime/device, signing, or
+  product persistence behavior.
+
+---
+
 ### 2026-08-11 - Codex - Windows Secure-Key Process Serialization
 
 Summary:

@@ -44,8 +44,10 @@ Setup flow:
 - `SecureKeyStorageHandler` registers the generic
   `peerdeal/native_bridges/secure_key_storage` channel. It stores validated
   generic key records as namespace-bound AES-GCM ciphertext, with the master
-  key held by Android Keystore and durable writes committed through app
-  preferences.
+  key held by Android Keystore and durable envelopes committed to private
+  `noBackupFilesDir` files. Load/save/delete operations use a bounded private
+  per-namespace file lock, with legacy preference records migrated under that
+  lock, so concurrent PeerDeal processes cannot race a read-modify-write.
 - `CaptureProtectionHandler` registers the generic
   `peerdeal/native_bridges/capture_protection` channel and applies the
   app-owned blocking decision through Android `FLAG_SECURE`.

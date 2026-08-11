@@ -799,3 +799,17 @@ Remaining:
 Windows host compilation passed. Android multi-process storage semantics,
 compare-and-swap behavior, runtime/device validation, signing, and product
 state wiring remain external or integration-owned.
+
+## Recent T87 Changes
+
+- The Android secure-key host now serializes each namespace with a private
+  hash-named file lock across PeerDeal app processes for load/save/delete.
+- Encrypted envelopes now live in private `noBackupFilesDir` files, written via
+  a flushed and synced temporary file replacement; legacy preference records
+  migrate under the same namespace lock.
+- Lock acquisition uses bounded five-second `tryLock` retries and fails closed
+  instead of allowing an unbounded storage wait.
+
+Android debug APK compilation passed. Compare-and-swap semantics, runtime/device
+validation, signing, and product state wiring remain external or
+integration-owned.
