@@ -234,6 +234,10 @@ a bounded five-second default deadline and return stable unavailable or failed
 results on timeout. Callers may also provide a cancellation signal so app-owned
 lifecycles can stop in-flight calls and their local deadline timers; transport
 policy remains in app and network layers.
+The Android and Windows host implementations require strict UTF-8 for native
+session and peer identity fields and reject C1/control-bearing or padded values
+before queueing received frames or sending datagrams. Host input normalization
+does not prove network reachability or add protocol/authentication semantics.
 App-owned native transport session factories must scrub native notes that look
 like secrets, tokens, passwords, or platform paths before exposing load results.
 `peerdeal_protocol.EventEnvelopeCodec` owns bounded canonical JSON bytes for

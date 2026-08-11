@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cwctype>
 #include <limits>
 #include <optional>
 #include <utility>
@@ -44,15 +45,35 @@ const EncodableValue* MapValue(const EncodableMap& map, const char* key) {
   return found == map.end() ? nullptr : &found->second;
 }
 
-bool IsSafeText(const std::string& value) {
-  if (value.empty() || value.size() > kMaxIdBytes ||
-      static_cast<unsigned char>(value.front()) <= 0x20 ||
-      static_cast<unsigned char>(value.back()) <= 0x20) {
+bool Utf8ToWide(const std::string& value, std::wstring* output) {
+  if (value.empty() ||
+      value.size() > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
     return false;
   }
-  return std::all_of(value.begin(), value.end(), [](unsigned char byte) {
-    return byte >= 0x20 && byte != 0x7f;
-  });
+  const int input_size = static_cast<int>(value.size());
+  const int output_size = ::MultiByteToWideChar(
+      CP_UTF8, MB_ERR_INVALID_CHARS, value.data(), input_size, nullptr, 0);
+  if (output_size <= 0) return false;
+  output->resize(static_cast<std::size_t>(output_size));
+  return ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, value.data(),
+                               input_size, output->data(), output_size) ==
+         output_size;
+}
+
+bool IsSafeText(const std::string& value) {
+  if (value.empty() || value.size() > kMaxIdBytes) return false;
+  std::wstring wide;
+  if (!Utf8ToWide(value, &wide) || wide.empty() ||
+      std::iswspace(wide.front()) || std::iswspace(wide.back())) {
+    return false;
+  }
+  for (const wchar_t character : wide) {
+    const auto code_point = static_cast<std::uint32_t>(character);
+    if (code_point < 0x20 || (code_point >= 0x7f && code_point <= 0x9f)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 std::optional<std::string> StringValue(const EncodableValue* value) {

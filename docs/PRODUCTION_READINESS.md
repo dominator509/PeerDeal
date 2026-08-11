@@ -1167,6 +1167,14 @@ second poll cannot overlap it. This hardens the Dart lifecycle boundary without
 claiming retroactive cancellation of an already-dispatched host call or proving
 native transport reachability.
 
+The T74 follow-up hardens native transport identity decoding on the implemented
+Android and Windows hosts. Received UDP frame fields must decode as strict
+UTF-8 and pass the existing nonblank, unpadded, control-free identity rules;
+invalid bytes are discarded before they enter the bounded receive queue, and
+invalid app-supplied fields are rejected before a send. This closes a concrete
+host input-normalization gap without claiming device, firewall, multicast, or
+cross-platform reachability.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

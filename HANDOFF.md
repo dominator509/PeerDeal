@@ -580,3 +580,16 @@ Remaining:
 - Native calls already dispatched remain host-owned; native transport
   reachability, device/profile validation, release signing, other-platform
   hosts, and product database/state wiring remain external or integration-owned.
+
+## Recent T74 Changes
+
+- Android native transport frame decoding now uses a reporting UTF-8 decoder
+  and rejects malformed or C1-control-bearing session and peer identities.
+- Windows native transport now validates UTF-8 through the Win32 decoder and
+  applies matching whitespace/control checks before accepting frame fields.
+- Android APK and Windows debug builds passed after the mirrored host change.
+
+Remaining:
+- Device/network reachability, firewall and multicast behavior, runtime
+  capture/key validation, release signing, other-platform hosts, and product
+  database/state wiring remain external or integration-owned.

@@ -72,7 +72,9 @@ to observe local device capabilities.
 - The Android and Windows hosts now back that channel with a bounded,
   host-private UDP multicast envelope on `239.255.42.99:40442`. The envelope
   is not a protocol artifact: it carries only the already-validated generic
-  frame fields and is filtered by session and recipient peer on receive.
+  frame fields and is filtered by session and recipient peer on receive. Host
+  decoders require strict UTF-8 and reject malformed, padded, or control-bearing
+  session/peer identities before queueing or sending.
 - Host socket availability does not prove local-network reachability. Device,
   firewall, multicast, other-platform, and product endpoint validation remain
   app/platform integration work.

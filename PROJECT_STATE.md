@@ -694,6 +694,13 @@ Generated: 2026-08-10
   overlapping native drains.
 - Focused mobile and desktop transport source/provisioner suites passed.
 
+## Recent T74 Changes
+
+- Android and Windows native transport hosts now reject malformed UTF-8 and
+  C1-control-bearing session/peer identity fields before queueing or sending
+  frames.
+- Both mirrored debug host builds passed after the decoder hardening.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -7722,6 +7722,26 @@ Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
 
+### T74: native transport strict identity decoding
+
+- Android native transport receive decoding now uses a reporting UTF-8
+  decoder; malformed bytes and C1/control-bearing identity fields are dropped
+  before frames enter the bounded queue.
+- Windows native transport now validates identity fields with strict UTF-8
+  conversion and matching whitespace/control checks before queueing received
+  frames or sending datagrams.
+- Both mirrored Android APK and Windows debug builds passed.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- transport/readiness/handoff records and READMEs
+
+Remaining:
+- Device/network reachability, firewall/multicast behavior, runtime host
+  validation, other-platform hosts, release signing, and product persistence
+  remain external or integration-owned.
+
 ### T73: transport polling cancellation propagation
 
 - Mirrored `AppTableSessionTransportProvisioner` instances now observe route

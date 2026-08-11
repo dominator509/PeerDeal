@@ -59,7 +59,8 @@ Setup flow:
   until signing is configured.
 - The release manifest declares `INTERNET` for the existing native-network
   boundary. The Android host now backs the generic live peer transport with a
-  bounded UDP multicast envelope; local-network discovery, device reachability,
+  bounded UDP multicast envelope with strict UTF-8/control-free identity
+  decoding; local-network discovery, device reachability,
   and other-platform transport remain platform implementation gaps.
 - Android capture blocking is implemented at the host level, but runtime/device
   validation, local-network discovery, transport, production platform recovery

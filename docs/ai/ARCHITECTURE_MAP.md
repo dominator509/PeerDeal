@@ -128,7 +128,8 @@ Local Hold'em producer flow:
 
 Android and Windows native transport hosts carry validated generic frames in a
 host-private bounded UDP multicast envelope and filter receive queues by session
-and recipient peer. Host lifecycle paths now fail closed and clean up partial
+and recipient peer. Host decoders require strict UTF-8 and reject malformed,
+padded, or control-bearing identity fields before queueing or sending. Host lifecycle paths now fail closed and clean up partial
 socket/Winsock initialization. The generic method-channel capability, send, and
 receive calls use a bounded five-second default deadline and accept caller
 cancellation for route lifecycle teardown. Local-network capability and
