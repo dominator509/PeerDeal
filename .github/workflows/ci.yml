@@ -78,6 +78,15 @@ jobs:
         working-directory: apps/peerdeal_mobile
         run: flutter build apk --debug --no-pub
 
+      - name: Verify Android release signing fails closed
+        working-directory: apps/peerdeal_mobile
+        shell: bash
+        run: |
+          if flutter build apk --release --no-pub; then
+            echo "Android release build unexpectedly succeeded without signing credentials."
+            exit 1
+          fi
+
   windows-debug-build:
     runs-on: windows-latest
     steps:

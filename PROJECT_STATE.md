@@ -762,6 +762,17 @@ These are host compilation gates only. Release signing, runtime/device
 validation, network reachability, other-platform hosts, and product
 database/state provisioning remain external or integration-owned.
 
+## Recent T80 Changes
+
+- CI now expects an Android release build without signing credentials to fail at
+  the Gradle signing guard before artifact assembly.
+- The negative check is credential-free and does not weaken debug builds or
+  operator-owned release signing.
+
+Signed release output, runtime/device validation, network reachability,
+other-platform hosts, and product database/state provisioning remain external
+or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

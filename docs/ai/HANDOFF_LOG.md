@@ -8069,3 +8069,27 @@ Risks:
 - CI host compilation does not prove physical-device persistence/capture,
   firewall or cross-device reachability, release signing, other-platform host
   implementations, or product database/state wiring.
+
+---
+
+### 2026-08-11 - Codex - Android Release Signing Guard CI Check
+
+Summary:
+- Added a credential-free expected-failure CI step for Android release builds.
+- The step requires the existing Gradle guard to reject `assembleRelease`
+  before artifact assembly when all four operator signing values are absent.
+
+Files changed:
+- `.github/workflows/ci.yml`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Local credential-free release build failed at `build.gradle.kts:49` with the
+  explicit `PEERDEAL_ANDROID_*` signing requirement.
+- The check does not consume or expose operator credentials.
+
+Risks:
+- This is a negative signing guard only. A successful signed release,
+  operator credential validation, and device/profile validation remain
+  external.

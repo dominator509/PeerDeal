@@ -691,3 +691,17 @@ Remaining:
 - CI compile success does not prove Android/Windows secure-key persistence,
   capture enforcement, firewall or cross-device reachability, release signing,
   other-platform hosts, or product database/state provisioning.
+
+## Recent T80 Changes
+
+- Added an expected-failure Android CI step that runs a release build without
+  signing credentials and requires the Gradle fail-closed guard to reject it.
+- The check prevents accidental unsigned release paths while preserving
+  operator-owned signing credentials outside CI.
+
+Local verification passed: credential-free `assembleRelease` stopped at the
+signing guard with the required `PEERDEAL_ANDROID_*` message.
+
+Remaining:
+- A successful signed release still requires operator-owned credentials and
+  release/profile/device validation; this change proves only the negative guard.

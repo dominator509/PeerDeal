@@ -1220,6 +1220,12 @@ jobs prove host build compatibility only; release signing, runtime/device
 secure-key and capture behavior, network reachability, and product state
 provisioning remain separately owned.
 
+The T80 follow-up exercises the Android release-signing guard in CI as an
+expected failure. A credential-free release build must stop at the Gradle guard
+before artifact assembly, preventing an accidental unsigned release path. The
+check uses no operator secrets and does not prove a successful signed artifact,
+release profile, or real-device behavior.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
