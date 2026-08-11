@@ -67,6 +67,60 @@ void main() {
       ]);
     });
 
+    test('fails closed before building too many contested commitments', () {
+      const showdown = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[
+          RankedShowdownResult(seat: 1, rankIndex: 0, summary: 'winner'),
+          RankedShowdownResult(seat: 2, rankIndex: 1, summary: 'runner-up'),
+        ],
+      );
+      final commitments = List<PotCommitment>.generate(
+        HoldemInputLimits.defaultMaxCommitments + 1,
+        (index) => PotCommitment(
+          seatId: 'seat-${index + 1}',
+          committed: index + 1,
+          isEligibleForShowdown: true,
+        ),
+        growable: false,
+      );
+
+      final outcome = projector.projectAndSettle(
+        showdown: showdown,
+        commitments: commitments,
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(outcome.isBlocked, isTrue);
+      expect(outcome.slices, isEmpty);
+      expect(outcome.warnings, <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT',
+      ]);
+    });
+
+    test('fails closed before building too many uncontested commitments', () {
+      final commitments = List<PotCommitment>.generate(
+        HoldemInputLimits.defaultMaxCommitments + 1,
+        (index) => PotCommitment(
+          seatId: 'seat-${index + 1}',
+          committed: index + 1,
+          isEligibleForShowdown: true,
+        ),
+        growable: false,
+      );
+
+      final outcome = projector.projectUncontestedAndSettle(
+        winningSeat: 1,
+        commitments: commitments,
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(outcome.isBlocked, isTrue);
+      expect(outcome.slices, isEmpty);
+      expect(outcome.warnings, <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT',
+      ]);
+    });
+
     test('blocks settlement when a contested slice is unawardable', () {
       final showdown = adapter.evaluate(
         const ShowdownEvaluationInput(

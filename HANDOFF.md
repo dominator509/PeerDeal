@@ -1165,6 +1165,18 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T122 Changes
+
+- The variant-owned `ShowdownSettlementProjector` now bounds direct commitment
+  collections to the shared nine-seat Hold'em launch limit before invoking
+  core side-pot construction.
+- Both contested and uncontested settlement paths fail closed with
+  `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT` when that limit is exceeded.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T121 Changes
 
 - `peerdeal_variants` now bounds direct Hold'em showdown seat collections to

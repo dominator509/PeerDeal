@@ -1125,6 +1125,15 @@ signing, and concrete product state wiring remain external or integration-owned.
 - `HoldemAdapter` identity and configuration validation reuse the same limit;
   focused variant tests (147) and package analysis pass.
 
+## T122 Hold'em Settlement Commitment Bound
+
+- `ShowdownSettlementProjector` now rejects commitment collections above the
+  shared nine-seat Hold'em limit before core side-pot construction for both
+  contested and uncontested settlement paths.
+- Overflow fails closed with
+  `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`; focused settlement,
+  coordinator, and evaluator tests pass.
+
 ## T119 Direct Sync Request Scope Validation
 
 - `BasicConflictDetector` and `BasicSnapshotApplier` now validate direct

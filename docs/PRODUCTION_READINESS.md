@@ -1548,6 +1548,12 @@ before sorting seats, expanding cards, or evaluating hands. Oversized input
 fails closed with `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`, and the same limit is reused
 by `HoldemAdapter` identity and configuration validation.
 
+The T122 follow-up closes the direct Hold'em settlement commitment-materialization
+gap. `ShowdownSettlementProjector` now applies the shared nine-seat commitment
+bound before invoking core side-pot construction for contested or uncontested
+settlement. Overflow fails closed with
+`ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

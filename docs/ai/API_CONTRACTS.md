@@ -335,6 +335,11 @@ expanding hole cards, or evaluating hands. It returns an empty result with
 `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`; `HoldemAdapter` identity and configuration
 validation reuse that same variant-owned limit.
 
+`ShowdownSettlementProjector` applies the same nine-seat commitment limit before
+calling core side-pot construction. Contested and uncontested overflow return a
+blocked projection with
+`ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`; core remains variant-agnostic.
+
 `HoldemEventCursor.toJson/fromJson` persist and restore the cursor's exact
 scope, next sequence, previous hash, actor, and last-event state. Hydration
 requires caller-owned event-id and timestamp factories and accepts an optional

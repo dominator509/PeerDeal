@@ -2,6 +2,25 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T122 Hold'em Settlement Commitment Bound
+
+Summary:
+- `ShowdownSettlementProjector` now bounds direct commitment collections to
+  the shared nine-seat Hold'em launch limit before core side-pot construction.
+- Both contested and uncontested settlement paths fail closed with
+  `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT` on overflow.
+
+Tests run:
+- Focused settlement, coordinator, and evaluator suite: 48 tests passed.
+- Focused `peerdeal_variants` analysis passed.
+
+Risks:
+- This protects the variant-to-core settlement boundary while direct core
+  pot-builder callers, product source wiring, native reachability, durable
+  database policy, and release inputs remain separate.
+
+---
+
 ### 2026-08-11 - Codex - T121 Hold'em Showdown Seat Bound
 
 Summary:

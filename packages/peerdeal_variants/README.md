@@ -57,6 +57,10 @@ ranked showdown winner, `ShowdownSettlementProjectionResult.settlement` is
 the blocked slices. App/session orchestration should stop settlement and surface
 a safe failure path instead of silently awarding partial pots.
 
+The projector also rejects more than nine direct commitments before core
+side-pot construction on both contested and uncontested paths, returning
+`ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`.
+
 ## Hold'em action application
 `HoldemBlindPostingCoordinator.postBlinds(...)` is the deterministic
 variant-local blind-posting gate. It runs only from `blindsPosting`, validates

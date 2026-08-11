@@ -2,11 +2,16 @@ import 'package:meta/meta.dart';
 import 'package:peerdeal_core/peerdeal_core.dart';
 
 import 'showdown_models.dart';
+import '../holdem/holdem_input_limits.dart';
 
 class ShowdownSettlementProjector {
-  const ShowdownSettlementProjector({this.engine = const PotEngine()});
+  const ShowdownSettlementProjector({
+    this.engine = const PotEngine(),
+    this.maxCommitments = HoldemInputLimits.defaultMaxCommitments,
+  }) : assert(maxCommitments > 0, 'maxCommitments must be positive');
 
   final PotEngine engine;
+  final int maxCommitments;
 
   ShowdownSettlementProjectionResult projectAndSettle({
     required ShowdownEvaluationResult showdown,
@@ -14,6 +19,10 @@ class ShowdownSettlementProjector {
     required int? Function(String seatId) seatForId,
     SettlementPolicy policy = const SettlementPolicy(),
   }) {
+    if (commitments.length > maxCommitments) {
+      return _blockedForCommitmentOverflow();
+    }
+
     final slices = engine.sidePotBuilder.build(commitments);
     if (commitments.isEmpty || slices.isEmpty) {
       return ShowdownSettlementProjectionResult.blocked(
@@ -86,6 +95,10 @@ class ShowdownSettlementProjector {
     required int? Function(String seatId) seatForId,
     SettlementPolicy policy = const SettlementPolicy(),
   }) {
+    if (commitments.length > maxCommitments) {
+      return _blockedForCommitmentOverflow();
+    }
+
     final slices = engine.sidePotBuilder.build(commitments);
     if (commitments.isEmpty || slices.isEmpty) {
       return ShowdownSettlementProjectionResult.blocked(
@@ -147,6 +160,19 @@ class ShowdownSettlementProjector {
       slices: slices,
       projection: projection,
       settlement: settlement,
+    );
+  }
+
+  ShowdownSettlementProjectionResult _blockedForCommitmentOverflow() {
+    return ShowdownSettlementProjectionResult.blocked(
+      slices: const <PotSlice>[],
+      projection: const ShowdownSliceWinnerProjection(
+        winningSeatIdsBySliceIndex: <int, List<String>>{},
+        unawardableSliceIndexes: <int>[],
+      ),
+      warnings: const <String>[
+        'ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT',
+      ],
     );
   }
 
