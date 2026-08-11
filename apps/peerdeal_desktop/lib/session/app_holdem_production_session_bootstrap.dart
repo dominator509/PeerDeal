@@ -19,6 +19,15 @@ abstract interface class AppHoldemProductionSessionSource {
   });
 }
 
+/// Optional extension for sources that can consume the verified peer and seat
+/// selected by the accepted join flow.
+abstract interface class AppHoldemProductionSessionContextSource {
+  Future<AppHoldemProductionSessionInput> loadForSessionContext(
+    JoinFlowSessionContext sessionContext, {
+    Future<void>? cancellation,
+  });
+}
+
 /// All product-owned inputs required by the app Hold'em composition boundary.
 class AppHoldemProductionSessionInput {
   const AppHoldemProductionSessionInput({
@@ -66,13 +75,16 @@ class AppHoldemProductionSessionInput {
 class AppHoldemProductionSessionBootstrap {
   const AppHoldemProductionSessionBootstrap({
     required AppHoldemProductionSessionSource source,
+    AppHoldemProductionSessionContextSource? contextSource,
     AppHoldemProductionSessionFactory factory =
         const AppHoldemProductionSessionFactory(),
     this.sourceLoadTimeout = const Duration(seconds: 5),
   }) : _source = source,
+       _contextSource = contextSource,
        _factory = factory;
 
   final AppHoldemProductionSessionSource _source;
+  final AppHoldemProductionSessionContextSource? _contextSource;
   final AppHoldemProductionSessionFactory _factory;
   final Duration sourceLoadTimeout;
 
@@ -91,6 +103,50 @@ class AppHoldemProductionSessionBootstrap {
     final input = await _loadSource(invite, cancellation: cancellation);
     _validateInput(invite, input);
 
+    return _createComposition(input);
+  }
+
+  Future<AppHoldemProductionSessionComposition> createForSessionContext(
+    JoinFlowSessionContext sessionContext, {
+    Future<void>? cancellation,
+  }) async {
+    if (sourceLoadTimeout <= Duration.zero) {
+      throw ArgumentError.value(
+        sourceLoadTimeout,
+        'sourceLoadTimeout',
+        'Production session source timeout must be positive.',
+      );
+    }
+    _validateInvite(sessionContext.invite);
+    _validateIdentity(
+      sessionContext.remotePeerId,
+      'sessionContext.remotePeerId',
+    );
+    if (sessionContext.localSeat < 1) {
+      throw ArgumentError.value(
+        sessionContext.localSeat,
+        'sessionContext.localSeat',
+        'Production session seat must be positive.',
+      );
+    }
+    final source = _contextSource;
+    if (source == null) {
+      throw StateError(
+        'Production session source does not support session context.',
+      );
+    }
+    final input = await _loadFuture(
+      source.loadForSessionContext(sessionContext, cancellation: cancellation),
+      cancellation: cancellation,
+    );
+    _validateInput(sessionContext.invite, input);
+
+    return _createComposition(input);
+  }
+
+  AppHoldemProductionSessionComposition _createComposition(
+    AppHoldemProductionSessionInput input,
+  ) {
     return _factory.create(
       initialTableState: input.initialTableState,
       initialHandState: input.initialHandState,
@@ -115,6 +171,16 @@ class AppHoldemProductionSessionBootstrap {
     ResolvedInvite invite, {
     Future<void>? cancellation,
   }) {
+    return _loadFuture(
+      _source.load(invite, cancellation: cancellation),
+      cancellation: cancellation,
+    );
+  }
+
+  Future<AppHoldemProductionSessionInput> _loadFuture(
+    Future<AppHoldemProductionSessionInput> sourceFuture, {
+    Future<void>? cancellation,
+  }) {
     final result = Completer<AppHoldemProductionSessionInput>();
     Timer? timeoutTimer;
 
@@ -130,7 +196,6 @@ class AppHoldemProductionSessionBootstrap {
       result.completeError(error, stackTrace);
     }
 
-    final sourceFuture = _source.load(invite, cancellation: cancellation);
     timeoutTimer = Timer(
       sourceLoadTimeout,
       () => completeError(

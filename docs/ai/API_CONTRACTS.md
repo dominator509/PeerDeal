@@ -585,3 +585,17 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - Never parse or reinterpret receipt key material in UI.
 - Never construct platform method channels inside receipt screens; use app
   boundary factories/loaders.
+## Join-to-session handoff
+
+- `JoinFlowSessionContext` is app-owned and contains the resolved invite,
+  selected remote peer ID, and positive local seat.
+- First-join context is emitted only when `BootstrapPlan.selectedPeerId` and
+  `GovernanceCommitResult.assignedSeat` are both valid. The existing
+  `JoinFlowReadyHandler(ResolvedInvite)` remains backward-compatible.
+- `AppHoldemProductionSessionContextSource.loadForSessionContext(...)` is an
+  optional extension of `AppHoldemProductionSessionSource`. The bootstrap
+  validates invite scope, peer identity, seat, timeout, and hydrated state
+  before composing the route.
+- `AppPersistedHoldemProductionSessionSource` applies the context peer and
+  seat through its app-owned input factory. Protocol schemas and native bridge
+  contracts do not gain receipt, poker, or session policy fields.

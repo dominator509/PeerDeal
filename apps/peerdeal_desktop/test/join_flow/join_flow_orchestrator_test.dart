@@ -52,6 +52,8 @@ void main() {
     expect(result.state, JoinFlowState.joined);
     expect(result.resolvedInvite?.tableId, 'tbl_001');
     expect(result.resolvedInvite?.sessionId, 'sess_001');
+    expect(result.sessionContext?.remotePeerId, 'peer_a');
+    expect(result.sessionContext?.localSeat, 1);
   });
 
   test('returns joined when event sink throws', () async {

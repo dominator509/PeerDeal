@@ -492,6 +492,20 @@ Generated: 2026-08-10
   including competing-writer detection. Cross-process locking and real-device
   persistence validation remain external.
 
+## Recent T63 Changes
+
+- Mirrored accepted first-join outcomes now carry a typed
+  `JoinFlowSessionContext` only when bootstrap supplies a selected reachable
+  peer and governance supplies a positive assigned seat.
+- App shells now prefer the context-aware production handoff when configured;
+  the existing invite-only callback remains available for legacy sources.
+- Persisted Hold'em sources can consume the typed context and apply its remote
+  peer and local seat while retaining strict snapshot scope and recovery replay
+  checks.
+- Rejoin peer binding, concrete product database/source provisioning, native
+  transport reachability, and device validation remain external integration
+  work.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`
@@ -609,7 +623,8 @@ Run after each retrofit step:
 3. Supply the concrete product implementation of
    `AppHoldemProductionSessionSource` and invoke
    `AppHoldemProductionSessionBootstrap` from the real session/state and local
-   identity flow; native peer transport device/network validation, and final UX
-   validation remain separate.
+   identity flow through the typed first-join handoff; add the governance-owned
+   rejoin peer binding, native peer transport device/network validation, and
+   final UX validation separately.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
    without crossing locked package boundaries.

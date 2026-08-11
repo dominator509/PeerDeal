@@ -94,13 +94,15 @@ class NativeJoinBootstrapCoordinator implements BootstrapCoordinator {
       );
     }
 
+    final reachablePeerIds = candidates
+        .where((candidate) => candidate.reachable)
+        .map((candidate) => candidate.peerId)
+        .toList(growable: false);
     return BootstrapPlan(
       requiresBootstrap: true,
-      peerCandidates: candidates
-          .where((candidate) => candidate.reachable)
-          .map((candidate) => candidate.peerId)
-          .toList(growable: false),
+      peerCandidates: reachablePeerIds,
       relayFallbackAllowed: true,
+      selectedPeerId: reachablePeerIds.isEmpty ? null : reachablePeerIds.first,
     );
   }
 

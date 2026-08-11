@@ -7671,3 +7671,11 @@ Risks:
 
 Next reviewer:
 Codex should run the full local gate set and commit if green.
+### T63: typed first-join session handoff
+
+- Added mirrored `JoinFlowSessionContext` propagation for selected peer and
+  assigned seat.
+- Added context-aware app bootstrap/source loading and persisted-input mapping.
+- Focused mobile and desktop join/session tests passed.
+- Remaining: rejoin peer binding, concrete product persistence/transport, and
+  Android/Windows runtime validation.

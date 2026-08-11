@@ -33,8 +33,8 @@ T54 typed core table-state hydration, T55 typed Hold'em state hydration, and
 T56 typed Hold'em event-cursor hydration, T57 typed persisted Hold'em source
 hydration, T58 deterministic persisted recovery-suffix replay, T59 app-owned
 local peer identity persistence, T60 provisioned-identity persisted-source
-composition, T61 single-flight local identity provisioning, and T62 post-save
-identity verification
+composition, T61 single-flight local identity provisioning, T62 post-save
+identity verification, and T63 typed join-to-session context handoff
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -88,6 +88,12 @@ are implemented on branch
 - Added fail-closed read-back verification after a newly generated identity is
   saved. The provisioner only returns success when native storage reloads the
   same peer ID, detecting competing writers or inconsistent persistence.
+- Added mirrored typed first-join session context handoff. The join bootstrap
+  selects the first reachable peer from its bounded candidate plan, accepted
+  governance carries the assigned seat, and the app shell passes both through
+  a context-aware persisted source/bootstrap route. Invite-only handoff stays
+  available for legacy sources; rejoin still needs a governance-provided peer
+  binding before it can use the new context path.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -471,3 +477,6 @@ are implemented on branch
   desktop, including overlapping provisioning calls.
 - T62 focused local-identity tests: passed, 7 tests each in mobile and
   desktop, including post-save contention detection.
+- T63 focused mobile and desktop join/session tests passed, including
+  selected-peer propagation, typed context route handoff, context-aware
+  bootstrap loading, and persisted peer/seat input construction.

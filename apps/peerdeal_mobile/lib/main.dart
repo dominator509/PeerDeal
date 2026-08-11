@@ -83,6 +83,7 @@ class PeerDealMobileRuntime {
     this.joinFlowInviteContextFactory,
     this.joinFlowEnabledModes,
     this.joinFlowReadyHandler,
+    this.joinFlowSessionReadyHandler,
     this.setupFlowOrchestratorFactory,
     this.setupFlowIntentFactory,
     this.setupFlowEnabledModes,
@@ -111,6 +112,7 @@ class PeerDealMobileRuntime {
   final JoinFlowInviteContextFactory? joinFlowInviteContextFactory;
   final Set<JoinFlowDemoMode>? joinFlowEnabledModes;
   final JoinFlowReadyHandler? joinFlowReadyHandler;
+  final JoinFlowSessionReadyHandler? joinFlowSessionReadyHandler;
   final SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory;
   final SetupFlowIntentFactory? setupFlowIntentFactory;
   final Set<SetupFlowDemoMode>? setupFlowEnabledModes;
@@ -140,6 +142,7 @@ class PeerDealMobileRuntime {
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
     Set<JoinFlowDemoMode>? joinFlowEnabledModes,
     JoinFlowReadyHandler? joinFlowReadyHandler,
+    JoinFlowSessionReadyHandler? joinFlowSessionReadyHandler,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     SetupFlowIntentFactory? setupFlowIntentFactory,
     Set<SetupFlowDemoMode>? setupFlowEnabledModes,
@@ -174,6 +177,8 @@ class PeerDealMobileRuntime {
           joinFlowInviteContextFactory ?? this.joinFlowInviteContextFactory,
       joinFlowEnabledModes: joinFlowEnabledModes ?? this.joinFlowEnabledModes,
       joinFlowReadyHandler: joinFlowReadyHandler ?? this.joinFlowReadyHandler,
+      joinFlowSessionReadyHandler:
+          joinFlowSessionReadyHandler ?? this.joinFlowSessionReadyHandler,
       setupFlowOrchestratorFactory:
           setupFlowOrchestratorFactory ?? this.setupFlowOrchestratorFactory,
       setupFlowIntentFactory:
@@ -224,6 +229,7 @@ class PeerDealMobileApp extends StatefulWidget {
     JoinFlowInviteContextFactory? joinFlowInviteContextFactory,
     Set<JoinFlowDemoMode>? joinFlowEnabledModes,
     JoinFlowReadyHandler? joinFlowReadyHandler,
+    JoinFlowSessionReadyHandler? joinFlowSessionReadyHandler,
     SetupFlowOrchestratorFactory? setupFlowOrchestratorFactory,
     SetupFlowIntentFactory? setupFlowIntentFactory,
     Set<SetupFlowDemoMode>? setupFlowEnabledModes,
@@ -252,6 +258,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _joinFlowInviteContextFactory = joinFlowInviteContextFactory,
        _joinFlowEnabledModes = joinFlowEnabledModes,
        _joinFlowReadyHandler = joinFlowReadyHandler,
+       _joinFlowSessionReadyHandler = joinFlowSessionReadyHandler,
        _setupFlowOrchestratorFactory = setupFlowOrchestratorFactory,
        _setupFlowIntentFactory = setupFlowIntentFactory,
        _setupFlowEnabledModes = setupFlowEnabledModes,
@@ -281,6 +288,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final JoinFlowInviteContextFactory? _joinFlowInviteContextFactory;
   final Set<JoinFlowDemoMode>? _joinFlowEnabledModes;
   final JoinFlowReadyHandler? _joinFlowReadyHandler;
+  final JoinFlowSessionReadyHandler? _joinFlowSessionReadyHandler;
   final SetupFlowOrchestratorFactory? _setupFlowOrchestratorFactory;
   final SetupFlowIntentFactory? _setupFlowIntentFactory;
   final Set<SetupFlowDemoMode>? _setupFlowEnabledModes;
@@ -315,6 +323,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   AppHoldemProductionSessionBootstrapRouteRegistration?
   _defaultJoinFlowReadyRegistration;
   JoinFlowReadyHandler? _defaultJoinFlowReadyHandler;
+  JoinFlowSessionReadyHandler? _defaultJoinFlowSessionReadyHandler;
 
   PeerDealMobileRuntime get _runtime {
     return (widget._runtime ?? const PeerDealMobileRuntime()).withOverrides(
@@ -327,6 +336,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       joinFlowInviteContextFactory: widget._joinFlowInviteContextFactory,
       joinFlowEnabledModes: widget._joinFlowEnabledModes,
       joinFlowReadyHandler: widget._joinFlowReadyHandler,
+      joinFlowSessionReadyHandler: widget._joinFlowSessionReadyHandler,
       setupFlowOrchestratorFactory: widget._setupFlowOrchestratorFactory,
       setupFlowIntentFactory: widget._setupFlowIntentFactory,
       setupFlowEnabledModes: widget._setupFlowEnabledModes,
@@ -458,6 +468,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
               inviteContextFactory: _runtime.joinFlowInviteContextFactory,
               enabledModes: _runtime.joinFlowEnabledModes,
               onJoinReady: _joinFlowReadyHandler,
+              onSessionReady: _joinFlowSessionReadyHandler,
             ),
           if (enabledRoutePaths.contains(DemoSliceRoutes.setupRoute.path))
             DemoSliceRoutes.setupRoute.path: (_) => SetupFlowRoute(
@@ -972,6 +983,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   JoinFlowReadyHandler? get _joinFlowReadyHandler {
     final configured = _runtime.joinFlowReadyHandler;
     if (configured != null) return configured;
+    if (_runtime.joinFlowSessionReadyHandler != null) return null;
     final registration = _productionSessionRouteRegistration();
     if (registration == null) return null;
     if (!identical(_defaultJoinFlowReadyRegistration, registration)) {
@@ -981,6 +993,23 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       };
     }
     return _defaultJoinFlowReadyHandler;
+  }
+
+  JoinFlowSessionReadyHandler? get _joinFlowSessionReadyHandler {
+    final configured = _runtime.joinFlowSessionReadyHandler;
+    if (configured != null) return configured;
+    if (_runtime.joinFlowReadyHandler != null) return null;
+    final registration = _productionSessionRouteRegistration();
+    if (registration == null) return null;
+    if (!identical(_defaultJoinFlowReadyRegistration, registration)) {
+      _defaultJoinFlowReadyRegistration = registration;
+      _defaultJoinFlowSessionReadyHandler = (context, sessionContext) {
+        Navigator.of(
+          context,
+        ).pushNamed(registration.path, arguments: sessionContext);
+      };
+    }
+    return _defaultJoinFlowSessionReadyHandler;
   }
 
   SetupFlowOrchestratorFactory get _setupFlowOrchestratorFactory {

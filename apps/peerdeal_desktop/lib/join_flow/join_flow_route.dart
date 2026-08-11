@@ -19,6 +19,8 @@ typedef JoinFlowInviteContextFactory =
     InviteContext Function(JoinFlowDemoMode mode);
 typedef JoinFlowReadyHandler =
     void Function(BuildContext context, ResolvedInvite resolvedInvite);
+typedef JoinFlowSessionReadyHandler =
+    void Function(BuildContext context, JoinFlowSessionContext sessionContext);
 
 const int _maxJoinDiagnostics = 4;
 
@@ -30,6 +32,7 @@ class JoinFlowRoute extends StatefulWidget {
     required JoinFlowOrchestratorFactory orchestratorFactory,
     JoinFlowInviteContextFactory? inviteContextFactory,
     this.onJoinReady,
+    this.onSessionReady,
   }) : _orchestratorFactory = orchestratorFactory,
        _inviteContextFactory = inviteContextFactory ?? _defaultInviteContextFor,
        _enabledModes =
@@ -47,6 +50,7 @@ class JoinFlowRoute extends StatefulWidget {
   final JoinFlowInviteContextFactory _inviteContextFactory;
   final Set<JoinFlowDemoMode> _enabledModes;
   final JoinFlowReadyHandler? onJoinReady;
+  final JoinFlowSessionReadyHandler? onSessionReady;
 
   @override
   State<JoinFlowRoute> createState() => _JoinFlowRouteState();
@@ -75,7 +79,8 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
       _mode = widget.initialMode;
       _outcome = _run(_mode);
       _observeOutcome(_outcome);
-    } else if (oldWidget.onJoinReady != widget.onJoinReady) {
+    } else if (oldWidget.onJoinReady != widget.onJoinReady ||
+        oldWidget.onSessionReady != widget.onSessionReady) {
       _observeOutcome(_outcome);
     }
   }
@@ -195,16 +200,31 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
 
       final safeOutcome = _safeJoinOutcome(rawOutcome);
       final resolvedInvite = safeOutcome.resolvedInvite;
+      final sessionContext = safeOutcome.sessionContext;
       final handler = widget.onJoinReady;
-      if (handler == null || resolvedInvite == null) return;
+      final sessionHandler = widget.onSessionReady;
+      if ((handler == null || resolvedInvite == null) &&
+          (sessionHandler == null || sessionContext == null)) {
+        return;
+      }
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || generation != _outcomeGeneration) return;
-        try {
-          handler(context, resolvedInvite);
-        } on Object {
-          // Product navigation is optional; a failed handoff must not expose
-          // raw callback errors through the join surface.
+        if (sessionHandler != null && sessionContext != null) {
+          try {
+            sessionHandler(context, sessionContext);
+          } on Object {
+            // Product navigation is optional; a failed handoff must not
+            // expose raw callback errors through the join surface.
+          }
+        }
+        if (handler != null && resolvedInvite != null) {
+          try {
+            handler(context, resolvedInvite);
+          } on Object {
+            // Product navigation is optional; a failed handoff must not
+            // expose raw callback errors through the join surface.
+          }
         }
       });
     });
@@ -277,6 +297,25 @@ JoinFlowOutcome _safeJoinOutcome(JoinFlowOutcome outcome) {
     diagnostics: _safeJoinDiagnostics(outcome.diagnostics),
     message: _isSafeJoinMessage(outcome.message) ? outcome.message : null,
     resolvedInvite: _safeResolvedInvite(outcome),
+    sessionContext: _safeSessionContext(outcome),
+  );
+}
+
+JoinFlowSessionContext? _safeSessionContext(JoinFlowOutcome outcome) {
+  final invite = _safeResolvedInvite(outcome);
+  final context = outcome.sessionContext;
+  if (invite == null || context == null) return null;
+  if (context.invite.inviteId != invite.inviteId ||
+      context.invite.tableId != invite.tableId ||
+      context.invite.sessionId != invite.sessionId ||
+      !_isSafeJoinIdentity(context.remotePeerId) ||
+      context.localSeat < 1) {
+    return null;
+  }
+  return JoinFlowSessionContext(
+    invite: invite,
+    remotePeerId: context.remotePeerId,
+    localSeat: context.localSeat,
   );
 }
 

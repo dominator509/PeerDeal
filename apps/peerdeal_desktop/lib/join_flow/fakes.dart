@@ -107,6 +107,7 @@ class FakeBootstrapCoordinator implements BootstrapCoordinator {
       requiresBootstrap: true,
       peerCandidates: <String>['peer_a', 'peer_b'],
       relayFallbackAllowed: true,
+      selectedPeerId: 'peer_a',
     );
   }
 }
@@ -126,6 +127,7 @@ class FakeGovernanceCommitter implements GovernanceCommitter {
     return GovernanceCommitResult(
       accepted: acceptJoin,
       reasonCode: acceptJoin ? null : 'ERR_GOVERNANCE_DENIED',
+      assignedSeat: acceptJoin ? 1 : null,
     );
   }
 
@@ -137,6 +139,7 @@ class FakeGovernanceCommitter implements GovernanceCommitter {
     return GovernanceCommitResult(
       accepted: acceptRejoin,
       reasonCode: acceptRejoin ? null : 'ERR_REJOIN_REJECTED',
+      assignedSeat: acceptRejoin ? 1 : null,
     );
   }
 }

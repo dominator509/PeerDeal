@@ -31,6 +31,9 @@ class AppHoldemProductionSessionBootstrapRouteRegistration {
       path: path,
       bootstrap: AppHoldemProductionSessionBootstrap(
         source: source,
+        contextSource: source is AppHoldemProductionSessionContextSource
+            ? source as AppHoldemProductionSessionContextSource
+            : null,
         factory: sessionFactory,
         sourceLoadTimeout: sourceLoadTimeout,
       ),

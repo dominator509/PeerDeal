@@ -217,3 +217,12 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 - Do not put receipt semantics in `peerdeal_native_bridges`.
 - Do not import package `src/` across package boundaries.
 - Do not change protocol catalog identities without fixture/test updates.
+## First-join production handoff
+
+`peerdeal_network` discovery produces bounded candidates. The app-owned join
+flow selects a reachable candidate for first join, accepted governance returns
+the assigned seat, and `JoinFlowSessionContext` crosses the app-shell boundary.
+The context-aware production bootstrap validates it and the persisted app
+source maps it into route input. Rejoin remains invite-only until governance
+exposes a remote peer binding. Core state truth, protocol schemas, native
+bridge semantics, and variant rules remain unchanged.

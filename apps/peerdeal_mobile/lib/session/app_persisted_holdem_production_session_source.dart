@@ -12,6 +12,12 @@ typedef AppHoldemProductionSessionInputFactory =
       HoldemStateSnapshot snapshot,
     );
 
+typedef AppHoldemProductionSessionContextInputFactory =
+    AppHoldemProductionSessionInput Function(
+      JoinFlowSessionContext sessionContext,
+      HoldemStateSnapshot snapshot,
+    );
+
 typedef AppHoldemProductionCloseEventAdapterFactory =
     AppRecoverySessionCloseEventAdapter Function(
       RecoveryPersistenceScope scope,
@@ -35,6 +41,8 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
   AppHoldemProductionSessionInput buildInput({
     required HoldemStateSnapshot snapshot,
     required String localPeerId,
+    String? remotePeerId,
+    int? localSeat,
   }) {
     return AppHoldemProductionSessionInput(
       initialTableState: snapshot.tableState,
@@ -49,9 +57,9 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
       ),
       path: path,
       navigationLabel: navigationLabel,
-      peerId: remotePeerId,
+      peerId: remotePeerId ?? this.remotePeerId,
       localPeerId: localPeerId,
-      localSeat: localSeat,
+      localSeat: localSeat ?? this.localSeat,
     );
   }
 }
@@ -62,7 +70,9 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
 /// deterministic recovery-suffix replay. The input factory remains responsible
 /// for local identity, route metadata, close policy, and platform dependencies.
 class AppPersistedHoldemProductionSessionSource
-    implements AppHoldemProductionSessionSource {
+    implements
+        AppHoldemProductionSessionSource,
+        AppHoldemProductionSessionContextSource {
   static Future<AppPersistedHoldemProductionSessionSource>
   fromProvisionedLocalIdentity({
     required RecoveryPersistenceStore store,
@@ -89,6 +99,12 @@ class AppPersistedHoldemProductionSessionSource
         snapshot: snapshot,
         localPeerId: identity.peerId,
       ),
+      contextInputFactory: (sessionContext, snapshot) => routePolicy.buildInput(
+        snapshot: snapshot,
+        localPeerId: identity.peerId,
+        remotePeerId: sessionContext.remotePeerId,
+        localSeat: sessionContext.localSeat,
+      ),
       eventIdFactory: eventIdFactory,
       emittedAtFactory: emittedAtFactory,
       eventHashFactory: eventHashFactory,
@@ -102,6 +118,7 @@ class AppPersistedHoldemProductionSessionSource
   const AppPersistedHoldemProductionSessionSource({
     required RecoveryPersistenceStore store,
     required AppHoldemProductionSessionInputFactory inputFactory,
+    AppHoldemProductionSessionContextInputFactory? contextInputFactory,
     required HoldemEventIdFactory eventIdFactory,
     required HoldemEventTimestampFactory emittedAtFactory,
     required HoldemEventHashFactory eventHashFactory,
@@ -112,6 +129,7 @@ class AppPersistedHoldemProductionSessionSource
     this.snapshotVersion = '1.0',
   }) : _store = store,
        _inputFactory = inputFactory,
+       _contextInputFactory = contextInputFactory,
        _eventIdFactory = eventIdFactory,
        _emittedAtFactory = emittedAtFactory,
        _eventHashFactory = eventHashFactory,
@@ -120,6 +138,7 @@ class AppPersistedHoldemProductionSessionSource
 
   final RecoveryPersistenceStore _store;
   final AppHoldemProductionSessionInputFactory _inputFactory;
+  final AppHoldemProductionSessionContextInputFactory? _contextInputFactory;
   final HoldemEventIdFactory _eventIdFactory;
   final HoldemEventTimestampFactory _emittedAtFactory;
   final HoldemEventHashFactory _eventHashFactory;
@@ -133,10 +152,42 @@ class AppPersistedHoldemProductionSessionSource
     ResolvedInvite invite, {
     Future<void>? cancellation,
   }) {
-    return Future<AppHoldemProductionSessionInput>.sync(() => _load(invite));
+    return Future<AppHoldemProductionSessionInput>.sync(
+      () => _load(invite: invite),
+    );
   }
 
-  AppHoldemProductionSessionInput _load(ResolvedInvite invite) {
+  @override
+  Future<AppHoldemProductionSessionInput> loadForSessionContext(
+    JoinFlowSessionContext sessionContext, {
+    Future<void>? cancellation,
+  }) {
+    if (_contextInputFactory == null) {
+      return Future<AppHoldemProductionSessionInput>.error(
+        StateError('Persisted session context loading is unavailable.'),
+      );
+    }
+    return Future<AppHoldemProductionSessionInput>.sync(
+      () =>
+          _load(invite: sessionContext.invite, sessionContext: sessionContext),
+    );
+  }
+
+  AppHoldemProductionSessionInput _load({
+    required ResolvedInvite invite,
+    JoinFlowSessionContext? sessionContext,
+  }) {
+    AppHoldemProductionSessionInput buildInput(HoldemStateSnapshot snapshot) {
+      final contextInputFactory = _contextInputFactory;
+      if (sessionContext != null && contextInputFactory != null) {
+        return contextInputFactory(sessionContext, snapshot);
+      }
+      if (sessionContext != null) {
+        throw StateError('Persisted session context loading is unavailable.');
+      }
+      return _inputFactory(invite, snapshot);
+    }
+
     final scope = RecoveryPersistenceScope(
       tableId: invite.tableId,
       sessionId: invite.sessionId,
@@ -188,7 +239,7 @@ class AppPersistedHoldemProductionSessionSource
         .where((event) => event.eventSeq > envelope.snapshotBaseEventSeq)
         .toList(growable: false);
     if (suffix.isEmpty) {
-      return _inputFactory(invite, state);
+      return buildInput(state);
     }
 
     final replay = _replayAdapter.replay(
@@ -202,8 +253,7 @@ class AppPersistedHoldemProductionSessionSource
       throw StateError('Persisted Holdem recovery replay was rejected.');
     }
 
-    return _inputFactory(
-      invite,
+    return buildInput(
       HoldemStateSnapshot(
         tableState: replay.coreState,
         handState: replay.handState,

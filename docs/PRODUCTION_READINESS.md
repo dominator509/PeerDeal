@@ -1073,6 +1073,17 @@ Storage contention, replacement, malformed read-back, and unavailable
 verification fail closed. This detects, but does not eliminate, cross-process
 write races; OS/device persistence validation remains external.
 
+The T63 follow-up closes the codable first-join handoff gap. The app-owned join
+flow now exposes a `JoinFlowSessionContext` only when bootstrap has selected a
+reachable peer and accepted governance has returned a positive seat. Both app
+shells pass that context through a context-aware production bootstrap route;
+the persisted Hold'em source applies the verified peer and seat while keeping
+snapshot scope validation and recovery replay unchanged. Invite-only callbacks
+remain compatible for legacy sources. Rejoin still lacks a governance-owned
+remote-peer binding, and concrete product database/source provisioning, native
+transport reachability, and device validation remain integration or operator
+work.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
@@ -1083,7 +1094,8 @@ write races; OS/device persistence validation remains external.
    existing key-ring, cipher, signer, and app capture contracts.
 3. Supply the concrete `AppHoldemProductionSessionSource` and invoke
    `AppHoldemProductionSessionBootstrap` from the real product session/state
-   source and local identity through the join-ready handoff; complete product
-   navigation/UI validation while
+   source and local identity through the typed first-join handoff; add the
+   governance-owned rejoin peer binding and complete product navigation/UI
+   validation while
    keeping native transport/device validation and durable database persistence
    separate.

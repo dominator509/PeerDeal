@@ -18,23 +18,30 @@ class AppHoldemProductionSessionBootstrapRoute extends StatefulWidget {
     super.key,
     required this.bootstrap,
     required this.invite,
+    this.sessionContext,
     this.routeName,
   });
 
   /// Creates a route builder for production route maps that pass a
-  /// [ResolvedInvite] through [RouteSettings.arguments].
+  /// [ResolvedInvite] or [JoinFlowSessionContext] through route arguments.
   static WidgetBuilder fromRouteSettings({
     required AppHoldemProductionSessionBootstrap bootstrap,
   }) {
     return (context) {
       final settings = ModalRoute.of(context)?.settings;
-      final invite = settings?.arguments;
-      if (invite is! ResolvedInvite) {
+      final argument = settings?.arguments;
+      final JoinFlowSessionContext? sessionContext =
+          argument is JoinFlowSessionContext ? argument : null;
+      final ResolvedInvite? invite = argument is ResolvedInvite
+          ? argument
+          : sessionContext?.invite;
+      if (invite == null) {
         return AppRouteFallbackScreen(routeName: settings?.name);
       }
       return AppHoldemProductionSessionBootstrapRoute(
         bootstrap: bootstrap,
         invite: invite,
+        sessionContext: sessionContext,
         routeName: settings?.name,
       );
     };
@@ -42,6 +49,7 @@ class AppHoldemProductionSessionBootstrapRoute extends StatefulWidget {
 
   final AppHoldemProductionSessionBootstrap bootstrap;
   final ResolvedInvite invite;
+  final JoinFlowSessionContext? sessionContext;
   final String? routeName;
 
   @override
@@ -66,6 +74,7 @@ class _AppHoldemProductionSessionBootstrapRouteState
     super.didUpdateWidget(oldWidget);
     if (oldWidget.bootstrap == widget.bootstrap &&
         oldWidget.invite == widget.invite &&
+        oldWidget.sessionContext == widget.sessionContext &&
         oldWidget.routeName == widget.routeName) {
       return;
     }
@@ -109,6 +118,13 @@ class _AppHoldemProductionSessionBootstrapRouteState
   }
 
   Future<AppHoldemProductionSessionComposition> _loadComposition() {
+    final sessionContext = widget.sessionContext;
+    if (sessionContext != null) {
+      return widget.bootstrap.createForSessionContext(
+        sessionContext,
+        cancellation: _sourceCancellation.future,
+      );
+    }
     return widget.bootstrap.createForInvite(
       widget.invite,
       cancellation: _sourceCancellation.future,

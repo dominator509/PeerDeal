@@ -64,6 +64,22 @@ class ResolvedInvite {
   final bool requiresCaptureAck;
 }
 
+/// Runtime facts required to hand an accepted join to a production session.
+///
+/// Peer selection and seat assignment are not invite fields. They must be
+/// supplied by the accepted bootstrap and governance boundaries.
+class JoinFlowSessionContext {
+  const JoinFlowSessionContext({
+    required this.invite,
+    required this.remotePeerId,
+    required this.localSeat,
+  });
+
+  final ResolvedInvite invite;
+  final String remotePeerId;
+  final int localSeat;
+}
+
 class DisclosureAcks {
   const DisclosureAcks({
     required this.receiptAck,
@@ -105,18 +121,25 @@ class BootstrapPlan {
     required this.requiresBootstrap,
     required this.peerCandidates,
     required this.relayFallbackAllowed,
+    this.selectedPeerId,
   });
 
   final bool requiresBootstrap;
   final List<String> peerCandidates;
   final bool relayFallbackAllowed;
+  final String? selectedPeerId;
 }
 
 class GovernanceCommitResult {
-  const GovernanceCommitResult({required this.accepted, this.reasonCode});
+  const GovernanceCommitResult({
+    required this.accepted,
+    this.reasonCode,
+    this.assignedSeat,
+  });
 
   final bool accepted;
   final String? reasonCode;
+  final int? assignedSeat;
 }
 
 class JoinFlowOutcome {
@@ -127,6 +150,7 @@ class JoinFlowOutcome {
     this.diagnostics = const <ProtocolDiagnostic>[],
     this.message,
     this.resolvedInvite,
+    this.sessionContext,
   });
 
   final JoinFlowState state;
@@ -135,4 +159,5 @@ class JoinFlowOutcome {
   final List<ProtocolDiagnostic> diagnostics;
   final String? message;
   final ResolvedInvite? resolvedInvite;
+  final JoinFlowSessionContext? sessionContext;
 }

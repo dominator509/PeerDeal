@@ -89,6 +89,37 @@ void main() {
     expect(identityBridge.savedKeys, hasLength(1));
   });
 
+  test('applies verified join peer and seat to context-aware input', () async {
+    final store = InMemoryRecoveryPersistenceStore();
+    _persist(store, _typedSnapshot());
+    final source = _source(
+      store,
+      contextInputFactory: (context, snapshot) =>
+          AppHoldemProductionSessionInput(
+            initialTableState: snapshot.tableState,
+            initialHandState: snapshot.handState,
+            initialCursor: snapshot.eventCursor,
+            closeEventAdapter: _closeAdapter(snapshot.tableState),
+            path: '/holdem-live',
+            navigationLabel: 'Live Holdem',
+            peerId: context.remotePeerId,
+            localPeerId: 'peer_local',
+            localSeat: context.localSeat,
+          ),
+    );
+
+    final input = await source.loadForSessionContext(
+      JoinFlowSessionContext(
+        invite: _invite(),
+        remotePeerId: 'peer_selected',
+        localSeat: 3,
+      ),
+    );
+
+    expect(input.peerId, 'peer_selected');
+    expect(input.localSeat, 3);
+  });
+
   test('fails closed when no typed snapshot is persisted', () {
     final source = _source(InMemoryRecoveryPersistenceStore());
 
@@ -197,6 +228,7 @@ void main() {
 AppPersistedHoldemProductionSessionSource _source(
   RecoveryPersistenceStore store, {
   AppHoldemProductionSessionInputFactory? inputFactory,
+  AppHoldemProductionSessionContextInputFactory? contextInputFactory,
 }) {
   return AppPersistedHoldemProductionSessionSource(
     store: store,
@@ -213,6 +245,7 @@ AppPersistedHoldemProductionSessionSource _source(
           localPeerId: 'peer_local',
           localSeat: 1,
         ),
+    contextInputFactory: contextInputFactory,
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-10T00:00:00Z',
     eventHashFactory: computeCanonicalHash,

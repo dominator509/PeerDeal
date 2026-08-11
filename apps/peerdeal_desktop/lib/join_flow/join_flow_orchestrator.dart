@@ -227,6 +227,11 @@ class JoinFlowOrchestrator {
       status: JoinDecisionStatus.okJoined,
       resultCode: 'OK_JOINED',
       resolvedInvite: resolvedInvite,
+      sessionContext: _sessionContext(
+        invite: resolvedInvite,
+        bootstrapPlan: bootstrapPlan,
+        commit: commit,
+      ),
     );
   }
 
@@ -309,6 +314,25 @@ class JoinFlowOrchestrator {
       status: JoinDecisionStatus.okRejoined,
       resultCode: 'OK_REJOINED',
       resolvedInvite: resolvedInvite,
+      sessionContext: _sessionContext(invite: resolvedInvite, commit: commit),
+    );
+  }
+
+  JoinFlowSessionContext? _sessionContext({
+    required ResolvedInvite invite,
+    required GovernanceCommitResult commit,
+    BootstrapPlan? bootstrapPlan,
+  }) {
+    final remotePeerId = bootstrapPlan?.selectedPeerId;
+    final localSeat = commit.assignedSeat;
+    if (remotePeerId == null || !_isExactNonEmpty(remotePeerId)) {
+      return null;
+    }
+    if (localSeat == null || localSeat < 1) return null;
+    return JoinFlowSessionContext(
+      invite: invite,
+      remotePeerId: remotePeerId,
+      localSeat: localSeat,
     );
   }
 

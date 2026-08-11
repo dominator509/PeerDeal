@@ -34,6 +34,23 @@ void main() {
     },
   );
 
+  test('loads context-aware source with verified peer and seat', () async {
+    final sessionContext = JoinFlowSessionContext(
+      invite: _invite(),
+      remotePeerId: 'peer_selected',
+      localSeat: 3,
+    );
+    final source = _ContextSource(_input());
+
+    final composition = await AppHoldemProductionSessionBootstrap(
+      source: source,
+      contextSource: source,
+    ).createForSessionContext(sessionContext);
+
+    expect(source.loadedContext, same(sessionContext));
+    expect(composition.route.path, '/holdem-live');
+  });
+
   test(
     'rejects hydrated state that does not match the resolved invite',
     () async {
@@ -148,6 +165,22 @@ class _Source implements AppHoldemProductionSessionSource {
   }
 
   Future<void>? loadedCancellation;
+}
+
+class _ContextSource extends _Source
+    implements AppHoldemProductionSessionContextSource {
+  _ContextSource(super.input);
+
+  JoinFlowSessionContext? loadedContext;
+
+  @override
+  Future<AppHoldemProductionSessionInput> loadForSessionContext(
+    JoinFlowSessionContext sessionContext, {
+    Future<void>? cancellation,
+  }) async {
+    loadedContext = sessionContext;
+    return input;
+  }
 }
 
 AppHoldemProductionSessionInput _input({String tableId = 'table_001'}) {
