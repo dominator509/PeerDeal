@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_retention_coordinator.dart';
@@ -185,6 +187,20 @@ void main() {
       expect(identityBridge.savedKeys, isEmpty);
     },
   );
+
+  test('fails closed before work begins when the load is cancelled', () async {
+    final store = InMemoryRecoveryPersistenceStore();
+    final identityBridge = _IdentityBridge();
+    final source = await _lazySource(store, identityBridge);
+    final cancellation = Completer<void>()..complete();
+
+    await expectLater(
+      source.load(_invite(), cancellation: cancellation.future),
+      throwsStateError,
+    );
+
+    expect(identityBridge.savedKeys, isEmpty);
+  });
 
   test(
     'rejects a non-positive timeout before provisioning persisted identity',
@@ -414,6 +430,24 @@ AppPersistedHoldemProductionSessionRoutePolicy _routePolicy() {
         protocolVersion: scope.protocolVersion,
       ),
     ),
+  );
+}
+
+Future<AppPersistedHoldemProductionSessionSource> _lazySource(
+  InMemoryRecoveryPersistenceStore store,
+  _IdentityBridge identityBridge,
+) {
+  return AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(
+    store: store,
+    identityProvisioner: NativeLocalPeerIdentityProvisioner(
+      loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+      writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+      identityFactory: () => 'peer_local',
+    ),
+    routePolicy: _routePolicy(),
+    eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
+    emittedAtFactory: () => '2026-08-10T00:00:00Z',
+    eventHashFactory: computeCanonicalHash,
   );
 }
 

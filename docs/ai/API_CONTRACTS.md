@@ -417,14 +417,16 @@ than exposing the newly generated ID to the session source. This is a
 read-after-write integrity check, not a cross-process compare-and-swap.
 
 `AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(...)`
-is the app-owned composition seam for that identity. It requires an existing
-`RecoveryPersistenceStore`, a `NativeLocalPeerIdentityProvisioner`, and an
-`AppPersistedHoldemProductionSessionRoutePolicy`. The factory provisions or
-loads the local ID once, maps it to `localPeerId`, and builds the existing
-typed persisted-source input with caller-owned route, remote `peerId`, local
-seat, and close-event policy. It fails closed when identity provisioning does
-not return a valid identity. It does not choose a database, discover a remote
-peer, or validate native runtime/device readiness.
+is the explicit eager composition seam for callers that require pre-provisioned
+identity. The production configuration uses
+`fromLocalIdentityProvisioner(...)`, which requires the same existing
+`RecoveryPersistenceStore`, `NativeLocalPeerIdentityProvisioner`, and
+`AppPersistedHoldemProductionSessionRoutePolicy` but provisions or loads the
+local ID only after snapshot validation and recovery replay succeed. Both
+source load methods accept the app route cancellation signal and fail closed
+before recovery access or around lazy identity provisioning when cancellation
+is observed. These adapters do not choose a database, discover a remote peer,
+or validate native runtime/device readiness.
 
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through

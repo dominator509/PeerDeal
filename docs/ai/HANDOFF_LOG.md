@@ -7722,6 +7722,18 @@ Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
 
+### T69: persisted-source cancellation propagation
+
+- Mirrored persisted invite and session-context loads now honor route
+  cancellation before recovery access and around lazy identity provisioning.
+- Cancelled loads fail closed with a stable `StateError`; focused mobile and
+  desktop persisted-session suites passed with 13 tests each, including the
+  pre-cancel no-secure-key-mutation regression.
+
+Remaining:
+- Product database/state provisioning, native transport reachability, and
+  runtime/device validation remain integration or operator work.
+
 ### T68: lazy persisted-session identity provisioning
 
 - Mirrored production configuration now composes

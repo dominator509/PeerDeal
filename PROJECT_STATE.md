@@ -552,6 +552,14 @@ Generated: 2026-08-10
 - Missing or rejected persisted state causes no secure-key mutation. Focused
   mobile and desktop persisted-session suites passed with 12 tests each.
 
+## Recent T69 Changes
+
+- Persisted invite and session-context loads now propagate route cancellation
+  through recovery access and lazy identity provisioning boundaries.
+- Cancelled loads fail closed before work begins. Focused mobile and desktop
+  persisted-session suites passed with 13 tests each, including the
+  no-secure-key-mutation regression.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

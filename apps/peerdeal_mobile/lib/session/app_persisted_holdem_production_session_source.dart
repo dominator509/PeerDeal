@@ -275,7 +275,7 @@ class AppPersistedHoldemProductionSessionSource
     ResolvedInvite invite, {
     Future<void>? cancellation,
   }) {
-    return _load(invite: invite);
+    return _load(invite: invite, cancellation: cancellation);
   }
 
   @override
@@ -288,13 +288,19 @@ class AppPersistedHoldemProductionSessionSource
         StateError('Persisted session context loading is unavailable.'),
       );
     }
-    return _load(invite: sessionContext.invite, sessionContext: sessionContext);
+    return _load(
+      invite: sessionContext.invite,
+      sessionContext: sessionContext,
+      cancellation: cancellation,
+    );
   }
 
   Future<AppHoldemProductionSessionInput> _load({
     required ResolvedInvite invite,
     JoinFlowSessionContext? sessionContext,
+    Future<void>? cancellation,
   }) async {
+    await _throwIfCancelled(cancellation);
     AppHoldemProductionSessionInput buildInput(HoldemStateSnapshot snapshot) {
       final contextInputFactory = _contextInputFactory;
       if (sessionContext != null && contextInputFactory != null) {
@@ -357,7 +363,9 @@ class AppPersistedHoldemProductionSessionSource
         .where((event) => event.eventSeq > envelope.snapshotBaseEventSeq)
         .toList(growable: false);
     if (suffix.isEmpty) {
+      await _throwIfCancelled(cancellation);
       await _ensureIdentity();
+      await _throwIfCancelled(cancellation);
       return buildInput(state);
     }
 
@@ -372,7 +380,9 @@ class AppPersistedHoldemProductionSessionSource
       throw StateError('Persisted Holdem recovery replay was rejected.');
     }
 
+    await _throwIfCancelled(cancellation);
     await _ensureIdentity();
+    await _throwIfCancelled(cancellation);
     return buildInput(
       HoldemStateSnapshot(
         tableState: replay.coreState,
@@ -386,6 +396,19 @@ class AppPersistedHoldemProductionSessionSource
     final identityLoader = _identityLoader;
     if (identityLoader != null) {
       await identityLoader();
+    }
+  }
+
+  Future<void> _throwIfCancelled(Future<void>? cancellation) async {
+    if (cancellation == null) return;
+    var cancelled = false;
+    cancellation.then<void>(
+      (_) => cancelled = true,
+      onError: (Object _, StackTrace _) => cancelled = true,
+    );
+    await Future<void>.value();
+    if (cancelled) {
+      throw StateError('Persisted session load cancelled.');
     }
   }
 }

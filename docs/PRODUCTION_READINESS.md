@@ -1121,6 +1121,13 @@ versions, scope mismatches, malformed state, or rejected replay therefore do
 not mutate secure-key storage; valid loads retain the existing identity
 provisioning and route composition behavior.
 
+The T69 follow-up closes the persisted-source cancellation gap. Invite and
+session-context loads now observe the app route cancellation signal before
+recovery access and immediately before and after lazy identity provisioning.
+Cancelled loads fail closed with a stable error and do not mutate secure-key
+storage when cancellation is already signaled; underlying native calls remain
+bounded by their existing bridge deadlines.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

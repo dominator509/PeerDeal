@@ -517,3 +517,12 @@ are implemented on branch
 - Missing or rejected persisted state therefore fails without secure-key
   mutation; focused mobile and desktop persisted-session suites passed with
   12 tests each.
+
+## Recent T69 Changes
+
+- Persisted invite and session-context source loads now honor the route
+  cancellation signal before recovery access and around lazy identity
+  provisioning.
+- Cancelled loads fail closed with a stable `StateError`; focused mobile and
+  desktop persisted-session suites passed with 13 tests each, including the
+  no-side-effect pre-cancel regression.

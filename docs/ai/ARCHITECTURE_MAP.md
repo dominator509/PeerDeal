@@ -89,8 +89,9 @@ Local Hold'em producer flow:
    handoff. Demo snapshots and compiled Game Files are not live session identity
    sources. `AppPersistedHoldemProductionSessionSource` hydrates a typed
    `HoldemStateSnapshot` and replays its suffix through the variant-owned
-   atomic recovery transaction. It leaves input mapping, identity, close
-   policy, and database choice to the product caller.
+   atomic recovery transaction. It honors route cancellation before recovery
+   access and around lazy identity provisioning. It leaves input mapping,
+   identity, close policy, and database choice to the product caller.
    Mirrored app shells also expose local peer identity adapters over generic
    secure-key storage; they persist the local ID but do not choose remote
    peers or create product session state.
