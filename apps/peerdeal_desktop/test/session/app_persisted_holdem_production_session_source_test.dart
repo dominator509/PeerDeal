@@ -156,6 +156,46 @@ void main() {
     },
   );
 
+  test(
+    'rejects a non-positive timeout before provisioning persisted identity',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      final identityBridge = _IdentityBridge();
+
+      await expectLater(
+        AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(
+          store: store,
+          identityProvisioner: NativeLocalPeerIdentityProvisioner(
+            loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+            writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+            identityFactory: () => 'peer_local',
+          ),
+          routePolicy: AppPersistedHoldemProductionSessionRoutePolicy(
+            path: '/holdem-live',
+            navigationLabel: 'Live Holdem',
+            remotePeerId: 'peer_default',
+            localSeat: 1,
+            closeEventAdapterFactory: (scope) => _closeAdapter(
+              TableState.initial(
+                tableId: scope.tableId,
+                sessionId: scope.sessionId,
+                protocolVersion: scope.protocolVersion,
+              ),
+            ),
+          ),
+          eventIdFactory: (eventType, eventSeq) =>
+              'evt_${eventType}_$eventSeq',
+          emittedAtFactory: () => '2026-08-10T00:00:00Z',
+          eventHashFactory: computeCanonicalHash,
+          sourceLoadTimeout: Duration.zero,
+        ),
+        throwsArgumentError,
+      );
+
+      expect(identityBridge.savedKeys, isEmpty);
+    },
+  );
+
   test('applies verified join peer and seat to context-aware input', () async {
     final store = InMemoryRecoveryPersistenceStore();
     _persist(store, _typedSnapshot());

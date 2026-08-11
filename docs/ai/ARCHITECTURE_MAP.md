@@ -112,7 +112,9 @@ Local Hold'em producer flow:
    explicit handler wins. This remains route orchestration only and does not
    provision product state, identity, persistence, or the concrete source. The
    `fromSource(...)` constructor keeps source, bootstrap, timeout, and route
-   registration assembly at this app boundary. Each runtime can instead accept
+   registration assembly at this app boundary. Both configuration entry points
+   reject non-positive timeouts; the persisted factory validates before native
+   identity provisioning. Each runtime can instead accept
    one `AppHoldemProductionSessionConfiguration.fromSource(...)` and derive a
    stable registration once; explicit and configured registrations cannot both
    be supplied.

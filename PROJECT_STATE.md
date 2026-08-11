@@ -526,6 +526,15 @@ Generated: 2026-08-10
   app analyzers reported no issues. This remains recovery-backed composition,
   not a claim that a product database or product route policy exists.
 
+## Recent T66 Changes
+
+- Mirrored configuration factories reject non-positive source-load timeouts
+  before route assembly or native local-identity provisioning.
+- Focused mobile and desktop persisted-session suites passed with 9 tests each,
+  including the regression proving invalid configuration performs no secure-key
+  mutation. Product database/state provisioning and runtime validation remain
+  integration-owned.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

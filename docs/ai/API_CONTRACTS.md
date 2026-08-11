@@ -364,6 +364,9 @@ Mobile and desktop also expose async
 provisions or reuses the app-owned local peer identity, constructs the existing
 `AppPersistedHoldemProductionSessionSource` over an injected recovery store, and
 passes its caller-owned route policy and event factories into `fromSource(...)`.
+Both configuration entry points reject non-positive source-load timeouts; the
+persisted variant performs that validation before native identity provisioning,
+so invalid configuration cannot mutate secure-key storage.
 It does not select a product database, invent route policy, or move persistence
 semantics into a native bridge.
 

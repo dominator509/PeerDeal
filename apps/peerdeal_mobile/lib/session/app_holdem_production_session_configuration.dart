@@ -37,6 +37,7 @@ class AppHoldemProductionSessionConfiguration {
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
   }) async {
+    _validateSourceLoadTimeout(sourceLoadTimeout);
     final source =
         await AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(
           store: store,
@@ -65,6 +66,7 @@ class AppHoldemProductionSessionConfiguration {
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
   }) {
+    _validateSourceLoadTimeout(sourceLoadTimeout);
     return AppHoldemProductionSessionConfiguration._(
       routeRegistration:
           AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(
@@ -81,4 +83,14 @@ class AppHoldemProductionSessionConfiguration {
   });
 
   final AppHoldemProductionSessionBootstrapRouteRegistration routeRegistration;
+
+  static void _validateSourceLoadTimeout(Duration sourceLoadTimeout) {
+    if (sourceLoadTimeout <= Duration.zero) {
+      throw ArgumentError.value(
+        sourceLoadTimeout,
+        'sourceLoadTimeout',
+        'Production session source timeout must be positive.',
+      );
+    }
+  }
 }

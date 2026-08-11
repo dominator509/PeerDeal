@@ -7707,3 +7707,17 @@ Remaining:
 - This closes app-owned recovery-backed composition only. Product database and
   state selection, native transport reachability, and runtime/device validation
   remain integration or operator work.
+
+### T66: fail-early persisted-session configuration validation
+
+- Mirrored `AppHoldemProductionSessionConfiguration` entry points now reject
+  non-positive source-load timeouts before route assembly.
+- The async persisted-identity factory validates before native local-identity
+  provisioning, preventing invalid configuration from mutating secure-key
+  storage.
+- Focused mobile and desktop persisted-session suites passed with 9 tests each,
+  including the no-secure-key-mutation regression.
+
+Remaining:
+- Product database/state provisioning, native transport reachability, and
+  runtime/device validation remain integration or operator work.

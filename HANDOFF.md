@@ -491,3 +491,12 @@ are implemented on branch
 - T65 focused mobile and desktop persisted-session suites passed, including
   configuration construction from persisted state and native local identity;
   both app analyzers passed.
+
+## Recent T66 Changes
+
+- Mirrored `AppHoldemProductionSessionConfiguration` factories now reject a
+  non-positive source-load timeout before route assembly or persisted local
+  identity provisioning.
+- Focused mobile and desktop persisted-session suites passed with 9 tests each,
+  including the no-secure-key-mutation regression; the full repository gates
+  remain required before commit.

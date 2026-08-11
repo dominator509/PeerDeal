@@ -1099,6 +1099,13 @@ factories. This is a recovery-backed integration seam, not production database
 provisioning; product state selection, route policy, native reachability, and
 device validation remain separate.
 
+The T66 follow-up closes the fail-early configuration gap. Both app-owned
+configuration entry points now reject non-positive source-load timeouts before
+route assembly, and the persisted-identity factory validates before invoking
+native identity provisioning. Mirrored tests prove invalid configuration does
+not mutate secure-key storage. This does not create product database/state
+provisioning or change the external runtime/device validation boundary.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
