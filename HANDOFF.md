@@ -1165,6 +1165,18 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T123 Changes
+
+- Direct Hold'em showdown projection now bounds result collections, pot-slice
+  maps, and contested seat-ID lists before materialization.
+- Overflow returns explicit projection warnings and is propagated through
+  settlement as a blocked result; existing malformed-evaluation slice
+  reporting remains unchanged.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T122 Changes
 
 - The variant-owned `ShowdownSettlementProjector` now bounds direct commitment

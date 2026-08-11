@@ -1554,6 +1554,13 @@ bound before invoking core side-pot construction for contested or uncontested
 settlement. Overflow fails closed with
 `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`.
 
+The T123 follow-up closes the direct Hold'em showdown projection-materialization
+gap. `ShowdownEvaluationResult` now bounds result collections, pot-slice maps,
+and per-slice contested seat-ID lists before building winner projections.
+Overflow carries explicit `ERR_HOLDEM_SHOWDOWN_RESULT_COUNT`,
+`ERR_HOLDEM_SHOWDOWN_SLICE_COUNT`, or
+`ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` warnings into blocked settlement.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

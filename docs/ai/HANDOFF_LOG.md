@@ -2,6 +2,26 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T123 Hold'em Showdown Projection Bounds
+
+Summary:
+- `ShowdownEvaluationResult` now bounds direct result collections, pot-slice
+  maps, and per-slice contested seat-ID lists before projection materialization.
+- Overflow carries explicit warnings through `ShowdownSliceWinnerProjection`
+  and blocked settlement results without changing malformed-evaluation slice
+  reporting.
+
+Tests run:
+- Focused `peerdeal_variants` projection suite: 52 tests passed.
+- Focused `peerdeal_variants` analysis passed.
+
+Risks:
+- This protects direct variant projection callers while product source wiring,
+  native reachability, durable database policy, and release inputs remain
+  separate.
+
+---
+
 ### 2026-08-11 - Codex - T122 Hold'em Settlement Commitment Bound
 
 Summary:

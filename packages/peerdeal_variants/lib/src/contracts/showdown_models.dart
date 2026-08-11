@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import '../holdem/holdem_input_limits.dart';
+
 @immutable
 class ShowdownSeatInput {
   const ShowdownSeatInput({
@@ -50,12 +52,15 @@ class ShowdownSliceWinnerProjection {
   const ShowdownSliceWinnerProjection({
     required this.winningSeatIdsBySliceIndex,
     required this.unawardableSliceIndexes,
+    this.warnings = const <String>[],
   });
 
   final Map<int, List<String>> winningSeatIdsBySliceIndex;
   final List<int> unawardableSliceIndexes;
+  final List<String> warnings;
 
-  bool get hasUnawardableSlices => unawardableSliceIndexes.isNotEmpty;
+  bool get hasUnawardableSlices =>
+      unawardableSliceIndexes.isNotEmpty || warnings.isNotEmpty;
 }
 
 @immutable
@@ -69,7 +74,9 @@ class ShowdownEvaluationResult {
   final List<String> warnings;
 
   List<ShowdownWinnerGroup> get winnerGroups {
-    if (warnings.isNotEmpty || results.isEmpty) {
+    if (warnings.isNotEmpty ||
+        results.isEmpty ||
+        results.length > HoldemInputLimits.defaultMaxShowdownResults) {
       return const <ShowdownWinnerGroup>[];
     }
 
@@ -92,7 +99,14 @@ class ShowdownEvaluationResult {
     required Map<int, Set<int>> eligibleSeatsBySliceIndex,
     String Function(int seat) seatIdFor = _defaultSeatIdFor,
   }) {
-    if (warnings.isNotEmpty || results.isEmpty) {
+    if (warnings.isNotEmpty ||
+        results.isEmpty ||
+        results.length > HoldemInputLimits.defaultMaxShowdownResults ||
+        eligibleSeatsBySliceIndex.length >
+            HoldemInputLimits.defaultMaxPotSlices ||
+        eligibleSeatsBySliceIndex.values.any(
+          (seats) => seats.length > HoldemInputLimits.defaultMaxSeatIdsPerSlice,
+        )) {
       return const <int, List<String>>{};
     }
 
@@ -132,6 +146,15 @@ class ShowdownEvaluationResult {
     required Map<int, List<String>> contestedSeatIdsBySliceIndex,
     required int? Function(String seatId) seatForId,
   }) {
+    final warning = _projectionInputWarning(contestedSeatIdsBySliceIndex);
+    if (warning != null) {
+      return ShowdownSliceWinnerProjection(
+        winningSeatIdsBySliceIndex: const <int, List<String>>{},
+        unawardableSliceIndexes: const <int>[],
+        warnings: <String>[warning],
+      );
+    }
+
     final winnersBySlice = <int, List<String>>{};
     final unawardableSliceIndexes = <int>[];
     final sliceIndexes = contestedSeatIdsBySliceIndex.keys.toList()..sort();
@@ -184,6 +207,24 @@ class ShowdownEvaluationResult {
       winningSeatIdsBySliceIndex: winnersBySlice,
       unawardableSliceIndexes: unawardableSliceIndexes,
     );
+  }
+
+  String? _projectionInputWarning(
+    Map<int, List<String>> contestedSeatIdsBySliceIndex,
+  ) {
+    if (results.length > HoldemInputLimits.defaultMaxShowdownResults) {
+      return 'ERR_HOLDEM_SHOWDOWN_RESULT_COUNT';
+    }
+    if (contestedSeatIdsBySliceIndex.length >
+        HoldemInputLimits.defaultMaxPotSlices) {
+      return 'ERR_HOLDEM_SHOWDOWN_SLICE_COUNT';
+    }
+    if (contestedSeatIdsBySliceIndex.values.any(
+      (seatIds) => seatIds.length > HoldemInputLimits.defaultMaxSeatIdsPerSlice,
+    )) {
+      return 'ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT';
+    }
+    return null;
   }
 }
 

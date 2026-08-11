@@ -598,6 +598,110 @@ void main() {
     });
 
     test(
+      'showdown projection fails closed on oversized result collections',
+      () {
+        final result = ShowdownEvaluationResult(
+          results: List<RankedShowdownResult>.generate(
+            HoldemInputLimits.defaultMaxShowdownResults + 1,
+            (index) => RankedShowdownResult(
+              seat: index + 1,
+              rankIndex: index,
+              summary: 'result',
+            ),
+            growable: false,
+          ),
+        );
+
+        final projection = result.projectContestedSeatIdsBySliceIndex(
+          contestedSeatIdsBySliceIndex: const <int, List<String>>{
+            0: <String>['seat-1'],
+          },
+          seatForId: _seatFromSeatId,
+        );
+
+        expect(projection.winningSeatIdsBySliceIndex, isEmpty);
+        expect(projection.warnings, <String>[
+          'ERR_HOLDEM_SHOWDOWN_RESULT_COUNT',
+        ]);
+        expect(projection.hasUnawardableSlices, isTrue);
+      },
+    );
+
+    test('showdown projection fails closed on oversized slice collections', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['Th', '9d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Ac', '3c'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      final contested = <int, List<String>>{
+        for (
+          var index = 0;
+          index < HoldemInputLimits.defaultMaxPotSlices + 1;
+          index++
+        )
+          index: <String>['seat-1'],
+      };
+      final projection = result.projectContestedSeatIdsBySliceIndex(
+        contestedSeatIdsBySliceIndex: contested,
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(projection.winningSeatIdsBySliceIndex, isEmpty);
+      expect(projection.warnings, <String>['ERR_HOLDEM_SHOWDOWN_SLICE_COUNT']);
+      expect(projection.hasUnawardableSlices, isTrue);
+    });
+
+    test('showdown projection fails closed on oversized slice seat IDs', () {
+      final result = adapter.evaluate(
+        const ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['Th', '9d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 2,
+              holeCards: <String>['Ac', '3c'],
+              isFolded: false,
+            ),
+          ],
+        ),
+      );
+
+      final projection = result.projectContestedSeatIdsBySliceIndex(
+        contestedSeatIdsBySliceIndex: <int, List<String>>{
+          0: List<String>.generate(
+            HoldemInputLimits.defaultMaxSeatIdsPerSlice + 1,
+            (index) => 'seat-${index + 1}',
+            growable: false,
+          ),
+        },
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(projection.winningSeatIdsBySliceIndex, isEmpty);
+      expect(projection.warnings, <String>[
+        'ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT',
+      ]);
+      expect(projection.hasUnawardableSlices, isTrue);
+    });
+
+    test(
       'showdown projection reports invalid evaluation slices unawardable',
       () {
         final result = adapter.evaluate(

@@ -124,6 +124,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-11-114` | Network routing and confidence services materialized unbounded caller-provided peer collections | 4 | T120 | RESOLVED | `peerdeal_network` now applies shared 32-peer-id, 32-candidate, and 64-peer-metric bounds before materialization. Overflow fails closed as empty bootstrap candidates, unresolved path selection, unsafe confidence, or unsafe primary election. |
 | `LEGACY-GAP-2026-08-11-115` | Hold'em showdown materialized caller-provided seats beyond the locked launch invariant | 4 | T121 | RESOLVED | `HoldemShowdownEvaluator` now rejects more than the shared nine-seat limit before sorting or card expansion with `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`; `HoldemAdapter` identity and config validation reuse the same limit. |
 | `LEGACY-GAP-2026-08-11-116` | Hold'em settlement passed unbounded commitment collections into core side-pot construction | 4 | T122 | RESOLVED | `ShowdownSettlementProjector` now applies the shared nine-seat commitment bound before core traversal for contested and uncontested paths; overflow fails closed with `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`. |
+| `LEGACY-GAP-2026-08-11-117` | Hold'em showdown projection materialized oversized result, slice, and contested seat-ID collections | 4 | T123 | RESOLVED | `ShowdownEvaluationResult` now bounds direct result, slice-map, and per-slice seat-ID projection inputs; overflow carries stable warnings through `ShowdownSliceWinnerProjection` and blocked settlement results. |
 
 ## Status Definitions
 

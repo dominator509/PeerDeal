@@ -64,7 +64,9 @@ class ShowdownSettlementProjector {
       return ShowdownSettlementProjectionResult.blocked(
         slices: slices,
         projection: projection,
-        warnings: const <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE'],
+        warnings: projection.warnings.isEmpty
+            ? const <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_UNAWARDABLE']
+            : projection.warnings,
       );
     }
 

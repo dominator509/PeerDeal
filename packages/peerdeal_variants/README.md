@@ -61,6 +61,10 @@ The projector also rejects more than nine direct commitments before core
 side-pot construction on both contested and uncontested paths, returning
 `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`.
 
+Direct winner projection also bounds result windows, slice maps, and contested
+seat-ID lists to nine entries. Overflow returns explicit projection warnings
+and blocks settlement rather than materializing unbounded caller collections.
+
 ## Hold'em action application
 `HoldemBlindPostingCoordinator.postBlinds(...)` is the deterministic
 variant-local blind-posting gate. It runs only from `blindsPosting`, validates

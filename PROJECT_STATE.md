@@ -1134,6 +1134,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`; focused settlement,
   coordinator, and evaluator tests pass.
 
+## T123 Hold'em Showdown Projection Bounds
+
+- `ShowdownEvaluationResult` now bounds direct result collections, pot-slice
+  maps, and per-slice contested seat-ID lists before projection materialization.
+- Overflow carries `ERR_HOLDEM_SHOWDOWN_RESULT_COUNT`,
+  `ERR_HOLDEM_SHOWDOWN_SLICE_COUNT`, or
+  `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` through blocked settlement projection;
+  focused variant projection tests (52) and analysis pass.
+
 ## T119 Direct Sync Request Scope Validation
 
 - `BasicConflictDetector` and `BasicSnapshotApplier` now validate direct

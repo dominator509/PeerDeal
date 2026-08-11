@@ -340,6 +340,13 @@ calling core side-pot construction. Contested and uncontested overflow return a
 blocked projection with
 `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`; core remains variant-agnostic.
 
+`ShowdownEvaluationResult` also bounds direct projection inputs: result windows,
+pot-slice maps, and contested seat-ID lists use the shared nine-seat Hold'em
+limits. Overflow returns projection warnings
+`ERR_HOLDEM_SHOWDOWN_RESULT_COUNT`, `ERR_HOLDEM_SHOWDOWN_SLICE_COUNT`, or
+`ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT`; settlement propagates those warnings as
+a blocked result.
+
 `HoldemEventCursor.toJson/fromJson` persist and restore the cursor's exact
 scope, next sequence, previous hash, actor, and last-event state. Hydration
 requires caller-owned event-id and timestamp factories and accepts an optional

@@ -121,6 +121,37 @@ void main() {
       ]);
     });
 
+    test(
+      'propagates oversized showdown result warnings through settlement',
+      () {
+        final outcome = projector.projectAndSettle(
+          showdown: ShowdownEvaluationResult(
+            results: List<RankedShowdownResult>.generate(
+              HoldemInputLimits.defaultMaxShowdownResults + 1,
+              (index) => RankedShowdownResult(
+                seat: index + 1,
+                rankIndex: index,
+                summary: 'result',
+              ),
+              growable: false,
+            ),
+          ),
+          commitments: const <PotCommitment>[
+            PotCommitment(
+              seatId: 'seat-1',
+              committed: 100,
+              isEligibleForShowdown: true,
+            ),
+          ],
+          seatForId: _seatFromSeatId,
+        );
+
+        expect(outcome.isBlocked, isTrue);
+        expect(outcome.warnings, <String>['ERR_HOLDEM_SHOWDOWN_RESULT_COUNT']);
+        expect(outcome.settlement, isNull);
+      },
+    );
+
     test('blocks settlement when a contested slice is unawardable', () {
       final showdown = adapter.evaluate(
         const ShowdownEvaluationInput(

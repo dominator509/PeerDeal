@@ -179,7 +179,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | --- | --- |
 | Protocol envelopes/catalog | `packages/peerdeal_protocol/lib/peerdeal_protocol.dart` |
 | Core reducer/state | `packages/peerdeal_core/lib/peerdeal_core.dart` |
-| Variants | `packages/peerdeal_variants/lib/peerdeal_variants.dart` (Hold'em showdown and settlement apply shared nine-seat input bounds before evaluation or core traversal) |
+| Variants | `packages/peerdeal_variants/lib/peerdeal_variants.dart` (Hold'em showdown evaluation and projection apply shared nine-seat collection bounds before materialization or core traversal) |
 | Modes/governance | `packages/peerdeal_modes/lib/peerdeal_modes.dart` |
 | Replay | `packages/peerdeal_replay/lib/peerdeal_replay.dart` |
 | Sync/recovery | `packages/peerdeal_sync/lib/peerdeal_sync.dart` |
