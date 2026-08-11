@@ -8171,6 +8171,34 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Windows Native Host Smoke CI Enforcement
+
+Summary:
+- Added a bounded PowerShell runner beside the existing Windows native host
+  smoke target.
+- CI now builds and executes that target, requires its stable pass marker, and
+  fails closed on nonzero exit or timeout.
+
+Files changed:
+- `.github/workflows/ci.yml`
+- `apps/peerdeal_desktop/tool/run_windows_native_host_smoke.ps1`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Windows smoke target rebuilt successfully.
+- Bounded local runner passed all app-storage, capture, local-network,
+  transport, and secure-key checkpoints.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+
+Risks:
+- Firewall behavior, Android runtime/device validation, release signing,
+  cross-device reachability, other-platform implementations, and product
+  database/session-state wiring remain external or integration-owned.
+
+---
+
 ### 2026-08-11 - Codex - Native Transport Send Contract Alignment
 
 Summary:

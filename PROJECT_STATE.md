@@ -894,6 +894,14 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Android now selects an operational non-loopback IPv4 multicast interface for
   send and receive, preferring Wi-Fi/Ethernet and failing closed otherwise.
 
+## Recent T92 Changes
+
+- Added `apps/peerdeal_desktop/tool/run_windows_native_host_smoke.ps1`, a
+  bounded runner that captures output, requires the native smoke pass marker,
+  rejects nonzero exits, and terminates timed-out hosts.
+- CI now builds and executes the Windows native host smoke target instead of
+  stopping at compilation. Local execution passed all existing checkpoints.
+
 ## Required Gates
 
 Run after each retrofit step:

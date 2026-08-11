@@ -1306,6 +1306,13 @@ send and receive, preferring an operational non-loopback IPv4 Wi-Fi/Ethernet
 interface and failing closed when none is available. The APK still requires a
 real-device pass for runtime behavior.
 
+The T92 follow-up promotes the existing Windows native host smoke from a
+manually executed proof to a repeatable CI gate. A bounded repository-owned
+PowerShell runner captures host diagnostics, requires the stable smoke pass
+marker, rejects nonzero exits, and terminates timed-out hosts. This strengthens
+host regression coverage without claiming firewall, device, release-signing,
+or cross-device reachability validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

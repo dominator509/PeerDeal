@@ -882,3 +882,17 @@ database or session-state wiring remain external or integration-owned.
 - Android debug APK compilation passed. No Android device or emulator is
   attached, so runtime persistence/capture and cross-device reachability remain
   external validation.
+
+## Recent T92 Changes
+
+- Added `apps/peerdeal_desktop/tool/run_windows_native_host_smoke.ps1`, a
+  bounded PowerShell runner for the existing public-contract Windows native
+  smoke target.
+- The runner captures stdout/stderr, requires the stable
+  `PEERDEAL_NATIVE_HOST_SMOKE_PASS` marker, rejects nonzero exits, and
+  terminates timed-out hosts.
+- CI now builds and executes the smoke target. Local execution passed app
+  storage, capture, local-network, transport, and secure-key checkpoints.
+
+The smoke gate does not claim firewall, Android device, release-signing, or
+cross-device reachability validation; those remain external.

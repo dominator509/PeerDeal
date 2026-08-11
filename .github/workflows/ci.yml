@@ -120,3 +120,12 @@ jobs:
       - name: Build Windows debug host
         working-directory: apps/peerdeal_desktop
         run: flutter build windows --debug --no-pub
+
+      - name: Build Windows native host runtime smoke
+        working-directory: apps/peerdeal_desktop
+        run: flutter build windows --debug --no-pub -t tool/windows_native_host_smoke.dart
+
+      - name: Run Windows native host runtime smoke
+        working-directory: apps/peerdeal_desktop
+        shell: pwsh
+        run: ./tool/run_windows_native_host_smoke.ps1
