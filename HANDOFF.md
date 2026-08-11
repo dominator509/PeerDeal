@@ -500,3 +500,11 @@ are implemented on branch
 - Focused mobile and desktop persisted-session suites passed with 9 tests each,
   including the no-secure-key-mutation regression; the full repository gates
   remain required before commit.
+
+## Recent T67 Changes
+
+- Mirrored persisted Hold'em route policies now fail before native identity
+  provisioning when path, navigation label, remote peer identity, or local seat
+  policy is invalid.
+- Focused mobile and desktop persisted-session suites passed with 10 tests each,
+  including the invalid-route-policy no-secure-key-mutation regression.

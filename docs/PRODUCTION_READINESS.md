@@ -1106,6 +1106,12 @@ native identity provisioning. Mirrored tests prove invalid configuration does
 not mutate secure-key storage. This does not create product database/state
 provisioning or change the external runtime/device validation boundary.
 
+The T67 follow-up extends the same fail-early rule to persisted route policy.
+Path, navigation label, remote peer identity, and positive local-seat policy
+are validated before native identity provisioning. Mirrored tests prove an
+invalid route policy cannot mutate secure-key storage; product database/state
+provisioning and runtime/device validation remain separate.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

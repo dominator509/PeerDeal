@@ -535,6 +535,15 @@ Generated: 2026-08-10
   mutation. Product database/state provisioning and runtime validation remain
   integration-owned.
 
+## Recent T67 Changes
+
+- Mirrored persisted Hold'em route policies now validate route metadata, remote
+  peer identity, and positive local seat before native local-identity
+  provisioning.
+- Focused mobile and desktop persisted-session suites passed with 10 tests each,
+  including the invalid-policy no-secure-key-mutation regression. Product
+  database/state provisioning and runtime validation remain integration-owned.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

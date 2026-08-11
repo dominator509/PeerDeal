@@ -7721,3 +7721,16 @@ Remaining:
 Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
+
+### T67: fail-early persisted route-policy validation
+
+- Mirrored persisted Hold'em route policies now validate route path, navigation
+  label, remote peer identity, and positive local seat before native local-peer
+  identity provisioning.
+- Invalid route policy fails with `ArgumentError`; focused mobile and desktop
+  persisted-session suites passed with 10 tests each, including the regression
+  proving secure-key storage is not mutated.
+
+Remaining:
+- Product database/state provisioning, native transport reachability, and
+  runtime/device validation remain integration or operator work.

@@ -367,6 +367,9 @@ passes its caller-owned route policy and event factories into `fromSource(...)`.
 Both configuration entry points reject non-positive source-load timeouts; the
 persisted variant performs that validation before native identity provisioning,
 so invalid configuration cannot mutate secure-key storage.
+The persisted source also validates route path, navigation label, remote peer
+identity, and positive local seat before provisioning; invalid app policy fails
+with `ArgumentError` and cannot mutate secure-key storage.
 It does not select a product database, invent route policy, or move persistence
 semantics into a native bridge.
 

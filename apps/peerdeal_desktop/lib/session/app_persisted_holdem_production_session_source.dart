@@ -38,6 +38,54 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
   final int localSeat;
   final AppHoldemProductionCloseEventAdapterFactory closeEventAdapterFactory;
 
+  /// Rejects route policy that cannot produce a valid production composition.
+  ///
+  /// This is intentionally checked before native local-identity provisioning;
+  /// malformed app policy must not cause a secure-storage mutation first.
+  void validate() {
+    if (path.trim().isEmpty ||
+        path != path.trim() ||
+        !path.startsWith('/') ||
+        path == '/' ||
+        path.endsWith('/') ||
+        path.contains('?') ||
+        path.contains('#') ||
+        path.contains('//') ||
+        path.contains(r'\') ||
+        _containsControlCharacter(path)) {
+      throw ArgumentError.value(
+        path,
+        'path',
+        'Production route path is not safe.',
+      );
+    }
+    if (navigationLabel.trim().isEmpty ||
+        navigationLabel != navigationLabel.trim() ||
+        _containsLabelControlCharacter(navigationLabel)) {
+      throw ArgumentError.value(
+        navigationLabel,
+        'navigationLabel',
+        'Production navigation label is not safe.',
+      );
+    }
+    if (remotePeerId.trim().isEmpty ||
+        remotePeerId != remotePeerId.trim() ||
+        _containsControlCharacter(remotePeerId)) {
+      throw ArgumentError.value(
+        remotePeerId,
+        'remotePeerId',
+        'Peer identity must be non-empty, unpadded, and control-free.',
+      );
+    }
+    if (localSeat < 1) {
+      throw ArgumentError.value(
+        localSeat,
+        'localSeat',
+        'Local seat must be positive.',
+      );
+    }
+  }
+
   AppHoldemProductionSessionInput buildInput({
     required HoldemStateSnapshot snapshot,
     required String localPeerId,
@@ -62,6 +110,12 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
       localSeat: localSeat ?? this.localSeat,
     );
   }
+
+  static bool _containsControlCharacter(String value) =>
+      value.codeUnits.any((codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F);
+
+  static bool _containsLabelControlCharacter(String value) =>
+      value.codeUnits.any((codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F);
 }
 
 /// Loads a typed Hold'em production state from the existing recovery store.
@@ -87,6 +141,7 @@ class AppPersistedHoldemProductionSessionSource
     String snapshotType = 'HoldemStateSnapshot',
     String snapshotVersion = '1.0',
   }) async {
+    routePolicy.validate();
     final provisioned = await identityProvisioner.ensureIdentity();
     final identity = provisioned.identity;
     if (!provisioned.isSuccess || identity == null) {
@@ -261,4 +316,5 @@ class AppPersistedHoldemProductionSessionSource
       ),
     );
   }
+
 }
