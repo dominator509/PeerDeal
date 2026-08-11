@@ -8338,6 +8338,26 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - T102 Generic Native Bridge Payload Bounds
+
+Summary:
+- Added shared `NativeBridgePayloadLimits` for generic method-channel
+  transport, discovery, secure-key, and diagnostic values.
+- Bounded platform-provided collections before iteration and bounded strings
+  and byte payloads before generic model construction.
+- Added regression coverage for oversized frame batches/payloads, discovery
+  collections, secure-key records, and secure-key fields.
+
+Validation:
+- Focused Flutter native-bridge suite passed: 61 tests.
+- Package analysis passed.
+
+Risks:
+- Native host/device behavior, cross-device network reachability, product
+  persistence, and release signing remain separate validation surfaces.
+
+---
+
 ### 2026-08-11 - Codex - T101 Recovery File Size Bounds
 
 Summary:

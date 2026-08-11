@@ -1,3 +1,4 @@
+export 'src/native_bridge_payload_limits.dart';
 export 'src/app_storage/app_storage_directory_bridge.dart';
 export 'src/app_storage/app_storage_directory_bridge_models.dart';
 export 'src/app_storage/app_storage_directory_channel_contract.dart';

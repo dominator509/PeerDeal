@@ -993,6 +993,16 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Production database replacement and platform filesystem/runtime validation
   remain external.
 
+## T102 Generic Native Bridge Payload Bounds
+
+- `peerdeal_native_bridges` now shares explicit generic limits for transport,
+  discovery, secure-key, and diagnostic method-channel values.
+- Collection sizes are checked before iteration. Frame payloads, transport
+  identities, discovery strings, secure-key fields, and diagnostics are bounded
+  before model construction; oversized values fail closed.
+- Receipt semantics remain app-owned, and native host/device, cross-device
+  network, production database, and release-signing validation remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

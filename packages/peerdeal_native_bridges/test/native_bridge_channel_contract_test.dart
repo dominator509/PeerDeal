@@ -181,6 +181,31 @@ void main() {
     expect(snapshot.warning, isNull);
   });
 
+  test('local network channel contract bounds discovery collections', () {
+    final snapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(
+      <String, Object?>{
+        'permissionGranted': true,
+        'foundEndpoints': List<Object?>.filled(
+          NativeBridgePayloadLimits.maxDiscoveryEntries + 1,
+          'peer_a',
+        ),
+        'interfaceHints': <Object?>[
+          String.fromCharCodes(
+            List<int>.filled(
+              NativeBridgePayloadLimits.maxDiscoveryValueBytes + 1,
+              97,
+            ),
+          ),
+          'wifi',
+        ],
+      },
+    );
+
+    expect(snapshot.permissionGranted, isTrue);
+    expect(snapshot.foundEndpoints, isEmpty);
+    expect(snapshot.interfaceHints, ['wifi']);
+  });
+
   test('secure key storage channel contract decodes fixture payload', () {
     final fixture = _loadFixture('secure_key_storage_bridge_contract.json');
     final methods = fixture['methods'] as Map<String, Object?>;
@@ -252,6 +277,50 @@ void main() {
     expect(snapshot.keys, hasLength(1));
     expect(snapshot.keys.single.keyId, 'receipt_signing_1');
     expect(snapshot.keys.single.active, isFalse);
+  });
+
+  test('secure key storage channel contract bounds records and key fields', () {
+    final tooManyRecords = SecureKeyStorageChannelContract.decodeSnapshot(
+      <String, Object?>{
+        'available': true,
+        'revision': 1,
+        'keys': List<Object?>.filled(
+          NativeBridgePayloadLimits.maxSecureKeyRecords + 1,
+          <String, Object?>{
+            'keyId': 'key',
+            'purpose': 'purpose',
+            'algorithm': 'algorithm',
+            'secret': 'secret',
+            'active': true,
+          },
+        ),
+      },
+    );
+    final oversizedKey = SecureKeyStorageChannelContract.decodeSnapshot(
+      <String, Object?>{
+        'available': true,
+        'revision': 1,
+        'keys': <Object?>[
+          <String, Object?>{
+            'keyId': 'key',
+            'purpose': 'purpose',
+            'algorithm': 'algorithm',
+            'secret': String.fromCharCodes(
+              List<int>.filled(
+                NativeBridgePayloadLimits.maxSecureKeySecretBytes + 1,
+                97,
+              ),
+            ),
+            'active': true,
+          },
+        ],
+      },
+    );
+
+    expect(tooManyRecords.available, isFalse);
+    expect(tooManyRecords.keys, isEmpty);
+    expect(oversizedKey.available, isTrue);
+    expect(oversizedKey.keys, isEmpty);
   });
 
   test('secure key storage channel contract encodes key records', () {
@@ -411,6 +480,50 @@ void main() {
     expect(snapshot.available, isTrue);
     expect(snapshot.frames, isEmpty);
     expect(snapshot.warning, isNull);
+  });
+
+  test('native transport channel contract bounds frames and payloads', () {
+    final tooManyFrames =
+        NativeTransportChannelContract.decodeReceiveSnapshot(<String, Object?>{
+          'available': true,
+          'frames': List<Object?>.filled(
+            NativeBridgePayloadLimits.maxTransportFrames + 1,
+            <String, Object?>{},
+          ),
+        });
+    final oversizedPayload =
+        NativeTransportChannelContract.decodeReceiveSnapshot(<String, Object?>{
+          'available': true,
+          'frames': <Object?>[
+            <String, Object?>{
+              'sessionId': 'session_1',
+              'senderPeerId': 'peer_a',
+              'recipientPeerId': 'peer_b',
+              'sequence': 1,
+              'payloadBytes': List<int>.filled(
+                NativeBridgePayloadLimits.maxTransportPayloadBytes + 1,
+                1,
+              ),
+            },
+          ],
+        });
+    final oversizedFrame = NativeTransportFrame(
+      sessionId: 'session_1',
+      senderPeerId: 'peer_a',
+      recipientPeerId: 'peer_b',
+      sequence: 1,
+      payloadBytes: List<int>.filled(
+        NativeBridgePayloadLimits.maxTransportPayloadBytes + 1,
+        1,
+      ),
+    );
+
+    expect(tooManyFrames.available, isFalse);
+    expect(tooManyFrames.frames, isEmpty);
+    expect(oversizedPayload.available, isTrue);
+    expect(oversizedPayload.frames, isEmpty);
+    expect(oversizedFrame.isUsable, isFalse);
+    expect(NativeTransportChannelContract.encodeFrame(oversizedFrame), isEmpty);
   });
 
   test('native transport channel contract encodes frames', () {

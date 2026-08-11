@@ -1387,6 +1387,14 @@ file replacement. Both paths fail closed with
 it does not claim production database replacement or platform filesystem/
 runtime validation.
 
+The T102 follow-up closes a generic native bridge materialization gap.
+`peerdeal_native_bridges` now bounds transport frame batches, discovery
+collections, secure-key record lists, frame payloads, identities, discovery
+values, key fields, and diagnostics before iteration or model construction.
+Oversized collections and fields fail closed through existing unavailable or
+empty results. This does not claim native host, device, cross-device network,
+production database, or release-signing validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

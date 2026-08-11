@@ -1,4 +1,5 @@
 import 'native_transport_bridge_models.dart';
+import '../native_bridge_payload_limits.dart';
 
 class NativeTransportChannelContract {
   const NativeTransportChannelContract._();
@@ -21,13 +22,22 @@ class NativeTransportChannelContract {
       available: _boolValue(payload['available']),
       sendSupported: _boolValue(payload['sendSupported']),
       receiveSupported: _boolValue(payload['receiveSupported']),
-      maxPayloadBytes: _nonNegativeIntValue(payload['maxPayloadBytes']),
-      notes: _stringValue(payload['notes']) ?? 'unavailable',
-      warning: _stringValue(payload['warning']),
+      maxPayloadBytes: _payloadLimitValue(payload['maxPayloadBytes']),
+      notes:
+          _boundedStringValue(
+            payload['notes'],
+            NativeBridgePayloadLimits.maxDiagnosticBytes,
+          ) ??
+          'unavailable',
+      warning: _boundedStringValue(
+        payload['warning'],
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
     );
   }
 
   static Map<String, Object?> encodeFrame(NativeTransportFrame frame) {
+    if (!frame.isUsable) return const <String, Object?>{};
     return <String, Object?>{
       'sessionId': frame.sessionId,
       'senderPeerId': frame.senderPeerId,
@@ -49,7 +59,10 @@ class NativeTransportChannelContract {
     return NativeTransportSendResult(
       isSuccess: _boolValue(payload['success']),
       warning:
-          _stringValue(payload['warning']) ??
+          _boundedStringValue(
+            payload['warning'],
+            NativeBridgePayloadLimits.maxDiagnosticBytes,
+          ) ??
           (_boolValue(payload['success'])
               ? null
               : 'Native transport send failed.'),
@@ -65,7 +78,15 @@ class NativeTransportChannelContract {
       );
     }
 
-    final frames = _listValue(payload['frames'])
+    final framePayloads = payload['frames'];
+    if (framePayloads is! List<dynamic> ||
+        framePayloads.length > NativeBridgePayloadLimits.maxTransportFrames) {
+      return const NativeTransportReceiveSnapshot.unavailable(
+        warning: 'Native transport receive snapshot is unavailable.',
+      );
+    }
+
+    final frames = framePayloads
         .map(_decodeFrame)
         .whereType<NativeTransportFrame>()
         .toList(growable: false);
@@ -73,7 +94,10 @@ class NativeTransportChannelContract {
     return NativeTransportReceiveSnapshot(
       available: _boolValue(payload['available']),
       frames: frames,
-      warning: _stringValue(payload['warning']),
+      warning: _boundedStringValue(
+        payload['warning'],
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
     );
   }
 
@@ -82,9 +106,24 @@ class NativeTransportChannelContract {
 
     final payloadBytes = _byteListValue(value['payloadBytes']);
     final frame = NativeTransportFrame(
-      sessionId: _stringValue(value['sessionId']) ?? '',
-      senderPeerId: _stringValue(value['senderPeerId']) ?? '',
-      recipientPeerId: _stringValue(value['recipientPeerId']) ?? '',
+      sessionId:
+          _boundedStringValue(
+            value['sessionId'],
+            NativeBridgePayloadLimits.maxTransportIdentityBytes,
+          ) ??
+          '',
+      senderPeerId:
+          _boundedStringValue(
+            value['senderPeerId'],
+            NativeBridgePayloadLimits.maxTransportIdentityBytes,
+          ) ??
+          '',
+      recipientPeerId:
+          _boundedStringValue(
+            value['recipientPeerId'],
+            NativeBridgePayloadLimits.maxTransportIdentityBytes,
+          ) ??
+          '',
       sequence: _positiveIntValue(value['sequence']),
       payloadBytes: payloadBytes,
     );
@@ -93,19 +132,30 @@ class NativeTransportChannelContract {
 
   static bool _boolValue(Object? value) => value is bool ? value : false;
 
-  static int _nonNegativeIntValue(Object? value) =>
-      value is int && value >= 0 ? value : 0;
+  static int _payloadLimitValue(Object? value) =>
+      value is int &&
+          value >= 1 &&
+          value <= NativeBridgePayloadLimits.maxTransportPayloadBytes
+      ? value
+      : 0;
 
   static int _positiveIntValue(Object? value) =>
       value is int && value >= 1 ? value : 0;
 
-  static String? _stringValue(Object? value) => value is String ? value : null;
-
-  static List<dynamic> _listValue(Object? value) =>
-      value is List<dynamic> ? value : const <dynamic>[];
+  static String? _boundedStringValue(Object? value, int maxBytes) {
+    if (value is! String ||
+        !NativeBridgePayloadLimits.isWithinUtf8Limit(value, maxBytes)) {
+      return null;
+    }
+    return value;
+  }
 
   static List<int> _byteListValue(Object? value) {
-    final values = _listValue(value);
+    if (value is! List<dynamic> ||
+        value.length > NativeBridgePayloadLimits.maxTransportPayloadBytes) {
+      return const <int>[];
+    }
+    final values = value;
     final bytes = <int>[];
     for (final value in values) {
       if (value is! int || value < 0 || value > 255) {

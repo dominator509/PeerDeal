@@ -1,3 +1,4 @@
+import '../native_bridge_payload_limits.dart';
 import 'local_network_bridge_models.dart';
 
 class LocalNetworkChannelContract {
@@ -22,8 +23,16 @@ class LocalNetworkChannelContract {
         payload['permissionPromptSupported'],
       ),
       broadcastSupported: _boolValue(payload['broadcastSupported']),
-      notes: _stringValue(payload['notes']) ?? 'unavailable',
-      warning: _stringValue(payload['warning']),
+      notes:
+          _boundedStringValue(
+            payload['notes'],
+            NativeBridgePayloadLimits.maxDiagnosticBytes,
+          ) ??
+          'unavailable',
+      warning: _boundedStringValue(
+        payload['warning'],
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
     );
   }
 
@@ -36,23 +45,44 @@ class LocalNetworkChannelContract {
       );
     }
 
+    final foundEndpoints = _stringListValue(payload['foundEndpoints']);
+    final interfaceHints = _stringListValue(payload['interfaceHints']);
     return LocalNetworkDiscoverySnapshot(
       permissionGranted: _boolValue(payload['permissionGranted']),
-      foundEndpoints: _stringListValue(payload['foundEndpoints']),
-      interfaceHints: _stringListValue(payload['interfaceHints']),
-      warning: _stringValue(payload['warning']),
+      foundEndpoints: foundEndpoints,
+      interfaceHints: interfaceHints,
+      warning: _boundedStringValue(
+        payload['warning'],
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
     );
   }
 
   static bool _boolValue(Object? value) => value is bool ? value : false;
 
-  static String? _stringValue(Object? value) => value is String ? value : null;
+  static String? _boundedStringValue(Object? value, int maxBytes) {
+    if (value is! String ||
+        !NativeBridgePayloadLimits.isWithinUtf8Limit(value, maxBytes)) {
+      return null;
+    }
+    return value;
+  }
 
-  static List<dynamic> _listValue(Object? value) =>
-      value is List<dynamic> ? value : const <dynamic>[];
-
-  static List<String> _stringListValue(Object? value) => _listValue(value)
-      .whereType<String>()
-      .where((item) => item.isNotEmpty)
-      .toList(growable: false);
+  static List<String> _stringListValue(Object? value) {
+    if (value is! List<dynamic> ||
+        value.length > NativeBridgePayloadLimits.maxDiscoveryEntries) {
+      return const <String>[];
+    }
+    return value
+        .whereType<String>()
+        .where(
+          (item) =>
+              item.isNotEmpty &&
+              NativeBridgePayloadLimits.isWithinUtf8Limit(
+                item,
+                NativeBridgePayloadLimits.maxDiscoveryValueBytes,
+              ),
+        )
+        .toList(growable: false);
+  }
 }

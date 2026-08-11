@@ -1,3 +1,4 @@
+import '../native_bridge_payload_limits.dart';
 import 'secure_key_storage_bridge_models.dart';
 
 class SecureKeyStorageChannelContract {
@@ -22,10 +23,16 @@ class SecureKeyStorageChannelContract {
     final available = _boolValue(payload['available']);
     final revision = _revisionValue(payload['revision']);
     final keyPayloads = payload['keys'];
-    if (!available || keyPayloads is! List<dynamic> || revision == null) {
+    if (!available ||
+        keyPayloads is! List<dynamic> ||
+        keyPayloads.length > NativeBridgePayloadLimits.maxSecureKeyRecords ||
+        revision == null) {
       return SecureKeyStorageSnapshot.unavailable(
         warning:
-            _stringValue(payload['warning']) ??
+            _boundedStringValue(
+              payload['warning'],
+              NativeBridgePayloadLimits.maxDiagnosticBytes,
+            ) ??
             'Secure key storage snapshot is unavailable.',
         revision: revision ?? 0,
       );
@@ -43,17 +50,32 @@ class SecureKeyStorageChannelContract {
       available: true,
       keys: List<SecureKeyRecord>.unmodifiable(keys),
       revision: revision,
-      warning: _stringValue(payload['warning']),
+      warning: _boundedStringValue(
+        payload['warning'],
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
     );
   }
 
   static SecureKeyRecord? _decodeKey(Object? payload) {
     if (payload is! Map<Object?, Object?>) return null;
 
-    final keyId = payload['keyId'];
-    final purpose = payload['purpose'];
-    final algorithm = payload['algorithm'];
-    final secret = payload['secret'];
+    final keyId = _boundedStringValue(
+      payload['keyId'],
+      NativeBridgePayloadLimits.maxSecureKeyIdBytes,
+    );
+    final purpose = _boundedStringValue(
+      payload['purpose'],
+      NativeBridgePayloadLimits.maxSecureKeyPurposeBytes,
+    );
+    final algorithm = _boundedStringValue(
+      payload['algorithm'],
+      NativeBridgePayloadLimits.maxSecureKeyAlgorithmBytes,
+    );
+    final secret = _boundedStringValue(
+      payload['secret'],
+      NativeBridgePayloadLimits.maxSecureKeySecretBytes,
+    );
     final active = payload['active'];
 
     if (keyId is! String ||
@@ -97,7 +119,10 @@ class SecureKeyStorageChannelContract {
     if (!success) {
       return SecureKeyStorageMutationResult.failure(
         warning:
-            _stringValue(payload['warning']) ??
+            _boundedStringValue(
+              payload['warning'],
+              NativeBridgePayloadLimits.maxDiagnosticBytes,
+            ) ??
             'Secure key storage mutation failed.',
         revision: revision,
         isConflict: isConflict,
@@ -106,14 +131,23 @@ class SecureKeyStorageChannelContract {
 
     return SecureKeyStorageMutationResult(
       isSuccess: true,
-      warning: _stringValue(payload['warning']),
+      warning: _boundedStringValue(
+        payload['warning'],
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
       revision: revision,
     );
   }
 
   static bool _boolValue(Object? value) => value is bool ? value : false;
 
-  static String? _stringValue(Object? value) => value is String ? value : null;
+  static String? _boundedStringValue(Object? value, int maxBytes) {
+    if (value is! String ||
+        !NativeBridgePayloadLimits.isWithinUtf8Limit(value, maxBytes)) {
+      return null;
+    }
+    return value;
+  }
 
   static int? _revisionValue(Object? value) {
     if (value == null) return 0;

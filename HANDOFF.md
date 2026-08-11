@@ -1029,3 +1029,19 @@ Remaining:
 - This bounds the JSON fallback only; production database replacement,
   platform filesystem/runtime validation, product startup, and release signing
   remain separate.
+
+## Recent T102 Changes
+
+- `peerdeal_native_bridges` now exposes one shared payload-limit contract for
+  generic method-channel decoding.
+- Transport frame batches, discovery collections, and secure-key record lists
+  are bounded before iteration; frame payloads, identities, discovery values,
+  key fields, and diagnostic strings are bounded before model construction.
+- Oversized collections and malformed or oversized fields fail closed through
+  the existing unavailable/empty result paths. Receipt semantics remain in the
+  app and receipt packages.
+
+Remaining:
+- This hardens the generic Dart bridge boundary only; native host behavior,
+  device persistence, cross-device network reachability, product startup,
+  database persistence, and release signing remain separate.

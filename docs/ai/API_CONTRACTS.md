@@ -624,6 +624,10 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   oversized input/output returns the fatal
   `ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE` conflict without hydrating or
   writing state.
+- Generic native bridge decoders bound transport frame batches, discovery
+  collections, secure-key record lists, frame payloads, identities, discovery
+  values, key fields, and diagnostics before iteration or model construction;
+  oversized values fail closed through existing unavailable or empty results.
 - Receipt import/export/verification failures must fail closed.
 - Receipt export encoding/inspection and HMAC cipher operations share bounded
   encoded-body, decoded-body, payload, ciphertext, and nonce limits; oversized

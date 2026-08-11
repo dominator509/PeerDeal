@@ -1,3 +1,5 @@
+import '../native_bridge_payload_limits.dart';
+
 class SecureKeyRecord {
   const SecureKeyRecord({
     required this.keyId,
@@ -14,13 +16,29 @@ class SecureKeyRecord {
   final bool active;
 
   bool get isUsable =>
+      NativeBridgePayloadLimits.isWithinUtf8Limit(
+        keyId,
+        NativeBridgePayloadLimits.maxSecureKeyIdBytes,
+      ) &&
       keyId.trim().isNotEmpty &&
       keyId.trim() == keyId &&
       !keyId.contains(':') &&
+      NativeBridgePayloadLimits.isWithinUtf8Limit(
+        purpose,
+        NativeBridgePayloadLimits.maxSecureKeyPurposeBytes,
+      ) &&
       purpose.trim().isNotEmpty &&
       purpose.trim() == purpose &&
+      NativeBridgePayloadLimits.isWithinUtf8Limit(
+        algorithm,
+        NativeBridgePayloadLimits.maxSecureKeyAlgorithmBytes,
+      ) &&
       algorithm.trim().isNotEmpty &&
       algorithm.trim() == algorithm &&
+      NativeBridgePayloadLimits.isWithinUtf8Limit(
+        secret,
+        NativeBridgePayloadLimits.maxSecureKeySecretBytes,
+      ) &&
       secret.trim().isNotEmpty &&
       secret.trim() == secret;
 }
