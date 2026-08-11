@@ -1074,3 +1074,17 @@ Remaining:
 - Real-device behavior, cross-device network reachability, other-platform
   hosts, product startup/database integration, and release signing remain
   separate.
+
+## Recent T105 Changes
+
+- Android transport interface selection now caps `NetworkInterface` enumeration
+  at 64 entries and each interface-address scan at 256 entries.
+- Windows transport interface selection now rejects adapter buffers above 1 MiB
+  and caps adapter traversal at 64 entries and unicast-address scans at 256.
+- Android and Windows debug builds passed; the direct Windows native-host smoke
+  passed transport send/receive and all other registered channel checks.
+
+Remaining:
+- Real-device behavior, cross-device network reachability, other-platform
+  hosts, product startup/database integration, and release signing remain
+  separate.

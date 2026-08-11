@@ -26,6 +26,10 @@ constexpr std::size_t kMaxPayloadBytes = 60 * 1024;
 constexpr std::size_t kMaxIdBytes = 256;
 constexpr std::size_t kMaxQueueSize = 512;
 constexpr std::size_t kMaxBatchSize = 64;
+constexpr ULONG kInitialAdapterBufferBytes = 16 * 1024;
+constexpr ULONG kMaxAdapterBufferBytes = 1024 * 1024;
+constexpr std::size_t kMaxAdapterCount = 64;
+constexpr std::size_t kMaxUnicastAddressCount = 256;
 constexpr std::size_t kHeaderBytes = 19;
 constexpr uint8_t kVersion = 1;
 constexpr std::array<uint8_t, 4> kMagic = {'P', 'D', 'L', '1'};
@@ -49,13 +53,16 @@ const char* SendFailureWarning(int error) {
 }
 
 std::optional<in_addr> SelectMulticastInterface() {
-  ULONG buffer_size = 16 * 1024;
+  ULONG buffer_size = kInitialAdapterBufferBytes;
   std::vector<uint8_t> buffer(buffer_size);
   const ULONG flags = GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_DNS_SERVER;
   ULONG status = ::GetAdaptersAddresses(
       AF_INET, flags, nullptr,
       reinterpret_cast<PIP_ADAPTER_ADDRESSES>(buffer.data()), &buffer_size);
   if (status == ERROR_BUFFER_OVERFLOW) {
+    if (buffer_size > kMaxAdapterBufferBytes) {
+      return std::nullopt;
+    }
     buffer.resize(buffer_size);
     status = ::GetAdaptersAddresses(
         AF_INET, flags, nullptr,
@@ -67,14 +74,18 @@ std::optional<in_addr> SelectMulticastInterface() {
   ULONG selected_metric = std::numeric_limits<ULONG>::max();
   const auto* adapters =
       reinterpret_cast<PIP_ADAPTER_ADDRESSES>(buffer.data());
-  for (const auto* adapter = adapters; adapter != nullptr;
-       adapter = adapter->Next) {
+  std::size_t adapter_count = 0;
+  for (const auto* adapter = adapters;
+       adapter != nullptr && adapter_count < kMaxAdapterCount;
+       adapter = adapter->Next, ++adapter_count) {
     if (adapter->OperStatus != IfOperStatusUp ||
         adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK) {
       continue;
     }
+    std::size_t address_count = 0;
     for (const auto* address = adapter->FirstUnicastAddress;
-         address != nullptr; address = address->Next) {
+         address != nullptr && address_count < kMaxUnicastAddressCount;
+         address = address->Next, ++address_count) {
       const auto* socket_address = address->Address.lpSockaddr;
       if (socket_address == nullptr || socket_address->sa_family != AF_INET) {
         continue;

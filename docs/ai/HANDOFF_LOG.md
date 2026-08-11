@@ -8338,6 +8338,22 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - T105 Native Transport Interface Enumeration Bounds
+
+Summary:
+- Android transport interface selection now caps interfaces at 64 and each
+  interface-address scan at 256 entries.
+- Windows transport interface selection rejects adapter buffers above 1 MiB and
+  caps adapters at 64 and unicast-address scans at 256 entries.
+- Android and Windows debug builds passed; direct Windows native-host smoke
+  passed all channel checks.
+
+Risks:
+- Device behavior, cross-device network reachability, other-platform hosts,
+  product persistence, and release signing remain separate.
+
+---
+
 ### 2026-08-11 - Codex - T104 Native Local-Network Enumeration Bounds
 
 Summary:

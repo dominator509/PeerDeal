@@ -1409,6 +1409,13 @@ unicast-address scans at 256 entries. Android and Windows host builds and the
 direct Windows native-host smoke pass; device behavior and cross-device
 reachability remain external.
 
+The T105 follow-up applies the same resource bounds to native transport
+interface selection. Android caps interface enumeration at 64 and each
+interface-address scan at 256. Windows rejects adapter buffers above 1 MiB and
+caps adapter traversal at 64 and unicast-address scans at 256. Android and
+Windows host builds and direct Windows smoke pass; device behavior and
+cross-device reachability remain external.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

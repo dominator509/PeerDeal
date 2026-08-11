@@ -635,6 +635,9 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - Android and Windows local-network hosts bound interface/adapter enumeration
   before serializing `interfaceHints`; Windows also bounds the adapter address
   buffer and each unicast-address scan. Host-side overflow fails closed.
+- Android and Windows transport interface selection applies the same bounded
+  adapter/interface and address traversal before opening multicast sockets;
+  oversized Windows adapter buffers fail closed.
 - Receipt import/export/verification failures must fail closed.
 - Receipt export encoding/inspection and HMAC cipher operations share bounded
   encoded-body, decoded-body, payload, ciphertext, and nonce limits; oversized

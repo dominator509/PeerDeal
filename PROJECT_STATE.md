@@ -1022,6 +1022,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   pass. Device behavior, cross-device reachability, other-platform hosts,
   production persistence, and release signing remain external.
 
+## T105 Native Transport Interface Enumeration Bounds
+
+- Android transport interface selection now caps interfaces at 64 and each
+  interface-address scan at 256 entries.
+- Windows transport interface selection rejects adapter buffers above 1 MiB and
+  caps adapters at 64 and unicast-address scans at 256 entries.
+- Android and Windows debug builds plus the direct Windows native-host smoke
+  pass. Device behavior, cross-device reachability, other-platform hosts,
+  production persistence, and release signing remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

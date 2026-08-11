@@ -40,6 +40,8 @@ internal class NativeTransportHandler(
         private const val MAX_ID_BYTES = 256
         private const val MAX_QUEUE_SIZE = 512
         private const val MAX_BATCH_SIZE = 64
+        private const val MAX_INTERFACE_COUNT = 64
+        private const val MAX_INTERFACE_ADDRESS_COUNT = 256
         private const val HEADER_BYTES = 19
         private const val VERSION: Byte = 1
         private val MAGIC = byteArrayOf('P'.code.toByte(), 'D'.code.toByte(), 'L'.code.toByte(), '1'.code.toByte())
@@ -258,7 +260,15 @@ internal class NativeTransportHandler(
 
     private fun selectMulticastInterface(): NetworkInterface? {
         val interfaces = try {
-            NetworkInterface.getNetworkInterfaces()?.toList().orEmpty()
+            val enumeration = NetworkInterface.getNetworkInterfaces()
+                ?: return null
+            val bounded = ArrayList<NetworkInterface>(MAX_INTERFACE_COUNT)
+            while (enumeration.hasMoreElements() &&
+                bounded.size < MAX_INTERFACE_COUNT
+            ) {
+                bounded.add(enumeration.nextElement())
+            }
+            bounded
         } catch (_: Exception) {
             return null
         }
@@ -269,13 +279,15 @@ internal class NativeTransportHandler(
                         !networkInterface.isLoopback &&
                         !networkInterface.isVirtual &&
                         networkInterface.supportsMulticast() &&
-                        networkInterface.interfaceAddresses.any { address ->
+                        networkInterface.interfaceAddresses.asSequence()
+                            .take(MAX_INTERFACE_ADDRESS_COUNT)
+                            .any { address ->
                             val inetAddress = address.address
                             inetAddress is Inet4Address &&
                                 !inetAddress.isAnyLocalAddress &&
                                 !inetAddress.isLoopbackAddress &&
                                 !inetAddress.isLinkLocalAddress
-                        }
+                            }
                 } catch (_: Exception) {
                     false
                 }
