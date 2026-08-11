@@ -544,6 +544,14 @@ Generated: 2026-08-10
   including the invalid-policy no-secure-key-mutation regression. Product
   database/state provisioning and runtime validation remain integration-owned.
 
+## Recent T68 Changes
+
+- Production persisted-session configuration now defers native local-identity
+  provisioning until the invite-scoped snapshot has passed validation and any
+  recovery suffix has replayed successfully.
+- Missing or rejected persisted state causes no secure-key mutation. Focused
+  mobile and desktop persisted-session suites passed with 12 tests each.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

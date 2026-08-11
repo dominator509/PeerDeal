@@ -7722,6 +7722,19 @@ Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
 
+### T68: lazy persisted-session identity provisioning
+
+- Mirrored production configuration now composes
+  `AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(...)`.
+- Invite-scoped snapshot validation and deterministic recovery replay complete
+  before native local identity provisioning; missing or rejected recovery state
+  cannot mutate secure-key storage.
+- Focused mobile and desktop persisted-session suites passed with 12 tests each.
+
+Remaining:
+- Product database/state provisioning, native transport reachability, and
+  runtime/device validation remain integration or operator work.
+
 ### T67: fail-early persisted route-policy validation
 
 - Mirrored persisted Hold'em route policies now validate route path, navigation

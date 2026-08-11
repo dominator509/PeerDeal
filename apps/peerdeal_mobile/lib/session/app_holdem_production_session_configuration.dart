@@ -39,7 +39,7 @@ class AppHoldemProductionSessionConfiguration {
   }) async {
     _validateSourceLoadTimeout(sourceLoadTimeout);
     final source =
-        await AppPersistedHoldemProductionSessionSource.fromProvisionedLocalIdentity(
+        await AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(
           store: store,
           identityProvisioner: identityProvisioner,
           routePolicy: routePolicy,

@@ -4,6 +4,7 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 import '../join_flow/join_flow_models.dart';
 import '../recovery/app_recovery_session_close_event_adapter.dart';
 import 'app_holdem_production_session_bootstrap.dart';
+import 'native_local_peer_identity_loader.dart';
 import 'native_local_peer_identity_provisioner.dart';
 
 typedef AppHoldemProductionSessionInputFactory =
@@ -170,10 +171,75 @@ class AppPersistedHoldemProductionSessionSource
     );
   }
 
+  /// Composes identity provisioning at the persisted-load boundary.
+  ///
+  /// The recovery window is validated and replayed before the provisioner is
+  /// invoked, so an invite with no usable persisted state does not mutate
+  /// native secure storage.
+  static Future<AppPersistedHoldemProductionSessionSource>
+  fromLocalIdentityProvisioner({
+    required RecoveryPersistenceStore store,
+    required NativeLocalPeerIdentityProvisioner identityProvisioner,
+    required AppPersistedHoldemProductionSessionRoutePolicy routePolicy,
+    required HoldemEventIdFactory eventIdFactory,
+    required HoldemEventTimestampFactory emittedAtFactory,
+    required HoldemEventHashFactory eventHashFactory,
+    HoldemCoreProjectionAdapter replayAdapter =
+        const HoldemCoreProjectionAdapter(),
+    HoldemEventReducer eventReducer = const HoldemEventReducer(),
+    String snapshotType = 'HoldemStateSnapshot',
+    String snapshotVersion = '1.0',
+  }) async {
+    routePolicy.validate();
+    AppLocalPeerIdentity? localIdentity;
+
+    Future<void> ensureIdentity() async {
+      if (localIdentity != null) return;
+      final provisioned = await identityProvisioner.ensureIdentity();
+      final identity = provisioned.identity;
+      if (!provisioned.isSuccess || identity == null) {
+        throw StateError('Local peer identity is unavailable.');
+      }
+      localIdentity = identity;
+    }
+
+    AppLocalPeerIdentity requireIdentity() {
+      final identity = localIdentity;
+      if (identity == null) {
+        throw StateError('Local peer identity is unavailable.');
+      }
+      return identity;
+    }
+
+    return AppPersistedHoldemProductionSessionSource(
+      store: store,
+      identityLoader: ensureIdentity,
+      inputFactory: (_, snapshot) => routePolicy.buildInput(
+        snapshot: snapshot,
+        localPeerId: requireIdentity().peerId,
+      ),
+      contextInputFactory: (sessionContext, snapshot) =>
+          routePolicy.buildInput(
+            snapshot: snapshot,
+            localPeerId: requireIdentity().peerId,
+            remotePeerId: sessionContext.remotePeerId,
+            localSeat: sessionContext.localSeat,
+          ),
+      eventIdFactory: eventIdFactory,
+      emittedAtFactory: emittedAtFactory,
+      eventHashFactory: eventHashFactory,
+      replayAdapter: replayAdapter,
+      eventReducer: eventReducer,
+      snapshotType: snapshotType,
+      snapshotVersion: snapshotVersion,
+    );
+  }
+
   const AppPersistedHoldemProductionSessionSource({
     required RecoveryPersistenceStore store,
     required AppHoldemProductionSessionInputFactory inputFactory,
     AppHoldemProductionSessionContextInputFactory? contextInputFactory,
+    Future<void> Function()? identityLoader,
     required HoldemEventIdFactory eventIdFactory,
     required HoldemEventTimestampFactory emittedAtFactory,
     required HoldemEventHashFactory eventHashFactory,
@@ -185,6 +251,7 @@ class AppPersistedHoldemProductionSessionSource
   }) : _store = store,
        _inputFactory = inputFactory,
        _contextInputFactory = contextInputFactory,
+       _identityLoader = identityLoader,
        _eventIdFactory = eventIdFactory,
        _emittedAtFactory = emittedAtFactory,
        _eventHashFactory = eventHashFactory,
@@ -194,6 +261,7 @@ class AppPersistedHoldemProductionSessionSource
   final RecoveryPersistenceStore _store;
   final AppHoldemProductionSessionInputFactory _inputFactory;
   final AppHoldemProductionSessionContextInputFactory? _contextInputFactory;
+  final Future<void> Function()? _identityLoader;
   final HoldemEventIdFactory _eventIdFactory;
   final HoldemEventTimestampFactory _emittedAtFactory;
   final HoldemEventHashFactory _eventHashFactory;
@@ -207,9 +275,7 @@ class AppPersistedHoldemProductionSessionSource
     ResolvedInvite invite, {
     Future<void>? cancellation,
   }) {
-    return Future<AppHoldemProductionSessionInput>.sync(
-      () => _load(invite: invite),
-    );
+    return _load(invite: invite);
   }
 
   @override
@@ -222,16 +288,13 @@ class AppPersistedHoldemProductionSessionSource
         StateError('Persisted session context loading is unavailable.'),
       );
     }
-    return Future<AppHoldemProductionSessionInput>.sync(
-      () =>
-          _load(invite: sessionContext.invite, sessionContext: sessionContext),
-    );
+    return _load(invite: sessionContext.invite, sessionContext: sessionContext);
   }
 
-  AppHoldemProductionSessionInput _load({
+  Future<AppHoldemProductionSessionInput> _load({
     required ResolvedInvite invite,
     JoinFlowSessionContext? sessionContext,
-  }) {
+  }) async {
     AppHoldemProductionSessionInput buildInput(HoldemStateSnapshot snapshot) {
       final contextInputFactory = _contextInputFactory;
       if (sessionContext != null && contextInputFactory != null) {
@@ -294,6 +357,7 @@ class AppPersistedHoldemProductionSessionSource
         .where((event) => event.eventSeq > envelope.snapshotBaseEventSeq)
         .toList(growable: false);
     if (suffix.isEmpty) {
+      await _ensureIdentity();
       return buildInput(state);
     }
 
@@ -308,6 +372,7 @@ class AppPersistedHoldemProductionSessionSource
       throw StateError('Persisted Holdem recovery replay was rejected.');
     }
 
+    await _ensureIdentity();
     return buildInput(
       HoldemStateSnapshot(
         tableState: replay.coreState,
@@ -317,4 +382,10 @@ class AppPersistedHoldemProductionSessionSource
     );
   }
 
+  Future<void> _ensureIdentity() async {
+    final identityLoader = _identityLoader;
+    if (identityLoader != null) {
+      await identityLoader();
+    }
+  }
 }

@@ -141,6 +141,8 @@ void main() {
             eventHashFactory: computeCanonicalHash,
           );
 
+      expect(identityBridge.savedKeys, isEmpty);
+
       final composition = await configuration.routeRegistration.bootstrap
           .createForSessionContext(
             JoinFlowSessionContext(
@@ -153,6 +155,34 @@ void main() {
       expect(composition.route.path, '/holdem-live');
       expect(composition.route.peerId, 'peer_selected');
       expect(identityBridge.savedKeys, hasLength(1));
+    },
+  );
+
+  test(
+    'defers identity provisioning until a persisted snapshot is valid',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      final identityBridge = _IdentityBridge();
+      final source =
+          await AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(
+            store: store,
+            identityProvisioner: NativeLocalPeerIdentityProvisioner(
+              loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+              writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+              identityFactory: () => 'peer_local',
+            ),
+            routePolicy: _routePolicy(),
+            eventIdFactory: (eventType, eventSeq) =>
+                'evt_${eventType}_$eventSeq',
+            emittedAtFactory: () => '2026-08-10T00:00:00Z',
+            eventHashFactory: computeCanonicalHash,
+          );
+
+      expect(identityBridge.savedKeys, isEmpty);
+
+      await expectLater(source.load(_invite()), throwsStateError);
+
+      expect(identityBridge.savedKeys, isEmpty);
     },
   );
 
@@ -369,6 +399,22 @@ void main() {
 
     expect(() => _source(store).load(_invite()), throwsA(isA<StateError>()));
   });
+}
+
+AppPersistedHoldemProductionSessionRoutePolicy _routePolicy() {
+  return AppPersistedHoldemProductionSessionRoutePolicy(
+    path: '/holdem-live',
+    navigationLabel: 'Live Holdem',
+    remotePeerId: 'peer_remote',
+    localSeat: 1,
+    closeEventAdapterFactory: (scope) => _closeAdapter(
+      TableState.initial(
+        tableId: scope.tableId,
+        sessionId: scope.sessionId,
+        protocolVersion: scope.protocolVersion,
+      ),
+    ),
+  );
 }
 
 AppPersistedHoldemProductionSessionSource _source(

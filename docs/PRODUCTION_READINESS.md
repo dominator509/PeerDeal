@@ -1092,12 +1092,13 @@ operator work.
 The T65 follow-up closes the app-owned persisted-source composition gap. Both
 app shells now expose an async
 `AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)`
-factory that provisions or reuses native local identity, composes the existing
-JSON recovery store with the persisted Hold'em source, and registers the
-validated bootstrap route while retaining caller-owned route policy and event
-factories. This is a recovery-backed integration seam, not production database
-provisioning; product state selection, route policy, native reachability, and
-device validation remain separate.
+factory that composes the existing JSON recovery store with the persisted
+Hold'em source and registers the validated bootstrap route while retaining
+caller-owned route policy and event factories. Its production path provisions
+or reuses native local identity only after invite-scoped snapshot validation
+and recovery replay. This is a recovery-backed integration seam, not production
+database provisioning; product state selection, route policy, native
+reachability, and device validation remain separate.
 
 The T66 follow-up closes the fail-early configuration gap. Both app-owned
 configuration entry points now reject non-positive source-load timeouts before
@@ -1111,6 +1112,14 @@ Path, navigation label, remote peer identity, and positive local-seat policy
 are validated before native identity provisioning. Mirrored tests prove an
 invalid route policy cannot mutate secure-key storage; product database/state
 provisioning and runtime/device validation remain separate.
+
+The T68 follow-up removes the remaining eager identity side effect from the
+production persisted-session configuration path. Its lazy source composition
+checks the invite-scoped recovery snapshot and deterministic suffix replay
+before invoking native identity provisioning. Missing snapshots, unsupported
+versions, scope mismatches, malformed state, or rejected replay therefore do
+not mutate secure-key storage; valid loads retain the existing identity
+provisioning and route composition behavior.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,

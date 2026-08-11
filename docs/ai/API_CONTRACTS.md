@@ -361,9 +361,11 @@ native transport.
 
 Mobile and desktop also expose async
 `AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)`. It
-provisions or reuses the app-owned local peer identity, constructs the existing
-`AppPersistedHoldemProductionSessionSource` over an injected recovery store, and
-passes its caller-owned route policy and event factories into `fromSource(...)`.
+constructs the existing `AppPersistedHoldemProductionSessionSource` over an
+injected recovery store and passes its caller-owned route policy and event
+factories into `fromSource(...)`. The production configuration uses
+`fromLocalIdentityProvisioner(...)`, which defers local identity provisioning
+until invite-scoped snapshot validation and recovery suffix replay succeed.
 Both configuration entry points reject non-positive source-load timeouts; the
 persisted variant performs that validation before native identity provisioning,
 so invalid configuration cannot mutate secure-key storage.
@@ -373,6 +375,11 @@ with `ArgumentError` and cannot mutate secure-key storage.
 It does not select a product database, invent route policy, or move persistence
 semantics into a native bridge.
 
+`fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
+callers that require pre-provisioned identity. The lazy production adapter is
+the default configuration path so missing, malformed, or rejected persisted
+state fails before native secure-key mutation.
+
 `AppPersistedHoldemProductionSessionSource` is the concrete app-owned adapter
 for the existing `RecoveryPersistenceStore` snapshot boundary. It decodes a
 `HoldemStateSnapshot` from a versioned `SnapshotEnvelope`, verifies exact
@@ -380,7 +387,8 @@ invite scope and snapshot/cursor sequence continuity, replays a persisted
 suffix through `HoldemCoreProjectionAdapter.replay(...)`, and invokes a
 caller-owned input factory. Missing snapshots, unsupported versions, scope
 mismatch, bad hashes, unsupported events, or reducer rejection fail closed.
-Replay is atomic and never returns partial state. The adapter does not select a
+Replay is atomic and never returns partial state; lazy identity provisioning
+occurs only after those checks pass. The adapter does not select a
 database, create local identity, or own route/close policy; those remain
 product integration responsibilities.
 

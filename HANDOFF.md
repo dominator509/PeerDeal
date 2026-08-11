@@ -508,3 +508,12 @@ are implemented on branch
   policy is invalid.
 - Focused mobile and desktop persisted-session suites passed with 10 tests each,
   including the invalid-route-policy no-secure-key-mutation regression.
+
+## Recent T68 Changes
+
+- Production persisted-session configuration now uses a lazy identity
+  provisioner source path. Invite-scoped snapshot validation and recovery replay
+  complete before native local identity can be created or saved.
+- Missing or rejected persisted state therefore fails without secure-key
+  mutation; focused mobile and desktop persisted-session suites passed with
+  12 tests each.

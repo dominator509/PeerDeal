@@ -113,8 +113,9 @@ Local Hold'em producer flow:
    provision product state, identity, persistence, or the concrete source. The
    `fromSource(...)` constructor keeps source, bootstrap, timeout, and route
    registration assembly at this app boundary. Both configuration entry points
-   reject non-positive timeouts and invalid persisted route policy; the persisted
-   factory validates before native identity provisioning. Each runtime can instead accept
+   reject non-positive timeouts and invalid persisted route policy; the production
+   persisted configuration validates and replays recovery before lazy native
+   identity provisioning. Each runtime can instead accept
    one `AppHoldemProductionSessionConfiguration.fromSource(...)` and derive a
    stable registration once; explicit and configured registrations cannot both
    be supplied.
