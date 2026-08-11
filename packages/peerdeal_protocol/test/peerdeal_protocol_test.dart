@@ -80,6 +80,36 @@ void main() {
     expect(a, equals(b));
   });
 
+  test('canonical json rejects bounded structure and value violations', () {
+    expect(
+      () => canonicalJsonEncode({
+        'a': 1,
+        'b': 2,
+      }, limits: const CanonicalJsonLimits(maxMapEntries: 1)),
+      throwsFormatException,
+    );
+    expect(
+      () => canonicalJsonEncode({
+        'nested': [1, 2],
+      }, limits: const CanonicalJsonLimits(maxListItems: 1)),
+      throwsFormatException,
+    );
+    expect(
+      () => canonicalJsonEncode({'value': Object()}),
+      throwsFormatException,
+    );
+    expect(
+      () => canonicalJsonEncode({
+        'value': 'long',
+      }, limits: const CanonicalJsonLimits(maxTextBytes: 3)),
+      throwsFormatException,
+    );
+    expect(
+      () => const CanonicalJsonLimits(maxEncodedBytes: 0).validate(),
+      throwsArgumentError,
+    );
+  });
+
   test('all protocol fixtures are JSON objects', () {
     final fixtures = protocolFixtureFiles();
 

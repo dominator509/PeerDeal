@@ -1443,6 +1443,14 @@ raw views share one immutable bounded payload. Provider-specific proof
 semantics, product verification wiring, and platform/runtime validation remain
 separate.
 
+The T109 follow-up closes the canonical JSON materialization gap.
+`peerdeal_protocol` now writes canonical JSON with bounded maps/lists, nesting,
+UTF-8 text, node count, and encoded bytes, without first constructing an
+unbounded normalized tree. `EventEnvelopeCodec` applies its configured wire
+limit during both encode and decode validation and rejects unsupported values
+or non-string object keys. Protocol schema semantics, product persistence,
+platform/runtime validation, and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

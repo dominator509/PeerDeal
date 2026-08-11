@@ -48,4 +48,33 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test(
+    'rejects structurally oversized event payloads before wire encoding',
+    () {
+      final payload = <String, Object?>{
+        for (var index = 0; index < 257; index += 1) 'key_$index': index,
+      };
+      final oversized = EventEnvelope(
+        eventId: event.eventId,
+        eventType: event.eventType,
+        eventVersion: event.eventVersion,
+        protocolVersion: event.protocolVersion,
+        eventSeq: event.eventSeq,
+        tableId: event.tableId,
+        sessionId: event.sessionId,
+        handId: event.handId,
+        emittedAt: event.emittedAt,
+        actorRef: event.actorRef,
+        payload: payload,
+        prevEventHash: event.prevEventHash,
+        eventHash: event.eventHash,
+      );
+
+      expect(
+        () => const EventEnvelopeCodec().encode(oversized),
+        throwsFormatException,
+      );
+    },
+  );
 }

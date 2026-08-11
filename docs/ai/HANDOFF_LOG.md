@@ -40,6 +40,33 @@ Next reviewer:
 
 ---
 
+### 2026-08-11 - Codex - T109 Canonical JSON Materialization Bounds
+
+Summary:
+- Added bounded deterministic canonical JSON writing in `peerdeal_protocol`
+  with map/list, nesting, UTF-8 text, node, and encoded-byte limits.
+- Event wire encode and decode validation now share the configured wire-byte
+  cap and fail closed on unsupported values or non-string object keys.
+
+Files changed:
+- Canonical JSON limits/writer, event codec, protocol barrel, README, and tests.
+- Readiness ledger, handoff queue, project state, and stable AI context docs.
+
+Tests run:
+- Focused protocol canonical JSON and event codec suites passed.
+- Focused `peerdeal_protocol` analysis passed.
+
+Risks:
+- This bounds protocol serialization and event wire validation. Protocol schema
+  semantics, product persistence, platform/runtime validation, other-platform
+  hosts, and release signing remain separate.
+
+Next reviewer:
+- Preserve the canonical limits when adding protocol payload families and keep
+  product/database selection outside `peerdeal_protocol`.
+
+---
+
 ### 2026-08-11 - Codex - T107 Privacy Diagnostics Bounds
 
 Summary:

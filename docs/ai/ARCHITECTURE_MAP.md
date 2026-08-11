@@ -21,7 +21,7 @@ packages add policy without mutating universal core truth.
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy; `DefaultDiagnosticsScrubber` bounds recursive map/list materialization, depth, text, and protocol diagnostic collections before app rendering |
 | Mode/variant policy | `peerdeal_modes`, `peerdeal_variants` | Session mode policy and poker variant rules |
 | Deterministic truth | `peerdeal_core` | Table state, reducer, invariants, pot/settlement primitives |
-| Protocol | `peerdeal_protocol` | Envelopes, catalog, fixtures, diagnostics |
+| Protocol | `peerdeal_protocol` | Envelopes, catalog, fixtures, diagnostics, bounded deterministic canonical JSON |
 
 ## Package Boundary Rules
 

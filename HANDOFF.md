@@ -1127,3 +1127,15 @@ Remaining:
 - Provider-specific proof semantics, product verification wiring, platform/
   device validation, production persistence, and release signing remain
   separate.
+
+## Recent T109 Changes
+
+- Added bounded deterministic canonical JSON writing in `peerdeal_protocol`
+  with map/list, nesting, UTF-8 text, node, and encoded-byte limits.
+- Event wire encode and decode validation now share the configured wire-byte
+  cap and fail closed on unsupported values or non-string object keys before
+  event processing.
+
+Remaining:
+- Protocol schema semantics, platform/runtime validation, product persistence,
+  other-platform hosts, and release signing remain separate.

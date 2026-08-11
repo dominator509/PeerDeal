@@ -266,8 +266,10 @@ before queueing received frames or sending datagrams. Host input normalization
 does not prove network reachability or add protocol/authentication semantics.
 App-owned native transport session factories must scrub native notes that look
 like secrets, tokens, passwords, or platform paths before exposing load results.
-`peerdeal_protocol.EventEnvelopeCodec` owns bounded canonical JSON bytes for
-`EventEnvelope` transport payloads. It rejects empty, malformed, non-object, or
+`peerdeal_protocol.EventEnvelopeCodec` owns bounded canonical JSON for
+`EventEnvelope` transport payloads. Its deterministic writer bounds maps, lists,
+nesting, UTF-8 text, nodes, and encoded bytes; encode and decode validation share
+the configured wire-byte limit. It rejects empty, malformed, non-object, or
 oversized payloads and is the only codec used by the mirrored app
 `AppTableSessionTransportHandler`s. Those handlers run behind the validating
 network receiver, require frame/session identity agreement, delegate to

@@ -1061,6 +1061,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   and normalized views share one immutable bounded payload; focused crypto
   tests and package analysis pass.
 
+## T109 Canonical JSON Materialization Bounds
+
+- `peerdeal_protocol` now writes deterministic canonical JSON through bounded
+  map/list, nesting, UTF-8 text, node, and encoded-byte limits instead of
+  recursively materializing an unbounded intermediate tree.
+- `EventEnvelopeCodec` applies the configured wire-byte limit during canonical
+  encode and decode validation, rejecting unsupported values and non-string
+  object keys. Focused protocol tests and package analysis pass.
+
 ## Required Gates
 
 Run after each retrofit step:

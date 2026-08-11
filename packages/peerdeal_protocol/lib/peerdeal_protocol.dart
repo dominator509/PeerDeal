@@ -11,4 +11,5 @@ export 'src/models/snapshot_envelope.dart';
 export 'src/schemas/game_file_schema.dart';
 export 'src/schemas/invite_payload_schema.dart';
 export 'src/serialization/canonical_json.dart';
+export 'src/serialization/canonical_json_limits.dart';
 export 'src/serialization/event_envelope_codec.dart';

@@ -12,6 +12,7 @@ Owns:
 - protocol versions
 - supported artifact catalog
 - envelope-level compatibility checks
+- bounded deterministic canonical JSON serialization
 - Game File public schema contract
 - invite payload public schema contract
 - accepted and rejected protocol fixtures
