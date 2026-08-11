@@ -1149,6 +1149,15 @@ retroactively withdraw a host mutation already dispatched, so host persistence
 must remain atomic and idempotent. Native device persistence and runtime
 validation remain external.
 
+The T72 follow-up closes the mounted receipt verification cancellation gap.
+Mirrored app key-ring loaders, artifact verifiers, presenters, and receipt
+routes now propagate an additive route cancellation signal into the generic
+secure-key load seam and complete it on route replacement or disposal. Legacy
+secure-key bridges remain valid through the existing load method. This bounds
+the Dart wait and prevents a pending receipt verification from outliving its
+route; it does not retroactively cancel a host call already dispatched and does
+not replace native persistence, device/profile, or release-signing validation.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

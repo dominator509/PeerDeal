@@ -41,11 +41,13 @@ class DemoReceiptRoute extends StatefulWidget {
 
 class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
   late Future<DemoReceiptSurfaceVm> _surface;
+  late Completer<void> _presentationCancellation;
 
   @override
   void initState() {
     super.initState();
-    _surface = _present();
+    _presentationCancellation = Completer<void>();
+    _surface = _present(cancellation: _presentationCancellation.future);
   }
 
   @override
@@ -58,12 +60,15 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
         oldWidget.exportArtifactFactory != widget.exportArtifactFactory ||
         oldWidget.artifactVerifier != widget.artifactVerifier ||
         oldWidget.recovery != widget.recovery) {
-      _surface = _present();
+      _cancelPresentation();
+      _presentationCancellation = Completer<void>();
+      _surface = _present(cancellation: _presentationCancellation.future);
     }
   }
 
   @override
   void dispose() {
+    _cancelPresentation();
     unawaited(widget.presenter.releaseCaptureProtection());
     super.dispose();
   }
@@ -86,15 +91,23 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     );
   }
 
-  Future<DemoReceiptSurfaceVm> _present() async {
+  void _cancelPresentation() {
+    if (!_presentationCancellation.isCompleted) {
+      _presentationCancellation.complete();
+    }
+  }
+
+  Future<DemoReceiptSurfaceVm> _present({Future<void>? cancellation}) async {
     try {
-      return await _presentUnsafe();
+      return await _presentUnsafe(cancellation: cancellation);
     } on Object {
       return _failedClosedSurface();
     }
   }
 
-  Future<DemoReceiptSurfaceVm> _presentUnsafe() async {
+  Future<DemoReceiptSurfaceVm> _presentUnsafe({
+    Future<void>? cancellation,
+  }) async {
     final artifact = widget.exportArtifact;
     if (artifact != null && widget.exportArtifactFactory != null) {
       return widget.presenter.present(
@@ -107,7 +120,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     }
 
     if (artifact != null) {
-      return _presentArtifact(artifact);
+      return _presentArtifact(artifact, cancellation: cancellation);
     }
 
     final exportFactory = widget.exportArtifactFactory;
@@ -133,7 +146,10 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     }
 
     if (exportFactory != null && receipt != null) {
-      return _presentArtifact(await exportFactory(receipt));
+      return _presentArtifact(
+        await exportFactory(receipt),
+        cancellation: cancellation,
+      );
     }
 
     return widget.presenter.present(
@@ -143,8 +159,9 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
   }
 
   Future<DemoReceiptSurfaceVm> _presentArtifact(
-    ReceiptExportArtifact artifact,
-  ) {
+    ReceiptExportArtifact artifact, {
+    Future<void>? cancellation,
+  }) {
     if (artifact.artifactType == 'unavailable') {
       return widget.presenter.present(
         receipt: const ReceiptScanResult(
@@ -170,6 +187,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
       artifact: artifact,
       verifier: verifier,
       recovery: widget.recovery,
+      cancellation: cancellation,
     );
   }
 

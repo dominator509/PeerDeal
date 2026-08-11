@@ -674,6 +674,16 @@ Generated: 2026-08-10
 - A cancellation stops the Dart wait; a host mutation already dispatched cannot
   be withdrawn by Dart and remains an atomic/idempotent host responsibility.
 
+## Recent T72 Changes
+
+- Receipt key-ring loading, artifact verification, and safe-surface presentation
+  now carry an additive route-cancellation capability through both app shells.
+- Mounted receipt routes complete that cancellation signal on replacement and
+  disposal, preventing pending native-backed verification from outliving the
+  route; base bridge implementations remain compatible.
+- Focused mirrored receipt route suites prove cancellation reaches the native
+  secure-key seam.
+
 ## Required Gates
 
 Run after each retrofit step:

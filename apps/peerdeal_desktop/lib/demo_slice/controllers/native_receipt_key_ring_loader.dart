@@ -14,7 +14,18 @@ class ReceiptKeyRingLoadResult {
   bool get hasEncryptionKey => keyRing.activeEncryptionKey() != null;
 }
 
-class NativeReceiptKeyRingLoader {
+/// Optional route-lifecycle cancellation capability for native key loads.
+///
+/// The existing [load] method remains unchanged so callers that do not own a
+/// cancellation lifecycle keep the same contract.
+abstract interface class CancellableNativeReceiptKeyRingLoader {
+  Future<ReceiptKeyRingLoadResult> loadCancellable({
+    Future<void>? cancellation,
+  });
+}
+
+class NativeReceiptKeyRingLoader
+    implements CancellableNativeReceiptKeyRingLoader {
   static const defaultNamespace = 'peerdeal.receipts';
 
   const NativeReceiptKeyRingLoader({
@@ -32,6 +43,17 @@ class NativeReceiptKeyRingLoader {
   final int maxKeySecretLength;
 
   Future<ReceiptKeyRingLoadResult> load() async {
+    return _load();
+  }
+
+  @override
+  Future<ReceiptKeyRingLoadResult> loadCancellable({
+    Future<void>? cancellation,
+  }) {
+    return _load(cancellation: cancellation);
+  }
+
+  Future<ReceiptKeyRingLoadResult> _load({Future<void>? cancellation}) async {
     if (!_isValidNamespace(namespace)) {
       return const ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
@@ -59,7 +81,12 @@ class NativeReceiptKeyRingLoader {
 
     final SecureKeyStorageSnapshot snapshot;
     try {
-      snapshot = await _bridge.loadKeyRing(namespace: namespace);
+      snapshot = _bridge is CancellableSecureKeyStorageBridge
+          ? await (_bridge as CancellableSecureKeyStorageBridge).loadKeyRing(
+              namespace: namespace,
+              cancellation: cancellation,
+            )
+          : await _bridge.loadKeyRing(namespace: namespace);
     } on Object {
       return const ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),

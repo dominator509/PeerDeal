@@ -103,3 +103,6 @@ native bridge -> key-ring loader/provisioner -> receipt signer/cipher ->
 artifact verifier -> presenter -> safe surface. Android encryption and
 Keystore access are implementation details of the generic bridge; receipt
 policy must not move into the host activity.
+Receipt route replacement and disposal also cancel pending native-backed
+verification through the app-owned loader/verifier seam; a host call already
+dispatched remains host-owned.

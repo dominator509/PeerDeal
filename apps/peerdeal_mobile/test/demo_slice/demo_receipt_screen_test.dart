@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_capture/peerdeal_capture.dart';
@@ -184,6 +186,37 @@ void main() {
     expect(captureBridge.requestCount, 1);
     expect(find.text('Receipt content hidden'), findsOneWidget);
     expect(find.text('receipt_id: r_1'), findsNothing);
+  });
+
+  testWidgets('cancels pending native verification when route is disposed', (
+    tester,
+  ) async {
+    final captureBridge = RecordingCaptureProtectionBridge();
+    final keyBridge = _PendingCancellableSecureKeyStorageBridge();
+    final presenter = DemoReceiptSurfacePresenter(
+      captureCoordinator: CaptureSurfaceCoordinator(bridge: captureBridge),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: DemoReceiptRoute(
+          snapshot: _fixtureSnapshot('verification_receipt_review.json'),
+          presenter: presenter,
+          exportArtifact: _signedArtifact,
+          artifactVerifier: DemoReceiptArtifactVerifier(
+            keyRingLoader: NativeReceiptKeyRingLoader(bridge: keyBridge),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(keyBridge.cancellationObserved.isCompleted, isFalse);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+
+    expect(keyBridge.cancellationObserved.isCompleted, isTrue);
   });
 
   testWidgets('does not verify an unavailable export artifact', (tester) async {
@@ -438,6 +471,33 @@ class RecordingSecureKeyStorageBridge implements SecureKeyStorageBridge {
         ),
       ],
     );
+  }
+}
+
+class _PendingCancellableSecureKeyStorageBridge
+    implements SecureKeyStorageBridge, CancellableSecureKeyStorageBridge {
+  final Completer<void> cancellationObserved = Completer<void>();
+  final Completer<SecureKeyStorageSnapshot> response =
+      Completer<SecureKeyStorageSnapshot>();
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+    Future<void>? cancellation,
+  }) {
+    cancellation?.then((_) {
+      if (!cancellationObserved.isCompleted) {
+        cancellationObserved.complete();
+      }
+      if (!response.isCompleted) {
+        response.complete(
+          const SecureKeyStorageSnapshot.unavailable(
+            warning: 'cancelled',
+          ),
+        );
+      }
+    });
+    return response.future;
   }
 }
 

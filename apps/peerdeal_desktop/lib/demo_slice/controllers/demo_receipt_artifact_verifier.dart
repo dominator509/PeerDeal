@@ -2,7 +2,16 @@ import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
 import 'native_receipt_key_ring_loader.dart';
 
-class DemoReceiptArtifactVerifier {
+/// Optional cancellation capability for a verifier owned by a route.
+abstract interface class CancellableDemoReceiptArtifactVerifier {
+  Future<ReceiptExportInspectionResult> inspectCancellable(
+    ReceiptExportArtifact artifact, {
+    Future<void>? cancellation,
+  });
+}
+
+class DemoReceiptArtifactVerifier
+    implements CancellableDemoReceiptArtifactVerifier {
   const DemoReceiptArtifactVerifier({
     required NativeReceiptKeyRingLoader keyRingLoader,
   }) : _keyRingLoader = keyRingLoader;
@@ -11,10 +20,27 @@ class DemoReceiptArtifactVerifier {
 
   Future<ReceiptExportInspectionResult> inspect(
     ReceiptExportArtifact artifact,
-  ) async {
+  ) {
+    return _inspect(artifact);
+  }
+
+  @override
+  Future<ReceiptExportInspectionResult> inspectCancellable(
+    ReceiptExportArtifact artifact, {
+    Future<void>? cancellation,
+  }) {
+    return _inspect(artifact, cancellation: cancellation);
+  }
+
+  Future<ReceiptExportInspectionResult> _inspect(
+    ReceiptExportArtifact artifact, {
+    Future<void>? cancellation,
+  }) async {
     final ReceiptKeyRingLoadResult loadResult;
     try {
-      loadResult = await _keyRingLoader.load();
+      loadResult = await _keyRingLoader.loadCancellable(
+        cancellation: cancellation,
+      );
     } catch (_) {
       return const ReceiptExportInspectionResult.rejected(
         message: 'Receipt signing key is unavailable.',

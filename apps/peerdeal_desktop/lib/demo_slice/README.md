@@ -51,6 +51,9 @@ Mounted receipt routes may receive an app-owned export factory. The route must
 turn the active snapshot into a deterministic receipt input, export through the
 factory, then verify through `DemoReceiptArtifactVerifierFactory` before
 projecting the safe surface.
+Receipt route replacement and disposal also cancel pending native-backed
+verification through the app-owned loader/verifier seam; a host call already
+dispatched remains host-owned.
 
 ## Local Bootstrap Flow
 

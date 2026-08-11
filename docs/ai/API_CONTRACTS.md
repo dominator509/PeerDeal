@@ -578,6 +578,14 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   before the deadline. The base secure-storage interfaces remain compatible
   with existing integrations. Cancellation cannot withdraw a host mutation
   after dispatch, so native mutation handlers must remain atomic/idempotent.
+- App receipt `NativeReceiptKeyRingLoader` implementations expose an additive
+  `loadCancellable({Future<void>? cancellation})` capability. The loader passes
+  the signal to `CancellableSecureKeyStorageBridge` when available and falls
+  back to the unchanged base load method otherwise.
+- App `DemoReceiptArtifactVerifier` and `DemoReceiptSurfacePresenter` expose
+  additive cancellable verification entry points. Mounted receipt routes
+  complete their signal on replacement or disposal so pending native-backed
+  verification fails closed instead of outliving the route.
 - The mobile Android host registers
   `peerdeal/native_bridges/secure_key_storage` with `loadKeyRing`, `saveKey`,
   and `deleteKey`. It returns only the generic snapshot/mutation maps defined

@@ -7722,6 +7722,46 @@ Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
 
+### T72: receipt verification cancellation propagation
+
+- Mirrored `NativeReceiptKeyRingLoader` implementations now expose additive
+  `loadCancellable` capability and forward cancellation to cancellable native
+  secure-key bridges while preserving the base loader path.
+- Mirrored `DemoReceiptArtifactVerifier` and presenter paths propagate the
+  cancellation signal into native-backed receipt verification.
+- Mounted receipt routes complete the signal on replacement and disposal, so a
+  pending native key load cannot outlive the route's Dart presentation owner.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/demo_receipt_artifact_verifier.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/demo_receipt_surface_presenter.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/screens/demo_receipt_screen.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/demo_receipt_artifact_verifier.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/demo_receipt_surface_presenter.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/screens/demo_receipt_screen.dart`
+- mirrored receipt loader, verifier, and route tests
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+
+Tests run:
+- Focused mobile receipt loader/verifier/factory/presenter/route suite: passed,
+  39 tests including pending-route cancellation.
+- Focused desktop receipt loader/verifier/factory/presenter/route suite:
+  passed, 39 tests including pending-route cancellation.
+- Focused `dart analyze apps/peerdeal_mobile apps/peerdeal_desktop`: passed.
+- `git diff --check`: passed before documentation edits.
+
+Remaining:
+- Native host persistence and already-dispatched operation semantics, device or
+  profile validation, release signing, other-platform storage, and product
+  database/state provisioning remain external or integration-owned.
+
 ### T71: secure-storage cancellation propagation
 
 - Added additive `CancellableSecureKeyStorageBridge` and mutation capability

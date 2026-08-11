@@ -549,3 +549,18 @@ are implemented on branch
 - Focused secure-storage bridge tests passed with cancellation coverage; the
   Dart wait is cancellable, but an already-dispatched native mutation cannot be
   retroactively withdrawn and remains an idempotent host responsibility.
+
+## Recent T72 Changes
+
+- Mirrored receipt key-ring loaders now expose an additive cancellable load
+  capability and forward route cancellation to secure-key bridges that support
+  it; legacy secure-key bridges retain the existing load path.
+- Receipt artifact verifiers and presenters propagate that capability, and
+  mounted receipt routes cancel pending native-backed verification on route
+  replacement or disposal.
+- Focused mirrored receipt loader, verifier, presenter, and route suites passed.
+
+Remaining:
+- Native host persistence behavior, already-dispatched operation semantics,
+  device/profile validation, release signing, and product database/state wiring
+  remain external or integration-owned.

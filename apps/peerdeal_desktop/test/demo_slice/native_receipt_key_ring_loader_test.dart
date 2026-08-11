@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_desktop/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:test/test.dart';
@@ -366,6 +368,23 @@ void main() {
       'Secure receipt key storage could not be loaded.',
     ]);
   });
+
+  test('forwards route cancellation to a cancellable native bridge', () async {
+    final bridge = _CancellableSecureKeyStorageBridge(
+      snapshot: const SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[],
+      ),
+    );
+    final cancellation = Completer<void>();
+
+    final result = await NativeReceiptKeyRingLoader(
+      bridge: bridge,
+    ).loadCancellable(cancellation: cancellation.future);
+
+    expect(result.warnings, isEmpty);
+    expect(bridge.cancellation, same(cancellation.future));
+  });
 }
 
 class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
@@ -389,5 +408,22 @@ class _ThrowingSecureKeyStorageBridge implements SecureKeyStorageBridge {
     required String namespace,
   }) async {
     throw StateError('secure storage unavailable');
+  }
+}
+
+class _CancellableSecureKeyStorageBridge
+    implements SecureKeyStorageBridge, CancellableSecureKeyStorageBridge {
+  _CancellableSecureKeyStorageBridge({required this.snapshot});
+
+  final SecureKeyStorageSnapshot snapshot;
+  Future<void>? cancellation;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+    Future<void>? cancellation,
+  }) async {
+    this.cancellation = cancellation;
+    return snapshot;
   }
 }

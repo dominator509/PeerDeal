@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:peerdeal_desktop/demo_slice/controllers/demo_receipt_artifact_verifier.dart';
@@ -102,6 +103,20 @@ void main() {
     expect(result.message, 'Receipt signing key is unavailable.');
     expect(result.diagnostics, ['Secure receipt key storage is unavailable.']);
     expect(result.diagnostics, isNot(contains('native exception')));
+  });
+
+  test('forwards cancellation to the key-ring loader', () async {
+    final loader = _RecordingCancellableKeyRingLoader();
+    final cancellation = Completer<void>();
+    final verifier = DemoReceiptArtifactVerifier(keyRingLoader: loader);
+
+    final result = await verifier.inspectCancellable(
+      const OpaqueExportEncoder().encode(_receipt),
+      cancellation: cancellation.future,
+    );
+
+    expect(result.status, 'rejected');
+    expect(loader.cancellation, same(cancellation.future));
   });
 
   test('scrubs unsafe key-ring loader warning diagnostics', () async {
@@ -246,6 +261,11 @@ class _ThrowingKeyRingLoader implements NativeReceiptKeyRingLoader {
   Future<ReceiptKeyRingLoadResult> load() async {
     throw StateError('native exception');
   }
+
+  @override
+  Future<ReceiptKeyRingLoadResult> loadCancellable({
+    Future<void>? cancellation,
+  }) => load();
 }
 
 class _StaticKeyRingLoader implements NativeReceiptKeyRingLoader {
@@ -268,5 +288,39 @@ class _StaticKeyRingLoader implements NativeReceiptKeyRingLoader {
   @override
   Future<ReceiptKeyRingLoadResult> load() async {
     return result;
+  }
+
+  @override
+  Future<ReceiptKeyRingLoadResult> loadCancellable({
+    Future<void>? cancellation,
+  }) => load();
+}
+
+class _RecordingCancellableKeyRingLoader implements NativeReceiptKeyRingLoader {
+  Future<void>? cancellation;
+
+  @override
+  final int maxKeyIdLength = 96;
+
+  @override
+  final int maxKeyRecords = 64;
+
+  @override
+  final int maxKeySecretLength = 256;
+
+  @override
+  final String namespace = NativeReceiptKeyRingLoader.defaultNamespace;
+
+  @override
+  Future<ReceiptKeyRingLoadResult> load() async {
+    return const ReceiptKeyRingLoadResult(keyRing: ReceiptKeyRingSnapshot());
+  }
+
+  @override
+  Future<ReceiptKeyRingLoadResult> loadCancellable({
+    Future<void>? cancellation,
+  }) async {
+    this.cancellation = cancellation;
+    return load();
   }
 }

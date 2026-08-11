@@ -61,9 +61,14 @@ class DemoReceiptSurfacePresenter {
     required ReceiptExportArtifact artifact,
     required DemoReceiptArtifactVerifier verifier,
     RecoveryResult<Object?>? recovery,
+    Future<void>? cancellation,
   }) async {
+    final inspection = await verifier.inspectCancellable(
+      artifact,
+      cancellation: cancellation,
+    );
     return _presentReceiptScan(
-      receipt: _scanFromInspection(await verifier.inspect(artifact)),
+      receipt: _scanFromInspection(inspection),
       recovery: recovery,
     );
   }
