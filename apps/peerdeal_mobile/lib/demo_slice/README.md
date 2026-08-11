@@ -94,9 +94,10 @@ remains the lower-level composition entrypoint. Missing,
 malformed, or throwing roots must fail closed before recovery windows are
 loaded. The native bridge supplies only a directory fact; recovery and
 retention policy remain app-owned. The factory result also includes a validated
-`snapshotWriter` for product code that already owns canonical typed Hold'em
-state and an event cursor; it persists only the supplied snapshot and does not
-choose state, append the event log, own a database, or define route policy.
+`persistenceWriter` and `snapshotWriter` seam. Product code may append a
+non-retention event suffix before checkpointing supplied typed state; retention
+events still go through the close-retention adapter. These writers do not
+choose state, event or snapshot IDs, route policy, or a database.
 Route cancellation also propagates through
 the app local-identity secure-key seam when the host exposes its additive
 cancellation capability; an already-dispatched host mutation remains

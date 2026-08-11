@@ -932,6 +932,18 @@ signing, and concrete product state wiring remain external or integration-owned.
 - The public recovery-store contract and package boundaries remain unchanged;
   production database replacement and platform/runtime validation remain open.
 
+## Recent T96 Changes
+
+- Added mirrored app-owned `AppHoldemProductionSessionPersistenceWriter`
+  implementations. They validate caller-supplied event suffix scope and
+  continuity, append events, and then persist the resulting typed snapshot.
+- Retention events fail before storage, append failure prevents checkpoint
+  writes, and checkpoint failure reports that the event log is durable for
+  recovery-suffix replay.
+- T93 configuration-factory results expose this writer over the same store;
+  product state selection, event identity, snapshot IDs, startup invocation,
+  database replacement, and native/device validation remain separate.
+
 ## Required Gates
 
 Run after each retrofit step:

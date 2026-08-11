@@ -12,6 +12,38 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-11 - Codex - Hold'em Event-Log Checkpoint Writer
+
+Summary:
+- Added mirrored `AppHoldemProductionSessionPersistenceWriter` app boundaries.
+- The writer validates a caller-supplied non-retention event suffix, appends it
+  to recovery, and then persists the resulting canonical typed snapshot.
+- Configuration-factory results expose this writer alongside `snapshotWriter`.
+
+Files changed:
+- Mirrored app persistence-writer files and focused tests.
+- Mirrored configuration factories and focused tests.
+- Readiness ledgers and stable AI context docs.
+
+Tests run:
+- Mobile and desktop focused factory plus persistence-writer suites: 8 tests
+  each passed.
+- Focused mirrored app analysis passed.
+- Full analyzer, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Dependency audit reports zero actionable upgrades and 11 newer versions below
+  the current toolchain ceiling.
+
+Risks:
+- Product startup still owns authoritative state, event identity, snapshot IDs,
+  route/retention policy, database replacement, and native/device validation.
+
+Next reviewer:
+- Invoke `persistenceWriter` only after the product state owner has accepted
+  the event batch and close-retention policy has been handled separately.
+
+---
+
 ### 2026-08-11 - Codex - Recovery Store Process Serialization
 
 Summary:

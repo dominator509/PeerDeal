@@ -4,6 +4,7 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 import '../recovery/app_recovery_persistence_store_factory.dart';
 import 'app_holdem_production_session_configuration.dart';
 import 'app_holdem_production_session_factory.dart';
+import 'app_holdem_production_session_persistence_writer.dart';
 import 'app_holdem_production_session_snapshot_writer.dart';
 import 'app_persisted_holdem_production_session_source.dart';
 import 'native_local_peer_identity_provisioner.dart';
@@ -16,6 +17,7 @@ typedef AppHoldemProductionSessionRoutePolicyFactory =
 class AppHoldemProductionSessionConfigurationLoadResult {
   const AppHoldemProductionSessionConfigurationLoadResult.available({
     required this.configuration,
+    required this.persistenceWriter,
     required this.snapshotWriter,
     this.warnings = const <String>[],
   });
@@ -23,9 +25,11 @@ class AppHoldemProductionSessionConfigurationLoadResult {
   const AppHoldemProductionSessionConfigurationLoadResult.unavailable({
     required this.warnings,
   }) : configuration = null,
+       persistenceWriter = null,
        snapshotWriter = null;
 
   final AppHoldemProductionSessionConfiguration? configuration;
+  final AppHoldemProductionSessionPersistenceWriter? persistenceWriter;
   final AppHoldemProductionSessionSnapshotWriter? snapshotWriter;
   final List<String> warnings;
 
@@ -107,6 +111,9 @@ class AppHoldemProductionSessionConfigurationFactory {
           );
       return AppHoldemProductionSessionConfigurationLoadResult.available(
         configuration: configuration,
+        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+          store: store,
+        ),
         snapshotWriter: AppHoldemProductionSessionSnapshotWriter(store: store),
         warnings: persistence.warnings,
       );

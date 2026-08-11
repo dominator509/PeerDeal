@@ -26,6 +26,7 @@ void main() {
 
     expect(result.isAvailable, isTrue);
     expect(result.configuration, isNotNull);
+    expect(result.persistenceWriter, isNotNull);
     expect(result.snapshotWriter, isNotNull);
     expect(capturedStore, isA<JsonFileRecoveryPersistenceStore>());
     expect(result.configuration!.routeRegistration.path, '/holdem-live');

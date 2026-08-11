@@ -434,6 +434,17 @@ The configuration-factory result exposes this writer over the same validated
 store. It does not select product state, append the event log, own a database
 or retention policy, or invoke startup.
 
+`AppHoldemProductionSessionPersistenceWriter.persist(...)` is the app-owned
+event-log-plus-checkpoint seam. It requires caller-supplied typed state, cursor,
+snapshot ID, and optional event suffix. Non-retention events must have exact
+scope, contiguous sequence, and hash-chain continuity ending at the supplied
+state/cursor. The writer appends the suffix first, then delegates the typed
+snapshot writer; append failure prevents checkpointing, while checkpoint
+failure reports that the event log is durable for recovery replay. It does not
+select state, generate event or snapshot identities, invoke retention, or
+replace a production database. The configuration-factory result exposes this
+writer over the same validated recovery store.
+
 `fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
 callers that require pre-provisioned identity. The lazy production adapter is
 the default configuration path so missing, malformed, or rejected persisted

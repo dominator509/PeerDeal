@@ -945,3 +945,19 @@ Remaining:
 - This strengthens the JSON recovery fallback but does not replace it with a
   production database or prove platform filesystem, device, or cross-device
   runtime behavior.
+
+## Recent T96 Changes
+
+- Added mirrored `AppHoldemProductionSessionPersistenceWriter` app boundaries.
+  They validate a caller-supplied event suffix, append it to the recovery log,
+  and then persist the resulting typed snapshot through the T94 writer.
+- Retention events are rejected before storage so close/wipe policy remains in
+  the existing retention adapter. Append failures prevent checkpoint writes;
+  checkpoint failures report the durable event-log warning for suffix replay.
+- T93 configuration-factory results now expose this writer alongside the typed
+  snapshot writer over the same recovery store.
+
+Remaining:
+- Product startup must supply authoritative state, event IDs/hashes, snapshot
+  IDs, and invoke the writer. It does not own product state selection, route
+  policy, retention, database replacement, startup, or native/device validation.

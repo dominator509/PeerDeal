@@ -282,3 +282,10 @@ typed variant state and event cursor data, validates the recovery scope, and
 persists a canonical-hashed `HoldemStateSnapshot` through `peerdeal_sync`. It
 does not choose product state, append the event log, own a database or retention
 policy, or replace the `peerdeal_core` reducer as the source of truth.
+
+The same factory result exposes `AppHoldemProductionSessionPersistenceWriter`
+for caller-owned event-log policy. It validates and appends a non-retention
+event suffix before checkpointing the typed snapshot, preserving a durable
+suffix for replay if the checkpoint fails. It remains an app orchestration edge
+over `peerdeal_sync`; it does not move state truth out of `peerdeal_core` or
+invent product startup, identity, route, or retention policy.

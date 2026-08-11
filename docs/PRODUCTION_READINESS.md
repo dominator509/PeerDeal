@@ -1336,6 +1336,15 @@ existing recovery store with fail-closed results. It does not select product
 state, append the event log, own a database or retention policy, or invoke
 startup; those remain product integration work.
 
+The T96 follow-up closes the app-owned event-log-plus-checkpoint seam. Both app
+shells now expose `AppHoldemProductionSessionPersistenceWriter` through the
+configuration result. It validates a caller-supplied event suffix for exact
+scope and hash/sequence continuity, appends events before the typed snapshot,
+rejects retention events before storage, and reports when a checkpoint fails
+after the event log is durable for suffix replay. It does not select product
+state, event identity, snapshot IDs, route or retention policy, startup, or a
+production database.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
@@ -1348,8 +1357,9 @@ startup; those remain product integration work.
    `AppHoldemProductionSessionConfigurationFactory` from the real product
    session/state source and local identity through the typed first-join and
    rejoin handoff, using `snapshotWriter` for authoritative typed snapshot
-   persistence where product inputs are available and defining event-log
-   policy and route policy;
+   persistence where product inputs are available through
+   `persistenceWriter`, supplying event identity and snapshot IDs, and defining
+   event-log policy and route policy;
    complete product state/route provisioning and navigation/UI validation while
    keeping native transport/device validation and durable database persistence
    separate.

@@ -106,6 +106,11 @@ For runtime-owned configuration, pass one
 derives that registration once and reuses it for route merging, readiness, and
 the default join handoff. Supplying both configuration forms fails closed.
 
+The persisted configuration load result also exposes `persistenceWriter` for a
+caller that owns an accepted event batch and resulting typed state; it appends
+non-retention events before the snapshot checkpoint and leaves close-retention
+handling separate.
+
 For local Hold'em lifecycle actions, construct the app-owned
 `AppHoldemTableSessionRuntime` with a validated `HoldemHandState` and
 `HoldemEventCursor`. It calls the variant projection adapter, commits the
