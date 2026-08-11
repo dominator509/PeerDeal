@@ -1,14 +1,18 @@
 import '../contracts/receipt_signing_key_provider.dart';
+import '../models/receipt_key_ring_input_limits.dart';
 import '../models/receipt_signing_key.dart';
 
 class StaticReceiptSigningKeyProvider implements ReceiptSigningKeyProvider {
   const StaticReceiptSigningKeyProvider({
     required this.activeKey,
     this.verificationKeys = const <ReceiptSigningKey>[],
-  });
+    this.maxVerificationKeys =
+        ReceiptKeyRingInputLimits.defaultMaxVerificationKeys,
+  }) : assert(maxVerificationKeys > 0, 'maxVerificationKeys must be positive');
 
   final ReceiptSigningKey activeKey;
   final List<ReceiptSigningKey> verificationKeys;
+  final int maxVerificationKeys;
 
   @override
   ReceiptSigningKey? activeSigningKey() {
@@ -19,6 +23,10 @@ class StaticReceiptSigningKeyProvider implements ReceiptSigningKeyProvider {
   ReceiptSigningKey? findSigningKey(String keyId) {
     if (activeKey.keyId == keyId && activeKey.isUsable) {
       return activeKey;
+    }
+
+    if (verificationKeys.length > maxVerificationKeys) {
+      return null;
     }
 
     for (final key in verificationKeys) {

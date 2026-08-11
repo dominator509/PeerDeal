@@ -81,4 +81,53 @@ void main() {
     expect(keyRing.activeEncryptionKey(), isNull);
     expect(keyRing.findEncryptionKey('bad:encryption'), isNull);
   });
+
+  test('fails closed before traversing oversized retained key collections', () {
+    const activeSigning = ReceiptSigningKey(
+      keyId: 'active_signing',
+      secret: 'active_secret',
+    );
+    const retainedSigning = ReceiptSigningKey(
+      keyId: 'retained_signing',
+      secret: 'retained_secret',
+    );
+    const activeEncryption = ReceiptEncryptionKey(
+      keyId: 'active_encryption',
+      secret: 'active_secret',
+    );
+    const retainedEncryption = ReceiptEncryptionKey(
+      keyId: 'retained_encryption',
+      secret: 'retained_secret',
+    );
+    const keyRing = ReceiptKeyRingSnapshot(
+      activeSigning: activeSigning,
+      verificationSigningKeys: <ReceiptSigningKey>[
+        retainedSigning,
+        retainedSigning,
+      ],
+      activeEncryption: activeEncryption,
+      decryptionKeys: <ReceiptEncryptionKey>[
+        retainedEncryption,
+        retainedEncryption,
+      ],
+      maxVerificationKeys: 1,
+      maxDecryptionKeys: 1,
+    );
+
+    expect(keyRing.activeSigningKey(), activeSigning);
+    expect(keyRing.findSigningKey('retained_signing'), isNull);
+    expect(keyRing.activeEncryptionKey(), activeEncryption);
+    expect(keyRing.findEncryptionKey('retained_encryption'), isNull);
+  });
+
+  test('requires positive retained-key limits', () {
+    expect(
+      () => ReceiptKeyRingSnapshot(maxVerificationKeys: 0),
+      throwsA(isA<AssertionError>()),
+    );
+    expect(
+      () => ReceiptKeyRingSnapshot(maxDecryptionKeys: 0),
+      throwsA(isA<AssertionError>()),
+    );
+  });
 }

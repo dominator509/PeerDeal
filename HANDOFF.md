@@ -1178,6 +1178,18 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T127 Receipt Key-Ring Bounds
+
+- `ReceiptKeyRingSnapshot` and `StaticReceiptSigningKeyProvider` now apply
+  receipt-owned retained-key limits of 128 verification/decryption entries by
+  default before lookup traversal; oversized collections fail closed.
+- Active usable keys remain available without traversing retained collections,
+  and focused receipt tests cover signing, encryption, and invalid limits.
+
+Remaining:
+- Native platform key storage, runtime/device validation, other-platform hosts,
+  product persistence/source wiring, and release signing remain separate.
+
 ## Recent T125 Changes
 
 - `DefaultGovernanceEngine` now checks configurable bounds before participant,

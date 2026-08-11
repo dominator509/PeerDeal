@@ -1143,6 +1143,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` through blocked settlement projection;
   focused variant projection tests (52) and analysis pass.
 
+## T127 Receipt Key-Ring Collection Bounds
+
+- `ReceiptKeyRingSnapshot` and `StaticReceiptSigningKeyProvider` now bound
+  retained verification and decryption collections to 128 entries by default
+  before lookup traversal, with configurable positive limits and fail-closed
+  overflow behavior.
+- Active usable keys remain directly available; focused receipt signing and
+  encryption tests cover overflow and invalid limit inputs.
+
 ## T126 Wizard Input and Compilation Bounds
 
 - `DefaultPresetResolver` now bounds preset layers, per-layer and merged values,

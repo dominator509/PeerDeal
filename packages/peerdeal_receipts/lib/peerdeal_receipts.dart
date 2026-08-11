@@ -9,6 +9,7 @@ export 'src/models/receipt_export_inspection_result.dart';
 export 'src/models/receipt_authorization_request.dart';
 export 'src/models/receipt_authorization_result.dart';
 export 'src/models/receipt_encryption_key.dart';
+export 'src/models/receipt_key_ring_input_limits.dart';
 export 'src/models/receipt_signing_key.dart';
 export 'src/contracts/receipt_service.dart';
 export 'src/contracts/receipt_authorizer.dart';

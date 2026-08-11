@@ -31,6 +31,9 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
 - `ReceiptKeyRingSnapshot` exposes loaded signing and encryption keys through
   receipt-owned provider contracts, so app shells do not interpret key rotation
   rules directly.
+- Receipt-owned key-ring providers bound retained verification and decryption
+  collections to 128 entries by default and fail closed before oversized
+  traversal.
 - `OpaqueExportDecoder` verifies signed export artifacts before import-side
   inspection and fails closed on malformed, unsigned, tampered, undecryptable,
   privacy-leaking payloads, or verifier adapter failures.

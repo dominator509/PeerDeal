@@ -765,6 +765,10 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   ambiguous active signing or encryption keys.
 - App receipt key-ring loaders must cap native secure-key snapshot records
   before mapping generic records into receipt signing/encryption providers.
+- Receipt-owned `ReceiptKeyRingSnapshot` and
+  `StaticReceiptSigningKeyProvider` cap retained verification/decryption key
+  collections at 128 entries by default before lookup traversal; overflow
+  returns no retained key while active usable keys remain directly available.
 - App receipt key-ring loaders must reject oversized or control-character
   native receipt key ids before mapping records into signing/encryption
   providers.

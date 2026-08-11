@@ -68,6 +68,30 @@ void main() {
     );
   });
 
+  test(
+    'fails closed when retained signing keys exceed the configured limit',
+    () {
+      const boundedProvider = StaticReceiptSigningKeyProvider(
+        activeKey: activeKey,
+        verificationKeys: <ReceiptSigningKey>[rotatedKey, rotatedKey],
+        maxVerificationKeys: 1,
+      );
+
+      expect(boundedProvider.findSigningKey(rotatedKey.keyId), isNull);
+      expect(boundedProvider.activeSigningKey(), activeKey);
+    },
+  );
+
+  test('requires a positive retained signing-key limit', () {
+    expect(
+      () => StaticReceiptSigningKeyProvider(
+        activeKey: activeKey,
+        maxVerificationKeys: 0,
+      ),
+      throwsA(isA<AssertionError>()),
+    );
+  });
+
   test('fails closed when verification key lookup throws', () {
     const signer = HmacSha256ReceiptSigner(
       keyProvider: _ThrowingSigningKeyProvider(),

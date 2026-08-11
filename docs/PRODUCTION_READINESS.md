@@ -1584,6 +1584,12 @@ fields, while validating nested values through bounded protocol canonical JSON.
 policy profiles, and validation messages, so oversized or unsupported values
 cannot reach Game File construction; failures use stable `ERR_WIZARD_*` codes.
 
+The T127 follow-up closes the direct receipt key-ring traversal gap.
+`ReceiptKeyRingSnapshot` and `StaticReceiptSigningKeyProvider` now bound
+retained verification/decryption collections to 128 entries by default before
+lookup traversal. Oversized collections fail closed while active usable keys
+remain available through the direct active-key path.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

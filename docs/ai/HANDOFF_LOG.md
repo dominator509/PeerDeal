@@ -2,6 +2,25 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T127 Receipt Key-Ring Collection Bounds
+
+Summary:
+- Receipt-owned key-ring providers now bound retained verification and
+  decryption collections to 128 entries by default before lookup traversal.
+- Oversized retained collections fail closed while active usable keys remain
+  available; the generic native bridge contract is unchanged.
+
+Tests run:
+- Focused receipt provider tests passed.
+- Full repository analysis, boundary, source-text, dependency, and test gates
+  passed.
+
+Risks:
+- Native secure-key runtime validation, other-platform implementations,
+  product persistence/source wiring, and release inputs remain separate.
+
+---
+
 ### 2026-08-11 - Codex - T126 Wizard Input and Compilation Bounds
 
 Summary:
