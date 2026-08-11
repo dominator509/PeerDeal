@@ -12,6 +12,41 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-11 - Codex - Typed Hold'em Snapshot Persistence
+
+Summary:
+- Added mirrored `AppHoldemProductionSessionSnapshotWriter` app boundaries.
+- The writer validates snapshot identity, recovery scope, cursor sequence, and
+  last-event hash consistency, creates a canonical-hashed typed
+  `HoldemStateSnapshot` envelope, delegates the recovery store, and fails closed.
+- T93 configuration-factory results expose the writer over the same validated
+  store.
+
+Files changed:
+- Mirrored snapshot writer files and focused tests.
+- Mirrored configuration factories and focused tests.
+- Readiness ledgers, demo-slice READMEs, and stable AI context docs.
+
+Tests run:
+- Combined mobile and desktop factory plus snapshot-writer suites: 7 tests each
+  passed.
+- Focused mirrored app analysis passed.
+- Full analyzer, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Dependency audit reports zero actionable upgrades and 11 newer versions below
+  the current toolchain ceiling.
+
+Risks:
+- Product state selection, event-log append policy, database persistence,
+  startup invocation, native reachability, device validation, and release
+  signing remain integration or operator work.
+
+Next reviewer:
+- Use `snapshotWriter` only after the real product state owner has canonical
+  state and event-cursor inputs.
+
+---
+
 ### 2026-08-11 - Codex - App-Owned Persisted Session Configuration Factory
 
 Summary:

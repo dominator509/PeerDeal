@@ -92,7 +92,11 @@ checked before passing the configuration into the runtime;
 remains the lower-level composition entrypoint. Missing,
 malformed, or throwing roots must fail closed before recovery windows are
 loaded. The native bridge supplies only a directory fact; recovery and
-retention policy remain app-owned. Route cancellation also propagates through
+retention policy remain app-owned. The factory result also includes a validated
+`snapshotWriter` for product code that already owns canonical typed Hold'em
+state and an event cursor; it persists only the supplied snapshot and does not
+choose state, append the event log, own a database, or define route policy.
+Route cancellation also propagates through
 the app local-identity secure-key seam when the host exposes its additive
 cancellation capability; an already-dispatched host mutation remains
 host-owned and must be atomic/idempotent.

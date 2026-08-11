@@ -1323,6 +1323,15 @@ route policy before any identity work. This does not invent product state,
 route policy, or a startup invocation; the concrete product session owner still
 must supply authoritative snapshot persistence and call the factory.
 
+The T94 follow-up closes the app-owned typed snapshot persistence seam. Both app
+shells now expose `AppHoldemProductionSessionSnapshotWriter` through the T93
+configuration result. It validates snapshot identity, recovery scope, event
+cursor sequence, and last-event hash consistency, creates a typed
+`HoldemStateSnapshot` payload, computes its canonical hash, and delegates the
+existing recovery store with fail-closed results. It does not select product
+state, append the event log, own a database or retention policy, or invoke
+startup; those remain product integration work.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
@@ -1334,7 +1343,9 @@ must supply authoritative snapshot persistence and call the factory.
 3. Supply the concrete `AppHoldemProductionSessionSource` and invoke the new
    `AppHoldemProductionSessionConfigurationFactory` from the real product
    session/state source and local identity through the typed first-join and
-   rejoin handoff, using authoritative snapshot persistence and route policy;
+   rejoin handoff, using `snapshotWriter` for authoritative typed snapshot
+   persistence where product inputs are available and defining event-log
+   policy and route policy;
    complete product state/route provisioning and navigation/UI validation while
    keeping native transport/device validation and durable database persistence
    separate.

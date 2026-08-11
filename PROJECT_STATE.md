@@ -912,6 +912,17 @@ signing, and concrete product state wiring remain external or integration-owned.
   is unavailable and does not select product state or invent route policy.
 - Focused mirrored factory tests and all repository gates passed.
 
+## Recent T94 Changes
+
+- Added mirrored app-owned `AppHoldemProductionSessionSnapshotWriter`
+  implementations over the existing `RecoveryPersistenceStore` boundary.
+- The writer validates snapshot identity, recovery scope, event cursor sequence,
+  and last-event hash consistency, then persists a typed `HoldemStateSnapshot`
+  with a canonical payload hash and stable fail-closed results.
+- T93 configuration-factory results expose the writer over the same validated
+  store; product state selection, event-log policy, database persistence,
+  startup invocation, and native/device validation remain separate.
+
 ## Required Gates
 
 Run after each retrofit step:

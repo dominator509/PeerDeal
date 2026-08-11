@@ -422,6 +422,18 @@ errors. The factory does not create product snapshots, select peers/seats, or
 own retention policy. Native identity provisioning remains lazy until a valid
 invite-scoped snapshot load reaches the source.
 
+`AppHoldemProductionSessionSnapshotWriter.save(...)` is the app-owned typed
+snapshot persistence seam. It requires a caller-selected snapshot ID, current
+`TableState`, `HoldemHandState`, and matching `HoldemEventCursor`; it rejects
+unsafe identity, scope mismatch, cursor/base-sequence mismatch, and inconsistent
+last-event hash input before writing. It creates a versioned
+`HoldemStateSnapshot` payload, computes the canonical payload hash, delegates
+to the injected `RecoveryPersistenceStore`, and returns its
+`RecoveryPersistenceResult`, failing closed on invalid state or store errors.
+The configuration-factory result exposes this writer over the same validated
+store. It does not select product state, append the event log, own a database
+or retention policy, or invoke startup.
+
 `fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
 callers that require pre-provisioned identity. The lazy production adapter is
 the default configuration path so missing, malformed, or rejected persisted

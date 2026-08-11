@@ -270,3 +270,10 @@ deterministic event/replay dependencies, and returns an explicit fail-closed
 load result. It does not choose a table, write a product snapshot, or invent
 retention policy; the product session owner supplies those inputs and invokes
 the factory.
+
+The factory result also exposes the app-owned
+`AppHoldemProductionSessionSnapshotWriter`. This edge consumes caller-supplied
+typed variant state and event cursor data, validates the recovery scope, and
+persists a canonical-hashed `HoldemStateSnapshot` through `peerdeal_sync`. It
+does not choose product state, append the event log, own a database or retention
+policy, or replace the `peerdeal_core` reducer as the source of truth.

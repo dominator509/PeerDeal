@@ -4,6 +4,7 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 import '../recovery/app_recovery_persistence_store_factory.dart';
 import 'app_holdem_production_session_configuration.dart';
 import 'app_holdem_production_session_factory.dart';
+import 'app_holdem_production_session_snapshot_writer.dart';
 import 'app_persisted_holdem_production_session_source.dart';
 import 'native_local_peer_identity_provisioner.dart';
 
@@ -15,14 +16,17 @@ typedef AppHoldemProductionSessionRoutePolicyFactory =
 class AppHoldemProductionSessionConfigurationLoadResult {
   const AppHoldemProductionSessionConfigurationLoadResult.available({
     required this.configuration,
+    required this.snapshotWriter,
     this.warnings = const <String>[],
   });
 
   const AppHoldemProductionSessionConfigurationLoadResult.unavailable({
     required this.warnings,
-  }) : configuration = null;
+  }) : configuration = null,
+       snapshotWriter = null;
 
   final AppHoldemProductionSessionConfiguration? configuration;
+  final AppHoldemProductionSessionSnapshotWriter? snapshotWriter;
   final List<String> warnings;
 
   bool get isAvailable => configuration != null;
@@ -103,6 +107,7 @@ class AppHoldemProductionSessionConfigurationFactory {
           );
       return AppHoldemProductionSessionConfigurationLoadResult.available(
         configuration: configuration,
+        snapshotWriter: AppHoldemProductionSessionSnapshotWriter(store: store),
         warnings: persistence.warnings,
       );
     } on Object {

@@ -913,3 +913,20 @@ Remaining:
   snapshot writer/source, and invoke this factory from product startup. Native
   reachability, Android device validation, release signing, and other-platform
   implementations remain external or operator-owned.
+
+## Recent T94 Changes
+
+- Added mirrored `AppHoldemProductionSessionSnapshotWriter` app boundaries.
+  The writer validates snapshot identity, table scope, cursor sequence, and
+  last-event hash consistency before creating a typed `HoldemStateSnapshot`.
+- It computes the locked canonical payload hash and delegates the envelope to
+  the existing `RecoveryPersistenceStore`, returning stable fail-closed
+  results on invalid input or persistence errors.
+- T93 configuration-factory results now expose this writer over the same
+  validated recovery store.
+
+Remaining:
+- Product code must supply authoritative table/hand state and event cursor,
+  choose snapshot IDs, define event-log policy, and invoke the writer. The
+  writer does not own product state selection, a database, retention, startup,
+  native reachability, device validation, or release signing.
