@@ -8338,6 +8338,31 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - T99 Identity Single-Flight Cleanup Race
+
+Summary:
+- Mirrored local-peer identity provisioners now share only non-cancellable
+  operations and clear in-flight state only when the exact tracked Future
+  completes.
+- This prevents a completed cancellable operation from clearing a newer shared
+  operation while preserving cancellation propagation into native secure-key
+  calls.
+
+Files changed:
+- Mirrored local identity provisioners and focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Mobile and desktop focused identity suites passed.
+- Full repository gates remain the release check for this change.
+
+Risks:
+- Cross-process/native/device persistence validation and release signing remain
+  external; no cross-process lock is claimed by the app-level single-flight.
+
+---
+
 ### 2026-08-11 - Codex - Persistence Checkpoint Preflight
 
 Summary:

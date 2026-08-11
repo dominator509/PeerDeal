@@ -1361,6 +1361,14 @@ failures still retain the deliberate durable-suffix-for-replay behavior. This
 does not select product state, event or snapshot identity, retention policy, or
 replace durable database/runtime validation.
 
+The T99 follow-up closes a mixed-cancellation cleanup race in the mirrored
+local-peer identity provisioners. Only non-cancellable operations are shared,
+and in-flight cleanup now checks the exact tracked Future before clearing it, so
+a completed cancellable call cannot clear a newer shared operation. Cancellable
+callers still propagate their own cancellation into native secure-key calls.
+This remains an in-process guarantee; native multi-process/device persistence
+validation remains external.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

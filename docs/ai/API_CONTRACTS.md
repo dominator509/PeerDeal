@@ -757,6 +757,11 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   seat through its app-owned input factory. Protocol schemas and native bridge
   contracts do not gain receipt, poker, or session policy fields.
 
+Local identity provisioners share only non-cancellable `ensureIdentity()` calls.
+When a cancellable call overlaps a tracked call, its completion cannot clear the
+newer tracked Future; the caller's cancellation signal is still passed through
+the additive cancellable secure-key bridge methods.
+
 ## Native Local-Network Host Status
 
 - Android and Windows register `peerdeal/native_bridges/local_network` and

@@ -164,6 +164,41 @@ void main() {
     expect(bridge.savedKeys, hasLength(1));
   });
 
+  test(
+    'does not let a cancellable operation clear a newer tracked operation',
+    () async {
+      final firstLoadGate = Completer<void>();
+      final secondLoadGate = Completer<void>();
+      final bridge = _CancellableMemorySecureKeyBridge(
+        loadGates: <Completer<void>?>[firstLoadGate, secondLoadGate, null],
+      );
+      final provisioner = NativeLocalPeerIdentityProvisioner(
+        loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+        writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+        identityFactory: () => 'peer_mixed_cancellation',
+      );
+      final cancellation = Completer<void>();
+
+      final cancellable = provisioner.ensureIdentity(
+        cancellation: cancellation.future,
+      );
+      final tracked = provisioner.ensureIdentity();
+      firstLoadGate.complete();
+      final firstResult = await cancellable;
+      final third = provisioner.ensureIdentity();
+
+      expect(firstResult.isSuccess, isTrue);
+      expect(bridge.loadCalls, 3);
+
+      secondLoadGate.complete();
+      final results = await Future.wait(
+        <Future<AppLocalPeerIdentityProvisionResult>>[tracked, third],
+      );
+      expect(results.every((result) => result.isSuccess), isTrue);
+      expect(bridge.loadCalls, 3);
+    },
+  );
+
   test('propagates caller cancellation through the identity bridge', () async {
     final bridge = _CancellableMemorySecureKeyBridge();
     final cancellation = Completer<void>();
@@ -188,11 +223,13 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
     List<SecureKeyRecord> keys = const <SecureKeyRecord>[],
     this.available = true,
     this.loadGate,
+    this.loadGates,
     this.savedPeerIdOverride,
   }) : keys = List<SecureKeyRecord>.from(keys);
 
   final bool available;
   final Completer<void>? loadGate;
+  final List<Completer<void>?>? loadGates;
   final String? savedPeerIdOverride;
   final List<SecureKeyRecord> keys;
   final List<SecureKeyRecord> savedKeys = <SecureKeyRecord>[];
@@ -203,7 +240,10 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
     required String namespace,
   }) async {
     loadCalls += 1;
-    await loadGate?.future;
+    final gate = loadGates != null && loadCalls <= loadGates!.length
+        ? loadGates![loadCalls - 1]
+        : loadGate;
+    await gate?.future;
     return Future<SecureKeyStorageSnapshot>.value(
       SecureKeyStorageSnapshot(
         available: available,
@@ -243,6 +283,8 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
 
 class _CancellableMemorySecureKeyBridge extends _MemorySecureKeyBridge
     implements CancellableSecureKeyStorageMutationBridge {
+  _CancellableMemorySecureKeyBridge({super.loadGates});
+
   Future<void>? loadCancellation;
   Future<void>? saveCancellation;
 

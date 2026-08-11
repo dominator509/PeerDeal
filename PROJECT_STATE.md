@@ -963,6 +963,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   checkpoint storage failures still retain the durable suffix for replay.
 - Focused mobile and desktop persistence suites and all repository gates pass.
 
+## T99 Identity Single-Flight Hardening
+
+- Mirrored local-peer identity provisioners now clear only the exact tracked
+  non-cancellable Future, so a completed cancellable call cannot clear a newer
+  shared operation.
+- Caller cancellation propagation remains intact; focused mobile and desktop
+  identity suites pass.
+- Cross-process/native/device persistence validation remains external.
+
 ## Required Gates
 
 Run after each retrofit step:

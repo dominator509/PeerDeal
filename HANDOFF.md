@@ -987,3 +987,16 @@ Remaining:
 Remaining:
 - Product startup, authoritative state, event identity, snapshot IDs, database
   persistence, native/device validation, and release signing remain separate.
+
+## Recent T99 Changes
+
+- Mirrored local-peer identity provisioners now track only non-cancellable
+  operations and clear the in-flight slot only when the completed Future is
+  still the tracked operation.
+- A completed cancellable call can no longer clear a newer shared operation;
+  per-call cancellation still reaches the native identity bridge.
+- Focused mobile and desktop identity suites passed.
+
+Remaining:
+- Cross-process/native/device persistence validation, product startup,
+  database persistence, and release signing remain separate.

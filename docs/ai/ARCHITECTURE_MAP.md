@@ -295,3 +295,8 @@ invent product startup, identity, route, or retention policy.
 Before the append, the mirrored writer preflights snapshot identity, metadata,
 scope/cursor/hash consistency, and typed Hold'em state so malformed checkpoint
 input cannot create a durable partial suffix.
+
+The mirrored local-peer identity provisioners share only non-cancellable
+operations and clear the in-flight slot by exact Future identity. This protects
+the app-level single-flight boundary when cancellable route calls overlap, but
+does not claim a cross-process/native lock.
