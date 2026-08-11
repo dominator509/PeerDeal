@@ -502,9 +502,18 @@ Generated: 2026-08-10
 - Persisted Hold'em sources can consume the typed context and apply its remote
   peer and local seat while retaining strict snapshot scope and recovery replay
   checks.
-- Rejoin peer binding, concrete product database/source provisioning, native
-  transport reachability, and device validation remain external integration
-  work.
+- Accepted rejoin governance results can now supply the remote peer binding and
+  assigned seat for the same typed context; missing binding fails closed.
+- Concrete product database/source provisioning, native transport reachability,
+  and device validation remain external integration work.
+
+## Recent T64 Changes
+
+- Added the optional app-owned `GovernanceCommitResult.assignedPeerId` field.
+  Rejoin session contexts use this governance-owned binding, while first joins
+  continue to use the bootstrap-selected peer.
+- Mirrored orchestrator and route tests prove accepted rejoin handoff and
+  fail-closed behavior when governance does not return a peer.
 
 ## Recent T47 Changes
 
@@ -623,8 +632,7 @@ Run after each retrofit step:
 3. Supply the concrete product implementation of
    `AppHoldemProductionSessionSource` and invoke
    `AppHoldemProductionSessionBootstrap` from the real session/state and local
-   identity flow through the typed first-join handoff; add the governance-owned
-   rejoin peer binding, native peer transport device/network validation, and
-   final UX validation separately.
+   identity flow through the typed first-join and rejoin handoff; add native
+   peer transport device/network validation and final UX validation separately.
 4. Continue production hardening items recorded in `docs/PRODUCTION_READINESS.md`
    without crossing locked package boundaries.

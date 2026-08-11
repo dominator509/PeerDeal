@@ -590,8 +590,11 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - `JoinFlowSessionContext` is app-owned and contains the resolved invite,
   selected remote peer ID, and positive local seat.
 - First-join context is emitted only when `BootstrapPlan.selectedPeerId` and
-  `GovernanceCommitResult.assignedSeat` are both valid. The existing
-  `JoinFlowReadyHandler(ResolvedInvite)` remains backward-compatible.
+  `GovernanceCommitResult.assignedSeat` are both valid. Accepted rejoin context
+  instead requires `GovernanceCommitResult.assignedPeerId` and
+  `assignedSeat`; missing or unsafe governance binding produces no session
+  context. The existing `JoinFlowReadyHandler(ResolvedInvite)` remains
+  backward-compatible.
 - `AppHoldemProductionSessionContextSource.loadForSessionContext(...)` is an
   optional extension of `AppHoldemProductionSessionSource`. The bootstrap
   validates invite scope, peer identity, seat, timeout, and hydrated state

@@ -92,8 +92,9 @@ are implemented on branch
   selects the first reachable peer from its bounded candidate plan, accepted
   governance carries the assigned seat, and the app shell passes both through
   a context-aware persisted source/bootstrap route. Invite-only handoff stays
-  available for legacy sources; rejoin still needs a governance-provided peer
-  binding before it can use the new context path.
+  available for legacy sources. Accepted rejoin governance can now provide the
+  remote peer binding and assigned seat for the same context path; missing
+  governance peer data still fails closed.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -480,3 +481,6 @@ are implemented on branch
 - T63 focused mobile and desktop join/session tests passed, including
   selected-peer propagation, typed context route handoff, context-aware
   bootstrap loading, and persisted peer/seat input construction.
+- T64 focused mobile and desktop join-flow suites passed, including
+  governance-bound rejoin peer propagation and fail-closed missing-peer
+  handoff.

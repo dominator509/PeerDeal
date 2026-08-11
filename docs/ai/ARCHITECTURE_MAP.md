@@ -222,7 +222,8 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 `peerdeal_network` discovery produces bounded candidates. The app-owned join
 flow selects a reachable candidate for first join, accepted governance returns
 the assigned seat, and `JoinFlowSessionContext` crosses the app-shell boundary.
-The context-aware production bootstrap validates it and the persisted app
-source maps it into route input. Rejoin remains invite-only until governance
-exposes a remote peer binding. Core state truth, protocol schemas, native
-bridge semantics, and variant rules remain unchanged.
+For rejoin, accepted governance supplies the remote peer binding and assigned
+seat because there is no bootstrap discovery phase. The context-aware
+production bootstrap validates it and the persisted app source maps it into
+route input. Missing governance peer data fails closed. Core state truth,
+protocol schemas, native bridge semantics, and variant rules remain unchanged.

@@ -323,7 +323,11 @@ class JoinFlowOrchestrator {
     required GovernanceCommitResult commit,
     BootstrapPlan? bootstrapPlan,
   }) {
-    final remotePeerId = bootstrapPlan?.selectedPeerId;
+    // First join binds to the peer selected by bootstrap. Rejoin has no
+    // bootstrap phase, so its peer must come from accepted governance.
+    final remotePeerId = bootstrapPlan != null
+        ? bootstrapPlan.selectedPeerId
+        : commit.assignedPeerId;
     final localSeat = commit.assignedSeat;
     if (remotePeerId == null || !_isExactNonEmpty(remotePeerId)) {
       return null;

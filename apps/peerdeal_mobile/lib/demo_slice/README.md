@@ -72,8 +72,9 @@ Join-flow bootstrap planning follows the same boundary rule through the
 app-owned `NativeJoinBootstrapCoordinator`: native local-network bridge ->
 normalized discovery -> `peerdeal_network` bootstrap candidates -> join
 `BootstrapPlan`. An accepted first join may then carry a
-`JoinFlowSessionContext` through the app shell: selected peer and governance
-assigned seat -> context-aware production source -> validated session route.
+`JoinFlowSessionContext` through the app shell: first-join selected peer or
+governance-bound rejoin peer plus assigned seat -> context-aware production
+source -> validated session route.
 Invite-only callbacks remain supported for integrations that do not expose
 the typed session source yet.
 

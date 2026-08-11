@@ -1079,10 +1079,15 @@ reachable peer and accepted governance has returned a positive seat. Both app
 shells pass that context through a context-aware production bootstrap route;
 the persisted Hold'em source applies the verified peer and seat while keeping
 snapshot scope validation and recovery replay unchanged. Invite-only callbacks
-remain compatible for legacy sources. Rejoin still lacks a governance-owned
-remote-peer binding, and concrete product database/source provisioning, native
-transport reachability, and device validation remain integration or operator
-work.
+remain compatible for legacy sources.
+
+The T64 follow-up closes the codable rejoin binding gap. Accepted rejoin
+governance results may now return an app-owned `assignedPeerId` alongside the
+positive seat, and the orchestrator propagates that binding through the same
+validated session context. A missing or invalid governance peer produces no
+production session handoff. Concrete product database/source provisioning,
+native transport reachability, and device validation remain integration or
+operator work.
 
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
@@ -1094,8 +1099,7 @@ work.
    existing key-ring, cipher, signer, and app capture contracts.
 3. Supply the concrete `AppHoldemProductionSessionSource` and invoke
    `AppHoldemProductionSessionBootstrap` from the real product session/state
-   source and local identity through the typed first-join handoff; add the
-   governance-owned rejoin peer binding and complete product navigation/UI
-   validation while
+   source and local identity through the typed first-join and rejoin handoff;
+   complete product navigation/UI validation while
    keeping native transport/device validation and durable database persistence
    separate.

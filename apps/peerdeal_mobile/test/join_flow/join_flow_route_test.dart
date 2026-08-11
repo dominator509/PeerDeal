@@ -70,6 +70,30 @@ void main() {
     expect(handedOffContext?.localSeat, 1);
   });
 
+  testWidgets(
+    'forwards governance-bound rejoin context to production handoff',
+    (tester) async {
+      JoinFlowSessionContext? handedOffContext;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: JoinFlowRoute(
+            initialMode: JoinFlowDemoMode.rejoin,
+            orchestratorFactory: demoFactory.create,
+            onSessionReady: (_, sessionContext) =>
+                handedOffContext = sessionContext,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(handedOffContext?.invite.inviteId, 'inv_001');
+      expect(handedOffContext?.remotePeerId, 'peer_a');
+      expect(handedOffContext?.localSeat, 1);
+    },
+  );
+
   testWidgets('does not hand off rejected join outcomes', (tester) async {
     ResolvedInvite? handedOffInvite;
 

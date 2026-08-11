@@ -113,10 +113,15 @@ class FakeBootstrapCoordinator implements BootstrapCoordinator {
 }
 
 class FakeGovernanceCommitter implements GovernanceCommitter {
-  FakeGovernanceCommitter({this.acceptJoin = true, this.acceptRejoin = true});
+  FakeGovernanceCommitter({
+    this.acceptJoin = true,
+    this.acceptRejoin = true,
+    this.rejoinPeerId = 'peer_a',
+  });
 
   final bool acceptJoin;
   final bool acceptRejoin;
+  final String? rejoinPeerId;
 
   @override
   Future<GovernanceCommitResult> commitJoin({
@@ -140,6 +145,7 @@ class FakeGovernanceCommitter implements GovernanceCommitter {
       accepted: acceptRejoin,
       reasonCode: acceptRejoin ? null : 'ERR_REJOIN_REJECTED',
       assignedSeat: acceptRejoin ? 1 : null,
+      assignedPeerId: acceptRejoin ? rejoinPeerId : null,
     );
   }
 }

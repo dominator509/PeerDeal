@@ -135,11 +135,13 @@ class GovernanceCommitResult {
     required this.accepted,
     this.reasonCode,
     this.assignedSeat,
+    this.assignedPeerId,
   });
 
   final bool accepted;
   final String? reasonCode;
   final int? assignedSeat;
+  final String? assignedPeerId;
 }
 
 class JoinFlowOutcome {

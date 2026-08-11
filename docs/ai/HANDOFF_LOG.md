@@ -7677,5 +7677,18 @@ Codex should run the full local gate set and commit if green.
   assigned seat.
 - Added context-aware app bootstrap/source loading and persisted-input mapping.
 - Focused mobile and desktop join/session tests passed.
-- Remaining: rejoin peer binding, concrete product persistence/transport, and
-  Android/Windows runtime validation.
+- Remaining: concrete product persistence/transport and Android/Windows runtime
+  validation.
+
+### T64: governance-bound rejoin session handoff
+
+- Added optional app-owned `GovernanceCommitResult.assignedPeerId`.
+- Accepted rejoin outcomes now build the typed session context from the
+  governance-assigned peer and seat; first join remains bootstrap-selected.
+- Missing governance peer data produces no production session handoff.
+- Mirrored mobile and desktop orchestrator and route tests pass for accepted
+  rejoin propagation and fail-closed missing-peer behavior.
+
+Remaining:
+- Concrete product source/database provisioning, native transport reachability,
+  and runtime/device validation remain outside this local contract seam.

@@ -171,7 +171,35 @@ void main() {
     expect(result.state, JoinFlowState.rejoined);
     expect(result.resolvedInvite?.tableId, 'tbl_001');
     expect(result.resolvedInvite?.sessionId, 'sess_001');
+    expect(result.sessionContext?.remotePeerId, 'peer_a');
+    expect(result.sessionContext?.localSeat, 1);
   });
+
+  test(
+    'does not create a rejoin session context without governance peer',
+    () async {
+      final orchestrator = JoinFlowOrchestrator(
+        inviteResolver: FakeInviteResolver(),
+        joinNegotiator: FakeJoinNegotiator(),
+        disclosureCoordinator: FakeDisclosureCoordinator(),
+        roleAuthorizer: FakeRoleAuthorizer(),
+        bootstrapCoordinator: FakeBootstrapCoordinator(),
+        governanceCommitter: FakeGovernanceCommitter(rejoinPeerId: null),
+        eventSink: RecordingJoinEventSink(),
+      );
+
+      final result = await orchestrator.runRejoin(
+        const InviteContext(
+          inviteCode: 'ABC123',
+          requestedRole: RequestedRole.player,
+          rejoinToken: 'rj_001',
+        ),
+      );
+
+      expect(result.status, JoinDecisionStatus.okRejoined);
+      expect(result.sessionContext, isNull);
+    },
+  );
 
   test('rejects first join when invite resolution throws', () async {
     final sink = RecordingJoinEventSink();
