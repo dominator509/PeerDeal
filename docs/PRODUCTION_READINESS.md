@@ -1237,6 +1237,13 @@ governance after a cancelled bootstrap. Native join bootstrap forwards the same
 signal to cancellable local-network bridges, while legacy bridge contracts remain
 valid. Calls already dispatched to adapters or governance remain owner-hosted.
 
+The T83 follow-up closes the app-process receipt key provisioning race. Mirrored
+receipt key-ring provisioners now single-flight concurrent `ensureActiveKeys()`
+calls, so concurrent exports share one native load/provision sequence instead
+of generating competing active keys or returning divergent in-memory rings. The
+guard clears after success or failure, preserving retry behavior. Cross-process
+storage atomicity and native/device persistence validation remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

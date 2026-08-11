@@ -794,6 +794,17 @@ remain external or integration-owned.
 Already-dispatched host or governance calls remain owner-hosted. Signed release
 output, operator credentials, and runtime/device validation remain external.
 
+## Recent T83 Changes
+
+- Mirrored app receipt key-ring provisioners now single-flight concurrent
+  `ensureActiveKeys()` calls, preventing duplicate native key writes and
+  divergent in-memory key rings within one process.
+- The guard is cleared after either outcome, so transient native-storage
+  failures remain retryable.
+
+Cross-process storage atomicity and runtime/native persistence validation remain
+external or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

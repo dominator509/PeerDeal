@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_provisioner.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_writer.dart';
@@ -63,6 +65,27 @@ void main() {
       result.keyRing.activeEncryptionKey()!.keyId,
       'receipt_encryption_test',
     );
+  });
+
+  test('single-flights concurrent key provisioning', () async {
+    final gate = Completer<void>();
+    final bridge = _ProvisioningBridge(loadGate: gate);
+    final provisioner = _provisioner(bridge);
+
+    final first = provisioner.ensureActiveKeys();
+    final second = provisioner.ensureActiveKeys();
+
+    expect(identical(first, second), isTrue);
+    expect(bridge.loadCalls, 1);
+
+    gate.complete();
+    final results = await Future.wait(<Future<ReceiptKeyRingProvisionResult>>[
+      first,
+      second,
+    ]);
+
+    expect(results[0], same(results[1]));
+    expect(bridge.savedKeys, hasLength(2));
   });
 
   test('creates only the missing active encryption key', () async {
@@ -224,16 +247,22 @@ class _ProvisioningBridge implements SecureKeyStorageMutationBridge {
   _ProvisioningBridge({
     this.snapshot = const SecureKeyStorageSnapshot(available: true, keys: []),
     this.saveResult = const SecureKeyStorageMutationResult(isSuccess: true),
+    this.loadGate,
   });
 
   final SecureKeyStorageSnapshot snapshot;
   final SecureKeyStorageMutationResult saveResult;
+  final Completer<void>? loadGate;
   final List<_SavedKey> savedKeys = <_SavedKey>[];
+  int loadCalls = 0;
 
   @override
   Future<SecureKeyStorageSnapshot> loadKeyRing({
     required String namespace,
   }) async {
+    loadCalls += 1;
+    final loadGate = this.loadGate;
+    if (loadGate != null) await loadGate.future;
     return snapshot;
   }
 

@@ -732,3 +732,21 @@ bootstrap forwarding, and no-governance-after-cancellation coverage.
 Remaining:
 - Already-dispatched adapter or governance calls remain owner-hosted; signed
   release output, credentials, and runtime/device validation remain external.
+
+## Recent T83 Changes
+
+- Mirrored receipt key-ring provisioners now single-flight concurrent
+  `ensureActiveKeys()` calls.
+- Concurrent receipt exports share one load/provision operation, so native key
+  storage cannot be raced by duplicate active-key creation within one app
+  process.
+- The in-flight guard clears after success or failure, preserving retry
+  behavior after a transient native-storage error.
+
+Focused mobile and desktop provisioner tests passed, including concurrent-call
+coverage.
+
+Remaining:
+- Cross-process/native storage atomicity, runtime persistence validation,
+  signed release output, credentials, and product database/state wiring remain
+  external or integration-owned.

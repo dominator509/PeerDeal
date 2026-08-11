@@ -8143,3 +8143,28 @@ Verification:
 Risks:
 - Already-dispatched adapter or governance calls remain owner-hosted; native
   runtime/device validation and signed release validation remain external.
+
+---
+
+### 2026-08-11 - Codex - Receipt Key Provisioning Single-Flight
+
+Summary:
+- Mirrored app receipt key-ring provisioners now share one in-flight
+  `ensureActiveKeys()` operation across concurrent callers.
+- This prevents duplicate active-key generation and divergent in-memory key
+  rings while preserving retry behavior after completion.
+
+Files changed:
+- Mirrored `native_receipt_key_ring_provisioner.dart` implementations and
+  focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Mobile and desktop focused provisioner suites passed.
+- Workspace analyze passed.
+
+Risks:
+- Cross-process/native storage atomicity, runtime/device persistence,
+  operator-owned release signing, and product database/state wiring remain
+  external or integration-owned.
