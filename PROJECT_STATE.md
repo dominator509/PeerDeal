@@ -1152,6 +1152,19 @@ signing, and concrete product state wiring remain external or integration-owned.
   without mutating app state; focused mobile and desktop runtime suites cover
   overflow and invalid limits.
 
+## T134 Production Session Factory Loader Wiring
+
+- Mirrored mobile and desktop runtimes now accept a configured
+  `AppHoldemProductionSessionConfigurationFactory` and adapt it to the typed
+  join/rejoin loader when no explicit loader is supplied.
+- Stable adapter identity prevents rebuild churn; explicit loader and route
+  precedence remain unchanged, and the accepted session context still reaches
+  the existing bootstrap route.
+- Focused mobile and desktop app-shell suites cover the factory fallback and
+  fail-closed missing-snapshot boundary.
+- Product state/source selection, database persistence, device/network
+  validation, other-platform hosts, and release signing remain open.
+
 ## T133 Native Host Build and Smoke Validation
 
 - Android debug APK and Windows debug host compilation pass.

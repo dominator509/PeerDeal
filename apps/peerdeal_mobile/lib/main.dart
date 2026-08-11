@@ -29,6 +29,7 @@ import 'session/app_holdem_production_session_bootstrap_route_registration.dart'
 import 'session/app_holdem_production_session_configuration.dart';
 import 'session/app_holdem_production_session_configuration_factory.dart';
 import 'session/app_holdem_production_session_configuration_loader.dart';
+import 'session/app_holdem_production_session_configuration_loader_factory.dart';
 import 'setup_flow/setup_flow_orchestrator.dart';
 import 'setup_flow/setup_flow_route.dart';
 import 'transport/app_table_session_transport_source.dart';
@@ -100,6 +101,7 @@ class PeerDealMobileRuntime {
     this.holdemProductionRoute,
     this.holdemProductionSessionBootstrapRoute,
     this.holdemProductionSession,
+    this.holdemProductionSessionConfigurationFactory,
     this.holdemProductionSessionConfigurationLoader,
     this.enabledDemoRoutePaths,
     this.productionRoutes,
@@ -133,6 +135,8 @@ class PeerDealMobileRuntime {
   final AppHoldemProductionSessionBootstrapRouteRegistration?
   holdemProductionSessionBootstrapRoute;
   final AppHoldemProductionSessionConfiguration? holdemProductionSession;
+  final AppHoldemProductionSessionConfigurationFactory?
+  holdemProductionSessionConfigurationFactory;
   final AppHoldemProductionSessionConfigurationLoader?
   holdemProductionSessionConfigurationLoader;
   final Set<String>? enabledDemoRoutePaths;
@@ -167,6 +171,8 @@ class PeerDealMobileRuntime {
     AppHoldemProductionSessionBootstrapRouteRegistration?
     holdemProductionSessionBootstrapRoute,
     AppHoldemProductionSessionConfiguration? holdemProductionSession,
+    AppHoldemProductionSessionConfigurationFactory?
+    holdemProductionSessionConfigurationFactory,
     AppHoldemProductionSessionConfigurationLoader?
     holdemProductionSessionConfigurationLoader,
     Set<String>? enabledDemoRoutePaths,
@@ -219,6 +225,9 @@ class PeerDealMobileRuntime {
           this.holdemProductionSessionBootstrapRoute,
       holdemProductionSession:
           holdemProductionSession ?? this.holdemProductionSession,
+      holdemProductionSessionConfigurationFactory:
+          holdemProductionSessionConfigurationFactory ??
+          this.holdemProductionSessionConfigurationFactory,
       holdemProductionSessionConfigurationLoader:
           holdemProductionSessionConfigurationLoader ??
           this.holdemProductionSessionConfigurationLoader,
@@ -264,6 +273,8 @@ class PeerDealMobileApp extends StatefulWidget {
     AppHoldemProductionSessionBootstrapRouteRegistration?
     holdemProductionSessionBootstrapRoute,
     AppHoldemProductionSessionConfiguration? holdemProductionSession,
+    AppHoldemProductionSessionConfigurationFactory?
+    holdemProductionSessionConfigurationFactory,
     AppHoldemProductionSessionConfigurationLoader?
     holdemProductionSessionConfigurationLoader,
     Set<String>? enabledDemoRoutePaths,
@@ -297,6 +308,8 @@ class PeerDealMobileApp extends StatefulWidget {
        _holdemProductionSessionBootstrapRoute =
            holdemProductionSessionBootstrapRoute,
        _holdemProductionSession = holdemProductionSession,
+       _holdemProductionSessionConfigurationFactory =
+           holdemProductionSessionConfigurationFactory,
        _holdemProductionSessionConfigurationLoader =
            holdemProductionSessionConfigurationLoader,
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
@@ -331,6 +344,8 @@ class PeerDealMobileApp extends StatefulWidget {
   final AppHoldemProductionSessionBootstrapRouteRegistration?
   _holdemProductionSessionBootstrapRoute;
   final AppHoldemProductionSessionConfiguration? _holdemProductionSession;
+  final AppHoldemProductionSessionConfigurationFactory?
+  _holdemProductionSessionConfigurationFactory;
   final AppHoldemProductionSessionConfigurationLoader?
   _holdemProductionSessionConfigurationLoader;
   final Set<String>? _enabledDemoRoutePaths;
@@ -360,6 +375,10 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   JoinFlowSessionReadyHandler? _defaultJoinFlowSessionReadyHandler;
   AppHoldemProductionSessionConfigurationLoader?
   _defaultJoinFlowSessionConfigurationLoader;
+  AppHoldemProductionSessionConfigurationFactory?
+  _defaultJoinFlowSessionConfigurationFactory;
+  AppHoldemProductionSessionConfigurationLoaderFactory?
+  _defaultJoinFlowSessionConfigurationLoaderFactory;
 
   PeerDealMobileRuntime get _runtime {
     return (widget._runtime ?? const PeerDealMobileRuntime()).withOverrides(
@@ -386,6 +405,8 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       holdemProductionSessionBootstrapRoute:
           widget._holdemProductionSessionBootstrapRoute,
       holdemProductionSession: widget._holdemProductionSession,
+      holdemProductionSessionConfigurationFactory:
+          widget._holdemProductionSessionConfigurationFactory,
       holdemProductionSessionConfigurationLoader:
           widget._holdemProductionSessionConfigurationLoader,
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
@@ -1074,7 +1095,11 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       return _defaultJoinFlowSessionReadyHandler;
     }
 
-    final loader = _runtime.holdemProductionSessionConfigurationLoader;
+    final loader =
+        _runtime.holdemProductionSessionConfigurationLoader ??
+        _loaderForConfigurationFactory(
+          _runtime.holdemProductionSessionConfigurationFactory,
+        );
     if (loader == null) return null;
     if (!identical(_defaultJoinFlowSessionConfigurationLoader, loader)) {
       _defaultJoinFlowSessionConfigurationLoader = loader;
@@ -1085,6 +1110,27 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       };
     }
     return _defaultJoinFlowSessionReadyHandler;
+  }
+
+  AppHoldemProductionSessionConfigurationLoader? _loaderForConfigurationFactory(
+    AppHoldemProductionSessionConfigurationFactory? configurationFactory,
+  ) {
+    if (configurationFactory == null) {
+      _defaultJoinFlowSessionConfigurationFactory = null;
+      _defaultJoinFlowSessionConfigurationLoaderFactory = null;
+      return null;
+    }
+    if (!identical(
+      _defaultJoinFlowSessionConfigurationFactory,
+      configurationFactory,
+    )) {
+      _defaultJoinFlowSessionConfigurationFactory = configurationFactory;
+      _defaultJoinFlowSessionConfigurationLoaderFactory =
+          AppHoldemProductionSessionConfigurationLoaderFactory(
+            configurationFactory: configurationFactory,
+          );
+    }
+    return _defaultJoinFlowSessionConfigurationLoaderFactory?.loader;
   }
 
   Future<void> _openLoadedProductionSession(

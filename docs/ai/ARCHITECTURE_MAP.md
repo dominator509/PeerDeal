@@ -313,6 +313,14 @@ before mounting. Loader failure or unavailable composition reaches the safe
 route surface; product state, database selection, and route policy remain at
 the app product edge.
 
+Both shells also accept an optional configured
+`AppHoldemProductionSessionConfigurationFactory`. When no explicit typed
+loader is provided, the shell creates one stable app-owned adapter that calls
+the factory for the accepted handoff and leaves the `JoinFlowSessionContext`
+on the existing bootstrap route. Explicit handlers and prebuilt routes retain
+precedence. This adapter does not select product state, route policy, or a
+database.
+
 The factory result also exposes the app-owned
 `AppHoldemProductionSessionSnapshotWriter`. This edge consumes caller-supplied
 typed variant state and event cursor data, validates the recovery scope, and

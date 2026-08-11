@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T134 Production Session Factory Loader Wiring
+
+Summary:
+- Mirrored app shells now accept a configured
+  `AppHoldemProductionSessionConfigurationFactory` directly.
+- A stable app-owned adapter invokes that factory for typed join/rejoin
+  handoffs when no explicit loader is supplied; explicit route and handler
+  precedence remains unchanged.
+- The accepted session context still reaches the existing bootstrap route,
+  while product state, route policy, and persistence remain caller-owned.
+
+Tests and gates:
+- Focused mobile and desktop app-shell Flutter suites pass, including the
+  factory fallback and missing-snapshot fail-closed path.
+
+Remaining:
+- Concrete product source/state wiring, database persistence, native/device
+  validation, other-platform hosts, and release signing remain external or
+  owner-controlled.
+
+Next reviewer:
+- Review the mirrored runtime API and publish the green T134 commit.
+
+---
+
 ### 2026-08-11 - Codex - T133 Native Host Build and Smoke Validation
 
 Summary:

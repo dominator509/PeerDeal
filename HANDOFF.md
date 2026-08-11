@@ -1178,6 +1178,25 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T134 Production Session Factory Loader Wiring
+
+- Mirrored mobile and desktop app shells now accept an optional configured
+  `AppHoldemProductionSessionConfigurationFactory` directly.
+- Each shell creates one stable app-owned adapter that invokes the factory for
+  the typed `JoinFlowSessionContext` handoff. Explicit typed loaders, explicit
+  join handlers, and prebuilt production routes retain precedence.
+- The accepted session context remains route-owned input to the existing
+  bootstrap; the factory still receives product-owned route policy, state, and
+  persistence dependencies.
+
+Tests and gates:
+- Focused mobile and desktop app-shell Flutter suites pass, including the
+  factory-to-loader handoff path.
+
+Remaining:
+- Product state/source provisioning, database selection, device/network
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T133 Native Host Build and Smoke Validation
 
 - Android debug APK and Windows debug host builds pass.

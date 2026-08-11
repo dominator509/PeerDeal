@@ -508,6 +508,15 @@ renders the safe fallback for loader errors or unavailable results. The shell
 does not interpret warnings, select product state, or move this contract into a
 shared package.
 
+The mirrored app runtimes also accept an optional
+`AppHoldemProductionSessionConfigurationFactory`. If no explicit
+`AppHoldemProductionSessionConfigurationLoader` is supplied, the shell creates
+one stable `AppHoldemProductionSessionConfigurationLoaderFactory` adapter and
+invokes `create()` for the accepted typed handoff. The accepted
+`JoinFlowSessionContext` remains the bootstrap route argument, and explicit
+loaders, handlers, and prebuilt routes retain precedence. The adapter does not
+select product state, route policy, persistence, or a database.
+
 `AppHoldemProductionSessionSnapshotWriter.save(...)` is the app-owned typed
 snapshot persistence seam. It requires a caller-selected snapshot ID, current
 `TableState`, `HoldemHandState`, and matching `HoldemEventCursor`; it rejects

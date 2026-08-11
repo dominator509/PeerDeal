@@ -1633,6 +1633,15 @@ capture, local-network, transport, and secure-key mutation checkpoints through
 the default RTK-safe wrapper. This does not close real-device, cross-device,
 other-platform, product persistence, or release-signing validation.
 
+The T134 follow-up closes the remaining codable app-registration gap around
+the persisted production-session factory. Both shells can now accept a
+configured `AppHoldemProductionSessionConfigurationFactory` directly and
+adapt it to the typed join/rejoin loader when no explicit loader is supplied.
+The adapter preserves explicit route/handler precedence and passes the
+accepted context through the existing bootstrap route. Product state/source
+selection, route policy, database persistence, and native/device validation
+remain caller-owned or external.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -26,6 +26,7 @@ import 'package:peerdeal_desktop/session/app_holdem_production_session_configura
 import 'package:peerdeal_desktop/session/app_holdem_production_session_configuration_factory.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_persistence_writer.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_snapshot_writer.dart';
+import 'package:peerdeal_desktop/session/app_persisted_holdem_production_session_source.dart';
 import 'package:peerdeal_desktop/setup_flow/setup_flow_route.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
@@ -1494,6 +1495,33 @@ void main() {
     expect(find.textContaining('secret'), findsNothing);
   });
 
+  testWidgets('adapts a configured session factory to the typed loader', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.join,
+          },
+          joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+            bootstrapCoordinator: FakeBootstrapCoordinator(),
+          ).create,
+          nativeReadinessLoader: _readyNativeReadinessLoader(),
+          holdemProductionSessionConfigurationFactory:
+              _productionConfigurationFactory('/holdem-factory'),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route unavailable'), findsOneWidget);
+    expect(find.text('Route: /holdem-factory'), findsOneWidget);
+  });
+
   testWidgets('rejects a bootstrap route that collides with a route', (
     tester,
   ) async {
@@ -2149,6 +2177,26 @@ AppNativeReadinessLoader _readyNativeReadinessLoader() {
     secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
       snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
     ),
+  );
+}
+
+AppHoldemProductionSessionConfigurationFactory _productionConfigurationFactory(
+  String path,
+) {
+  return AppHoldemProductionSessionConfigurationFactory(
+    recoveryStoreFactory: AppRecoveryPersistenceStoreFactory(
+      rootDirectoryFactory: () => Directory.systemTemp,
+    ),
+    routePolicyFactory: (_) => AppPersistedHoldemProductionSessionRoutePolicy(
+      path: path,
+      navigationLabel: 'Live Holdem',
+      remotePeerId: 'peer_remote',
+      localSeat: 1,
+      closeEventAdapterFactory: (_) => throw StateError('unused'),
+    ),
+    eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
+    emittedAtFactory: () => '2026-08-11T00:00:00Z',
+    eventHashFactory: (_) => 'hash',
   );
 }
 
