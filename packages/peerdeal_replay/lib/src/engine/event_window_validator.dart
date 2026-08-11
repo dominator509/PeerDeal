@@ -3,12 +3,45 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import '../models/replay_mismatch.dart';
 
 class EventWindowValidator {
-  const EventWindowValidator();
+  EventWindowValidator({int maxEvents = defaultMaxEvents})
+    : _maxEvents = maxEvents {
+    if (maxEvents <= 0) {
+      throw ArgumentError.value(
+        maxEvents,
+        'maxEvents',
+        'Replay event limit must be positive.',
+      );
+    }
+  }
+
+  static const defaultMaxEvents = 4096;
+
+  final int _maxEvents;
+
+  List<ReplayMismatch> validateEventCount(List<EventEnvelope> events) {
+    if (events.length <= _maxEvents) {
+      return const <ReplayMismatch>[];
+    }
+
+    return <ReplayMismatch>[
+      ReplayMismatch(
+        code: 'ERR_REPLAY_EVENT_WINDOW_TOO_LARGE',
+        message: 'Replay event window exceeds the configured limit.',
+        expected: _maxEvents,
+        actual: events.length,
+      ),
+    ];
+  }
 
   List<ReplayMismatch> validate(
     List<EventEnvelope> events, {
     int? expectedPreviousEventSeq,
   }) {
+    final sizeMismatches = validateEventCount(events);
+    if (sizeMismatches.isNotEmpty) {
+      return sizeMismatches;
+    }
+
     final mismatches = <ReplayMismatch>[];
 
     if (expectedPreviousEventSeq != null && events.isNotEmpty) {

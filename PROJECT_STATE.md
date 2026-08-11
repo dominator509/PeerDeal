@@ -1098,6 +1098,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   payload structure exceeds the protocol limits. Focused protocol and recovery
   tests and package analysis pass.
 
+## T113 Replay Event Window Bounds
+
+- `EventWindowValidator` now applies a configurable positive event-count limit,
+  defaulting to 4,096 events, and reports the structured
+  `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE` mismatch when exceeded.
+- `BasicReplayEngine` checks the raw request event list before protocol, scope,
+  range, selection, or projector traversal; the selected window remains
+  validated after filtering and snapshot-suffix planning. Focused replay tests
+  and package analysis pass.
+
 ## Required Gates
 
 Run after each retrofit step:

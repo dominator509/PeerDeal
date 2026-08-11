@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T113 Replay Event Window Bounds
+
+Summary:
+- `EventWindowValidator` now enforces a configurable positive event-count
+  limit, defaulting to 4,096 events.
+- `BasicReplayEngine` checks the raw request list before protocol, scope, range,
+  selection, or projector traversal and returns
+  `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE` when the limit is exceeded.
+
+Tests run:
+- Focused replay engine and snapshot suffix suite: 24 tests passed.
+- Focused `peerdeal_replay` analysis passed.
+
+Risks:
+- This hardens the Dart replay request boundary only. Product persistence,
+  platform/runtime validation, other-platform hosts, and release signing remain
+  separate.
+
+Next reviewer:
+- Preserve the event-count bound when adding replay transports or product
+  session sources; do not move replay policy into protocol or native bridges.
+
+---
+
 ## Format
 
 ### YYYY-MM-DD - Agent - Task

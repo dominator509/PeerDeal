@@ -18,8 +18,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     this.protocolCatalog = const ProtocolCatalog(),
   }) : anchorHashCalculator =
            anchorHashCalculator ?? const AnchorHashCalculator(),
-       eventWindowValidator =
-           eventWindowValidator ?? const EventWindowValidator(),
+       eventWindowValidator = eventWindowValidator ?? EventWindowValidator(),
        snapshotSuffixReplayer =
            snapshotSuffixReplayer ?? const SnapshotSuffixReplayer();
 
@@ -32,6 +31,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
   @override
   ReplayResult<TState> replay(ReplayRequest request) {
     final mismatches = <ReplayMismatch>[
+      ...eventWindowValidator.validateEventCount(request.events),
       ..._validateProtocolVersions(request),
       ..._validateReplayScope(request),
       ..._validateReplayRange(request),

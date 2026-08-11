@@ -60,6 +60,12 @@ sequence bounds, and `fromEventSeq` must not exceed `toEventSeq`. Invalid
 replay ranges fail before event filtering, anchor calculation, or projector
 execution.
 
+`BasicReplayEngine` also rejects replay requests whose raw event list exceeds
+`EventWindowValidator`'s configured `maxEvents` before protocol, scope, range,
+or projector traversal. The default is 4,096 events and the structured failure
+code is `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE`. The selected event window remains
+subject to the same validator after range and snapshot-suffix selection.
+
 ## App Route Surface
 
 Current app shells mount demo-oriented routes rather than production app flows.

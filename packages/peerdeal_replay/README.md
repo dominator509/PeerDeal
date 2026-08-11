@@ -26,6 +26,9 @@ as the first package drop for Sprint 7. It is not yet a production reconstructio
   identities before projection.
 - Replay event windows reject sequence gaps, non-increasing event sequences,
   hash-chain breaks, and snapshot suffix gaps before projection.
+- Replay requests reject event windows above the configurable `EventWindowValidator`
+  limit before protocol, scope, range, or projector traversal; the default is
+  4,096 events and the failure code is `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE`.
 - Replay request ranges reject non-positive or inverted event sequence bounds
   before filtering events or invoking reconstruction projectors.
 - Replay now rejects event or snapshot table/session scope mismatches against

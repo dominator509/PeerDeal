@@ -1477,6 +1477,15 @@ closed on structurally oversized persisted snapshot payloads before importing
 them into in-memory recovery state. Protocol schema and sync ownership remain
 unchanged.
 
+The T113 follow-up closes the replay request traversal gap.
+`EventWindowValidator` now enforces a configurable positive event-count limit,
+defaulting to 4,096 events, and `BasicReplayEngine` checks the raw request list
+before protocol, scope, range, selection, or projector work. Oversized requests
+fail with `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE`; selected windows remain validated
+after filtering. This is a Dart replay-boundary hardening change and does not
+claim product persistence, device/network reachability, other-platform hosts,
+or release signing.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

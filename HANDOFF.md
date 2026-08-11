@@ -1165,6 +1165,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T113 Changes
+
+- `EventWindowValidator` now applies a configurable positive event-count limit,
+  defaulting to 4,096 events, with the structured
+  `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE` failure code.
+- `BasicReplayEngine` validates the raw request list before protocol, scope,
+  range, selection, or projector traversal while retaining selected-window
+  validation after filtering.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T112 Changes
 
 - `EventEnvelope.fromJson` and `SnapshotEnvelope.fromJson` now validate their

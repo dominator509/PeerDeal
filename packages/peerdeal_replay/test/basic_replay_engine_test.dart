@@ -166,6 +166,45 @@ void main() {
     expect(result.mismatches.single.actual, 0);
   });
 
+  test('rejects oversized replay event windows before request traversal', () {
+    final failingEngine = BasicReplayEngine<FakeTableProjection>(
+      projector: const _ThrowingReplayProjector(throwOnCreate: true),
+      eventWindowValidator: EventWindowValidator(maxEvents: 2),
+    );
+
+    final event = EventEnvelope(
+      eventId: 'evt_1',
+      eventType: 'OpenTableSessionOpened',
+      eventVersion: '1.0',
+      protocolVersion: currentProtocolVersion.toWire(),
+      eventSeq: 1,
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      handId: null,
+      emittedAt: '2026-04-25T00:00:00Z',
+      actorRef: 'system',
+      payload: const <String, Object?>{},
+      prevEventHash: genesisEventHash,
+      eventHash: 'hash_1',
+    );
+
+    final result = failingEngine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: currentProtocolVersion.toWire(),
+        scope: ReplayScope.session,
+        events: List<EventEnvelope>.filled(3, event),
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_EVENT_WINDOW_TOO_LARGE');
+    expect(result.mismatches.single.expected, 2);
+    expect(result.mismatches.single.actual, 3);
+  });
+
   test('rejects inverted replay event range before projection', () {
     final failingEngine = BasicReplayEngine<FakeTableProjection>(
       projector: const _ThrowingReplayProjector(throwOnCreate: true),
