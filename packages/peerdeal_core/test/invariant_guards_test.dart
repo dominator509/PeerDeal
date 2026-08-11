@@ -17,6 +17,48 @@ void main() {
       expect(codesFor(TableState.initial()), isEmpty);
     });
 
+    test('round-trips TableState JSON without losing typed fields', () {
+      final state =
+          TableState.initial(
+            tableId: 'table_001',
+            sessionId: 'session_001',
+            protocolVersion: '1.0',
+          ).copyWith(
+            phase: TablePhase.liveActive,
+            eventSequence: 7,
+            closeRequested: true,
+            playersConnected: 3,
+            playersSeated: 2,
+            activeHandId: 'hand_001',
+            metadata: const <String, Object?>{'mode_type': 'open_table'},
+          );
+
+      final persisted = Map<String, Object?>.from(
+        jsonDecode(jsonEncode(state.toJson())) as Map,
+      );
+      final restored = TableState.fromJson(persisted);
+
+      expect(restored.toJson(), state.toJson());
+    });
+
+    test('rejects malformed TableState JSON', () {
+      final malformed = TableState.initial().toJson()
+        ..['phase'] = 'unknown_phase';
+
+      expect(
+        () => TableState.fromJson(malformed),
+        throwsA(isA<FormatException>()),
+      );
+
+      final wrongType = TableState.initial().toJson()
+        ..['players_connected'] = 'three';
+
+      expect(
+        () => TableState.fromJson(wrongType),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('flag missing table identity fields', () {
       final state = TableState.initial(
         tableId: ' ',

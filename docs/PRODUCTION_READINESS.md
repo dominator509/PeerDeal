@@ -1008,6 +1008,12 @@ Call/Check, and All-in events carry the configured local seat rather than
 assuming seat zero. Focused route tests now decode the canonical outbound event
 and assert non-zero local-seat attribution in both app shells.
 
+The T54 follow-up adds strict `peerdeal_core` `TableState.fromJson(...)`
+hydration matching the existing `toJson()` shape. It rejects malformed field
+types, unknown phases, and non-string metadata keys before typed state is
+rehydrated. This advances persistence safety without inventing the still-open
+product source or variant-state serialization schema.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

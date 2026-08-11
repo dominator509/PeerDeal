@@ -55,6 +55,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-10-045` | `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_action_button.dart` and focused UI test | 4 | T51 | RESOLVED | Shared action controls now own focus, expose focus semantics, request focus on pointer activation, and bind Enter, numpad Enter, and Space to the same action with a stable focus outline. Final device/accessibility validation remains external. |
 | `LEGACY-GAP-2026-08-10-046` | `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_action_button.dart` and focused UI test | 4 | T52 | RESOLVED | Shared action controls now guarantee a 48 logical-pixel minimum interactive height while preserving the stable focus outline. Device, text-scale, and final accessibility validation remain external. |
 | `LEGACY-GAP-2026-08-10-047` | mirrored `apps/peerdeal_mobile/lib/session/` and `apps/peerdeal_desktop/lib/session/` production table surfaces and route tests | 4 | T53 | RESOLVED | Fold, Call/Check, and All-in actions now use the configured local seat instead of hard-coded seat zero; canonical outbound event tests lock non-zero local-seat attribution in both app shells. |
+| `LEGACY-GAP-2026-08-10-048` | `packages/peerdeal_core/lib/src/models/table_state.dart` and invariant tests | 4 | T54 | RESOLVED | Added strict `TableState.fromJson(...)` hydration matching the existing `toJson()` shape, rejecting malformed primitive fields, unknown phases, and non-string metadata keys. Full product source and variant-state persistence remain integration-owned. |
 
 ## Status Definitions
 

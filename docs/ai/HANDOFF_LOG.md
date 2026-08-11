@@ -12,6 +12,34 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Core Table-State Hydration Parser
+
+Summary:
+- Added strict `TableState.fromJson(...)` hydration matching the existing
+  `TableState.toJson()` shape.
+- Malformed primitive fields, unknown phases, and non-string metadata keys fail
+  closed before state hydration.
+
+Files changed:
+- `packages/peerdeal_core/lib/src/models/table_state.dart`.
+- `packages/peerdeal_core/test/invariant_guards_test.dart`.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused core invariant/model suite: passed, 13 tests.
+- Real JSON encode/decode round-trip: passed.
+
+Risks:
+- Full product source, variant-state serialization, durable database wiring,
+  and local identity provisioning remain integration-owned.
+
+Next reviewer:
+- Use this typed table-state parser from an authoritative product persistence
+  source once its state schema is supplied.
+
+---
+
 ### 2026-08-10 - Codex - Production Table Local-Seat Action Routing
 
 Summary:

@@ -396,6 +396,14 @@ Generated: 2026-08-10
   suites passed with 8 tests each, including canonical outbound event
   attribution for local seat 1.
 
+## Recent T54 Changes
+
+- `peerdeal_core` now provides strict `TableState.fromJson(...)` hydration that
+  mirrors the existing `toJson()` fields, rejects unknown phases and malformed
+  primitive values, and preserves only string-keyed metadata. The focused core
+  invariant/model suite passed with 13 tests; full product source and
+  variant-state persistence remain integration-owned.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

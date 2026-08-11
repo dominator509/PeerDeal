@@ -36,6 +36,33 @@ class TableState {
     );
   }
 
+  factory TableState.fromJson(Map<String, Object?> json) {
+    final phaseValue = json['phase'];
+    if (phaseValue is! String) {
+      throw const FormatException('TableState phase must be a string.');
+    }
+
+    final TablePhase phase;
+    try {
+      phase = TablePhase.values.byName(phaseValue);
+    } on ArgumentError {
+      throw FormatException('Unknown TableState phase: $phaseValue.');
+    }
+
+    return TableState(
+      tableId: _requiredString(json, 'table_id'),
+      sessionId: _requiredString(json, 'session_id'),
+      phase: phase,
+      protocolVersion: _requiredString(json, 'protocol_version'),
+      eventSequence: _requiredInt(json, 'event_sequence'),
+      closeRequested: _requiredBool(json, 'close_requested'),
+      playersConnected: _requiredInt(json, 'players_connected'),
+      playersSeated: _requiredInt(json, 'players_seated'),
+      activeHandId: _nullableString(json, 'active_hand_id'),
+      metadata: _requiredMap(json, 'metadata'),
+    );
+  }
+
   final String tableId;
   final String sessionId;
   final TablePhase phase;
@@ -74,24 +101,77 @@ class TableState {
       closeRequested: closeRequested ?? this.closeRequested,
       playersConnected: playersConnected ?? this.playersConnected,
       playersSeated: playersSeated ?? this.playersSeated,
-      activeHandId:
-          identical(activeHandId, _sentinel) ? this.activeHandId : activeHandId as String?,
+      activeHandId: identical(activeHandId, _sentinel)
+          ? this.activeHandId
+          : activeHandId as String?,
       metadata: metadata ?? this.metadata,
     );
   }
 
   Map<String, Object?> toJson() => <String, Object?>{
-        'table_id': tableId,
-        'session_id': sessionId,
-        'phase': phase.name,
-        'protocol_version': protocolVersion,
-        'event_sequence': eventSequence,
-        'close_requested': closeRequested,
-        'players_connected': playersConnected,
-        'players_seated': playersSeated,
-        'active_hand_id': activeHandId,
-        'metadata': metadata,
-      };
+    'table_id': tableId,
+    'session_id': sessionId,
+    'phase': phase.name,
+    'protocol_version': protocolVersion,
+    'event_sequence': eventSequence,
+    'close_requested': closeRequested,
+    'players_connected': playersConnected,
+    'players_seated': playersSeated,
+    'active_hand_id': activeHandId,
+    'metadata': metadata,
+  };
+
+  static String _requiredString(Map<String, Object?> json, String key) {
+    final value = json[key];
+    if (value is! String) {
+      throw FormatException('TableState $key must be a string.');
+    }
+    return value;
+  }
+
+  static String? _nullableString(Map<String, Object?> json, String key) {
+    final value = json[key];
+    if (value != null && value is! String) {
+      throw FormatException('TableState $key must be a string or null.');
+    }
+    return value as String?;
+  }
+
+  static int _requiredInt(Map<String, Object?> json, String key) {
+    final value = json[key];
+    if (value is! int) {
+      throw FormatException('TableState $key must be an integer.');
+    }
+    return value;
+  }
+
+  static bool _requiredBool(Map<String, Object?> json, String key) {
+    final value = json[key];
+    if (value is! bool) {
+      throw FormatException('TableState $key must be a boolean.');
+    }
+    return value;
+  }
+
+  static Map<String, Object?> _requiredMap(
+    Map<String, Object?> json,
+    String key,
+  ) {
+    final value = json[key];
+    if (value is! Map<Object?, Object?>) {
+      throw FormatException('TableState $key must be an object.');
+    }
+    final entries = <MapEntry<String, Object?>>[];
+    for (final entry in value.entries) {
+      if (entry.key is! String) {
+        throw FormatException('TableState $key contains a non-string key.');
+      }
+      entries.add(MapEntry(entry.key as String, entry.value));
+    }
+    return Map<String, Object?>.unmodifiable(<String, Object?>{
+      for (final entry in entries) entry.key: entry.value,
+    });
+  }
 
   static const Object _sentinel = Object();
 }
