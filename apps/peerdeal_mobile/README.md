@@ -60,8 +60,9 @@ Setup flow:
 - The release manifest declares `INTERNET` for the existing native-network
   boundary. The Android host now backs the generic live peer transport with a
   bounded UDP multicast envelope with strict UTF-8/control-free identity
-  decoding; local-network discovery, device reachability,
-  and other-platform transport remain platform implementation gaps.
+  decoding and registers the generic local-network capability channel with
+  bounded interface facts; peer discovery, device reachability, and
+  other-platform transport remain platform/product gaps.
 - Android capture blocking is implemented at the host level, but runtime/device
   validation, local-network discovery, transport, production platform recovery
   persistence, and the remaining other-platform hooks are still open. The app

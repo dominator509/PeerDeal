@@ -35,6 +35,7 @@ hydration, T58 deterministic persisted recovery-suffix replay, T59 app-owned
 local peer identity persistence, T60 provisioned-identity persisted-source
 composition, T61 single-flight local identity provisioning, T62 post-save
 identity verification, and T63 typed join-to-session context handoff
+and T75 Android/Windows local-network host registration
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -593,3 +594,21 @@ Remaining:
 - Device/network reachability, firewall and multicast behavior, runtime
   capture/key validation, release signing, other-platform hosts, and product
   database/state wiring remain external or integration-owned.
+
+## Recent T75 Changes
+
+- Android and Windows now register the locked
+  `peerdeal/native_bridges/local_network` channel.
+- Both hosts report bounded active-interface capability facts and generic
+  interface hints without exposing adapter paths or peer data.
+- Peer discovery remains explicitly unsupported and returns an empty endpoint
+  list because no discovery advertisement protocol or endpoint provisioning
+  contract exists in this repository.
+- Android APK and Windows debug builds passed after the mirrored host change.
+
+Remaining:
+- A protocol-owned peer discovery advertisement and product endpoint
+  provisioning are still required before `foundEndpoints` can be populated.
+  Device/network reachability, runtime capture/key validation, release signing,
+  other-platform hosts, and product database/state wiring remain external or
+  integration-owned.

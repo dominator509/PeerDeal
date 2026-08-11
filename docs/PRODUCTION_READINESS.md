@@ -1175,6 +1175,15 @@ invalid app-supplied fields are rejected before a send. This closes a concrete
 host input-normalization gap without claiming device, firewall, multicast, or
 cross-platform reachability.
 
+The T75 follow-up registers the locked generic local-network method channel on
+the Android and Windows hosts and reports bounded active-interface capability
+facts plus generic interface hints. Host discovery remains fail-closed with an
+empty `foundEndpoints` list because this repository contains no discovery
+advertisement protocol or product endpoint-provisioning contract; fabricating
+peer identities or introducing an unowned wire format would cross the protocol
+and app boundaries. Android APK and Windows debug builds pass for this host
+registration slice.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

@@ -656,3 +656,13 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - `AppPersistedHoldemProductionSessionSource` applies the context peer and
   seat through its app-owned input factory. Protocol schemas and native bridge
   contracts do not gain receipt, poker, or session policy fields.
+
+## Native Local-Network Host Status
+
+- Android and Windows register `peerdeal/native_bridges/local_network` and
+  return bounded active-interface capability facts plus generic interface
+  hints.
+- They return `discoverySupported: false` and an empty `foundEndpoints` list
+  until a protocol-owned discovery advertisement and product
+  endpoint-provisioning contract exist; no peer identities are invented at the
+  native boundary.

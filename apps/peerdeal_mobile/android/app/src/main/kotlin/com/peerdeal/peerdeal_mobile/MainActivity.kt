@@ -9,6 +9,7 @@ class MainActivity : FlutterActivity() {
     private var captureProtectionHandler: CaptureProtectionHandler? = null
     private var appStorageDirectoryHandler: AppStorageDirectoryHandler? = null
     private var nativeTransportHandler: NativeTransportHandler? = null
+    private var localNetworkHandler: LocalNetworkHandler? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -39,6 +40,13 @@ class MainActivity : FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             NativeTransportHandler.CHANNEL_NAME,
         ).setMethodCallHandler(transportHandler)
+
+        val localNetworkHandler = LocalNetworkHandler()
+        this.localNetworkHandler = localNetworkHandler
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            LocalNetworkHandler.CHANNEL_NAME,
+        ).setMethodCallHandler(localNetworkHandler)
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
@@ -58,12 +66,17 @@ class MainActivity : FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             NativeTransportHandler.CHANNEL_NAME,
         ).setMethodCallHandler(null)
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            LocalNetworkHandler.CHANNEL_NAME,
+        ).setMethodCallHandler(null)
         secureKeyStorageHandler?.close()
         secureKeyStorageHandler = null
         captureProtectionHandler = null
         appStorageDirectoryHandler = null
         nativeTransportHandler?.close()
         nativeTransportHandler = null
+        localNetworkHandler = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 }

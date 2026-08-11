@@ -701,6 +701,16 @@ Generated: 2026-08-10
   frames.
 - Both mirrored debug host builds passed after the decoder hardening.
 
+## Recent T75 Changes
+
+- Android and Windows now register the locked generic local-network channel.
+- Both hosts report bounded active-interface availability and generic interface
+  hints; no adapter paths or peer identifiers cross the bridge.
+- Host discovery remains fail-closed with an empty endpoint list because the
+  repository has no discovery advertisement protocol or endpoint provisioning
+  contract.
+- Android APK and Windows debug host builds passed.
+
 ## Required Gates
 
 Run after each retrofit step:

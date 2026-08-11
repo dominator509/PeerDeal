@@ -48,6 +48,11 @@ to observe local device capabilities.
   bounded five-second default deadline and stable fail-closed timeout results.
   App-owned bootstrap loaders may provide cancellation for route lifecycle
   teardown; discovery and routing policy remain outside this package.
+- Android and Windows app hosts register the generic local-network channel and
+  report bounded active-interface capability facts and generic interface hints.
+  They return `discoverySupported: false` with no fabricated endpoints until a
+  protocol-owned discovery advertisement and endpoint-provisioning contract
+  exist.
 - Native bridge warnings are normalized for app-layer safe-surface and network
   routing policy.
 - Channel names, method names, fixture payloads, and decode behavior are locked

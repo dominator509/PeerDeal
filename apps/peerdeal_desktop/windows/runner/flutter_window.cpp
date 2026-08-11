@@ -9,6 +9,7 @@
 #include "windows_app_storage.h"
 #include "windows_native_transport.h"
 #include "windows_secure_key_storage.h"
+#include "windows_local_network.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -38,6 +39,8 @@ bool FlutterWindow::OnCreate() {
       flutter_controller_->engine()->messenger());
   native_transport_ = std::make_unique<WindowsNativeTransport>(
       flutter_controller_->engine()->messenger());
+  local_network_ = std::make_unique<WindowsLocalNetwork>(
+      flutter_controller_->engine()->messenger());
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
@@ -57,6 +60,7 @@ void FlutterWindow::OnDestroy() {
   capture_protection_ = nullptr;
   app_storage_ = nullptr;
   native_transport_ = nullptr;
+  local_network_ = nullptr;
   secure_key_storage_ = nullptr;
   if (flutter_controller_) {
     flutter_controller_ = nullptr;

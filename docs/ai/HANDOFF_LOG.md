@@ -7927,3 +7927,32 @@ Remaining:
 Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
+
+---
+
+### 2026-08-10 - Codex - Local-Network Host Channel Registration
+
+Summary:
+- Registered the locked generic local-network method channel on the Android and
+  Windows hosts.
+- Added bounded active-interface availability and generic interface hints.
+- Kept peer discovery fail-closed with an empty endpoint list because no
+  discovery advertisement protocol or product endpoint-provisioning contract
+  exists in the repository.
+
+Files changed:
+- Mirrored Android and Windows local-network host handlers and registration.
+- Matching handoff, readiness, README, and AI context records.
+
+Tests run:
+- Android debug APK build: passed.
+- Windows debug build: passed.
+
+Risks:
+- The hosts expose interface capability only. Protocol-owned peer discovery,
+  endpoint provisioning, device/network reachability, and runtime validation
+  remain open.
+
+Next reviewer:
+Continue with runtime Android/Windows validation or define the missing
+protocol-owned discovery advertisement before populating `foundEndpoints`.

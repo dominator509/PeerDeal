@@ -51,6 +51,10 @@ Setup flow:
   through the bounded host-private UDP multicast envelope after strict
   UTF-8/control-free identity validation. Device/firewall
   reachability and endpoint provisioning remain outside the host seam.
+- `windows/runner/windows_local_network.*` registers the generic
+  `peerdeal/native_bridges/local_network` channel and reports bounded active
+  interface facts. It does not fabricate peer endpoints; discovery remains
+  unsupported until a protocol-owned advertisement contract exists.
 - Records are validated and stored as a bounded versioned envelope in Windows
   Credential Manager under a namespace-derived target. The host does not
   interpret receipt purposes, algorithms, or rotation policy.
