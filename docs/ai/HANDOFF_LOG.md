@@ -12,6 +12,36 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Production Table Local-Seat Action Routing
+
+Summary:
+- Mirrored production Hold'em table surfaces now use the configured local seat
+  for Fold, Call/Check, and All-in actions instead of hard-coded seat zero.
+- Focused route tests decode the canonical outbound event and assert local seat
+  1 attribution in both app shells.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_table_surface.dart`.
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_table_surface.dart`.
+- Mirrored `app_holdem_table_session_route_test.dart` files.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused mobile and desktop production-table route suites: passed, 8 tests
+  each.
+- Full repository analyzer and test gate: passed.
+
+Risks:
+- Device/network transport validation and final production UX validation remain
+  external.
+
+Next reviewer:
+- Continue with the next codable production gap while preserving app-owned
+  local-seat identity and canonical event attribution.
+
+---
+
 ### 2026-08-10 - Codex - Shared Action Hit Target Hardening
 
 Summary:

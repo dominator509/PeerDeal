@@ -389,6 +389,13 @@ Generated: 2026-08-10
   footprint. The focused UI-kit suite passed with 4 tests; device, text-scale,
   and final accessibility validation remain external.
 
+## Recent T53 Changes
+
+- Mirrored production Hold'em table surfaces now use the configured local seat
+  for Fold, Call/Check, and All-in actions. Focused mobile and desktop route
+  suites passed with 8 tests each, including canonical outbound event
+  attribution for local seat 1.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

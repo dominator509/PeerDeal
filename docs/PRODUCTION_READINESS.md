@@ -1003,6 +1003,11 @@ same shared action controls, keeping touch and pointer targets usable without
 changing the public control API. Device, text-scale, screen-reader, and final
 visual validation remain external.
 
+The T53 follow-up fixes mirrored production Hold'em action routing so Fold,
+Call/Check, and All-in events carry the configured local seat rather than
+assuming seat zero. Focused route tests now decode the canonical outbound event
+and assert non-zero local-seat attribution in both app shells.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

@@ -235,6 +235,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(bridge.sendCalls, 1);
+    expect(bridge.lastSentFrame, isNotNull);
+    expect(
+      const EventEnvelopeCodec()
+          .decode(bridge.lastSentFrame!.payloadBytes)
+          .payload['actor_seat'],
+      1,
+    );
     expect(find.text('Action synchronized'), findsOneWidget);
   });
 
@@ -507,6 +514,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   _FakeNativeTransportBridge({required this.receiveFrame});
 
   final NativeTransportFrame receiveFrame;
+  NativeTransportFrame? lastSentFrame;
   int receiveCalls = 0;
   int sendCalls = 0;
   bool _served = false;
@@ -545,6 +553,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   Future<NativeTransportSendResult> sendFrame(
     NativeTransportFrame frame,
   ) async {
+    lastSentFrame = frame;
     sendCalls++;
     return const NativeTransportSendResult(isSuccess: true);
   }

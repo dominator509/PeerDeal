@@ -28,7 +28,7 @@ app-shell bootstrap-route registration with default join-ready navigation,
 T47 source-backed bootstrap-route assembly, T48 runtime-owned production
 session configuration, T49 fail-closed Android release signing, T50 production
 table UI accessibility/responsive hardening, T51 keyboard/focus control
-hardening, and T52 action hit-target hardening
+hardening, T52 action hit-target hardening, and T53 local-seat action routing
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -52,6 +52,8 @@ are implemented on branch
   Enter, and Space to the same visible action without layout shift.
 - Shared action controls now guarantee a 48 logical-pixel minimum interactive
   height for touch and pointer use.
+- Mirrored production Hold'em table actions now emit the configured local seat
+  for Fold, Call/Check, and All-in actions instead of assuming seat zero.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -417,3 +419,5 @@ are implemented on branch
 - T50 Dart format and `rtk git diff --check`: passed.
 - T51 focused UI-kit widget tests: passed, 4 tests.
 - T52 focused UI-kit widget tests: passed, 4 tests.
+- T53 focused mobile and desktop production-table route tests: passed, 8 tests
+  each, including canonical non-zero local-seat event attribution.

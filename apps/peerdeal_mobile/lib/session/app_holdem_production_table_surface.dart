@@ -160,8 +160,8 @@ class _AppHoldemProductionTableSurfaceState
       PeerDealActionButton(
         label: 'Fold',
         onPressed: () => _submitAction(
-          const HoldemTableAction(
-            actorSeat: 0,
+          HoldemTableAction(
+            actorSeat: widget.localSeat,
             type: HoldemTableActionType.fold,
           ),
         ),
@@ -170,8 +170,8 @@ class _AppHoldemProductionTableSurfaceState
         PeerDealActionButton(
           label: 'Call',
           onPressed: () => _submitAction(
-            const HoldemTableAction(
-              actorSeat: 0,
+            HoldemTableAction(
+              actorSeat: widget.localSeat,
               type: HoldemTableActionType.call,
             ),
           ),
@@ -180,8 +180,8 @@ class _AppHoldemProductionTableSurfaceState
         PeerDealActionButton(
           label: 'Check',
           onPressed: () => _submitAction(
-            const HoldemTableAction(
-              actorSeat: 0,
+            HoldemTableAction(
+              actorSeat: widget.localSeat,
               type: HoldemTableActionType.check,
             ),
           ),
@@ -193,8 +193,8 @@ class _AppHoldemProductionTableSurfaceState
         PeerDealActionButton(
           label: 'All-in',
           onPressed: () => _submitAction(
-            const HoldemTableAction(
-              actorSeat: 0,
+            HoldemTableAction(
+              actorSeat: widget.localSeat,
               type: HoldemTableActionType.allIn,
             ),
           ),
