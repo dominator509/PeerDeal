@@ -8205,6 +8205,41 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Windows Native Host Runtime Smoke
+
+Summary:
+- Added a dependency-free `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart`
+  target using the existing public native bridge contracts.
+- Direct execution of the built Windows runner passed app storage, capture
+  capability/enable/release, local-network capability/discovery, transport
+  capability/receive, and secure-key save/read-back/CAS/conditional-delete
+  checks.
+- UDP multicast send returned the host's stable send failure and is retained as
+  a network/firewall validation warning.
+
+Files changed:
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart` and desktop README.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Verification:
+- `flutter build windows --debug --no-pub -t tool/windows_native_host_smoke.dart`:
+  passed.
+- Direct built executable smoke run: passed all required channel checkpoints;
+  multicast send emitted the documented warning.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed. Dependency audit
+  reports zero actionable upgrades and 11 newer versions below the current
+  toolchain ceiling.
+
+Risks:
+- Android device/emulator runtime validation, Windows multicast reachability,
+  firewall/profile validation, other-platform native implementations,
+  operator-owned release signing, and product database/state wiring remain
+  external or integration-owned.
+
+---
+
 ### 2026-08-11 - Codex - Android Secure-Key Process Serialization
 
 Summary:

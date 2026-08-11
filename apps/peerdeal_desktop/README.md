@@ -70,6 +70,13 @@ Setup flow:
 - Build the host with `flutter build windows --no-pub`. Credential Manager
   runtime persistence and capture behavior still require an operator
   profile/device validation.
+- For a direct Windows host runtime smoke pass, build and execute
+  `tool/windows_native_host_smoke.dart`:
+  `flutter build windows --debug --no-pub -t tool/windows_native_host_smoke.dart`
+  followed by the generated `build/windows/x64/runner/Debug/peerdeal_desktop.exe`.
+  The smoke checks registered storage, capture, local-network, transport, and
+  revision-aware secure-key calls. A multicast send warning is retained when
+  the host firewall or network profile rejects the packet.
 - The app shell exposes a deterministic retention coordinator that invokes
   recovery persistence wipe after a caller supplies a closed-session time and
   policy. `AppRecoverySessionCloseCoordinator` binds that policy and scope to

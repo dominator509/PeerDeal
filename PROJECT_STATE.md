@@ -869,6 +869,21 @@ state wiring remain external or integration-owned.
 Runtime/device validation, other-platform native storage and capture, release
 signing, and concrete product state wiring remain external or integration-owned.
 
+## Recent T89 Changes
+
+- Added `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart` to exercise
+  the registered Windows method channels through the actual built runner.
+- Direct execution passed app storage, capture enable/release, local-network
+  capability/discovery, transport capability/receive, secure-key read-back and
+  revision-conflict checks, conditional replacement/delete, and cleanup.
+- UDP multicast send returned the host's stable send failure in this environment
+  and is recorded as a network/firewall validation warning rather than a pass.
+  Android runtime validation remains unavailable because no device or emulator
+  is attached.
+- Full analyze, boundary-check, source-text, serialized test, dependency-audit,
+  and `git diff --check` gates passed. Dependency audit reports zero actionable
+  upgrades and 11 newer versions below the current toolchain ceiling.
+
 ## Required Gates
 
 Run after each retrofit step:

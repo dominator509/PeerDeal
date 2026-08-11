@@ -835,3 +835,24 @@ integration-owned.
 Runtime/device persistence and capture validation, other-platform native
 implementations, operator-owned release signing, and concrete product database
 or session-state wiring remain external or integration-owned.
+
+## Recent T89 Changes
+
+- Added `tool/windows_native_host_smoke.dart`, a dependency-free desktop smoke
+  target that uses the existing public native bridge contracts rather than test
+  doubles.
+- The built Windows host executed app-support lookup, capture capability plus
+  enable/release, local-network capability/discovery, transport capability and
+  receive, and secure-key save/read-back, stale-writer conflict, conditional
+  replacement/delete, and tombstone read-back checks successfully.
+- The host's UDP multicast send returned its stable `Native transport send
+  failed` result in this environment. The smoke target records that warning
+  without hiding it; firewall, interface, and cross-device reachability remain
+  external validation.
+
+The direct smoke executable exited cleanly. No Android device or emulator was
+available for the corresponding Android runtime pass.
+
+Full analyze, boundary-check, source-text, serialized test, dependency-audit,
+and `git diff --check` gates passed. Dependency audit reports zero actionable
+upgrades and 11 newer versions below the current toolchain ceiling.

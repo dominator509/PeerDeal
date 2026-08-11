@@ -1290,10 +1290,19 @@ revision and refresh on a conflict while retaining legacy bridge compatibility.
 This closes the coded CAS/version gap; runtime/device validation, other-platform
 storage, release signing, and product state/database wiring remain separate.
 
+The T89 follow-up adds a dependency-free Windows native-host smoke target under
+the desktop app's `tool/` directory. The built host was executed directly and
+passed app-support lookup, capture capability plus enable/release, local-network
+capability/discovery, transport capability/receive, and secure-key
+save/read-back, stale-writer conflict, conditional replacement/delete, and
+tombstone read-back checks. The host returned its stable transport-send failure
+for the UDP multicast attempt in this environment; firewall, interface,
+cross-device reachability, and Android device validation remain external.
+
 ## Next production hardening order
-1. Validate Android and Windows secure-key and capture behavior at runtime,
-   including Android real-device persistence, `FLAG_SECURE`, Windows display
-   affinity, and operator-owned release signing.
+1. Validate Android secure-key/capture behavior on a real device, and validate
+   Windows UDP multicast send across the intended firewall/interface profile,
+   including operator-owned release signing.
 2. Replace the remaining native bridge stubs with platform implementations
    that satisfy the locked method-channel contracts, starting with other
    platform secure receipt key storage and capture enforcement behind the
