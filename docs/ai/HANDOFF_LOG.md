@@ -8044,3 +8044,28 @@ Risks:
 - Already-dispatched native calls remain host-owned. Runtime/device readiness,
   network reachability, other-platform native implementations, release signing,
   and product database/state wiring remain external or integration-owned.
+
+---
+
+### 2026-08-11 - Codex - Native Host CI Build Gates
+
+Summary:
+- Added separate CI jobs for Android debug APK and Windows debug host
+  compilation.
+- Preserved the existing workspace quality gates and kept compile success
+  distinct from release signing and runtime/device validation.
+
+Files changed:
+- `.github/workflows/ci.yml`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests and builds:
+- Local `flutter build apk --debug --no-pub`: passed.
+- Local `flutter build windows --no-pub`: passed.
+- Full repository gates remain the required CI baseline.
+
+Risks:
+- CI host compilation does not prove physical-device persistence/capture,
+  firewall or cross-device reachability, release signing, other-platform host
+  implementations, or product database/state wiring.

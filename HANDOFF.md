@@ -674,3 +674,20 @@ Remaining:
   readiness, device/network reachability, release signing, other-platform
   implementations, and product database/state wiring remain external or
   integration-owned.
+
+## Recent T79 Changes
+
+- Added a CI job that compiles the Android debug APK on Ubuntu.
+- Added a separate CI job that compiles the Windows debug host on Windows.
+- Kept release signing and runtime/device checks separate from compile-only
+  automation because they require operator credentials or physical runtime
+  validation.
+
+Local host verification passed:
+- `flutter build apk --debug --no-pub`
+- `flutter build windows --no-pub`
+
+Remaining:
+- CI compile success does not prove Android/Windows secure-key persistence,
+  capture enforcement, firewall or cross-device reachability, release signing,
+  other-platform hosts, or product database/state provisioning.

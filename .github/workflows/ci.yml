@@ -60,3 +60,40 @@ jobs:
 
       - name: Test
         run: dart run melos run test
+
+  android-debug-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install workspace dependencies
+        run: flutter pub get
+
+      - name: Build Android debug APK
+        working-directory: apps/peerdeal_mobile
+        run: flutter build apk --debug --no-pub
+
+  windows-debug-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Install workspace dependencies
+        run: flutter pub get
+
+      - name: Build Windows debug host
+        working-directory: apps/peerdeal_desktop
+        run: flutter build windows --debug --no-pub

@@ -1212,6 +1212,14 @@ wins. Already-dispatched host calls, runtime/device validation, network
 reachability, other-platform native implementations, and product database/state
 provisioning remain external.
 
+The T79 follow-up adds native host compilation to repository CI. Pull requests
+and pushes to the configured CI branches now compile an Android debug APK and a
+Windows debug host in separate platform jobs, in addition to the existing
+workspace analyzer, boundary, dependency, source-text, and test gates. These
+jobs prove host build compatibility only; release signing, runtime/device
+secure-key and capture behavior, network reachability, and product state
+provisioning remain separately owned.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

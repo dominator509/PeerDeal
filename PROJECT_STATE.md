@@ -752,6 +752,16 @@ Already-dispatched host calls remain host-owned; runtime/device validation,
 network reachability, other-platform native implementations, and product
 database/state provisioning remain external or integration-owned.
 
+## Recent T79 Changes
+
+- Repository CI now compiles an Android debug APK and a Windows debug host in
+  separate platform jobs.
+- Local verification produced the Android debug APK and Windows host artifact.
+
+These are host compilation gates only. Release signing, runtime/device
+validation, network reachability, other-platform hosts, and product
+database/state provisioning remain external or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:
