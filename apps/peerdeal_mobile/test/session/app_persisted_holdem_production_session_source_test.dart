@@ -229,8 +229,7 @@ void main() {
               ),
             ),
           ),
-          eventIdFactory: (eventType, eventSeq) =>
-              'evt_${eventType}_$eventSeq',
+          eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
           emittedAtFactory: () => '2026-08-10T00:00:00Z',
           eventHashFactory: computeCanonicalHash,
           sourceLoadTimeout: Duration.zero,
@@ -269,8 +268,7 @@ void main() {
               ),
             ),
           ),
-          eventIdFactory: (eventType, eventSeq) =>
-              'evt_${eventType}_$eventSeq',
+          eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
           emittedAtFactory: () => '2026-08-10T00:00:00Z',
           eventHashFactory: computeCanonicalHash,
         ),
@@ -311,6 +309,31 @@ void main() {
     expect(input.peerId, 'peer_selected');
     expect(input.localSeat, 3);
   });
+
+  test('rejects an unsafe dynamic peer override before input construction', () {
+    expect(
+      () => _routePolicy().buildInput(
+        snapshot: _typedSnapshot(),
+        localPeerId: 'peer_local',
+        remotePeerId: ' peer_selected',
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test(
+    'rejects a non-positive dynamic seat override before input construction',
+    () {
+      expect(
+        () => _routePolicy().buildInput(
+          snapshot: _typedSnapshot(),
+          localPeerId: 'peer_local',
+          localSeat: 0,
+        ),
+        throwsArgumentError,
+      );
+    },
+  );
 
   test('fails closed when no typed snapshot is persisted', () {
     final source = _source(InMemoryRecoveryPersistenceStore());

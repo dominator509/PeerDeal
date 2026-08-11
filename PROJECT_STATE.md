@@ -944,6 +944,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   product state selection, event identity, snapshot IDs, startup invocation,
   database replacement, and native/device validation remain separate.
 
+## Recent T97 Changes
+
+- Mirrored `AppPersistedHoldemProductionSessionRoutePolicy.buildInput(...)`
+  now revalidates context-supplied remote peer IDs and local seats before
+  constructing production session input.
+- Direct source consumers therefore retain the same fail-closed peer and seat
+  gates as the context-aware production bootstrap.
+- Product state, route policy ownership, database replacement, and runtime
+  validation remain separate.
+
 ## Required Gates
 
 Run after each retrofit step:

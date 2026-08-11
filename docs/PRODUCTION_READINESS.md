@@ -1345,6 +1345,14 @@ after the event log is durable for suffix replay. It does not select product
 state, event identity, snapshot IDs, route or retention policy, startup, or a
 production database.
 
+The T97 follow-up closes the direct-source metadata bypass around the
+first-join/rejoin handoff. Mirrored `AppPersistedHoldemProductionSessionRoutePolicy`
+instances now revalidate both configured values and context-supplied remote
+peer/local-seat overrides before constructing production session input. This
+preserves the bootstrap's fail-closed metadata boundary for direct source
+consumers without selecting product state, changing route policy ownership, or
+replacing durable database/runtime validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -496,7 +496,10 @@ local ID only after snapshot validation and recovery replay succeed. Both
 source load methods accept the app route cancellation signal and fail closed
 before recovery access or around lazy identity provisioning when cancellation
 is observed. These adapters do not choose a database, discover a remote peer,
-or validate native runtime/device readiness.
+or validate native runtime/device readiness. `AppPersistedHoldemProductionSessionRoutePolicy.buildInput(...)`
+also revalidates context-supplied remote-peer and local-seat overrides before
+constructing route input, so direct source consumers cannot bypass the same
+peer-identity and positive-seat gates used by the bootstrap.
 
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through

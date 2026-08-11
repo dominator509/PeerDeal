@@ -261,6 +261,9 @@ seat because there is no bootstrap discovery phase. The context-aware
 production bootstrap validates it and the persisted app source maps it into
 route input. Missing governance peer data fails closed. Core state truth,
 protocol schemas, native bridge semantics, and variant rules remain unchanged.
+The route policy validates both its configured peer/seat and any first-join or
+rejoin context overrides before producing app session input, preserving the
+same fail-closed boundary for direct source consumers.
 
 `AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(...)` is
 the mirrored app-owned composition entrypoint for recovery-backed sessions. It

@@ -69,22 +69,8 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
         'Production navigation label is not safe.',
       );
     }
-    if (remotePeerId.trim().isEmpty ||
-        remotePeerId != remotePeerId.trim() ||
-        _containsControlCharacter(remotePeerId)) {
-      throw ArgumentError.value(
-        remotePeerId,
-        'remotePeerId',
-        'Peer identity must be non-empty, unpadded, and control-free.',
-      );
-    }
-    if (localSeat < 1) {
-      throw ArgumentError.value(
-        localSeat,
-        'localSeat',
-        'Local seat must be positive.',
-      );
-    }
+    _validatePeerId(remotePeerId, 'remotePeerId');
+    _validateLocalSeat(localSeat, 'localSeat');
   }
 
   AppHoldemProductionSessionInput buildInput({
@@ -93,6 +79,11 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
     String? remotePeerId,
     int? localSeat,
   }) {
+    final selectedRemotePeerId = remotePeerId ?? this.remotePeerId;
+    final selectedLocalSeat = localSeat ?? this.localSeat;
+    _validatePeerId(selectedRemotePeerId, 'remotePeerId');
+    _validateLocalSeat(selectedLocalSeat, 'localSeat');
+
     return AppHoldemProductionSessionInput(
       initialTableState: snapshot.tableState,
       initialHandState: snapshot.handState,
@@ -106,10 +97,32 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
       ),
       path: path,
       navigationLabel: navigationLabel,
-      peerId: remotePeerId ?? this.remotePeerId,
+      peerId: selectedRemotePeerId,
       localPeerId: localPeerId,
-      localSeat: localSeat ?? this.localSeat,
+      localSeat: selectedLocalSeat,
     );
+  }
+
+  static void _validatePeerId(String peerId, String fieldName) {
+    if (peerId.trim().isEmpty ||
+        peerId != peerId.trim() ||
+        _containsControlCharacter(peerId)) {
+      throw ArgumentError.value(
+        peerId,
+        fieldName,
+        'Peer identity must be non-empty, unpadded, and control-free.',
+      );
+    }
+  }
+
+  static void _validateLocalSeat(int localSeat, String fieldName) {
+    if (localSeat < 1) {
+      throw ArgumentError.value(
+        localSeat,
+        fieldName,
+        'Local seat must be positive.',
+      );
+    }
   }
 
   static bool _containsControlCharacter(String value) =>

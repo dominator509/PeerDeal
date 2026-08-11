@@ -12,6 +12,38 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-11 - Codex - Production Rejoin Metadata Gate
+
+Summary:
+- Mirrored persisted Hold'em route policies now validate dynamic remote-peer
+  and local-seat overrides inside `buildInput(...)`.
+- Direct source consumers cannot bypass the bootstrap's first-join/rejoin
+  metadata validation before production input construction.
+
+Files changed:
+- Mirrored persisted production-session source implementations and focused
+  regression tests.
+- Readiness ledgers and stable AI context docs.
+
+Tests run:
+- Mobile and desktop persisted-source suites: 14 tests each passed.
+- Focused mirrored app analysis passed.
+- Full analyzer, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Dependency audit reports zero actionable upgrades and 11 newer versions below
+  the current toolchain ceiling.
+
+Risks:
+- This hardens metadata validation only. Product state selection, startup,
+  database persistence, native/device validation, and release signing remain
+  separate boundaries.
+
+Next reviewer:
+- Preserve the dynamic peer/seat validation when connecting a real product
+  source to first-join and rejoin route handoffs.
+
+---
+
 ### 2026-08-11 - Codex - Hold'em Event-Log Checkpoint Writer
 
 Summary:

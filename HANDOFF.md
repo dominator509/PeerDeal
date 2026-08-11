@@ -961,3 +961,15 @@ Remaining:
 - Product startup must supply authoritative state, event IDs/hashes, snapshot
   IDs, and invoke the writer. It does not own product state selection, route
   policy, retention, database replacement, startup, or native/device validation.
+
+## Recent T97 Changes
+
+- Mirrored `AppPersistedHoldemProductionSessionRoutePolicy.buildInput(...)`
+  now revalidates context-supplied remote peer IDs and local seats before
+  constructing production session input.
+- This closes the direct-source bypass around the bootstrap's first-join/rejoin
+  metadata gates without changing route policy ownership or session state truth.
+
+Remaining:
+- Product startup, authoritative state, event identity, snapshot IDs, database
+  persistence, native/device validation, and release signing remain separate.
