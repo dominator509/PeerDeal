@@ -362,11 +362,13 @@ native transport.
 `AppPersistedHoldemProductionSessionSource` is the concrete app-owned adapter
 for the existing `RecoveryPersistenceStore` snapshot boundary. It decodes a
 `HoldemStateSnapshot` from a versioned `SnapshotEnvelope`, verifies exact
-invite scope and snapshot/cursor sequence continuity, and invokes a caller-
-owned input factory. Missing snapshots, unsupported versions, scope mismatch,
-and recovery suffix events beyond the snapshot base fail closed. The adapter
-does not select a database, create local identity, own route/close policy, or
-replay suffix events; those remain product integration responsibilities.
+invite scope and snapshot/cursor sequence continuity, replays a persisted
+suffix through `HoldemCoreProjectionAdapter.replay(...)`, and invokes a
+caller-owned input factory. Missing snapshots, unsupported versions, scope
+mismatch, bad hashes, unsupported events, or reducer rejection fail closed.
+Replay is atomic and never returns partial state. The adapter does not select a
+database, create local identity, or own route/close policy; those remain
+product integration responsibilities.
 
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through

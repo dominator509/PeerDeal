@@ -12,6 +12,37 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - Deterministic Persisted Recovery-Suffix Replay
+
+Summary:
+- Added atomic `HoldemCoreProjectionAdapter.replay(...)` composition across
+  cursor acceptance, `CoreReducer`, and `HoldemEventReducer`.
+- Mirrored persisted production sources now replay valid recovery suffixes and
+  fail closed on tampered or unsupported events without partial state.
+
+Files changed:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_core_projection_adapter.dart`
+  and focused replay tests.
+- Mirrored app persisted-session sources and focused source tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Tests run:
+- Focused variants replay/projection tests: passed, 7 tests total.
+- Focused mobile persisted-source suite: passed, 5 tests.
+- Focused desktop persisted-source suite: passed, 5 tests.
+- Focused variants and app analyzers: passed.
+
+Risks:
+- Product database wiring, local identity, native/device validation, and
+  release signing remain integration or operator-owned.
+
+Next reviewer:
+- Supply the real product source and identity mapping, or continue with the
+  documented native/device runtime validation gates.
+
+---
+
 ### 2026-08-10 - Codex - Typed Persisted Hold'em Production Source
 
 Summary:

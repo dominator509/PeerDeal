@@ -432,6 +432,19 @@ Generated: 2026-08-10
   identity, and event replay remain integration-owned. Focused mobile and
   desktop tests passed with 4 tests each.
 
+## Recent T58 Changes
+
+- `HoldemCoreProjectionAdapter.replay(...)` now applies persisted suffix events
+  atomically. Cursor acceptance verifies scope, sequence, catalog support, and
+  event hashes; `CoreReducer` applies universal table truth; and
+  `HoldemEventReducer` applies hand-scoped variant truth.
+- Mirrored persisted production sources now use that replay path. Valid
+  recovery suffixes advance the typed snapshot before input-factory mapping,
+  while tampered or unsupported events fail closed with no partial state.
+  Focused variant replay tests passed with 2 tests and mobile/desktop source
+  tests passed with 5 tests each. Product database wiring and local identity
+  remain integration-owned.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

@@ -6,6 +6,7 @@ import 'holdem_action_street_coordinator.dart';
 import '../contracts/showdown_models.dart';
 import 'holdem_hand_phase.dart';
 import 'holdem_hand_state.dart';
+import 'holdem_event_reducer.dart';
 import 'holdem_settlement_blocked_event_builder.dart';
 import 'holdem_settlement_projected_event_builder.dart';
 import 'holdem_showdown_coordinator.dart';
@@ -323,6 +324,27 @@ class HoldemCoreProjectionResult {
   bool get isRejected => !isApplied;
 }
 
+@immutable
+class HoldemRecoveryReplayResult {
+  const HoldemRecoveryReplayResult({
+    required this.isApplied,
+    required this.coreState,
+    required this.handState,
+    required this.cursor,
+    required this.appliedEventCount,
+    this.reasonCode,
+  });
+
+  final bool isApplied;
+  final TableState coreState;
+  final HoldemHandState handState;
+  final HoldemEventCursor cursor;
+  final int appliedEventCount;
+  final String? reasonCode;
+
+  bool get isRejected => !isApplied;
+}
+
 /// Connects Hold'em variant transitions to canonical protocol events and the
 /// universal deterministic core reducer.
 ///
@@ -345,6 +367,96 @@ class HoldemCoreProjectionAdapter {
   final HoldemSettlementBlockedEventBuilder settlementBlockedBuilder;
   final HoldemSettlementProjectedEventBuilder settlementProjectedBuilder;
   final HoldemHandSettledEventBuilder handSettledBuilder;
+
+  /// Replays a persisted suffix as one deterministic, atomic state transition.
+  ///
+  /// Cursor acceptance verifies the event stream and hash chain, core applies
+  /// universal table truth, and the variant reducer applies hand-scoped truth.
+  /// A rejected event returns the original states so callers cannot expose a
+  /// partially replayed recovery window.
+  HoldemRecoveryReplayResult replay({
+    required TableState coreState,
+    required HoldemHandState handState,
+    required HoldemEventCursor cursor,
+    required Iterable<EventEnvelope> events,
+    HoldemEventReducer eventReducer = const HoldemEventReducer(),
+  }) {
+    var nextCoreState = coreState;
+    var nextHandState = handState;
+    var nextCursor = cursor;
+    var appliedEventCount = 0;
+
+    for (final event in events) {
+      final accepted = nextCursor.accept(event);
+      if (accepted.isRejected) {
+        return HoldemRecoveryReplayResult(
+          isApplied: false,
+          coreState: coreState,
+          handState: handState,
+          cursor: cursor,
+          appliedEventCount: 0,
+          reasonCode:
+              accepted.reasonCode ?? 'ERR_HOLDEM_RECOVERY_EVENT_REJECTED',
+        );
+      }
+
+      final projectedCoreState = _applyReplayCoreEvent(
+        current: nextCoreState,
+        event: event,
+      );
+      if (projectedCoreState == null) {
+        return HoldemRecoveryReplayResult(
+          isApplied: false,
+          coreState: coreState,
+          handState: handState,
+          cursor: cursor,
+          appliedEventCount: 0,
+          reasonCode: 'ERR_HOLDEM_RECOVERY_CORE_REJECTED',
+        );
+      }
+
+      var projectedHandState = nextHandState;
+      if (event.handId != null) {
+        final reduced = eventReducer.apply(state: nextHandState, event: event);
+        if (reduced.isRejected) {
+          return HoldemRecoveryReplayResult(
+            isApplied: false,
+            coreState: coreState,
+            handState: handState,
+            cursor: cursor,
+            appliedEventCount: 0,
+            reasonCode:
+                reduced.reasonCode ?? 'ERR_HOLDEM_RECOVERY_VARIANT_REJECTED',
+          );
+        }
+        projectedHandState = reduced.state;
+      }
+
+      nextCoreState = projectedCoreState;
+      nextHandState = projectedHandState;
+      nextCursor = accepted.cursor;
+      appliedEventCount += 1;
+    }
+
+    return HoldemRecoveryReplayResult(
+      isApplied: true,
+      coreState: nextCoreState,
+      handState: nextHandState,
+      cursor: nextCursor,
+      appliedEventCount: appliedEventCount,
+    );
+  }
+
+  TableState? _applyReplayCoreEvent({
+    required TableState current,
+    required EventEnvelope event,
+  }) {
+    try {
+      return coreReducer.apply(current, event);
+    } on Object {
+      return null;
+    }
+  }
 
   HoldemCoreProjectionResult startHand({
     required TableState coreState,

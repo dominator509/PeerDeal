@@ -53,6 +53,53 @@ void main() {
     expect(() => source.load(_invite()), throwsA(isA<StateError>()));
   });
 
+  test(
+    'replays a valid recovery suffix before invoking the input factory',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      final persisted = _typedSnapshot();
+      _persist(store, persisted);
+      final issued = persisted.eventCursor.issue(
+        eventType: 'OpenTableSessionOpened',
+        eventId: 'evt_open_001',
+        emittedAt: '2026-08-10T00:00:01Z',
+        actorRef: 'system',
+        payload: const <String, Object?>{'mode_type': 'open_table'},
+      );
+      final append = store.appendEvents(
+        scope: _scope(),
+        events: <EventEnvelope>[issued.event],
+      );
+      expect(append.isSuccess, isTrue);
+
+      HoldemStateSnapshot? captured;
+      final source = _source(
+        store,
+        inputFactory: (invite, snapshot) {
+          captured = snapshot;
+          return AppHoldemProductionSessionInput(
+            initialTableState: snapshot.tableState,
+            initialHandState: snapshot.handState,
+            initialCursor: snapshot.eventCursor,
+            closeEventAdapter: _closeAdapter(snapshot.tableState),
+            path: '/holdem-live',
+            navigationLabel: 'Live Holdem',
+            peerId: 'peer_remote',
+            localPeerId: 'peer_local',
+            localSeat: 1,
+          );
+        },
+      );
+
+      await source.load(_invite());
+
+      expect(captured?.tableState.phase, TablePhase.openReady);
+      expect(captured?.tableState.eventSequence, 1);
+      expect(captured?.eventCursor.nextEventSeq, 2);
+      expect(captured?.eventCursor.previousEventHash, issued.event.eventHash);
+    },
+  );
+
   test('fails closed on unsupported snapshot versions', () {
     final store = InMemoryRecoveryPersistenceStore();
     final persisted = _typedSnapshot();
@@ -76,7 +123,7 @@ void main() {
     expect(() => _source(store).load(_invite()), throwsA(isA<StateError>()));
   });
 
-  test('fails closed when recovery suffix requires product replay', () {
+  test('fails closed on an unsupported recovery suffix event', () {
     final store = InMemoryRecoveryPersistenceStore();
     _persist(store, _typedSnapshot());
     final append = store.appendEvents(

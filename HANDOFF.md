@@ -30,8 +30,8 @@ session configuration, T49 fail-closed Android release signing, T50 production
 table UI accessibility/responsive hardening, T51 keyboard/focus control
 hardening, T52 action hit-target hardening, T53 local-seat action routing,
 T54 typed core table-state hydration, T55 typed Hold'em state hydration, and
-T56 typed Hold'em event-cursor hydration, and T57 typed persisted Hold'em
-source hydration
+T56 typed Hold'em event-cursor hydration, T57 typed persisted Hold'em source
+hydration, and T58 deterministic persisted recovery-suffix replay
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -67,6 +67,9 @@ are implemented on branch
   session sources. They hydrate the typed table, Hold'em hand, and event
   cursor state from the existing recovery store and fail closed on missing,
   unsupported, mismatched, or unreplayed snapshot data.
+- Added variant-owned atomic recovery replay. It validates cursor/hash-chain
+  continuity, applies universal core events, applies hand-scoped Hold'em
+  events, and never exposes a partially replayed state.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -438,4 +441,7 @@ are implemented on branch
 - T55 focused variant state persistence tests: passed, 3 tests.
 - T56 focused event-cursor persistence tests: passed, 3 tests.
 - T57 focused persisted-source tests: passed, 4 tests each in mobile and
+  desktop.
+- T58 focused variant recovery-replay tests: passed, 2 tests.
+- T58 focused persisted-source tests: passed, 5 tests each in mobile and
   desktop.

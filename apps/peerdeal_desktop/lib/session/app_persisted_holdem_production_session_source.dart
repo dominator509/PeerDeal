@@ -12,9 +12,9 @@ typedef AppHoldemProductionSessionInputFactory =
 
 /// Loads a typed Hold'em production state from the existing recovery store.
 ///
-/// The adapter owns snapshot decoding and persistence-scope checks only. The
-/// input factory remains responsible for local identity, route metadata, close
-/// policy, and any platform runtime dependencies.
+/// The adapter owns snapshot decoding, persistence-scope checks, and
+/// deterministic recovery-suffix replay. The input factory remains responsible
+/// for local identity, route metadata, close policy, and platform dependencies.
 class AppPersistedHoldemProductionSessionSource
     implements AppHoldemProductionSessionSource {
   const AppPersistedHoldemProductionSessionSource({
@@ -23,19 +23,26 @@ class AppPersistedHoldemProductionSessionSource
     required HoldemEventIdFactory eventIdFactory,
     required HoldemEventTimestampFactory emittedAtFactory,
     required HoldemEventHashFactory eventHashFactory,
+    HoldemCoreProjectionAdapter replayAdapter =
+        const HoldemCoreProjectionAdapter(),
+    HoldemEventReducer eventReducer = const HoldemEventReducer(),
     this.snapshotType = 'HoldemStateSnapshot',
     this.snapshotVersion = '1.0',
   }) : _store = store,
        _inputFactory = inputFactory,
        _eventIdFactory = eventIdFactory,
        _emittedAtFactory = emittedAtFactory,
-       _eventHashFactory = eventHashFactory;
+       _eventHashFactory = eventHashFactory,
+       _replayAdapter = replayAdapter,
+       _eventReducer = eventReducer;
 
   final RecoveryPersistenceStore _store;
   final AppHoldemProductionSessionInputFactory _inputFactory;
   final HoldemEventIdFactory _eventIdFactory;
   final HoldemEventTimestampFactory _emittedAtFactory;
   final HoldemEventHashFactory _eventHashFactory;
+  final HoldemCoreProjectionAdapter _replayAdapter;
+  final HoldemEventReducer _eventReducer;
   final String snapshotType;
   final String snapshotVersion;
 
@@ -44,15 +51,10 @@ class AppPersistedHoldemProductionSessionSource
     ResolvedInvite invite, {
     Future<void>? cancellation,
   }) {
-    return Future<AppHoldemProductionSessionInput>.sync(
-      () => _load(invite, cancellation: cancellation),
-    );
+    return Future<AppHoldemProductionSessionInput>.sync(() => _load(invite));
   }
 
-  AppHoldemProductionSessionInput _load(
-    ResolvedInvite invite, {
-    Future<void>? cancellation,
-  }) {
+  AppHoldemProductionSessionInput _load(ResolvedInvite invite) {
     final scope = RecoveryPersistenceScope(
       tableId: invite.tableId,
       sessionId: invite.sessionId,
@@ -86,14 +88,6 @@ class AppPersistedHoldemProductionSessionSource
         'Persisted Holdem state snapshot scope mismatches invite.',
       );
     }
-    if (window.events.any(
-      (event) => event.eventSeq > envelope.snapshotBaseEventSeq,
-    )) {
-      throw StateError(
-        'Persisted recovery suffix requires product-owned event replay.',
-      );
-    }
-
     final state = HoldemStateSnapshot.fromJson(
       envelope.payload,
       eventIdFactory: _eventIdFactory,
@@ -108,6 +102,31 @@ class AppPersistedHoldemProductionSessionSource
       throw StateError('Persisted Holdem state does not match snapshot scope.');
     }
 
-    return _inputFactory(invite, state);
+    final suffix = window.events
+        .where((event) => event.eventSeq > envelope.snapshotBaseEventSeq)
+        .toList(growable: false);
+    if (suffix.isEmpty) {
+      return _inputFactory(invite, state);
+    }
+
+    final replay = _replayAdapter.replay(
+      coreState: state.tableState,
+      handState: state.handState,
+      cursor: state.eventCursor,
+      events: suffix,
+      eventReducer: _eventReducer,
+    );
+    if (replay.isRejected) {
+      throw StateError('Persisted Holdem recovery replay was rejected.');
+    }
+
+    return _inputFactory(
+      invite,
+      HoldemStateSnapshot(
+        tableState: replay.coreState,
+        handState: replay.handState,
+        eventCursor: replay.cursor,
+      ),
+    );
   }
 }

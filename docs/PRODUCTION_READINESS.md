@@ -1034,6 +1034,14 @@ caller still supplies local identity, route/close policy, event factories, and
 the product input mapping; concrete database wiring and suffix replay remain
 open integration work.
 
+The T58 follow-up closes the suffix-replay portion of that boundary. The
+variant-owned replay transaction validates each persisted event through the
+Hold'em cursor, applies universal events through `CoreReducer`, applies
+hand-scoped events through `HoldemEventReducer`, and commits only after the
+whole suffix succeeds. Invalid or unsupported suffixes fail closed without
+partial state. Product database selection, local identity, and native/device
+runtime validation remain integration or operator-owned.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display
