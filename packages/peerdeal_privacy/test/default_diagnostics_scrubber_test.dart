@@ -96,4 +96,64 @@ void main() {
       'message': 'No details are still safe.',
     });
   });
+
+  test('DefaultDiagnosticsScrubber bounds maps, lists, depth, and text', () {
+    const scrubber = DefaultDiagnosticsScrubber();
+    final wideMap = <String, Object?>{
+      for (var index = 0; index < 65; index++) 'field_$index': index,
+    };
+    final wideList = List<Object?>.generate(65, (index) => index);
+    final longText = String.fromCharCodes(
+      List<int>.filled(DefaultDiagnosticsScrubber.maxTextBytes + 1, 120),
+    );
+    Map<String, Object?> nested = <String, Object?>{'leaf': 'value'};
+    for (var index = 0; index < DefaultDiagnosticsScrubber.maxDepth; index++) {
+      nested = <String, Object?>{'nested': nested};
+    }
+
+    final result = scrubber.scrub({
+      'wide_map': wideMap,
+      'wide_list': wideList,
+      'nested': nested,
+      'long_text': longText,
+    });
+
+    expect(result.payload['wide_map'], isA<Map<Object?, Object?>>());
+    expect(
+      (result.payload['wide_map']! as Map<Object?, Object?>).length,
+      DefaultDiagnosticsScrubber.maxMapEntries,
+    );
+    expect(
+      (result.payload['wide_map']! as Map<Object?, Object?>)['<truncated>'],
+      '<truncated>',
+    );
+    expect(result.payload['wide_list'], isA<List<Object?>>());
+    expect(
+      (result.payload['wide_list']! as List<Object?>).length,
+      DefaultDiagnosticsScrubber.maxListItems,
+    );
+    expect((result.payload['wide_list']! as List<Object?>).last, '<truncated>');
+    expect(result.payload['long_text'], '<truncated>');
+    expect(result.payload['nested'], isA<Map<Object?, Object?>>());
+    expect(result.payload['nested'].toString(), contains('<truncated>'));
+  });
+
+  test('DefaultDiagnosticsScrubber bounds protocol diagnostic lists', () {
+    const scrubber = DefaultDiagnosticsScrubber();
+    final result = scrubber.scrubProtocolDiagnostics(
+      List<ProtocolDiagnostic>.generate(
+        DefaultDiagnosticsScrubber.maxProtocolDiagnostics + 1,
+        (index) => ProtocolDiagnostic(
+          code: 'ERR_$index',
+          message: 'Diagnostic $index',
+        ),
+      ),
+    );
+
+    expect(
+      result,
+      hasLength(DefaultDiagnosticsScrubber.maxProtocolDiagnostics),
+    );
+    expect(result.last.code, 'ERR_DIAGNOSTICS_TRUNCATED');
+  });
 }

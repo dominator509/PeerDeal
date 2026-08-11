@@ -12,6 +12,35 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-11 - Codex - T107 Privacy Diagnostics Bounds
+
+Summary:
+- `DefaultDiagnosticsScrubber` now bounds recursive maps and lists at 64
+  entries, nested depth at 8, text at 512 UTF-8 bytes, and protocol
+  diagnostics at 64 items.
+- Overflow emits stable `<truncated>` markers or
+  `ERR_DIAGNOSTICS_TRUNCATED` while sensitive-field redaction remains intact.
+
+Files changed:
+- Privacy scrubber, focused regression tests, and privacy README.
+- Readiness ledger, handoff queue, project state, and stable AI context docs.
+
+Tests run:
+- Focused `peerdeal_privacy` diagnostics suite: 6 tests passed.
+- Focused `peerdeal_privacy` analysis passed.
+
+Risks:
+- This bounds the shared privacy scrubbing boundary. App rendering,
+  production database replacement, platform/runtime validation,
+  other-platform hosts, product startup integration, and release signing
+  remain separate.
+
+Next reviewer:
+- Preserve these limits when adding new diagnostics-producing adapters or
+  widening shareable-field payloads.
+
+---
+
 ### 2026-08-11 - Codex - T106 Recovery Event-Window Bounds
 
 Summary:

@@ -1426,6 +1426,14 @@ oversized.
 This hardens the JSON fallback and in-memory seam only; it does not replace the
 production database or prove platform/runtime persistence behavior.
 
+The T107 follow-up closes the privacy scrubber materialization gap.
+`DefaultDiagnosticsScrubber` now bounds recursive maps and lists at 64 entries,
+nested depth at 8, text at 512 UTF-8 bytes, and protocol diagnostics at 64
+items. Overflow emits stable truncation markers while sensitive-field redaction
+remains intact. This hardens the shared privacy boundary; app rendering,
+production database replacement, and platform/runtime validation remain
+separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

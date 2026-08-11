@@ -1101,3 +1101,16 @@ Remaining:
 - Production database replacement, platform/runtime persistence validation,
   other-platform hosts, product startup integration, and release signing
   remain separate.
+
+## Recent T107 Changes
+
+- `DefaultDiagnosticsScrubber` now bounds recursive maps and lists at 64
+  entries, nested depth at 8, text at 512 UTF-8 bytes, and protocol
+  diagnostics at 64 items.
+- Overflow emits stable `<truncated>` markers or
+  `ERR_DIAGNOSTICS_TRUNCATED` while existing redaction behavior is preserved.
+
+Remaining:
+- App rendering, production database replacement, platform/runtime validation,
+  other-platform hosts, product startup integration, and release signing
+  remain separate.

@@ -1043,6 +1043,14 @@ signing, and concrete product state wiring remain external or integration-owned.
   database replacement and platform/runtime persistence validation remain
   external.
 
+## T107 Privacy Diagnostics Bounds
+
+- `DefaultDiagnosticsScrubber` now bounds recursive maps and lists at 64
+  entries, nested depth at 8, text at 512 UTF-8 bytes, and protocol
+  diagnostics at 64 items.
+- Overflow emits stable truncation markers while existing sensitive-field
+  redaction remains intact. Focused privacy tests and package analysis pass.
+
 ## Required Gates
 
 Run after each retrofit step:

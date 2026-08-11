@@ -126,6 +126,9 @@ Mounted receipt surfaces scrub receipt/recovery status, messages, shareable
 fields, recommended actions, and diagnostics before rendering. Rendered receipt
 shareable fields and recovery diagnostics must be bounded with stable
 truncation lines.
+`DefaultDiagnosticsScrubber` also bounds recursive maps and lists at 64 entries,
+nested depth at 8, text at 512 UTF-8 bytes, and protocol diagnostics at 64 items
+before returning scrubbed payloads; overflow emits stable truncation markers.
 Capture surface coordinators must scrub native warning detail and replace
 sensitive native notes with stable unavailable text before UI projection.
 The capture protection bridge exposes `getCapability` and `setBlocking` on
