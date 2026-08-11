@@ -624,6 +624,13 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   oversized input/output returns the fatal
   `ERR_RECOVERY_PERSISTENCE_FILE_TOO_LARGE` conflict without hydrating or
   writing state.
+- `peerdeal_sync` recovery stores apply configurable event-count and per-event
+  byte limits (4,096 events and 64 KiB by default); oversized append batches,
+  hydrated windows, and individual events return fatal
+  `ERR_RECOVERY_PERSISTENCE_EVENT_COUNT_TOO_LARGE` or
+  `ERR_RECOVERY_PERSISTENCE_EVENT_TOO_LARGE` conflicts without mutating state;
+  non-JSON event payloads return
+  `ERR_RECOVERY_PERSISTENCE_EVENT_INVALID` instead.
 - Generic native bridge decoders bound transport frame batches, discovery
   collections, secure-key record lists, frame payloads, identities, discovery
   values, key fields, and diagnostics before iteration or model construction;

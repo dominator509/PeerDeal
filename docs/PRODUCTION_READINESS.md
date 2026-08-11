@@ -1416,6 +1416,16 @@ caps adapter traversal at 64 and unicast-address scans at 256. Android and
 Windows host builds and direct Windows smoke pass; device behavior and
 cross-device reachability remain external.
 
+The T106 follow-up closes the remaining recovery event-window bound. The
+`peerdeal_sync` in-memory and JSON stores now enforce configurable event-count
+and per-event byte limits, defaulting to 4,096 events and the protocol codec's
+64 KiB event bound. Oversized append batches, hydrated JSON windows, and
+individual events fail closed before state mutation with stable fatal conflicts;
+non-JSON event payloads are rejected as invalid rather than misclassified as
+oversized.
+This hardens the JSON fallback and in-memory seam only; it does not replace the
+production database or prove platform/runtime persistence behavior.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

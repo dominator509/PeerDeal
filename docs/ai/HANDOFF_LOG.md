@@ -12,6 +12,34 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-11 - Codex - T106 Recovery Event-Window Bounds
+
+Summary:
+- `peerdeal_sync` in-memory and JSON recovery stores now enforce configurable
+  event-count and per-event byte limits, defaulting to 4,096 events and the
+  protocol codec's 64 KiB event bound.
+- Oversized append batches, hydrated JSON windows, and individual events fail
+  closed before recovery state mutation with stable fatal conflicts.
+
+Files changed:
+- Sync recovery stores, focused persistence tests, and sync README.
+- Readiness ledger, handoff queue, project state, and stable AI context docs.
+
+Tests run:
+- Focused `peerdeal_sync` recovery persistence suite: 25 tests passed.
+- Focused `peerdeal_sync` analysis passed.
+
+Risks:
+- This bounds the in-memory and JSON recovery seam only. Production database
+  replacement, platform/runtime persistence validation, product startup
+  integration, other-platform hosts, and release signing remain separate.
+
+Next reviewer:
+- Preserve the event-count and canonical protocol byte limits when a concrete
+  product persistence source replaces or supplements the JSON fallback.
+
+---
+
 ### 2026-08-11 - Codex - Production Rejoin Metadata Gate
 
 Summary:

@@ -32,6 +32,89 @@ void main() {
     );
   });
 
+  test(
+    'rejects an event window above the configured count without mutation',
+    () {
+      final store = InMemoryRecoveryPersistenceStore(maxEvents: 1);
+      expect(
+        store
+            .appendEvents(
+              scope: scope,
+              events: <EventEnvelope>[
+                _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+              ],
+            )
+            .isSuccess,
+        isTrue,
+      );
+
+      final result = store.appendEvents(
+        scope: scope,
+        events: <EventEnvelope>[
+          _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
+        ],
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(
+        result.conflicts.single.code,
+        'ERR_RECOVERY_PERSISTENCE_EVENT_COUNT_TOO_LARGE',
+      );
+      expect(result.conflicts.single.expected, '1');
+      expect(result.conflicts.single.actual, '2');
+      expect(store.loadWindow(scope).events.map((event) => event.eventSeq), [
+        1,
+      ]);
+    },
+  );
+
+  test('rejects an event above the configured byte limit without mutation', () {
+    final store = InMemoryRecoveryPersistenceStore(maxEventBytes: 1024);
+    final result = store.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(
+          seq: 1,
+          prevHash: genesisEventHash,
+          hash: 'hash_1',
+          payload: <String, Object?>{
+            'blob': String.fromCharCodes(List<int>.filled(2048, 120)),
+          },
+        ),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_EVENT_TOO_LARGE',
+    );
+    expect(result.conflicts.single.expected, '1024');
+    expect(store.loadWindow(scope).events, isEmpty);
+  });
+
+  test('rejects an event with a non-JSON payload without mutation', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    final result = store.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(
+          seq: 1,
+          prevHash: genesisEventHash,
+          hash: 'hash_1',
+          payload: <String, Object?>{'invalid': Object()},
+        ),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_EVENT_INVALID',
+    );
+    expect(store.loadWindow(scope).events, isEmpty);
+  });
+
   test('wipes an in-memory recovery window idempotently', () {
     final store = InMemoryRecoveryPersistenceStore();
     store.appendEvents(
@@ -346,6 +429,108 @@ void main() {
         maxFileBytes: 0,
       ),
       throwsArgumentError,
+    );
+    expect(
+      () => JsonFileRecoveryPersistenceStore(
+        rootDirectory: directory,
+        maxEvents: 0,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => JsonFileRecoveryPersistenceStore(
+        rootDirectory: directory,
+        maxEventBytes: 0,
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test(
+    'file store rejects an oversized persisted event window before hydration',
+    () {
+      final directory = Directory.systemTemp.createTempSync(
+        'peerdeal_recovery_store_',
+      );
+      addTearDown(() {
+        if (directory.existsSync()) {
+          directory.deleteSync(recursive: true);
+        }
+      });
+
+      final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+      expect(
+        writer
+            .appendEvents(
+              scope: scope,
+              events: <EventEnvelope>[
+                _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+                _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
+              ],
+            )
+            .isSuccess,
+        isTrue,
+      );
+
+      final limited = JsonFileRecoveryPersistenceStore(
+        rootDirectory: directory,
+        maxEvents: 1,
+      );
+      final result = limited.appendEvents(
+        scope: scope,
+        events: <EventEnvelope>[
+          _event(seq: 3, prevHash: 'hash_2', hash: 'hash_3'),
+        ],
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(
+        result.conflicts.single.code,
+        'ERR_RECOVERY_PERSISTENCE_EVENT_COUNT_TOO_LARGE',
+      );
+      expect(result.conflicts.single.expected, '1');
+      expect(limited.loadWindow(scope).events, isEmpty);
+    },
+  );
+
+  test('file store rejects an oversized event before durable replacement', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final limited = JsonFileRecoveryPersistenceStore(
+      rootDirectory: directory,
+      maxEventBytes: 1024,
+    );
+    final result = limited.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(
+          seq: 1,
+          prevHash: genesisEventHash,
+          hash: 'hash_1',
+          payload: <String, Object?>{
+            'blob': String.fromCharCodes(List<int>.filled(2048, 120)),
+          },
+        ),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_EVENT_TOO_LARGE',
+    );
+    expect(
+      directory.listSync().whereType<File>().where(
+        (candidate) => candidate.path.endsWith('.json'),
+      ),
+      isEmpty,
     );
   });
 
@@ -672,6 +857,7 @@ EventEnvelope _event({
   String tableId = 'table_1',
   String sessionId = 'session_1',
   String protocolVersion = '1.0.0',
+  Map<String, Object?> payload = const <String, Object?>{},
 }) {
   return EventEnvelope(
     eventId: 'evt_$seq',
@@ -684,7 +870,7 @@ EventEnvelope _event({
     handId: null,
     emittedAt: '2026-06-08T00:00:00Z',
     actorRef: 'system',
-    payload: const <String, Object?>{},
+    payload: payload,
     prevEventHash: prevHash,
     eventHash: hash,
   );

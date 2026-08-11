@@ -15,13 +15,31 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
   JsonFileRecoveryPersistenceStore({
     required Directory rootDirectory,
     int maxFileBytes = defaultMaxFileBytes,
+    int maxEvents = InMemoryRecoveryPersistenceStore.defaultMaxEvents,
+    int maxEventBytes = InMemoryRecoveryPersistenceStore.defaultMaxEventBytes,
   }) : _rootDirectory = rootDirectory,
-       _maxFileBytes = maxFileBytes {
+       _maxFileBytes = maxFileBytes,
+       _maxEvents = maxEvents,
+       _maxEventBytes = maxEventBytes {
     if (maxFileBytes <= 0) {
       throw ArgumentError.value(
         maxFileBytes,
         'maxFileBytes',
         'Recovery persistence file limit must be positive.',
+      );
+    }
+    if (maxEvents <= 0) {
+      throw ArgumentError.value(
+        maxEvents,
+        'maxEvents',
+        'Recovery persistence event limit must be positive.',
+      );
+    }
+    if (maxEventBytes <= 0) {
+      throw ArgumentError.value(
+        maxEventBytes,
+        'maxEventBytes',
+        'Recovery persistence event byte limit must be positive.',
       );
     }
   }
@@ -30,6 +48,8 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
 
   final Directory _rootDirectory;
   final int _maxFileBytes;
+  final int _maxEvents;
+  final int _maxEventBytes;
 
   @override
   RecoveryPersistenceResult saveSnapshot({
@@ -178,7 +198,10 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
   }
 
   _HydratedRecoveryStore _hydrate(RecoveryPersistenceScope scope) {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = InMemoryRecoveryPersistenceStore(
+      maxEvents: _maxEvents,
+      maxEventBytes: _maxEventBytes,
+    );
     final file = _fileFor(scope);
     if (!file.existsSync()) {
       return _HydratedRecoveryStore(
@@ -197,6 +220,8 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
         return _corruptStore(store);
       }
       window = _decodeWindow(decoded);
+    } on _RecoveryPersistenceEventCountException {
+      return _eventCountTooLarge(store);
     } on Object {
       return _corruptStore(store);
     }
@@ -312,6 +337,15 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     return _HydratedRecoveryStore(store: store, result: _fileTooLargeResult());
   }
 
+  _HydratedRecoveryStore _eventCountTooLarge(
+    InMemoryRecoveryPersistenceStore store,
+  ) {
+    return _HydratedRecoveryStore(
+      store: store,
+      result: _eventCountTooLargeResult(),
+    );
+  }
+
   RecoveryPersistenceResult _fileTooLargeResult() {
     return const RecoveryPersistenceResult(
       isSuccess: false,
@@ -325,10 +359,28 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     );
   }
 
+  RecoveryPersistenceResult _eventCountTooLargeResult() {
+    return RecoveryPersistenceResult(
+      isSuccess: false,
+      conflicts: <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_EVENT_COUNT_TOO_LARGE',
+          message:
+              'Recovery persistence event window exceeds the configured limit.',
+          severity: SyncConflictSeverity.fatal,
+          expected: '$_maxEvents',
+        ),
+      ],
+    );
+  }
+
   PersistedRecoveryWindow _decodeWindow(Map<String, Object?> json) {
     final events = json['events'];
     if (events is! List<Object?>) {
       throw const FormatException('Expected recovery events list.');
+    }
+    if (events.length > _maxEvents) {
+      throw const _RecoveryPersistenceEventCountException();
     }
 
     final snapshot = json['snapshot'];
@@ -393,4 +445,8 @@ class _HydratedRecoveryStore {
 
 class _RecoveryPersistenceLockException implements Exception {
   const _RecoveryPersistenceLockException();
+}
+
+class _RecoveryPersistenceEventCountException implements Exception {
+  const _RecoveryPersistenceEventCountException();
 }

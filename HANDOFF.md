@@ -1088,3 +1088,16 @@ Remaining:
 - Real-device behavior, cross-device network reachability, other-platform
   hosts, product startup/database integration, and release signing remain
   separate.
+
+## Recent T106 Changes
+
+- `peerdeal_sync` recovery stores now enforce configurable event-count and
+  per-event byte limits, defaulting to 4,096 events and the protocol codec's
+  64 KiB event bound.
+- Oversized in-memory batches, hydrated JSON windows, and individual events
+  fail closed before recovery state mutation with stable fatal conflicts.
+
+Remaining:
+- Production database replacement, platform/runtime persistence validation,
+  other-platform hosts, product startup integration, and release signing
+  remain separate.

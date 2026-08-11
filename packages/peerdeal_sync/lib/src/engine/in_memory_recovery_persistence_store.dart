@@ -8,6 +8,32 @@ import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 
 class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
+  InMemoryRecoveryPersistenceStore({
+    int maxEvents = defaultMaxEvents,
+    int maxEventBytes = defaultMaxEventBytes,
+  }) : _maxEvents = maxEvents,
+       _eventCodec = EventEnvelopeCodec(maxBytes: maxEventBytes) {
+    if (maxEvents <= 0) {
+      throw ArgumentError.value(
+        maxEvents,
+        'maxEvents',
+        'Recovery persistence event limit must be positive.',
+      );
+    }
+    if (maxEventBytes <= 0) {
+      throw ArgumentError.value(
+        maxEventBytes,
+        'maxEventBytes',
+        'Recovery persistence event byte limit must be positive.',
+      );
+    }
+  }
+
+  static const defaultMaxEvents = 4096;
+  static const defaultMaxEventBytes = 64 * 1024;
+
+  final int _maxEvents;
+  final EventEnvelopeCodec _eventCodec;
   final Map<String, _RecoveryPersistenceRecord> _records =
       <String, _RecoveryPersistenceRecord>{};
 
@@ -115,16 +141,17 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
       );
     }
 
-    final record = _records.putIfAbsent(
-      scope.storageKey,
-      _RecoveryPersistenceRecord.new,
-    );
-    final conflicts = _validateEventAppend(scope, record.events, events);
+    final record = _records[scope.storageKey];
+    final storedEvents = record?.events ?? const <EventEnvelope>[];
+    final conflicts = _validateEventAppend(scope, storedEvents, events);
     if (conflicts.isNotEmpty) {
       return RecoveryPersistenceResult(isSuccess: false, conflicts: conflicts);
     }
 
-    record.events.addAll(events);
+    final target =
+        record ??
+        _records.putIfAbsent(scope.storageKey, _RecoveryPersistenceRecord.new);
+    target.events.addAll(events);
     return const RecoveryPersistenceResult.success();
   }
 
@@ -205,10 +232,42 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
     List<EventEnvelope> storedEvents,
     List<EventEnvelope> events,
   ) {
+    final totalEventCount = storedEvents.length + events.length;
+    if (totalEventCount > _maxEvents) {
+      return <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_EVENT_COUNT_TOO_LARGE',
+          message:
+              'Recovery persistence event window exceeds the configured limit.',
+          severity: SyncConflictSeverity.fatal,
+          expected: '$_maxEvents',
+          actual: '$totalEventCount',
+        ),
+      ];
+    }
+
     final conflicts = <SyncConflict>[];
     EventEnvelope? previous = storedEvents.isEmpty ? null : storedEvents.last;
 
     for (final event in events) {
+      try {
+        _eventCodec.encode(event);
+      } on FormatException catch (error) {
+        final isTooLarge =
+            error.message == 'Event envelope wire payload is too large.';
+        conflicts.add(
+          SyncConflict(
+            code: isTooLarge
+                ? 'ERR_RECOVERY_PERSISTENCE_EVENT_TOO_LARGE'
+                : 'ERR_RECOVERY_PERSISTENCE_EVENT_INVALID',
+            message: isTooLarge
+                ? 'Recovery persistence event exceeds the configured byte limit.'
+                : 'Recovery persistence event could not be encoded.',
+            severity: SyncConflictSeverity.fatal,
+            expected: isTooLarge ? '${_eventCodec.maxBytes}' : null,
+          ),
+        );
+      }
       if (event.tableId != scope.tableId ||
           event.sessionId != scope.sessionId) {
         conflicts.add(

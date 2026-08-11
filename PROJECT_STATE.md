@@ -1032,6 +1032,17 @@ signing, and concrete product state wiring remain external or integration-owned.
   pass. Device behavior, cross-device reachability, other-platform hosts,
   production persistence, and release signing remain external.
 
+## T106 Recovery Event-Window Bounds
+
+- `peerdeal_sync` in-memory and JSON recovery stores now enforce configurable
+  event-count and per-event byte limits, defaulting to 4,096 events and the
+  protocol codec's 64 KiB event bound.
+- Oversized append batches, hydrated JSON windows, and individual events fail
+  closed before mutating recovery state, with stable fatal conflict codes.
+- Focused recovery persistence tests and package analysis pass. Production
+  database replacement and platform/runtime persistence validation remain
+  external.
+
 ## Required Gates
 
 Run after each retrofit step:

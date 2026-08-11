@@ -211,6 +211,9 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   hardens the JSON fallback against cross-process lost updates without turning
   it into a product database. Its configurable positive file-size cap defaults
   to 4 MiB and rejects oversized input before JSON decode or durable output.
+  Both in-memory and JSON stores also cap recovery windows at 4,096 events by
+  default and validate each event through the configurable 64 KiB protocol
+  codec bound before state mutation.
 - App-native readiness aggregation accepts an app-owned cancellation signal and
   forwards it to additive cancellable capability bridges. Mirrored app states
   cancel stale readiness work when the loader changes or the state disposes;

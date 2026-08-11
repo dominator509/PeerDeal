@@ -41,6 +41,9 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
 - A JSON file-backed recovery store can durably round-trip event/snapshot
   windows through protocol envelope parsers and fails closed when persisted
   data is corrupt.
+- Recovery stores reject event windows above a configurable 4,096-event
+  default and reject individual events above the protocol codec's configurable
+  64 KiB default before mutating in-memory or durable state.
 - File-backed recovery windows are written as canonical protocol JSON through
   a temporary file before replacing the durable window.
 - Recovery stores expose an idempotent, scope-validated `wipe` operation;
