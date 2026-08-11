@@ -7722,6 +7722,40 @@ Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
 
+### T73: transport polling cancellation propagation
+
+- Mirrored `AppTableSessionTransportProvisioner` instances now observe route
+  cancellation while awaiting injected session factories and fail closed with
+  a stable unavailable warning.
+- Mirrored `NativeTransportSessionFactory` and `NativeTransportSession` paths
+  carry cancellation into `AppTableSessionTransportSource`.
+- Transport sources race pending polls against route cancellation and source
+  disposal. The visible wait cancels immediately, while the underlying drain
+  remains registered until settlement to prevent overlapping native drains.
+
+Files changed:
+- mirrored `apps/peerdeal_mobile/lib/transport/` source, factory, and
+  provisioner files
+- mirrored `apps/peerdeal_desktop/lib/transport/` source, factory, and
+  provisioner files
+- mirrored transport source and provisioner tests
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+
+Tests run:
+- Focused mobile transport source/provisioner suite: passed, 14 tests.
+- Focused desktop transport source/provisioner suite: passed, 14 tests.
+- Focused mirrored app analysis passed before documentation edits.
+
+Remaining:
+- Native transport reachability and already-dispatched host-call semantics,
+  runtime/device validation, release signing, other-platform hosts, and
+  product database/state provisioning remain external or integration-owned.
+
 ### T72: receipt verification cancellation propagation
 
 - Mirrored `NativeReceiptKeyRingLoader` implementations now expose additive

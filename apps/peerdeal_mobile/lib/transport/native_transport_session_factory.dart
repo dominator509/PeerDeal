@@ -72,6 +72,7 @@ class NativeTransportSessionFactory {
         drain: _createDrain(bridge: bridge, handler: handler),
         maxPayloadBytes: capability.maxPayloadBytes,
         nativeNotes: _safeNativeNotes(capability.notes),
+        cancellation: _cancellation,
       ),
       warnings: capability.warning == null
           ? const <String>[]
@@ -182,18 +183,21 @@ class NativeTransportSession {
     required this.drain,
     required this.maxPayloadBytes,
     required this.nativeNotes,
+    this.cancellation,
   });
 
   final TransportFrameSender sender;
   final NativeTransportFrameDrain drain;
   final int maxPayloadBytes;
   final String nativeNotes;
+  final Future<void>? cancellation;
 
   AppTableSessionTransportSource createSource({
     required String sessionId,
     required String peerId,
     Duration pollInterval = const Duration(seconds: 1),
     NativeTransportSourceTimerFactory? timerFactory,
+    Future<void>? cancellation,
   }) {
     return AppTableSessionTransportSource(
       drain: () => drain.drain(sessionId: sessionId, peerId: peerId),
@@ -201,6 +205,7 @@ class NativeTransportSession {
       peerId: peerId,
       pollInterval: pollInterval,
       timerFactory: timerFactory,
+      cancellation: cancellation ?? this.cancellation,
     );
   }
 }

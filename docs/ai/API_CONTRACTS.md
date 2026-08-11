@@ -250,6 +250,11 @@ poll interval, serialized in-flight polls, explicit lifecycle state, and
   transport remains platform-owned outside this Dart contract, with bounded
   Android/Windows host implementations behind the existing method channel.
   Platform source provisioning and network reachability remain separate.
+  The source accepts an optional route cancellation signal and also owns an
+  internal disposal signal. Either signal makes the visible poll fail closed
+  with a bounded stable warning; an underlying drain that has already started
+  remains registered until it settles, so cancellation cannot create an
+  overlapping native drain.
   Mobile and
   desktop `AppTableSessionTransportProvisioner.load(peerId: ...)` composes the
   app runtime handler with `NativeTransportSessionFactory.loadSession`, then
@@ -258,7 +263,10 @@ poll interval, serialized in-flight polls, explicit lifecycle state, and
   failures without exposing raw diagnostics. The provisioner does not create
   session policy or choose routes. App shells expose the source through runtime
 injection, and `AppTableSessionTransportSourceMount` owns start, source
-replacement, and disposal for a mounted table route.
+replacement, and disposal for a mounted table route. Provisioner loading also
+observes the route cancellation signal when a factory is injected, preserving
+fail-closed route teardown even when the injected factory cannot cancel its
+underlying operation.
 
 For Hold'em sessions, `HoldemEventCursor.accept(event)` is the remote stream
 gate. It requires matching protocol/table/session identity, the exact next

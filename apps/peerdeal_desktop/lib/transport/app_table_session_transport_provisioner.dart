@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../session/app_holdem_table_session_runtime.dart';
 import '../session/app_table_session_runtime.dart';
 import 'app_table_session_transport_handler.dart';
@@ -20,7 +22,8 @@ class AppTableSessionTransportProvisioner {
            nativeSessionFactory ??
            NativeTransportSessionFactory(cancellation: cancellation),
        _pollInterval = pollInterval,
-       _timerFactory = timerFactory;
+       _timerFactory = timerFactory,
+       _cancellation = cancellation;
 
   final AppTableSessionRuntime _runtime;
   final AppHoldemTableSessionRuntime? _holdemRuntime;
@@ -28,6 +31,7 @@ class AppTableSessionTransportProvisioner {
   final NativeTransportSessionFactory _nativeSessionFactory;
   final Duration _pollInterval;
   final NativeTransportSourceTimerFactory? _timerFactory;
+  final Future<void>? _cancellation;
 
   Future<AppTableSessionTransportProvisionResult> load({
     required String peerId,
@@ -45,7 +49,13 @@ class AppTableSessionTransportProvisioner {
     );
     NativeTransportSessionLoadResult loaded;
     try {
-      loaded = await _nativeSessionFactory.loadSession(handler: handler);
+      final loadedResult = await _loadSession(handler: handler);
+      if (loadedResult == null) {
+        return const AppTableSessionTransportProvisionResult.unavailable(
+          warnings: <String>['Native transport session load cancelled.'],
+        );
+      }
+      loaded = loadedResult;
     } on Object {
       return const AppTableSessionTransportProvisionResult.unavailable(
         warnings: <String>['Native transport session could not be loaded.'],
@@ -67,6 +77,7 @@ class AppTableSessionTransportProvisioner {
       peerId: peerId,
       pollInterval: _pollInterval,
       timerFactory: _timerFactory,
+      cancellation: _cancellation,
     );
     return AppTableSessionTransportProvisionResult.available(
       runtime: _runtime,
@@ -78,6 +89,39 @@ class AppTableSessionTransportProvisioner {
         fallback: 'Native transport session warning unavailable.',
       ),
     );
+  }
+
+  Future<NativeTransportSessionLoadResult?> _loadSession({
+    required AppTableSessionTransportHandler handler,
+  }) async {
+    final operation = _nativeSessionFactory.loadSession(handler: handler);
+    final cancellation = _cancellation;
+    if (cancellation == null) return operation;
+
+    final result = Completer<NativeTransportSessionLoadResult?>();
+    void completeValue(NativeTransportSessionLoadResult? value) {
+      if (!result.isCompleted) result.complete(value);
+    }
+
+    void completeError(Object error, StackTrace stackTrace) {
+      if (!result.isCompleted) result.completeError(error, stackTrace);
+    }
+
+    unawaited(
+      operation.then<void>(
+        completeValue,
+        onError: (Object error, StackTrace stackTrace) {
+          completeError(error, stackTrace);
+        },
+      ),
+    );
+    unawaited(
+      cancellation.then<void>(
+        (_) => completeValue(null),
+        onError: (Object _, StackTrace _) => completeValue(null),
+      ),
+    );
+    return result.future;
   }
 
   static bool _isValidIdentity(String value) {

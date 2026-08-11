@@ -684,6 +684,16 @@ Generated: 2026-08-10
 - Focused mirrored receipt route suites prove cancellation reaches the native
   secure-key seam.
 
+## Recent T73 Changes
+
+- Mirrored app transport provisioners now fail closed when route cancellation
+  wins during injected native session loading.
+- Transport session factories pass route cancellation into mounted sources;
+  source disposal and route cancellation cancel the visible poll wait while
+  the underlying drain remains registered until settlement, preventing
+  overlapping native drains.
+- Focused mobile and desktop transport source/provisioner suites passed.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -564,3 +564,19 @@ Remaining:
 - Native host persistence behavior, already-dispatched operation semantics,
   device/profile validation, release signing, and product database/state wiring
   remain external or integration-owned.
+
+## Recent T73 Changes
+
+- Mirrored app transport provisioners now race injected session loading against
+  route cancellation and fail closed with a stable unavailable result.
+- Mirrored transport session factories carry the route cancellation signal into
+  provisioned sources. Sources also cancel pending polls on route disposal,
+  while retaining the underlying in-flight drain registration until it settles;
+  this prevents cancellation from starting overlapping native drains.
+- Focused mobile and desktop transport source/provisioner suites passed with
+  cancellation and no-overlap coverage.
+
+Remaining:
+- Native calls already dispatched remain host-owned; native transport
+  reachability, device/profile validation, release signing, other-platform
+  hosts, and product database/state wiring remain external or integration-owned.

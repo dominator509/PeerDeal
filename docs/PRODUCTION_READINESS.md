@@ -1158,6 +1158,15 @@ the Dart wait and prevents a pending receipt verification from outliving its
 route; it does not retroactively cancel a host call already dispatched and does
 not replace native persistence, device/profile, or release-signing validation.
 
+The T73 follow-up closes the mirrored app transport lifecycle cancellation gap.
+Provisioners now fail closed when route cancellation wins during injected
+session loading, and transport sources race pending polls against both route
+replacement and source disposal. A cancelled poll returns before the native
+drain settles, but remains registered until that drain actually settles so a
+second poll cannot overlap it. This hardens the Dart lifecycle boundary without
+claiming retroactive cancellation of an already-dispatched host call or proving
+native transport reachability.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

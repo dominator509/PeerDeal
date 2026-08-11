@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_desktop/recovery/app_recovery_retention_coordinator.dart';
 import 'package:peerdeal_desktop/recovery/app_recovery_session_close_coordinator.dart';
@@ -6,6 +8,7 @@ import 'package:peerdeal_desktop/session/app_table_session_runtime.dart';
 import 'package:peerdeal_desktop/transport/app_table_session_transport_provisioner.dart';
 import 'package:peerdeal_desktop/transport/native_transport_session_factory.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_privacy/peerdeal_privacy.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
@@ -87,6 +90,56 @@ void main() {
       'Native transport capability could not be loaded.',
     ]);
   });
+
+  test('cancels an injected session load before it settles', () async {
+    final cancellation = Completer<void>();
+    final factory = _DelayedNativeTransportSessionFactory();
+    final loading = AppTableSessionTransportProvisioner(
+      runtime: _runtime(),
+      nativeSessionFactory: factory,
+      cancellation: cancellation.future,
+    ).load(peerId: 'peer_b');
+
+    cancellation.complete();
+
+    final result = await loading;
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport session load cancelled.']);
+
+    factory.result.complete(
+      const NativeTransportSessionLoadResult.unavailable(),
+    );
+  });
+
+  test(
+    'propagates route cancellation into a provisioned source poll',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _PendingReceiveNativeTransportBridge();
+      final result = await AppTableSessionTransportProvisioner(
+        runtime: _runtime(),
+        nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
+        pollInterval: const Duration(milliseconds: 100),
+        cancellation: cancellation.future,
+      ).load(peerId: 'peer_b');
+
+      expect(result.available, isTrue);
+      final poll = result.source!.pollNow();
+      cancellation.complete();
+
+      final pollResult = await poll;
+      expect(pollResult.available, isFalse);
+      expect(pollResult.warnings, ['Native transport source poll cancelled.']);
+
+      result.source!.dispose();
+      bridge.receiveResult.complete(
+        const NativeTransportReceiveSnapshot(
+          available: true,
+          frames: <NativeTransportFrame>[],
+        ),
+      );
+    },
+  );
 }
 
 AppTableSessionRuntime _runtime() {
@@ -215,5 +268,34 @@ class _ThrowingCapabilityTransportBridge implements NativeTransportBridge {
     NativeTransportFrame frame,
   ) async {
     return const NativeTransportSendResult.failure(warning: 'unavailable');
+  }
+}
+
+class _DelayedNativeTransportSessionFactory
+    extends NativeTransportSessionFactory {
+  _DelayedNativeTransportSessionFactory()
+    : super(bridge: _FakeNativeTransportBridge());
+
+  final Completer<NativeTransportSessionLoadResult> result =
+      Completer<NativeTransportSessionLoadResult>();
+
+  @override
+  Future<NativeTransportSessionLoadResult> loadSession({
+    required TransportFrameHandler handler,
+  }) {
+    return result.future;
+  }
+}
+
+class _PendingReceiveNativeTransportBridge extends _FakeNativeTransportBridge {
+  final Completer<NativeTransportReceiveSnapshot> receiveResult =
+      Completer<NativeTransportReceiveSnapshot>();
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+  }) {
+    return receiveResult.future;
   }
 }

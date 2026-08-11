@@ -54,6 +54,9 @@ Transport ingress:
    commits accepted events, including retention-gated close events.
 5. An app-owned source controller can schedule bounded polls of the loaded
    native drain, serialize overlapping polls, and stop with the route lifecycle.
+   Route cancellation and source disposal fail the visible poll closed; an
+   already-started drain remains tracked until settlement so teardown cannot
+   create overlapping native drains.
 
 Local Hold'em producer flow:
 

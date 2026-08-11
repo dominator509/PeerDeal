@@ -7,6 +7,7 @@ const _minimumPollInterval = Duration(milliseconds: 100);
 const _maximumPollInterval = Duration(minutes: 1);
 const _maximumWarningCount = 4;
 const _maximumWarningLength = 160;
+const _pollCancellationWarning = 'Native transport source poll cancelled.';
 
 typedef NativeTransportFrameDrainCallback =
     Future<NativeTransportFrameDrainResult> Function();
@@ -77,17 +78,21 @@ class AppTableSessionTransportSource {
     required String peerId,
     Duration pollInterval = _defaultPollInterval,
     NativeTransportSourceTimerFactory? timerFactory,
+    Future<void>? cancellation,
   }) : _drain = drain,
        _sessionId = sessionId,
        _peerId = peerId,
        _pollInterval = pollInterval,
-       _timerFactory = timerFactory ?? Timer.periodic;
+       _timerFactory = timerFactory ?? Timer.periodic,
+       _cancellation = cancellation;
 
   final NativeTransportFrameDrainCallback _drain;
   final String _sessionId;
   final String _peerId;
   final Duration _pollInterval;
   final NativeTransportSourceTimerFactory _timerFactory;
+  final Future<void>? _cancellation;
+  final Completer<void> _disposeCancellation = Completer<void>();
 
   Timer? _timer;
   Future<AppTableSessionTransportPollResult>? _pollInFlight;
@@ -145,6 +150,9 @@ class AppTableSessionTransportSource {
     if (_state == AppTableSessionTransportSourceState.disposed) return;
     stop();
     _state = AppTableSessionTransportSourceState.disposed;
+    if (!_disposeCancellation.isCompleted) {
+      _disposeCancellation.complete();
+    }
   }
 
   Future<AppTableSessionTransportPollResult> pollNow() async {
@@ -157,15 +165,78 @@ class AppTableSessionTransportSource {
     }
 
     final inFlight = _pollInFlight;
-    if (inFlight != null) return inFlight;
+    if (inFlight != null) return _observePoll(inFlight);
 
     final future = _poll();
     _pollInFlight = future;
+    unawaited(_releasePollWhenSettled(future));
+    return _observePoll(future);
+  }
+
+  Future<void> _releasePollWhenSettled(
+    Future<AppTableSessionTransportPollResult> future,
+  ) async {
     try {
-      return _remember(await future);
-    } finally {
-      if (identical(_pollInFlight, future)) _pollInFlight = null;
+      await future;
+    } on Object {
+      // The observer owns the visible failure result; this cleanup only keeps
+      // the underlying drain registered until it has actually settled.
     }
+    if (identical(_pollInFlight, future)) {
+      _pollInFlight = null;
+    }
+  }
+
+  Future<AppTableSessionTransportPollResult> _observePoll(
+    Future<AppTableSessionTransportPollResult> future,
+  ) async {
+    final observed = Completer<AppTableSessionTransportPollResult>();
+
+    void completeValue(AppTableSessionTransportPollResult value) {
+      if (!observed.isCompleted) observed.complete(value);
+    }
+
+    void completeError(Object error, StackTrace stackTrace) {
+      if (!observed.isCompleted) observed.completeError(error, stackTrace);
+    }
+
+    unawaited(
+      future.then<void>(
+        completeValue,
+        onError: (Object error, StackTrace stackTrace) {
+          completeError(error, stackTrace);
+        },
+      ),
+    );
+    unawaited(
+      _disposeCancellation.future.then<void>((_) {
+        completeValue(
+          const AppTableSessionTransportPollResult.unavailable(
+            warnings: <String>[_pollCancellationWarning],
+          ),
+        );
+      }),
+    );
+
+    final cancellation = _cancellation;
+    if (cancellation != null) {
+      unawaited(
+        cancellation.then<void>(
+          (_) => completeValue(
+            const AppTableSessionTransportPollResult.unavailable(
+              warnings: <String>[_pollCancellationWarning],
+            ),
+          ),
+          onError: (Object _, StackTrace _) => completeValue(
+            const AppTableSessionTransportPollResult.unavailable(
+              warnings: <String>[_pollCancellationWarning],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return _remember(await observed.future);
   }
 
   Future<AppTableSessionTransportPollResult> _poll() async {

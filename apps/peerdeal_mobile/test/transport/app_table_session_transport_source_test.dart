@@ -63,6 +63,67 @@ void main() {
     expect(drainCalls, 1);
   });
 
+  test(
+    'cancels a pending drain without starting an overlapping poll',
+    () async {
+      final drainResult = Completer<NativeTransportFrameDrainResult>();
+      final cancellation = Completer<void>();
+      var drainCalls = 0;
+      final source = AppTableSessionTransportSource(
+        sessionId: 'session_1',
+        peerId: 'peer_b',
+        cancellation: cancellation.future,
+        drain: () {
+          drainCalls += 1;
+          return drainResult.future;
+        },
+      );
+
+      final first = source.pollNow();
+      cancellation.complete();
+
+      final firstResult = await first;
+      final secondResult = await source.pollNow();
+      expect(firstResult.available, isFalse);
+      expect(firstResult.warnings, ['Native transport source poll cancelled.']);
+      expect(secondResult.warnings, [
+        'Native transport source poll cancelled.',
+      ]);
+      expect(drainCalls, 1);
+
+      source.dispose();
+      drainResult.complete(
+        const NativeTransportFrameDrainResult(
+          available: true,
+          results: <TransportFrameReceiveResult>[],
+        ),
+      );
+    },
+  );
+
+  test('disposal cancels a pending drain owned by the source', () async {
+    final drainResult = Completer<NativeTransportFrameDrainResult>();
+    final source = AppTableSessionTransportSource(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      drain: () => drainResult.future,
+    );
+
+    final poll = source.pollNow();
+    source.dispose();
+
+    final result = await poll;
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport source poll cancelled.']);
+
+    drainResult.complete(
+      const NativeTransportFrameDrainResult(
+        available: true,
+        results: <TransportFrameReceiveResult>[],
+      ),
+    );
+  });
+
   test('rejects invalid scope and poll interval before draining', () async {
     var drainCalls = 0;
     Future<NativeTransportFrameDrainResult> drain() async {
