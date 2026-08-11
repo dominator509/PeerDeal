@@ -2,6 +2,27 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T126 Wizard Input and Compilation Bounds
+
+Summary:
+- `DefaultPresetResolver` now bounds preset/setup collections and validates
+  nested values through bounded protocol canonical JSON before resolution.
+- Direct drafts and `DefaultGameFileCompiler` plans repeat the boundary for
+  resolved fields, policy profiles, and validation messages with stable
+  `ERR_WIZARD_*` failures.
+
+Tests run:
+- Focused `peerdeal_wizard` resolver suite passed.
+- Focused `peerdeal_wizard` compiler suite passed.
+- Focused `peerdeal_wizard` analysis passed.
+
+Risks:
+- This hardens setup materialization and compilation while product source
+  wiring, native reachability, durable database policy, and release inputs
+  remain separate.
+
+---
+
 ### 2026-08-11 - Codex - T125 Mode Governance Collection Bounds
 
 Summary:

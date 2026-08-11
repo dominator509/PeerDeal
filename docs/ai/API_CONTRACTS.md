@@ -81,6 +81,17 @@ lower positive limits for a mode. Oversized collections deny with
 configured capacity also denies rather than returning an oversized next
 ordering.
 
+## Wizard Setup
+
+`DefaultPresetResolver` rejects oversized preset layers, per-layer values,
+merged fields, conflicts, helper suggestions, partial settings, ambiguities,
+and resolved fields before returning a draft. Nested preset and setup values
+must pass bounded protocol canonical JSON. Direct `ResolvedSetupDraft` values
+are checked again during validation. `DefaultGameFileCompiler` repeats the
+resolved-field, policy-profile, and validation-message checks for manually
+constructed plans. Overflow or unsupported values fail closed with stable
+`ERR_WIZARD_*` result codes.
+
 ## App Route Surface
 
 Current app shells mount demo-oriented routes rather than production app flows.

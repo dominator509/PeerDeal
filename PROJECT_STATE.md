@@ -1143,6 +1143,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` through blocked settlement projection;
   focused variant projection tests (52) and analysis pass.
 
+## T126 Wizard Input and Compilation Bounds
+
+- `DefaultPresetResolver` now bounds preset layers, per-layer and merged values,
+  conflicts, helper suggestions, partial settings, ambiguities, and resolved
+  fields; nested values use bounded protocol canonical JSON validation.
+- Direct drafts and compiler plans reject oversized or unsupported resolved
+  fields, policy profiles, and validation messages; focused wizard resolver and
+  compiler suites plus package analysis pass.
+
 ## T125 Mode Governance Collection Bounds
 
 - `DefaultGovernanceEngine` now applies configurable limits before participant,

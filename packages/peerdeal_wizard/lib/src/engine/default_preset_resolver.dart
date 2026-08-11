@@ -1,22 +1,75 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import '../contracts/preset_resolver.dart';
 import '../models/preset_models.dart';
 import '../models/resolved_setup_draft.dart';
 import '../models/setup_intent.dart';
 import '../models/validated_setup_plan.dart';
+import '../models/wizard_input_limits.dart';
+import '../models/wizard_result_codes.dart';
 
 class DefaultPresetResolver implements PresetResolver {
-  const DefaultPresetResolver();
+  const DefaultPresetResolver({
+    this.maxPresetLayers = WizardInputLimits.defaultMaxPresetLayers,
+    this.maxPresetValues = WizardInputLimits.defaultMaxPresetValues,
+    this.maxMergedValues = WizardInputLimits.defaultMaxMergedValues,
+    this.maxConflicts = WizardInputLimits.defaultMaxConflicts,
+    this.maxHelperSuggestions = WizardInputLimits.defaultMaxHelperSuggestions,
+    this.maxPartialSettings = WizardInputLimits.defaultMaxPartialSettings,
+    this.maxAmbiguities = WizardInputLimits.defaultMaxAmbiguities,
+    this.maxResolvedFields = WizardInputLimits.defaultMaxResolvedFields,
+  }) : assert(maxPresetLayers > 0, 'maxPresetLayers must be positive'),
+       assert(maxPresetValues > 0, 'maxPresetValues must be positive'),
+       assert(maxMergedValues > 0, 'maxMergedValues must be positive'),
+       assert(maxConflicts > 0, 'maxConflicts must be positive'),
+       assert(
+         maxHelperSuggestions > 0,
+         'maxHelperSuggestions must be positive',
+       ),
+       assert(maxPartialSettings > 0, 'maxPartialSettings must be positive'),
+       assert(maxAmbiguities > 0, 'maxAmbiguities must be positive'),
+       assert(maxResolvedFields > 0, 'maxResolvedFields must be positive');
+
+  final int maxPresetLayers;
+  final int maxPresetValues;
+  final int maxMergedValues;
+  final int maxConflicts;
+  final int maxHelperSuggestions;
+  final int maxPartialSettings;
+  final int maxAmbiguities;
+  final int maxResolvedFields;
 
   @override
   PresetResolutionResult mergeLayers(List<PresetLayer> layers) {
+    if (layers.length > maxPresetLayers) {
+      return _blockedResolution(WizardResultCodes.presetLayerCountTooLarge);
+    }
+
     final ordered = [...layers]
       ..sort((a, b) => a.priority.compareTo(b.priority));
     final merged = <String, Object?>{};
     final conflicts = <String>[];
 
     for (final layer in ordered) {
+      if (layer.values.length > maxPresetValues) {
+        return _blockedResolution(WizardResultCodes.presetValueCountTooLarge);
+      }
+      if (!_isCanonicalJsonBounded(
+        layer.values,
+        maxMapEntries: maxPresetValues,
+      )) {
+        return _blockedResolution(WizardResultCodes.presetValuesInvalid);
+      }
+
       for (final entry in layer.values.entries) {
+        if (!merged.containsKey(entry.key) &&
+            merged.length >= maxMergedValues) {
+          return _blockedResolution(WizardResultCodes.mergedValueCountTooLarge);
+        }
         if (merged.containsKey(entry.key) && merged[entry.key] != entry.value) {
+          if (conflicts.length >= maxConflicts) {
+            return _blockedResolution(WizardResultCodes.conflictCountTooLarge);
+          }
           conflicts.add(
             'Conflict on ${entry.key} resolved in favor of ${layer.presetId}.',
           );
@@ -41,15 +94,48 @@ class DefaultPresetResolver implements PresetResolver {
   }) {
     final intentId = intent.intentId.trim();
     final hostPseudonymousId = intent.hostPseudonymousId.trim();
+    final intentInputError = _intentInputError(intent);
+    if (intentInputError != null) {
+      return _blockedDraft(intentId, intentInputError);
+    }
+
     final presetResolution = mergeLayers(presetLayers);
+    if (presetResolution.errors.isNotEmpty) {
+      return _blockedDraft(intentId, presetResolution.errors.first);
+    }
+
     final resolved = <String, Object?>{
       ...presetResolution.mergedValues,
       ...intent.partialSettings,
     };
+    if (resolved.length > maxResolvedFields ||
+        !_isCanonicalJsonBounded(resolved, maxMapEntries: maxResolvedFields)) {
+      return _blockedDraft(
+        intentId,
+        resolved.length > maxResolvedFields
+            ? WizardResultCodes.resolvedFieldCountTooLarge
+            : WizardResultCodes.resolvedFieldsInvalid,
+      );
+    }
 
     final helperApplied = <String>[];
     if (intent.helperEnabled) {
       for (final suggestion in intent.helperSuggestions) {
+        if (!_isCanonicalJsonBounded(<String, Object?>{
+          suggestion.key: suggestion.value,
+        }, maxMapEntries: 1)) {
+          return _blockedDraft(
+            intentId,
+            WizardResultCodes.helperSuggestionInvalid,
+          );
+        }
+        if (!resolved.containsKey(suggestion.key) &&
+            resolved.length >= maxResolvedFields) {
+          return _blockedDraft(
+            intentId,
+            WizardResultCodes.resolvedFieldCountTooLarge,
+          );
+        }
         resolved.putIfAbsent(suggestion.key, () {
           helperApplied.add(suggestion.key);
           return suggestion.value;
@@ -101,8 +187,24 @@ class DefaultPresetResolver implements PresetResolver {
     final errors = <String>[];
     final warnings = <String>[];
 
-    if (draft.unresolvedIssues.isNotEmpty) {
+    if (draft.unresolvedIssues.length > maxAmbiguities) {
+      errors.add(WizardResultCodes.ambiguityCountTooLarge);
+    } else if (draft.unresolvedIssues.isNotEmpty) {
       errors.addAll(draft.unresolvedIssues);
+    }
+    if (draft.appliedPresetIds.length > maxPresetLayers) {
+      errors.add(WizardResultCodes.presetLayerCountTooLarge);
+    }
+    if (draft.helperApplied.length > maxHelperSuggestions) {
+      errors.add(WizardResultCodes.helperSuggestionCountTooLarge);
+    }
+    if (draft.resolvedFields.length > maxResolvedFields) {
+      errors.add(WizardResultCodes.resolvedFieldCountTooLarge);
+    } else if (!_isCanonicalJsonBounded(
+      draft.resolvedFields,
+      maxMapEntries: maxResolvedFields,
+    )) {
+      errors.add(WizardResultCodes.resolvedFieldsInvalid);
     }
 
     final seatCount = draft.resolvedFields['seat_count'];
@@ -145,5 +247,62 @@ class DefaultPresetResolver implements PresetResolver {
       ),
       buildReady: errors.isEmpty,
     );
+  }
+
+  PresetResolutionResult _blockedResolution(String code) {
+    return PresetResolutionResult(
+      mergedValues: const <String, Object?>{},
+      appliedPresetIds: const <String>[],
+      errors: <String>[code],
+    );
+  }
+
+  ResolvedSetupDraft _blockedDraft(String intentId, String code) {
+    return ResolvedSetupDraft(
+      intentId: intentId,
+      modeId: '',
+      variantId: '',
+      resolvedFields: const <String, Object?>{},
+      appliedPresetIds: const <String>[],
+      unresolvedIssues: <String>[code],
+    );
+  }
+
+  String? _intentInputError(SetupIntent intent) {
+    if (intent.partialSettings.length > maxPartialSettings) {
+      return WizardResultCodes.partialSettingCountTooLarge;
+    }
+    if (!_isCanonicalJsonBounded(
+      intent.partialSettings,
+      maxMapEntries: maxPartialSettings,
+    )) {
+      return WizardResultCodes.partialSettingsInvalid;
+    }
+    if (intent.helperSuggestions.length > maxHelperSuggestions) {
+      return WizardResultCodes.helperSuggestionCountTooLarge;
+    }
+    if (intent.ambiguities.length > maxAmbiguities) {
+      return WizardResultCodes.ambiguityCountTooLarge;
+    }
+    return null;
+  }
+
+  bool _isCanonicalJsonBounded(Object? value, {required int maxMapEntries}) {
+    try {
+      canonicalJsonEncode(
+        value,
+        limits: CanonicalJsonLimits(
+          maxMapEntries: maxMapEntries,
+          maxListItems: WizardInputLimits.defaultMaxPresetValues,
+          maxDepth: WizardInputLimits.defaultMaxCanonicalDepth,
+          maxTextBytes: WizardInputLimits.defaultMaxCanonicalTextBytes,
+          maxNodes: WizardInputLimits.defaultMaxCanonicalNodes,
+          maxEncodedBytes: WizardInputLimits.defaultMaxCanonicalEncodedBytes,
+        ),
+      );
+      return true;
+    } on Object {
+      return false;
+    }
   }
 }

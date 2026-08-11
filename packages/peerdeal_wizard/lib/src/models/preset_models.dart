@@ -21,9 +21,11 @@ class PresetResolutionResult {
     required this.mergedValues,
     required this.appliedPresetIds,
     this.conflicts = const <String>[],
+    this.errors = const <String>[],
   });
 
   final Map<String, Object?> mergedValues;
   final List<String> appliedPresetIds;
   final List<String> conflicts;
+  final List<String> errors;
 }

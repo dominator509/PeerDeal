@@ -39,3 +39,5 @@ are present.
 - `DefaultGameFileCompiler.tryCompile(...)` rechecks build-ready mode and
   variant support plus non-empty plan identity, so manually constructed plans
   cannot bypass resolver validation.
+- Preset resolution and direct Game File compilation apply bounded collection
+  and canonical JSON checks, failing closed with stable `ERR_WIZARD_*` codes.

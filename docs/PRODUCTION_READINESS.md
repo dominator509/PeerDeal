@@ -1576,6 +1576,14 @@ and 256 waitlist entries. Oversized collections and waitlist growth at
 capacity fail closed with `ERR_GOVERNANCE_PARTICIPANT_COUNT`,
 `ERR_GOVERNANCE_SEAT_COUNT`, or `ERR_GOVERNANCE_WAITLIST_COUNT`.
 
+The T126 follow-up closes the direct wizard materialization gap.
+`DefaultPresetResolver` now bounds preset layers, per-layer and merged values,
+conflicts, helper suggestions, partial settings, ambiguities, and resolved
+fields, while validating nested values through bounded protocol canonical JSON.
+`DefaultGameFileCompiler` repeats the direct-plan boundary for resolved fields,
+policy profiles, and validation messages, so oversized or unsupported values
+cannot reach Game File construction; failures use stable `ERR_WIZARD_*` codes.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

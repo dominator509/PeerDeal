@@ -1165,6 +1165,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T126 Changes
+
+- `DefaultPresetResolver` now bounds preset layers, per-layer values, merged
+  fields, conflicts, helper suggestions, partial settings, and ambiguities;
+  nested values are checked through bounded protocol canonical JSON.
+- Direct drafts and `DefaultGameFileCompiler` plans also reject oversized or
+  unsupported resolved fields, policy profiles, and validation message lists
+  with stable `ERR_WIZARD_*` codes before Game File construction.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T125 Changes
 
 - `DefaultGovernanceEngine` now checks configurable bounds before participant,

@@ -184,7 +184,7 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 | Replay | `packages/peerdeal_replay/lib/peerdeal_replay.dart` |
 | Sync/recovery | `packages/peerdeal_sync/lib/peerdeal_sync.dart` |
 | Receipts | `packages/peerdeal_receipts/lib/peerdeal_receipts.dart` |
-| Wizard/setup | `packages/peerdeal_wizard/lib/peerdeal_wizard.dart` |
+| Wizard/setup | `packages/peerdeal_wizard/lib/peerdeal_wizard.dart` (bounded preset/setup materialization and direct Game File plan validation through wizard-owned limits plus protocol canonical JSON) |
 | Native bridges | `packages/peerdeal_native_bridges/lib/peerdeal_native_bridges.dart` |
 | App-support directory | `AppStorageDirectoryBridge` through the native-bridges public barrel |
 

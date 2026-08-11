@@ -215,5 +215,49 @@ void main() {
       expect(result.gameFile, isNull);
       expect(result.errors, ['unsupported_mode_id']);
     });
+
+    test('tryCompile rejects oversized direct resolved fields', () {
+      const compiler = DefaultGameFileCompiler();
+      final plan = ValidatedSetupPlan(
+        planId: 'plan_fields_overflow',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        policyProfileIds: const <String, String>{},
+        resolvedFields: <String, Object?>{
+          for (
+            var index = 0;
+            index < WizardInputLimits.defaultMaxResolvedFields + 1;
+            index++
+          )
+            'field-$index': index,
+        },
+        validationResult: const ValidationResult(isValid: true),
+        buildReady: true,
+      );
+
+      final result = compiler.tryCompile(plan);
+
+      expect(result.isCompiled, isFalse);
+      expect(result.errors, [WizardResultCodes.resolvedFieldCountTooLarge]);
+      expect(result.warnings, isEmpty);
+    });
+
+    test('tryCompile rejects direct plans with unsupported nested values', () {
+      const compiler = DefaultGameFileCompiler();
+      const plan = ValidatedSetupPlan(
+        planId: 'plan_invalid_fields',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        policyProfileIds: <String, String>{},
+        resolvedFields: <String, Object?>{'unsupported': Object()},
+        validationResult: ValidationResult(isValid: true),
+        buildReady: true,
+      );
+
+      final result = compiler.tryCompile(plan);
+
+      expect(result.isCompiled, isFalse);
+      expect(result.errors, [WizardResultCodes.resolvedFieldsInvalid]);
+    });
   });
 }
