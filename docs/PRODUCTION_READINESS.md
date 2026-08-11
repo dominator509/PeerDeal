@@ -1042,6 +1042,14 @@ whole suffix succeeds. Invalid or unsupported suffixes fail closed without
 partial state. Product database selection, local identity, and native/device
 runtime validation remain integration or operator-owned.
 
+The T59 follow-up adds mirrored app-owned local peer identity persistence over
+the existing generic secure-key bridge. The app maps one fixed identity record
+within the `peerdeal.identity` namespace, reuses exactly one active valid
+record, provisions a secure-random peer ID when the record is missing, and
+fails closed on unavailable, invalid, inactive, or ambiguous storage. The
+concrete production source still needs to compose this identity with real
+route policy, remote peer selection, and product state/database wiring.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

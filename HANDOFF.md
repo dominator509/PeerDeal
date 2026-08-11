@@ -31,7 +31,8 @@ table UI accessibility/responsive hardening, T51 keyboard/focus control
 hardening, T52 action hit-target hardening, T53 local-seat action routing,
 T54 typed core table-state hydration, T55 typed Hold'em state hydration, and
 T56 typed Hold'em event-cursor hydration, T57 typed persisted Hold'em source
-hydration, and T58 deterministic persisted recovery-suffix replay
+hydration, T58 deterministic persisted recovery-suffix replay, and T59
+app-owned local peer identity persistence
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -70,6 +71,10 @@ are implemented on branch
 - Added variant-owned atomic recovery replay. It validates cursor/hash-chain
   continuity, applies universal core events, applies hand-scoped Hold'em
   events, and never exposes a partially replayed state.
+- Added mirrored app-owned local peer identity loaders, writers, and
+  provisioners over the generic secure-key bridge. They persist one active
+  identity, fail closed on unavailable or ambiguous storage, and generate a
+  cryptographically random ID only when no identity is present.
 - Added the generated Windows desktop host and generic Credential Manager-backed
   secure-key channel with bounded versioned records.
 - Generic secure-key method-channel load, save, and delete calls now use a
@@ -444,4 +449,6 @@ are implemented on branch
   desktop.
 - T58 focused variant recovery-replay tests: passed, 2 tests.
 - T58 focused persisted-source tests: passed, 5 tests each in mobile and
+  desktop.
+- T59 focused local-identity tests: passed, 5 tests each in mobile and
   desktop.

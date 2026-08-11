@@ -445,6 +445,20 @@ Generated: 2026-08-10
   tests passed with 5 tests each. Product database wiring and local identity
   remain integration-owned.
 
+## Recent T59 Changes
+
+- Mirrored mobile and desktop app shells now provide
+  `NativeLocalPeerIdentityLoader`, `NativeLocalPeerIdentityWriter`, and
+  `NativeLocalPeerIdentityProvisioner` over the existing generic secure-key
+  bridge. The app boundary owns the `peerdeal.identity` namespace and
+  `peer_identity`/`opaque-peer-id` record mapping; the native bridge remains
+  generic.
+- One active persisted identity is reused, missing identity is provisioned
+  with a secure-random default, and unavailable, invalid, inactive, or
+  ambiguous records fail closed. Focused mobile and desktop tests passed with
+  5 tests each. Wiring the identity into the concrete production source and
+  route policy remains integration-owned.
+
 ## Recent T47 Changes
 
 - Added mirrored `AppHoldemProductionSessionBootstrapRouteRegistration.fromSource(...)`

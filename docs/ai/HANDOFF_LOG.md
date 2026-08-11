@@ -12,6 +12,38 @@ Tests run:
 Risks:
 Next reviewer:
 
+### 2026-08-10 - Codex - App-Owned Local Peer Identity Persistence
+
+Summary:
+- Added mirrored secure-key-backed local peer identity loaders, writers, and
+  provisioners in the app shells.
+- The adapters reuse exactly one active valid identity, provision a secure
+  random ID only when storage is empty, and fail closed on unavailable,
+  malformed, inactive, or ambiguous records.
+
+Files changed:
+- Mirrored app `session/native_local_peer_identity_loader.dart`,
+  `native_local_peer_identity_writer.dart`, and
+  `native_local_peer_identity_provisioner.dart`.
+- Mirrored focused local identity tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Tests run:
+- Focused mobile local identity suite: passed, 5 tests.
+- Focused desktop local identity suite: passed, 5 tests.
+- Focused mobile and desktop analyzers: passed.
+
+Risks:
+- Concrete production source/route composition, database wiring, native/device
+  runtime validation, and release signing remain integration or operator-owned.
+
+Next reviewer:
+- Compose the provisioned identity with the real product session source and
+  route policy when those product-owned inputs are available.
+
+---
+
 ### 2026-08-10 - Codex - Deterministic Persisted Recovery-Suffix Replay
 
 Summary:

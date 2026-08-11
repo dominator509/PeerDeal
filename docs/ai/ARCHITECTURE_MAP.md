@@ -91,6 +91,9 @@ Local Hold'em producer flow:
    `HoldemStateSnapshot` and replays its suffix through the variant-owned
    atomic recovery transaction. It leaves input mapping, identity, close
    policy, and database choice to the product caller.
+   Mirrored app shells also expose local peer identity adapters over generic
+   secure-key storage; they persist the local ID but do not choose remote
+   peers or create product session state.
 9. `AppHoldemProductionSessionBootstrapRouteRegistration` lets either app shell
    merge the existing bootstrap route into its production map and native-
    readiness gate. When no explicit `JoinFlowReadyHandler` is supplied, the

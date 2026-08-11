@@ -370,6 +370,17 @@ Replay is atomic and never returns partial state. The adapter does not select a
 database, create local identity, or own route/close policy; those remain
 product integration responsibilities.
 
+`NativeLocalPeerIdentityLoader`, `NativeLocalPeerIdentityWriter`, and
+`NativeLocalPeerIdentityProvisioner` are mirrored app-shell contracts over the
+generic `SecureKeyStorageBridge` and `SecureKeyStorageMutationBridge`. They
+map one `peerdeal.identity` record with purpose `peer_identity` and algorithm
+`opaque-peer-id`; exactly one active valid record is required for loading.
+Provisioning reuses an existing record or saves a cryptographically random
+peer ID when the storage is available but empty. Unavailable, malformed,
+inactive, or ambiguous records fail closed. These adapters do not decide route
+policy, remote peer selection, or product session state; the concrete source
+must compose those inputs.
+
 `PeerDealAppNavigationEntry` accepts an optional opaque `arguments` payload.
 The default app-shell home forwards that value through
 `RouteSettings.arguments`; it does not interpret, persist, or validate the
