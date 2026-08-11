@@ -317,7 +317,13 @@ sessions.
 scope, next sequence, previous hash, actor, and last-event state. Hydration
 requires caller-owned event-id and timestamp factories and accepts an optional
 event-hash factory, so persistence cannot silently replace product event
-policy.
+
+`TableState.fromJson`, `HoldemSeatState.fromJson`, `HoldemHandState.fromJson`,
+`HoldemEventCursor.fromJson`, and `HoldemStateSnapshot.fromJson` first validate
+materialized input through the bounded canonical protocol serializer. This
+caps maps, lists, nesting, text, nodes, and encoded bytes before typed field
+reads or collection copies; deterministic truth and product persistence remain
+owned by their existing boundaries.
 
 `AppHoldemTableSessionRoute` is the app-owned non-demo composition boundary. It
 accepts an injected validated `AppHoldemTableSessionRuntime` and peer identity,

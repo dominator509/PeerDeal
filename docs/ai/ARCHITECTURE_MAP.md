@@ -20,7 +20,7 @@ packages add policy without mutating universal core truth.
 | Replay/recovery | `peerdeal_replay`, `peerdeal_sync` | Event windows, request ranges, anchors, snapshots, safe-close recovery |
 | Privacy/receipt/capture | `peerdeal_privacy`, `peerdeal_receipts`, `peerdeal_capture` | Retention, receipt artifacts, capture policy; `DefaultDiagnosticsScrubber` bounds recursive map/list materialization, depth, text, and protocol diagnostic collections before app rendering; `OpaqueExportDecoder` bounds decoded artifact/payload JSON structure before receipt shape inspection |
 | Mode/variant policy | `peerdeal_modes`, `peerdeal_variants` | Session mode policy and poker variant rules |
-| Deterministic truth | `peerdeal_core` | Table state, reducer, invariants, pot/settlement primitives |
+| Deterministic truth | `peerdeal_core` | Table state, reducer, invariants, pot/settlement primitives; `TableState.fromJson` bounds materialized JSON through protocol canonical limits before typed hydration |
 | Protocol | `peerdeal_protocol` | Envelopes, catalog, fixtures, diagnostics, bounded deterministic canonical JSON |
 
 ## Package Boundary Rules
@@ -61,7 +61,8 @@ Transport ingress:
 Local Hold'em producer flow:
 
 1. App/session code supplies validated `HoldemHandState` and `HoldemEventCursor`
-   to `AppHoldemTableSessionRuntime`.
+   to `AppHoldemTableSessionRuntime`; typed Hold'em state and snapshot hydration
+   bounds materialized JSON through protocol canonical limits first.
 2. `HoldemCoreProjectionAdapter` emits catalog-approved events and projects them
    through `peerdeal_core`.
 3. The app runtime atomically commits the non-retention batch before advancing

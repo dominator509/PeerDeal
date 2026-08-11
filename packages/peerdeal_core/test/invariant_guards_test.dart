@@ -59,6 +59,19 @@ void main() {
       );
     });
 
+    test('rejects structurally oversized metadata during hydration', () {
+      final oversizedMetadata = <String, Object?>{
+        for (var index = 0; index < 257; index++) 'metadata_$index': index,
+      };
+      final malformed = TableState.initial().toJson()
+        ..['metadata'] = oversizedMetadata;
+
+      expect(
+        () => TableState.fromJson(malformed),
+        throwsA(isA<FormatException>()),
+      );
+    });
+
     test('flag missing table identity fields', () {
       final state = TableState.initial(
         tableId: ' ',

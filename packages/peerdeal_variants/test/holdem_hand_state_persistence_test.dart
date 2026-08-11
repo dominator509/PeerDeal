@@ -95,6 +95,30 @@ void main() {
       throwsA(isA<FormatException>()),
     );
   });
+
+  test(
+    'rejects structurally oversized Holdem collections during hydration',
+    () {
+      final oversizedSeats = _stateJson()
+        ..['seats'] = List<Object?>.generate(
+          257,
+          (_) => <String, Object?>{
+            'seat': 0,
+            'stack': 100,
+            'in_hand': true,
+            'folded': false,
+            'all_in': false,
+            'committed_this_round': 0,
+            'committed_this_hand': 0,
+          },
+        );
+
+      expect(
+        () => HoldemHandState.fromJson(oversizedSeats),
+        throwsA(isA<FormatException>()),
+      );
+    },
+  );
 }
 
 Map<String, Object?> _stateJson() => <String, Object?>{

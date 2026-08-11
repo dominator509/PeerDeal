@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'holdem_betting_round.dart';
 import 'holdem_hand_phase.dart';
@@ -16,6 +17,7 @@ class HoldemSeatState {
   });
 
   factory HoldemSeatState.fromJson(Map<String, Object?> json) {
+    canonicalJsonEncode(json);
     return HoldemSeatState(
       seat: _requiredInt(json, 'seat'),
       stack: _requiredInt(json, 'stack'),
@@ -86,6 +88,7 @@ class HoldemHandState {
   });
 
   factory HoldemHandState.fromJson(Map<String, Object?> json) {
+    canonicalJsonEncode(json);
     final seats = _requiredList(json, 'seats');
     return HoldemHandState(
       handId: _requiredString(json, 'hand_id'),

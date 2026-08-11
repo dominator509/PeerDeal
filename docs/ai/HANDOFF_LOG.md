@@ -40,6 +40,31 @@ Next reviewer:
 
 ---
 
+### 2026-08-11 - Codex - T111 Typed State Hydration Bounds
+
+Summary:
+- `TableState`, `HoldemSeatState`, `HoldemHandState`, `HoldemEventCursor`, and
+  `HoldemStateSnapshot` now validate materialized JSON through bounded canonical
+  protocol serialization before typed field or collection materialization.
+- Oversized maps/lists and unsupported nested values fail closed without moving
+  core truth, variant rules, or product persistence ownership.
+
+Tests run:
+- Focused core hydration/invariant suite: 13 tests passed.
+- Focused Hold'em hydration/snapshot suites: 9 tests passed.
+- Focused core and variant analysis passed.
+
+Risks:
+- This bounds Dart-side typed hydration only. Product persistence/source wiring,
+  platform/runtime validation, other-platform hosts, and release signing remain
+  separate.
+
+Next reviewer:
+- Preserve protocol canonical limits at new typed hydration entry points and
+  keep product persistence and platform validation outside package models.
+
+---
+
 ### 2026-08-11 - Codex - T110 Receipt JSON Structure Bounds
 
 Summary:

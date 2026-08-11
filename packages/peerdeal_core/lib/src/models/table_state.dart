@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'table_phase.dart';
 
@@ -37,6 +38,7 @@ class TableState {
   }
 
   factory TableState.fromJson(Map<String, Object?> json) {
+    canonicalJsonEncode(json);
     final phaseValue = json['phase'];
     if (phaseValue is! String) {
       throw const FormatException('TableState phase must be a string.');

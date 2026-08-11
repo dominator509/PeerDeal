@@ -56,6 +56,7 @@ class HoldemEventCursor {
     required HoldemEventTimestampFactory emittedAtFactory,
     HoldemEventHashFactory eventHashFactory = _defaultEventHash,
   }) {
+    canonicalJsonEncode(json);
     return HoldemEventCursor(
       protocolVersion: _cursorRequiredString(json, 'protocol_version'),
       tableId: _cursorRequiredString(json, 'table_id'),

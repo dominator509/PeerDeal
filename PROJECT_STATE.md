@@ -1079,6 +1079,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   object keys fail closed without changing signature, cipher, opacity, or
   authorization semantics. Focused receipt tests and package analysis pass.
 
+## T111 Typed State Hydration Bounds
+
+- `TableState`, `HoldemSeatState`, `HoldemHandState`, `HoldemEventCursor`, and
+  `HoldemStateSnapshot` now validate materialized JSON through the existing
+  bounded canonical protocol serializer before reading typed fields or copying
+  collections.
+- Oversized maps/lists and unsupported nested values fail closed without moving
+  deterministic truth out of `peerdeal_core` or variant rules out of
+  `peerdeal_variants`. Focused core/variant tests and package analysis pass.
+
 ## Required Gates
 
 Run after each retrofit step:

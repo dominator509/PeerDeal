@@ -1152,3 +1152,15 @@ Remaining:
 Remaining:
 - Platform key storage, runtime/device validation, product persistence,
   other-platform hosts, and release signing remain separate.
+
+## Recent T111 Changes
+
+- `TableState`, `HoldemSeatState`, `HoldemHandState`, `HoldemEventCursor`, and
+  `HoldemStateSnapshot` now validate materialized JSON through bounded canonical
+  protocol serialization before typed field or collection materialization.
+- Oversized maps/lists and unsupported nested values fail closed while core
+  truth and variant rules remain in their existing package boundaries.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.

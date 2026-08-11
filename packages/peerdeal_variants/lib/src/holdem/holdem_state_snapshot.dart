@@ -34,6 +34,7 @@ class HoldemStateSnapshot {
     required HoldemEventTimestampFactory emittedAtFactory,
     HoldemEventHashFactory eventHashFactory = _defaultSnapshotEventHash,
   }) {
+    canonicalJsonEncode(json);
     try {
       return HoldemStateSnapshot(
         tableState: TableState.fromJson(_object(json, 'table_state')),

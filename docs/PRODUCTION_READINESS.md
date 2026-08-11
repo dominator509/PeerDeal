@@ -1460,6 +1460,15 @@ values, and invalid object keys fail closed without changing receipt signature,
 cipher, opacity, or authorization semantics. Platform key storage and
 runtime/device validation remain separate.
 
+The T111 follow-up closes the typed state hydration structure gap.
+`TableState`, `HoldemSeatState`, `HoldemHandState`, `HoldemEventCursor`, and
+`HoldemStateSnapshot` validate materialized JSON through the existing bounded
+canonical protocol writer before typed field reads or collection copies.
+Oversized maps/lists and unsupported nested values fail closed while
+deterministic truth remains in `peerdeal_core` and Hold'em rules remain in
+`peerdeal_variants`. Product persistence/source wiring and platform/runtime
+validation remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

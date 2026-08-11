@@ -68,6 +68,30 @@ void main() {
       throwsA(isA<FormatException>()),
     );
   });
+
+  test('rejects structurally oversized snapshot roots during hydration', () {
+    final oversized =
+        HoldemStateSnapshot(
+          tableState: TableState.initial(
+            tableId: 'table_001',
+            sessionId: 'session_001',
+            protocolVersion: '1.0.0',
+          ),
+          handState: _handState(),
+          eventCursor: _cursor(),
+        ).toJson()..addAll(<String, Object?>{
+          for (var index = 0; index < 254; index++) 'extra_$index': index,
+        });
+
+    expect(
+      () => HoldemStateSnapshot.fromJson(
+        oversized,
+        eventIdFactory: (_, eventSeq) => 'event-$eventSeq',
+        emittedAtFactory: () => 'timestamp',
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  });
 }
 
 HoldemHandState _handState() => const HoldemHandState(
