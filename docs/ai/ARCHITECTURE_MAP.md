@@ -94,7 +94,9 @@ Local Hold'em producer flow:
    identity, close policy, and database choice to the product caller.
    Mirrored app shells also expose local peer identity adapters over generic
    secure-key storage; they persist the local ID but do not choose remote
-   peers or create product session state.
+   peers or create product session state. The adapters detect the additive
+   cancellable secure-key capability so route cancellation reaches native
+   identity load/save/read-back calls when the host implements it.
    The app-owned `fromProvisionedLocalIdentity(...)` composition factory can
    now provision or reuse that ID and map it into the persisted source while a
    caller supplies route, remote-peer, local-seat, and close-event policy. It

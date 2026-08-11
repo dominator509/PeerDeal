@@ -571,6 +571,13 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   five-second default deadline and return stable unavailable/failure results on
   timeout; timeout handling remains generic and receipt policy stays in app
   orchestration.
+- `CancellableSecureKeyStorageBridge` and
+  `CancellableSecureKeyStorageMutationBridge` are additive capabilities. When
+  implemented, callers may pass a per-call `Future<void>? cancellation`; the
+  Dart bridge returns stable unavailable/failure results when cancellation wins
+  before the deadline. The base secure-storage interfaces remain compatible
+  with existing integrations. Cancellation cannot withdraw a host mutation
+  after dispatch, so native mutation handlers must remain atomic/idempotent.
 - The mobile Android host registers
   `peerdeal/native_bridges/secure_key_storage` with `loadKeyRing`, `saveKey`,
   and `deleteKey`. It returns only the generic snapshot/mutation maps defined

@@ -42,7 +42,9 @@ class NativeLocalPeerIdentityLoader {
   final String algorithm;
   final int maxPeerIdLength;
 
-  Future<AppLocalPeerIdentityLoadResult> load() async {
+  Future<AppLocalPeerIdentityLoadResult> load({
+    Future<void>? cancellation,
+  }) async {
     if (!_isValidNamespace(namespace) ||
         !_isValidKeyId(keyId) ||
         !_isValidLabel(purpose) ||
@@ -55,7 +57,13 @@ class NativeLocalPeerIdentityLoader {
 
     final SecureKeyStorageSnapshot snapshot;
     try {
-      snapshot = await _bridge.loadKeyRing(namespace: namespace);
+      final bridge = _bridge;
+      if (bridge is CancellableSecureKeyStorageBridge) {
+        snapshot = await (bridge as CancellableSecureKeyStorageBridge)
+            .loadKeyRing(namespace: namespace, cancellation: cancellation);
+      } else {
+        snapshot = await bridge.loadKeyRing(namespace: namespace);
+      }
     } on Object {
       return const AppLocalPeerIdentityLoadResult(
         warnings: <String>['Local peer identity storage could not be loaded.'],

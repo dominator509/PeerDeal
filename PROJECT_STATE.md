@@ -663,6 +663,17 @@ Generated: 2026-08-10
   platform call. Runtime Android/Windows capture behavior and other-platform
   implementations remain external validation work.
 
+## Recent T71 Changes
+
+- Generic secure-key method-channel load/save/delete calls now support additive
+  per-call cancellation and return stable unavailable/failure results when the
+  caller lifecycle ends before the bounded deadline.
+- Mirrored app local-identity loaders, writers, provisioners, and persisted
+  Hold'em sources forward route cancellation into the native-backed identity
+  path without changing the base secure-storage interface.
+- A cancellation stops the Dart wait; a host mutation already dispatched cannot
+  be withdrawn by Dart and remains an atomic/idempotent host responsibility.
+
 ## Required Gates
 
 Run after each retrofit step:

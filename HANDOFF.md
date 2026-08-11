@@ -537,3 +537,15 @@ are implemented on branch
   indefinitely on a torn-down or unresponsive plugin.
 - Focused capture bridge tests passed, including timeout and non-positive
   timeout validation coverage.
+
+## Recent T71 Changes
+
+- Generic secure-key method-channel load/save/delete calls now accept an
+  additive per-call cancellation capability and return stable fail-closed
+  cancellation results before the five-second deadline.
+- Mirrored app local-identity loaders, writers, provisioners, and persisted
+  Hold'em sources propagate the route cancellation signal through that
+  capability while preserving legacy bridge implementations.
+- Focused secure-storage bridge tests passed with cancellation coverage; the
+  Dart wait is cancellable, but an already-dispatched native mutation cannot be
+  retroactively withdrawn and remains an idempotent host responsibility.

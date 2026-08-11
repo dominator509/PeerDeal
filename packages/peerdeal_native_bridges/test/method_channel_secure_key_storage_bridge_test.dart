@@ -80,6 +80,25 @@ void main() {
     expect(snapshot.warning, 'Secure key storage call timed out.');
   });
 
+  test('cancels an in-flight secure key load before the deadline', () async {
+    final pending = Completer<Object?>();
+    final cancellation = Completer<void>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) => pending.future);
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final request = bridge.loadKeyRing(
+      namespace: 'peerdeal.receipts',
+      cancellation: cancellation.future,
+    );
+    await Future<void>.delayed(Duration.zero);
+    cancellation.complete();
+    final snapshot = await request;
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.warning, 'Secure key storage call cancelled.');
+  });
+
   test('returns unavailable snapshot for malformed platform payload', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
@@ -216,6 +235,43 @@ void main() {
 
     expect(result.isSuccess, isFalse);
     expect(result.warning, 'Secure key storage call timed out.');
+  });
+
+  test('cancels in-flight secure key mutations before the deadline', () async {
+    final cancellation = Completer<void>();
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) => pending.future);
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final save = bridge.saveKey(
+      namespace: 'peerdeal.receipts',
+      key: const SecureKeyRecord(
+        keyId: 'receipt_signing_1',
+        purpose: 'receipt_signing',
+        algorithm: 'hmac-sha256',
+        secret: 'signing_secret_1',
+        active: true,
+      ),
+      cancellation: cancellation.future,
+    );
+    final delete = bridge.deleteKey(
+      namespace: 'peerdeal.receipts',
+      keyId: 'receipt_signing_1',
+      cancellation: cancellation.future,
+    );
+    await Future<void>.delayed(Duration.zero);
+    cancellation.complete();
+
+    final results = await Future.wait(<Future<SecureKeyStorageMutationResult>>[
+      save,
+      delete,
+    ]);
+
+    expect(results.map((result) => result.warning), [
+      'Secure key storage call cancelled.',
+      'Secure key storage call cancelled.',
+    ]);
   });
 
   test(

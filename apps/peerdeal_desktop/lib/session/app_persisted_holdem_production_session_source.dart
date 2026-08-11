@@ -193,9 +193,11 @@ class AppPersistedHoldemProductionSessionSource
     routePolicy.validate();
     AppLocalPeerIdentity? localIdentity;
 
-    Future<void> ensureIdentity() async {
+    Future<void> ensureIdentity({Future<void>? cancellation}) async {
       if (localIdentity != null) return;
-      final provisioned = await identityProvisioner.ensureIdentity();
+      final provisioned = await identityProvisioner.ensureIdentity(
+        cancellation: cancellation,
+      );
       final identity = provisioned.identity;
       if (!provisioned.isSuccess || identity == null) {
         throw StateError('Local peer identity is unavailable.');
@@ -218,13 +220,12 @@ class AppPersistedHoldemProductionSessionSource
         snapshot: snapshot,
         localPeerId: requireIdentity().peerId,
       ),
-      contextInputFactory: (sessionContext, snapshot) =>
-          routePolicy.buildInput(
-            snapshot: snapshot,
-            localPeerId: requireIdentity().peerId,
-            remotePeerId: sessionContext.remotePeerId,
-            localSeat: sessionContext.localSeat,
-          ),
+      contextInputFactory: (sessionContext, snapshot) => routePolicy.buildInput(
+        snapshot: snapshot,
+        localPeerId: requireIdentity().peerId,
+        remotePeerId: sessionContext.remotePeerId,
+        localSeat: sessionContext.localSeat,
+      ),
       eventIdFactory: eventIdFactory,
       emittedAtFactory: emittedAtFactory,
       eventHashFactory: eventHashFactory,
@@ -239,7 +240,7 @@ class AppPersistedHoldemProductionSessionSource
     required RecoveryPersistenceStore store,
     required AppHoldemProductionSessionInputFactory inputFactory,
     AppHoldemProductionSessionContextInputFactory? contextInputFactory,
-    Future<void> Function()? identityLoader,
+    Future<void> Function({Future<void>? cancellation})? identityLoader,
     required HoldemEventIdFactory eventIdFactory,
     required HoldemEventTimestampFactory emittedAtFactory,
     required HoldemEventHashFactory eventHashFactory,
@@ -261,7 +262,7 @@ class AppPersistedHoldemProductionSessionSource
   final RecoveryPersistenceStore _store;
   final AppHoldemProductionSessionInputFactory _inputFactory;
   final AppHoldemProductionSessionContextInputFactory? _contextInputFactory;
-  final Future<void> Function()? _identityLoader;
+  final Future<void> Function({Future<void>? cancellation})? _identityLoader;
   final HoldemEventIdFactory _eventIdFactory;
   final HoldemEventTimestampFactory _emittedAtFactory;
   final HoldemEventHashFactory _eventHashFactory;
@@ -364,7 +365,7 @@ class AppPersistedHoldemProductionSessionSource
         .toList(growable: false);
     if (suffix.isEmpty) {
       await _throwIfCancelled(cancellation);
-      await _ensureIdentity();
+      await _ensureIdentity(cancellation: cancellation);
       await _throwIfCancelled(cancellation);
       return buildInput(state);
     }
@@ -381,7 +382,7 @@ class AppPersistedHoldemProductionSessionSource
     }
 
     await _throwIfCancelled(cancellation);
-    await _ensureIdentity();
+    await _ensureIdentity(cancellation: cancellation);
     await _throwIfCancelled(cancellation);
     return buildInput(
       HoldemStateSnapshot(
@@ -392,10 +393,10 @@ class AppPersistedHoldemProductionSessionSource
     );
   }
 
-  Future<void> _ensureIdentity() async {
+  Future<void> _ensureIdentity({Future<void>? cancellation}) async {
     final identityLoader = _identityLoader;
     if (identityLoader != null) {
-      await identityLoader();
+      await identityLoader(cancellation: cancellation);
     }
   }
 

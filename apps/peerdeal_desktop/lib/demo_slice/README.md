@@ -86,4 +86,7 @@ then composes that store with native local identity, caller-owned route policy,
 and event factories before the validated session route is mounted. Missing,
 malformed, or throwing roots must fail closed before recovery windows are
 loaded. The native bridge supplies only a directory fact; recovery and
-retention policy remain app-owned.
+retention policy remain app-owned. Route cancellation also propagates through
+the app local-identity secure-key seam when the host exposes its additive
+cancellation capability; an already-dispatched host mutation remains
+host-owned and must be atomic/idempotent.

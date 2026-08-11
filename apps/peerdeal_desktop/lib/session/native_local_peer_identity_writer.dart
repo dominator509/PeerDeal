@@ -37,8 +37,9 @@ class NativeLocalPeerIdentityWriter {
   final int maxPeerIdLength;
 
   Future<AppLocalPeerIdentityWriteResult> save(
-    AppLocalPeerIdentity identity,
-  ) async {
+    AppLocalPeerIdentity identity, {
+    Future<void>? cancellation,
+  }) async {
     if (!_isValidNamespace(namespace) ||
         !_isValidKeyId(keyId) ||
         !_isValidLabel(purpose) ||
@@ -51,16 +52,24 @@ class NativeLocalPeerIdentityWriter {
 
     final SecureKeyStorageMutationResult result;
     try {
-      result = await _bridge.saveKey(
-        namespace: namespace,
-        key: SecureKeyRecord(
-          keyId: keyId,
-          purpose: purpose,
-          algorithm: algorithm,
-          secret: identity.peerId,
-          active: true,
-        ),
+      final bridge = _bridge;
+      final key = SecureKeyRecord(
+        keyId: keyId,
+        purpose: purpose,
+        algorithm: algorithm,
+        secret: identity.peerId,
+        active: true,
       );
+      if (bridge is CancellableSecureKeyStorageMutationBridge) {
+        result = await (bridge as CancellableSecureKeyStorageMutationBridge)
+            .saveKey(
+              namespace: namespace,
+              key: key,
+              cancellation: cancellation,
+            );
+      } else {
+        result = await bridge.saveKey(namespace: namespace, key: key);
+      }
     } on Object {
       return const AppLocalPeerIdentityWriteResult.failure(
         warning: 'Local peer identity save failed.',

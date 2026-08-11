@@ -1140,6 +1140,15 @@ five-second default used by secure storage, transport, and local-network
 bridges. Runtime Android/Windows capture validation and other-platform capture
 implementations remain external.
 
+The T71 follow-up closes the remaining persisted-identity cancellation gap.
+Generic secure-key load/save/delete calls expose an additive per-call
+cancellation capability, and mirrored app identity loaders, writers,
+provisioners, and persisted Hold'em sources propagate route cancellation into
+that seam. Cancellation fails closed before the bridge deadline; Dart cannot
+retroactively withdraw a host mutation already dispatched, so host persistence
+must remain atomic and idempotent. Native device persistence and runtime
+validation remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

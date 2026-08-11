@@ -7722,6 +7722,49 @@ Remaining:
 - Product database/state provisioning, native transport reachability, and
   runtime/device validation remain integration or operator work.
 
+### T71: secure-storage cancellation propagation
+
+- Added additive `CancellableSecureKeyStorageBridge` and mutation capability
+  interfaces; the base secure-storage interfaces remain compatible.
+- Generic method-channel load/save/delete calls now race the existing bounded
+  deadline against caller cancellation and return stable unavailable/failure
+  results when cancellation wins.
+- Mirrored app local-identity loaders, writers, provisioners, and persisted
+  Hold'em sources forward route cancellation through the capability.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_bridge.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/method_channel_secure_key_storage_bridge.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_secure_key_storage_bridge_test.dart`
+- `apps/peerdeal_mobile/lib/session/native_local_peer_identity_loader.dart`
+- `apps/peerdeal_mobile/lib/session/native_local_peer_identity_writer.dart`
+- `apps/peerdeal_mobile/lib/session/native_local_peer_identity_provisioner.dart`
+- `apps/peerdeal_mobile/lib/session/app_persisted_holdem_production_session_source.dart`
+- `apps/peerdeal_desktop/lib/session/native_local_peer_identity_loader.dart`
+- `apps/peerdeal_desktop/lib/session/native_local_peer_identity_writer.dart`
+- `apps/peerdeal_desktop/lib/session/native_local_peer_identity_provisioner.dart`
+- `apps/peerdeal_desktop/lib/session/app_persisted_holdem_production_session_source.dart`
+- `HANDOFF.md`
+- `HANDOFF_QUEUE.md`
+- `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused secure-storage method-channel suite: passed, 14 tests.
+- Focused mobile identity and persisted-source suites: passed, 21 tests.
+- Focused desktop identity and persisted-source suites: passed, 21 tests.
+- `dart analyze packages/peerdeal_native_bridges apps/peerdeal_mobile apps/peerdeal_desktop`: passed.
+- `git diff --check`: passed.
+
+Remaining:
+- Runtime Android/Windows key persistence, host mutation idempotency under
+  cancellation, operator release signing, other-platform storage, product
+  database/state provisioning, and native transport reachability remain
+  integration or operator work.
+
 ### T69: persisted-source cancellation propagation
 
 - Mirrored persisted invite and session-context loads now honor route

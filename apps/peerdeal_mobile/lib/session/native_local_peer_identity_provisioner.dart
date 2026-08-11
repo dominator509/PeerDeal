@@ -52,18 +52,24 @@ class NativeLocalPeerIdentityProvisioner {
   final AppLocalPeerIdentityFactory _identityFactory;
   Future<AppLocalPeerIdentityProvisionResult>? _inFlight;
 
-  Future<AppLocalPeerIdentityProvisionResult> ensureIdentity() {
+  Future<AppLocalPeerIdentityProvisionResult> ensureIdentity({
+    Future<void>? cancellation,
+  }) {
     final inFlight = _inFlight;
-    if (inFlight != null) return inFlight;
+    if (inFlight != null && cancellation == null) return inFlight;
 
-    final operation = _ensureIdentity();
-    _inFlight = operation;
+    final operation = _ensureIdentity(cancellation: cancellation);
+    if (cancellation == null) {
+      _inFlight = operation;
+    }
     return operation;
   }
 
-  Future<AppLocalPeerIdentityProvisionResult> _ensureIdentity() async {
+  Future<AppLocalPeerIdentityProvisionResult> _ensureIdentity({
+    Future<void>? cancellation,
+  }) async {
     try {
-      final loaded = await _loader.load();
+      final loaded = await _loader.load(cancellation: cancellation);
       if (loaded.warnings.isNotEmpty) {
         return AppLocalPeerIdentityProvisionResult(warnings: loaded.warnings);
       }
@@ -81,7 +87,7 @@ class NativeLocalPeerIdentityProvisioner {
       }
 
       final identity = AppLocalPeerIdentity(peerId: peerId);
-      final saved = await _writer.save(identity);
+      final saved = await _writer.save(identity, cancellation: cancellation);
       if (!saved.isSuccess) {
         return AppLocalPeerIdentityProvisionResult(
           warnings: <String>[
@@ -89,7 +95,7 @@ class NativeLocalPeerIdentityProvisioner {
           ],
         );
       }
-      final verified = await _loader.load();
+      final verified = await _loader.load(cancellation: cancellation);
       if (verified.warnings.isNotEmpty ||
           verified.identity?.peerId != identity.peerId) {
         return const AppLocalPeerIdentityProvisionResult(

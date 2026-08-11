@@ -9,7 +9,9 @@ import 'secure_key_storage_channel_contract.dart';
 const _secureKeyStorageCallTimeout = Duration(seconds: 5);
 
 class MethodChannelSecureKeyStorageBridge
-    implements SecureKeyStorageMutationBridge {
+    implements
+        SecureKeyStorageMutationBridge,
+        CancellableSecureKeyStorageMutationBridge {
   MethodChannelSecureKeyStorageBridge({
     MethodChannel? channel,
     Duration timeout = _secureKeyStorageCallTimeout,
@@ -24,6 +26,7 @@ class MethodChannelSecureKeyStorageBridge
   @override
   Future<SecureKeyStorageSnapshot> loadKeyRing({
     required String namespace,
+    Future<void>? cancellation,
   }) async {
     if (!_isValidNamespace(namespace)) {
       return const SecureKeyStorageSnapshot.unavailable(
@@ -33,12 +36,17 @@ class MethodChannelSecureKeyStorageBridge
 
     final Map<String, Object?>? result;
     try {
-      result = await _channel
-          .invokeMapMethod<String, Object?>(
-            SecureKeyStorageChannelContract.loadKeyRingMethod,
-            <String, Object?>{'namespace': namespace},
-          )
-          .timeout(_timeout);
+      result = await _invokeWithDeadline(
+        _channel.invokeMapMethod<String, Object?>(
+          SecureKeyStorageChannelContract.loadKeyRingMethod,
+          <String, Object?>{'namespace': namespace},
+        ),
+        cancellation: cancellation,
+      );
+    } on _SecureKeyStorageCallCancelled {
+      return const SecureKeyStorageSnapshot.unavailable(
+        warning: 'Secure key storage call cancelled.',
+      );
     } on TimeoutException {
       return const SecureKeyStorageSnapshot.unavailable(
         warning: 'Secure key storage call timed out.',
@@ -64,6 +72,7 @@ class MethodChannelSecureKeyStorageBridge
   Future<SecureKeyStorageMutationResult> saveKey({
     required String namespace,
     required SecureKeyRecord key,
+    Future<void>? cancellation,
   }) async {
     if (!_isValidNamespace(namespace) || !key.isUsable) {
       return const SecureKeyStorageMutationResult.failure(
@@ -73,15 +82,20 @@ class MethodChannelSecureKeyStorageBridge
 
     final Map<String, Object?>? result;
     try {
-      result = await _channel
-          .invokeMapMethod<String, Object?>(
-            SecureKeyStorageChannelContract.saveKeyMethod,
-            <String, Object?>{
-              'namespace': namespace,
-              'key': SecureKeyStorageChannelContract.encodeKey(key),
-            },
-          )
-          .timeout(_timeout);
+      result = await _invokeWithDeadline(
+        _channel.invokeMapMethod<String, Object?>(
+          SecureKeyStorageChannelContract.saveKeyMethod,
+          <String, Object?>{
+            'namespace': namespace,
+            'key': SecureKeyStorageChannelContract.encodeKey(key),
+          },
+        ),
+        cancellation: cancellation,
+      );
+    } on _SecureKeyStorageCallCancelled {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'Secure key storage call cancelled.',
+      );
     } on TimeoutException {
       return const SecureKeyStorageMutationResult.failure(
         warning: 'Secure key storage call timed out.',
@@ -110,6 +124,7 @@ class MethodChannelSecureKeyStorageBridge
   Future<SecureKeyStorageMutationResult> deleteKey({
     required String namespace,
     required String keyId,
+    Future<void>? cancellation,
   }) async {
     if (!_isValidNamespace(namespace) || !_isValidKeyId(keyId)) {
       return const SecureKeyStorageMutationResult.failure(
@@ -119,12 +134,17 @@ class MethodChannelSecureKeyStorageBridge
 
     final Map<String, Object?>? result;
     try {
-      result = await _channel
-          .invokeMapMethod<String, Object?>(
-            SecureKeyStorageChannelContract.deleteKeyMethod,
-            <String, Object?>{'namespace': namespace, 'keyId': keyId},
-          )
-          .timeout(_timeout);
+      result = await _invokeWithDeadline(
+        _channel.invokeMapMethod<String, Object?>(
+          SecureKeyStorageChannelContract.deleteKeyMethod,
+          <String, Object?>{'namespace': namespace, 'keyId': keyId},
+        ),
+        cancellation: cancellation,
+      );
+    } on _SecureKeyStorageCallCancelled {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'Secure key storage call cancelled.',
+      );
     } on TimeoutException {
       return const SecureKeyStorageMutationResult.failure(
         warning: 'Secure key storage call timed out.',
@@ -162,6 +182,61 @@ class MethodChannelSecureKeyStorageBridge
     return timeout;
   }
 
+  Future<T> _invokeWithDeadline<T>(
+    Future<T> operation, {
+    Future<void>? cancellation,
+  }) {
+    final completer = Completer<T>();
+    Timer? timer;
+    var completed = false;
+
+    void completeValue(T value) {
+      if (completed) return;
+      completed = true;
+      timer?.cancel();
+      completer.complete(value);
+    }
+
+    void completeError(Object error, StackTrace stackTrace) {
+      if (completed) return;
+      completed = true;
+      timer?.cancel();
+      completer.completeError(error, stackTrace);
+    }
+
+    timer = Timer(
+      _timeout,
+      () => completeError(
+        TimeoutException('Secure key storage call timed out.', _timeout),
+        StackTrace.current,
+      ),
+    );
+    unawaited(
+      operation.then<void>(
+        completeValue,
+        onError: (Object error, StackTrace stackTrace) {
+          completeError(error, stackTrace);
+        },
+      ),
+    );
+
+    if (cancellation != null) {
+      unawaited(
+        cancellation.then<void>(
+          (_) => completeError(
+            const _SecureKeyStorageCallCancelled(),
+            StackTrace.current,
+          ),
+          onError: (Object _, StackTrace _) => completeError(
+            const _SecureKeyStorageCallCancelled(),
+            StackTrace.current,
+          ),
+        ),
+      );
+    }
+    return completer.future;
+  }
+
   String _warning(String prefix, Object error) {
     if (error is PlatformException) {
       final message = error.message;
@@ -171,4 +246,8 @@ class MethodChannelSecureKeyStorageBridge
     }
     return '$prefix: $error';
   }
+}
+
+final class _SecureKeyStorageCallCancelled implements Exception {
+  const _SecureKeyStorageCallCancelled();
 }

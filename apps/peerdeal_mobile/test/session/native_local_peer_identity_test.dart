@@ -146,6 +146,24 @@ void main() {
     expect(bridge.loadCalls, 2);
     expect(bridge.savedKeys, hasLength(1));
   });
+
+  test('propagates caller cancellation through the identity bridge', () async {
+    final bridge = _CancellableMemorySecureKeyBridge();
+    final cancellation = Completer<void>();
+    final provisioner = NativeLocalPeerIdentityProvisioner(
+      loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+      writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+      identityFactory: () => 'peer_cancel_aware',
+    );
+
+    final result = await provisioner.ensureIdentity(
+      cancellation: cancellation.future,
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(bridge.loadCancellation, same(cancellation.future));
+    expect(bridge.saveCancellation, same(cancellation.future));
+  });
 }
 
 class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
@@ -203,5 +221,39 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
   }) async {
     keys.removeWhere((record) => record.keyId == keyId);
     return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+}
+
+class _CancellableMemorySecureKeyBridge extends _MemorySecureKeyBridge
+    implements CancellableSecureKeyStorageMutationBridge {
+  Future<void>? loadCancellation;
+  Future<void>? saveCancellation;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+    Future<void>? cancellation,
+  }) {
+    loadCancellation = cancellation;
+    return super.loadKeyRing(namespace: namespace);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKey({
+    required String namespace,
+    required SecureKeyRecord key,
+    Future<void>? cancellation,
+  }) {
+    saveCancellation = cancellation;
+    return super.saveKey(namespace: namespace, key: key);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKey({
+    required String namespace,
+    required String keyId,
+    Future<void>? cancellation,
+  }) {
+    return super.deleteKey(namespace: namespace, keyId: keyId);
   }
 }
