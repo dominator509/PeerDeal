@@ -1,10 +1,15 @@
 import '../contracts/session_path_selector.dart';
 import '../models/bootstrap_candidate.dart';
+import '../models/network_input_limits.dart';
 import '../models/network_route_class.dart';
 import '../models/session_path_descriptor.dart';
 
 class BasicSessionPathSelector implements SessionPathSelector {
-  const BasicSessionPathSelector();
+  const BasicSessionPathSelector({
+    this.maxCandidates = NetworkInputLimits.defaultMaxCandidates,
+  }) : assert(maxCandidates > 0, 'maxCandidates must be positive');
+
+  final int maxCandidates;
 
   @override
   SessionPathDescriptor selectPath({
@@ -14,6 +19,15 @@ class BasicSessionPathSelector implements SessionPathSelector {
     String? electedPrimaryPeerId,
   }) {
     final primaryPeerId = _validPeerIdOrNull(electedPrimaryPeerId);
+    if (candidates.length > maxCandidates) {
+      return SessionPathDescriptor(
+        routeClass: NetworkRouteClass.relay,
+        primaryPeerId: primaryPeerId ?? 'unresolved',
+        usesRelay: false,
+        transportAgnostic: true,
+        reason: 'candidate_window_too_large',
+      );
+    }
     final reachable =
         candidates
             .where((c) => c.reachable && _isValidPeerId(c.peerId))

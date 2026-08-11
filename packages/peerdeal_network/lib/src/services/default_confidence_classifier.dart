@@ -1,13 +1,24 @@
 import '../models/network_confidence.dart';
+import '../models/network_input_limits.dart';
 import '../models/peer_metric_snapshot.dart';
 import 'confidence_classifier.dart';
 
 class DefaultConfidenceClassifier implements ConfidenceClassifier {
-  const DefaultConfidenceClassifier();
+  const DefaultConfidenceClassifier({
+    this.maxSnapshots = NetworkInputLimits.defaultMaxPeerMetrics,
+  }) : assert(maxSnapshots > 0, 'maxSnapshots must be positive');
+
+  final int maxSnapshots;
 
   @override
   NetworkConfidence classify(Iterable<PeerMetricSnapshot> snapshots) {
-    final items = snapshots.toList(growable: false);
+    final items = <PeerMetricSnapshot>[];
+    for (final snapshot in snapshots) {
+      if (items.length >= maxSnapshots) {
+        return NetworkConfidence.unsafe;
+      }
+      items.add(snapshot);
+    }
     if (items.isEmpty) return NetworkConfidence.unsafe;
 
     final anyAnchorMismatch = items.any((s) => !s.anchorAligned);

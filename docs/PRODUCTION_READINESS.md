@@ -1535,6 +1535,13 @@ rules before event traversal, snapshot projection, or projector access. Invalid
 requests fail closed with `ERR_RECOVERY_SCOPE_INVALID` or
 `ERR_SNAPSHOT_APPLY_SCOPE_INVALID`.
 
+The T120 follow-up closes the direct network collection-materialization gap.
+`peerdeal_network` now applies shared bounds of 32 peer IDs, 32 bootstrap
+candidates, and 64 peer metrics before routing or confidence materialization.
+Overflow fails closed as empty bootstrap candidates, unresolved path selection,
+unsafe confidence, or unsafe primary election without traversing an unbounded
+caller collection.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

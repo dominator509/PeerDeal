@@ -1108,6 +1108,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   validated after filtering and snapshot-suffix planning. Focused replay tests
   and package analysis pass.
 
+## T120 Network Collection Bounds
+
+- `peerdeal_network` now bounds direct peer-id, bootstrap-candidate, and
+  peer-metric collections before routing or confidence materialization.
+- Shared defaults are 32 peer IDs, 32 candidates, and 64 peer metrics.
+  Overflow fails closed as empty bootstrap candidates, unresolved path
+  selection, unsafe confidence, or unsafe primary election. Focused network
+  tests (42) and package analysis pass.
+
 ## T119 Direct Sync Request Scope Validation
 
 - `BasicConflictDetector` and `BasicSnapshotApplier` now validate direct

@@ -13,6 +13,7 @@ export 'src/models/bootstrap_resolution_result.dart';
 export 'src/models/direct_relay_transition_plan.dart';
 export 'src/models/lan_discovery_result.dart';
 export 'src/models/network_confidence.dart';
+export 'src/models/network_input_limits.dart';
 export 'src/models/network_route_class.dart';
 export 'src/models/peer_metric_snapshot.dart';
 export 'src/models/primary_peer_decision.dart';

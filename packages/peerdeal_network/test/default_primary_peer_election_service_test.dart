@@ -2,6 +2,37 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('fails closed when the peer-metric window exceeds its limit', () {
+    const service = DefaultPrimaryPeerElectionService(
+      confidenceClassifier: DefaultConfidenceClassifier(),
+      maxSnapshots: 1,
+    );
+    final decision = service.elect(
+      snapshots: List<PeerMetricSnapshot>.generate(
+        2,
+        (index) => PeerMetricSnapshot(
+          peerId: 'peer_$index',
+          routeClass: NetworkRouteClass.remoteDirect,
+          avgLatencyMs: 20,
+          ackLagMs: 30,
+          disconnectsInWindow: 0,
+          reachabilityCount: 2,
+          eventIndexLag: 0,
+          anchorAligned: true,
+          snapshotServeMs: 10,
+        ),
+      ),
+      baselineEventIndex: 5,
+      expectedAnchorHash: 'anchor_5',
+    );
+
+    expect(decision.primaryPeerId, 'none');
+    expect(decision.confidence, NetworkConfidence.unsafe);
+    expect(decision.requiresPause, isTrue);
+    expect(decision.rankings, isEmpty);
+    expect(decision.reason, 'Peer metric window exceeds the configured limit');
+  });
+
   test('elects best aligned peer deterministically', () {
     const service = DefaultPrimaryPeerElectionService(
       confidenceClassifier: DefaultConfidenceClassifier(),

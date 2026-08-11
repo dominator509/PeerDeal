@@ -2,6 +2,27 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('returns unsafe when the peer-metric window exceeds its limit', () {
+    const classifier = DefaultConfidenceClassifier(maxSnapshots: 2);
+    final result = classifier.classify(
+      List<PeerMetricSnapshot>.generate(
+        3,
+        (index) => PeerMetricSnapshot(
+          peerId: 'peer_$index',
+          routeClass: NetworkRouteClass.remoteDirect,
+          avgLatencyMs: 20,
+          ackLagMs: 30,
+          disconnectsInWindow: 0,
+          reachabilityCount: 2,
+          eventIndexLag: 0,
+          anchorAligned: true,
+        ),
+      ),
+    );
+
+    expect(result, NetworkConfidence.unsafe);
+  });
+
   test('returns high for fast aligned peers', () {
     const classifier = DefaultConfidenceClassifier();
 

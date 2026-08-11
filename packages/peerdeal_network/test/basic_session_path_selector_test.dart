@@ -2,6 +2,33 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('fails closed when the candidate window exceeds its limit', () {
+    const selector = BasicSessionPathSelector(maxCandidates: 1);
+    final result = selector.selectPath(
+      candidates: const [
+        BootstrapCandidate(
+          peerId: 'peer_a',
+          routeClass: NetworkRouteClass.lanDirect,
+          reachable: true,
+          priority: 10,
+        ),
+        BootstrapCandidate(
+          peerId: 'peer_b',
+          routeClass: NetworkRouteClass.remoteDirect,
+          reachable: true,
+          priority: 9,
+        ),
+      ],
+      preferLan: true,
+      relayAllowed: true,
+    );
+
+    expect(result.routeClass, NetworkRouteClass.relay);
+    expect(result.primaryPeerId, 'unresolved');
+    expect(result.usesRelay, isFalse);
+    expect(result.reason, 'candidate_window_too_large');
+  });
+
   test('selects LAN path when preferLan and LAN candidate exists', () {
     const selector = BasicSessionPathSelector();
     final result = selector.selectPath(

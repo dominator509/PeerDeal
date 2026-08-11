@@ -1,4 +1,5 @@
 import '../models/network_confidence.dart';
+import '../models/network_input_limits.dart';
 import '../models/network_route_class.dart';
 import '../models/peer_metric_snapshot.dart';
 import '../models/primary_peer_decision.dart';
@@ -7,9 +8,13 @@ import 'confidence_classifier.dart';
 import 'primary_peer_election_service.dart';
 
 class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
-  const DefaultPrimaryPeerElectionService({required this.confidenceClassifier});
+  const DefaultPrimaryPeerElectionService({
+    required this.confidenceClassifier,
+    this.maxSnapshots = NetworkInputLimits.defaultMaxPeerMetrics,
+  }) : assert(maxSnapshots > 0, 'maxSnapshots must be positive');
 
   final ConfidenceClassifier confidenceClassifier;
+  final int maxSnapshots;
 
   @override
   PrimaryPeerDecision elect({
@@ -19,7 +24,23 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
     String? currentPrimaryPeerId,
   }) {
     final validCurrentPrimaryPeerId = _validPeerIdOrNull(currentPrimaryPeerId);
-    final items = snapshots
+    final boundedSnapshots = <PeerMetricSnapshot>[];
+    for (final snapshot in snapshots) {
+      if (boundedSnapshots.length >= maxSnapshots) {
+        return PrimaryPeerDecision(
+          primaryPeerId: validCurrentPrimaryPeerId ?? 'none',
+          confidence: NetworkConfidence.unsafe,
+          reason: 'Peer metric window exceeds the configured limit',
+          baselineEventIndex: baselineEventIndex,
+          expectedAnchorHash: expectedAnchorHash,
+          requiresTransfer: false,
+          requiresPause: true,
+          rankings: const <ScoreBreakdown>[],
+        );
+      }
+      boundedSnapshots.add(snapshot);
+    }
+    final items = boundedSnapshots
         .where((snapshot) => _isValidPeerId(snapshot.peerId))
         .toList(growable: false);
     if (items.isEmpty) {

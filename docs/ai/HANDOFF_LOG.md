@@ -2,6 +2,24 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T120 Network Collection Bounds
+
+Summary:
+- `peerdeal_network` now bounds direct peer-id, candidate, and peer-metric
+  collections before routing or confidence materialization.
+- Shared defaults are 32 peer IDs, 32 candidates, and 64 peer metrics;
+  overflow returns empty, unresolved, or unsafe fail-closed results.
+
+Tests run:
+- Focused `peerdeal_network` suite: 42 tests passed.
+- Focused `peerdeal_network` analysis passed.
+
+Risks:
+- This hardens package-level direct callers while native reachability,
+  platform runtime, product source, and database policy remain separate.
+
+---
+
 ### 2026-08-11 - Codex - T119 Direct Sync Request Scope Validation
 
 Summary:

@@ -1,15 +1,23 @@
 import '../contracts/bootstrap_candidate_provider.dart';
 import '../models/bootstrap_candidate.dart';
 import '../models/bootstrap_resolution_request.dart';
+import '../models/network_input_limits.dart';
 import '../models/network_route_class.dart';
 
 class BasicBootstrapCandidateProvider implements BootstrapCandidateProvider {
-  const BasicBootstrapCandidateProvider();
+  const BasicBootstrapCandidateProvider({
+    this.maxPeerIds = NetworkInputLimits.defaultMaxPeerIds,
+  }) : assert(maxPeerIds > 0, 'maxPeerIds must be positive');
+
+  final int maxPeerIds;
 
   @override
   Future<List<BootstrapCandidate>> resolveCandidates(
     BootstrapResolutionRequest request,
   ) async {
+    if (request.peerIds.length > maxPeerIds) {
+      return const <BootstrapCandidate>[];
+    }
     final peerIds = _validatedPeerIds(request.peerIds);
     return peerIds
         .asMap()

@@ -1165,6 +1165,18 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T120 Changes
+
+- `peerdeal_network` now bounds direct peer-id, bootstrap-candidate, and
+  peer-metric collections before routing or confidence materialization.
+- Bootstrap overflow returns no candidates; path selection returns an
+  unresolved relay descriptor; confidence classification and primary election
+  return unsafe results without traversing beyond the configured bound.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T119 Changes
 
 - Direct `RecoveryRequest` and `SnapshotApplyRequest` processing now validates

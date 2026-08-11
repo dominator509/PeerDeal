@@ -652,6 +652,10 @@ actionable plans. Invalid caps fail closed for table loading and
 fall back to relay-only join bootstrap plans. Invalid app-owned session/table
 bootstrap scope, including padded values, must fail closed or fall back before
 native capability lookup.
+The package services also enforce direct-caller collection bounds before
+materialization: 32 peer IDs, 32 bootstrap candidates, and 64 peer metrics by
+default. Overflow produces empty bootstrap resolution, an unresolved path,
+unsafe confidence, or an unsafe primary decision.
 Discovery `foundEndpoints` and `interfaceHints` lists must contain real
 non-empty strings; malformed platform list entries are dropped rather than
 coerced into route inputs. Sensitive native peer endpoints must be dropped
