@@ -80,10 +80,24 @@ jobs:
 
       - name: Verify Android release signing fails closed
         working-directory: apps/peerdeal_mobile
+        env:
+          PEERDEAL_ANDROID_KEYSTORE: ''
+          PEERDEAL_ANDROID_KEYSTORE_PASSWORD: ''
+          PEERDEAL_ANDROID_KEY_ALIAS: ''
+          PEERDEAL_ANDROID_KEY_PASSWORD: ''
         shell: bash
         run: |
-          if flutter build apk --release --no-pub; then
+          set +e
+          output="$(flutter build apk --release --no-pub 2>&1)"
+          status=$?
+          set -e
+          printf '%s\n' "$output"
+          if [ "$status" -eq 0 ]; then
             echo "Android release build unexpectedly succeeded without signing credentials."
+            exit 1
+          fi
+          if ! grep -Fq "Android release builds require all four PEERDEAL_ANDROID_* signing values" <<<"$output"; then
+            echo "Android release build failed without the expected signing guard diagnostic."
             exit 1
           fi
 

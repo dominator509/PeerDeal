@@ -1226,6 +1226,10 @@ before artifact assembly, preventing an accidental unsigned release path. The
 check uses no operator secrets and does not prove a successful signed artifact,
 release profile, or real-device behavior.
 
+The T81 follow-up makes that negative check deterministic: CI explicitly clears
+all four Android signing variables and requires the exact Gradle signing
+diagnostic. An unrelated release-build failure cannot satisfy the guard.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

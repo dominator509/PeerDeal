@@ -8093,3 +8093,27 @@ Risks:
 - This is a negative signing guard only. A successful signed release,
   operator credential validation, and device/profile validation remain
   external.
+
+---
+
+### 2026-08-11 - Codex - Exact Android Signing Guard Assertion
+
+Summary:
+- Explicitly blanked all four Android signing variables in the CI negative
+  test.
+- Required the exact Gradle signing diagnostic after the expected nonzero
+  release-build result, preventing arbitrary failures from passing the check.
+
+Files changed:
+- `.github/workflows/ci.yml`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Local credential-free release build still produced the expected Gradle
+  signing diagnostic and failed before artifact assembly.
+- Workflow YAML parses successfully.
+
+Risks:
+- This remains a negative guard only; signed release, operator credential,
+  profile, and device validation remain external.

@@ -773,6 +773,16 @@ Signed release output, runtime/device validation, network reachability,
 other-platform hosts, and product database/state provisioning remain external
 or integration-owned.
 
+## Recent T81 Changes
+
+- The Android release-signing CI check now explicitly clears every signing
+  variable and matches the exact expected Gradle guard diagnostic.
+- An unrelated release-build failure now fails the CI check instead of being
+  mistaken for proof that signing is enforced.
+
+Signed release output, operator credentials, and runtime/device validation
+remain external or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

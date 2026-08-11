@@ -82,6 +82,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-10-072` | App-shell native-readiness aggregation lifecycle cancellation | 4 | T78 | RESOLVED | Added additive cancellable local-network and native-transport capability interfaces, forwarded route cancellation through mirrored readiness loaders, and cancelled stale readiness work on loader replacement or app disposal. Existing base bridges remain compatible; already-dispatched host calls and runtime/device validation remain external. |
 | `LEGACY-GAP-2026-08-10-073` | Native host compilation absent from CI | 4 | T79 | RESOLVED | Added separate Android debug APK and Windows debug host CI jobs. These compile gates catch host integration regressions without claiming release signing or runtime/device validation. |
 | `LEGACY-GAP-2026-08-10-074` | Android release-signing guard absent from CI | 4 | T80 | RESOLVED | Added an expected-failure CI check proving a credential-free Android release build stops at the Gradle signing guard. The check does not use or expose operator credentials and does not claim a signed release artifact. |
+| `LEGACY-GAP-2026-08-10-075` | Android signing CI check accepted arbitrary failures | 4 | T81 | RESOLVED | The release-signing CI check now blanks all four signing variables and requires the exact Gradle signing diagnostic, preventing unrelated Android build failures from satisfying the negative guard. |
 
 ## Status Definitions
 

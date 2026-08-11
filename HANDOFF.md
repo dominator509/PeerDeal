@@ -705,3 +705,14 @@ signing guard with the required `PEERDEAL_ANDROID_*` message.
 Remaining:
 - A successful signed release still requires operator-owned credentials and
   release/profile/device validation; this change proves only the negative guard.
+
+## Recent T81 Changes
+
+- Tightened the Android release-signing CI assertion to blank all four signing
+  variables explicitly.
+- The expected-failure step now requires the exact Gradle signing diagnostic,
+  so unrelated build failures cannot falsely pass the guard.
+
+Remaining:
+- Signed release output, operator credential validation, and runtime/device
+  release validation remain external.
