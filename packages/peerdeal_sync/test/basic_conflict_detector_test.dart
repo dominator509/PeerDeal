@@ -5,6 +5,20 @@ import 'package:test/test.dart';
 void main() {
   const detector = BasicConflictDetector();
 
+  test('rejects an invalid direct request scope before traversing events', () {
+    final result = detector.detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'x' * RecoveryPersistenceLimits.defaultMaxStorageKeyBytes,
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_SCOPE_INVALID');
+  });
+
   test('rejects an oversized event window before traversing events', () {
     const request = RecoveryRequest(
       tableId: 'table_1',

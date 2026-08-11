@@ -2,9 +2,10 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/snapshot_applier.dart';
 import '../contracts/snapshot_state_projector.dart';
+import '../models/recovery_event_window_limits.dart';
+import '../models/recovery_persistence_scope.dart';
 import '../models/snapshot_apply_request.dart';
 import '../models/snapshot_apply_result.dart';
-import '../models/recovery_event_window_limits.dart';
 import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 
@@ -126,6 +127,20 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
   List<SyncConflict> _validate(SnapshotApplyRequest request) {
     final conflicts = <SyncConflict>[];
     final snapshot = request.snapshot;
+
+    if (!RecoveryPersistenceScope(
+      tableId: request.tableId,
+      sessionId: request.sessionId,
+      protocolVersion: request.protocolVersion,
+    ).hasValidStorageIdentity) {
+      return const <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_SNAPSHOT_APPLY_SCOPE_INVALID',
+          message: 'Snapshot apply request scope identity is invalid.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ];
+    }
 
     if (request.events.length > maxEvents) {
       return <SyncConflict>[

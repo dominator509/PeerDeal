@@ -3,6 +3,7 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import '../contracts/conflict_detector.dart';
 import '../models/conflict_detection_result.dart';
 import '../models/recovery_event_window_limits.dart';
+import '../models/recovery_persistence_scope.dart';
 import '../models/recovery_request.dart';
 import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
@@ -27,6 +28,22 @@ class BasicConflictDetector implements ConflictDetector {
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
     final conflicts = <SyncConflict>[];
+
+    if (!RecoveryPersistenceScope(
+      tableId: request.tableId,
+      sessionId: request.sessionId,
+      protocolVersion: request.protocolVersion,
+    ).hasValidStorageIdentity) {
+      return const ConflictDetectionResult(
+        conflicts: <SyncConflict>[
+          SyncConflict(
+            code: 'ERR_RECOVERY_SCOPE_INVALID',
+            message: 'Recovery request scope identity is invalid.',
+            severity: SyncConflictSeverity.fatal,
+          ),
+        ],
+      );
+    }
 
     if (request.events.length > maxEvents) {
       return ConflictDetectionResult(

@@ -1108,6 +1108,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   validated after filtering and snapshot-suffix planning. Focused replay tests
   and package analysis pass.
 
+## T119 Direct Sync Request Scope Validation
+
+- `BasicConflictDetector` and `BasicSnapshotApplier` now validate direct
+  table/session/protocol request identities through the shared
+  `RecoveryPersistenceScope` rules before event traversal, snapshot projection,
+  or projector access.
+- Invalid direct scopes return fatal `ERR_RECOVERY_SCOPE_INVALID` or
+  `ERR_SNAPSHOT_APPLY_SCOPE_INVALID` conflicts. Focused `peerdeal_sync` tests
+  (70) and package analysis pass.
+
 ## T118 Recovery Scope Storage-Key Bound
 
 - `RecoveryPersistenceScope` now rejects storage keys above the shared 180-byte

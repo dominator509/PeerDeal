@@ -221,6 +221,10 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
   Both in-memory and JSON stores also cap recovery windows at 4,096 events by
   default and validate each event through the configurable 64 KiB protocol
   codec bound before state mutation.
+- Direct recovery conflict detection and snapshot application reuse the same
+  scope validation before event traversal, snapshot projection, or projector
+  access; invalid direct scopes fail closed with stable processor-specific
+  conflicts.
 - App-native readiness aggregation accepts an app-owned cancellation signal and
   forwards it to additive cancellable capability bridges. Mirrored app states
   cancel stale readiness work when the loader changes or the state disposes;

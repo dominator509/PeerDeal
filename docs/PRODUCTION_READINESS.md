@@ -1528,6 +1528,13 @@ in-memory and JSON recovery stores reject oversized scopes with the existing
 `ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID` conflict before mutation or file
 creation.
 
+The T119 follow-up closes the direct sync request-scope bypass. Both
+`BasicConflictDetector` and `BasicSnapshotApplier` now validate direct
+table/session/protocol identities through the shared `RecoveryPersistenceScope`
+rules before event traversal, snapshot projection, or projector access. Invalid
+requests fail closed with `ERR_RECOVERY_SCOPE_INVALID` or
+`ERR_SNAPSHOT_APPLY_SCOPE_INVALID`.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

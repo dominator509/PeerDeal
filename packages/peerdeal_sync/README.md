@@ -62,6 +62,9 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
 - Recovery persistence scopes cap the complete UTF-8 storage key at 180 bytes
   before in-memory indexing or base64url filename generation; oversized scopes
   fail closed as `ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID`.
+- Direct recovery requests and snapshot-apply requests reuse the same scope
+  validation before event traversal or projector access, failing closed with
+  `ERR_RECOVERY_SCOPE_INVALID` or `ERR_SNAPSHOT_APPLY_SCOPE_INVALID`.
 - File-backed recovery windows are written as canonical protocol JSON through
   a temporary file before replacing the durable window.
 - Recovery stores expose an idempotent, scope-validated `wipe` operation;

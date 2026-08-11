@@ -566,6 +566,10 @@ session identities without padding, control characters, or the internal `::`
 storage-key delimiter. The complete UTF-8 storage key is capped at 180 bytes
 before in-memory indexing or base64url filename generation; oversized scopes
 fail closed with `ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID`.
+Direct `RecoveryRequest` and `SnapshotApplyRequest` processors apply the same
+scope validation before event traversal, snapshot projection, or projector
+access, returning `ERR_RECOVERY_SCOPE_INVALID` or
+`ERR_SNAPSHOT_APPLY_SCOPE_INVALID` for invalid request identities.
 App shells own durable root selection. `AppRecoveryPersistenceStoreFactory`
 accepts an injected root directory factory, and the mobile/desktop shells may
 default it from `PEERDEAL_RECOVERY_ROOT`. Blank, missing, or throwing roots fail

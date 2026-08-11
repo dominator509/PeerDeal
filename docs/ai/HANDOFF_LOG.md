@@ -2,6 +2,25 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T119 Direct Sync Request Scope Validation
+
+Summary:
+- Direct `RecoveryRequest` and `SnapshotApplyRequest` processing now validates
+  table, session, and protocol identities through shared
+  `RecoveryPersistenceScope` rules before event, snapshot, or projector work.
+- Invalid direct scopes return `ERR_RECOVERY_SCOPE_INVALID` or
+  `ERR_SNAPSHOT_APPLY_SCOPE_INVALID`.
+
+Tests run:
+- Focused `peerdeal_sync` suite: 70 tests passed.
+- Focused `peerdeal_sync` analysis passed.
+
+Risks:
+- This hardens direct Dart sync ingress but does not define product identity,
+  database persistence, platform runtime, or device validation policy.
+
+---
+
 ### 2026-08-11 - Codex - T118 Recovery Scope Storage-Key Bound
 
 Summary:

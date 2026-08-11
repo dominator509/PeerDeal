@@ -5,6 +5,24 @@ import 'package:test/test.dart';
 import 'fakes/fake_snapshot_projector.dart';
 
 void main() {
+  test('rejects an invalid direct apply scope before projector access', () {
+    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+      projector: FakeSnapshotProjector(),
+    );
+    final result = applier.apply(
+      SnapshotApplyRequest(
+        tableId: 'table_1',
+        sessionId: 'x' * RecoveryPersistenceLimits.defaultMaxStorageKeyBytes,
+        protocolVersion: '1.0.0',
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.appliedEventCount, 0);
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_APPLY_SCOPE_INVALID');
+  });
+
   test('rejects an oversized event window before applying events', () {
     final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
       projector: _ThrowingEventProjector(),

@@ -1165,6 +1165,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T119 Changes
+
+- Direct `RecoveryRequest` and `SnapshotApplyRequest` processing now validates
+  table, session, and protocol scope identities through the shared
+  `RecoveryPersistenceScope` rules before event traversal, snapshot projection,
+  or projector access.
+- Invalid direct scopes fail closed with processor-specific fatal conflicts:
+  `ERR_RECOVERY_SCOPE_INVALID` and `ERR_SNAPSHOT_APPLY_SCOPE_INVALID`.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T118 Changes
 
 - `RecoveryPersistenceScope` now rejects storage keys above the shared 180-byte
