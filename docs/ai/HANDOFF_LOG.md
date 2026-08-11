@@ -8200,6 +8200,31 @@ Risks:
 
 ---
 
+### 2026-08-11 - Codex - Android Multicast Interface Selection
+
+Summary:
+- Android native transport now chooses an operational non-loopback IPv4
+  multicast interface, preferring Wi-Fi/Ethernet deterministically.
+- The selected interface is applied to outbound multicast sockets and the
+  receiver; missing usable interfaces fail closed.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, `docs/ai/API_CONTRACTS.md`, and
+  `docs/ai/ARCHITECTURE_MAP.md`.
+
+Verification:
+- Android debug APK compilation passed.
+- No Android device or emulator was attached for runtime validation.
+
+Risks:
+- Android runtime persistence/capture, cross-device multicast reachability,
+  release signing, other-platform native implementations, and product
+  database/session-state wiring remain external or integration-owned.
+
+---
+
 ### 2026-08-11 - Codex - Secure-Key Revision Compare-and-Swap
 
 Summary:

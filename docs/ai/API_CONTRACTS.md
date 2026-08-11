@@ -253,6 +253,10 @@ policy remains in app and network layers.
 The `sendFrame` method-channel arguments carry the encoded transport fields under
 one nested `frame` map. Android and Windows native hosts must unwrap that map
 before validating or encoding the host-private datagram envelope.
+Android and Windows host transports must select a usable operational IPv4
+multicast interface for host membership and outbound sends, and fail closed when
+no usable interface is available. This is host readiness behavior, not a
+discovery or endpoint advertisement protocol.
 The Android and Windows host implementations require strict UTF-8 for native
 session and peer identity fields and reject C1/control-bearing or padded values
 before queueing received frames or sending datagrams. Host input normalization

@@ -7,10 +7,11 @@ import android.os.Looper
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.net.DatagramPacket
-import java.net.DatagramSocket
+import java.net.Inet4Address
 import java.net.InetAddress
-import java.net.MulticastSocket
 import java.net.InetSocketAddress
+import java.net.MulticastSocket
+import java.net.NetworkInterface
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.CharacterCodingException
@@ -137,8 +138,12 @@ internal class NativeTransportHandler(
         if (closed) return failure("Native transport is closed.")
         val frame = frameFromCall(call) ?: return failure("Native transport frame is invalid.")
         val bytes = encode(frame) ?: return failure("Native transport frame is invalid.")
+        val multicastInterface = selectMulticastInterface()
+            ?: return failure("Native transport multicast interface is unavailable.")
         return try {
-            DatagramSocket().use { socket ->
+            MulticastSocket(null).use { socket ->
+                socket.networkInterface = multicastInterface
+                socket.timeToLive = 1
                 val packet = DatagramPacket(
                     bytes,
                     bytes.size,
@@ -199,10 +204,12 @@ internal class NativeTransportHandler(
 
         var candidateSocket: MulticastSocket? = null
         var candidateLock: WifiManager.MulticastLock? = null
+        val multicastInterface = selectMulticastInterface() ?: return false
         return try {
             candidateSocket = MulticastSocket(null).apply {
                 reuseAddress = true
                 bind(InetSocketAddress(PORT))
+                networkInterface = multicastInterface
                 timeToLive = 1
                 joinGroup(InetAddress.getByName(MULTICAST_ADDRESS))
             }
@@ -246,6 +253,53 @@ internal class NativeTransportHandler(
             candidateSocket?.close()
             releaseMulticastLock(candidateLock)
             false
+        }
+    }
+
+    private fun selectMulticastInterface(): NetworkInterface? {
+        val interfaces = try {
+            NetworkInterface.getNetworkInterfaces()?.toList().orEmpty()
+        } catch (_: Exception) {
+            return null
+        }
+        return interfaces.asSequence()
+            .filter { networkInterface ->
+                try {
+                    networkInterface.isUp &&
+                        !networkInterface.isLoopback &&
+                        !networkInterface.isVirtual &&
+                        networkInterface.supportsMulticast() &&
+                        networkInterface.interfaceAddresses.any { address ->
+                            val inetAddress = address.address
+                            inetAddress is Inet4Address &&
+                                !inetAddress.isAnyLocalAddress &&
+                                !inetAddress.isLoopbackAddress &&
+                                !inetAddress.isLinkLocalAddress
+                        }
+                } catch (_: Exception) {
+                    false
+                }
+            }
+            .sortedWith(
+                compareBy<NetworkInterface>(
+                    { multicastInterfacePriority(it) },
+                    { it.index },
+                    { it.name },
+                ),
+            )
+            .firstOrNull()
+    }
+
+    private fun multicastInterfacePriority(networkInterface: NetworkInterface): Int {
+        val name = try {
+            "${networkInterface.name} ${networkInterface.displayName ?: ""}".lowercase()
+        } catch (_: Exception) {
+            return 2
+        }
+        return when {
+            name.contains("wifi") || name.contains("wlan") -> 0
+            name.contains("eth") -> 1
+            else -> 2
         }
     }
 

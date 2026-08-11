@@ -1301,6 +1301,10 @@ capability/discovery, transport capability/send/receive, and secure-key
 save/read-back, stale-writer conflict, conditional replacement/delete, and
 tombstone read-back checks. Android debug APK compilation passed. Cross-device
 reachability, Android device validation, and release signing remain external.
+The T91 follow-up makes Android multicast interface selection explicit for both
+send and receive, preferring an operational non-loopback IPv4 Wi-Fi/Ethernet
+interface and failing closed when none is available. The APK still requires a
+real-device pass for runtime behavior.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate

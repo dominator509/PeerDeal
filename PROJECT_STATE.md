@@ -891,6 +891,8 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Windows now selects an operational IPv4 multicast interface for membership
   and sends. Direct host smoke passed transport send and receive, and Android
   debug APK compilation passed.
+- Android now selects an operational non-loopback IPv4 multicast interface for
+  send and receive, preferring Wi-Fi/Ethernet and failing closed otherwise.
 
 ## Required Gates
 

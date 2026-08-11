@@ -871,3 +871,14 @@ upgrades and 11 newer versions below the current toolchain ceiling.
 Runtime/device validation, cross-device multicast reachability, operator-owned
 release signing, other-platform native implementations, and concrete product
 database or session-state wiring remain external or integration-owned.
+
+## Recent T91 Changes
+
+- Android native multicast transport now selects an operational non-loopback
+  IPv4 interface, prefers Wi-Fi/Ethernet deterministically, and assigns that
+  interface to both outbound multicast sockets and the receiver.
+- Android transport fails closed when no usable multicast interface exists,
+  instead of reporting a socket path that cannot select a local network.
+- Android debug APK compilation passed. No Android device or emulator is
+  attached, so runtime persistence/capture and cross-device reachability remain
+  external validation.
