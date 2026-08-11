@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T133 Native Host Build and Smoke Validation
+
+Summary:
+- Android debug APK and Windows debug host builds pass.
+- The dedicated Windows smoke target passes app-storage, capture,
+  local-network, transport, and secure-key mutation checkpoints through the
+  default RTK-safe wrapper.
+- The wrapper now resolves its default executable path when `PSScriptRoot` is
+  empty under RTK PowerShell invocation.
+
+Tests and gates:
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and diff-check gates pass; actionable upgrades: 0.
+
+Remaining:
+- Real device and cross-device network validation, other-platform hosts,
+  product state/database wiring, and release signing remain external or
+  owner-controlled.
+
+Next reviewer:
+- Review the bounded wrapper change and publish the green T133 commit.
+
+---
+
 ### 2026-08-11 - Codex - T132 Typed Production Session Handoff Loader
 
 Summary:

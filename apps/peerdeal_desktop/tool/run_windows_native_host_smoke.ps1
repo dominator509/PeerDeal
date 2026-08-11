@@ -1,11 +1,23 @@
 [CmdletBinding()]
 param(
-    [string]$ExecutablePath = (Join-Path $PSScriptRoot '..\build\windows\x64\runner\Debug\peerdeal_desktop.exe'),
+    [string]$ExecutablePath = '',
     [ValidateRange(1, 300)]
     [int]$TimeoutSeconds = 30
 )
 
 $ErrorActionPreference = 'Stop'
+if ([string]::IsNullOrWhiteSpace($ExecutablePath)) {
+    # RTK's PowerShell bridge can invoke a script with an empty PSScriptRoot.
+    $scriptRoot = $PSScriptRoot
+    if ([string]::IsNullOrWhiteSpace($scriptRoot) -and
+        -not [string]::IsNullOrWhiteSpace($MyInvocation.MyCommand.Path)) {
+        $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+    }
+    if ([string]::IsNullOrWhiteSpace($scriptRoot)) {
+        $scriptRoot = Join-Path (Get-Location).Path 'tool'
+    }
+    $ExecutablePath = Join-Path $scriptRoot '..\build\windows\x64\runner\Debug\peerdeal_desktop.exe'
+}
 $resolvedExecutablePath = [System.IO.Path]::GetFullPath($ExecutablePath)
 if (-not (Test-Path -LiteralPath $resolvedExecutablePath -PathType Leaf)) {
     throw "Windows native host smoke executable was not found: $resolvedExecutablePath"

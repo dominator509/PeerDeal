@@ -1152,6 +1152,18 @@ signing, and concrete product state wiring remain external or integration-owned.
   without mutating app state; focused mobile and desktop runtime suites cover
   overflow and invalid limits.
 
+## T133 Native Host Build and Smoke Validation
+
+- Android debug APK and Windows debug host compilation pass.
+- The dedicated Windows smoke target passes app storage, capture,
+  local-network, transport, and secure-key mutation checkpoints through the
+  default RTK-safe wrapper path.
+- The wrapper derives its executable path when RTK invokes the script with an
+  empty `PSScriptRoot`.
+- This is local host evidence only; real device/cross-device behavior,
+  other-platform implementations, product state/database wiring, and release
+  signing remain open.
+
 ## T132 Typed Production Session Handoff Loader
 
 - Mirrored mobile and desktop app shells now expose an optional typed loader

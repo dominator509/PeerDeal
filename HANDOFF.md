@@ -1178,6 +1178,32 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T133 Native Host Build and Smoke Validation
+
+- Android debug APK and Windows debug host builds pass.
+- The dedicated Windows native-host smoke target and default RTK PowerShell
+  wrapper pass app-storage, capture capability/enable/release, local-network
+  capability/discovery, transport capability/send/receive, and secure-key
+  baseline, save/read-back, stale-writer conflict, conditional save/delete,
+  and delete read-back checkpoints.
+- The wrapper now derives its executable path when `PSScriptRoot` is empty
+  under RTK PowerShell invocation.
+
+Tests and gates:
+- `flutter build apk --debug --no-pub` passed.
+- `flutter build windows --debug --no-pub` passed.
+- `flutter build windows --debug --no-pub -t tool/windows_native_host_smoke.dart`
+  passed.
+- `run_windows_native_host_smoke.ps1` passed with its default executable path.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates pass; actionable dependency
+  upgrades: 0.
+
+Remaining:
+- Real Android device behavior, cross-device multicast/firewall profiles,
+  other-platform hosts, product state/database wiring, and release signing
+  remain external or owner-controlled validation.
+
 ## Recent T132 Typed Production Session Handoff Loader
 
 - Mirrored mobile and desktop app shells now accept an optional

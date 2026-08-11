@@ -1626,6 +1626,13 @@ results. The product still owns the concrete source, state, route policy, and
 factory invocation; device, platform, database, and signing validation remain
 external.
 
+The T133 follow-up adds local host-build and runtime evidence for the existing
+native contracts. Android debug APK compilation and Windows debug host
+compilation pass, and the dedicated Windows smoke target passes app storage,
+capture, local-network, transport, and secure-key mutation checkpoints through
+the default RTK-safe wrapper. This does not close real-device, cross-device,
+other-platform, product persistence, or release-signing validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
