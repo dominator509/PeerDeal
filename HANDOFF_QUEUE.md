@@ -78,6 +78,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-10-068` | Android and Windows native transport identity decoding | 4 | T74 | RESOLVED | Native host frame decoders now reject malformed UTF-8 and C1-control-bearing session/peer identities before queueing or sending. Device/network reachability and runtime host validation remain external. |
 | `LEGACY-GAP-2026-08-10-069` | Android and Windows local-network host registration | 4 | T75 | RESOLVED | Registered the locked local-network method channel on both hosts and added bounded active-interface capability/hint reporting. Peer discovery remains fail-closed with no fabricated endpoints because the repository has no discovery advertisement protocol. |
 | `LEGACY-GAP-2026-08-10-070` | Capture bridge and mounted receipt-route lifecycle cancellation | 4 | T76 | RESOLVED | Added additive cancellable capture capability/action interfaces, bounded method-channel cancellation, and mirrored receipt presenter/coordinator propagation on route replacement and disposal. Native calls already dispatched remain host-owned; runtime/device capture validation remains external. |
+| `LEGACY-GAP-2026-08-10-071` | App-support directory method-channel deadline and lifecycle cancellation | 4 | T77 | RESOLVED | Added a bounded five-second app-storage lookup with additive cancellation and propagated it through mirrored native recovery-store factories. Missing or cancelled native directory lookup still fails closed without creating a persistence factory. |
 
 ## Status Definitions
 

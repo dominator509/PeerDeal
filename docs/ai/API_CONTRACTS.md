@@ -513,6 +513,11 @@ contract. Android returns private no-backup app storage and Windows returns
 native bridge owns no recovery or receipt semantics. Missing, malformed, or
 failed native directory results return no default factory and therefore fail
 closed.
+The method-channel lookup uses a bounded five-second default deadline and
+returns a stable unavailable fact on timeout. The additive
+`CancellableAppStorageDirectoryBridge` capability lets app-owned startup or
+route lifecycles cancel the lookup; the existing base bridge remains valid and
+an already-dispatched host call remains host-owned.
 
 ## Local Network Bootstrap Boundary
 

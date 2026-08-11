@@ -726,6 +726,19 @@ Already-dispatched native calls remain host-owned. Runtime/device capture
 validation, release signing, other-platform hosts, and product database/state
 provisioning remain external or integration-owned.
 
+## Recent T77 Changes
+
+- Added additive cancellation support to the generic app-support directory
+  bridge without changing the base app-storage interface.
+- App-support method-channel lookups now have a positive five-second default
+  deadline and fail-closed timeout/cancellation results.
+- Mirrored recovery persistence factories forward cancellation to cancellable
+  directory bridges while preserving compatibility with existing fakes.
+
+Runtime persistence validation, product database/state provisioning,
+other-platform storage, and already-dispatched native call semantics remain
+external or integration-owned.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -64,6 +64,9 @@ to observe local device capabilities.
   and returned as unavailable facts with decode warnings.
 - Secure-key method-channel load, save, and delete calls use a bounded
   five-second default deadline and return fail-closed timeout results.
+- App-support directory method-channel lookup uses a bounded five-second
+  default deadline and an additive cancellation capability; timeout or
+  cancellation returns an unavailable fact without throwing through app code.
 
 ## Method-channel contracts
 - Capture protection channel: `peerdeal/native_bridges/capture_protection`
@@ -74,6 +77,8 @@ to observe local device capabilities.
   `loadKeyRing`, `saveKey`, and `deleteKey`.
 - Native transport channel: `peerdeal/native_bridges/transport` with
   `getCapability`, `sendFrame`, and `receiveFrames`.
+- App-support directory channel: `peerdeal/native_bridges/app_storage` with
+  `getAppSupportDirectory`.
 - The Android and Windows hosts now back that channel with a bounded,
   host-private UDP multicast envelope on `239.255.42.99:40442`. The envelope
   is not a protocol artifact: it carries only the already-validated generic

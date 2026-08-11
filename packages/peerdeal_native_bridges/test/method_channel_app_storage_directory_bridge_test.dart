@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -10,6 +12,16 @@ void main() {
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
+  });
+
+  test('rejects a non-positive method-channel timeout', () {
+    expect(
+      () => MethodChannelAppStorageDirectoryBridge(
+        channel: channel,
+        timeout: Duration.zero,
+      ),
+      throwsArgumentError,
+    );
   });
 
   test('loads an available app support directory', () async {
@@ -62,5 +74,38 @@ void main() {
 
     expect(snapshot.available, isFalse);
     expect(snapshot.directoryPath, isNull);
+  });
+
+  test('fails closed when the platform call times out', () async {
+    final pending = Completer<Object?>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) => pending.future);
+
+    final snapshot = await MethodChannelAppStorageDirectoryBridge(
+      channel: channel,
+      timeout: const Duration(milliseconds: 1),
+    ).getAppSupportDirectory();
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.warning, 'Native app storage directory lookup timed out.');
+    pending.complete(null);
+  });
+
+  test('cancels an in-flight platform lookup', () async {
+    final pending = Completer<Object?>();
+    final cancellation = Completer<void>();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) => pending.future);
+
+    final lookup = MethodChannelAppStorageDirectoryBridge(
+      channel: channel,
+    ).getAppSupportDirectory(cancellation: cancellation.future);
+    cancellation.complete();
+
+    final snapshot = await lookup;
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.warning, 'Native app storage directory lookup cancelled.');
+    pending.complete(null);
   });
 }

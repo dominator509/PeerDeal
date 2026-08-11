@@ -99,6 +99,9 @@ dart analyze .
   validation is still open. App shells prefer
   explicit `PEERDEAL_RECOVERY_ROOT` and otherwise use the generic app-support
   directory bridge: Android private no-backup storage or Windows `LocalAppData`.
+  The app-support lookup has a bounded five-second deadline and an additive
+  cancellation capability; unavailable or cancelled lookup fails closed before
+  a recovery factory is created.
   Android and Windows now also provide bounded host-backed native peer
   transport through the existing channel, but device/network reachability,
   production database persistence, other-platform storage, and other platform

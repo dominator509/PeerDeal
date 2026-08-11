@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:peerdeal_mobile/recovery/app_recovery_persistence_store_factory.dart';
@@ -148,6 +149,23 @@ void main() {
     expect(factory, isNull);
   });
 
+  test(
+    'forwards cancellation to cancellable native app support lookup',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _CancellableAppStorageDirectoryBridge();
+      final factoryFuture =
+          AppRecoveryPersistenceStoreFactory.fromNativeAppSupport(
+            bridge: bridge,
+            cancellation: cancellation.future,
+          );
+      cancellation.complete();
+
+      expect(await factoryFuture, isNull);
+      expect(bridge.cancellation, same(cancellation.future));
+    },
+  );
+
   test('fails closed when app cannot provide recovery root', () {
     final factory = AppRecoveryPersistenceStoreFactory(
       rootDirectoryFactory: () => throw StateError('root unavailable'),
@@ -257,6 +275,20 @@ class _UnavailableAppStorageDirectoryBridge
 
   @override
   Future<AppStorageDirectorySnapshot> getAppSupportDirectory() async {
+    return const AppStorageDirectorySnapshot.unavailable();
+  }
+}
+
+class _CancellableAppStorageDirectoryBridge
+    implements AppStorageDirectoryBridge, CancellableAppStorageDirectoryBridge {
+  Future<void>? cancellation;
+
+  @override
+  Future<AppStorageDirectorySnapshot> getAppSupportDirectory({
+    Future<void>? cancellation,
+  }) async {
+    this.cancellation = cancellation;
+    await cancellation;
     return const AppStorageDirectorySnapshot.unavailable();
   }
 }

@@ -7986,3 +7986,30 @@ Risks:
 - Already-dispatched native calls remain host-owned. Android/Windows runtime
   capture validation, release signing, other-platform hosts, and product
   database/state wiring remain external or integration-owned.
+
+---
+
+### 2026-08-11 - Codex - App-Support Directory Cancellation
+
+Summary:
+- Added an additive cancellable app-support directory bridge capability while
+  preserving the existing base interface.
+- Generic app-storage lookup now races a positive five-second deadline against
+  caller cancellation and returns stable unavailable facts on either outcome.
+- Mirrored recovery persistence factories forward cancellation to compatible
+  bridges and fail closed without constructing a factory when lookup fails.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/app_storage/` and focused tests.
+- Mirrored app recovery persistence factories and focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Tests run:
+- Focused native app-storage bridge suite: passed, 7 tests.
+- Mirrored mobile and desktop recovery-factory suites: passed, 13 tests each.
+
+Risks:
+- Already-dispatched native calls remain host-owned. Runtime persistence
+  validation, product database/state provisioning, other-platform storage,
+  and release/operator validation remain external or integration-owned.

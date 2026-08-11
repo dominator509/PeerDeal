@@ -633,3 +633,22 @@ Remaining:
 - Already-dispatched native calls remain host-owned. Android/Windows runtime
   capture validation, release signing, other-platform hosts, and product
   database/state wiring remain external or integration-owned.
+
+## Recent T77 Changes
+
+- Added an additive cancellable app-support directory bridge capability while
+  preserving the existing base interface.
+- Generic app-support directory method-channel lookup now uses a bounded
+  five-second deadline and stable fail-closed timeout/cancellation results.
+- Mirrored recovery persistence factories forward optional cancellation when
+  the injected directory bridge supports it; unavailable or cancelled lookup
+  still returns no persistence factory.
+
+Focused verification passed:
+- Native app-storage bridge: 7 tests.
+- Mirrored mobile and desktop recovery-factory suites: 13 tests each.
+
+Remaining:
+- Native directory calls already dispatched remain host-owned. Runtime
+  persistence validation, product database/state provisioning, other-platform
+  storage, and release/operator validation remain external or integration-owned.

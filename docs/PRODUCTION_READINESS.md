@@ -1193,6 +1193,15 @@ disabled. Focused native bridge, coordinator, and receipt presenter suites
 pass; already-dispatched host calls and runtime/device capture validation
 remain external.
 
+The T77 follow-up closes the remaining unbounded app-support directory lookup.
+The generic app-storage method channel now uses a positive five-second default
+deadline and an additive cancellation capability, returning stable unavailable
+facts when timeout or cancellation wins. Mirrored recovery persistence
+factories forward cancellation when the injected bridge supports it and still
+fail closed without constructing a factory when native directory lookup is
+unavailable. Runtime persistence validation and product database/state
+provisioning remain external.
+
 ## Next production hardening order
 1. Validate Android and Windows secure-key and capture behavior at runtime,
    including Android real-device persistence, `FLAG_SECURE`, Windows display

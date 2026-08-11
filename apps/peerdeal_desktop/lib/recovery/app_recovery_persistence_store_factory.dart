@@ -45,11 +45,19 @@ class AppRecoveryPersistenceStoreFactory {
 
   static Future<AppRecoveryPersistenceStoreFactory?> fromNativeAppSupport({
     AppStorageDirectoryBridge? bridge,
+    Future<void>? cancellation,
   }) async {
     final AppStorageDirectorySnapshot snapshot;
     try {
-      snapshot = await (bridge ?? MethodChannelAppStorageDirectoryBridge())
-          .getAppSupportDirectory();
+      final directoryBridge =
+          bridge ?? MethodChannelAppStorageDirectoryBridge();
+      if (directoryBridge is CancellableAppStorageDirectoryBridge) {
+        snapshot =
+            await (directoryBridge as CancellableAppStorageDirectoryBridge)
+                .getAppSupportDirectory(cancellation: cancellation);
+      } else {
+        snapshot = await directoryBridge.getAppSupportDirectory();
+      }
     } on Object {
       return null;
     }
