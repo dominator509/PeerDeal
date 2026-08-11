@@ -1143,6 +1143,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` through blocked settlement projection;
   focused variant projection tests (52) and analysis pass.
 
+## T130 App Session Event-Batch Bound
+
+- Mirrored `AppTableSessionRuntime` owners now enforce the shared 4,096-event
+  default, with a positive caller-owned override, before copying or reducing
+  caller-supplied non-retention event batches.
+- Oversized batches fail closed with `ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE`
+  without mutating app state; focused mobile and desktop runtime suites cover
+  overflow and invalid limits.
+
 ## T129 Persisted Session Writer Event Bound
 
 - Mirrored `AppHoldemProductionSessionPersistenceWriter` instances now enforce

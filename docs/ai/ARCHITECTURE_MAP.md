@@ -51,7 +51,9 @@ Transport ingress:
 3. The app handler binds frame/session identity and delegates the event to
    `AppTableSessionRuntime`.
 4. The runtime delegates deterministic projection to `peerdeal_core` and only
-   commits accepted events, including retention-gated close events.
+   commits accepted events, including retention-gated close events. Its
+   non-retention event-batch entry point enforces the shared 4,096-event bound
+   before copying or reducing caller input.
 5. An app-owned source controller can schedule bounded polls of the loaded
    native drain, serialize overlapping polls, and stop with the route lifecycle.
    Route cancellation and source disposal fail the visible poll closed; an

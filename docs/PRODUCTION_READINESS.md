@@ -1602,6 +1602,12 @@ The T129 follow-up closes the mirrored persistence-writer input gap.
 or appending a caller-supplied suffix. Oversized suffixes fail closed without
 creating durable event or snapshot data.
 
+The T130 follow-up closes the app inbound event-batch materialization gap.
+Mirrored `AppTableSessionRuntime` owners now enforce the shared 4,096-event
+default, with a positive caller-owned override, before copying or reducing a
+caller-supplied non-retention batch. Oversized input fails closed with
+`ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE` without mutating app state.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

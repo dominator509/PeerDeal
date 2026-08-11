@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T130 App Session Event-Batch Bound
+
+Summary:
+- Mirrored `AppTableSessionRuntime` owners now enforce the shared
+  `RecoveryEventWindowLimits.defaultMaxEvents` bound before copying or reducing
+  caller-supplied non-retention event batches; callers can provide a smaller
+  positive limit.
+- Oversized batches fail closed with `ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE`
+  without changing runtime state.
+
+Tests run:
+- Focused mobile and desktop session-runtime suites passed (8 each).
+- Focused mobile and desktop Flutter analysis passed.
+
+Risks:
+- This hardens the app inbound runtime boundary; concrete product session/state
+  wiring, native runtime validation, other-platform implementations, and
+  release signing remain separate.
+
+Next reviewer:
+- Run the full local gate set and commit if green.
+
+---
+
 ### 2026-08-11 - Codex - T129 Persisted Session Writer Event Bound
 
 Summary:

@@ -659,7 +659,10 @@ projection or close retention fails. A `SessionClosed` event is committed only
   composes this handler with a validated native session and bounded source, while
   platform transport provisioning and production event-source startup remain
   outside this contract. App route source mounting is an app-shell lifecycle
-  concern.
+  concern. Non-retention event batches are bounded by the shared 4,096-event
+  recovery limit, or a smaller positive caller limit, before copying or reducer
+  traversal; oversized batches fail closed with
+  `ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE`.
 `AppHoldemTableSessionRuntime` is the app-owned local Hold'em composition seam:
 it invokes `HoldemCoreProjectionAdapter`, preflights the resulting non-retention
 batch through `AppTableSessionRuntime`, and advances Hold'em state/cursor only

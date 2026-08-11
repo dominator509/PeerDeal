@@ -1,5 +1,6 @@
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 import '../recovery/app_recovery_session_close_event_adapter.dart';
 
@@ -106,15 +107,18 @@ class AppTableSessionRuntime {
     required AppRecoverySessionCloseEventAdapter closeEventAdapter,
     CoreReducer reducer = const CoreReducer(),
     DateTime Function()? clock,
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : _state = _validateInitialState(initialState),
        _closeEventAdapter = closeEventAdapter,
        _reducer = reducer,
-       _clock = clock ?? DateTime.now;
+       _clock = clock ?? DateTime.now,
+       _maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents);
 
   TableState _state;
   final AppRecoverySessionCloseEventAdapter _closeEventAdapter;
   final CoreReducer _reducer;
   final DateTime Function() _clock;
+  final int _maxRecoveryEvents;
   EventEnvelope? _lastAcceptedEvent;
   int _acceptedEventCount = 0;
 
@@ -187,13 +191,19 @@ class AppTableSessionRuntime {
     int? expectedEventSequence,
     String? expectedLastEventHash,
   }) {
-    final incoming = List<EventEnvelope>.unmodifiable(events);
-    if (incoming.isEmpty) {
+    if (events.isEmpty) {
       return AppTableSessionEventBatchResult.rejected(
         state: _state,
         reasonCode: 'ERR_APP_SESSION_EVENT_BATCH_EMPTY',
       );
     }
+    if (events.length > _maxRecoveryEvents) {
+      return AppTableSessionEventBatchResult.rejected(
+        state: _state,
+        reasonCode: 'ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE',
+      );
+    }
+    final incoming = List<EventEnvelope>.unmodifiable(events);
 
     var projectedState = _state;
     for (final event in incoming) {
@@ -296,4 +306,15 @@ class AppTableSessionRuntime {
     }
     return List<String>.unmodifiable(warnings);
   }
+}
+
+int _validateMaxRecoveryEvents(int value) {
+  if (value <= 0) {
+    throw ArgumentError.value(
+      value,
+      'maxRecoveryEvents',
+      'Recovery event limit must be positive.',
+    );
+  }
+  return value;
 }

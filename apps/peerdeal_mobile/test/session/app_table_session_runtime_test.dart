@@ -141,11 +141,40 @@ void main() {
     expect(runtime.state.eventSequence, 2);
     expect(runtime.acceptedEventCount, 2);
   });
+
+  test('rejects an oversized event batch before materialization', () {
+    final runtime = _runtime(
+      scope: scope,
+      store: _FakeRecoveryStore(),
+      maxRecoveryEvents: 1,
+    );
+    final result = runtime.applyEventBatch(<EventEnvelope>[
+      _event(type: 'OpenTableSessionOpened', seq: 1),
+      _event(type: 'SessionCloseRequested', seq: 2, prevHash: 'hash_1'),
+    ]);
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_APP_SESSION_EVENT_BATCH_TOO_LARGE');
+    expect(runtime.state.eventSequence, 0);
+    expect(runtime.acceptedEventCount, 0);
+  });
+
+  test('rejects a non-positive event batch limit', () {
+    expect(
+      () => _runtime(
+        scope: scope,
+        store: _FakeRecoveryStore(),
+        maxRecoveryEvents: 0,
+      ),
+      throwsArgumentError,
+    );
+  });
 }
 
 AppTableSessionRuntime _runtime({
   required RecoveryPersistenceScope scope,
   required _FakeRecoveryStore store,
+  int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
 }) {
   return AppTableSessionRuntime(
     initialState: TableState.initial(
@@ -160,6 +189,7 @@ AppTableSessionRuntime _runtime({
         policy: _policy(seconds: 0),
       ),
     ),
+    maxRecoveryEvents: maxRecoveryEvents,
   );
 }
 

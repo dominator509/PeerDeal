@@ -1178,6 +1178,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T130 App Session Event-Batch Bound
+
+- Mirrored `AppTableSessionRuntime` owners now enforce the shared
+  `RecoveryEventWindowLimits.defaultMaxEvents` bound, configurable per runtime,
+  before copying or reducing caller-supplied non-retention event batches.
+- Oversized batches and non-positive limits fail closed without changing app
+  state; focused mobile and desktop runtime tests cover both paths.
+
+Remaining:
+- Concrete product session/state wiring, native platform key storage,
+  runtime/device validation, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T129 Persisted Session Writer Event Bound
 
 - Mirrored `AppHoldemProductionSessionPersistenceWriter` instances now enforce
