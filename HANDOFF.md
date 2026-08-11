@@ -1139,3 +1139,16 @@ Remaining:
 Remaining:
 - Protocol schema semantics, platform/runtime validation, product persistence,
   other-platform hosts, and release signing remain separate.
+
+## Recent T110 Changes
+
+- `OpaqueExportDecoder` now validates artifact-body and plaintext-payload JSON
+  through bounded canonical protocol serialization before receipt shape
+  inspection, using receipt-owned decoded-body and payload byte limits.
+- Structurally oversized maps, deep values, unsupported values, and invalid
+  object keys fail closed without changing receipt signature, cipher, opacity,
+  or authorization semantics.
+
+Remaining:
+- Platform key storage, runtime/device validation, product persistence,
+  other-platform hosts, and release signing remain separate.

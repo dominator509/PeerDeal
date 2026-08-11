@@ -1070,6 +1070,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   encode and decode validation, rejecting unsupported values and non-string
   object keys. Focused protocol tests and package analysis pass.
 
+## T110 Receipt JSON Structure Bounds
+
+- `OpaqueExportDecoder` now validates decoded artifact-body and plaintext-payload
+  JSON through bounded canonical protocol serialization before receipt shape
+  inspection, using the receipt-owned decoded-body and payload byte limits.
+- Structurally oversized maps, deep values, unsupported values, and invalid
+  object keys fail closed without changing signature, cipher, opacity, or
+  authorization semantics. Focused receipt tests and package analysis pass.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -34,6 +34,8 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
 - `OpaqueExportDecoder` verifies signed export artifacts before import-side
   inspection and fails closed on malformed, unsigned, tampered, undecryptable,
   privacy-leaking payloads, or verifier adapter failures.
+- Receipt artifact and payload JSON decoding also applies bounded canonical
+  structure validation before shape inspection.
 - `DefaultReceiptService.exportReceipt` fails closed to an unavailable artifact
   when export signing or encryption adapters throw.
 - `OpaqueExportEncoder` also fails closed for direct callers when signer or

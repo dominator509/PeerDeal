@@ -40,6 +40,35 @@ Next reviewer:
 
 ---
 
+### 2026-08-11 - Codex - T110 Receipt JSON Structure Bounds
+
+Summary:
+- `OpaqueExportDecoder` now validates decoded artifact-body and plaintext-payload
+  JSON through bounded canonical protocol serialization before receipt shape
+  inspection, using receipt-owned decoded-body and payload byte limits.
+- Structurally oversized maps, deep values, unsupported values, and invalid
+  object keys fail closed without changing receipt signature, cipher, opacity,
+  or authorization semantics.
+
+Files changed:
+- Receipt decoder, README, and focused regression tests.
+- Readiness ledger, handoff queue, project state, and stable AI context docs.
+
+Tests run:
+- Focused receipt artifact decoder suite: 13 tests passed.
+- Focused `peerdeal_receipts` analysis passed.
+
+Risks:
+- This bounds receipt JSON decode structure in Dart. Platform key storage,
+  runtime/device validation, product persistence, other-platform hosts, and
+  release signing remain separate.
+
+Next reviewer:
+- Preserve receipt-owned byte limits when adding new artifact fields and keep
+  cryptographic/key-storage semantics outside the generic protocol serializer.
+
+---
+
 ### 2026-08-11 - Codex - T109 Canonical JSON Materialization Bounds
 
 Summary:

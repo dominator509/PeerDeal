@@ -217,6 +217,35 @@ void main() {
     expect(result.isAccepted, isFalse);
     expect(result.message, 'Receipt artifact payload shape is unsupported.');
   });
+
+  test('rejects structurally oversized decoded payloads', () {
+    final payload = <String, Object?>{
+      'receipt_id': 'r_1',
+      'receipt_version': '1.0',
+      'protocol_version': '1.x',
+      'mode_type': 'tournament',
+      'payload_hash': 'hash_77',
+      'opaque_payload': 'opaque_77',
+      for (var index = 0; index < 252; index += 1) 'extra_$index': index,
+    };
+    final payloadText = jsonEncode(payload);
+    final artifact = ReceiptExportArtifact(
+      artifactType: 'file',
+      encodedBody: _encodeBody(<String, Object?>{
+        'format_version': '1.0',
+        'cipher': 'none',
+        'payload': payloadText,
+      }),
+      minimalMetadata: const <String, Object?>{},
+    );
+
+    final result = const OpaqueExportDecoder(
+      requireSignature: false,
+    ).inspect(artifact);
+
+    expect(result.isAccepted, isFalse);
+    expect(result.message, 'Receipt artifact payload shape is unsupported.');
+  });
 }
 
 Map<String, Object?> _decodeBody(String encodedBody) {

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import '../contracts/receipt_cipher.dart';
 import '../contracts/receipt_signer.dart';
 import '../models/receipt_export_artifact.dart';
@@ -116,7 +118,15 @@ class OpaqueExportDecoder {
       final decodedBytes = base64Decode(encodedBody);
       if (decodedBytes.length > _limits.maxDecodedBodyBytes) return null;
       final decoded = jsonDecode(utf8.decode(decodedBytes));
-      return decoded is Map<String, Object?> ? decoded : null;
+      if (decoded is! Map<String, Object?>) return null;
+      canonicalJsonEncode(
+        decoded,
+        limits: CanonicalJsonLimits(
+          maxTextBytes: _limits.maxDecodedBodyBytes,
+          maxEncodedBytes: _limits.maxDecodedBodyBytes,
+        ),
+      );
+      return decoded;
     } on Object {
       return null;
     }
@@ -155,7 +165,15 @@ class OpaqueExportDecoder {
     try {
       if (utf8.encode(payload).length > _limits.maxPayloadBytes) return null;
       final decoded = jsonDecode(payload);
-      return decoded is Map<String, Object?> ? decoded : null;
+      if (decoded is! Map<String, Object?>) return null;
+      canonicalJsonEncode(
+        decoded,
+        limits: CanonicalJsonLimits(
+          maxTextBytes: _limits.maxPayloadBytes,
+          maxEncodedBytes: _limits.maxPayloadBytes,
+        ),
+      );
+      return decoded;
     } on Object {
       return null;
     }

@@ -1451,6 +1451,15 @@ limit during both encode and decode validation and rejects unsupported values
 or non-string object keys. Protocol schema semantics, product persistence,
 platform/runtime validation, and release signing remain separate.
 
+The T110 follow-up closes the receipt JSON structure gap.
+`OpaqueExportDecoder` now validates decoded artifact-body and plaintext-payload
+JSON through the bounded canonical protocol writer before receipt shape
+inspection, using receipt-owned decoded-body and payload byte limits for text
+and encoded output. Structurally oversized maps, deep values, unsupported
+values, and invalid object keys fail closed without changing receipt signature,
+cipher, opacity, or authorization semantics. Platform key storage and
+runtime/device validation remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

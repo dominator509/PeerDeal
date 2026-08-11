@@ -654,6 +654,9 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - Receipt export encoding/inspection and HMAC cipher operations share bounded
   encoded-body, decoded-body, payload, ciphertext, and nonce limits; oversized
   values fail closed before base64, JSON, or keystream processing.
+- `OpaqueExportDecoder` also validates artifact-body and plaintext-payload JSON
+  through bounded canonical protocol serialization before receipt shape
+  inspection, using receipt-owned decoded-body and payload byte limits.
 - App receipt export factories must not copy provisioning warning detail into
   unavailable artifact reasons.
 - App receipt export factories must convert provisioning dependency exceptions
