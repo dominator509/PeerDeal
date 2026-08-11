@@ -148,7 +148,9 @@ Recovery:
 2. Replay bounds the raw request event list, then validates ranges, event
    windows, gaps, anchors, and unsupported versions before projection; anchor
    hashing and snapshot suffix planning share the same event bound.
-3. Sync detects conflicts and applies snapshot plus suffix events.
+3. Sync bounds direct caller-provided event lists before conflict detection or
+   snapshot/suffix projection, then detects conflicts and applies snapshot plus
+   suffix events.
 4. Fatal conflicts recommend safe close instead of unsafe resume.
 
 Receipts:

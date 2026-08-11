@@ -2,18 +2,37 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/conflict_detector.dart';
 import '../models/conflict_detection_result.dart';
+import '../models/recovery_event_window_limits.dart';
 import '../models/recovery_request.dart';
 import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 
 class BasicConflictDetector implements ConflictDetector {
-  const BasicConflictDetector({this.protocolCatalog = const ProtocolCatalog()});
+  const BasicConflictDetector({
+    this.protocolCatalog = const ProtocolCatalog(),
+    this.maxEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+  }) : assert(maxEvents > 0, 'maxEvents must be positive');
 
   final ProtocolCatalog protocolCatalog;
+  final int maxEvents;
 
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
     final conflicts = <SyncConflict>[];
+
+    if (request.events.length > maxEvents) {
+      return ConflictDetectionResult(
+        conflicts: <SyncConflict>[
+          SyncConflict(
+            code: 'ERR_RECOVERY_EVENT_COUNT_TOO_LARGE',
+            message: 'Recovery event window exceeds the configured limit.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '$maxEvents',
+            actual: '${request.events.length}',
+          ),
+        ],
+      );
+    }
 
     if (!protocolCatalog.supportsProtocolVersion(request.protocolVersion)) {
       conflicts.add(

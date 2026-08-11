@@ -1108,6 +1108,16 @@ signing, and concrete product state wiring remain external or integration-owned.
   validated after filtering and snapshot-suffix planning. Focused replay tests
   and package analysis pass.
 
+## T115 Direct Sync Event Window Bounds
+
+- `BasicConflictDetector` and `BasicSnapshotApplier` now enforce the shared
+  configurable 4,096-event recovery-window default on direct caller-provided
+  event lists before protocol, scope, sequence, or projector traversal.
+- Oversized direct sync requests return the fatal
+  `ERR_RECOVERY_EVENT_COUNT_TOO_LARGE` conflict; persistence stores retain
+  their existing durable-window limits and persistence-specific conflict codes.
+- Focused `peerdeal_sync` tests (61) and package analysis pass.
+
 ## T114 Replay Anchor And Selection Fail-Closed Bounds
 
 - Oversized replay requests now return immediately before protocol, scope, range,

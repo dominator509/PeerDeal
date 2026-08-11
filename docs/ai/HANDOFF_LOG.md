@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T115 Direct Sync Event Window Bounds
+
+Summary:
+- `BasicConflictDetector` and `BasicSnapshotApplier` now reject direct
+  caller-provided recovery event lists above the shared configurable default of
+  4,096 events before protocol, scope, sequence, or projector traversal.
+- Oversized input returns the fatal `ERR_RECOVERY_EVENT_COUNT_TOO_LARGE` code;
+  durable stores retain their existing persistence-specific limits and codes.
+
+Tests run:
+- Focused `peerdeal_sync` suite: 61 tests passed.
+- Focused `peerdeal_sync` analysis passed.
+
+Risks:
+- This bounds direct Dart sync processors only. Product database persistence,
+  platform/runtime validation, other-platform hosts, and release signing
+  remain separate.
+
+Next reviewer:
+- Preserve the shared sync event bound before adding transport or product
+  session callers around conflict detection and snapshot application.
+
+---
+
 ### 2026-08-11 - Codex - T114 Replay Anchor And Selection Bounds
 
 Summary:

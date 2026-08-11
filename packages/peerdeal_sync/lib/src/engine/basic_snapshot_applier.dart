@@ -4,13 +4,26 @@ import '../contracts/snapshot_applier.dart';
 import '../contracts/snapshot_state_projector.dart';
 import '../models/snapshot_apply_request.dart';
 import '../models/snapshot_apply_result.dart';
+import '../models/recovery_event_window_limits.dart';
 import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 
 class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
-  BasicSnapshotApplier({required this.projector});
+  BasicSnapshotApplier({
+    required this.projector,
+    this.maxEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+  }) {
+    if (maxEvents <= 0) {
+      throw ArgumentError.value(
+        maxEvents,
+        'maxEvents',
+        'Recovery snapshot apply event limit must be positive.',
+      );
+    }
+  }
 
   final SnapshotStateProjector<TState> projector;
+  final int maxEvents;
 
   @override
   SnapshotApplyResult<TState> apply(SnapshotApplyRequest request) {
@@ -105,6 +118,18 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
   List<SyncConflict> _validate(SnapshotApplyRequest request) {
     final conflicts = <SyncConflict>[];
     final snapshot = request.snapshot;
+
+    if (request.events.length > maxEvents) {
+      return <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_EVENT_COUNT_TOO_LARGE',
+          message: 'Recovery event window exceeds the configured limit.',
+          severity: SyncConflictSeverity.fatal,
+          expected: '$maxEvents',
+          actual: '${request.events.length}',
+        ),
+      ];
+    }
 
     if (snapshot == null && request.events.isEmpty) {
       conflicts.add(

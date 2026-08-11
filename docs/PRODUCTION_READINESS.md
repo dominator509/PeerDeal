@@ -1495,6 +1495,14 @@ failure mismatches instead of allowing helper exceptions to escape. Protocol
 hashing remains in `peerdeal_protocol`; product persistence, device/network
 reachability, other-platform hosts, and release signing remain separate.
 
+The T115 follow-up closes the direct sync traversal gap. `BasicConflictDetector`
+and `BasicSnapshotApplier` now reject caller-provided recovery event lists above
+the shared configurable 4,096-event default before protocol, scope, sequence,
+or projector traversal, returning the fatal
+`ERR_RECOVERY_EVENT_COUNT_TOO_LARGE` conflict. Durable persistence remains
+behind its existing store-specific validation and codes; product database
+persistence and runtime/device validation remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

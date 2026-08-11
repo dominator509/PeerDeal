@@ -4,6 +4,7 @@ import '../contracts/recovery_persistence_store.dart';
 import '../models/persisted_recovery_window.dart';
 import '../models/recovery_persistence_result.dart';
 import '../models/recovery_persistence_scope.dart';
+import '../models/recovery_event_window_limits.dart';
 import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 
@@ -29,7 +30,7 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
     }
   }
 
-  static const defaultMaxEvents = 4096;
+  static const defaultMaxEvents = RecoveryEventWindowLimits.defaultMaxEvents;
   static const defaultMaxEventBytes = 64 * 1024;
 
   final int _maxEvents;

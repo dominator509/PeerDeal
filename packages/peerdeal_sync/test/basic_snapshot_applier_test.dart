@@ -5,6 +5,32 @@ import 'package:test/test.dart';
 import 'fakes/fake_snapshot_projector.dart';
 
 void main() {
+  test('rejects an oversized event window before applying events', () {
+    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+      projector: _ThrowingEventProjector(),
+      maxEvents: 1,
+    );
+
+    final result = applier.apply(
+      SnapshotApplyRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        events: <EventEnvelope>[
+          _event(1, prevEventHash: genesisEventHash, eventHash: 'hash_1'),
+          _event(2, prevEventHash: 'hash_1', eventHash: 'hash_2'),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.appliedEventCount, 0);
+    expect(result.state.appliedEventTypes, isEmpty);
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_COUNT_TOO_LARGE');
+    expect(result.conflicts.single.expected, '1');
+    expect(result.conflicts.single.actual, '2');
+  });
+
   test('applies snapshot first and only replays suffix events', () {
     final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
@@ -267,4 +293,26 @@ class _ThrowingEventProjector extends FakeSnapshotProjector {
   }) {
     throw StateError('projector failed');
   }
+}
+
+EventEnvelope _event(
+  int eventSeq, {
+  required String prevEventHash,
+  required String eventHash,
+}) {
+  return EventEnvelope(
+    eventId: 'evt_$eventSeq',
+    eventType: eventSeq == 1 ? 'OpenTableSessionOpened' : 'RecoveryPauseEnded',
+    eventVersion: '1.0',
+    protocolVersion: '1.0.0',
+    eventSeq: eventSeq,
+    tableId: 'table_1',
+    sessionId: 'session_1',
+    handId: null,
+    emittedAt: '2026-04-25T00:00:00Z',
+    actorRef: 'system',
+    payload: const <String, Object?>{},
+    prevEventHash: prevEventHash,
+    eventHash: eventHash,
+  );
 }

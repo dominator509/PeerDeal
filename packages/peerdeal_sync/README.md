@@ -46,6 +46,9 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
 - Recovery stores reject event windows above a configurable 4,096-event
   default and reject individual events above the protocol codec's configurable
   64 KiB default before mutating in-memory or durable state.
+- Direct conflict detection and snapshot application also reject oversized
+  in-memory recovery event windows before protocol, sequence, or projector
+  traversal, using the same configurable 4,096-event default.
 - File-backed recovery windows are written as canonical protocol JSON through
   a temporary file before replacing the durable window.
 - Recovery stores expose an idempotent, scope-validated `wipe` operation;

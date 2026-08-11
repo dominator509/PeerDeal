@@ -5,6 +5,53 @@ import 'package:test/test.dart';
 void main() {
   const detector = BasicConflictDetector();
 
+  test('rejects an oversized event window before traversing events', () {
+    const request = RecoveryRequest(
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      protocolVersion: '2.0.0',
+      mode: RecoveryMode.reconnect,
+      events: <EventEnvelope>[
+        EventEnvelope(
+          eventId: 'evt_1',
+          eventType: 'OpenTableSessionOpened',
+          eventVersion: '1.0',
+          protocolVersion: '1.0.0',
+          eventSeq: 1,
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          handId: null,
+          emittedAt: '2026-04-25T00:00:00Z',
+          actorRef: 'system',
+          payload: <String, Object?>{},
+          prevEventHash: genesisEventHash,
+          eventHash: 'hash_1',
+        ),
+        EventEnvelope(
+          eventId: 'evt_2',
+          eventType: 'RecoveryPauseEnded',
+          eventVersion: '1.0',
+          protocolVersion: '1.0.0',
+          eventSeq: 2,
+          tableId: 'other_table',
+          sessionId: 'session_1',
+          handId: null,
+          emittedAt: '2026-04-25T00:00:01Z',
+          actorRef: 'system',
+          payload: <String, Object?>{},
+          prevEventHash: 'hash_1',
+          eventHash: 'hash_2',
+        ),
+      ],
+    );
+
+    final result = const BasicConflictDetector(maxEvents: 1).detect(request);
+
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_COUNT_TOO_LARGE');
+    expect(result.conflicts.single.expected, '1');
+    expect(result.conflicts.single.actual, '2');
+  });
+
   test(
     'flags fatal mismatch when final event hash differs from expected baseline',
     () {

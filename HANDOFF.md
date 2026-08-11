@@ -1165,6 +1165,19 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T115 Changes
+
+- Direct sync conflict detection and snapshot application now reject recovery
+  event lists above the shared configurable 4,096-event default before
+  protocol, scope, sequence, or projector traversal.
+- The stable fatal code is `ERR_RECOVERY_EVENT_COUNT_TOO_LARGE`; persistence
+  stores continue to own durable-window mutation and their existing
+  persistence-specific error codes.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T114 Changes
 
 - Oversized replay requests now return immediately before secondary protocol,
