@@ -130,6 +130,135 @@ void main() {
       expect(decision.resultCode, GovernanceResultCodes.errSeatOfferMissing);
     });
 
+    test('fails closed before participant traversal on oversized contexts', () {
+      const engine = DefaultGovernanceEngine(maxParticipants: 1);
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: List<ParticipantSnapshot>.generate(
+          2,
+          (index) => ParticipantSnapshot(
+            participantId: 'participant-${index + 1}',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          growable: false,
+        ),
+        seats: const <SeatSnapshot>[],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.admitParticipant,
+          actorId: 'participant-1',
+          subjectId: 'participant-2',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(
+        decision.resultCode,
+        GovernanceResultCodes.errParticipantCountTooLarge,
+      );
+    });
+
+    test('fails closed before seat traversal on oversized contexts', () {
+      const engine = DefaultGovernanceEngine(maxSeats: 1);
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const <ParticipantSnapshot>[
+          ParticipantSnapshot(
+            participantId: 'participant-1',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const <SeatSnapshot>[
+          SeatSnapshot(seatIndex: 1, state: SeatState.empty),
+          SeatSnapshot(seatIndex: 2, state: SeatState.empty),
+        ],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.offerSeat,
+          actorId: 'participant-1',
+          subjectId: 'participant-1',
+          seatIndex: 1,
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errSeatCountTooLarge);
+    });
+
+    test('fails closed before waitlist traversal on oversized contexts', () {
+      const engine = DefaultGovernanceEngine(maxWaitlistEntries: 1);
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const <ParticipantSnapshot>[
+          ParticipantSnapshot(
+            participantId: 'participant-1',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.waitlistActive,
+          ),
+        ],
+        seats: const <SeatSnapshot>[],
+        waitlistOrdering: const <String>['existing-1', 'existing-2'],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.addToWaitlist,
+          actorId: 'participant-1',
+          subjectId: 'participant-1',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(
+        decision.resultCode,
+        GovernanceResultCodes.errWaitlistCountTooLarge,
+      );
+    });
+
+    test('bounds waitlist growth when the input is at capacity', () {
+      const engine = DefaultGovernanceEngine(maxWaitlistEntries: 1);
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const <ParticipantSnapshot>[
+          ParticipantSnapshot(
+            participantId: 'participant-1',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.waitlistActive,
+          ),
+        ],
+        seats: const <SeatSnapshot>[],
+        waitlistOrdering: const <String>['existing-1'],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.addToWaitlist,
+          actorId: 'participant-1',
+          subjectId: 'participant-1',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(
+        decision.resultCode,
+        GovernanceResultCodes.errWaitlistCountTooLarge,
+      );
+    });
+
     test('assigns a claimed seat to active occupancy deterministically', () {
       final context = GovernanceContext(
         modeId: 'open_table',

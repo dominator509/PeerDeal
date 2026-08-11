@@ -1,3 +1,4 @@
+import '../models/mode_input_limits.dart';
 import 'governance_action.dart';
 import 'governance_context.dart';
 import 'governance_decision.dart';
@@ -9,13 +10,28 @@ import 'seat_state.dart';
 import 'waitlist_state.dart';
 
 class DefaultGovernanceEngine implements GovernanceEngine {
-  const DefaultGovernanceEngine();
+  const DefaultGovernanceEngine({
+    this.maxParticipants = ModeInputLimits.defaultMaxParticipants,
+    this.maxSeats = ModeInputLimits.defaultMaxSeats,
+    this.maxWaitlistEntries = ModeInputLimits.defaultMaxWaitlistEntries,
+  }) : assert(maxParticipants > 0, 'maxParticipants must be positive'),
+       assert(maxSeats > 0, 'maxSeats must be positive'),
+       assert(maxWaitlistEntries > 0, 'maxWaitlistEntries must be positive');
+
+  final int maxParticipants;
+  final int maxSeats;
+  final int maxWaitlistEntries;
 
   @override
   GovernanceDecision evaluate({
     required GovernanceContext context,
     required GovernanceAction action,
   }) {
+    final inputError = _inputLimitError(context);
+    if (inputError != null) {
+      return GovernanceDecision.deny(inputError);
+    }
+
     final actor = context.participantById(action.actorId);
     final subject = context.participantById(action.subjectId);
 
@@ -166,6 +182,11 @@ class DefaultGovernanceEngine implements GovernanceEngine {
       case GovernanceActionType.addToWaitlist:
         final ordering = List<String>.from(context.waitlistOrdering);
         if (!ordering.contains(subject.participantId)) {
+          if (ordering.length >= maxWaitlistEntries) {
+            return GovernanceDecision.deny(
+              GovernanceResultCodes.errWaitlistCountTooLarge,
+            );
+          }
           ordering.add(subject.participantId);
         }
         return GovernanceDecision(
@@ -241,6 +262,19 @@ class DefaultGovernanceEngine implements GovernanceEngine {
   bool _canManageSeats(ParticipantSnapshot? actor) {
     return actor != null &&
         (actor.role == RoleKind.host || actor.role == RoleKind.cohost);
+  }
+
+  String? _inputLimitError(GovernanceContext context) {
+    if (context.participants.length > maxParticipants) {
+      return GovernanceResultCodes.errParticipantCountTooLarge;
+    }
+    if (context.seats.length > maxSeats) {
+      return GovernanceResultCodes.errSeatCountTooLarge;
+    }
+    if (context.waitlistOrdering.length > maxWaitlistEntries) {
+      return GovernanceResultCodes.errWaitlistCountTooLarge;
+    }
+    return null;
   }
 }
 

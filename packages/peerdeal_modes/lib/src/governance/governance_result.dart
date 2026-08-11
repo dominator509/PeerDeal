@@ -17,4 +17,7 @@ class GovernanceResultCodes {
       'ERR_WAITLIST_PROMOTION_UNAVAILABLE';
   static const errPermissionDenied = 'ERR_PERMISSION_DENIED';
   static const errParticipantMissing = 'ERR_PARTICIPANT_MISSING';
+  static const errParticipantCountTooLarge = 'ERR_GOVERNANCE_PARTICIPANT_COUNT';
+  static const errSeatCountTooLarge = 'ERR_GOVERNANCE_SEAT_COUNT';
+  static const errWaitlistCountTooLarge = 'ERR_GOVERNANCE_WAITLIST_COUNT';
 }

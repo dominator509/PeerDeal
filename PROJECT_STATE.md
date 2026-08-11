@@ -1143,6 +1143,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT` through blocked settlement projection;
   focused variant projection tests (52) and analysis pass.
 
+## T125 Mode Governance Collection Bounds
+
+- `DefaultGovernanceEngine` now applies configurable limits before participant,
+  seat, or waitlist traversal: 256 participants, 64 seats, and 256 waitlist
+  entries by default.
+- Oversized contexts and waitlist growth at capacity fail closed with stable
+  governance result codes; focused mode-governance tests (17) and package
+  analysis pass.
+
 ## T124 Core Pot Settlement Bounds
 
 - `SidePotBuilder` and `PotEngine` now apply variant-agnostic core limits of 64

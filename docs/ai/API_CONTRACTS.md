@@ -70,6 +70,17 @@ bound for direct callers. `BasicReplayEngine` fails closed with
 `ERR_REPLAY_SELECTION_FAILURE` or `ERR_REPLAY_ANCHOR_CALCULATION_FAILURE` if an
 injected helper rejects input or canonical anchor materialization fails.
 
+## Mode Governance
+
+`DefaultGovernanceEngine` checks caller-provided governance context collections
+before participant lookup or seat/waitlist traversal. Its defaults are 256
+participants, 64 seats, and 256 waitlist entries, and callers may configure
+lower positive limits for a mode. Oversized collections deny with
+`ERR_GOVERNANCE_PARTICIPANT_COUNT`, `ERR_GOVERNANCE_SEAT_COUNT`, or
+`ERR_GOVERNANCE_WAITLIST_COUNT`. Adding a participant to a waitlist at its
+configured capacity also denies rather than returning an oversized next
+ordering.
+
 ## App Route Surface
 
 Current app shells mount demo-oriented routes rather than production app flows.

@@ -14,4 +14,5 @@ export 'src/governance/seat_state.dart';
 export 'src/governance/waitlist_state.dart';
 export 'src/models/mode_capabilities.dart';
 export 'src/models/mode_identity.dart';
+export 'src/models/mode_input_limits.dart';
 export 'src/models/mode_policy_models.dart';

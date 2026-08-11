@@ -2,6 +2,24 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T125 Mode Governance Collection Bounds
+
+Summary:
+- `DefaultGovernanceEngine` now bounds participant, seat, and waitlist
+  collections before lookup/traversal, with defaults of 256, 64, and 256.
+- Oversized context inputs and waitlist growth at capacity return stable denial
+  codes without changing mode ownership or policy semantics.
+
+Tests run:
+- Focused `peerdeal_modes` governance suite: 17 tests passed.
+- Focused `peerdeal_modes` analysis passed.
+
+Risks:
+- This hardens the mode-policy boundary while product source wiring, native
+  reachability, durable database policy, and release inputs remain separate.
+
+---
+
 ### 2026-08-11 - Codex - T124 Core Pot Settlement Bounds
 
 Summary:

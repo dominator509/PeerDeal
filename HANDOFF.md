@@ -1165,6 +1165,20 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T125 Changes
+
+- `DefaultGovernanceEngine` now checks configurable bounds before participant,
+  seat, or waitlist traversal: 256 participants, 64 seats, and 256 waitlist
+  entries by default.
+- Oversized context collections fail closed with
+  `ERR_GOVERNANCE_PARTICIPANT_COUNT`, `ERR_GOVERNANCE_SEAT_COUNT`, or
+  `ERR_GOVERNANCE_WAITLIST_COUNT`; waitlist admission also cannot grow a full
+  bounded ordering.
+
+Remaining:
+- Product persistence/source wiring, platform key storage, runtime/device
+  validation, other-platform hosts, and release signing remain separate.
+
 ## Recent T124 Changes
 
 - `peerdeal_core` now bounds direct pot commitments to 64, winning slice-map

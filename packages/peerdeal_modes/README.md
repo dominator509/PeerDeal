@@ -38,3 +38,5 @@ app orchestration.
 - Mid-session waitlist promotion obeys mode policy and manager permissions.
 - Reload and ledger policy tests now lock Open Table private-ledger reloads and
   Tournament reentry behavior while rejecting unsupported reload policy strings.
+- `DefaultGovernanceEngine` bounds participant, seat, and waitlist collections
+  before traversal and prevents waitlist growth beyond configured capacity.

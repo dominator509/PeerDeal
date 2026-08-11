@@ -1569,6 +1569,13 @@ side-pot or award traversal. Overflow fails closed with
 `ERR_CORE_SETTLEMENT_WINNER_SLICE_COUNT`, or
 `ERR_CORE_SETTLEMENT_WINNER_COUNT`.
 
+The T125 follow-up closes the direct mode-governance collection gap.
+`DefaultGovernanceEngine` now checks configurable limits before participant,
+seat, or waitlist lookup/traversal, defaulting to 256 participants, 64 seats,
+and 256 waitlist entries. Oversized collections and waitlist growth at
+capacity fail closed with `ERR_GOVERNANCE_PARTICIPANT_COUNT`,
+`ERR_GOVERNANCE_SEAT_COUNT`, or `ERR_GOVERNANCE_WAITLIST_COUNT`.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
