@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+
 import '../session/app_holdem_table_session_runtime.dart';
 import '../session/app_table_session_runtime.dart';
 import 'app_table_session_transport_handler.dart';
@@ -144,10 +146,10 @@ class AppTableSessionTransportProvisioner {
   }
 
   static bool _isValidIdentity(String value) {
-    final trimmed = value.trim();
-    return trimmed.isNotEmpty &&
-        trimmed == value &&
-        !value.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f);
+    return NativeBridgePayloadLimits.isSafeUtf8Text(
+      value,
+      NativeBridgePayloadLimits.maxTransportIdentityBytes,
+    );
   }
 
   static List<String> _safeWarnings(

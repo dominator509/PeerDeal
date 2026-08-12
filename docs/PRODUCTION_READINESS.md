@@ -1769,6 +1769,16 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T159 follow-up closes the native transport source/provisioner scope gap.
+Mirrored app transport sources and provisioners now reuse the shared native
+bridge safe UTF-8 validator before source start, polling, or capability lookup,
+rejecting empty, padded, C0/C1-control-bearing, or over-256-byte session and
+peer scopes. Focused mobile and desktop source/provisioner suites cover the
+lifecycle boundary. Full repository analyze, boundary, source-text,
+dependency-audit, test, and diff gates pass. Android and Windows runtime/network
+validation, other-platform hosts, product state/database provisioning, and
+release signing remain separate.
+
 The T158 follow-up closes a direct native transport send-model boundary gap.
 Mirrored app-native transport sinks now validate converted `NativeTransportFrame`
 values before invoking an injected native bridge, so the trim-only network

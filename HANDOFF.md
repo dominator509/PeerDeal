@@ -1449,6 +1449,23 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T159 Native Transport Source Scope Bound
+
+- Mirrored transport sources and provisioners now reuse the shared native
+  bridge safe UTF-8/control-free identity validator before source start,
+  polling, or capability lookup.
+- Invalid C0/C1-bearing and over-256-byte session/peer scopes can no longer
+  appear as a started source or reach native capability provisioning.
+- Focused mobile and desktop source/provisioner suites cover rejection before
+  source drain and capability lookup.
+- Full repository analyze, boundary, source-text, dependency-audit, and test
+  gates passed; diff validation is clean.
+
+Remaining:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  separate.
+
 ## Recent T158 Native Transport Send Model Bound
 
 - Mirrored app-native transport sinks now validate the converted

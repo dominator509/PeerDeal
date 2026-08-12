@@ -191,6 +191,44 @@ void main() {
     expect(drainCalls, 0);
   });
 
+  test(
+    'rejects control-bearing and oversized scopes before source start or poll',
+    () async {
+      final invalidScopes = <List<String>>[
+        <String>['session_${String.fromCharCode(1)}', 'peer_b'],
+        <String>['session_1', 'peer_${String.fromCharCode(0x85)}'],
+        <String>['x' * 257, 'peer_b'],
+      ];
+
+      for (final scopes in invalidScopes) {
+        var drainCalls = 0;
+        final source = AppTableSessionTransportSource(
+          sessionId: scopes[0],
+          peerId: scopes[1],
+          drain: () async {
+            drainCalls += 1;
+            return const NativeTransportFrameDrainResult(
+              available: true,
+              results: <TransportFrameReceiveResult>[],
+            );
+          },
+        );
+
+        final start = source.start();
+        final poll = await source.pollNow();
+        expect(start.isSuccess, isFalse);
+        expect(start.warnings, [
+          'Native transport source scope is invalid.',
+        ]);
+        expect(poll.available, isFalse);
+        expect(poll.warnings, [
+          'Native transport source scope is invalid.',
+        ]);
+        expect(drainCalls, 0);
+      }
+    },
+  );
+
   test('bounds and scrubs source warnings', () async {
     final source = AppTableSessionTransportSource(
       sessionId: 'session_1',

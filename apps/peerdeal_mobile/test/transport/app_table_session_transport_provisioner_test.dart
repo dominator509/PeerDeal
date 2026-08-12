@@ -57,6 +57,29 @@ void main() {
   );
 
   test(
+    'rejects control-bearing and oversized peer identities before capability',
+    () async {
+      final bridge = _FakeNativeTransportBridge();
+      for (final peerId in <String>[
+        'peer_${String.fromCharCode(0x85)}',
+        'x' * 257,
+      ]) {
+        final result = await AppTableSessionTransportProvisioner(
+          runtime: _runtime(),
+          nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
+        ).load(peerId: peerId);
+
+        expect(result.available, isFalse);
+        expect(result.source, isNull);
+        expect(result.warnings, [
+          'Native transport peer identity is invalid.',
+        ]);
+      }
+      expect(bridge.capabilityLookups, 0);
+    },
+  );
+
+  test(
     'fails closed when native transport capability is unavailable',
     () async {
       final bridge = _FakeNativeTransportBridge(

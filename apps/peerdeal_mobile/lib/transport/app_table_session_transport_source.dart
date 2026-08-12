@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+
 import 'native_transport_frame_adapter.dart';
 
 const _defaultPollInterval = Duration(seconds: 1);
@@ -347,10 +349,10 @@ class AppTableSessionTransportSource {
   }
 
   static bool _isValidScope(String value) {
-    final trimmed = value.trim();
-    return trimmed.isNotEmpty &&
-        trimmed == value &&
-        !_hasControlCharacter(value);
+    return NativeBridgePayloadLimits.isSafeUtf8Text(
+      value,
+      NativeBridgePayloadLimits.maxTransportIdentityBytes,
+    );
   }
 
   static bool _hasControlCharacter(String value) {

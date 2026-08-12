@@ -140,6 +140,30 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T159 Native Transport Source Scope Bound
+
+Summary:
+- Mirrored app transport sources and provisioners now reuse the shared native
+  bridge safe UTF-8/control-free identity validator before lifecycle start,
+  polling, or capability lookup.
+- Invalid C0/C1-bearing and oversized session/peer scopes fail closed before
+  source scheduling or native provisioning.
+
+Files changed:
+- Mirrored mobile and desktop transport source/provisioner implementations and
+  tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop source/provisioner suites passed, 18 tests each.
+- Full repository analyze, boundary, source-text, dependency-audit, and test
+  gates passed.
+
+Risks:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  external or operator-owned boundaries.
+
 ### 2026-08-11 - Codex - T158 Native Transport Send Model Bound
 
 Summary:
