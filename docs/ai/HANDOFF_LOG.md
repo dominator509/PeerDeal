@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T199 Android Secure-Key Atomic Replacement
+
+Summary:
+- Android generic secure-key storage now replaces an existing encrypted
+  envelope with an API-compatible same-filesystem POSIX rename.
+- This closes the concrete update/rotation failure caused by relying on
+  `File.renameTo`, which is not required to replace an existing destination.
+- The generic method-channel contract and receipt-owned key semantics are
+  unchanged.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Focused mobile receipt/key-ring suites passed.
+- Android debug APK build passed.
+
+Remaining:
+- Real-device Android secure-key/capture validation, cross-device transport
+  reachability, release signing, other-platform hosts, and product-owned
+  session/database wiring remain separate.
+
+---
+
 ### 2026-08-12 - Codex - T198 Context-Aware Initial Hold'em Snapshot Loading
 
 Summary:

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
+import android.system.Os
 import android.util.Base64
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -415,7 +416,11 @@ internal class SecureKeyStorageHandler(context: Context) :
                 output.flush()
                 output.fd.sync()
             }
-            temporaryFile.renameTo(storageFile)
+            // POSIX rename replaces an existing destination atomically. File.renameTo
+            // is not required to replace an existing file on Android, so it can make
+            // every key update after the first save fail on otherwise healthy storage.
+            Os.rename(temporaryFile.absolutePath, storageFile.absolutePath)
+            true
         } catch (_: Exception) {
             false
         } finally {

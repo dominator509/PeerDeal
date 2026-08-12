@@ -2253,6 +2253,15 @@ errors are unchanged, with focused mobile and desktop source coverage. This
 does not select product state, provide a durable database, or prove device,
 network, signing, or other-platform readiness.
 
+The T199 follow-up closes a concrete Android secure-key persistence defect.
+Encrypted envelope writes now use same-filesystem POSIX replacement through
+Android's supported `Os.rename` API, so an existing envelope is replaced
+atomically instead of relying on `File.renameTo`, whose replacement behavior is
+not guaranteed. This preserves the generic secure-key method-channel contract
+and enables subsequent receipt-key updates and rotations after the first save.
+Focused mobile receipt/key-ring suites and the Android debug APK build pass;
+real-device secure-key persistence remains external validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
