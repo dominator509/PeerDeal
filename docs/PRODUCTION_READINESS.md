@@ -2234,6 +2234,14 @@ terminal discard. FIFO retry ordering and the existing event-plus-snapshot
 write policy are unchanged. This bounds coordinator-held recovery data; it does
 not replace product-owned durable database persistence.
 
+The T197 follow-up closes two Android native transport teardown boundaries.
+Malformed receive requests are validated before receiver initialization, so
+untrusted method calls cannot allocate multicast resources. Android sends now
+recheck the closed state under the lifecycle lock while emitting, preventing an
+in-flight send from publishing after engine teardown. The focused Android
+contract test and debug APK build pass; real-device transport behavior,
+cross-device reachability, and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

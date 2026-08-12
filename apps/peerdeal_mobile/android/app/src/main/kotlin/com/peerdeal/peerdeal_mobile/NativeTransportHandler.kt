@@ -149,27 +149,30 @@ internal class NativeTransportHandler(
         val multicastInterface = selectMulticastInterface()
             ?: return failure("Native transport multicast interface is unavailable.")
         return try {
-            MulticastSocket(null).use { socket ->
-                socket.networkInterface = multicastInterface
-                socket.timeToLive = 1
-                val packet = DatagramPacket(
-                    bytes,
-                    bytes.size,
-                    InetAddress.getByName(MULTICAST_ADDRESS),
-                    PORT,
-                )
-                socket.send(packet)
+            synchronized(lifecycleLock) {
+                if (closed) {
+                    failure("Native transport is closed.")
+                } else {
+                    MulticastSocket(null).use { socket ->
+                        socket.networkInterface = multicastInterface
+                        socket.timeToLive = 1
+                        val packet = DatagramPacket(
+                            bytes,
+                            bytes.size,
+                            InetAddress.getByName(MULTICAST_ADDRESS),
+                            PORT,
+                        )
+                        socket.send(packet)
+                    }
+                    mapOf("success" to true)
+                }
             }
-            mapOf("success" to true)
         } catch (_: Exception) {
             failure("Native transport send failed.")
         }
     }
 
     private fun receive(call: MethodCall): Map<String, Any?> {
-        if (!ensureReceiver()) {
-            return receiveUnavailablePayload()
-        }
         val sessionId = safeString(call.argument<Any?>("sessionId"))
         val peerId = safeString(call.argument<Any?>("peerId"))
         if (sessionId == null || peerId == null) {
@@ -178,6 +181,9 @@ internal class NativeTransportHandler(
                 "frames" to emptyList<Map<String, Any?>>(),
                 "warning" to "Native transport receive request is invalid.",
             )
+        }
+        if (!ensureReceiver()) {
+            return receiveUnavailablePayload()
         }
 
         return synchronized(lifecycleLock) {

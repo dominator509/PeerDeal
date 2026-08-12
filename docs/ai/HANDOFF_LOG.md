@@ -2,6 +2,20 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T197 Harden Android Transport Teardown Boundaries
+
+Summary:
+- Android native transport now validates receive scope identities before
+  initializing its multicast receiver, avoiding resource allocation for
+  malformed method calls.
+- Android send emission now rechecks the closed state while holding the
+  lifecycle lock, preventing a late multicast send after engine teardown.
+- Focused Android contract coverage and the debug APK build passed.
+
+Remaining:
+- Real-device transport behavior, cross-device reachability, release signing,
+  and product session/database wiring remain external or integration-owned.
+
 ### 2026-08-12 - Codex - T196 Bound Pending Checkpoint Resources
 
 Summary:

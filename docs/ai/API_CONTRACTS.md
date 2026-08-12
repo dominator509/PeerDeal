@@ -867,6 +867,11 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - Android and Windows transport interface selection applies the same bounded
   adapter/interface and address traversal before opening multicast sockets;
   oversized Windows adapter buffers fail closed.
+- Android transport validates receive scope identities before initializing the
+  multicast receiver. Android send emission is serialized with host lifecycle
+  closure and rechecks the closed state before socket I/O, so teardown cannot
+  publish a late multicast frame; method results still fail closed after
+  teardown.
 - Receipt import/export/verification failures must fail closed.
 - Receipt export encoding/inspection and HMAC cipher operations share bounded
   encoded-body, decoded-body, payload, ciphertext, and nonce limits; oversized
