@@ -65,7 +65,8 @@ to observe local device capabilities.
 - Secure-key method-channel load, save, and delete calls use a bounded
   five-second default deadline and return fail-closed timeout results.
 - Secure-key method-channel requests reject namespaces above the shared 128-byte
-  UTF-8 limit before platform dispatch, matching Android and Windows hosts.
+  UTF-8 limit and reject control-bearing text before platform dispatch, matching
+  Android and Windows hosts.
 - App-support directory method-channel lookup uses a bounded five-second
   default deadline and an additive cancellation capability; timeout or
   cancellation returns an unavailable fact without throwing through app code.

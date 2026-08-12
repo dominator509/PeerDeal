@@ -19,4 +19,14 @@ class NativeBridgePayloadLimits {
 
   static bool isWithinUtf8Limit(String value, int maxBytes) =>
       utf8.encode(value).length <= maxBytes;
+
+  static bool isSafeUtf8Text(String value, int maxBytes) =>
+      isWithinUtf8Limit(value, maxBytes) &&
+      value.trim().isNotEmpty &&
+      value.trim() == value &&
+      value.codeUnits.every(
+        (codeUnit) =>
+            codeUnit >= 0x20 &&
+            !(codeUnit >= 0x7F && codeUnit <= 0x9F),
+      );
 }

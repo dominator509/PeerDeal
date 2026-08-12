@@ -836,10 +836,10 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - App receipt key-ring writers must reject blank, padded, or delimiter-bearing
   receipt key ids before calling native delete methods.
 - Generic native secure key storage method-channel requests must reject blank,
-  padded, or oversized UTF-8 namespaces, key ids, and key record fields before
-  platform calls; secure-key namespaces are capped at 128 UTF-8 bytes and all
-  other bounded text fields use limits consistently at the Dart and
-  Android/Windows host boundaries.
+  padded, oversized, or control-bearing UTF-8 namespaces, key ids, and key
+  record fields before platform calls; secure-key namespaces are capped at 128
+  UTF-8 bytes and all other bounded text fields use limits consistently at the
+  Dart and Android/Windows host boundaries.
 - Generic secure-key method-channel load, save, and delete calls use a bounded
   five-second default deadline and return stable unavailable/failure results on
   timeout; timeout handling remains generic and receipt policy stays in app

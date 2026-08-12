@@ -20,6 +20,26 @@ Validation:
 - Full repository analyze, boundary, source-text, test, dependency-audit, and
   diff-check gates passed before commit and push.
 
+### 2026-08-11 - Codex - T141 Dart Secure-Key Text Validation Hardening
+
+Summary:
+- Shared native-bridge validation now applies UTF-8 byte and control-character
+  rules consistently to secure-key namespaces, IDs, purposes, algorithms, and
+  secrets.
+- Oversized or control-bearing save/delete requests fail before native dispatch.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/native_bridge_payload_limits.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_bridge_models.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/method_channel_secure_key_storage_bridge.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_secure_key_storage_bridge_test.dart`
+- Readiness and handoff records.
+
+Validation:
+- Focused method-channel and channel-contract Flutter tests passed.
+- Full repository analyze, boundary, source-text, test, dependency-audit, and
+  diff-check gates passed before commit and push.
+
 ### 2026-08-11 - Codex - T140 Dart Secure-Key Namespace Boundary Hardening
 
 Summary:

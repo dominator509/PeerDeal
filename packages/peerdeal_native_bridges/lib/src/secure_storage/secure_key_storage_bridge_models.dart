@@ -16,31 +16,23 @@ class SecureKeyRecord {
   final bool active;
 
   bool get isUsable =>
-      NativeBridgePayloadLimits.isWithinUtf8Limit(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
         keyId,
         NativeBridgePayloadLimits.maxSecureKeyIdBytes,
       ) &&
-      keyId.trim().isNotEmpty &&
-      keyId.trim() == keyId &&
       !keyId.contains(':') &&
-      NativeBridgePayloadLimits.isWithinUtf8Limit(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
         purpose,
         NativeBridgePayloadLimits.maxSecureKeyPurposeBytes,
       ) &&
-      purpose.trim().isNotEmpty &&
-      purpose.trim() == purpose &&
-      NativeBridgePayloadLimits.isWithinUtf8Limit(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
         algorithm,
         NativeBridgePayloadLimits.maxSecureKeyAlgorithmBytes,
       ) &&
-      algorithm.trim().isNotEmpty &&
-      algorithm.trim() == algorithm &&
-      NativeBridgePayloadLimits.isWithinUtf8Limit(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
         secret,
         NativeBridgePayloadLimits.maxSecureKeySecretBytes,
-      ) &&
-      secret.trim().isNotEmpty &&
-      secret.trim() == secret;
+      );
 }
 
 class SecureKeyStorageSnapshot {

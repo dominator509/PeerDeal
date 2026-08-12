@@ -270,15 +270,17 @@ class MethodChannelSecureKeyStorageBridge
   }
 
   bool _isValidNamespace(String namespace) =>
-      NativeBridgePayloadLimits.isWithinUtf8Limit(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
         namespace,
         NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes,
-      ) &&
-      namespace.trim().isNotEmpty &&
-      namespace.trim() == namespace;
+      );
 
   bool _isValidKeyId(String keyId) =>
-      keyId.trim().isNotEmpty && keyId.trim() == keyId && !keyId.contains(':');
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        keyId,
+        NativeBridgePayloadLimits.maxSecureKeyIdBytes,
+      ) &&
+      !keyId.contains(':');
 
   bool _isValidRevision(int revision) => revision >= 0;
 

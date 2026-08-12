@@ -166,6 +166,24 @@ void main() {
     expect(log, isEmpty);
   });
 
+  test('rejects oversized UTF-8 delete key IDs before calling platform', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          return <String, Object?>{'success': true};
+        });
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final result = await bridge.deleteKey(
+      namespace: 'peerdeal.receipts',
+      keyId: String.fromCharCodes(List<int>.filled(65, 0x1F600)),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Secure key storage delete request is invalid.');
+    expect(log, isEmpty);
+  });
+
   test('saves secure key records over the method channel', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
@@ -431,11 +449,27 @@ void main() {
       namespace: 'peerdeal.receipts',
       keyId: ' receipt_signing_1 ',
     );
+    final controlSaveResult = await bridge.saveKey(
+      namespace: 'peerdeal.receipts',
+      key: const SecureKeyRecord(
+        keyId: 'receipt\n_signing_1',
+        purpose: 'receipt_signing',
+        algorithm: 'hmac-sha256',
+        secret: 'signing_secret_1',
+        active: true,
+      ),
+    );
+    final controlDeleteResult = await bridge.deleteKey(
+      namespace: 'peerdeal.receipts',
+      keyId: 'receipt\u0001_signing_1',
+    );
 
     expect(saveResult.isSuccess, isFalse);
     expect(deleteResult.isSuccess, isFalse);
     expect(paddedSaveResult.isSuccess, isFalse);
     expect(paddedDeleteResult.isSuccess, isFalse);
+    expect(controlSaveResult.isSuccess, isFalse);
+    expect(controlDeleteResult.isSuccess, isFalse);
     expect(log, isEmpty);
   });
 }

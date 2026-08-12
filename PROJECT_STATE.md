@@ -1194,6 +1194,17 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Android device/runtime validation, cross-device networking, other-platform
   hosts, database persistence, and release signing remain open.
 
+## T141 Dart Secure-Key Text Validation Hardening
+
+- Shared native-bridge validation now applies UTF-8 byte and control-character
+  rules consistently to secure-key namespaces, IDs, purposes, algorithms, and
+  secrets.
+- Oversized or control-bearing save/delete requests fail before native dispatch.
+- Focused method-channel and channel-contract tests cover multibyte and control
+  rejection paths.
+- Android device/runtime validation, cross-device networking, other-platform
+  hosts, database persistence, and release signing remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

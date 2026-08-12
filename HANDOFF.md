@@ -1247,6 +1247,23 @@ Remaining:
 - Android device/runtime validation, cross-device networking, other-platform
   hosts, database persistence, and release signing remain separate.
 
+## Recent T141 Dart Secure-Key Text Validation Hardening
+
+- Shared native-bridge validation now rejects oversized or control-bearing
+  secure-key namespaces, key IDs, purposes, algorithms, and secrets.
+- Delete key-ID requests use the same UTF-8 byte and control-character rules as
+  save records and Android/Windows host validation.
+
+Tests and gates:
+- Focused secure-key method-channel and channel-contract Flutter tests pass,
+  including oversized multibyte IDs and control-bearing save/delete requests.
+- Full repository analyze, boundary, source-text, test, dependency-audit, and
+  diff-check gates pass before commit and push.
+
+Remaining:
+- Android device/runtime validation, cross-device networking, other-platform
+  hosts, database persistence, and release signing remain separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints

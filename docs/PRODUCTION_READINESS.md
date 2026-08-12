@@ -1694,6 +1694,12 @@ dispatching to Android or Windows. Focused secure-key bridge coverage exercises
 the multibyte rejection path. This keeps host and Dart request limits aligned;
 device/runtime validation remains separate.
 
+The T141 follow-up closes the remaining Dart secure-key text mismatch. Shared
+safe UTF-8 validation now rejects oversized or control-bearing key IDs,
+purposes, algorithms, secrets, namespaces, and delete requests before native
+dispatch. The method-channel and channel-contract suites cover multibyte and
+control-character rejection without weakening the generic bridge boundary.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
