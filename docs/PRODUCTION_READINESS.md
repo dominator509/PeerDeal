@@ -2270,6 +2270,13 @@ bridge contract coverage, full repository gates, Android debug, Windows debug,
 and Windows native-host smoke validation pass. Platform/device behavior,
 other-platform storage, product state, and release signing remain separate.
 
+The T202 follow-up closes mutable diagnostic payload leaks across protocol and
+replay boundaries. `ProtocolDiagnostic` and `ReplayMismatch` now deep-freeze
+nested expected/actual values at construction, and serialized diagnostic trees
+remain immutable snapshots. Focused protocol, privacy, replay, mobile, and
+desktop suites pass; product state, native/device, durable database, and
+release-signing validation remain separate.
+
 The T201 follow-up closes immutable-model leaks in the Hold'em settlement event
 drafts. Projected, blocked, and completed settlement drafts now deep-freeze
 payload trees, and projected award maps are independently owned before event

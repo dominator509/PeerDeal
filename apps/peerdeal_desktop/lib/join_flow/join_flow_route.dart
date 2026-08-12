@@ -390,7 +390,7 @@ List<ProtocolDiagnostic> _safeJoinDiagnostics(
 
   return <ProtocolDiagnostic>[
     ...safeDiagnostics,
-    const ProtocolDiagnostic(
+    ProtocolDiagnostic(
       code: 'ERR_JOIN_DIAGNOSTICS_TRUNCATED',
       message: 'Join diagnostics were truncated.',
     ),

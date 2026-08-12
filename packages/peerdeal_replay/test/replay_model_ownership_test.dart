@@ -18,7 +18,7 @@ void main() {
     prevEventHash: genesisEventHash,
     eventHash: 'hash_1',
   );
-  const mismatch = ReplayMismatch(
+  final mismatch = ReplayMismatch(
     code: 'ERR_TEST_REPLAY',
     message: 'Test replay mismatch.',
     expected: 'expected',
@@ -66,5 +66,41 @@ void main() {
     expect(result.mismatches, <ReplayMismatch>[mismatch]);
     expect(() => result.warnings.clear(), throwsUnsupportedError);
     expect(() => result.mismatches.clear(), throwsUnsupportedError);
+  });
+
+  test('replay mismatch owns nested diagnostic details', () {
+    final expected = <String, Object?>{
+      'allowed': <Object?>['anchor_a'],
+    };
+    final actual = <String, Object?>{
+      'received': <Object?>['anchor_b'],
+    };
+    final mismatch = ReplayMismatch(
+      code: 'ERR_TEST_REPLAY',
+      message: 'Test replay mismatch.',
+      expected: expected,
+      actual: actual,
+    );
+    final diagnostic = mismatch.toProtocolDiagnostic();
+
+    expected['allowed'] = <Object?>['changed'];
+    actual['received'] = <Object?>['changed'];
+
+    expect(mismatch.expected, {
+      'allowed': ['anchor_a'],
+    });
+    expect(mismatch.actual, {
+      'received': ['anchor_b'],
+    });
+    expect(diagnostic.toJson(), {
+      'code': 'ERR_TEST_REPLAY',
+      'message': 'Test replay mismatch.',
+      'expected': {
+        'allowed': ['anchor_a'],
+      },
+      'actual': {
+        'received': ['anchor_b'],
+      },
+    });
   });
 }

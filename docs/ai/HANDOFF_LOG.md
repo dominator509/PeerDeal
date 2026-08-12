@@ -2,6 +2,47 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T202 Diagnostic Payload Ownership
+
+Summary:
+- `ProtocolDiagnostic` and `ReplayMismatch` now deep-freeze nested
+  `expected`/`actual` payload trees at construction.
+- Diagnostic serialization exposes immutable snapshots rather than caller-owned
+  maps or lists.
+- The protocol package now declares its existing `meta` dependency explicitly;
+  app const call sites were updated to preserve analyzer correctness.
+
+Files changed:
+- `packages/peerdeal_protocol/lib/src/models/protocol_diagnostic.dart`
+- `packages/peerdeal_protocol/pubspec.yaml`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `packages/peerdeal_replay/lib/src/models/replay_mismatch.dart`
+- `packages/peerdeal_replay/test/replay_model_ownership_test.dart`
+- `packages/peerdeal_privacy/lib/src/services/default_diagnostics_scrubber.dart`
+- `packages/peerdeal_privacy/test/default_diagnostics_scrubber_test.dart`
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_orchestrator.dart`
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_model_ownership_test.dart`
+- `apps/peerdeal_mobile/test/safe_surface/safe_result_projection_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_orchestrator.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_model_ownership_test.dart`
+- `apps/peerdeal_desktop/test/safe_surface/safe_result_projection_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused protocol, privacy, replay, mobile, and desktop suites passed.
+- Full analyze, boundary-check, source-text, dependency-audit, and repository
+  test gates passed.
+- Android debug APK and Windows debug artifacts built successfully.
+- `git diff --check` passed.
+
+Risks:
+- Product state/database wiring, native/device validation, other-platform
+  hosts, and release signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T201 Hold'em Settlement Draft Ownership
 
 Summary:

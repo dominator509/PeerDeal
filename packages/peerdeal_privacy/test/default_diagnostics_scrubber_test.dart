@@ -52,7 +52,7 @@ void main() {
     const scrubber = DefaultDiagnosticsScrubber();
 
     final result = scrubber.scrubProtocolDiagnostic(
-      const ProtocolDiagnostic(
+      ProtocolDiagnostic(
         code: ProtocolResultCodes.errProtocolIncompatible,
         message: 'Invite protocol version is not supported.',
         expected: '1.0.0',
@@ -72,13 +72,13 @@ void main() {
     const scrubber = DefaultDiagnosticsScrubber();
 
     final result = scrubber.scrubProtocolDiagnostics([
-      const ProtocolDiagnostic(
+      ProtocolDiagnostic(
         code: ProtocolResultCodes.errProtocolIncompatible,
         message: 'Invite protocol version is not supported.',
         expected: '1.0.0',
         actual: '2.0.0',
       ),
-      const ProtocolDiagnostic(
+      ProtocolDiagnostic(
         code: ProtocolResultCodes.errProtocolIncompatible,
         message: 'No details are still safe.',
       ),

@@ -1,10 +1,16 @@
+import 'package:meta/meta.dart';
+
+import 'model_collection_ownership.dart';
+
+@immutable
 class ProtocolDiagnostic {
-  const ProtocolDiagnostic({
+  ProtocolDiagnostic({
     required this.code,
     required this.message,
-    this.expected,
-    this.actual,
-  });
+    Object? expected,
+    Object? actual,
+  }) : expected = freezeProtocolValue(expected),
+       actual = freezeProtocolValue(actual);
 
   final String code;
   final String message;

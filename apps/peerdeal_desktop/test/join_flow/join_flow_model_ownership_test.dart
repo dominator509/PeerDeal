@@ -27,7 +27,7 @@ void main() {
 
   test('join outcomes own diagnostics', () {
     final diagnostics = <ProtocolDiagnostic>[
-      const ProtocolDiagnostic(code: 'ERR_JOIN', message: 'rejected'),
+      ProtocolDiagnostic(code: 'ERR_JOIN', message: 'rejected'),
     ];
     final outcome = JoinFlowOutcome(
       state: JoinFlowState.joinRejected,

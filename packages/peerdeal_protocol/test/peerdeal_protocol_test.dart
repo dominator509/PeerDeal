@@ -196,7 +196,7 @@ void main() {
   });
 
   test('protocol diagnostic serializes optional details consistently', () {
-    const diagnostic = ProtocolDiagnostic(
+    final diagnostic = ProtocolDiagnostic(
       code: ProtocolResultCodes.errProtocolIncompatible,
       message: 'Protocol version is not supported.',
       expected: '1.0.0',
@@ -209,6 +209,47 @@ void main() {
       'expected': '1.0.0',
       'actual': '2.0.0',
     });
+  });
+
+  test('protocol diagnostic owns nested optional details', () {
+    final expected = <String, Object?>{
+      'allowed': <Object?>['1.0.0'],
+    };
+    final actual = <String, Object?>{
+      'received': <Object?>['2.0.0'],
+    };
+    final diagnostic = ProtocolDiagnostic(
+      code: ProtocolResultCodes.errProtocolIncompatible,
+      message: 'Protocol version is not supported.',
+      expected: expected,
+      actual: actual,
+    );
+    final serialized = diagnostic.toJson();
+
+    expected['allowed'] = <Object?>['changed'];
+    actual['received'] = <Object?>['changed'];
+
+    expect(diagnostic.expected, {
+      'allowed': ['1.0.0'],
+    });
+    expect(diagnostic.actual, {
+      'received': ['2.0.0'],
+    });
+    expect(serialized, {
+      'code': 'ERR_PROTOCOL_INCOMPATIBLE',
+      'message': 'Protocol version is not supported.',
+      'expected': {
+        'allowed': ['1.0.0'],
+      },
+      'actual': {
+        'received': ['2.0.0'],
+      },
+    });
+    expect(
+      () => (serialized['expected']! as Map<Object?, Object?>)['allowed'] =
+          <Object?>['changed again'],
+      throwsUnsupportedError,
+    );
   });
 
   test('protocol catalog accepts fixture-backed command', () {

@@ -16,7 +16,7 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
 
   static const _truncated = '<truncated>';
   static const _truncationKey = '<truncated>';
-  static const _truncationDiagnostic = ProtocolDiagnostic(
+  static final _truncationDiagnostic = ProtocolDiagnostic(
     code: 'ERR_DIAGNOSTICS_TRUNCATED',
     message: 'Diagnostics were truncated.',
   );

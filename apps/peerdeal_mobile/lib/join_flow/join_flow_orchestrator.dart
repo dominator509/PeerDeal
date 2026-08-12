@@ -420,7 +420,7 @@ class JoinFlowOrchestrator {
   }) async {
     if (!_isExactNonEmpty(context.inviteCode)) {
       const resultCode = 'ERR_INVITE_CONTEXT_INVALID';
-      const diagnostics = <ProtocolDiagnostic>[
+      final diagnostics = <ProtocolDiagnostic>[
         ProtocolDiagnostic(
           code: resultCode,
           message: 'Invite context is invalid.',

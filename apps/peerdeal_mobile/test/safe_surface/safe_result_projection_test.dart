@@ -92,7 +92,7 @@ void main() {
 
   test('recovery view model owns diagnostics', () {
     final diagnostics = <ProtocolDiagnostic>[
-      const ProtocolDiagnostic(code: 'ERR_ONE', message: 'One'),
+      ProtocolDiagnostic(code: 'ERR_ONE', message: 'One'),
     ];
     final result = SafeRecoveryVm(
       canResume: false,
