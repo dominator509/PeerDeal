@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T191 Immutable Table Warning Results
+
+Summary:
+- Mirrored `DemoRecoveryPersistenceLoadResult` constructors now snapshot both
+  available and unavailable recovery warning lists before table rendering.
+- Mirrored unavailable native transport senders now own their fallback warning
+  lists before reusing them for rejected sends.
+- Const demo fixtures were migrated without changing displayed warning behavior.
+
+Validation:
+- Focused mobile and desktop demo-table plus native-transport suites passed 23
+  tests each, including recovery warning ownership regressions.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Product state provisioning, durable database replacement, device/network
+  validation, other-platform hosts, release signing, and final navigation/UX
+  validation remain external or integration-owned.
+
 ### 2026-08-12 - Codex - T190 Immutable Route And Home Policy
 
 Summary:

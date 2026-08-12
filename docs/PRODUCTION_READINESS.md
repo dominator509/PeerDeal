@@ -2182,6 +2182,18 @@ smoke markers. Product state provisioning, durable database replacement,
 device/network validation, other-platform hosts, release signing, and final
 navigation/UX validation remain separate.
 
+The T191 follow-up closes the remaining direct app warning-list ownership
+leaks found in the mounted table path. Mirrored `DemoRecoveryPersistenceLoadResult`
+constructors now snapshot available and unavailable recovery warning lists, and
+the unavailable native transport sender owns its fallback warning list before
+reusing it for rejected sends. Focused mobile and desktop demo-table plus
+native-transport suites passed 23 tests each, including recovery ownership
+regressions. Full repository gates, Android debug, Windows debug, and Windows
+native-host smoke validation passed, including all 16 native-host smoke
+markers. Product state provisioning, durable database replacement,
+device/network validation, other-platform hosts, release signing, and final
+navigation/UX validation remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

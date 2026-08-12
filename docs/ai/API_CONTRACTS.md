@@ -244,7 +244,11 @@ and native-note text before exposing render state to app UI.
 construction, and `PeerDealAppScaffold` snapshots its action-widget list;
 callers must treat these public collections as read-only after construction.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning
-lists before passing load results into table surfaces.
+lists before passing load results into table surfaces. The mirrored
+`DemoRecoveryPersistenceLoadResult` constructors also snapshot available and
+unavailable warning lists; callers must treat the exposed warnings as read-only
+after construction. The unavailable app transport sender applies the same
+ownership rule to fallback warnings before producing rejected sends.
 Mounted table routes must cap injected bootstrap candidate lists before passing
 load results into table surfaces.
 Mounted table routes must cap displayed recovery persistence event counts for

@@ -15,6 +15,27 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 void main() {
+  test('snapshots demo recovery warning lists', () {
+    final availableWarnings = <String>['available_warning'];
+    final available = DemoRecoveryPersistenceLoadResult.available(
+      persistedEventCount: 1,
+      hasSnapshot: true,
+      warnings: availableWarnings,
+    );
+    final unavailableWarnings = <String>['unavailable_warning'];
+    final unavailable = DemoRecoveryPersistenceLoadResult.unavailable(
+      warnings: unavailableWarnings,
+    );
+
+    availableWarnings.add('later_available_warning');
+    unavailableWarnings.add('later_unavailable_warning');
+
+    expect(available.warnings, ['available_warning']);
+    expect(unavailable.warnings, ['unavailable_warning']);
+    expect(() => available.warnings.add('mutated'), throwsUnsupportedError);
+    expect(() => unavailable.warnings.add('mutated'), throwsUnsupportedError);
+  });
+
   testWidgets('scrubs table bootstrap and recovery warnings before rendering', (
     tester,
   ) async {
@@ -40,12 +61,11 @@ void main() {
             ],
             warnings: <String>[r'C:\secret\peers.log'],
           ),
-          recoveryPersistence:
-              const DemoRecoveryPersistenceLoadResult.available(
-                persistedEventCount: 1,
-                hasSnapshot: false,
-                warnings: <String>['token sk-demo-secret'],
-              ),
+          recoveryPersistence: DemoRecoveryPersistenceLoadResult.available(
+            persistedEventCount: 1,
+            hasSnapshot: false,
+            warnings: <String>['token sk-demo-secret'],
+          ),
           onOpenChat: null,
           onOpenReceipt: null,
         ),
@@ -83,12 +103,11 @@ void main() {
             nativeNotes: 'unavailable',
             warnings: <String>['Local network bootstrap loader unavailable.'],
           ),
-          recoveryPersistence:
-              const DemoRecoveryPersistenceLoadResult.unavailable(
-                warnings: <String>[
-                  'Recovery persistence store factory unavailable.',
-                ],
-              ),
+          recoveryPersistence: DemoRecoveryPersistenceLoadResult.unavailable(
+            warnings: <String>[
+              'Recovery persistence store factory unavailable.',
+            ],
+          ),
           onOpenChat: null,
           onOpenReceipt: null,
         ),

@@ -97,7 +97,7 @@ class NativeTransportSessionFactory {
 
   TransportFrameSender _createSender(NativeTransportBridge bridge) {
     if (_maxPayloadBytes < 1) {
-      return const _UnavailableTransportFrameSender(
+      return _UnavailableTransportFrameSender(
         warnings: <String>['App transport payload limit is invalid.'],
       );
     }
@@ -164,7 +164,8 @@ class NativeTransportSessionFactory {
 }
 
 class _UnavailableTransportFrameSender implements TransportFrameSender {
-  const _UnavailableTransportFrameSender({required this.warnings});
+  _UnavailableTransportFrameSender({required List<String> warnings})
+    : warnings = List<String>.unmodifiable(warnings);
 
   final List<String> warnings;
 

@@ -128,7 +128,7 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
   Future<DemoRecoveryPersistenceLoadResult> _loadRecoveryPersistence() async {
     final factory = widget.recoveryPersistenceStoreFactory;
     if (factory == null) {
-      return const DemoRecoveryPersistenceLoadResult.unavailable(
+      return DemoRecoveryPersistenceLoadResult.unavailable(
         warnings: <String>['Recovery persistence store factory unavailable.'],
       );
     }
@@ -161,7 +161,7 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
         ],
       );
     } on Object {
-      return const DemoRecoveryPersistenceLoadResult.unavailable(
+      return DemoRecoveryPersistenceLoadResult.unavailable(
         warnings: <String>['Recovery persistence window unavailable.'],
       );
     }
@@ -329,16 +329,19 @@ String _safeTableWarning(String warning, {required String fallback}) {
 }
 
 class DemoRecoveryPersistenceLoadResult {
-  const DemoRecoveryPersistenceLoadResult.available({
+  DemoRecoveryPersistenceLoadResult.available({
     required this.persistedEventCount,
     required this.hasSnapshot,
-    this.warnings = const <String>[],
-  }) : isAvailable = true;
+    List<String> warnings = const <String>[],
+  }) : isAvailable = true,
+       warnings = List<String>.unmodifiable(warnings);
 
-  const DemoRecoveryPersistenceLoadResult.unavailable({required this.warnings})
-    : isAvailable = false,
-      persistedEventCount = 0,
-      hasSnapshot = false;
+  DemoRecoveryPersistenceLoadResult.unavailable({
+    required List<String> warnings,
+  }) : isAvailable = false,
+       persistedEventCount = 0,
+       hasSnapshot = false,
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool isAvailable;
   final int persistedEventCount;
