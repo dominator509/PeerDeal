@@ -195,8 +195,10 @@ class NativeBootstrapCandidateLoader {
       value != null && value.trim().isNotEmpty;
 
   static bool _isValidScope(String value) {
-    final trimmed = value.trim();
-    return trimmed.isNotEmpty && trimmed == value;
+    return NativeBridgePayloadLimits.isSafeUtf8Text(
+      value,
+      NativeBridgePayloadLimits.maxTransportIdentityBytes,
+    );
   }
 
   static String _nativeNotes(

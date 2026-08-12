@@ -2426,6 +2426,12 @@ boundary, so mounted demo bootstrap cannot bypass the shared endpoint rules
 or traverse an oversized direct caller collection. Native discovery
 advertisement and real endpoint provisioning remain separate.
 
+The T219 follow-up closes the remaining demo-bootstrap scope boundary. Mirrored
+mobile and desktop loaders now require session and table identities to satisfy
+the shared safe UTF-8 transport-identity limit before any native capability
+lookup or provider resolution. Control-bearing, padded, empty, or oversized
+scope values fail closed consistently with the production join coordinator.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

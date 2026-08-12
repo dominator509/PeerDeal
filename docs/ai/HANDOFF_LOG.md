@@ -27,6 +27,27 @@ Risks:
 
 ---
 
+### 2026-08-12 - Codex - T219 Harden Demo Bootstrap Scope Inputs
+
+Summary:
+- Mirrored demo bootstrap loaders now apply the shared safe UTF-8 transport
+  identity boundary to session and table scope before native capability lookup
+  or provider resolution.
+- Added mirrored control-bearing scope regressions; padded and empty scope
+  behavior remains fail-closed.
+
+Verification:
+- Mirrored mobile and desktop demo bootstrap suites passed.
+- App analyzers and full repository gates passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, durable product state, other-platform hosts, and release
+  signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T217 Bound Endpoint Parser Traversal
 
 Summary:
