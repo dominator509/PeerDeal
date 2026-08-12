@@ -528,7 +528,7 @@ class _RecordingTransportSender implements TransportFrameSender {
   Future<TransportFrameSendResult> send(TransportFrame frame) async {
     frames.add(frame);
     if (failAtSend == frames.length) {
-      return const TransportFrameSendResult.rejected(
+      return TransportFrameSendResult.rejected(
         reasonCode: 'ERR_TEST_TRANSPORT_SEND_FAILED',
       );
     }

@@ -36,7 +36,7 @@ void main() {
         available: true,
         results: <TransportFrameReceiveResult>[
           const TransportFrameReceiveResult.accepted(),
-          const TransportFrameReceiveResult.rejected(
+          TransportFrameReceiveResult.rejected(
             reasonCode: 'ERR_EVENT_REJECTED',
           ),
         ],

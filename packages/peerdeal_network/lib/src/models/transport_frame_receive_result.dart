@@ -1,19 +1,20 @@
 class TransportFrameReceiveResult {
-  const TransportFrameReceiveResult({
+  TransportFrameReceiveResult({
     required this.accepted,
     required this.reasonCode,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   const TransportFrameReceiveResult.accepted()
     : accepted = true,
       reasonCode = 'OK_TRANSPORT_FRAME_RECEIVED',
       warnings = const <String>[];
 
-  const TransportFrameReceiveResult.rejected({
+  TransportFrameReceiveResult.rejected({
     required this.reasonCode,
-    this.warnings = const <String>[],
-  }) : accepted = false;
+    List<String> warnings = const <String>[],
+  }) : accepted = false,
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool accepted;
   final String reasonCode;

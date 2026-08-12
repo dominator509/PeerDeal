@@ -5,7 +5,7 @@ void main() {
   test('fails closed when the peer-id window exceeds its limit', () async {
     const provider = BasicBootstrapCandidateProvider(maxPeerIds: 2);
     final result = await provider.resolveCandidates(
-      const BootstrapResolutionRequest(
+      BootstrapResolutionRequest(
         sessionId: 'sess_1',
         tableId: 'table_1',
         preferLan: true,
@@ -22,7 +22,7 @@ void main() {
     () async {
       const provider = BasicBootstrapCandidateProvider();
       final result = await provider.resolveCandidates(
-        const BootstrapResolutionRequest(
+        BootstrapResolutionRequest(
           sessionId: 'sess_1',
           tableId: 'table_1',
           preferLan: true,
@@ -39,7 +39,7 @@ void main() {
   test('drops malformed peer ids before candidate selection', () async {
     const provider = BasicBootstrapCandidateProvider();
     final result = await provider.resolveCandidates(
-      const BootstrapResolutionRequest(
+      BootstrapResolutionRequest(
         sessionId: 'sess_1',
         tableId: 'table_1',
         preferLan: true,
@@ -57,7 +57,7 @@ void main() {
   test('deduplicates exact peer ids before assigning priorities', () async {
     const provider = BasicBootstrapCandidateProvider();
     final result = await provider.resolveCandidates(
-      const BootstrapResolutionRequest(
+      BootstrapResolutionRequest(
         sessionId: 'sess_1',
         tableId: 'table_1',
         preferLan: false,

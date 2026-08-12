@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T175 Immutable Network Collections
+
+Summary:
+- Generic network models now defensively copy and freeze bootstrap peer/candidate
+  lists, LAN discovery lists, transport payload bytes, warning diagnostics, and
+  peer-election rankings.
+- Network and app transport call sites were migrated from invalid const
+  construction without changing package boundaries or runtime behavior.
+
+Validation:
+- Focused network ownership and transport suites: passed 22 tests.
+- Affected mobile transport suites: passed 44 tests.
+- Affected desktop transport suites: passed 44 tests.
+- Full analyze, boundary-check, source-text, dependency-audit, and serialized
+  repository test gates passed. Dependency audit reported 0 actionable upgrades
+  and 11 newer toolchain-blocked versions.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T174 Immutable Native-Bridge Collections
 
 Summary:

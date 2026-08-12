@@ -28,7 +28,7 @@ class ValidatingTransportFrameSender implements TransportFrameSender {
     try {
       await _sink.sendFrame(frame);
     } on Object {
-      return const TransportFrameSendResult.rejected(
+      return TransportFrameSendResult.rejected(
         reasonCode: 'ERR_TRANSPORT_FRAME_SEND_FAILED',
         warnings: <String>['transport_frame_sink_failed'],
       );

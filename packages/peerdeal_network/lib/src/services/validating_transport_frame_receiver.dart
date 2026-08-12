@@ -28,7 +28,7 @@ class ValidatingTransportFrameReceiver implements TransportFrameReceiver {
     try {
       await _handler.handleFrame(frame);
     } on Object {
-      return const TransportFrameReceiveResult.rejected(
+      return TransportFrameReceiveResult.rejected(
         reasonCode: 'ERR_TRANSPORT_FRAME_RECEIVE_FAILED',
         warnings: <String>['transport_frame_handler_failed'],
       );

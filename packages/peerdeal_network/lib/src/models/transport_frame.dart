@@ -1,11 +1,11 @@
 class TransportFrame {
-  const TransportFrame({
+  TransportFrame({
     required this.sessionId,
     required this.fromPeerId,
     required this.toPeerId,
     required this.sequence,
-    required this.payload,
-  });
+    required List<int> payload,
+  }) : payload = List<int>.unmodifiable(payload);
 
   final String sessionId;
   final String fromPeerId;

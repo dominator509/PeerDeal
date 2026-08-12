@@ -1,11 +1,12 @@
 class LanDiscoveryResult {
-  const LanDiscoveryResult({
+  LanDiscoveryResult({
     required this.discoveryEnabled,
-    required this.foundPeerIds,
-    required this.interfaceHints,
+    required List<String> foundPeerIds,
+    required List<String> interfaceHints,
     required this.permissionSatisfied,
     this.warning,
-  });
+  }) : foundPeerIds = List<String>.unmodifiable(foundPeerIds),
+       interfaceHints = List<String>.unmodifiable(interfaceHints);
 
   final bool discoveryEnabled;
   final List<String> foundPeerIds;

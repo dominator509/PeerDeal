@@ -7,7 +7,7 @@ void main() {
 
     final plan = policy.buildPlan(
       currentPrimaryPeerId: 'peer_a',
-      decision: const PrimaryPeerDecision(
+      decision: PrimaryPeerDecision(
         primaryPeerId: 'peer_b',
         confidence: NetworkConfidence.high,
         reason: 'better_peer',
@@ -30,7 +30,7 @@ void main() {
 
     final plan = policy.buildPlan(
       currentPrimaryPeerId: ' peer_a',
-      decision: const PrimaryPeerDecision(
+      decision: PrimaryPeerDecision(
         primaryPeerId: 'peer_b',
         confidence: NetworkConfidence.high,
         reason: 'better_peer',

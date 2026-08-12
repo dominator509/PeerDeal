@@ -5,7 +5,7 @@ void main() {
   test('accepts valid frames through the transport handler', () async {
     final handler = _RecordingTransportFrameHandler();
     final receiver = ValidatingTransportFrameReceiver(handler: handler);
-    const frame = TransportFrame(
+    final frame = TransportFrame(
       sessionId: 'session_1',
       fromPeerId: 'peer_a',
       toPeerId: 'peer_b',
@@ -25,7 +25,7 @@ void main() {
     final receiver = ValidatingTransportFrameReceiver(handler: handler);
 
     final result = await receiver.receive(
-      const TransportFrame(
+      TransportFrame(
         sessionId: 'session_1',
         fromPeerId: '',
         toPeerId: 'peer_b',
@@ -48,7 +48,7 @@ void main() {
     );
 
     final result = await receiver.receive(
-      const TransportFrame(
+      TransportFrame(
         sessionId: 'session_1',
         fromPeerId: 'peer_a',
         toPeerId: 'peer_b',

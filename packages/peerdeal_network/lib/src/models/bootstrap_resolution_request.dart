@@ -1,11 +1,11 @@
 class BootstrapResolutionRequest {
-  const BootstrapResolutionRequest({
+  BootstrapResolutionRequest({
     required this.sessionId,
     required this.tableId,
     required this.preferLan,
     required this.relayAllowed,
-    required this.peerIds,
-  });
+    required List<String> peerIds,
+  }) : peerIds = List<String>.unmodifiable(peerIds);
 
   final String sessionId;
   final String tableId;

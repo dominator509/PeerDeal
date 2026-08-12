@@ -6,7 +6,7 @@ void main() {
     const validator = BasicTransportFrameValidator();
 
     final result = validator.validate(
-      const TransportFrame(
+      TransportFrame(
         sessionId: 'session_1',
         fromPeerId: 'peer_a',
         toPeerId: 'peer_b',
@@ -23,7 +23,7 @@ void main() {
     const validator = BasicTransportFrameValidator();
 
     final result = validator.validate(
-      const TransportFrame(
+      TransportFrame(
         sessionId: '',
         fromPeerId: '',
         toPeerId: '',
@@ -44,7 +44,7 @@ void main() {
     const validator = BasicTransportFrameValidator();
 
     final result = validator.validate(
-      const TransportFrame(
+      TransportFrame(
         sessionId: ' session_1 ',
         fromPeerId: ' peer_a ',
         toPeerId: ' peer_b ',
@@ -68,7 +68,7 @@ void main() {
       const validator = BasicTransportFrameValidator();
 
       final result = validator.validate(
-        const TransportFrame(
+        TransportFrame(
           sessionId: 'session_1',
           fromPeerId: 'peer_a',
           toPeerId: 'peer_a',
@@ -86,7 +86,7 @@ void main() {
     const validator = BasicTransportFrameValidator(maxPayloadBytes: 2);
 
     final result = validator.validate(
-      const TransportFrame(
+      TransportFrame(
         sessionId: 'session_1',
         fromPeerId: 'peer_a',
         toPeerId: 'peer_b',

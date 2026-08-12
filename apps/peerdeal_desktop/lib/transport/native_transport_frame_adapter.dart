@@ -117,7 +117,7 @@ class NativeTransportFrameDrain {
         results.add(result);
       } on Object {
         results.add(
-          const TransportFrameReceiveResult.rejected(
+          TransportFrameReceiveResult.rejected(
             reasonCode: 'ERR_NATIVE_TRANSPORT_FRAME_RECEIVE_FAILED',
             warnings: <String>['Native transport frame receive failed.'],
           ),

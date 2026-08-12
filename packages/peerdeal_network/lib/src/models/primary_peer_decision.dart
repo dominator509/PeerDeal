@@ -2,7 +2,7 @@ import 'network_confidence.dart';
 import 'score_breakdown.dart';
 
 class PrimaryPeerDecision {
-  const PrimaryPeerDecision({
+  PrimaryPeerDecision({
     required this.primaryPeerId,
     required this.confidence,
     required this.reason,
@@ -10,8 +10,8 @@ class PrimaryPeerDecision {
     required this.expectedAnchorHash,
     required this.requiresTransfer,
     required this.requiresPause,
-    required this.rankings,
-  });
+    required List<ScoreBreakdown> rankings,
+  }) : rankings = List<ScoreBreakdown>.unmodifiable(rankings);
 
   final String primaryPeerId;
   final NetworkConfidence confidence;

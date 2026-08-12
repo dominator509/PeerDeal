@@ -41,8 +41,8 @@ and T149 cancelled native receive suppression, T150 source-owned drain
 disposal cancellation, T168 exact inbound-event checkpoint identity, T169
 immutable app-session diagnostics, T170 immutable startup diagnostics, T171
 immutable local-identity diagnostics, T172 immutable readiness/transport
-diagnostics, T173 immutable app-boundary collections, and T174 immutable
-native-bridge collections
+diagnostics, T173 immutable app-boundary collections, T174 immutable
+native-bridge collections, and T175 immutable network collections
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1460,6 +1460,19 @@ Remaining:
   transport frame payload bytes.
 - Native bridge contract tests and affected mobile and desktop suites cover
   source-list isolation and immutable package-boundary results.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
+## Recent T175 Immutable Network Collections
+
+- Generic network models now defensively copy and freeze bootstrap peer/candidate
+  lists, LAN discovery lists, transport payload bytes, warning diagnostics, and
+  peer-election rankings.
+- Focused network and mirrored mobile/desktop transport suites cover source-list
+  isolation and immutable network results.
 
 Remaining:
 - Durable database replacement, real product state selection, device/network

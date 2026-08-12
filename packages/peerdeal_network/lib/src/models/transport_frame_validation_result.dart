@@ -1,8 +1,8 @@
 class TransportFrameValidationResult {
-  const TransportFrameValidationResult({
+  TransportFrameValidationResult({
     required this.isValid,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   const TransportFrameValidationResult.valid()
     : isValid = true,

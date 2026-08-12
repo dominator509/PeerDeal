@@ -1874,6 +1874,15 @@ isolation and mutation rejection. Durable database replacement, real product
 state selection, device/network validation, other-platform hosts, release
 signing, and final UX remain separate.
 
+The T175 follow-up closes the generic network collection ownership gap.
+Network models now defensively copy and freeze bootstrap peer/candidate lists,
+LAN discovery lists, transport payload bytes, warning diagnostics, and
+peer-election rankings before results cross the network package boundary.
+Focused network and app transport suites cover source-list isolation and
+mutation rejection. Durable database replacement, real product state
+selection, device/network validation, other-platform hosts, release signing,
+and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

@@ -5,7 +5,7 @@ void main() {
   test('sends valid frames through the transport sink', () async {
     final sink = _RecordingTransportFrameSink();
     final sender = ValidatingTransportFrameSender(sink: sink);
-    const frame = TransportFrame(
+    final frame = TransportFrame(
       sessionId: 'session_1',
       fromPeerId: 'peer_a',
       toPeerId: 'peer_b',
@@ -25,7 +25,7 @@ void main() {
     final sender = ValidatingTransportFrameSender(sink: sink);
 
     final result = await sender.send(
-      const TransportFrame(
+      TransportFrame(
         sessionId: '',
         fromPeerId: 'peer_a',
         toPeerId: 'peer_a',
@@ -49,7 +49,7 @@ void main() {
     );
 
     final result = await sender.send(
-      const TransportFrame(
+      TransportFrame(
         sessionId: 'session_1',
         fromPeerId: 'peer_a',
         toPeerId: 'peer_b',

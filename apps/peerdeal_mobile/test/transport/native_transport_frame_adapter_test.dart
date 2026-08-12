@@ -47,7 +47,7 @@ void main() {
     );
 
     final result = await sender.send(
-      const TransportFrame(
+      TransportFrame(
         sessionId: 'session_1',
         fromPeerId: 'peer_a',
         toPeerId: 'peer_a',
@@ -69,7 +69,7 @@ void main() {
 
       await expectLater(
         sink.sendFrame(
-          const TransportFrame(
+          TransportFrame(
             sessionId: 'session_1',
             fromPeerId: 'peer_a',
             toPeerId: 'peer_a',
@@ -336,7 +336,7 @@ void main() {
 }
 
 TransportFrame _frame() {
-  return const TransportFrame(
+  return TransportFrame(
     sessionId: 'session_1',
     fromPeerId: 'peer_a',
     toPeerId: 'peer_b',

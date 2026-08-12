@@ -1339,6 +1339,17 @@ Remaining:
   state selection, device/network validation, other-platform hosts, release
   signing, and final UX.
 
+## T175 Immutable Network Collections
+
+- Generic network models now defensively copy and freeze bootstrap peer/candidate
+  lists, LAN discovery lists, transport payload bytes, warning diagnostics, and
+  peer-election rankings.
+- Focused network and mirrored mobile/desktop transport suites prove caller-owned
+  collections cannot alter package-boundary results.
+- Remaining work is unchanged: durable database replacement, real product state
+  selection, device/network validation, other-platform hosts, release signing,
+  and final UX.
+
 ## T173 Immutable App-Boundary Collections
 
 - Mirrored native bootstrap candidate, native transport session/drain, and

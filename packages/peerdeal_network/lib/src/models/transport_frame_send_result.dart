@@ -1,19 +1,20 @@
 class TransportFrameSendResult {
-  const TransportFrameSendResult({
+  TransportFrameSendResult({
     required this.sent,
     required this.reasonCode,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   const TransportFrameSendResult.sent()
     : sent = true,
       reasonCode = 'OK_TRANSPORT_FRAME_SENT',
       warnings = const <String>[];
 
-  const TransportFrameSendResult.rejected({
+  TransportFrameSendResult.rejected({
     required this.reasonCode,
-    this.warnings = const <String>[],
-  }) : sent = false;
+    List<String> warnings = const <String>[],
+  }) : sent = false,
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool sent;
   final String reasonCode;
