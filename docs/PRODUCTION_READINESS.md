@@ -2411,6 +2411,16 @@ crypto coverage passes. Provider-specific proof semantics, product
 verification wiring, real device/network validation, durable database
 persistence, other-platform hosts, and release signing remain separate.
 
+The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
+network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
+discovery values into bounded typed endpoint metadata, and mirrored mobile and
+desktop join coordinators retain the selected `BootstrapCandidate` through
+`BootstrapPlan`, `JoinFlowSessionContext`, and the safe route boundary. Provider
+endpoint metadata remains authoritative when present, malformed locations fail
+closed, and bare peer IDs remain compatible. Native discovery advertisement,
+real endpoint provisioning/reachability, product state, other-platform hosts,
+and release signing remain separate.
+
 The T215 follow-up closes the replay snapshot trust and reconstruction gap.
 `BasicReplayEngine` now recomputes canonical snapshot payload hashes, rejects
 negative snapshot base sequences, and requires the optional

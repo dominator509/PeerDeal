@@ -402,8 +402,14 @@ class JoinFlowOrchestrator {
     final remotePeerId = bootstrapPlan != null
         ? bootstrapPlan.selectedPeerId
         : commit.assignedPeerId;
+    final selectedCandidate = bootstrapPlan?.selectedCandidate;
     final localSeat = commit.assignedSeat;
     if (remotePeerId == null || !_isExactNonEmpty(remotePeerId)) {
+      return null;
+    }
+    if (selectedCandidate != null &&
+        (selectedCandidate.peerId != remotePeerId ||
+            !selectedCandidate.reachable)) {
       return null;
     }
     if (localSeat == null || localSeat < 1) return null;
@@ -411,6 +417,7 @@ class JoinFlowOrchestrator {
       invite: invite,
       remotePeerId: remotePeerId,
       localSeat: localSeat,
+      bootstrapCandidate: selectedCandidate,
     );
   }
 

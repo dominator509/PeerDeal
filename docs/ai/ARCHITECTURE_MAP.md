@@ -304,6 +304,10 @@ the assigned seat, and `JoinFlowSessionContext` crosses the app-shell boundary.
 `JoinFlowOutcome` diagnostics are copied into read-only app-owned collections at
 construction, so authorization and handoff state cannot be changed by a
 caller-owned list after acceptance.
+When discovery supplies `peer-id@host[:port]`, the network parser preserves the
+selected typed `BootstrapCandidate` through `BootstrapPlan` and
+`JoinFlowSessionContext`; the route boundary validates the optional endpoint
+metadata without making it authoritative over the peer ID.
 For rejoin, accepted governance supplies the remote peer binding and assigned
 seat because there is no bootstrap discovery phase. The context-aware
 production bootstrap validates it and the persisted app source maps it into

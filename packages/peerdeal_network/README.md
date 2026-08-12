@@ -58,3 +58,7 @@ score, and recover network paths without owning game truth.
 - The validating transport receiver rejects invalid frames before calling a
   session handler and converts handler exceptions into explicit failed receive
   results.
+- The network-owned discovery endpoint parser validates the existing
+  `peer-id` and `peer-id@host[:port]` forms, bounds and deduplicates locations,
+  drops malformed or sensitive values, and projects host/port metadata onto
+  existing bootstrap candidates without overriding provider-owned metadata.

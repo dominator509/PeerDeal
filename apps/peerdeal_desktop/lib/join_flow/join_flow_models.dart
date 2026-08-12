@@ -1,3 +1,4 @@
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 enum JoinFlowState {
@@ -73,11 +74,18 @@ class JoinFlowSessionContext {
     required this.invite,
     required this.remotePeerId,
     required this.localSeat,
+    this.bootstrapCandidate,
   });
 
   final ResolvedInvite invite;
   final String remotePeerId;
   final int localSeat;
+
+  /// The selected network candidate, when discovery supplied endpoint data.
+  ///
+  /// The peer ID remains the authoritative join identity. Endpoint metadata
+  /// is optional because relay or later product-owned routing may provide it.
+  final BootstrapCandidate? bootstrapCandidate;
 }
 
 class DisclosureAcks {
@@ -123,12 +131,14 @@ class BootstrapPlan {
     required List<String> peerCandidates,
     required this.relayFallbackAllowed,
     this.selectedPeerId,
+    this.selectedCandidate,
   }) : peerCandidates = List<String>.unmodifiable(peerCandidates);
 
   final bool requiresBootstrap;
   final List<String> peerCandidates;
   final bool relayFallbackAllowed;
   final String? selectedPeerId;
+  final BootstrapCandidate? selectedCandidate;
 }
 
 class GovernanceCommitResult {

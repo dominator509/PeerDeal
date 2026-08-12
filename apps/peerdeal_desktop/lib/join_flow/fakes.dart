@@ -1,3 +1,4 @@
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'join_flow_adapters.dart';
@@ -98,6 +99,10 @@ class FakeRoleAuthorizer implements RoleAuthorizer {
 }
 
 class FakeBootstrapCoordinator implements BootstrapCoordinator {
+  FakeBootstrapCoordinator({this.selectedCandidate});
+
+  final BootstrapCandidate? selectedCandidate;
+
   @override
   Future<BootstrapPlan> buildPlan({
     required ResolvedInvite resolvedInvite,
@@ -108,6 +113,7 @@ class FakeBootstrapCoordinator implements BootstrapCoordinator {
       peerCandidates: <String>['peer_a', 'peer_b'],
       relayFallbackAllowed: true,
       selectedPeerId: 'peer_a',
+      selectedCandidate: selectedCandidate,
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:peerdeal_mobile/join_flow/fakes.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_adapters.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
 import 'package:peerdeal_mobile/join_flow/join_flow_orchestrator.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:test/test.dart';
 
@@ -56,6 +57,38 @@ void main() {
     expect(result.resolvedInvite?.sessionId, 'sess_001');
     expect(result.sessionContext?.remotePeerId, 'peer_a');
     expect(result.sessionContext?.localSeat, 1);
+  });
+
+  test('hands selected endpoint metadata into the session context', () async {
+    final orchestrator = JoinFlowOrchestrator(
+      inviteResolver: FakeInviteResolver(),
+      joinNegotiator: FakeJoinNegotiator(),
+      disclosureCoordinator: FakeDisclosureCoordinator(allAccepted: true),
+      roleAuthorizer: FakeRoleAuthorizer(allow: true),
+      bootstrapCoordinator: FakeBootstrapCoordinator(
+        selectedCandidate: const BootstrapCandidate(
+          peerId: 'peer_a',
+          routeClass: NetworkRouteClass.lanDirect,
+          reachable: true,
+          priority: 1,
+          host: '192.168.1.10',
+          port: 40442,
+        ),
+      ),
+      governanceCommitter: FakeGovernanceCommitter(acceptJoin: true),
+      eventSink: RecordingJoinEventSink(),
+    );
+
+    final result = await orchestrator.runFirstJoin(
+      const InviteContext(
+        inviteCode: 'ABC123',
+        requestedRole: RequestedRole.player,
+      ),
+    );
+
+    expect(result.sessionContext?.bootstrapCandidate?.peerId, 'peer_a');
+    expect(result.sessionContext?.bootstrapCandidate?.host, '192.168.1.10');
+    expect(result.sessionContext?.bootstrapCandidate?.port, 40442);
   });
 
   test('cancels before governance when bootstrap is cancelled', () async {

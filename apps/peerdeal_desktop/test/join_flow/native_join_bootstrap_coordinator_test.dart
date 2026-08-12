@@ -54,6 +54,35 @@ void main() {
     expect(provider.request!.peerIds, <String>['peer-a', 'peer-b']);
   });
 
+  test('preserves selected discovered endpoint metadata', () async {
+    final coordinator = NativeJoinBootstrapCoordinator(
+      bridge: _StaticLocalNetworkBridge(
+        capability: const LocalNetworkCapability(
+          discoverySupported: true,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: 'local-network-ready',
+        ),
+        discovery: LocalNetworkDiscoverySnapshot(
+          permissionGranted: true,
+          foundEndpoints: <String>['peer-a@192.168.1.10:40442'],
+          interfaceHints: const <String>[],
+        ),
+      ),
+    );
+
+    final plan = await coordinator.buildPlan(
+      resolvedInvite: _resolvedInvite,
+      roleGrant: _roleGrant,
+    );
+
+    expect(plan.selectedPeerId, 'peer-a');
+    expect(plan.selectedCandidate, isNotNull);
+    expect(plan.selectedCandidate!.peerId, 'peer-a');
+    expect(plan.selectedCandidate!.host, '192.168.1.10');
+    expect(plan.selectedCandidate!.port, 40442);
+  });
+
   test(
     'caps normalized native discovery endpoints before join bootstrap',
     () async {
@@ -111,6 +140,12 @@ void main() {
         ),
         provider: _StaticBootstrapCandidateProvider(
           candidates: <BootstrapCandidate>[
+            const BootstrapCandidate(
+              peerId: 'peer-blocked',
+              routeClass: NetworkRouteClass.lanDirect,
+              reachable: false,
+              priority: 4,
+            ),
             BootstrapCandidate(
               peerId: ' peer-a ',
               routeClass: NetworkRouteClass.lanDirect,

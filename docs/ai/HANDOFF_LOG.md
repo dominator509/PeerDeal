@@ -2,6 +2,39 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T216 Preserve Bootstrap Endpoint Handoff
+
+Summary:
+- Added the network-owned `DiscoveredPeerEndpoint` parser for the existing
+  `peer-id` and `peer-id@host[:port]` discovery values, with bounded validation
+  and provider-metadata preservation.
+- Mirrored mobile and desktop native join coordinators now retain the selected
+  `BootstrapCandidate` instead of reducing it to a peer-ID-only plan.
+- `BootstrapPlan`, `JoinFlowSessionContext`, and the safe route boundary now
+  carry and validate optional selected host/port metadata while preserving the
+  existing peer-ID and relay fallback contracts.
+
+Files changed:
+- `packages/peerdeal_network/lib/src/models/discovered_peer_endpoint.dart`
+- `packages/peerdeal_network/lib/src/services/discovered_peer_endpoint_parser.dart`
+- `packages/peerdeal_network/test/discovered_peer_endpoint_parser_test.dart`
+- mirrored mobile and desktop `join_flow_models.dart`,
+  `native_join_bootstrap_coordinator.dart`, `join_flow_orchestrator.dart`,
+  `join_flow_route.dart`, `fakes.dart`, and focused tests
+
+Verification:
+- Network parser/provider tests passed.
+- Mirrored mobile and desktop native-bootstrap and join-orchestrator suites
+  passed.
+- Full repository gates and app/native artifact validation remain required.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, durable product state, other-platform hosts, and release
+  signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T215 Verified Snapshot Replay Hydration
 
 Summary:

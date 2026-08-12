@@ -66,10 +66,13 @@ class NativeJoinBootstrapCoordinator
       );
     }
 
-    final peerIds = _normalizedUnique(
+    final endpoints = DiscoveredPeerEndpointParser.parseAll(
       discovery.foundEndpoints,
       maxValues: _maxPeerCandidates,
     );
+    final peerIds = endpoints
+        .map((endpoint) => endpoint.peerId)
+        .toList(growable: false);
     if (peerIds.isEmpty) {
       return BootstrapPlan(
         requiresBootstrap: true,
@@ -97,17 +100,42 @@ class NativeJoinBootstrapCoordinator
       );
     }
 
-    final reachablePeerIds = _normalizedUnique(
-      candidates
-          .where((candidate) => candidate.reachable)
-          .map((candidate) => candidate.peerId),
-      maxValues: _maxPeerCandidates,
+    final projectedCandidates = DiscoveredPeerEndpointParser.projectCandidates(
+      candidates,
+      endpoints,
     );
+    final reachableCandidates = <BootstrapCandidate>[];
+    final seenPeerIds = <String>{};
+    for (final candidate in projectedCandidates) {
+      if (!candidate.reachable) continue;
+      if (reachableCandidates.length == _maxPeerCandidates) break;
+      final peerId = _safeNativeText(candidate.peerId);
+      if (peerId.isEmpty || !seenPeerIds.add(peerId)) continue;
+      reachableCandidates.add(
+        peerId == candidate.peerId
+            ? candidate
+            : BootstrapCandidate(
+                peerId: peerId,
+                routeClass: candidate.routeClass,
+                reachable: candidate.reachable,
+                priority: candidate.priority,
+                host: candidate.host,
+                port: candidate.port,
+                reason: candidate.reason,
+              ),
+      );
+    }
+    final reachablePeerIds = reachableCandidates
+        .map((candidate) => candidate.peerId)
+        .toList(growable: false);
     return BootstrapPlan(
       requiresBootstrap: true,
       peerCandidates: reachablePeerIds,
       relayFallbackAllowed: true,
       selectedPeerId: reachablePeerIds.isEmpty ? null : reachablePeerIds.first,
+      selectedCandidate: reachableCandidates.isEmpty
+          ? null
+          : reachableCandidates.first,
     );
   }
 
@@ -143,23 +171,6 @@ class NativeJoinBootstrapCoordinator
         warning: 'Local network discovery could not be loaded.',
       );
     }
-  }
-
-  static List<String> _normalizedUnique(
-    Iterable<String> values, {
-    required int maxValues,
-  }) {
-    final seen = <String>{};
-    final result = <String>[];
-    for (final value in values) {
-      if (result.length == maxValues) break;
-      final normalized = _safeNativeText(value);
-      if (normalized.isEmpty || !seen.add(normalized)) {
-        continue;
-      }
-      result.add(normalized);
-    }
-    return result;
   }
 
   static bool _isValidScope(String value) {

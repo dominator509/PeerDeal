@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
@@ -336,17 +337,24 @@ JoinFlowSessionContext? _safeSessionContext(JoinFlowOutcome outcome) {
   final invite = _safeResolvedInvite(outcome);
   final context = outcome.sessionContext;
   if (invite == null || context == null) return null;
+  final bootstrapCandidate = context.bootstrapCandidate;
   if (context.invite.inviteId != invite.inviteId ||
       context.invite.tableId != invite.tableId ||
       context.invite.sessionId != invite.sessionId ||
       !_isSafeJoinIdentity(context.remotePeerId) ||
-      context.localSeat < 1) {
+      context.localSeat < 1 ||
+      (bootstrapCandidate != null &&
+          !_isSafeBootstrapCandidate(
+            bootstrapCandidate,
+            context.remotePeerId,
+          ))) {
     return null;
   }
   return JoinFlowSessionContext(
     invite: invite,
     remotePeerId: context.remotePeerId,
     localSeat: context.localSeat,
+    bootstrapCandidate: bootstrapCandidate,
   );
 }
 
@@ -375,6 +383,37 @@ bool _isSafeJoinIdentity(String value) {
   return value.codeUnits.every(
     (codeUnit) => codeUnit > 0x20 && codeUnit != 0x7F,
   );
+}
+
+bool _isSafeBootstrapCandidate(
+  BootstrapCandidate candidate,
+  String remotePeerId,
+) {
+  if (candidate.peerId != remotePeerId ||
+      !candidate.reachable ||
+      candidate.priority < 0) {
+    return false;
+  }
+  final host = candidate.host;
+  if (host != null && !_isSafeEndpointHost(host)) return false;
+  final port = candidate.port;
+  if (port != null && (port < 1 || port > 65535)) return false;
+  final reason = candidate.reason;
+  return reason == null || _isSafeJoinIdentity(reason);
+}
+
+bool _isSafeEndpointHost(String value) {
+  if (value.isEmpty || value.length > 253 || value.trim() != value) {
+    return false;
+  }
+  if (value.contains(':')) {
+    return RegExp(r'^[0-9A-Fa-f:]+$').hasMatch(value);
+  }
+  return RegExp(r'^[A-Za-z0-9.-]+$').hasMatch(value) &&
+      !value.startsWith('.') &&
+      !value.endsWith('.') &&
+      !value.startsWith('-') &&
+      !value.endsWith('-');
 }
 
 List<ProtocolDiagnostic> _safeJoinDiagnostics(
