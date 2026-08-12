@@ -16,7 +16,7 @@ void main() {
     );
 
     final result = coordinator.recover(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -54,7 +54,7 @@ void main() {
     );
 
     final result = coordinator.recover(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -548,7 +548,7 @@ void main() {
     );
 
     final result = coordinator.recover(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -588,7 +588,7 @@ void main() {
     );
 
     final result = coordinator.recover(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -668,7 +668,7 @@ class _NoConflictDetector implements ConflictDetector {
 
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
-    return const ConflictDetectionResult(conflicts: <SyncConflict>[]);
+    return ConflictDetectionResult(conflicts: <SyncConflict>[]);
   }
 }
 

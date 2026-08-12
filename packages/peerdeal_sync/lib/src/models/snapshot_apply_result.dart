@@ -5,14 +5,15 @@ import 'sync_conflict.dart';
 
 @immutable
 class SnapshotApplyResult<TState> {
-  const SnapshotApplyResult({
+  SnapshotApplyResult({
     required this.state,
     required this.appliedEventCount,
     required this.finalAppliedEventSeq,
     this.isSuccess = true,
-    this.conflicts = const <SyncConflict>[],
-    this.warnings = const <String>[],
-  });
+    List<SyncConflict> conflicts = const <SyncConflict>[],
+    List<String> warnings = const <String>[],
+  }) : conflicts = List<SyncConflict>.unmodifiable(conflicts),
+       warnings = List<String>.unmodifiable(warnings);
 
   final TState state;
   final bool isSuccess;

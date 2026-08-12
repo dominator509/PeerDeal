@@ -1350,6 +1350,17 @@ Remaining:
   selection, device/network validation, other-platform hosts, release signing,
   and final UX.
 
+## T176 Immutable Sync/Recovery Collections
+
+- Sync and recovery models now defensively copy and freeze recovery event
+  requests/windows, conflict results, warning diagnostics, snapshot results,
+  persistence results, and reconciliation notes.
+- Focused sync ownership, conflict, snapshot, and coordinator suites prove
+  caller-owned collections cannot alter recovery-boundary results.
+- Remaining work is unchanged: durable database replacement, real product state
+  selection, device/network validation, other-platform hosts, release signing,
+  and final UX.
+
 ## T173 Immutable App-Boundary Collections
 
 - Mirrored native bootstrap candidate, native transport session/drain, and

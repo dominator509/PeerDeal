@@ -2477,7 +2477,7 @@ class _OversizedRecoveryStore implements RecoveryPersistenceStore {
     required RecoveryPersistenceScope scope,
     required SnapshotEnvelope snapshot,
   }) {
-    return const RecoveryPersistenceResult.success();
+    return RecoveryPersistenceResult.success();
   }
 
   @override
@@ -2485,12 +2485,12 @@ class _OversizedRecoveryStore implements RecoveryPersistenceStore {
     required RecoveryPersistenceScope scope,
     required List<EventEnvelope> events,
   }) {
-    return const RecoveryPersistenceResult.success();
+    return RecoveryPersistenceResult.success();
   }
 
   @override
   RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) {
-    return const RecoveryPersistenceResult.success();
+    return RecoveryPersistenceResult.success();
   }
 
   @override

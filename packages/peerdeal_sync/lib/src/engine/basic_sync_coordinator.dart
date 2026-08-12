@@ -30,7 +30,7 @@ class BasicSyncCoordinator<TState> implements SyncCoordinator<TState> {
         finalAppliedEventSeq: null,
         safeCloseRecommended: true,
         conflicts: detection.conflicts,
-        reconciliation: const ReconciliationResult(
+        reconciliation: ReconciliationResult(
           canResume: false,
           requiresRecovery: true,
           recommendedAction: 'safe_close',
@@ -62,7 +62,7 @@ class BasicSyncCoordinator<TState> implements SyncCoordinator<TState> {
             error: error,
           ),
         ],
-        reconciliation: const ReconciliationResult(
+        reconciliation: ReconciliationResult(
           canResume: false,
           requiresRecovery: true,
           recommendedAction: 'safe_close',
@@ -85,7 +85,7 @@ class BasicSyncCoordinator<TState> implements SyncCoordinator<TState> {
         safeCloseRecommended: true,
         conflicts: applyResult.conflicts,
         warnings: applyResult.warnings,
-        reconciliation: const ReconciliationResult(
+        reconciliation: ReconciliationResult(
           canResume: false,
           requiresRecovery: true,
           recommendedAction: 'safe_close',

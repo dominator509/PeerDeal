@@ -13,7 +13,7 @@ Map<String, Object?> demoFixtureJson(String fixtureName) {
 }
 
 RecoveryResult<Object?> demoRecoveryResult() {
-  return const RecoveryResult<Object?>(
+  return RecoveryResult<Object?>(
     isSuccess: false,
     reconciliation: ReconciliationResult(
       canResume: false,

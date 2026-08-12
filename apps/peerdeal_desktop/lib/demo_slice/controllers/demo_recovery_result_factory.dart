@@ -8,7 +8,7 @@ class DemoRecoveryResultFactory {
   RecoveryResult<Object?>? createFor(DemoScenarioSnapshot snapshot) {
     if (snapshot.scenarioId != 'recovery_pause_transfer') return null;
 
-    return const RecoveryResult<Object?>(
+    return RecoveryResult<Object?>(
       isSuccess: false,
       reconciliation: ReconciliationResult(
         canResume: false,

@@ -121,7 +121,7 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
     }
 
     record.snapshot = snapshot;
-    return const RecoveryPersistenceResult.success();
+    return RecoveryPersistenceResult.success();
   }
 
   @override
@@ -138,7 +138,7 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
     }
 
     if (events.isEmpty) {
-      return const RecoveryPersistenceResult.success(
+      return RecoveryPersistenceResult.success(
         warnings: <String>['No recovery events were appended.'],
       );
     }
@@ -154,7 +154,7 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
         record ??
         _records.putIfAbsent(scope.storageKey, _RecoveryPersistenceRecord.new);
     target.events.addAll(events);
-    return const RecoveryPersistenceResult.success();
+    return RecoveryPersistenceResult.success();
   }
 
   @override
@@ -168,13 +168,13 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
     }
 
     _records.remove(scope.storageKey);
-    return const RecoveryPersistenceResult.success();
+    return RecoveryPersistenceResult.success();
   }
 
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
     if (!scope.hasValidStorageIdentity) {
-      return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+      return PersistedRecoveryWindow(events: <EventEnvelope>[]);
     }
 
     final record = _records[scope.storageKey];

@@ -56,7 +56,7 @@ class AppHoldemProductionSessionPersistenceWriter {
     if (snapshotValidation != null) return snapshotValidation;
 
     RecoveryPersistenceResult eventResult =
-        const RecoveryPersistenceResult.success();
+        RecoveryPersistenceResult.success();
     if (events.isNotEmpty && !eventsAlreadyPersisted) {
       final scope = RecoveryPersistenceScope(
         tableId: tableState.tableId,
@@ -66,7 +66,7 @@ class AppHoldemProductionSessionPersistenceWriter {
       try {
         eventResult = _store.appendEvents(scope: scope, events: events);
       } on Object {
-        return const RecoveryPersistenceResult(
+        return RecoveryPersistenceResult(
           isSuccess: false,
           warnings: <String>['Holdem event-log persistence is unavailable.'],
         );
@@ -104,7 +104,7 @@ class AppHoldemProductionSessionPersistenceWriter {
   }) {
     if (events.isEmpty) return null;
     if (events.length > _maxRecoveryEvents) {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>[
           'Holdem event-log suffix exceeds the configured recovery event limit.',
@@ -116,7 +116,7 @@ class AppHoldemProductionSessionPersistenceWriter {
     for (final event in events) {
       if (event.eventType == 'SessionClosed' ||
           event.eventType == 'SessionWiped') {
-        return const RecoveryPersistenceResult(
+        return RecoveryPersistenceResult(
           isSuccess: false,
           warnings: <String>[
             'Holdem retention events require the close-retention adapter.',
@@ -126,7 +126,7 @@ class AppHoldemProductionSessionPersistenceWriter {
       if (event.tableId != tableState.tableId ||
           event.sessionId != tableState.sessionId ||
           event.protocolVersion != tableState.protocolVersion) {
-        return const RecoveryPersistenceResult(
+        return RecoveryPersistenceResult(
           isSuccess: false,
           warnings: <String>['Holdem event-log scope does not match state.'],
         );
@@ -134,7 +134,7 @@ class AppHoldemProductionSessionPersistenceWriter {
       if (previous != null &&
           (event.eventSeq != previous.eventSeq + 1 ||
               event.prevEventHash != previous.eventHash)) {
-        return const RecoveryPersistenceResult(
+        return RecoveryPersistenceResult(
           isSuccess: false,
           warnings: <String>['Holdem event-log suffix is not contiguous.'],
         );
@@ -146,7 +146,7 @@ class AppHoldemProductionSessionPersistenceWriter {
     if (lastEvent.eventSeq != tableState.eventSequence ||
         eventCursor.nextEventSeq != lastEvent.eventSeq + 1 ||
         eventCursor.previousEventHash != lastEvent.eventHash) {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>[
           'Holdem event-log suffix does not match resulting state.',
@@ -156,7 +156,7 @@ class AppHoldemProductionSessionPersistenceWriter {
     final lastEventHash = tableState.metadata['last_event_hash'];
     if (lastEventHash != null &&
         (lastEventHash is! String || lastEventHash != lastEvent.eventHash)) {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem event-log state hash is inconsistent.'],
       );

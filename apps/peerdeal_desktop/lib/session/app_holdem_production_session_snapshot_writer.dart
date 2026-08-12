@@ -49,7 +49,7 @@ class AppHoldemProductionSessionSnapshotWriter {
       protocolVersion: tableState.protocolVersion,
     );
     if (!scope.hasValidStorageIdentity) {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot persistence scope is invalid.'],
       );
@@ -57,7 +57,7 @@ class AppHoldemProductionSessionSnapshotWriter {
     if (eventCursor.tableId != tableState.tableId ||
         eventCursor.sessionId != tableState.sessionId ||
         eventCursor.protocolVersion != tableState.protocolVersion) {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot state and cursor scope differ.'],
       );
@@ -66,7 +66,7 @@ class AppHoldemProductionSessionSnapshotWriter {
     final snapshotBaseEventSeq = eventCursor.nextEventSeq - 1;
     if (snapshotBaseEventSeq < 0 ||
         tableState.eventSequence != snapshotBaseEventSeq) {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot state and cursor sequence differ.'],
       );
@@ -75,7 +75,7 @@ class AppHoldemProductionSessionSnapshotWriter {
     if (lastEventHash != null &&
         (lastEventHash is! String ||
             lastEventHash != eventCursor.previousEventHash)) {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot event hash is inconsistent.'],
       );
@@ -89,7 +89,7 @@ class AppHoldemProductionSessionSnapshotWriter {
       );
       canonicalJsonEncode(typedSnapshot.toJson());
     } on Object {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot serialization is invalid.'],
       );
@@ -121,7 +121,7 @@ class AppHoldemProductionSessionSnapshotWriter {
       protocolVersion: tableState.protocolVersion,
     );
     if (!scope.hasValidStorageIdentity) {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot persistence scope is invalid.'],
       );
@@ -148,7 +148,7 @@ class AppHoldemProductionSessionSnapshotWriter {
         payload: payload,
       );
     } on Object {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot serialization is unavailable.'],
       );
@@ -157,7 +157,7 @@ class AppHoldemProductionSessionSnapshotWriter {
     try {
       return _store.saveSnapshot(scope: scope, snapshot: envelope);
     } on Object {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot persistence is unavailable.'],
       );

@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T176 Immutable Sync/Recovery Collections
+
+Summary:
+- Sync and recovery models now defensively copy and freeze recovery event
+  requests/windows, conflict results, warning diagnostics, snapshot results,
+  persistence results, and reconciliation notes.
+- Sync and app/test call sites were migrated from invalid const construction
+  without changing package boundaries or runtime behavior.
+
+Validation:
+- Focused sync ownership, conflict, snapshot, and coordinator suites: passed
+  45 tests.
+- Full analyze, boundary-check, source-text, dependency-audit, and serialized
+  repository test gates passed. Dependency audit reported 0 actionable upgrades
+  and 11 newer toolchain-blocked versions.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T175 Immutable Network Collections
 
 Summary:

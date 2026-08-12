@@ -5,7 +5,8 @@ import 'sync_conflict.dart';
 
 @immutable
 class ConflictDetectionResult {
-  const ConflictDetectionResult({required this.conflicts});
+  ConflictDetectionResult({required List<SyncConflict> conflicts})
+    : conflicts = List<SyncConflict>.unmodifiable(conflicts);
 
   final List<SyncConflict> conflicts;
 

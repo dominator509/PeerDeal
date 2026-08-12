@@ -5,15 +5,17 @@ import 'sync_conflict.dart';
 
 @immutable
 class RecoveryPersistenceResult {
-  const RecoveryPersistenceResult({
+  RecoveryPersistenceResult({
     required this.isSuccess,
-    this.conflicts = const <SyncConflict>[],
-    this.warnings = const <String>[],
-  });
+    List<SyncConflict> conflicts = const <SyncConflict>[],
+    List<String> warnings = const <String>[],
+  }) : conflicts = List<SyncConflict>.unmodifiable(conflicts),
+       warnings = List<String>.unmodifiable(warnings);
 
-  const RecoveryPersistenceResult.success({this.warnings = const <String>[]})
+  RecoveryPersistenceResult.success({List<String> warnings = const <String>[]})
     : isSuccess = true,
-      conflicts = const <SyncConflict>[];
+      conflicts = const <SyncConflict>[],
+      warnings = List<String>.unmodifiable(warnings);
 
   final bool isSuccess;
   final List<SyncConflict> conflicts;

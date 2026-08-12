@@ -73,7 +73,7 @@ void main() {
 
   test('propagates a failed persistence wipe without claiming deletion', () {
     final store = _FakeRecoveryStore(
-      wipeResult: const RecoveryPersistenceResult(
+      wipeResult: RecoveryPersistenceResult(
         isSuccess: false,
         conflicts: <SyncConflict>[
           SyncConflict(
@@ -168,9 +168,9 @@ RetentionPolicy _policy({required int seconds}) {
 
 class _FakeRecoveryStore implements RecoveryPersistenceStore {
   _FakeRecoveryStore({
-    this.wipeResult = const RecoveryPersistenceResult.success(),
+    RecoveryPersistenceResult? wipeResult,
     this.throwOnWipe = false,
-  });
+  }) : wipeResult = wipeResult ?? RecoveryPersistenceResult.success();
 
   final RecoveryPersistenceResult wipeResult;
   final bool throwOnWipe;
@@ -180,13 +180,13 @@ class _FakeRecoveryStore implements RecoveryPersistenceStore {
   RecoveryPersistenceResult saveSnapshot({
     required RecoveryPersistenceScope scope,
     required SnapshotEnvelope snapshot,
-  }) => const RecoveryPersistenceResult.success();
+  }) => RecoveryPersistenceResult.success();
 
   @override
   RecoveryPersistenceResult appendEvents({
     required RecoveryPersistenceScope scope,
     required List<EventEnvelope> events,
-  }) => const RecoveryPersistenceResult.success();
+  }) => RecoveryPersistenceResult.success();
 
   @override
   RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) {
@@ -197,7 +197,7 @@ class _FakeRecoveryStore implements RecoveryPersistenceStore {
 
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
-    return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+    return PersistedRecoveryWindow(events: <EventEnvelope>[]);
   }
 }
 

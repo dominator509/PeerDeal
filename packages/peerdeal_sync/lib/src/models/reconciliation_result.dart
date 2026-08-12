@@ -2,12 +2,12 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ReconciliationResult {
-  const ReconciliationResult({
+  ReconciliationResult({
     required this.canResume,
     required this.requiresRecovery,
     required this.recommendedAction,
-    this.notes = const <String>[],
-  });
+    List<String> notes = const <String>[],
+  }) : notes = List<String>.unmodifiable(notes);
 
   final bool canResume;
   final bool requiresRecovery;

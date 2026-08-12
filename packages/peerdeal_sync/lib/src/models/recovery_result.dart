@@ -6,15 +6,16 @@ import 'sync_conflict.dart';
 
 @immutable
 class RecoveryResult<TState> {
-  const RecoveryResult({
+  RecoveryResult({
     required this.isSuccess,
     required this.reconciliation,
-    required this.conflicts,
+    required List<SyncConflict> conflicts,
     required this.safeCloseRecommended,
     this.state,
     this.finalAppliedEventSeq,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : conflicts = List<SyncConflict>.unmodifiable(conflicts),
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool isSuccess;
   final TState? state;

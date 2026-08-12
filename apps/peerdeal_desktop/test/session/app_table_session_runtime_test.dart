@@ -277,22 +277,22 @@ class _FakeRecoveryStore implements RecoveryPersistenceStore {
   RecoveryPersistenceResult saveSnapshot({
     required RecoveryPersistenceScope scope,
     required SnapshotEnvelope snapshot,
-  }) => const RecoveryPersistenceResult.success();
+  }) => RecoveryPersistenceResult.success();
 
   @override
   RecoveryPersistenceResult appendEvents({
     required RecoveryPersistenceScope scope,
     required List<EventEnvelope> events,
-  }) => const RecoveryPersistenceResult.success();
+  }) => RecoveryPersistenceResult.success();
 
   @override
   RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) {
     wipeCalls++;
     if (throwOnWipe) throw StateError('wipe failed');
-    return const RecoveryPersistenceResult.success();
+    return RecoveryPersistenceResult.success();
   }
 
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) =>
-      const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+      PersistedRecoveryWindow(events: <EventEnvelope>[]);
 }

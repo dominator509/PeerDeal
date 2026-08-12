@@ -50,7 +50,7 @@ void main() {
           status: 'ok',
           message: 'Receipt resolved.',
         ),
-        recovery: const RecoveryResult<Object?>(
+        recovery: RecoveryResult<Object?>(
           isSuccess: false,
           reconciliation: ReconciliationResult(
             canResume: false,

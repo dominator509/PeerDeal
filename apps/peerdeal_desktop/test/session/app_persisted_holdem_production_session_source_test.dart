@@ -790,17 +790,17 @@ class _OversizedRecoveryStore implements RecoveryPersistenceStore {
   RecoveryPersistenceResult saveSnapshot({
     required RecoveryPersistenceScope scope,
     required SnapshotEnvelope snapshot,
-  }) => const RecoveryPersistenceResult.success();
+  }) => RecoveryPersistenceResult.success();
 
   @override
   RecoveryPersistenceResult appendEvents({
     required RecoveryPersistenceScope scope,
     required List<EventEnvelope> events,
-  }) => const RecoveryPersistenceResult.success();
+  }) => RecoveryPersistenceResult.success();
 
   @override
   RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) =>
-      const RecoveryPersistenceResult.success();
+      RecoveryPersistenceResult.success();
 
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) =>
@@ -816,7 +816,7 @@ class _FailingSnapshotStore extends _OversizedRecoveryStore {
     required SnapshotEnvelope snapshot,
   }) {
     saveSnapshotCalls += 1;
-    return const RecoveryPersistenceResult(
+    return RecoveryPersistenceResult(
       isSuccess: false,
       warnings: <String>['initial snapshot save failed'],
     );
@@ -824,7 +824,7 @@ class _FailingSnapshotStore extends _OversizedRecoveryStore {
 
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
-    return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+    return PersistedRecoveryWindow(events: <EventEnvelope>[]);
   }
 }
 

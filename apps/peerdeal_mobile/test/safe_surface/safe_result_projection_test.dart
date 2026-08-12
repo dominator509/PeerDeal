@@ -35,7 +35,7 @@ void main() {
     const projection = SafeResultProjection();
 
     final result = projection.projectRecovery(
-      const RecoveryResult<Object?>(
+      RecoveryResult<Object?>(
         isSuccess: false,
         reconciliation: ReconciliationResult(
           canResume: false,

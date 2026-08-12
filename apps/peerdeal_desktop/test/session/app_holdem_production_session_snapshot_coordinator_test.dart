@@ -300,7 +300,7 @@ class _ToggleSnapshotStore extends InMemoryRecoveryPersistenceStore {
     saveAttempts++;
     if (failuresRemaining > 0) {
       failuresRemaining--;
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['temporary snapshot failure'],
       );

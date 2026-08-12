@@ -48,7 +48,7 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   }) {
     if (events.length > _maxRecoveryEvents) {
       return _enqueueOperation(() {
-        const result = RecoveryPersistenceResult(
+        final result = RecoveryPersistenceResult(
           isSuccess: false,
           warnings: <String>[
             'Holdem snapshot event suffix exceeds the configured recovery event limit.',
@@ -65,7 +65,7 @@ class AppHoldemProductionSessionSnapshotCoordinator {
       try {
         snapshotId = _snapshotIdFactory(tableState, eventCursor);
       } on Object {
-        const result = RecoveryPersistenceResult(
+        final result = RecoveryPersistenceResult(
           isSuccess: false,
           warnings: <String>['Holdem snapshot ID could not be created.'],
         );
@@ -88,7 +88,7 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   Future<RecoveryPersistenceResult> retryPending() {
     return _enqueueOperation(() {
       if (_pending.isEmpty) {
-        return const RecoveryPersistenceResult.success();
+        return RecoveryPersistenceResult.success();
       }
       return _persistCheckpoint(_pending.first);
     });
@@ -101,7 +101,7 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   Future<void> discardPending() {
     final operation = _tail.then<void>((_) {
       _pending.clear();
-      _lastResult = const RecoveryPersistenceResult.success();
+      _lastResult = RecoveryPersistenceResult.success();
     });
     _tail = operation.then<void>(
       (_) {},
@@ -189,7 +189,7 @@ class AppHoldemProductionSessionSnapshotCoordinator {
         eventsAlreadyPersisted: checkpoint.eventsAlreadyPersisted,
       );
     } on Object {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem snapshot checkpoint is unavailable.'],
       );

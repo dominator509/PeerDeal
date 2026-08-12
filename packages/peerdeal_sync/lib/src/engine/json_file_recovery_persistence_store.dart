@@ -119,10 +119,10 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
             candidate.deleteSync();
           }
         }
-        return const RecoveryPersistenceResult.success();
+        return RecoveryPersistenceResult.success();
       });
     } on Object {
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         conflicts: <SyncConflict>[
           SyncConflict(
@@ -138,19 +138,19 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
     if (!scope.hasValidStorageIdentity) {
-      return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+      return PersistedRecoveryWindow(events: <EventEnvelope>[]);
     }
 
     try {
       return _withScopeLock(scope, () {
         final hydrate = _hydrate(scope);
         if (!hydrate.result.isSuccess) {
-          return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+          return PersistedRecoveryWindow(events: <EventEnvelope>[]);
         }
         return hydrate.store.loadWindow(scope);
       }, createRoot: false);
     } on Object {
-      return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+      return PersistedRecoveryWindow(events: <EventEnvelope>[]);
     }
   }
 
@@ -208,7 +208,7 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     if (!file.existsSync()) {
       return _HydratedRecoveryStore(
         store: store,
-        result: const RecoveryPersistenceResult.success(),
+        result: RecoveryPersistenceResult.success(),
       );
     }
 
@@ -243,7 +243,7 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
 
     return _HydratedRecoveryStore(
       store: store,
-      result: const RecoveryPersistenceResult.success(),
+      result: RecoveryPersistenceResult.success(),
     );
   }
 
@@ -266,7 +266,7 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
       }
       tempFile.writeAsStringSync(encodedWindow, flush: true);
       tempFile.renameSync(file.path);
-      return const RecoveryPersistenceResult.success();
+      return RecoveryPersistenceResult.success();
     } on Object {
       if (tempFile != null && tempFile.existsSync()) {
         try {
@@ -275,7 +275,7 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
           // Best-effort cleanup; the failed persistence result is authoritative.
         }
       }
-      return const RecoveryPersistenceResult(
+      return RecoveryPersistenceResult(
         isSuccess: false,
         conflicts: <SyncConflict>[
           SyncConflict(
@@ -292,9 +292,9 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
     RecoveryPersistenceScope scope,
   ) {
     if (scope.hasValidStorageIdentity) {
-      return const RecoveryPersistenceResult.success();
+      return RecoveryPersistenceResult.success();
     }
-    return const RecoveryPersistenceResult(
+    return RecoveryPersistenceResult(
       isSuccess: false,
       conflicts: <SyncConflict>[
         SyncConflict(
@@ -307,7 +307,7 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
   }
 
   RecoveryPersistenceResult _lockFailure() {
-    return const RecoveryPersistenceResult(
+    return RecoveryPersistenceResult(
       isSuccess: false,
       conflicts: <SyncConflict>[
         SyncConflict(
@@ -322,7 +322,7 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
   _HydratedRecoveryStore _corruptStore(InMemoryRecoveryPersistenceStore store) {
     return _HydratedRecoveryStore(
       store: store,
-      result: const RecoveryPersistenceResult(
+      result: RecoveryPersistenceResult(
         isSuccess: false,
         conflicts: <SyncConflict>[
           SyncConflict(
@@ -349,7 +349,7 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
   }
 
   RecoveryPersistenceResult _fileTooLargeResult() {
-    return const RecoveryPersistenceResult(
+    return RecoveryPersistenceResult(
       isSuccess: false,
       conflicts: <SyncConflict>[
         SyncConflict(

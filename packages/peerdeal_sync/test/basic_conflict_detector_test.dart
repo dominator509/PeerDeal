@@ -20,7 +20,7 @@ void main() {
   });
 
   test('rejects an oversized event window before traversing events', () {
-    const request = RecoveryRequest(
+    final request = RecoveryRequest(
       tableId: 'table_1',
       sessionId: 'session_1',
       protocolVersion: '2.0.0',
@@ -167,7 +167,7 @@ void main() {
     'flags fatal mismatch when final event hash differs from expected baseline',
     () {
       final result = detector.detect(
-        const RecoveryRequest(
+        RecoveryRequest(
           tableId: 'table_1',
           sessionId: 'session_1',
           protocolVersion: '1.0.0',
@@ -200,7 +200,7 @@ void main() {
 
   test('flags fatal unsupported recovery protocol', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '2.0.0',
@@ -227,7 +227,7 @@ void main() {
 
   test('flags fatal event protocol mismatch', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -258,7 +258,7 @@ void main() {
 
   test('flags fatal unsupported event artifact', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -289,7 +289,7 @@ void main() {
 
   test('flags fatal unsupported snapshot artifact', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -357,7 +357,7 @@ void main() {
 
   test('flags fatal event hash chain break', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -405,7 +405,7 @@ void main() {
 
   test('flags fatal event sequence gap', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -453,7 +453,7 @@ void main() {
 
   test('flags fatal event scope mismatch', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -486,7 +486,7 @@ void main() {
 
   test('flags fatal empty recovery window', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',

@@ -1883,6 +1883,15 @@ mutation rejection. Durable database replacement, real product state
 selection, device/network validation, other-platform hosts, release signing,
 and final UX remain separate.
 
+The T176 follow-up closes the generic sync/recovery collection ownership gap.
+Sync models now defensively copy and freeze recovery event requests/windows,
+conflict results, warning diagnostics, snapshot results, persistence results,
+and reconciliation notes before results cross the recovery boundary. Focused
+sync ownership, conflict, snapshot, and coordinator suites cover source-list
+isolation and mutation rejection. Durable database replacement, real product
+state selection, device/network validation, other-platform hosts, release
+signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

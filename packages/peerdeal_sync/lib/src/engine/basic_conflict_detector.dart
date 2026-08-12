@@ -34,7 +34,7 @@ class BasicConflictDetector implements ConflictDetector {
       sessionId: request.sessionId,
       protocolVersion: request.protocolVersion,
     ).hasValidStorageIdentity) {
-      return const ConflictDetectionResult(
+      return ConflictDetectionResult(
         conflicts: <SyncConflict>[
           SyncConflict(
             code: 'ERR_RECOVERY_SCOPE_INVALID',

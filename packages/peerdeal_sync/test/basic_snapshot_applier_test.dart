@@ -255,7 +255,7 @@ void main() {
     );
 
     final result = applier.apply(
-      const SnapshotApplyRequest(
+      SnapshotApplyRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -275,7 +275,7 @@ void main() {
     );
 
     final result = applier.apply(
-      const SnapshotApplyRequest(
+      SnapshotApplyRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -313,7 +313,7 @@ void main() {
     );
 
     final result = applier.apply(
-      const SnapshotApplyRequest(
+      SnapshotApplyRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -356,7 +356,7 @@ void main() {
       );
 
       final result = applier.apply(
-        const SnapshotApplyRequest(
+        SnapshotApplyRequest(
           tableId: 'table_1',
           sessionId: 'session_1',
           protocolVersion: '1.0.0',

@@ -54,7 +54,7 @@ class AppRecoveryRetentionCoordinator {
     }
 
     if (!wipeDue) {
-      return const AppRecoveryRetentionEnforcementResult(
+      return AppRecoveryRetentionEnforcementResult(
         isWipeDue: false,
         persistenceResult: RecoveryPersistenceResult.success(),
       );
