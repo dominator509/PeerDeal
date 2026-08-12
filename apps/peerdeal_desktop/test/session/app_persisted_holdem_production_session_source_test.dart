@@ -714,7 +714,7 @@ void main() {
         tableId: scope.tableId,
         sessionId: scope.sessionId,
         snapshotBaseEventSeq: 0,
-        snapshotHash: 'hash_001',
+        snapshotHash: computeCanonicalHash(persisted.toJson()),
         payload: persisted.toJson(),
       ),
     );
@@ -726,8 +726,10 @@ void main() {
   test(
     'fails closed on a tampered persisted snapshot hash before identity work',
     () async {
-      final store = InMemoryRecoveryPersistenceStore();
-      _persist(store, _typedSnapshot(), snapshotHash: 'tampered_hash');
+      final persisted = _typedSnapshot();
+      final store = _SnapshotRecoveryStore(
+        _snapshotEnvelope(persisted, snapshotHash: 'tampered_hash'),
+      );
       var identityCalls = 0;
       final source = _source(
         store,
@@ -924,6 +926,17 @@ class _OversizedRecoveryStore implements RecoveryPersistenceStore {
       PersistedRecoveryWindow(events: <EventEnvelope>[_event(1), _event(2)]);
 }
 
+class _SnapshotRecoveryStore extends _OversizedRecoveryStore {
+  _SnapshotRecoveryStore(this.snapshot);
+
+  final SnapshotEnvelope snapshot;
+
+  @override
+  PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
+    return PersistedRecoveryWindow(snapshot: snapshot, events: const []);
+  }
+}
+
 class _UnavailableRecoveryLoadStore extends _OversizedRecoveryStore
     implements RecoveryPersistenceLoadResultStore {
   @override
@@ -992,19 +1005,36 @@ void _persist(
   final scope = _scope();
   final result = store.saveSnapshot(
     scope: scope,
-    snapshot: SnapshotEnvelope(
+    snapshot: _snapshotEnvelope(
+      state,
+      snapshotHash: snapshotHash,
       snapshotId: snapshotId,
       snapshotType: snapshotType,
       snapshotVersion: snapshotVersion,
-      protocolVersion: scope.protocolVersion,
-      tableId: scope.tableId,
-      sessionId: scope.sessionId,
-      snapshotBaseEventSeq: state.tableState.eventSequence,
-      snapshotHash: snapshotHash ?? computeCanonicalHash(state.toJson()),
-      payload: state.toJson(),
     ),
   );
   expect(result.isSuccess, isTrue);
+}
+
+SnapshotEnvelope _snapshotEnvelope(
+  HoldemStateSnapshot state, {
+  String? snapshotHash,
+  String snapshotId = 'snapshot_001',
+  String snapshotType = 'HoldemStateSnapshot',
+  String snapshotVersion = '1.0',
+}) {
+  final scope = _scope();
+  return SnapshotEnvelope(
+    snapshotId: snapshotId,
+    snapshotType: snapshotType,
+    snapshotVersion: snapshotVersion,
+    protocolVersion: scope.protocolVersion,
+    tableId: scope.tableId,
+    sessionId: scope.sessionId,
+    snapshotBaseEventSeq: state.tableState.eventSequence,
+    snapshotHash: snapshotHash ?? computeCanonicalHash(state.toJson()),
+    payload: state.toJson(),
+  );
 }
 
 HoldemStateSnapshot _typedSnapshot({

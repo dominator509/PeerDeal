@@ -56,6 +56,7 @@ class InMemoryRecoveryPersistenceStore
 
     final conflicts = <SyncConflict>[
       ..._validateSnapshotScope(scope, snapshot),
+      ..._validateSnapshotIntegrity(snapshot),
     ];
     if (conflicts.isNotEmpty) {
       return RecoveryPersistenceResult(isSuccess: false, conflicts: conflicts);
@@ -240,6 +241,50 @@ class InMemoryRecoveryPersistenceStore
       );
     }
     return conflicts;
+  }
+
+  List<SyncConflict> _validateSnapshotIntegrity(SnapshotEnvelope snapshot) {
+    try {
+      canonicalJsonEncode(snapshot.toJson());
+    } on FormatException catch (error) {
+      final isTooLarge =
+          error.message == 'Canonical JSON payload is too large.';
+      return <SyncConflict>[
+        SyncConflict(
+          code: isTooLarge
+              ? 'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_TOO_LARGE'
+              : 'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_INVALID',
+          message: isTooLarge
+              ? 'Persisted snapshot exceeds the configured canonical limit.'
+              : 'Persisted snapshot could not be encoded as canonical protocol JSON.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ];
+    } on Object {
+      return const <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_INVALID',
+          message:
+              'Persisted snapshot could not be encoded as canonical protocol JSON.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ];
+    }
+
+    try {
+      if (snapshot.snapshotHash == computeCanonicalHash(snapshot.payload)) {
+        return const <SyncConflict>[];
+      }
+    } on Object {
+      // Normalize hash computation failures into the same fatal contract.
+    }
+    return const <SyncConflict>[
+      SyncConflict(
+        code: 'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_PAYLOAD_HASH_MISMATCH',
+        message: 'Persisted snapshot payload hash does not match the envelope.',
+        severity: SyncConflictSeverity.fatal,
+      ),
+    ];
   }
 
   List<SyncConflict> _validateEventAppend(

@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T213 Persistence Snapshot Integrity
+
+Summary:
+- Shared in-memory and JSON-file recovery stores now validate snapshot
+  canonical JSON and payload hashes before record mutation or durable hydration.
+- Tampered or unencodable snapshots fail closed through the same sync-owned
+  persistence boundary instead of relying only on later recovery application.
+- App tests that intentionally inject a tampered snapshot now use a read-only
+  fixture store so they continue to exercise the app source integrity guard.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- Mirrored mobile and desktop persisted-source focused tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Sync recovery persistence suite: 32 tests passed.
+- Mobile and desktop persisted-source suites: 27 tests passed each.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Product-owned database persistence, native/device and cross-device
+  validation, other-platform hosts, and release signing remain external or
+  integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T212 Persisted Snapshot Read Boundary
 
 Summary:

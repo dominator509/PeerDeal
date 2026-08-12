@@ -116,6 +116,44 @@ void main() {
     expect(store.loadWindow(scope).events, isEmpty);
   });
 
+  test('rejects an unencodable snapshot without mutation', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    final result = store.saveSnapshot(
+      scope: scope,
+      snapshot: SnapshotEnvelope(
+        snapshotId: 'snapshot_0',
+        protocolVersion: scope.protocolVersion,
+        tableId: scope.tableId,
+        sessionId: scope.sessionId,
+        snapshotBaseEventSeq: 0,
+        snapshotHash: 'unused',
+        payload: <String, Object?>{'invalid': Object()},
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_INVALID',
+    );
+    expect(store.loadWindow(scope).snapshot, isNull);
+  });
+
+  test('rejects a tampered snapshot payload hash without mutation', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    final result = store.saveSnapshot(
+      scope: scope,
+      snapshot: _snapshot(seq: 0, hash: 'tampered_hash'),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_PAYLOAD_HASH_MISMATCH',
+    );
+    expect(store.loadWindow(scope).snapshot, isNull);
+  });
+
   test('wipes an in-memory recovery window idempotently', () {
     final store = InMemoryRecoveryPersistenceStore();
     store.appendEvents(
@@ -124,10 +162,7 @@ void main() {
         _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
       ],
     );
-    store.saveSnapshot(
-      scope: scope,
-      snapshot: _snapshot(seq: 1, hash: 'snapshot_hash_1'),
-    );
+    store.saveSnapshot(scope: scope, snapshot: _snapshot(seq: 1));
 
     final firstWipe = store.wipe(scope: scope);
     final secondWipe = store.wipe(scope: scope);
@@ -248,7 +283,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
       ),
-      snapshot: _snapshot(seq: 0, hash: 'snapshot_hash_0'),
+      snapshot: _snapshot(seq: 0),
     );
     final wipe = store.wipe(scope: invalidScope);
 
@@ -319,7 +354,7 @@ void main() {
         tableId: 'table_1',
         sessionId: 'session_1',
         snapshotBaseEventSeq: 2,
-        snapshotHash: 'snapshot_hash',
+        snapshotHash: computeCanonicalHash(const <String, Object?>{}),
         payload: <String, Object?>{},
       ),
     );
@@ -345,7 +380,7 @@ void main() {
         tableId: 'table_1',
         sessionId: 'session_1',
         snapshotBaseEventSeq: 2,
-        snapshotHash: 'snapshot_hash',
+        snapshotHash: computeCanonicalHash(const <String, Object?>{}),
         payload: <String, Object?>{},
       ),
     );
@@ -367,14 +402,11 @@ void main() {
         _event(seq: 2, prevHash: 'hash_1', hash: 'hash_2'),
       ],
     );
-    store.saveSnapshot(
-      scope: scope,
-      snapshot: _snapshot(seq: 2, hash: 'snapshot_hash_2'),
-    );
+    store.saveSnapshot(scope: scope, snapshot: _snapshot(seq: 2));
 
     final result = store.saveSnapshot(
       scope: scope,
-      snapshot: _snapshot(seq: 1, hash: 'snapshot_hash_1'),
+      snapshot: _snapshot(seq: 1),
     );
 
     expect(result.isSuccess, isFalse);
@@ -395,12 +427,12 @@ void main() {
     );
     store.saveSnapshot(
       scope: scope,
-      snapshot: _snapshot(seq: 1, hash: 'snapshot_hash_1'),
+      snapshot: _snapshot(seq: 1, payload: <String, Object?>{'version': 1}),
     );
 
     final result = store.saveSnapshot(
       scope: scope,
-      snapshot: _snapshot(seq: 1, hash: 'snapshot_hash_tampered'),
+      snapshot: _snapshot(seq: 1, payload: <String, Object?>{'version': 2}),
     );
 
     expect(result.isSuccess, isFalse);
@@ -408,9 +440,18 @@ void main() {
       result.conflicts.single.code,
       'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_HASH_MISMATCH',
     );
-    expect(result.conflicts.single.expected, 'snapshot_hash_1');
-    expect(result.conflicts.single.actual, 'snapshot_hash_tampered');
-    expect(store.loadWindow(scope).snapshot?.snapshotHash, 'snapshot_hash_1');
+    expect(
+      result.conflicts.single.expected,
+      computeCanonicalHash(const <String, Object?>{'version': 1}),
+    );
+    expect(
+      result.conflicts.single.actual,
+      computeCanonicalHash(const <String, Object?>{'version': 2}),
+    );
+    expect(
+      store.loadWindow(scope).snapshot?.snapshotHash,
+      computeCanonicalHash(const <String, Object?>{'version': 1}),
+    );
   });
 
   test('file store persists recovery windows across store instances', () {
@@ -433,7 +474,7 @@ void main() {
     );
     final snapshot = writer.saveSnapshot(
       scope: scope,
-      snapshot: _snapshot(seq: 2, hash: 'snapshot_hash_2'),
+      snapshot: _snapshot(seq: 2),
     );
 
     final reader = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
@@ -442,7 +483,10 @@ void main() {
     expect(append.isSuccess, isTrue);
     expect(snapshot.isSuccess, isTrue);
     expect(window.events.map((event) => event.eventSeq), <int>[1, 2]);
-    expect(window.snapshot?.snapshotHash, 'snapshot_hash_2');
+    expect(
+      window.snapshot?.snapshotHash,
+      computeCanonicalHash(const <String, Object?>{}),
+    );
   });
 
   test('file store rejects non-positive file limits', () {
@@ -866,6 +910,43 @@ void main() {
     expect(writer.loadWindow(scope).events, isEmpty);
   });
 
+  test('file store fails closed on a persisted snapshot hash mismatch', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    expect(
+      writer.saveSnapshot(scope: scope, snapshot: _snapshot(seq: 0)).isSuccess,
+      isTrue,
+    );
+    final persisted = directory.listSync().whereType<File>().singleWhere(
+      (candidate) => candidate.path.endsWith('.json'),
+    );
+    final decoded = Map<String, Object?>.from(
+      jsonDecode(persisted.readAsStringSync()) as Map,
+    );
+    final snapshot = Map<String, Object?>.from(decoded['snapshot'] as Map)
+      ..['snapshot_hash'] = 'tampered_hash';
+    persisted.writeAsStringSync(
+      jsonEncode(<String, Object?>{...decoded, 'snapshot': snapshot}),
+    );
+
+    final result = writer.loadWindowResult(scope);
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_PAYLOAD_HASH_MISMATCH',
+    );
+    expect(result.window.snapshot, isNull);
+  });
+
   test('file store fails closed on corrupt persisted data', () {
     final directory = Directory.systemTemp.createTempSync(
       'peerdeal_recovery_store_',
@@ -1000,14 +1081,18 @@ EventEnvelope _event({
   );
 }
 
-SnapshotEnvelope _snapshot({required int seq, required String hash}) {
+SnapshotEnvelope _snapshot({
+  required int seq,
+  String? hash,
+  Map<String, Object?> payload = const <String, Object?>{},
+}) {
   return SnapshotEnvelope(
     snapshotId: 'snapshot_$seq',
     protocolVersion: '1.0.0',
     tableId: 'table_1',
     sessionId: 'session_1',
     snapshotBaseEventSeq: seq,
-    snapshotHash: hash,
-    payload: const <String, Object?>{},
+    snapshotHash: hash ?? computeCanonicalHash(payload),
+    payload: payload,
   );
 }

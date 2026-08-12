@@ -38,6 +38,8 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
   delimiter-bearing identities before mutating memory or resolving file paths.
 - Persisted snapshots cannot regress to an older checkpoint or replace an
   existing checkpoint with a different snapshot hash.
+- Recovery stores validate persisted snapshot canonical JSON and payload hashes
+  before mutating in-memory state or hydrating durable JSON files.
 - A JSON file-backed recovery store can durably round-trip event/snapshot
   windows through protocol envelope parsers and fails closed when persisted
   data is corrupt.

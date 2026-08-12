@@ -860,7 +860,7 @@ the gates below are satisfied.
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
   replay event-range request validation,
-  sync recovery persistence scope-identity validation,
+  sync recovery persistence scope-identity and snapshot-integrity validation,
   app-owned recovery store construction, exact environment-configured recovery
   root loading, native app-support recovery-root fallback, app-owned recovery
   root validation, mounted recovery-window loading,
@@ -2386,6 +2386,18 @@ app boundary. Focused mobile and desktop persisted-source suites pass; full
 repository gates and debug artifact builds pass: analyze, boundary,
 source-text, serialized test, dependency-audit, and diff gates are green;
 Android debug APK and Windows debug artifacts build successfully.
+
+The T213 follow-up closes the shared persistence snapshot-integrity gap.
+In-memory and JSON-file recovery stores now validate snapshot canonical JSON and
+payload hashes before mutating a recovery window or hydrating durable data.
+Tampered or unencodable snapshots therefore fail closed consistently with the
+existing conflict-detector and snapshot-applier contracts. Focused sync,
+mobile, and desktop persisted-source suites pass; full repository gates and
+debug artifact builds pass: analyze, boundary, source-text, serialized test,
+dependency-audit, and diff gates are green; Android debug APK and Windows
+debug artifacts build successfully. Product-owned database persistence,
+native/device, cross-device, other-platform, and release-signing validation
+remain separate.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
