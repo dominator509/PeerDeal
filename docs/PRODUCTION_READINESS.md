@@ -2377,6 +2377,16 @@ gates and debug artifact builds pass: analyze, boundary, source-text,
 serialized test, dependency-audit, and diff gates are green; Android debug APK
 and Windows debug artifacts build successfully.
 
+The T212 follow-up closes the app-owned persisted snapshot read boundary.
+Mirrored production session sources now validate stored snapshot IDs, types,
+and versions with the same bounded metadata rule used by snapshot writers,
+before snapshot hydration, replay, or local identity provisioning. Malformed
+legacy or externally supplied recovery metadata therefore fails closed at the
+app boundary. Focused mobile and desktop persisted-source suites pass; full
+repository gates and debug artifact builds pass: analyze, boundary,
+source-text, serialized test, dependency-audit, and diff gates are green;
+Android debug APK and Windows debug artifacts build successfully.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

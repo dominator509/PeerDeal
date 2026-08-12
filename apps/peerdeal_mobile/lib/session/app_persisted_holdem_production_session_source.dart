@@ -7,6 +7,7 @@ import '../join_flow/join_flow_models.dart';
 import '../recovery/app_recovery_session_close_event_adapter.dart';
 import 'app_holdem_production_session_bootstrap.dart';
 import 'app_holdem_production_session_snapshot_coordinator.dart';
+import 'app_holdem_production_session_snapshot_writer.dart';
 import 'native_local_peer_identity_loader.dart';
 import 'native_local_peer_identity_provisioner.dart';
 
@@ -457,6 +458,7 @@ class AppPersistedHoldemProductionSessionSource
       }
       return input;
     }
+    _validatePersistedSnapshotMetadata(envelope);
     if (envelope.snapshotType != snapshotType ||
         envelope.snapshotVersion != snapshotVersion) {
       throw StateError(
@@ -549,6 +551,24 @@ class AppPersistedHoldemProductionSessionSource
       return envelope.snapshotHash == computeCanonicalHash(envelope.payload);
     } on Object {
       return false;
+    }
+  }
+
+  static void _validatePersistedSnapshotMetadata(SnapshotEnvelope envelope) {
+    if (!AppHoldemProductionSessionSnapshotWriter.isSafeSnapshotMetadata(
+      envelope.snapshotId,
+    )) {
+      throw StateError('Persisted Holdem snapshot identity is invalid.');
+    }
+    if (!AppHoldemProductionSessionSnapshotWriter.isSafeSnapshotMetadata(
+      envelope.snapshotType,
+    )) {
+      throw StateError('Persisted Holdem snapshot type is invalid.');
+    }
+    if (!AppHoldemProductionSessionSnapshotWriter.isSafeSnapshotMetadata(
+      envelope.snapshotVersion,
+    )) {
+      throw StateError('Persisted Holdem snapshot version is invalid.');
     }
   }
 

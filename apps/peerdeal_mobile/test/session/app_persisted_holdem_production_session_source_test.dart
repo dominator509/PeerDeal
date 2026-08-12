@@ -748,6 +748,59 @@ void main() {
     },
   );
 
+  test(
+    'fails closed on unsafe persisted snapshot metadata before identity work',
+    () async {
+      final cases =
+          <({String id, String type, String version, String warning})>[
+            (
+              id: 'snapshot_${String.fromCharCode(0x85)}',
+              type: 'HoldemStateSnapshot',
+              version: '1.0',
+              warning: 'Persisted Holdem snapshot identity is invalid.',
+            ),
+            (
+              id: 'snapshot_001',
+              type: 'HoldemState${String.fromCharCode(0x85)}',
+              version: '1.0',
+              warning: 'Persisted Holdem snapshot type is invalid.',
+            ),
+            (
+              id: 'snapshot_001',
+              type: 'HoldemStateSnapshot',
+              version: '1.${String.fromCharCode(0x85)}',
+              warning: 'Persisted Holdem snapshot version is invalid.',
+            ),
+          ];
+      for (final testCase in cases) {
+        final store = InMemoryRecoveryPersistenceStore();
+        _persist(
+          store,
+          _typedSnapshot(),
+          snapshotId: testCase.id,
+          snapshotType: testCase.type,
+          snapshotVersion: testCase.version,
+        );
+        var identityCalls = 0;
+        final source = _source(
+          store,
+          identityLoader: ({cancellation}) async => identityCalls += 1,
+        );
+
+        await expectLater(
+          source.load(_invite()),
+          throwsA(
+            predicate(
+              (error) =>
+                  error is StateError && error.message == testCase.warning,
+            ),
+          ),
+        );
+        expect(identityCalls, 0);
+      }
+    },
+  );
+
   test('fails closed on an unsupported recovery suffix event', () {
     final store = InMemoryRecoveryPersistenceStore();
     _persist(store, _typedSnapshot());
@@ -932,14 +985,17 @@ void _persist(
   RecoveryPersistenceStore store,
   HoldemStateSnapshot state, {
   String? snapshotHash,
+  String snapshotId = 'snapshot_001',
+  String snapshotType = 'HoldemStateSnapshot',
+  String snapshotVersion = '1.0',
 }) {
   final scope = _scope();
   final result = store.saveSnapshot(
     scope: scope,
     snapshot: SnapshotEnvelope(
-      snapshotId: 'snapshot_001',
-      snapshotType: 'HoldemStateSnapshot',
-      snapshotVersion: '1.0',
+      snapshotId: snapshotId,
+      snapshotType: snapshotType,
+      snapshotVersion: snapshotVersion,
       protocolVersion: scope.protocolVersion,
       tableId: scope.tableId,
       sessionId: scope.sessionId,

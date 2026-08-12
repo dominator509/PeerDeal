@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T212 Persisted Snapshot Read Boundary
+
+Summary:
+- Mirrored mobile and desktop production session sources now validate stored
+  snapshot IDs, types, and versions before hydration, replay, or identity
+  provisioning.
+- The read path reuses the bounded writer metadata rule and fails closed for
+  unsafe legacy or externally supplied recovery metadata.
+
+Files changed:
+- Mirrored `app_persisted_holdem_production_session_source.dart` files.
+- Mirrored persisted-source focused tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Mobile and desktop persisted-source suites: 26 tests passed each.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Durable database choice, product state hydration, native/device and
+  cross-device validation, other-platform hosts, and release signing remain
+  external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T211 Exact Recovery Window Budget
 
 Summary:
