@@ -82,15 +82,16 @@ class AppHoldemProductionSessionSnapshotWriter {
     }
 
     try {
-      HoldemStateSnapshot(
+      final typedSnapshot = HoldemStateSnapshot(
         tableState: tableState,
         handState: handState,
         eventCursor: eventCursor,
       );
+      canonicalJsonEncode(typedSnapshot.toJson());
     } on Object {
       return const RecoveryPersistenceResult(
         isSuccess: false,
-        warnings: <String>['Holdem snapshot state is invalid.'],
+        warnings: <String>['Holdem snapshot serialization is invalid.'],
       );
     }
     return null;
@@ -127,32 +128,31 @@ class AppHoldemProductionSessionSnapshotWriter {
     }
     final snapshotBaseEventSeq = eventCursor.nextEventSeq - 1;
 
-    final HoldemStateSnapshot typedSnapshot;
+    final SnapshotEnvelope envelope;
     try {
-      typedSnapshot = HoldemStateSnapshot(
+      final typedSnapshot = HoldemStateSnapshot(
         tableState: tableState,
         handState: handState,
         eventCursor: eventCursor,
       );
+      final payload = typedSnapshot.toJson();
+      envelope = SnapshotEnvelope(
+        snapshotId: snapshotId,
+        snapshotType: snapshotType,
+        snapshotVersion: snapshotVersion,
+        protocolVersion: tableState.protocolVersion,
+        tableId: tableState.tableId,
+        sessionId: tableState.sessionId,
+        snapshotBaseEventSeq: snapshotBaseEventSeq,
+        snapshotHash: computeCanonicalHash(payload),
+        payload: payload,
+      );
     } on Object {
       return const RecoveryPersistenceResult(
         isSuccess: false,
-        warnings: <String>['Holdem snapshot state is invalid.'],
+        warnings: <String>['Holdem snapshot serialization is unavailable.'],
       );
     }
-
-    final payload = typedSnapshot.toJson();
-    final envelope = SnapshotEnvelope(
-      snapshotId: snapshotId,
-      snapshotType: snapshotType,
-      snapshotVersion: snapshotVersion,
-      protocolVersion: tableState.protocolVersion,
-      tableId: tableState.tableId,
-      sessionId: tableState.sessionId,
-      snapshotBaseEventSeq: snapshotBaseEventSeq,
-      snapshotHash: computeCanonicalHash(payload),
-      payload: payload,
-    );
 
     try {
       return _store.saveSnapshot(scope: scope, snapshot: envelope);

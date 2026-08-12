@@ -1280,6 +1280,20 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Focused mobile and desktop transport/route tests cover late receive
   suppression.
 
+## T153 Snapshot Serialization Preflight Hardening
+
+- Mirrored snapshot writers now preflight canonical serialization of typed
+  snapshots before event-log append.
+- Unsupported snapshot values fail closed with stable persistence warnings;
+  event and snapshot stores remain unchanged.
+- Focused mobile and desktop persistence-writer and snapshot-writer suites cover
+  the unsupported metadata path.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## T152 Snapshot ID Factory Failure Hardening
 
 - Mirrored production snapshot coordinators now invoke caller-owned snapshot ID

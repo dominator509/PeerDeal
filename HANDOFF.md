@@ -1408,6 +1408,26 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T153 Snapshot Serialization Preflight Hardening
+
+- Mirrored snapshot writers now canonical-encode typed snapshots during
+  validation before any event suffix append.
+- Serialization and hashing failures return stable persistence results instead
+  of escaping, so malformed state cannot leave a durable event suffix without
+  its snapshot checkpoint.
+- Focused mobile and desktop persistence-writer and snapshot-writer suites
+  cover unsupported snapshot metadata.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all app-storage, capture, local-network,
+  transport, and secure-key checks.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T152 Snapshot ID Factory Failure Hardening
 
 - Mirrored production snapshot coordinators now generate snapshot IDs inside

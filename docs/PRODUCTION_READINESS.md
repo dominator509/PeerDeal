@@ -1769,6 +1769,17 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T153 follow-up closes the snapshot serialization preflight boundary.
+Mirrored snapshot writers now canonical-encode typed snapshots during
+validation before appending event suffixes; serialization and hashing failures
+return stable persistence results and cannot leave durable event state without
+a snapshot checkpoint. Focused mobile and desktop persistence-writer and
+snapshot-writer suites cover unsupported snapshot metadata. Full repository
+analyze, boundary, source-text, dependency-audit, test, and diff gates pass.
+Android debug, Windows debug, and Windows native-host smoke builds and smoke
+validation pass. Product state provisioning, device/network validation,
+other-platform hosts, and release signing remain separate.
+
 The T152 follow-up closes the snapshot-ID factory failure boundary. Mirrored
 production snapshot coordinators now invoke caller-owned snapshot-ID factories
 inside the serialized checkpoint queue; factory exceptions fail closed with a

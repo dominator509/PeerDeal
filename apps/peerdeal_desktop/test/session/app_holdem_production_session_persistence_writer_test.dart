@@ -116,6 +116,38 @@ void main() {
     expect(store.loadWindow(_scope()).snapshot, isNull);
   });
 
+  test(
+    'preflights snapshot serialization before appending an event suffix',
+    () {
+      final store = InMemoryRecoveryPersistenceStore();
+      final state = _typedSnapshotAfterEvent();
+      final malformed = HoldemStateSnapshot(
+        tableState: state.tableState.copyWith(
+          metadata: <String, Object?>{'unsupported': Object()},
+        ),
+        handState: state.handState,
+        eventCursor: state.eventCursor,
+      );
+
+      final result = AppHoldemProductionSessionPersistenceWriter(store: store)
+          .persist(
+            snapshotId: 'snapshot_001',
+            tableState: malformed.tableState,
+            handState: malformed.handState,
+            eventCursor: malformed.eventCursor,
+            events: <EventEnvelope>[_event()],
+          );
+
+      expect(result.isSuccess, isFalse);
+      expect(
+        result.warnings,
+        contains('Holdem snapshot serialization is invalid.'),
+      );
+      expect(store.loadWindow(_scope()).events, isEmpty);
+      expect(store.loadWindow(_scope()).snapshot, isNull);
+    },
+  );
+
   test('rejects retention events before event-log persistence', () {
     final store = InMemoryRecoveryPersistenceStore();
     final state = _typedSnapshotAfterEvent();
