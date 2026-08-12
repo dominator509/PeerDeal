@@ -2305,6 +2305,21 @@ debug APK and Windows debug artifacts built successfully. Native/device,
 cross-device, product-state/database, other-platform, and release-signing
 validation remain separate production-boundary work.
 
+The T205 follow-up closes the app-shell production-session cancellation gap.
+Mirrored mobile and desktop typed configuration loaders now accept route
+cancellation, forward it through configuration and persisted local-identity
+construction, and complete it when a load is superseded, disposed, rejected,
+or successfully mounted. Stale configured loads therefore cannot continue
+cancellable app-owned construction after the route handoff is no longer
+valid; the mounted bootstrap route remains the owner of downstream native
+identity/storage cancellation.
+Focused mobile and desktop app-shell and configuration-factory suites pass;
+full analyze, boundary, source-text, serialized test, dependency-audit, and
+diff gates pass; Android debug APK and Windows debug artifacts build
+successfully.
+This does not supply product-owned state/database inputs or prove native/device,
+cross-device, other-platform, or release-signing readiness.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

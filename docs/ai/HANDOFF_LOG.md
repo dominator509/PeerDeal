@@ -2,6 +2,40 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T205 Production Session Load Cancellation
+
+Summary:
+- Mirrored mobile and desktop typed production-session configuration loaders
+  now accept optional route cancellation.
+- App-shell replacement, disposal, fallback, and successful handoff complete
+  the active cancellation signal, while configuration and persisted local
+  identity construction honor it before returning a route configuration.
+- Stale production loads remain ignored and now stop their cancellable
+  app-owned work instead of only losing the route token.
+
+Files changed:
+- Mirrored app-shell main lifecycle, configuration loader/factory,
+  configuration, and persisted session source files.
+- Mirrored app-shell and configuration-factory focused tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused mobile app-shell and configuration-factory suites passed.
+- Focused desktop app-shell and configuration-factory suites passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Cancellation cannot undo a native operation that has already completed, and
+  the mounted bootstrap route remains the owner of downstream native identity
+  cancellation. External loaders may ignore the optional signal. Product
+  database/state wiring, native/device validation, cross-device reachability,
+  other-platform hosts, and release signing remain external or
+  integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T204 Demo Recovery Read Fail-Closed
 
 Summary:

@@ -1451,10 +1451,11 @@ void main() {
             bootstrapCoordinator: FakeBootstrapCoordinator(),
           ).create,
           nativeReadinessLoader: _readyNativeReadinessLoader(),
-          holdemProductionSessionConfigurationLoader: (sessionContext) async {
-            handedOffContext = sessionContext;
-            return loadResult;
-          },
+          holdemProductionSessionConfigurationLoader:
+              (sessionContext, {Future<void>? cancellation}) async {
+                handedOffContext = sessionContext;
+                return loadResult;
+              },
         ),
       ),
     );
@@ -1475,6 +1476,7 @@ void main() {
         Completer<AppHoldemProductionSessionConfigurationLoadResult>();
     final currentResult = _availableConfigurationLoadResult('/holdem-current');
     var loadCount = 0;
+    Future<void>? staleCancellation;
 
     await tester.pumpWidget(
       PeerDealDesktopApp(
@@ -1486,25 +1488,33 @@ void main() {
           joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
             bootstrapCoordinator: FakeBootstrapCoordinator(),
           ).create,
-          holdemProductionSessionConfigurationLoader: (_) {
-            loadCount += 1;
-            return loadCount == 1
-                ? staleLoad.future
-                : Future<
-                    AppHoldemProductionSessionConfigurationLoadResult
-                  >.value(currentResult);
-          },
+          holdemProductionSessionConfigurationLoader:
+              (_, {Future<void>? cancellation}) {
+                loadCount += 1;
+                if (loadCount == 1) staleCancellation = cancellation;
+                return loadCount == 1
+                    ? staleLoad.future
+                    : Future<
+                        AppHoldemProductionSessionConfigurationLoadResult
+                      >.value(currentResult);
+              },
         ),
       ),
     );
 
     await tester.tap(find.text('Join'));
     await tester.pumpAndSettle();
+
+    expect(staleCancellation, isNotNull);
+    var cancellationObserved = false;
+    staleCancellation!.then<void>((_) => cancellationObserved = true);
     Navigator.of(tester.element(find.text('Join flow'))).pop();
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Join'));
     await tester.pumpAndSettle();
+
+    expect(cancellationObserved, isTrue);
 
     expect(loadCount, 2);
     expect(find.text('Route: /holdem-current'), findsOneWidget);
@@ -1532,7 +1542,8 @@ void main() {
             joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
               bootstrapCoordinator: FakeBootstrapCoordinator(),
             ).create,
-            holdemProductionSessionConfigurationLoader: (_) => staleLoad.future,
+            holdemProductionSessionConfigurationLoader:
+                (_, {Future<void>? cancellation}) => staleLoad.future,
           ),
         ),
       );
@@ -1575,10 +1586,11 @@ void main() {
           joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
             bootstrapCoordinator: FakeBootstrapCoordinator(),
           ).create,
-          holdemProductionSessionConfigurationLoader: (_) async =>
-              AppHoldemProductionSessionConfigurationLoadResult.unavailable(
-                warnings: <String>['secret loader detail'],
-              ),
+          holdemProductionSessionConfigurationLoader:
+              (_, {Future<void>? cancellation}) async =>
+                  AppHoldemProductionSessionConfigurationLoadResult.unavailable(
+                    warnings: <String>['secret loader detail'],
+                  ),
         ),
       ),
     );

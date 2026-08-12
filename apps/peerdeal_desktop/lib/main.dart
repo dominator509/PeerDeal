@@ -400,6 +400,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   AppHoldemProductionSessionConfigurationLoaderFactory?
   _defaultJoinFlowSessionConfigurationLoaderFactory;
   Object? _activeProductionSessionLoad;
+  Completer<void>? _productionSessionLoadCancellation;
 
   PeerDealDesktopRuntime get _runtime {
     return (widget._runtime ?? PeerDealDesktopRuntime()).withOverrides(
@@ -1131,16 +1132,21 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
         );
     if (loader == null) return null;
     if (!identical(_defaultJoinFlowSessionConfigurationLoader, loader)) {
+      _invalidateProductionSessionLoad();
       _defaultJoinFlowSessionConfigurationLoader = loader;
       _defaultJoinFlowSessionReadyHandler = (context, sessionContext) {
+        _invalidateProductionSessionLoad();
         final loadToken = Object();
+        final cancellation = Completer<void>();
         _activeProductionSessionLoad = loadToken;
+        _productionSessionLoadCancellation = cancellation;
         unawaited(
           _openLoadedProductionSession(
             context,
             loader,
             sessionContext,
             loadToken,
+            cancellation.future,
           ),
         );
       };
@@ -1176,12 +1182,14 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     AppHoldemProductionSessionConfigurationLoader loader,
     JoinFlowSessionContext sessionContext,
     Object loadToken,
+    Future<void> cancellation,
   ) async {
     late AppHoldemProductionSessionConfigurationLoadResult result;
     try {
-      result = await loader(sessionContext);
+      result = await loader(sessionContext, cancellation: cancellation);
     } on Object {
       if (_isActiveProductionSessionLoad(loadToken)) {
+        _invalidateProductionSessionLoad();
         _pushRouteFallback(context);
       }
       return;
@@ -1193,12 +1201,14 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
         configuration == null ||
         result.persistenceWriter == null ||
         result.snapshotWriter == null) {
+      _invalidateProductionSessionLoad();
       _pushRouteFallback(context);
       return;
     }
 
     final registration = configuration.routeRegistration;
     if (!_canMountLoadedProductionRoute(registration.path)) {
+      _invalidateProductionSessionLoad();
       _pushRouteFallback(context);
       return;
     }
@@ -1227,6 +1237,11 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
 
   void _invalidateProductionSessionLoad() {
     _activeProductionSessionLoad = null;
+    final cancellation = _productionSessionLoadCancellation;
+    if (cancellation != null && !cancellation.isCompleted) {
+      cancellation.complete();
+    }
+    _productionSessionLoadCancellation = null;
   }
 
   bool _canMountLoadedProductionRoute(String path) {

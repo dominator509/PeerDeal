@@ -182,10 +182,13 @@ class AppPersistedHoldemProductionSessionSource
     AppHoldemProductionSessionContextInitialSnapshotLoader?
     contextInitialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    Future<void>? cancellation,
   }) async {
     routePolicy.validate();
     _validateMaxRecoveryEvents(maxRecoveryEvents);
-    final provisioned = await identityProvisioner.ensureIdentity();
+    final provisioned = await identityProvisioner.ensureIdentity(
+      cancellation: cancellation,
+    );
     final identity = provisioned.identity;
     if (!provisioned.isSuccess || identity == null) {
       throw StateError('Local peer identity is unavailable.');
@@ -242,9 +245,11 @@ class AppPersistedHoldemProductionSessionSource
     AppHoldemProductionSessionContextInitialSnapshotLoader?
     contextInitialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    Future<void>? cancellation,
   }) async {
     routePolicy.validate();
     _validateMaxRecoveryEvents(maxRecoveryEvents);
+    await _throwIfCancelled(cancellation);
     AppLocalPeerIdentity? localIdentity;
 
     Future<void> ensureIdentity({Future<void>? cancellation}) async {
@@ -547,7 +552,7 @@ class AppPersistedHoldemProductionSessionSource
     }
   }
 
-  Future<void> _throwIfCancelled(Future<void>? cancellation) async {
+  static Future<void> _throwIfCancelled(Future<void>? cancellation) async {
     if (cancellation == null) return;
     var cancelled = false;
     cancellation.then<void>(

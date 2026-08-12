@@ -42,6 +42,7 @@ class AppHoldemProductionSessionConfiguration {
     AppHoldemProductionSessionContextInitialSnapshotLoader?
     contextInitialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    Future<void>? cancellation,
   }) async {
     _validateSourceLoadTimeout(sourceLoadTimeout);
     final source =
@@ -60,6 +61,7 @@ class AppHoldemProductionSessionConfiguration {
           initialSnapshotLoader: initialSnapshotLoader,
           contextInitialSnapshotLoader: contextInitialSnapshotLoader,
           maxRecoveryEvents: maxRecoveryEvents,
+          cancellation: cancellation,
         );
     return AppHoldemProductionSessionConfiguration.fromSource(
       path: routePolicy.path,

@@ -8,5 +8,6 @@ import 'app_holdem_production_session_configuration_factory.dart';
 /// state, route policy, identity, or persistence.
 typedef AppHoldemProductionSessionConfigurationLoader =
     Future<AppHoldemProductionSessionConfigurationLoadResult> Function(
-      JoinFlowSessionContext sessionContext,
-    );
+      JoinFlowSessionContext sessionContext, {
+      Future<void>? cancellation,
+    });

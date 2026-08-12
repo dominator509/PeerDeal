@@ -116,7 +116,9 @@ class AppHoldemProductionSessionConfigurationFactory {
 
   Future<AppHoldemProductionSessionConfigurationLoadResult> create({
     JoinFlowSessionContext? sessionContext,
+    Future<void>? cancellation,
   }) async {
+    await _throwIfCancelled(cancellation);
     final persistence = _recoveryStoreFactory.create();
     final store = persistence.store;
     if (store == null) {
@@ -165,7 +167,9 @@ class AppHoldemProductionSessionConfigurationFactory {
             initialSnapshotLoader: _initialSnapshotLoader,
             contextInitialSnapshotLoader: _contextInitialSnapshotLoader,
             maxRecoveryEvents: _maxRecoveryEvents,
+            cancellation: cancellation,
           );
+      await _throwIfCancelled(cancellation);
       return AppHoldemProductionSessionConfigurationLoadResult.available(
         configuration: configuration,
         persistenceWriter: persistenceWriter,
@@ -178,6 +182,21 @@ class AppHoldemProductionSessionConfigurationFactory {
           ...persistence.warnings,
           'Holdem production session configuration is unavailable.',
         ],
+      );
+    }
+  }
+
+  Future<void> _throwIfCancelled(Future<void>? cancellation) async {
+    if (cancellation == null) return;
+    var cancelled = false;
+    cancellation.then<void>(
+      (_) => cancelled = true,
+      onError: (Object _, StackTrace _) => cancelled = true,
+    );
+    await Future<void>.value();
+    if (cancelled) {
+      throw StateError(
+        'Holdem production session configuration load cancelled.',
       );
     }
   }
