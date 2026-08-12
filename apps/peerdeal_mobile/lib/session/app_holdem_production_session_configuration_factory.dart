@@ -67,6 +67,7 @@ class AppHoldemProductionSessionConfigurationFactory {
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
     int maxPendingCheckpoints = AppHoldemProductionSessionSnapshotCoordinator
         .defaultMaxPendingCheckpoints,
+    AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
   }) : _recoveryStoreFactory = recoveryStoreFactory,
        _routePolicyFactory = routePolicyFactory,
        _contextRoutePolicyFactory = contextRoutePolicyFactory,
@@ -81,7 +82,8 @@ class AppHoldemProductionSessionConfigurationFactory {
        _sessionFactory = sessionFactory,
        _sourceLoadTimeout = sourceLoadTimeout,
        _maxRecoveryEvents = maxRecoveryEvents,
-       _maxPendingCheckpoints = maxPendingCheckpoints;
+       _maxPendingCheckpoints = maxPendingCheckpoints,
+       _initialSnapshotLoader = initialSnapshotLoader;
 
   final AppRecoveryPersistenceStoreFactory _recoveryStoreFactory;
   final AppHoldemProductionSessionRoutePolicyFactory _routePolicyFactory;
@@ -99,6 +101,7 @@ class AppHoldemProductionSessionConfigurationFactory {
   final Duration _sourceLoadTimeout;
   final int _maxRecoveryEvents;
   final int _maxPendingCheckpoints;
+  final AppHoldemProductionSessionInitialSnapshotLoader? _initialSnapshotLoader;
 
   Future<AppHoldemProductionSessionConfigurationLoadResult> create({
     JoinFlowSessionContext? sessionContext,
@@ -147,6 +150,7 @@ class AppHoldemProductionSessionConfigurationFactory {
             sessionFactory: _sessionFactory,
             sourceLoadTimeout: _sourceLoadTimeout,
             snapshotCoordinator: snapshotCoordinator,
+            initialSnapshotLoader: _initialSnapshotLoader,
             maxRecoveryEvents: _maxRecoveryEvents,
           );
       return AppHoldemProductionSessionConfigurationLoadResult.available(

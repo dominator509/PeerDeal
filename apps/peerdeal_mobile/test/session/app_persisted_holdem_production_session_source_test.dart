@@ -7,6 +7,8 @@ import 'package:peerdeal_mobile/recovery/app_recovery_session_close_coordinator.
 import 'package:peerdeal_mobile/recovery/app_recovery_session_close_event_adapter.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_session_bootstrap.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_session_configuration.dart';
+import 'package:peerdeal_mobile/session/app_holdem_production_session_persistence_writer.dart';
+import 'package:peerdeal_mobile/session/app_holdem_production_session_snapshot_coordinator.dart';
 import 'package:peerdeal_mobile/session/app_persisted_holdem_production_session_source.dart';
 import 'package:peerdeal_mobile/session/native_local_peer_identity_loader.dart';
 import 'package:peerdeal_mobile/session/native_local_peer_identity_provisioner.dart';
@@ -348,6 +350,128 @@ void main() {
   });
 
   test(
+    'hydrates and checkpoints an injected initial snapshot before first join',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      final identityBridge = _IdentityBridge();
+      final initial = _typedSnapshot();
+      final source =
+          await AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(
+            store: store,
+            identityProvisioner: NativeLocalPeerIdentityProvisioner(
+              loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+              writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+              identityFactory: () => 'peer_local',
+            ),
+            routePolicy: _routePolicy(),
+            eventIdFactory: (eventType, eventSeq) =>
+                'evt_${eventType}_$eventSeq',
+            emittedAtFactory: () => '2026-08-12T00:00:00Z',
+            eventHashFactory: computeCanonicalHash,
+            snapshotCoordinator: AppHoldemProductionSessionSnapshotCoordinator(
+              persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+                store: store,
+              ),
+            ),
+            initialSnapshotLoader: (invite, {cancellation}) async {
+              expect(invite.tableId, _invite().tableId);
+              expect(invite.sessionId, _invite().sessionId);
+              return initial;
+            },
+          );
+
+      final input = await source.load(_invite());
+      final persisted = store.loadWindow(_scope()).snapshot;
+
+      expect(input.initialTableState.toJson(), initial.tableState.toJson());
+      expect(identityBridge.savedKeys, hasLength(1));
+      expect(persisted, isNotNull);
+      expect(persisted!.snapshotBaseEventSeq, 0);
+      expect(persisted.payload, initial.toJson());
+    },
+  );
+
+  test(
+    'rejects an invalid initial snapshot before identity provisioning',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      final identityBridge = _IdentityBridge();
+      final source =
+          await AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(
+            store: store,
+            identityProvisioner: NativeLocalPeerIdentityProvisioner(
+              loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+              writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+              identityFactory: () => 'peer_local',
+            ),
+            routePolicy: _routePolicy(),
+            eventIdFactory: (eventType, eventSeq) =>
+                'evt_${eventType}_$eventSeq',
+            emittedAtFactory: () => '2026-08-12T00:00:00Z',
+            eventHashFactory: computeCanonicalHash,
+            snapshotCoordinator: AppHoldemProductionSessionSnapshotCoordinator(
+              persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+                store: store,
+              ),
+            ),
+            initialSnapshotLoader: (_, {cancellation}) async =>
+                _typedSnapshot(tableId: 'table_other'),
+          );
+
+      await expectLater(
+        source.load(_invite()),
+        throwsA(
+          predicate(
+            (error) =>
+                error is StateError &&
+                error.message ==
+                    'Initial Holdem state does not match the invite.',
+          ),
+        ),
+      );
+
+      expect(identityBridge.savedKeys, isEmpty);
+      expect(store.loadWindow(_scope()).snapshot, isNull);
+    },
+  );
+
+  test(
+    'requires initial-state persistence before provisioning identity',
+    () async {
+      final identityBridge = _IdentityBridge();
+      final source =
+          await AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(
+            store: InMemoryRecoveryPersistenceStore(),
+            identityProvisioner: NativeLocalPeerIdentityProvisioner(
+              loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+              writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+              identityFactory: () => 'peer_local',
+            ),
+            routePolicy: _routePolicy(),
+            eventIdFactory: (eventType, eventSeq) =>
+                'evt_${eventType}_$eventSeq',
+            emittedAtFactory: () => '2026-08-12T00:00:00Z',
+            eventHashFactory: computeCanonicalHash,
+            initialSnapshotLoader: (_, {cancellation}) async =>
+                _typedSnapshot(),
+          );
+
+      await expectLater(
+        source.load(_invite()),
+        throwsA(
+          predicate(
+            (error) =>
+                error is StateError &&
+                error.message ==
+                    'Initial Holdem state persistence is unavailable.',
+          ),
+        ),
+      );
+      expect(identityBridge.savedKeys, isEmpty);
+    },
+  );
+
+  test(
     'rejects an oversized recovery window before snapshot processing',
     () async {
       final source = _source(_OversizedRecoveryStore(), maxRecoveryEvents: 1);
@@ -365,6 +489,34 @@ void main() {
       );
     },
   );
+
+  test('fails closed when the initial checkpoint cannot be saved', () async {
+    final store = _FailingSnapshotStore();
+    final identityBridge = _IdentityBridge();
+    final source =
+        await AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(
+          store: store,
+          identityProvisioner: NativeLocalPeerIdentityProvisioner(
+            loader: NativeLocalPeerIdentityLoader(bridge: identityBridge),
+            writer: NativeLocalPeerIdentityWriter(bridge: identityBridge),
+            identityFactory: () => 'peer_local',
+          ),
+          routePolicy: _routePolicy(),
+          eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
+          emittedAtFactory: () => '2026-08-12T00:00:00Z',
+          eventHashFactory: computeCanonicalHash,
+          snapshotCoordinator: AppHoldemProductionSessionSnapshotCoordinator(
+            persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+              store: store,
+            ),
+          ),
+          initialSnapshotLoader: (_, {cancellation}) async => _typedSnapshot(),
+        );
+
+    await expectLater(source.load(_invite()), throwsStateError);
+    expect(store.saveSnapshotCalls, 1);
+    expect(store.loadWindow(_scope()).snapshot, isNull);
+  });
 
   test('rejects a non-positive recovery event limit', () {
     expect(
@@ -579,6 +731,27 @@ class _OversizedRecoveryStore implements RecoveryPersistenceStore {
       PersistedRecoveryWindow(events: <EventEnvelope>[_event(1), _event(2)]);
 }
 
+class _FailingSnapshotStore extends _OversizedRecoveryStore {
+  int saveSnapshotCalls = 0;
+
+  @override
+  RecoveryPersistenceResult saveSnapshot({
+    required RecoveryPersistenceScope scope,
+    required SnapshotEnvelope snapshot,
+  }) {
+    saveSnapshotCalls += 1;
+    return const RecoveryPersistenceResult(
+      isSuccess: false,
+      warnings: <String>['initial snapshot save failed'],
+    );
+  }
+
+  @override
+  PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
+    return const PersistedRecoveryWindow(events: <EventEnvelope>[]);
+  }
+}
+
 EventEnvelope _event(int eventSeq) {
   return EventEnvelope(
     eventId: 'evt_$eventSeq',
@@ -616,12 +789,16 @@ void _persist(RecoveryPersistenceStore store, HoldemStateSnapshot state) {
   expect(result.isSuccess, isTrue);
 }
 
-HoldemStateSnapshot _typedSnapshot() {
+HoldemStateSnapshot _typedSnapshot({
+  String tableId = 'table_001',
+  String sessionId = 'session_001',
+  String protocolVersion = '1.0.0',
+}) {
   return HoldemStateSnapshot(
     tableState: TableState.initial(
-      tableId: 'table_001',
-      sessionId: 'session_001',
-      protocolVersion: '1.0.0',
+      tableId: tableId,
+      sessionId: sessionId,
+      protocolVersion: protocolVersion,
     ),
     handState: const HoldemHandState(
       handId: 'hand_001',
@@ -636,9 +813,9 @@ HoldemStateSnapshot _typedSnapshot() {
       minimumRaiseAmount: 1,
     ),
     eventCursor: HoldemEventCursor(
-      protocolVersion: '1.0.0',
-      tableId: 'table_001',
-      sessionId: 'session_001',
+      protocolVersion: protocolVersion,
+      tableId: tableId,
+      sessionId: sessionId,
       nextEventSeq: 1,
       previousEventHash: genesisEventHash,
       actorRef: 'peer_local',

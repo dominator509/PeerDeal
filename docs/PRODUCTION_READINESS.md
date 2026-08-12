@@ -1769,6 +1769,19 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T164 follow-up closes the first-join typed-state provisioning gap in the
+existing app-owned production-session source. Mirrored persisted Hold'em
+sources and configuration factories now accept an optional product-owned
+initial snapshot loader. When no recovery snapshot exists, the source validates
+invite scope, zero event sequence, cursor sequence one, and the protocol
+genesis hash, then checkpoints the typed state through the existing snapshot
+coordinator before returning production input. Missing persistence, invalid
+initial state, and checkpoint failures fail closed before route exposure;
+focused mobile and desktop source/configuration suites cover the paths. Full
+repository gates and Android/Windows artifact validation pass. Durable
+database replacement, real product state selection, device/network validation,
+other-platform hosts, release signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

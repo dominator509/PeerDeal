@@ -1313,6 +1313,24 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## T164 First-Join Typed State Checkpoint
+
+- Mirrored persisted Hold'em sources and configuration factories now accept an
+  optional product-owned initial typed-state loader for an empty recovery
+  window.
+- Invite scope, event/cursor sequence, and protocol genesis invariants are
+  validated before local identity provisioning; the initial state is then
+  checkpointed through the existing snapshot coordinator before app input is
+  returned.
+- Focused mobile and desktop source/configuration tests cover first join,
+  invalid scope, missing persistence, and checkpoint failure. Full repository
+  gates, Android/Windows builds, and Windows native-host smoke pass.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## T163 Receipt Key-Ring Native Text Bound
 
 - Mirrored receipt key-ring loaders and writers now reuse the locked native

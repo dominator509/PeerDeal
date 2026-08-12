@@ -38,6 +38,7 @@ class AppHoldemProductionSessionConfiguration {
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
     AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
+    AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     _validateSourceLoadTimeout(sourceLoadTimeout);
@@ -54,6 +55,7 @@ class AppHoldemProductionSessionConfiguration {
           snapshotType: snapshotType,
           snapshotVersion: snapshotVersion,
           snapshotCoordinator: snapshotCoordinator,
+          initialSnapshotLoader: initialSnapshotLoader,
           maxRecoveryEvents: maxRecoveryEvents,
         );
     return AppHoldemProductionSessionConfiguration.fromSource(

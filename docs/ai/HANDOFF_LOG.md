@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T164 First-Join Typed State Checkpoint
+
+Summary:
+- Mirrored persisted Hold'em sources and configuration factories now accept an
+  optional product-owned initial typed snapshot loader for empty recovery.
+- Invite scope, sequence zero, cursor sequence one, and protocol genesis are
+  validated before identity provisioning; the initial state is checkpointed
+  through the existing snapshot coordinator before app input is returned.
+
+Files changed:
+- Mirrored app Hold'em persisted source/configuration/factory files and focused
+  source tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop source/configuration suites passed (30 tests
+  each), followed by full analyze, boundary, source-text, dependency-audit,
+  and serialized test gates.
+- Android debug APK and Windows debug artifacts built successfully; Windows
+  native-host smoke passed all bridge checkpoints.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T163 Receipt Key-Ring Native Text Bound
 
 Summary:

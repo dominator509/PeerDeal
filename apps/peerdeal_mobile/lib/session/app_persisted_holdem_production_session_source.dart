@@ -1,4 +1,5 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
@@ -8,6 +9,12 @@ import 'app_holdem_production_session_bootstrap.dart';
 import 'app_holdem_production_session_snapshot_coordinator.dart';
 import 'native_local_peer_identity_loader.dart';
 import 'native_local_peer_identity_provisioner.dart';
+
+typedef AppHoldemProductionSessionInitialSnapshotLoader =
+    Future<HoldemStateSnapshot> Function(
+      ResolvedInvite invite, {
+        Future<void>? cancellation,
+      });
 
 typedef AppHoldemProductionSessionInputFactory =
     AppHoldemProductionSessionInput Function(
@@ -142,6 +149,9 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
 /// The adapter owns snapshot decoding, persistence-scope checks, and
 /// deterministic recovery-suffix replay. The input factory remains responsible
 /// for local identity, route metadata, close policy, and platform dependencies.
+/// When no snapshot exists, an optional initial snapshot loader supplies
+/// product-owned first-join state; it is validated and checkpointed through the
+/// caller-owned snapshot coordinator before the input is returned.
 class AppPersistedHoldemProductionSessionSource
     implements
         AppHoldemProductionSessionSource,
@@ -160,6 +170,7 @@ class AppPersistedHoldemProductionSessionSource
     String snapshotType = 'HoldemStateSnapshot',
     String snapshotVersion = '1.0',
     AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
+    AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     routePolicy.validate();
@@ -192,6 +203,7 @@ class AppPersistedHoldemProductionSessionSource
       snapshotType: snapshotType,
       snapshotVersion: snapshotVersion,
       snapshotCoordinator: snapshotCoordinator,
+      initialSnapshotLoader: initialSnapshotLoader,
       maxRecoveryEvents: maxRecoveryEvents,
     );
   }
@@ -215,6 +227,7 @@ class AppPersistedHoldemProductionSessionSource
     String snapshotType = 'HoldemStateSnapshot',
     String snapshotVersion = '1.0',
     AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
+    AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     routePolicy.validate();
@@ -264,6 +277,7 @@ class AppPersistedHoldemProductionSessionSource
       snapshotType: snapshotType,
       snapshotVersion: snapshotVersion,
       snapshotCoordinator: snapshotCoordinator,
+      initialSnapshotLoader: initialSnapshotLoader,
       maxRecoveryEvents: maxRecoveryEvents,
     );
   }
@@ -281,7 +295,8 @@ class AppPersistedHoldemProductionSessionSource
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
     this.snapshotType = 'HoldemStateSnapshot',
     this.snapshotVersion = '1.0',
-    AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
+    this.snapshotCoordinator,
+    this.initialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
        _store = store,
@@ -305,6 +320,8 @@ class AppPersistedHoldemProductionSessionSource
   final HoldemEventReducer _eventReducer;
   final String snapshotType;
   final String snapshotVersion;
+  final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
+  final AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader;
   final int maxRecoveryEvents;
 
   @override
@@ -372,7 +389,34 @@ class AppPersistedHoldemProductionSessionSource
 
     final envelope = window.snapshot;
     if (envelope == null) {
-      throw StateError('No typed Holdem state snapshot is persisted.');
+      final snapshotCoordinator = this.snapshotCoordinator;
+      if (snapshotCoordinator == null) {
+        throw StateError('Initial Holdem state persistence is unavailable.');
+      }
+      final initialSnapshotLoader = this.initialSnapshotLoader;
+      if (initialSnapshotLoader == null) {
+        throw StateError('No typed Holdem state snapshot is persisted.');
+      }
+
+      final initialSnapshot = await initialSnapshotLoader(
+        invite,
+        cancellation: cancellation,
+      );
+      await _throwIfCancelled(cancellation);
+      _validateInitialSnapshot(initialSnapshot, invite);
+      await _ensureIdentity(cancellation: cancellation);
+      await _throwIfCancelled(cancellation);
+
+      final input = buildInput(initialSnapshot);
+      final persistenceResult = await snapshotCoordinator.persist(
+        tableState: initialSnapshot.tableState,
+        handState: initialSnapshot.handState,
+        eventCursor: initialSnapshot.eventCursor,
+      );
+      if (!persistenceResult.isSuccess) {
+        throw StateError('Initial Holdem state could not be persisted.');
+      }
+      return input;
     }
     if (envelope.snapshotType != snapshotType ||
         envelope.snapshotVersion != snapshotVersion) {
@@ -438,6 +482,23 @@ class AppPersistedHoldemProductionSessionSource
     final identityLoader = _identityLoader;
     if (identityLoader != null) {
       await identityLoader(cancellation: cancellation);
+    }
+  }
+
+  static void _validateInitialSnapshot(
+    HoldemStateSnapshot snapshot,
+    ResolvedInvite invite,
+  ) {
+    if (snapshot.tableState.tableId != invite.tableId ||
+        snapshot.tableState.sessionId != invite.sessionId ||
+        snapshot.tableState.protocolVersion != invite.protocolVersion ||
+        snapshot.eventCursor.tableId != invite.tableId ||
+        snapshot.eventCursor.sessionId != invite.sessionId ||
+        snapshot.eventCursor.protocolVersion != invite.protocolVersion ||
+        snapshot.tableState.eventSequence != 0 ||
+        snapshot.eventCursor.nextEventSeq != 1 ||
+        snapshot.eventCursor.previousEventHash != genesisEventHash) {
+      throw StateError('Initial Holdem state does not match the invite.');
     }
   }
 
