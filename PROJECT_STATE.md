@@ -1293,6 +1293,26 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## T155 Snapshot Checkpoint Queue Bound
+
+- Mirrored snapshot coordinators retain at most 64 failed checkpoints by
+  default, with a positive caller-owned pending-checkpoint limit.
+- A full retry queue fails closed with a stable warning and does not retain
+  another checkpoint, preventing unbounded memory growth during store outage.
+- Configuration factories pass the same pending-checkpoint limit into the
+  coordinator.
+- Focused mobile and desktop coordinator/configuration suites cover queue
+  capacity and invalid-limit failure.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds
+  passed; the smoke run passed all bridge checkpoints.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## T153 Snapshot Serialization Preflight Hardening
 
 - Mirrored snapshot writers now preflight canonical serialization of typed

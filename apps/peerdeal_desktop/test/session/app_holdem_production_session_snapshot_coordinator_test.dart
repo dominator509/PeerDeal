@@ -97,6 +97,49 @@ void main() {
     );
   });
 
+  test('bounds pending checkpoints when the store stays unavailable', () async {
+    final store = _ToggleSnapshotStore(failuresRemaining: 10);
+    final typed = _typedSnapshot();
+    final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+      persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+        store: store,
+      ),
+      maxPendingCheckpoints: 1,
+    );
+
+    final first = await coordinator.persist(
+      tableState: typed.tableState,
+      handState: typed.handState,
+      eventCursor: typed.eventCursor,
+    );
+    final second = await coordinator.persist(
+      tableState: typed.tableState,
+      handState: typed.handState,
+      eventCursor: typed.eventCursor,
+    );
+
+    expect(first.isSuccess, isFalse);
+    expect(second.isSuccess, isFalse);
+    expect(
+      second.warnings,
+      contains('Holdem snapshot checkpoint queue is full.'),
+    );
+    expect(coordinator.hasPending, isTrue);
+    expect(store.saveAttempts, 2);
+  });
+
+  test('rejects a non-positive pending checkpoint limit', () {
+    expect(
+      () => AppHoldemProductionSessionSnapshotCoordinator(
+        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+          store: _ToggleSnapshotStore(),
+        ),
+        maxPendingCheckpoints: 0,
+      ),
+      throwsArgumentError,
+    );
+  });
+
   test(
     'persists the accepted event suffix before its snapshot checkpoint',
     () async {

@@ -15,17 +15,24 @@ typedef AppHoldemProductionSnapshotIdFactory =
 /// cannot silently discard the last durable state. Event-log policy remains
 /// caller-owned by [AppHoldemProductionSessionPersistenceWriter].
 class AppHoldemProductionSessionSnapshotCoordinator {
+  static const int defaultMaxPendingCheckpoints = 64;
+
   AppHoldemProductionSessionSnapshotCoordinator({
     required AppHoldemProductionSessionPersistenceWriter persistenceWriter,
     AppHoldemProductionSnapshotIdFactory? snapshotIdFactory,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    int maxPendingCheckpoints = defaultMaxPendingCheckpoints,
   }) : _persistenceWriter = persistenceWriter,
        _snapshotIdFactory = snapshotIdFactory ?? _defaultSnapshotId,
-       _maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents);
+       _maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
+       _maxPendingCheckpoints = _validateMaxPendingCheckpoints(
+         maxPendingCheckpoints,
+       );
 
   final AppHoldemProductionSessionPersistenceWriter _persistenceWriter;
   final AppHoldemProductionSnapshotIdFactory _snapshotIdFactory;
   final int _maxRecoveryEvents;
+  final int _maxPendingCheckpoints;
   Future<void> _tail = Future<void>.value();
   final List<_SnapshotCheckpoint> _pending = <_SnapshotCheckpoint>[];
   RecoveryPersistenceResult? _lastResult;
@@ -129,7 +136,12 @@ class AppHoldemProductionSessionSnapshotCoordinator {
                 'Holdem snapshot checkpoint failed after event-log persistence.',
               ),
         );
-        if (!identical(pending, checkpoint)) _pending.add(checkpoint);
+        if (!identical(pending, checkpoint)) {
+          if (_pending.length >= _maxPendingCheckpoints) {
+            return _queueFullResult(pendingResult);
+          }
+          _pending.add(checkpoint);
+        }
         return pendingResult;
       }
       _pending.removeAt(0);
@@ -139,6 +151,9 @@ class AppHoldemProductionSessionSnapshotCoordinator {
     final result = _save(checkpoint);
     _lastResult = result;
     if (!result.isSuccess) {
+      if (_pending.length >= _maxPendingCheckpoints) {
+        return _queueFullResult(result);
+      }
       _pending.add(
         checkpoint.copyWith(
           eventsAlreadyPersisted: result.warnings.contains(
@@ -148,6 +163,19 @@ class AppHoldemProductionSessionSnapshotCoordinator {
       );
     }
     return result;
+  }
+
+  RecoveryPersistenceResult _queueFullResult(RecoveryPersistenceResult result) {
+    final bounded = RecoveryPersistenceResult(
+      isSuccess: false,
+      conflicts: result.conflicts,
+      warnings: <String>[
+        ...result.warnings,
+        'Holdem snapshot checkpoint queue is full.',
+      ],
+    );
+    _lastResult = bounded;
+    return bounded;
   }
 
   RecoveryPersistenceResult _save(_SnapshotCheckpoint checkpoint) {
@@ -182,6 +210,17 @@ int _validateMaxRecoveryEvents(int value) {
       value,
       'maxRecoveryEvents',
       'Recovery event limit must be positive.',
+    );
+  }
+  return value;
+}
+
+int _validateMaxPendingCheckpoints(int value) {
+  if (value <= 0) {
+    throw ArgumentError.value(
+      value,
+      'maxPendingCheckpoints',
+      'Pending snapshot checkpoint limit must be positive.',
     );
   }
   return value;

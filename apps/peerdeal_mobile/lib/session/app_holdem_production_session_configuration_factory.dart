@@ -65,6 +65,8 @@ class AppHoldemProductionSessionConfigurationFactory {
         const AppHoldemProductionSessionFactory(),
     Duration sourceLoadTimeout = const Duration(seconds: 5),
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    int maxPendingCheckpoints = AppHoldemProductionSessionSnapshotCoordinator
+        .defaultMaxPendingCheckpoints,
   }) : _recoveryStoreFactory = recoveryStoreFactory,
        _routePolicyFactory = routePolicyFactory,
        _contextRoutePolicyFactory = contextRoutePolicyFactory,
@@ -78,7 +80,8 @@ class AppHoldemProductionSessionConfigurationFactory {
        _snapshotVersion = snapshotVersion,
        _sessionFactory = sessionFactory,
        _sourceLoadTimeout = sourceLoadTimeout,
-       _maxRecoveryEvents = maxRecoveryEvents;
+       _maxRecoveryEvents = maxRecoveryEvents,
+       _maxPendingCheckpoints = maxPendingCheckpoints;
 
   final AppRecoveryPersistenceStoreFactory _recoveryStoreFactory;
   final AppHoldemProductionSessionRoutePolicyFactory _routePolicyFactory;
@@ -95,6 +98,7 @@ class AppHoldemProductionSessionConfigurationFactory {
   final AppHoldemProductionSessionFactory _sessionFactory;
   final Duration _sourceLoadTimeout;
   final int _maxRecoveryEvents;
+  final int _maxPendingCheckpoints;
 
   Future<AppHoldemProductionSessionConfigurationLoadResult> create({
     JoinFlowSessionContext? sessionContext,
@@ -124,6 +128,7 @@ class AppHoldemProductionSessionConfigurationFactory {
       final snapshotCoordinator = AppHoldemProductionSessionSnapshotCoordinator(
         persistenceWriter: persistenceWriter,
         maxRecoveryEvents: _maxRecoveryEvents,
+        maxPendingCheckpoints: _maxPendingCheckpoints,
       );
       final configuration =
           await AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(

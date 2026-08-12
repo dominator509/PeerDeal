@@ -140,6 +140,32 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T155 Snapshot Checkpoint Queue Bound
+
+Summary:
+- Mirrored snapshot coordinators now cap retained failed checkpoints at 64 by
+  default, with a positive caller-owned pending-checkpoint limit.
+- A full queue fails closed with a stable warning instead of retaining another
+  checkpoint during a persistent recovery-store outage.
+- Configuration factories pass the same pending-checkpoint limit into the
+  coordinator.
+
+Files changed:
+- Mirrored snapshot coordinators, configuration factories, and focused tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop coordinator and configuration suites passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds
+  passed; the smoke run passed all bridge checks.
+
+Risks:
+- Product state/database provisioning, device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  external boundaries.
+
 ### 2026-08-11 - Codex - T154 Snapshot Coordinator Recovery Bound
 
 Summary:

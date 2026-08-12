@@ -5,6 +5,7 @@ import 'package:peerdeal_mobile/join_flow/join_flow_models.dart';
 import 'package:peerdeal_mobile/recovery/app_recovery_persistence_store_factory.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_session_configuration_factory.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_session_configuration_loader_factory.dart';
+import 'package:peerdeal_mobile/session/app_holdem_production_session_snapshot_coordinator.dart';
 import 'package:peerdeal_mobile/session/app_persisted_holdem_production_session_source.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
@@ -62,6 +63,16 @@ void main() {
 
   test('fails closed for an invalid recovery event limit', () async {
     final result = await _create(maxRecoveryEvents: 0);
+
+    expect(result.isAvailable, isFalse);
+    expect(
+      result.warnings,
+      contains('Holdem production session configuration is unavailable.'),
+    );
+  });
+
+  test('fails closed for an invalid pending checkpoint limit', () async {
+    final result = await _create(maxPendingCheckpoints: 0);
 
     expect(result.isAvailable, isFalse);
     expect(
@@ -142,11 +153,14 @@ Future<AppHoldemProductionSessionConfigurationLoadResult> _create({
   RecoveryPersistenceRootDirectoryFactory? rootDirectoryFactory,
   AppHoldemProductionSessionRoutePolicyFactory? routePolicyFactory,
   int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+  int maxPendingCheckpoints = AppHoldemProductionSessionSnapshotCoordinator
+      .defaultMaxPendingCheckpoints,
 }) {
   return _configurationFactory(
     rootDirectoryFactory: rootDirectoryFactory,
     routePolicyFactory: routePolicyFactory,
     maxRecoveryEvents: maxRecoveryEvents,
+    maxPendingCheckpoints: maxPendingCheckpoints,
   ).create();
 }
 
@@ -156,6 +170,8 @@ AppHoldemProductionSessionConfigurationFactory _configurationFactory({
   AppHoldemProductionSessionContextRoutePolicyFactory?
   contextRoutePolicyFactory,
   int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+  int maxPendingCheckpoints = AppHoldemProductionSessionSnapshotCoordinator
+      .defaultMaxPendingCheckpoints,
 }) {
   return AppHoldemProductionSessionConfigurationFactory(
     recoveryStoreFactory: AppRecoveryPersistenceStoreFactory(
@@ -167,6 +183,7 @@ AppHoldemProductionSessionConfigurationFactory _configurationFactory({
     emittedAtFactory: () => '2026-08-11T00:00:00Z',
     eventHashFactory: (_) => 'hash',
     maxRecoveryEvents: maxRecoveryEvents,
+    maxPendingCheckpoints: maxPendingCheckpoints,
   );
 }
 

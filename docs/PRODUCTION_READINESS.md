@@ -1769,6 +1769,18 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T155 follow-up closes an unbounded recovery-failure queue. Mirrored snapshot
+coordinators now retain at most 64 failed checkpoints by default, accept a
+positive caller-owned pending-checkpoint limit, and fail closed with a stable
+queue-full warning when that limit is reached. Configuration factories pass the
+same limit into the coordinator. Focused mobile and desktop coordinator and
+configuration suites cover queue capacity and invalid-limit failure. Product
+state provisioning, durable database replacement, device/network validation,
+other-platform hosts, and release signing remain separate. Full repository
+analyze, boundary, source-text, dependency-audit, test, and diff gates pass.
+Android debug, Windows debug, and Windows native-host smoke builds and smoke
+validation pass.
+
 The T154 follow-up closes the snapshot coordinator recovery-bound mismatch.
 Mirrored snapshot coordinators now enforce the configured recovery-event limit
 before copying event suffixes or entering persistence, and configuration
