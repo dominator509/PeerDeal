@@ -140,6 +140,30 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T152 Snapshot ID Factory Failure Hardening
+
+Summary:
+- Mirrored production snapshot coordinators now invoke snapshot-ID factories
+  inside the serialized checkpoint queue.
+- Factory exceptions fail closed with a stable persistence warning, update the
+  last result, and do not create pending or durable state.
+
+Files changed:
+- Mirrored snapshot coordinators and focused coordinator regression tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop snapshot coordinator suites passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all checks.
+
+Risks:
+- Product state/database provisioning, device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  external boundaries.
+
 ### 2026-08-11 - Codex - T151 Transport Provisioning Cancellation Recheck
 
 Summary:

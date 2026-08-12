@@ -1280,6 +1280,20 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Focused mobile and desktop transport/route tests cover late receive
   suppression.
 
+## T152 Snapshot ID Factory Failure Hardening
+
+- Mirrored production snapshot coordinators now invoke caller-owned snapshot ID
+  factories inside the serialized checkpoint operation.
+- Factory exceptions return the stable `Holdem snapshot ID could not be
+  created.` persistence warning without store mutation or pending state.
+- Focused mobile and desktop snapshot coordinator suites cover the fail-closed
+  path.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## T151 Transport Provisioning Cancellation Recheck
 
 - Mirrored `AppTableSessionTransportProvisioner` implementations now perform a

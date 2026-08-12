@@ -1408,6 +1408,24 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T152 Snapshot ID Factory Failure Hardening
+
+- Mirrored production snapshot coordinators now generate snapshot IDs inside
+  the serialized checkpoint queue.
+- Caller snapshot-ID factory exceptions fail closed with a stable persistence
+  warning, update `lastResult`, and cannot create pending or durable state.
+- Focused mobile and desktop snapshot coordinator suites cover the failure.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all app-storage, capture, local-network,
+  transport, and secure-key checks.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T151 Transport Provisioning Cancellation Recheck
 
 - Mirrored transport provisioners now recheck their route cancellation signal

@@ -1769,6 +1769,17 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T152 follow-up closes the snapshot-ID factory failure boundary. Mirrored
+production snapshot coordinators now invoke caller-owned snapshot-ID factories
+inside the serialized checkpoint queue; factory exceptions fail closed with a
+stable persistence warning, update the last result, and do not create pending
+or durable state. Focused mobile and desktop snapshot coordinator suites cover
+the failure. Full repository analyze, boundary, source-text, dependency-audit,
+test, and diff gates pass. Android debug, Windows debug, and Windows
+native-host smoke builds and smoke validation pass. Product state provisioning,
+device/network validation, other-platform hosts, and release signing remain
+separate.
+
 The T151 follow-up closes the transport provisioning cancellation race.
 Mirrored transport provisioners now recheck route cancellation after native
 session creation and before returning an available session/source, so

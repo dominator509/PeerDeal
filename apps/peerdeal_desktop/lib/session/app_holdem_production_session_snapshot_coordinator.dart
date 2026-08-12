@@ -36,14 +36,30 @@ class AppHoldemProductionSessionSnapshotCoordinator {
     required HoldemEventCursor eventCursor,
     List<EventEnvelope> events = const <EventEnvelope>[],
   }) {
-    final checkpoint = _SnapshotCheckpoint(
-      snapshotId: _snapshotIdFactory(tableState, eventCursor),
-      tableState: tableState,
-      handState: handState,
-      eventCursor: eventCursor,
-      events: events,
-    );
-    return _enqueue(checkpoint);
+    final capturedEvents = List<EventEnvelope>.unmodifiable(events);
+    return _enqueueOperation(() {
+      final String snapshotId;
+      try {
+        snapshotId = _snapshotIdFactory(tableState, eventCursor);
+      } on Object {
+        const result = RecoveryPersistenceResult(
+          isSuccess: false,
+          warnings: <String>['Holdem snapshot ID could not be created.'],
+        );
+        _lastResult = result;
+        return result;
+      }
+
+      return _persistCheckpoint(
+        _SnapshotCheckpoint(
+          snapshotId: snapshotId,
+          tableState: tableState,
+          handState: handState,
+          eventCursor: eventCursor,
+          events: capturedEvents,
+        ),
+      );
+    });
   }
 
   Future<RecoveryPersistenceResult> retryPending() {
@@ -69,10 +85,6 @@ class AppHoldemProductionSessionSnapshotCoordinator {
       onError: (Object error, StackTrace stackTrace) {},
     );
     return operation;
-  }
-
-  Future<RecoveryPersistenceResult> _enqueue(_SnapshotCheckpoint checkpoint) {
-    return _enqueueOperation(() => _persistCheckpoint(checkpoint));
   }
 
   Future<RecoveryPersistenceResult> _enqueueOperation(

@@ -31,6 +31,32 @@ void main() {
   );
 
   test(
+    'fails closed when the snapshot ID factory throws',
+    () async {
+      final store = _ToggleSnapshotStore();
+      final typed = _typedSnapshot();
+      final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+          store: store,
+        ),
+        snapshotIdFactory: (_, _) => throw StateError('snapshot id failed'),
+      );
+
+      final result = await coordinator.persist(
+        tableState: typed.tableState,
+        handState: typed.handState,
+        eventCursor: typed.eventCursor,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warnings, ['Holdem snapshot ID could not be created.']);
+      expect(coordinator.lastResult, same(result));
+      expect(coordinator.hasPending, isFalse);
+      expect(store.saveAttempts, 0);
+    },
+  );
+
+  test(
     'persists the accepted event suffix before its snapshot checkpoint',
     () async {
       final store = _ToggleSnapshotStore();
