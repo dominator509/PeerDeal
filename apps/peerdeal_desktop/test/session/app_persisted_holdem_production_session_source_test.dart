@@ -312,6 +312,52 @@ void main() {
     expect(input.localSeat, 3);
   });
 
+  test(
+    'loads a context-aware initial snapshot for a new accepted session',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      final context = JoinFlowSessionContext(
+        invite: _invite(),
+        remotePeerId: 'peer_selected',
+        localSeat: 3,
+      );
+      JoinFlowSessionContext? capturedContext;
+      final initial = _typedSnapshot();
+      final source = _source(
+        store,
+        contextInputFactory: (context, snapshot) =>
+            AppHoldemProductionSessionInput(
+              initialTableState: snapshot.tableState,
+              initialHandState: snapshot.handState,
+              initialCursor: snapshot.eventCursor,
+              closeEventAdapter: _closeAdapter(snapshot.tableState),
+              path: '/holdem-live',
+              navigationLabel: 'Live Holdem',
+              peerId: context.remotePeerId,
+              localPeerId: 'peer_local',
+              localSeat: context.localSeat,
+            ),
+        snapshotCoordinator: AppHoldemProductionSessionSnapshotCoordinator(
+          persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+            store: store,
+          ),
+        ),
+        contextInitialSnapshotLoader: (sessionContext, {cancellation}) async {
+          capturedContext = sessionContext;
+          return initial;
+        },
+        initialSnapshotLoader: (_, {cancellation}) async =>
+            throw StateError('invite-only loader should not be used'),
+      );
+
+      final input = await source.loadForSessionContext(context);
+
+      expect(capturedContext, same(context));
+      expect(input.initialTableState.toJson(), initial.tableState.toJson());
+      expect(store.loadWindow(_scope()).snapshot, isNotNull);
+    },
+  );
+
   test('rejects an unsafe dynamic peer override before input construction', () {
     for (final peerId in <String>[
       ' peer_selected',
@@ -757,6 +803,8 @@ AppPersistedHoldemProductionSessionSource _source(
   Future<void> Function({Future<void>? cancellation})? identityLoader,
   AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
   AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
+  AppHoldemProductionSessionContextInitialSnapshotLoader?
+  contextInitialSnapshotLoader,
   int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
 }) {
   return AppPersistedHoldemProductionSessionSource(
@@ -781,6 +829,7 @@ AppPersistedHoldemProductionSessionSource _source(
     identityLoader: identityLoader,
     snapshotCoordinator: snapshotCoordinator,
     initialSnapshotLoader: initialSnapshotLoader,
+    contextInitialSnapshotLoader: contextInitialSnapshotLoader,
     maxRecoveryEvents: maxRecoveryEvents,
   );
 }

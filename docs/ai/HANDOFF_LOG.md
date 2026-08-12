@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T198 Context-Aware Initial Hold'em Snapshot Loading
+
+Summary:
+- Mirrored mobile and desktop persisted Hold'em sources now accept an optional
+  context-aware initial snapshot loader for new accepted sessions.
+- The loader receives the exact `JoinFlowSessionContext`; the existing
+  invite-only loader remains the compatibility fallback.
+- Configuration factories forward the seam without moving product state or
+  session policy into shared packages.
+
+Files changed:
+- Mirrored app session source and configuration plumbing/tests.
+- `docs/PRODUCTION_READINESS.md` and stable AI contract/handoff docs.
+
+Tests run:
+- Focused mobile and desktop persisted Hold'em source suites passed.
+
+Remaining:
+- Product-owned state/database wiring, device/network validation, other-platform
+  native hosts, release signing, and final UX remain separate.
+
+---
+
 ### 2026-08-12 - Codex - T197 Harden Android Transport Teardown Boundaries
 
 Summary:

@@ -2242,6 +2242,17 @@ in-flight send from publishing after engine teardown. The focused Android
 contract test and debug APK build pass; real-device transport behavior,
 cross-device reachability, and release signing remain separate.
 
+The T198 follow-up closes the remaining app-owned first-join state-context gap.
+Mirrored mobile and desktop persisted Hold'em sources and configuration
+factories now accept an optional context-aware initial snapshot loader. When a
+new accepted session has no recovery snapshot, that loader receives the exact
+`JoinFlowSessionContext` containing the validated remote peer and local seat;
+the existing invite-only loader remains the compatibility fallback. Snapshot
+scope validation, identity ordering, checkpoint persistence, and fail-closed
+errors are unchanged, with focused mobile and desktop source coverage. This
+does not select product state, provide a durable database, or prove device,
+network, signing, or other-platform readiness.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

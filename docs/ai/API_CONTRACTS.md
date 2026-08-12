@@ -1028,6 +1028,13 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - `AppPersistedHoldemProductionSessionSource` applies the context peer and
   seat through its app-owned input factory. Protocol schemas and native bridge
   contracts do not gain receipt, poker, or session policy fields.
+- When no typed snapshot is persisted, the optional
+  `AppHoldemProductionSessionContextInitialSnapshotLoader` receives the exact
+  accepted `JoinFlowSessionContext` before identity provisioning and route
+  input construction. If it is absent, the existing invite-only
+  `AppHoldemProductionSessionInitialSnapshotLoader` remains the fallback.
+  Either result is checked against invite scope and checkpointed through the
+  caller-owned snapshot coordinator before the session input is returned.
 
 Local identity provisioners share only non-cancellable `ensureIdentity()` calls.
 When a cancellable call overlaps a tracked call, its completion cannot clear the

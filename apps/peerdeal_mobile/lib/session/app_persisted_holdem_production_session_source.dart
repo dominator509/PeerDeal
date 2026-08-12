@@ -16,6 +16,12 @@ typedef AppHoldemProductionSessionInitialSnapshotLoader =
       Future<void>? cancellation,
     });
 
+typedef AppHoldemProductionSessionContextInitialSnapshotLoader =
+    Future<HoldemStateSnapshot> Function(
+      JoinFlowSessionContext sessionContext, {
+      Future<void>? cancellation,
+    });
+
 typedef AppHoldemProductionSessionInputFactory =
     AppHoldemProductionSessionInput Function(
       ResolvedInvite invite,
@@ -150,8 +156,10 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
 /// deterministic recovery-suffix replay. The input factory remains responsible
 /// for local identity, route metadata, close policy, and platform dependencies.
 /// When no snapshot exists, an optional initial snapshot loader supplies
-/// product-owned first-join state; it is validated and checkpointed through the
-/// caller-owned snapshot coordinator before the input is returned.
+/// product-owned first-join state; a context-aware loader can additionally
+/// receive the accepted peer and seat binding. The state is validated and
+/// checkpointed through the caller-owned snapshot coordinator before input is
+/// returned.
 class AppPersistedHoldemProductionSessionSource
     implements
         AppHoldemProductionSessionSource,
@@ -171,6 +179,8 @@ class AppPersistedHoldemProductionSessionSource
     String snapshotVersion = '1.0',
     AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
     AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
+    AppHoldemProductionSessionContextInitialSnapshotLoader?
+    contextInitialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     routePolicy.validate();
@@ -204,6 +214,7 @@ class AppPersistedHoldemProductionSessionSource
       snapshotVersion: snapshotVersion,
       snapshotCoordinator: snapshotCoordinator,
       initialSnapshotLoader: initialSnapshotLoader,
+      contextInitialSnapshotLoader: contextInitialSnapshotLoader,
       maxRecoveryEvents: maxRecoveryEvents,
     );
   }
@@ -228,6 +239,8 @@ class AppPersistedHoldemProductionSessionSource
     String snapshotVersion = '1.0',
     AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
     AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
+    AppHoldemProductionSessionContextInitialSnapshotLoader?
+    contextInitialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) async {
     routePolicy.validate();
@@ -278,6 +291,7 @@ class AppPersistedHoldemProductionSessionSource
       snapshotVersion: snapshotVersion,
       snapshotCoordinator: snapshotCoordinator,
       initialSnapshotLoader: initialSnapshotLoader,
+      contextInitialSnapshotLoader: contextInitialSnapshotLoader,
       maxRecoveryEvents: maxRecoveryEvents,
     );
   }
@@ -297,6 +311,7 @@ class AppPersistedHoldemProductionSessionSource
     this.snapshotVersion = '1.0',
     this.snapshotCoordinator,
     this.initialSnapshotLoader,
+    this.contextInitialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
        _store = store,
@@ -322,6 +337,8 @@ class AppPersistedHoldemProductionSessionSource
   final String snapshotVersion;
   final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
   final AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader;
+  final AppHoldemProductionSessionContextInitialSnapshotLoader?
+  contextInitialSnapshotLoader;
   final int maxRecoveryEvents;
 
   @override
@@ -403,10 +420,14 @@ class AppPersistedHoldemProductionSessionSource
         throw StateError('No typed Holdem state snapshot is persisted.');
       }
 
-      final initialSnapshot = await initialSnapshotLoader(
-        invite,
-        cancellation: cancellation,
-      );
+      final contextInitialSnapshotLoader = this.contextInitialSnapshotLoader;
+      final initialSnapshot =
+          sessionContext != null && contextInitialSnapshotLoader != null
+          ? await contextInitialSnapshotLoader(
+              sessionContext,
+              cancellation: cancellation,
+            )
+          : await initialSnapshotLoader(invite, cancellation: cancellation);
       await _throwIfCancelled(cancellation);
       _validateInitialSnapshot(initialSnapshot, invite);
       await _ensureIdentity(cancellation: cancellation);
