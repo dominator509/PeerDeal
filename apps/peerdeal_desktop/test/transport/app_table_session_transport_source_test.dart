@@ -124,6 +124,39 @@ void main() {
     );
   });
 
+  test('propagates source disposal into a cancellable drain', () async {
+    final drainResult = Completer<NativeTransportFrameDrainResult>();
+    final cancellationObserved = Completer<void>();
+    final source = AppTableSessionTransportSource(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      drain: () => drainResult.future,
+      drainWithCancellation: (cancellation) {
+        cancellation.then<void>((_) {
+          if (!cancellationObserved.isCompleted) {
+            cancellationObserved.complete();
+          }
+        });
+        return drainResult.future;
+      },
+    );
+
+    final poll = source.pollNow();
+    source.dispose();
+
+    await cancellationObserved.future;
+    final result = await poll;
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport source poll cancelled.']);
+
+    drainResult.complete(
+      const NativeTransportFrameDrainResult(
+        available: true,
+        results: <TransportFrameReceiveResult>[],
+      ),
+    );
+  });
+
   test('rejects invalid scope and poll interval before draining', () async {
     var drainCalls = 0;
     Future<NativeTransportFrameDrainResult> drain() async {

@@ -140,6 +140,32 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T150 Source-Owned Drain Disposal Cancellation
+
+Summary:
+- Mirrored transport sources expose an additive cancellable drain callback and
+  complete its signal on disposal or external route cancellation.
+- Native session factories use the seam so standalone source mounts cannot leave
+  in-flight native receives active after disposal.
+
+Files changed:
+- Mirrored transport sources, native session factories, and source/drain
+  regression tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop source, drain, and session-factory suites passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all checks.
+
+Risks:
+- Already-dispatched native host work remains host-owned; product state/database
+  provisioning, device/runtime validation, other-platform hosts,
+  cross-device networking, and release signing remain external boundaries.
+
 ### 2026-08-11 - Codex - T148 Inbound Checkpoint Lifecycle Invalidation
 
 Summary:

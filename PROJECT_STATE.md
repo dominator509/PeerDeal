@@ -1280,6 +1280,15 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Focused mobile and desktop transport/route tests cover late receive
   suppression.
 
+## T150 Source-Owned Drain Disposal Cancellation
+
+- Mirrored transport sources expose an additive cancellable drain callback and
+  complete its signal on disposal or external route cancellation.
+- Native session factories use the callback so standalone source mounts cannot
+  leave in-flight native receives active after disposal.
+- Focused mobile and desktop source, drain, and session-factory tests cover
+  disposal propagation.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

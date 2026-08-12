@@ -1769,6 +1769,17 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T150 follow-up closes the standalone source lifecycle gap. Mirrored
+transport sources now expose an additive cancellable drain callback and
+complete its signal on source disposal or external route cancellation; native
+session factories use it to prevent disposed source mounts from leaving
+in-flight native receives active. Focused mobile and desktop source,
+transport-drain, and session-factory suites cover disposal propagation. Full
+repository analyze, boundary, source-text, dependency-audit, test, and diff
+gates pass. Android debug, Windows debug, and Windows native-host smoke builds
+and smoke validation pass. Product state provisioning, device/network
+validation, other-platform hosts, and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

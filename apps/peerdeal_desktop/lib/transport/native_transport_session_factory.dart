@@ -205,6 +205,11 @@ class NativeTransportSession {
         peerId: peerId,
         cancellation: cancellation ?? this.cancellation,
       ),
+      drainWithCancellation: (sourceCancellation) => drain.drain(
+        sessionId: sessionId,
+        peerId: peerId,
+        cancellation: sourceCancellation,
+      ),
       sessionId: sessionId,
       peerId: peerId,
       pollInterval: pollInterval,

@@ -11,6 +11,8 @@ const _pollCancellationWarning = 'Native transport source poll cancelled.';
 
 typedef NativeTransportFrameDrainCallback =
     Future<NativeTransportFrameDrainResult> Function();
+typedef NativeTransportCancellableFrameDrainCallback =
+    Future<NativeTransportFrameDrainResult> Function(Future<void> cancellation);
 
 typedef NativeTransportSourceTimerFactory =
     Timer Function(Duration interval, void Function(Timer timer) callback);
@@ -74,25 +76,39 @@ class AppTableSessionTransportSourceStartResult {
 class AppTableSessionTransportSource {
   AppTableSessionTransportSource({
     required NativeTransportFrameDrainCallback drain,
+    NativeTransportCancellableFrameDrainCallback? drainWithCancellation,
     required String sessionId,
     required String peerId,
     Duration pollInterval = _defaultPollInterval,
     NativeTransportSourceTimerFactory? timerFactory,
     Future<void>? cancellation,
   }) : _drain = drain,
+       _drainWithCancellation = drainWithCancellation,
        _sessionId = sessionId,
        _peerId = peerId,
        _pollInterval = pollInterval,
        _timerFactory = timerFactory ?? Timer.periodic,
-       _cancellation = cancellation;
+       _cancellation = cancellation {
+    final externalCancellation = _cancellation;
+    if (externalCancellation != null) {
+      unawaited(
+        externalCancellation.then<void>(
+          (_) => _cancelDrain(),
+          onError: (Object _, StackTrace _) => _cancelDrain(),
+        ),
+      );
+    }
+  }
 
   final NativeTransportFrameDrainCallback _drain;
+  final NativeTransportCancellableFrameDrainCallback? _drainWithCancellation;
   final String _sessionId;
   final String _peerId;
   final Duration _pollInterval;
   final NativeTransportSourceTimerFactory _timerFactory;
   final Future<void>? _cancellation;
   final Completer<void> _disposeCancellation = Completer<void>();
+  final Completer<void> _drainCancellation = Completer<void>();
 
   Timer? _timer;
   Future<AppTableSessionTransportPollResult>? _pollInFlight;
@@ -153,6 +169,7 @@ class AppTableSessionTransportSource {
     if (!_disposeCancellation.isCompleted) {
       _disposeCancellation.complete();
     }
+    _cancelDrain();
   }
 
   Future<AppTableSessionTransportPollResult> pollNow() async {
@@ -275,9 +292,19 @@ class AppTableSessionTransportSource {
 
   Future<NativeTransportFrameDrainResult?> _loadDrainResult() async {
     try {
+      final drainWithCancellation = _drainWithCancellation;
+      if (drainWithCancellation != null) {
+        return await drainWithCancellation(_drainCancellation.future);
+      }
       return await _drain();
     } on Object {
       return null;
+    }
+  }
+
+  void _cancelDrain() {
+    if (!_drainCancellation.isCompleted) {
+      _drainCancellation.complete();
     }
   }
 

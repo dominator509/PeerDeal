@@ -37,7 +37,8 @@ composition, T61 single-flight local identity provisioning, T62 post-save
 identity verification, and T63 typed join-to-session context handoff
 and T75 Android/Windows local-network host registration, T147 production
 table lifecycle invalidation, T148 inbound checkpoint lifecycle invalidation,
-and T149 cancelled native receive suppression
+and T149 cancelled native receive suppression, and T150 source-owned drain
+disposal cancellation
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1401,6 +1402,25 @@ Remaining:
 - Full analyze, boundary-check, source-text, test, dependency-audit, Android
   debug build, Windows debug build, Windows native-host smoke, and diff-check
   gates pass.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
+## Recent T150 Source-Owned Drain Disposal Cancellation
+
+- Mirrored transport sources now expose an additive cancellable drain seam and
+  complete that signal on source disposal or external route cancellation.
+- Native transport session factories use the seam so standalone source mounts
+  cannot leave an in-flight native receive active after disposal.
+- Focused mobile and desktop source, drain, and session-factory suites cover
+  source-owned cancellation.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all app-storage, capture, local-network,
+  transport, and secure-key checks.
 
 Remaining:
 - Product state/database provisioning, Android device/runtime validation,
