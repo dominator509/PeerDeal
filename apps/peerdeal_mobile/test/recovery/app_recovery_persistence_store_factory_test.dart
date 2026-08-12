@@ -8,6 +8,17 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes recovery warning diagnostics', () {
+    final warnings = <String>['warning_1'];
+    final result = AppRecoveryPersistenceStoreLoadResult.unavailable(
+      warnings: warnings,
+    );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   const scope = RecoveryPersistenceScope(
     tableId: 'table_1',
     sessionId: 'session_1',

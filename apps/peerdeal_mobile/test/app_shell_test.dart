@@ -1576,7 +1576,7 @@ void main() {
             bootstrapCoordinator: FakeBootstrapCoordinator(),
           ).create,
           holdemProductionSessionConfigurationLoader: (_) async =>
-              const AppHoldemProductionSessionConfigurationLoadResult.unavailable(
+              AppHoldemProductionSessionConfigurationLoadResult.unavailable(
                 warnings: <String>['secret loader detail'],
               ),
         ),
@@ -2447,7 +2447,7 @@ class _UnsafeRecoveryFactory extends AppRecoveryPersistenceStoreFactory {
 
   @override
   AppRecoveryPersistenceStoreLoadResult create() {
-    return const AppRecoveryPersistenceStoreLoadResult.unavailable(
+    return AppRecoveryPersistenceStoreLoadResult.unavailable(
       warnings: <String>[
         'token recovery-secret',
         'safe warning',

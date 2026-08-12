@@ -13,6 +13,18 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes configuration warning diagnostics', () {
+    final warnings = <String>['warning_1'];
+    final result =
+        AppHoldemProductionSessionConfigurationLoadResult.unavailable(
+          warnings: warnings,
+        );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('fails closed when the recovery root is unavailable', () async {
     final result = await _create(rootDirectoryFactory: () => Directory(' '));
 

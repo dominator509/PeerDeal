@@ -38,8 +38,8 @@ identity verification, and T63 typed join-to-session context handoff
 and T75 Android/Windows local-network host registration, T147 production
 table lifecycle invalidation, T148 inbound checkpoint lifecycle invalidation,
 and T149 cancelled native receive suppression, T150 source-owned drain
-disposal cancellation, T168 exact inbound-event checkpoint identity, and T169
-immutable app-session diagnostics
+disposal cancellation, T168 exact inbound-event checkpoint identity, T169
+immutable app-session diagnostics, and T170 immutable startup diagnostics
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1448,6 +1448,20 @@ Remaining:
 Remaining:
 - Product state/database provisioning, Android device/runtime validation,
   cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
+## Recent T170 Immutable Startup Diagnostics
+
+- Mirrored recovery-store and production-session configuration load results now
+  defensively copy and freeze warning lists.
+- Caller-owned startup diagnostics can no longer mutate the result consumed by
+  app route/session orchestration.
+- Focused mobile and desktop configuration, recovery, and app-shell suites
+  cover source-list isolation and immutable result diagnostics.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
   separate.
 
 ## Recent T169 Immutable App-Session Diagnostics

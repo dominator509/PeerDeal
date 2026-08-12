@@ -1829,6 +1829,15 @@ mobile and desktop runtime suites cover both properties. Durable database
 replacement, real product state selection, device/network validation,
 other-platform hosts, release signing, and final UX remain separate.
 
+The T170 follow-up closes the app startup/session diagnostic ownership gap.
+Mirrored recovery-store and production-session configuration load-result
+constructors now defensively copy and freeze warning lists, preventing
+caller-owned diagnostics from changing after route/session orchestration has
+received them. Focused mobile and desktop configuration, recovery, and app-shell
+suites cover source-list isolation and mutation rejection. Durable database
+replacement, real product state selection, device/network validation,
+other-platform hosts, release signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

@@ -8,14 +8,15 @@ typedef RecoveryPersistenceRootDirectoryFactory = Directory Function();
 const peerDealRecoveryRootEnvironmentVariable = 'PEERDEAL_RECOVERY_ROOT';
 
 class AppRecoveryPersistenceStoreLoadResult {
-  const AppRecoveryPersistenceStoreLoadResult.available({
+  AppRecoveryPersistenceStoreLoadResult.available({
     required this.store,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
-  const AppRecoveryPersistenceStoreLoadResult.unavailable({
-    required this.warnings,
-  }) : store = null;
+  AppRecoveryPersistenceStoreLoadResult.unavailable({
+    required List<String> warnings,
+  }) : store = null,
+       warnings = List<String>.unmodifiable(warnings);
 
   final RecoveryPersistenceStore? store;
   final List<String> warnings;
@@ -83,13 +84,13 @@ class AppRecoveryPersistenceStoreFactory {
     try {
       rootDirectory = _rootDirectoryFactory();
     } on Object {
-      return const AppRecoveryPersistenceStoreLoadResult.unavailable(
+      return AppRecoveryPersistenceStoreLoadResult.unavailable(
         warnings: <String>['Recovery persistence root is unavailable.'],
       );
     }
 
     if (!_isValidRootPath(rootDirectory.path)) {
-      return const AppRecoveryPersistenceStoreLoadResult.unavailable(
+      return AppRecoveryPersistenceStoreLoadResult.unavailable(
         warnings: <String>['Recovery persistence root is invalid.'],
       );
     }

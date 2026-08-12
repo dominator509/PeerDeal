@@ -23,18 +23,19 @@ typedef AppHoldemProductionSessionContextRoutePolicyFactory =
     );
 
 class AppHoldemProductionSessionConfigurationLoadResult {
-  const AppHoldemProductionSessionConfigurationLoadResult.available({
+  AppHoldemProductionSessionConfigurationLoadResult.available({
     required this.configuration,
     required this.persistenceWriter,
     required this.snapshotWriter,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
-  const AppHoldemProductionSessionConfigurationLoadResult.unavailable({
-    required this.warnings,
+  AppHoldemProductionSessionConfigurationLoadResult.unavailable({
+    required List<String> warnings,
   }) : configuration = null,
        persistenceWriter = null,
-       snapshotWriter = null;
+       snapshotWriter = null,
+       warnings = List<String>.unmodifiable(warnings);
 
   final AppHoldemProductionSessionConfiguration? configuration;
   final AppHoldemProductionSessionPersistenceWriter? persistenceWriter;
