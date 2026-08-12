@@ -392,6 +392,51 @@ void main() {
   );
 
   test(
+    'rejects orphaned recovery events before initial-state provisioning',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      final append = store.appendEvents(
+        scope: _scope(),
+        events: <EventEnvelope>[_event(1)],
+      );
+      expect(append.isSuccess, isTrue);
+
+      var identityCalls = 0;
+      var initialSnapshotLoaderCalls = 0;
+      final source = _source(
+        store,
+        identityLoader: ({cancellation}) async => identityCalls += 1,
+        snapshotCoordinator: AppHoldemProductionSessionSnapshotCoordinator(
+          persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+            store: store,
+          ),
+        ),
+        initialSnapshotLoader: (_, {cancellation}) async {
+          initialSnapshotLoaderCalls += 1;
+          return _typedSnapshot();
+        },
+      );
+
+      await expectLater(
+        source.load(_invite()),
+        throwsA(
+          predicate(
+            (error) =>
+                error is StateError &&
+                error.message ==
+                    'Persisted Holdem recovery events have no snapshot anchor.',
+          ),
+        ),
+      );
+
+      expect(identityCalls, 0);
+      expect(initialSnapshotLoaderCalls, 0);
+      expect(store.loadWindow(_scope()).snapshot, isNull);
+      expect(store.loadWindow(_scope()).events, hasLength(1));
+    },
+  );
+
+  test(
     'rejects an invalid initial snapshot before identity provisioning',
     () async {
       final store = InMemoryRecoveryPersistenceStore();
@@ -684,6 +729,9 @@ AppPersistedHoldemProductionSessionSource _source(
   RecoveryPersistenceStore store, {
   AppHoldemProductionSessionInputFactory? inputFactory,
   AppHoldemProductionSessionContextInputFactory? contextInputFactory,
+  Future<void> Function({Future<void>? cancellation})? identityLoader,
+  AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator,
+  AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
   int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
 }) {
   return AppPersistedHoldemProductionSessionSource(
@@ -705,6 +753,9 @@ AppPersistedHoldemProductionSessionSource _source(
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-10T00:00:00Z',
     eventHashFactory: computeCanonicalHash,
+    identityLoader: identityLoader,
+    snapshotCoordinator: snapshotCoordinator,
+    initialSnapshotLoader: initialSnapshotLoader,
     maxRecoveryEvents: maxRecoveryEvents,
   );
 }

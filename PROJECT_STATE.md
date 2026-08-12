@@ -1313,6 +1313,20 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## T165 Orphaned Recovery Event Guard
+
+- Mirrored persisted Hold'em sources now fail closed when durable recovery
+  events exist without a typed snapshot anchor.
+- Initial product-state loading, local identity provisioning, and checkpoint
+  work are skipped; the orphaned suffix remains unchanged for operator or
+  product recovery handling.
+- Focused mobile and desktop source suites cover the integrity boundary.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## T164 First-Join Typed State Checkpoint
 
 - Mirrored persisted Hold'em sources and configuration factories now accept an

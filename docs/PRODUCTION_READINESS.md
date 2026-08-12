@@ -1782,6 +1782,16 @@ repository gates and Android/Windows artifact validation pass. Durable
 database replacement, real product state selection, device/network validation,
 other-platform hosts, release signing, and final UX remain separate.
 
+The T165 follow-up closes the orphaned recovery-event integrity gap in the
+app-owned persisted Hold'em source. A recovery window containing durable event
+suffix data without a typed snapshot anchor now fails closed before invoking
+the product initial-state loader, local identity provisioning, or checkpoint
+coordinator; initial product state cannot mask an unanchored event log.
+Focused mobile and desktop source suites cover the rejection and prove the
+existing suffix remains unchanged. Durable database replacement, real product
+state selection, device/network validation, other-platform hosts, release
+signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

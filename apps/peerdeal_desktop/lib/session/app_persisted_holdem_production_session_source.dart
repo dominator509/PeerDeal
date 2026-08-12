@@ -389,6 +389,11 @@ class AppPersistedHoldemProductionSessionSource
 
     final envelope = window.snapshot;
     if (envelope == null) {
+      if (window.events.isNotEmpty) {
+        throw StateError(
+          'Persisted Holdem recovery events have no snapshot anchor.',
+        );
+      }
       final snapshotCoordinator = this.snapshotCoordinator;
       if (snapshotCoordinator == null) {
         throw StateError('Initial Holdem state persistence is unavailable.');

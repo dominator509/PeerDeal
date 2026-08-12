@@ -1449,6 +1449,21 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T165 Orphaned Recovery Event Guard
+
+- Mirrored persisted Hold'em sources now reject a recovery event suffix when
+  no typed snapshot anchor exists; new initial state cannot mask durable
+  orphaned events.
+- The guard runs before the product initial-state loader, local identity
+  provisioning, or snapshot checkpoint coordinator.
+- Focused mobile and desktop suites prove the suffix remains unchanged and no
+  provisioning path is called.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## Recent T164 First-Join Typed State Checkpoint
 
 - Mirrored persisted Hold'em sources and configuration factories now accept an
