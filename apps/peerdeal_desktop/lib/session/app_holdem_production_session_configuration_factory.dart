@@ -1,6 +1,7 @@
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
+import '../join_flow/join_flow_models.dart';
 import '../recovery/app_recovery_persistence_store_factory.dart';
 import 'app_holdem_production_session_configuration.dart';
 import 'app_holdem_production_session_factory.dart';
@@ -13,6 +14,12 @@ import 'native_local_peer_identity_provisioner.dart';
 typedef AppHoldemProductionSessionRoutePolicyFactory =
     AppPersistedHoldemProductionSessionRoutePolicy Function(
       RecoveryPersistenceStore store,
+    );
+
+typedef AppHoldemProductionSessionContextRoutePolicyFactory =
+    AppPersistedHoldemProductionSessionRoutePolicy Function(
+      RecoveryPersistenceStore store,
+      JoinFlowSessionContext sessionContext,
     );
 
 class AppHoldemProductionSessionConfigurationLoadResult {
@@ -43,6 +50,8 @@ class AppHoldemProductionSessionConfigurationFactory {
   const AppHoldemProductionSessionConfigurationFactory({
     required AppRecoveryPersistenceStoreFactory recoveryStoreFactory,
     required AppHoldemProductionSessionRoutePolicyFactory routePolicyFactory,
+    AppHoldemProductionSessionContextRoutePolicyFactory?
+    contextRoutePolicyFactory,
     required HoldemEventIdFactory eventIdFactory,
     required HoldemEventTimestampFactory emittedAtFactory,
     required HoldemEventHashFactory eventHashFactory,
@@ -58,6 +67,7 @@ class AppHoldemProductionSessionConfigurationFactory {
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : _recoveryStoreFactory = recoveryStoreFactory,
        _routePolicyFactory = routePolicyFactory,
+       _contextRoutePolicyFactory = contextRoutePolicyFactory,
        _eventIdFactory = eventIdFactory,
        _emittedAtFactory = emittedAtFactory,
        _eventHashFactory = eventHashFactory,
@@ -72,6 +82,8 @@ class AppHoldemProductionSessionConfigurationFactory {
 
   final AppRecoveryPersistenceStoreFactory _recoveryStoreFactory;
   final AppHoldemProductionSessionRoutePolicyFactory _routePolicyFactory;
+  final AppHoldemProductionSessionContextRoutePolicyFactory?
+  _contextRoutePolicyFactory;
   final HoldemEventIdFactory _eventIdFactory;
   final HoldemEventTimestampFactory _emittedAtFactory;
   final HoldemEventHashFactory _eventHashFactory;
@@ -84,7 +96,9 @@ class AppHoldemProductionSessionConfigurationFactory {
   final Duration _sourceLoadTimeout;
   final int _maxRecoveryEvents;
 
-  Future<AppHoldemProductionSessionConfigurationLoadResult> create() async {
+  Future<AppHoldemProductionSessionConfigurationLoadResult> create({
+    JoinFlowSessionContext? sessionContext,
+  }) async {
     final persistence = _recoveryStoreFactory.create();
     final store = persistence.store;
     if (store == null) {
@@ -94,7 +108,10 @@ class AppHoldemProductionSessionConfigurationFactory {
     }
 
     try {
-      final routePolicy = _routePolicyFactory(store);
+      final routePolicy = sessionContext == null
+          ? _routePolicyFactory(store)
+          : (_contextRoutePolicyFactory?.call(store, sessionContext) ??
+                _routePolicyFactory(store));
       routePolicy.validate();
       final snapshotWriter = AppHoldemProductionSessionSnapshotWriter(
         store: store,

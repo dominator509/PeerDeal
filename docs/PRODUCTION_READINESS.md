@@ -1716,6 +1716,15 @@ This closes host boundary validation only; it does not claim production database
 persistence, device/runtime reachability, other-platform hosts, or release
 signing.
 
+The T144 follow-up closes the app-shell context propagation mismatch. Mirrored
+`AppHoldemProductionSessionConfigurationFactory` instances now accept an
+optional `JoinFlowSessionContext` and context-aware route-policy factory, and
+the generated loader forwards the exact accepted context before route/source
+composition. Existing no-context factory callers retain their original policy
+path. Focused mobile and desktop configuration suites cover the loader handoff;
+this enables product-owned context policy but does not supply product state,
+database persistence, device validation, other-platform hosts, or signing.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

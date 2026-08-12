@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_desktop/join_flow/join_flow_models.dart';
 import 'package:peerdeal_desktop/recovery/app_recovery_persistence_store_factory.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_configuration_factory.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_configuration_loader_factory.dart';
 import 'package:peerdeal_desktop/session/app_persisted_holdem_production_session_source.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
@@ -33,6 +35,29 @@ void main() {
     expect(result.snapshotWriter, isNotNull);
     expect(capturedStore, isA<JsonFileRecoveryPersistenceStore>());
     expect(result.configuration!.routeRegistration.path, '/holdem-live');
+  });
+
+  test('forwards accepted join context to the configuration loader', () async {
+    JoinFlowSessionContext? capturedContext;
+    final context = _sessionContext();
+    final loader = AppHoldemProductionSessionConfigurationLoaderFactory(
+      configurationFactory: _configurationFactory(
+        contextRoutePolicyFactory: (_, sessionContext) {
+          capturedContext = sessionContext;
+          return _routePolicy(
+            path: '/holdem-seat-${sessionContext.localSeat}',
+            remotePeerId: sessionContext.remotePeerId,
+            localSeat: sessionContext.localSeat,
+          );
+        },
+      ),
+    );
+
+    final result = await loader.loader(context);
+
+    expect(result.isAvailable, isTrue);
+    expect(capturedContext, same(context));
+    expect(result.configuration!.routeRegistration.path, '/holdem-seat-2');
   });
 
   test('fails closed for an invalid recovery event limit', () async {
@@ -106,28 +131,61 @@ Future<AppHoldemProductionSessionConfigurationLoadResult> _create({
   AppHoldemProductionSessionRoutePolicyFactory? routePolicyFactory,
   int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
 }) {
-  final factory = AppHoldemProductionSessionConfigurationFactory(
+  return _configurationFactory(
+    rootDirectoryFactory: rootDirectoryFactory,
+    routePolicyFactory: routePolicyFactory,
+    maxRecoveryEvents: maxRecoveryEvents,
+  ).create();
+}
+
+AppHoldemProductionSessionConfigurationFactory _configurationFactory({
+  RecoveryPersistenceRootDirectoryFactory? rootDirectoryFactory,
+  AppHoldemProductionSessionRoutePolicyFactory? routePolicyFactory,
+  AppHoldemProductionSessionContextRoutePolicyFactory?
+  contextRoutePolicyFactory,
+  int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+}) {
+  return AppHoldemProductionSessionConfigurationFactory(
     recoveryStoreFactory: AppRecoveryPersistenceStoreFactory(
       rootDirectoryFactory: rootDirectoryFactory ?? () => Directory.systemTemp,
     ),
     routePolicyFactory: routePolicyFactory ?? (_) => _routePolicy(),
+    contextRoutePolicyFactory: contextRoutePolicyFactory,
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-11T00:00:00Z',
     eventHashFactory: (_) => 'hash',
     maxRecoveryEvents: maxRecoveryEvents,
   );
-  return factory.create();
 }
 
-AppPersistedHoldemProductionSessionRoutePolicy _routePolicy() {
+AppPersistedHoldemProductionSessionRoutePolicy _routePolicy({
+  String path = '/holdem-live',
+  String remotePeerId = 'peer_remote',
+  int localSeat = 1,
+}) {
   return AppPersistedHoldemProductionSessionRoutePolicy(
-    path: '/holdem-live',
+    path: path,
     navigationLabel: 'Live Holdem',
-    remotePeerId: 'peer_remote',
-    localSeat: 1,
+    remotePeerId: remotePeerId,
+    localSeat: localSeat,
     closeEventAdapterFactory: (_) => throw StateError('unused'),
   );
 }
+
+JoinFlowSessionContext _sessionContext() => JoinFlowSessionContext(
+  invite: const ResolvedInvite(
+    inviteId: 'invite_001',
+    tableId: 'table_001',
+    sessionId: 'session_001',
+    modeType: 'open_table',
+    protocolVersion: '1.0.0',
+    requiresReceiptAck: false,
+    requiresRetentionAck: false,
+    requiresCaptureAck: false,
+  ),
+  remotePeerId: 'peer_context_remote',
+  localSeat: 2,
+);
 
 HoldemHandState _handState() => const HoldemHandState(
   handId: 'hand_001',

@@ -1225,6 +1225,15 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Production database persistence, device/runtime reachability, other-platform
   hosts, and release signing remain open.
 
+## T144 Production Join-Context Propagation
+
+- Mirrored configuration factories now accept an optional accepted join context
+  and context-aware route-policy factory.
+- The generated loader forwards the exact `JoinFlowSessionContext` before route
+  and source composition, with the prior no-context policy path preserved.
+- Focused mobile and desktop configuration suites pass; product state/database
+  provisioning and platform/runtime validation remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

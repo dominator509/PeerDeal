@@ -491,11 +491,13 @@ semantics into a native bridge.
 `AppHoldemProductionSessionConfigurationFactory` is the mirrored app-edge
 wrapper around that persisted configuration. Its `create()` method returns an
 explicit available/unavailable result, carries recovery-root warnings, builds a
-store-aware caller-owned route policy, forwards deterministic event/replay and
-session dependencies, and fails closed on invalid policy or composition
-errors. The factory does not create product snapshots, select peers/seats, or
-own retention policy. Native identity provisioning remains lazy until a valid
-invite-scoped snapshot load reaches the source.
+store-aware caller-owned route policy, and may receive the accepted
+`JoinFlowSessionContext` so an optional context-aware policy factory can select
+route metadata before source composition. It forwards deterministic
+event/replay and session dependencies and fails closed on invalid policy or
+composition errors. The factory does not create product snapshots, select
+peers/seats, or own retention policy. Native identity provisioning remains lazy
+until a valid invite-scoped snapshot load reaches the source.
 
 Both app shells expose an optional
 `AppHoldemProductionSessionConfigurationLoader` callback for the successful
@@ -516,10 +518,11 @@ The mirrored app runtimes also accept an optional
 `AppHoldemProductionSessionConfigurationFactory`. If no explicit
 `AppHoldemProductionSessionConfigurationLoader` is supplied, the shell creates
 one stable `AppHoldemProductionSessionConfigurationLoaderFactory` adapter and
-invokes `create()` for the accepted typed handoff. The accepted
-`JoinFlowSessionContext` remains the bootstrap route argument, and explicit
-loaders, handlers, and prebuilt routes retain precedence. The adapter does not
-select product state, route policy, persistence, or a database.
+invokes `create(sessionContext: acceptedContext)` for the accepted typed
+handoff. The accepted `JoinFlowSessionContext` remains the bootstrap route
+argument and is also available to the optional context-aware route-policy
+factory; explicit loaders, handlers, and prebuilt routes retain precedence. The
+adapter does not select product state, persistence, or a database.
 
 When the configuration factory creates the route, it shares one typed snapshot
 writer with its event-plus-snapshot persistence writer and serialized snapshot

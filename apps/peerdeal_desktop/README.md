@@ -111,6 +111,11 @@ caller that owns an accepted event batch and resulting typed state; it appends
 non-retention events before the snapshot checkpoint and leaves close-retention
 handling separate.
 
+The generated production configuration loader forwards the accepted
+`JoinFlowSessionContext` to an optional context-aware route-policy factory before
+composition. Existing factories without that callback retain their original
+store-aware policy behavior.
+
 For local Hold'em lifecycle actions, construct the app-owned
 `AppHoldemTableSessionRuntime` with a validated `HoldemHandState` and
 `HoldemEventCursor`. It calls the variant projection adapter, commits the

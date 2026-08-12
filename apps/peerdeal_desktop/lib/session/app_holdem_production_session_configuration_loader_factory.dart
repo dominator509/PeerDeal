@@ -19,8 +19,8 @@ class AppHoldemProductionSessionConfigurationLoaderFactory {
   late final AppHoldemProductionSessionConfigurationLoader loader = _load;
 
   Future<AppHoldemProductionSessionConfigurationLoadResult> _load(
-    JoinFlowSessionContext _,
+    JoinFlowSessionContext sessionContext,
   ) {
-    return _configurationFactory.create();
+    return _configurationFactory.create(sessionContext: sessionContext);
   }
 }

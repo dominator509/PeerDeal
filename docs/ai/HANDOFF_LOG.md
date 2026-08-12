@@ -40,6 +40,24 @@ Validation:
 - Full repository analyze, boundary, source-text, test, dependency-audit, and
   diff-check gates passed before commit and push.
 
+### 2026-08-11 - Codex - T144 Production Join-Context Propagation
+
+Summary:
+- Mirrored production configuration factories now accept optional accepted join
+  context and context-aware route-policy factories.
+- Generated loader adapters forward the exact `JoinFlowSessionContext` before
+  route/source composition while preserving no-context callers.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_configuration_factory.dart`
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_configuration_loader_factory.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_configuration_factory.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_configuration_loader_factory.dart`
+- Mirrored focused configuration tests and readiness records.
+
+Validation:
+- Focused mobile and desktop configuration Flutter suites passed.
+
 ### 2026-08-11 - Codex - T143 Native App-Storage Path Boundary Hardening
 
 Summary:

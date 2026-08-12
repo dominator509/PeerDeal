@@ -1301,6 +1301,23 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T144 Production Join-Context Propagation
+
+- Mirrored configuration factories now accept an optional accepted
+  `JoinFlowSessionContext` and context-aware route-policy factory.
+- The generated configuration loader forwards the exact accepted context before
+  route/source composition; existing no-context callers retain their fallback
+  route-policy behavior.
+
+Tests:
+- Focused mobile and desktop configuration Flutter suites pass, including the
+  loader-to-policy context handoff.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints
