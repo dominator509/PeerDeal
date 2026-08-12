@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
+
+Summary:
+- Removed the duplicated mobile and desktop demo endpoint parser and metadata
+  projector.
+- Mirrored `NativeBootstrapCandidateLoader` implementations now use the shared
+  bounded `peerdeal_network` parser and projector with the native 64-entry
+  discovery budget, preserving provider-owned host/port metadata.
+- Bounded direct interface-hint traversal and added mirrored oversized-input
+  regressions.
+
+Verification:
+- Mirrored mobile and desktop demo bootstrap suites passed.
+- Mirrored app analyzers reported no issues.
+- Full repository analyze, boundary, source-text, dependency, and test gates
+  passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, durable product state, other-platform hosts, and release
+  signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T217 Bound Endpoint Parser Traversal
 
 Summary:

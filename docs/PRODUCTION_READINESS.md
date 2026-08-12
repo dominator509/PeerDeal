@@ -2417,6 +2417,15 @@ discovery values, and `projectCandidates` bounds both endpoint and candidate
 iterables before producing an immutable projection. Malformed or excess
 values therefore cannot force unbounded traversal through the network API.
 
+The T218 follow-up closes the mirrored demo bootstrap duplication gap. Mobile
+and desktop `NativeBootstrapCandidateLoader` now use the same bounded
+`peerdeal_network` endpoint parser and metadata projector as the production
+join path, with the native bridge's 64-entry discovery budget applied before
+provider resolution. Interface-hint normalization is bounded at the same
+boundary, so mounted demo bootstrap cannot bypass the shared endpoint rules
+or traverse an oversized direct caller collection. Native discovery
+advertisement and real endpoint provisioning remain separate.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

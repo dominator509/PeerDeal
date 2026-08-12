@@ -173,6 +173,36 @@ void main() {
     },
   );
 
+  test('bounds direct native discovery traversal before resolution', () async {
+    final provider = _RecordingBootstrapCandidateProvider();
+    final result = await NativeBootstrapCandidateLoader(
+      bridge: _FakeLocalNetworkBridge(
+        capability: const LocalNetworkCapability(
+          discoverySupported: true,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: 'local-network-ready',
+        ),
+        discovery: LocalNetworkDiscoverySnapshot(
+          permissionGranted: true,
+          foundEndpoints: <String>[
+            ...List<String>.filled(
+              NativeBridgePayloadLimits.maxDiscoveryEntries,
+              '',
+            ),
+            'peer-after-boundary',
+          ],
+          interfaceHints: <String>[],
+        ),
+      ),
+      provider: provider,
+    ).load(sessionId: 'session-1', tableId: 'table-1');
+
+    expect(result.discoveryAvailable, isTrue);
+    expect(result.candidates, isEmpty);
+    expect(provider.request, isNull);
+  });
+
   test(
     'scrubs native discovery endpoints before candidate resolution',
     () async {
