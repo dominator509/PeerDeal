@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T181 Immutable Receipt Collections
+
+Summary:
+- Receipt scan results, export artifacts, and export inspection results now
+  defensively copy and recursively freeze public maps/lists before exposing
+  receipt data to decoders, presenters, or app shells.
+- `ReceiptKeyRingSnapshot` and `StaticReceiptSigningKeyProvider` now own and
+  freeze retained signing/encryption key collections while preserving their
+  existing bounded lookup behavior.
+- Mirrored app consumers and shared receipt test fixtures were migrated from
+  stale const construction without changing receipt policy or package
+  boundaries.
+
+Validation:
+- Focused `peerdeal_receipts` suite: passed 54 tests, including the new
+  collection-ownership regression; package analyzer passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Platform-secure storage validation, provider-specific proof semantics,
+  product verification wiring, durable database replacement, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T180 Immutable Crypto Verification Collections
 
 Summary:

@@ -120,7 +120,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
         exportFactory != null || cancellableExportFactory != null;
     if (artifact != null && hasExportFactory) {
       return widget.presenter.present(
-        receipt: const ReceiptScanResult(
+        receipt: ReceiptScanResult(
           status: 'rejected',
           message: 'Receipt export source configuration is invalid.',
         ),
@@ -136,7 +136,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     final receipt = widget.receipt;
     if (!hasExportFactory && receipt != null) {
       return widget.presenter.present(
-        receipt: const ReceiptScanResult(
+        receipt: ReceiptScanResult(
           status: 'rejected',
           message: 'Receipt export path is unavailable.',
         ),
@@ -147,7 +147,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
 
     if (hasExportFactory && receipt == null) {
       return widget.presenter.present(
-        receipt: const ReceiptScanResult(
+        receipt: ReceiptScanResult(
           status: 'rejected',
           message: 'Receipt export input is unavailable.',
         ),
@@ -159,7 +159,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     if (hasExportFactory && receipt != null) {
       if (exportFactory != null && cancellableExportFactory != null) {
         return widget.presenter.present(
-          receipt: const ReceiptScanResult(
+          receipt: ReceiptScanResult(
             status: 'rejected',
             message: 'Receipt export source configuration is invalid.',
           ),
@@ -191,7 +191,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
   }) {
     if (artifact.artifactType == 'unavailable') {
       return widget.presenter.present(
-        receipt: const ReceiptScanResult(
+        receipt: ReceiptScanResult(
           status: 'rejected',
           message: 'Receipt artifact is unavailable.',
         ),
@@ -203,7 +203,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     final verifier = widget.artifactVerifier;
     if (verifier == null) {
       return widget.presenter.present(
-        receipt: const ReceiptScanResult(
+        receipt: ReceiptScanResult(
           status: 'rejected',
           message: 'Receipt artifact verifier is unavailable.',
         ),

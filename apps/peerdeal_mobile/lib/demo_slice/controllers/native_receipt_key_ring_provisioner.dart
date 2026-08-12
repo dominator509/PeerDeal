@@ -201,7 +201,7 @@ class NativeReceiptKeyRingProvisioner {
         if (verified.warnings.isNotEmpty ||
             !_activeKeysMatch(keyRing, verified.keyRing)) {
           return ReceiptKeyRingProvisionResult(
-            keyRing: const ReceiptKeyRingSnapshot(),
+            keyRing: ReceiptKeyRingSnapshot(),
             warnings: const <String>[
               'Receipt key persistence could not be verified.',
             ],

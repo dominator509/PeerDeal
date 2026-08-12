@@ -1,16 +1,20 @@
+import 'model_collection_ownership.dart';
+
 class ReceiptExportInspectionResult {
-  const ReceiptExportInspectionResult({
+  ReceiptExportInspectionResult({
     required this.status,
     required this.message,
-    this.payload = const <String, Object?>{},
-    this.diagnostics = const <String>[],
-  });
+    Map<String, Object?> payload = const <String, Object?>{},
+    List<String> diagnostics = const <String>[],
+  }) : payload = freezeReceiptObjectMap(payload),
+       diagnostics = List<String>.unmodifiable(diagnostics);
 
-  const ReceiptExportInspectionResult.rejected({
+  ReceiptExportInspectionResult.rejected({
     required this.message,
-    this.diagnostics = const <String>[],
+    List<String> diagnostics = const <String>[],
   }) : status = 'rejected',
-       payload = const <String, Object?>{};
+       payload = const <String, Object?>{},
+       diagnostics = List<String>.unmodifiable(diagnostics);
 
   final String status;
   final String message;

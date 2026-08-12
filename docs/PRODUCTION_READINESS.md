@@ -1931,6 +1931,15 @@ Provider-specific proof semantics, product verification wiring, durable
 database replacement, device/network validation, other-platform hosts, release
 signing, and final UX remain separate.
 
+The T181 follow-up closes the receipt-owned collection ownership gap. Receipt
+scan results, export artifacts, export inspection results, and retained signing
+or encryption key provider collections now defensively copy and recursively
+freeze caller-owned maps/lists at construction. The focused receipt suite (54
+tests), full repository gates, both app builds, and the native-host smoke gate
+pass. Platform-secure storage, provider-specific proof semantics, product
+verification wiring, durable database replacement, device/network validation,
+other-platform hosts, release signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

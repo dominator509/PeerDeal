@@ -10,7 +10,7 @@ void main() {
     keyId: 'receipt_encryption_0',
     secret: 'encryption_secret_0',
   );
-  const keyRing = ReceiptKeyRingSnapshot(
+  final keyRing = ReceiptKeyRingSnapshot(
     activeEncryption: activeKey,
     decryptionKeys: <ReceiptEncryptionKey>[rotatedKey],
   );
@@ -35,7 +35,7 @@ void main() {
 
   test('decrypts payloads from retained rotated keys', () {
     final rotatedCipher = HmacSha256ReceiptCipher(
-      keyProvider: const ReceiptKeyRingSnapshot(activeEncryption: rotatedKey),
+      keyProvider: ReceiptKeyRingSnapshot(activeEncryption: rotatedKey),
       nonceFactory: () => List<int>.filled(32, 9),
     );
     final currentCipher = HmacSha256ReceiptCipher(keyProvider: keyRing);
@@ -61,7 +61,7 @@ void main() {
 
   test('fails closed when key material is unavailable', () {
     final cipher = HmacSha256ReceiptCipher(
-      keyProvider: const ReceiptKeyRingSnapshot(),
+      keyProvider: ReceiptKeyRingSnapshot(),
       nonceFactory: () => List<int>.filled(32, 7),
     );
 

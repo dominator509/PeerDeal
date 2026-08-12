@@ -828,6 +828,10 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   `StaticReceiptSigningKeyProvider` cap retained verification/decryption key
   collections at 128 entries by default before lookup traversal; overflow
   returns no retained key while active usable keys remain directly available.
+- Receipt scan results, export artifacts, export inspection results, and
+  retained key-provider collections defensively copy and freeze caller-owned
+  maps/lists at construction; nested JSON-like map/list values in receipt
+  payload-bearing models are recursively frozen.
 - App receipt key-ring loaders must reject oversized or control-character
   native receipt key ids before mapping records into signing/encryption
   providers.

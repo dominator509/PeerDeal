@@ -51,13 +51,13 @@ class NativeReceiptExportArtifactFactory {
         cancellation: cancellation,
       );
     } catch (_) {
-      return const ReceiptExportArtifact.unavailable(
+      return ReceiptExportArtifact.unavailable(
         reason: 'Receipt key provisioning failed.',
       );
     }
 
     if (!provisionResult.isSuccess) {
-      return const ReceiptExportArtifact.unavailable(
+      return ReceiptExportArtifact.unavailable(
         reason: 'Receipt key provisioning failed.',
       );
     }

@@ -275,7 +275,7 @@ void main() {
         child: DemoReceiptRoute(
           snapshot: _fixtureSnapshot('verification_receipt_review.json'),
           presenter: presenter,
-          exportArtifact: const ReceiptExportArtifact.unavailable(
+          exportArtifact: ReceiptExportArtifact.unavailable(
             reason: 'native key storage detail',
           ),
           artifactVerifier: DemoReceiptArtifactVerifier(
@@ -469,7 +469,7 @@ DemoScenarioSnapshot _fixtureSnapshot(String fixtureName) {
   return DemoScenarioSnapshot.fromJson(demoFixtureJson(fixtureName));
 }
 
-const _keyRing = ReceiptKeyRingSnapshot(
+final _keyRing = ReceiptKeyRingSnapshot(
   activeSigning: ReceiptSigningKey(
     keyId: 'receipt_key_1',
     secret: 'test_secret_1',
@@ -491,7 +491,7 @@ const _receipt = PeerDealReceipt(
 );
 
 final _signedArtifact = OpaqueExportEncoder(
-  signer: const HmacSha256ReceiptSigner(keyProvider: _keyRing),
+  signer: HmacSha256ReceiptSigner(keyProvider: _keyRing),
 ).encode(_receipt);
 
 class RecordingSecureKeyStorageBridge implements SecureKeyStorageBridge {

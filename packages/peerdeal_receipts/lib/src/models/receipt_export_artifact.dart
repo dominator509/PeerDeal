@@ -1,12 +1,14 @@
+import 'model_collection_ownership.dart';
+
 class ReceiptExportArtifact {
-  const ReceiptExportArtifact({
+  ReceiptExportArtifact({
     required this.artifactType,
     required this.encodedBody,
-    required this.minimalMetadata,
+    required Map<String, Object?> minimalMetadata,
     this.reason,
-  });
+  }) : minimalMetadata = freezeReceiptObjectMap(minimalMetadata);
 
-  const ReceiptExportArtifact.unavailable({required this.reason})
+  ReceiptExportArtifact.unavailable({required this.reason})
     : artifactType = 'unavailable',
       encodedBody = '',
       minimalMetadata = const <String, Object?>{};

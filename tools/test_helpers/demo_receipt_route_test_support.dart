@@ -73,11 +73,11 @@ class RecordingReceiptKeyStorageBridge implements SecureKeyStorageBridge {
 
 ReceiptExportArtifact signedDemoReceiptArtifact() {
   return OpaqueExportEncoder(
-    signer: const HmacSha256ReceiptSigner(keyProvider: _receiptKeyRing),
+    signer: HmacSha256ReceiptSigner(keyProvider: _receiptKeyRing),
   ).encode(_receipt);
 }
 
-const _receiptKeyRing = ReceiptKeyRingSnapshot(
+final _receiptKeyRing = ReceiptKeyRingSnapshot(
   activeSigning: ReceiptSigningKey(
     keyId: 'receipt_key_1',
     secret: 'test_secret_1',

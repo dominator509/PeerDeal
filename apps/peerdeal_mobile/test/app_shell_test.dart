@@ -201,7 +201,7 @@ void main() {
         receiptExportArtifact: signedDemoReceiptArtifact(),
         receiptExportArtifactFactory: (_) async {
           exportFactoryCalled = true;
-          return const ReceiptExportArtifact.unavailable(
+          return ReceiptExportArtifact.unavailable(
             reason: 'conflicting export source used',
           );
         },
@@ -272,7 +272,7 @@ void main() {
             _receiptForSnapshot(snapshot, pseudonymousUserId: 'user_injected'),
         receiptExportArtifactFactory: (receipt) async {
           exportedUserId = receipt.pseudonymousUserId;
-          return const ReceiptExportArtifact.unavailable(
+          return ReceiptExportArtifact.unavailable(
             reason: 'test artifact unavailable',
           );
         },
@@ -325,7 +325,7 @@ void main() {
         },
         receiptExportArtifactFactory: (receipt) async {
           exportCalled = true;
-          return const ReceiptExportArtifact.unavailable(
+          return ReceiptExportArtifact.unavailable(
             reason: 'test artifact unavailable',
           );
         },

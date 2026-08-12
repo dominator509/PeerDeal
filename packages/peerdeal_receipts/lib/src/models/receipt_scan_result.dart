@@ -1,9 +1,11 @@
+import 'model_collection_ownership.dart';
+
 class ReceiptScanResult {
-  const ReceiptScanResult({
+  ReceiptScanResult({
     required this.status,
     required this.message,
-    this.shareableFields = const <String, Object?>{},
-  });
+    Map<String, Object?> shareableFields = const <String, Object?>{},
+  }) : shareableFields = freezeReceiptObjectMap(shareableFields);
 
   final String status;
   final String message;

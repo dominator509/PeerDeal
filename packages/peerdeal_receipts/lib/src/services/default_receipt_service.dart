@@ -27,13 +27,13 @@ class DefaultReceiptService implements ReceiptService {
   @override
   ReceiptExportArtifact exportReceipt(PeerDealReceipt receipt) {
     if (!receipt.hasRequiredEnvelopeFields) {
-      return const ReceiptExportArtifact.unavailable(
+      return ReceiptExportArtifact.unavailable(
         reason: 'Receipt envelope is malformed.',
       );
     }
 
     if (receipt.wipeState == ReceiptWipeState.wiped) {
-      return const ReceiptExportArtifact.unavailable(
+      return ReceiptExportArtifact.unavailable(
         reason: 'Receipt unavailable.',
       );
     }
@@ -41,7 +41,7 @@ class DefaultReceiptService implements ReceiptService {
     try {
       return _exportEncoder.encode(receipt);
     } on Object {
-      return const ReceiptExportArtifact.unavailable(
+      return ReceiptExportArtifact.unavailable(
         reason: 'Receipt export failed.',
       );
     }
@@ -50,14 +50,14 @@ class DefaultReceiptService implements ReceiptService {
   @override
   ReceiptScanResult scanReceipt(PeerDealReceipt receipt) {
     if (!receipt.hasRequiredEnvelopeFields) {
-      return const ReceiptScanResult(
+      return ReceiptScanResult(
         status: 'rejected',
         message: 'Receipt envelope is malformed.',
       );
     }
 
     if (receipt.wipeState == ReceiptWipeState.wiped) {
-      return const ReceiptScanResult(
+      return ReceiptScanResult(
         status: 'wiped',
         message: 'Receipt unavailable.',
       );

@@ -98,7 +98,7 @@ class NativeReceiptKeyRingLoader
 
     if (!snapshot.available) {
       return ReceiptKeyRingLoadResult(
-        keyRing: const ReceiptKeyRingSnapshot(),
+        keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>[
           _safeNativeWarning(
             snapshot.warning,
@@ -142,7 +142,7 @@ class NativeReceiptKeyRingLoader
     );
     if (warnings.isNotEmpty) {
       return ReceiptKeyRingLoadResult(
-        keyRing: const ReceiptKeyRingSnapshot(),
+        keyRing: ReceiptKeyRingSnapshot(),
         warnings: warnings,
       );
     }

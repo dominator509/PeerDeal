@@ -43,7 +43,7 @@ void main() {
 
   test('exports encrypted and signed artifacts when configured', () {
     final cipher = HmacSha256ReceiptCipher(
-      keyProvider: const ReceiptKeyRingSnapshot(
+      keyProvider: ReceiptKeyRingSnapshot(
         activeEncryption: ReceiptEncryptionKey(
           keyId: 'receipt_encryption_1',
           secret: 'encryption_secret_1',
@@ -86,14 +86,14 @@ void main() {
   });
 
   test('exports artifacts signed by HMAC receipt signer', () {
-    const keyProvider = StaticReceiptSigningKeyProvider(
+    final keyProvider = StaticReceiptSigningKeyProvider(
       activeKey: ReceiptSigningKey(
         keyId: 'receipt_key_1',
         secret: 'test_secret_1',
       ),
     );
-    const signer = HmacSha256ReceiptSigner(keyProvider: keyProvider);
-    const signedService = DefaultReceiptService(
+    final signer = HmacSha256ReceiptSigner(keyProvider: keyProvider);
+    final signedService = DefaultReceiptService(
       authorizer: DefaultReceiptAuthorizer(),
       exportEncoder: OpaqueExportEncoder(signer: signer),
     );

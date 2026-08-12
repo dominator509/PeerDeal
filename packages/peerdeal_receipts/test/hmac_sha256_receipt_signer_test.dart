@@ -10,11 +10,11 @@ void main() {
     keyId: 'receipt_key_0',
     secret: 'test_secret_0',
   );
-  const provider = StaticReceiptSigningKeyProvider(
+  final provider = StaticReceiptSigningKeyProvider(
     activeKey: activeKey,
     verificationKeys: <ReceiptSigningKey>[rotatedKey],
   );
-  const signer = HmacSha256ReceiptSigner(keyProvider: provider);
+  final signer = HmacSha256ReceiptSigner(keyProvider: provider);
 
   test('signs receipt payloads deterministically with active key id', () {
     final signature = signer.sign('payload');
@@ -42,7 +42,7 @@ void main() {
   });
 
   test('verifies signatures from retained rotated keys', () {
-    const rotatedSigner = HmacSha256ReceiptSigner(
+    final rotatedSigner = HmacSha256ReceiptSigner(
       keyProvider: StaticReceiptSigningKeyProvider(activeKey: rotatedKey),
     );
 
@@ -53,10 +53,10 @@ void main() {
   });
 
   test('does not use malformed signing keys', () {
-    const invalidProvider = StaticReceiptSigningKeyProvider(
+    final invalidProvider = StaticReceiptSigningKeyProvider(
       activeKey: ReceiptSigningKey(keyId: 'bad:key', secret: 'test_secret'),
     );
-    const invalidSigner = HmacSha256ReceiptSigner(keyProvider: invalidProvider);
+    final invalidSigner = HmacSha256ReceiptSigner(keyProvider: invalidProvider);
 
     expect(() => invalidSigner.sign('payload'), throwsStateError);
     expect(
@@ -71,7 +71,7 @@ void main() {
   test(
     'fails closed when retained signing keys exceed the configured limit',
     () {
-      const boundedProvider = StaticReceiptSigningKeyProvider(
+      final boundedProvider = StaticReceiptSigningKeyProvider(
         activeKey: activeKey,
         verificationKeys: <ReceiptSigningKey>[rotatedKey, rotatedKey],
         maxVerificationKeys: 1,
@@ -93,7 +93,7 @@ void main() {
   });
 
   test('fails closed when verification key lookup throws', () {
-    const signer = HmacSha256ReceiptSigner(
+    final signer = HmacSha256ReceiptSigner(
       keyProvider: _ThrowingSigningKeyProvider(),
     );
 

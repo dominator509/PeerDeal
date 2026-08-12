@@ -17,15 +17,15 @@ void main() {
     payloadHash: 'hash_77',
     opaquePayload: 'opaque_77',
   );
-  const keyProvider = StaticReceiptSigningKeyProvider(
+  final keyProvider = StaticReceiptSigningKeyProvider(
     activeKey: ReceiptSigningKey(
       keyId: 'receipt_key_1',
       secret: 'test_secret_1',
     ),
   );
-  const signer = HmacSha256ReceiptSigner(keyProvider: keyProvider);
-  const encoder = OpaqueExportEncoder(signer: signer);
-  const decoder = OpaqueExportDecoder(signer: signer);
+  final signer = HmacSha256ReceiptSigner(keyProvider: keyProvider);
+  final encoder = OpaqueExportEncoder(signer: signer);
+  final decoder = OpaqueExportDecoder(signer: signer);
 
   test('verifies signed opaque export artifact', () {
     final artifact = encoder.encode(receipt);
@@ -92,7 +92,7 @@ void main() {
 
   test('rejects malformed artifact body', () {
     final result = decoder.inspect(
-      const ReceiptExportArtifact(
+      ReceiptExportArtifact(
         artifactType: 'file',
         encodedBody: 'not-base64',
         minimalMetadata: <String, Object?>{},
@@ -145,7 +145,7 @@ void main() {
   test('rejects encrypted artifact when cipher is unavailable', () {
     final encryptedEncoder = OpaqueExportEncoder(
       cipher: HmacSha256ReceiptCipher(
-        keyProvider: const ReceiptKeyRingSnapshot(
+        keyProvider: ReceiptKeyRingSnapshot(
           activeEncryption: ReceiptEncryptionKey(
             keyId: 'receipt_encryption_1',
             secret: 'encryption_secret_1',
@@ -165,7 +165,7 @@ void main() {
 
   test('verifies and decrypts encrypted signed export artifact', () {
     final cipher = HmacSha256ReceiptCipher(
-      keyProvider: const ReceiptKeyRingSnapshot(
+      keyProvider: ReceiptKeyRingSnapshot(
         activeEncryption: ReceiptEncryptionKey(
           keyId: 'receipt_encryption_1',
           secret: 'encryption_secret_1',

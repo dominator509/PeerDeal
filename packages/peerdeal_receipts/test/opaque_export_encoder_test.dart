@@ -17,7 +17,7 @@ void main() {
   );
 
   test('fails closed when signing throws', () {
-    const encoder = OpaqueExportEncoder(signer: _ThrowingReceiptSigner());
+    final encoder = OpaqueExportEncoder(signer: _ThrowingReceiptSigner());
 
     final artifact = encoder.encode(receipt);
 
@@ -28,7 +28,7 @@ void main() {
   });
 
   test('fails closed when encryption throws', () {
-    const encoder = OpaqueExportEncoder(cipher: _ThrowingReceiptCipher());
+    final encoder = OpaqueExportEncoder(cipher: _ThrowingReceiptCipher());
 
     final artifact = encoder.encode(receipt);
 
@@ -39,7 +39,7 @@ void main() {
   });
 
   test('fails closed when the encoded artifact exceeds its limit', () {
-    const encoder = OpaqueExportEncoder(
+    final encoder = OpaqueExportEncoder(
       limits: ReceiptExportLimits(maxEncodedBodyLength: 8),
     );
 
@@ -50,7 +50,7 @@ void main() {
   });
 
   test('fails closed when the receipt payload exceeds its limit', () {
-    const encoder = OpaqueExportEncoder(
+    final encoder = OpaqueExportEncoder(
       limits: ReceiptExportLimits(maxPayloadBytes: 8),
     );
 

@@ -33,7 +33,7 @@ class OpaqueExportDecoder {
 
     final body = _decodeArtifactBody(artifact.encodedBody);
     if (body == null) {
-      return const ReceiptExportInspectionResult.rejected(
+      return ReceiptExportInspectionResult.rejected(
         message: 'Receipt artifact body is malformed.',
       );
     }
@@ -47,7 +47,7 @@ class OpaqueExportDecoder {
 
     final payload = body['payload'];
     if (payload is! String || payload.isEmpty) {
-      return const ReceiptExportInspectionResult.rejected(
+      return ReceiptExportInspectionResult.rejected(
         message: 'Receipt artifact payload is malformed.',
       );
     }
@@ -56,14 +56,14 @@ class OpaqueExportDecoder {
         ? _limits.maxCiphertextLength
         : _limits.maxPayloadBytes;
     if (payloadBytes > payloadLimit) {
-      return const ReceiptExportInspectionResult.rejected(
+      return ReceiptExportInspectionResult.rejected(
         message: 'Receipt artifact payload is malformed.',
       );
     }
 
     final signature = body['signature'];
     if (signature == null && _requireSignature) {
-      return const ReceiptExportInspectionResult.rejected(
+      return ReceiptExportInspectionResult.rejected(
         message: 'Receipt artifact is unsigned.',
       );
     }
@@ -71,7 +71,7 @@ class OpaqueExportDecoder {
     if (signature != null) {
       final signer = _signer;
       if (signer == null || signature is! String || signature.isEmpty) {
-        return const ReceiptExportInspectionResult.rejected(
+        return ReceiptExportInspectionResult.rejected(
           message: 'Receipt artifact signature cannot be verified.',
         );
       }
@@ -81,7 +81,7 @@ class OpaqueExportDecoder {
         signature: signature,
       );
       if (!isVerified) {
-        return const ReceiptExportInspectionResult.rejected(
+        return ReceiptExportInspectionResult.rejected(
           message: 'Receipt artifact signature verification failed.',
         );
       }
@@ -92,14 +92,14 @@ class OpaqueExportDecoder {
       payload: payload,
     );
     if (plaintextPayload == null) {
-      return const ReceiptExportInspectionResult.rejected(
+      return ReceiptExportInspectionResult.rejected(
         message: 'Receipt artifact payload cannot be decoded.',
       );
     }
 
     final payloadShape = _decodePayloadShape(plaintextPayload);
     if (payloadShape == null || !_hasRequiredPayloadFields(payloadShape)) {
-      return const ReceiptExportInspectionResult.rejected(
+      return ReceiptExportInspectionResult.rejected(
         message: 'Receipt artifact payload shape is unsupported.',
       );
     }

@@ -42,7 +42,7 @@ class DemoReceiptArtifactVerifier
         cancellation: cancellation,
       );
     } catch (_) {
-      return const ReceiptExportInspectionResult.rejected(
+      return ReceiptExportInspectionResult.rejected(
         message: 'Receipt signing key is unavailable.',
         diagnostics: <String>['Secure receipt key storage is unavailable.'],
       );

@@ -21,14 +21,14 @@ void main() {
   });
 }
 
-const _keyRing = ReceiptKeyRingSnapshot(
+final _keyRing = ReceiptKeyRingSnapshot(
   activeSigning: ReceiptSigningKey(
     keyId: 'receipt_key_1',
     secret: 'test_secret_1',
   ),
 );
 
-const _signer = HmacSha256ReceiptSigner(keyProvider: _keyRing);
+final _signer = HmacSha256ReceiptSigner(keyProvider: _keyRing);
 
 final _availableSnapshot = SecureKeyStorageSnapshot(
   available: true,

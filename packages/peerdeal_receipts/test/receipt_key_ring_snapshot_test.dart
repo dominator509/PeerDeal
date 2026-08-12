@@ -11,18 +11,18 @@ void main() {
       keyId: 'receipt_signing_0',
       secret: 'signing_secret_0',
     );
-    const keyRing = ReceiptKeyRingSnapshot(
+    final keyRing = ReceiptKeyRingSnapshot(
       activeSigning: activeSigning,
       verificationSigningKeys: <ReceiptSigningKey>[rotatedSigning],
     );
-    const signer = HmacSha256ReceiptSigner(keyProvider: keyRing);
+    final signer = HmacSha256ReceiptSigner(keyProvider: keyRing);
 
     final signature = signer.sign('payload');
 
     expect(signature, startsWith('hmac-sha256:receipt_signing_1:'));
     expect(signer.verify(payload: 'payload', signature: signature), isTrue);
 
-    const rotatedSigner = HmacSha256ReceiptSigner(
+    final rotatedSigner = HmacSha256ReceiptSigner(
       keyProvider: StaticReceiptSigningKeyProvider(activeKey: rotatedSigning),
     );
     final rotatedSignature = rotatedSigner.sign('payload');
@@ -42,7 +42,7 @@ void main() {
       keyId: 'receipt_encryption_0',
       secret: 'encryption_secret_0',
     );
-    const keyRing = ReceiptKeyRingSnapshot(
+    final keyRing = ReceiptKeyRingSnapshot(
       activeEncryption: activeEncryption,
       decryptionKeys: <ReceiptEncryptionKey>[retainedEncryption],
     );
@@ -56,7 +56,7 @@ void main() {
   });
 
   test('fails closed for malformed key material', () {
-    const keyRing = ReceiptKeyRingSnapshot(
+    final keyRing = ReceiptKeyRingSnapshot(
       activeSigning: ReceiptSigningKey(
         keyId: 'bad:signing',
         secret: 'signing_secret',
@@ -99,7 +99,7 @@ void main() {
       keyId: 'retained_encryption',
       secret: 'retained_secret',
     );
-    const keyRing = ReceiptKeyRingSnapshot(
+    final keyRing = ReceiptKeyRingSnapshot(
       activeSigning: activeSigning,
       verificationSigningKeys: <ReceiptSigningKey>[
         retainedSigning,

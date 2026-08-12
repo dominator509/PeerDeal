@@ -6,16 +6,21 @@ import '../models/receipt_signing_key.dart';
 
 class ReceiptKeyRingSnapshot
     implements ReceiptSigningKeyProvider, ReceiptEncryptionKeyProvider {
-  const ReceiptKeyRingSnapshot({
+  ReceiptKeyRingSnapshot({
     this.activeSigning,
-    this.verificationSigningKeys = const <ReceiptSigningKey>[],
+    List<ReceiptSigningKey> verificationSigningKeys =
+        const <ReceiptSigningKey>[],
     this.activeEncryption,
-    this.decryptionKeys = const <ReceiptEncryptionKey>[],
+    List<ReceiptEncryptionKey> decryptionKeys = const <ReceiptEncryptionKey>[],
     this.maxVerificationKeys =
         ReceiptKeyRingInputLimits.defaultMaxVerificationKeys,
     this.maxDecryptionKeys = ReceiptKeyRingInputLimits.defaultMaxDecryptionKeys,
   }) : assert(maxVerificationKeys > 0, 'maxVerificationKeys must be positive'),
-       assert(maxDecryptionKeys > 0, 'maxDecryptionKeys must be positive');
+       assert(maxDecryptionKeys > 0, 'maxDecryptionKeys must be positive'),
+       verificationSigningKeys = List<ReceiptSigningKey>.unmodifiable(
+         verificationSigningKeys,
+       ),
+       decryptionKeys = List<ReceiptEncryptionKey>.unmodifiable(decryptionKeys);
 
   final ReceiptSigningKey? activeSigning;
   final List<ReceiptSigningKey> verificationSigningKeys;

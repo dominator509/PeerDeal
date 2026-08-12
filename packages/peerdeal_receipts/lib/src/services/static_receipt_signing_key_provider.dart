@@ -3,12 +3,15 @@ import '../models/receipt_key_ring_input_limits.dart';
 import '../models/receipt_signing_key.dart';
 
 class StaticReceiptSigningKeyProvider implements ReceiptSigningKeyProvider {
-  const StaticReceiptSigningKeyProvider({
+  StaticReceiptSigningKeyProvider({
     required this.activeKey,
-    this.verificationKeys = const <ReceiptSigningKey>[],
+    List<ReceiptSigningKey> verificationKeys = const <ReceiptSigningKey>[],
     this.maxVerificationKeys =
         ReceiptKeyRingInputLimits.defaultMaxVerificationKeys,
-  }) : assert(maxVerificationKeys > 0, 'maxVerificationKeys must be positive');
+  }) : assert(maxVerificationKeys > 0, 'maxVerificationKeys must be positive'),
+       verificationKeys = List<ReceiptSigningKey>.unmodifiable(
+         verificationKeys,
+       );
 
   final ReceiptSigningKey activeKey;
   final List<ReceiptSigningKey> verificationKeys;

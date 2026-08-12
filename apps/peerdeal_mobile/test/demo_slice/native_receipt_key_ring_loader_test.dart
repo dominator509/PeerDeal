@@ -9,7 +9,7 @@ void main() {
   test('copies and freezes receipt key-ring load warnings', () {
     final warnings = <String>['warning_1'];
     final result = ReceiptKeyRingLoadResult(
-      keyRing: const ReceiptKeyRingSnapshot(),
+      keyRing: ReceiptKeyRingSnapshot(),
       warnings: warnings,
     );
 

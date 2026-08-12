@@ -8,7 +8,7 @@ void main() {
     const projection = SafeResultProjection();
 
     final result = projection.projectReceiptScan(
-      const ReceiptScanResult(
+      ReceiptScanResult(
         status: 'ok',
         message: 'Receipt resolved for supported client view.',
         shareableFields: {

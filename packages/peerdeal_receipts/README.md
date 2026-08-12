@@ -34,6 +34,9 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
 - Receipt-owned key-ring providers bound retained verification and decryption
   collections to 128 entries by default and fail closed before oversized
   traversal.
+- Receipt scan, export, inspection, and key-ring models defensively copy and
+  freeze caller-owned maps/lists at construction, including nested JSON-like
+  payload values.
 - `OpaqueExportDecoder` verifies signed export artifacts before import-side
   inspection and fails closed on malformed, unsigned, tampered, undecryptable,
   privacy-leaking payloads, or verifier adapter failures.

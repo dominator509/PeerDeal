@@ -11,7 +11,7 @@ void main() {
   test('copies and freezes receipt key-ring provision warnings', () {
     final warnings = <String>['warning_1'];
     final result = ReceiptKeyRingProvisionResult(
-      keyRing: const ReceiptKeyRingSnapshot(),
+      keyRing: ReceiptKeyRingSnapshot(),
       warnings: warnings,
     );
 

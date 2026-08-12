@@ -18,7 +18,7 @@ void main() {
     );
 
     final result = await presenter.present(
-      receipt: const ReceiptScanResult(
+      receipt: ReceiptScanResult(
         status: 'ok',
         message: 'Receipt resolved.',
         shareableFields: {'receipt_id': 'r_1', 'receipt_token': 'secret'},
@@ -46,7 +46,7 @@ void main() {
       );
 
       final result = await presenter.present(
-        receipt: const ReceiptScanResult(
+        receipt: ReceiptScanResult(
           status: 'ok',
           message: 'Receipt resolved.',
         ),

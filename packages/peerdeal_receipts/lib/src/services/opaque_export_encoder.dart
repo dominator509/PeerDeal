@@ -23,7 +23,7 @@ class OpaqueExportEncoder {
     try {
       return _encode(receipt);
     } on Object {
-      return const ReceiptExportArtifact.unavailable(
+      return ReceiptExportArtifact.unavailable(
         reason: 'Receipt export failed.',
       );
     }
