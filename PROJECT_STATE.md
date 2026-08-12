@@ -1313,6 +1313,21 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## T160 Native Readiness Secure-Key Namespace Bound
+
+- Mirrored app-native readiness loaders now enforce the shared 128-byte safe
+  UTF-8/control-free secure-key namespace boundary before bridge lookup.
+- Invalid C1-bearing or oversized namespaces fail closed without invoking
+  secure-key storage.
+- Focused mobile and desktop readiness suites cover the boundary.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+
+Remaining:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  separate.
+
 ## T159 Native Transport Source Scope Bound
 
 - Mirrored app transport sources and provisioners now enforce the shared

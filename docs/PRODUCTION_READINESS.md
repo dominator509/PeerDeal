@@ -1769,6 +1769,16 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T160 follow-up closes the native readiness secure-key namespace gap.
+Mirrored app-native readiness loaders now reuse the shared 128-byte safe UTF-8
+validator before secure-key storage lookup, rejecting empty, padded,
+C0/C1-control-bearing, or oversized namespaces before an injected bridge call.
+Focused mobile and desktop readiness suites cover rejection before native
+storage invocation. Full repository analyze, boundary, source-text,
+dependency-audit, test, and diff gates pass. Android and Windows runtime/network
+validation, other-platform hosts, product state/database provisioning, and
+release signing remain separate.
+
 The T159 follow-up closes the native transport source/provisioner scope gap.
 Mirrored app transport sources and provisioners now reuse the shared native
 bridge safe UTF-8 validator before source start, polling, or capability lookup,

@@ -190,13 +190,13 @@ class AppNativeReadinessLoader {
   }
 
   bool _isValidSecureKeyNamespace(String namespace) {
-    if (namespace.isEmpty || namespace.trim() != namespace) return false;
-    if (namespace.contains('::')) return false;
-
-    for (final codeUnit in namespace.codeUnits) {
-      if (codeUnit < 0x20 || codeUnit == 0x7f) return false;
+    if (!NativeBridgePayloadLimits.isSafeUtf8Text(
+      namespace,
+      NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes,
+    )) {
+      return false;
     }
-
+    if (namespace.contains('::')) return false;
     return true;
   }
 }

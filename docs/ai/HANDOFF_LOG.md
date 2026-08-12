@@ -140,6 +140,28 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T160 Native Readiness Secure-Key Namespace Bound
+
+Summary:
+- Mirrored app-native readiness loaders now reuse the shared 128-byte
+  UTF-8/control-free secure-key namespace validator before bridge lookup.
+- Invalid C1-bearing and oversized namespaces fail closed before native
+  storage invocation.
+
+Files changed:
+- Mirrored mobile and desktop readiness loaders and tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop readiness suites passed, 7 tests each.
+- Full repository analyze, boundary, source-text, dependency-audit, and test
+  gates passed.
+
+Risks:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  external or operator-owned boundaries.
+
 ### 2026-08-11 - Codex - T159 Native Transport Source Scope Bound
 
 Summary:

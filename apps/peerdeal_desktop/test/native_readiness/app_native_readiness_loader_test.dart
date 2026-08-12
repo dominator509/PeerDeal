@@ -211,6 +211,8 @@ void main() {
       for (final namespace in <String>[
         ' peerdeal.receipts',
         'peerdeal.receipts\nsecret',
+        'peerdeal.receipts${String.fromCharCode(0x85)}',
+        'x' * 129,
         'peerdeal::receipts',
       ]) {
         final secureStorage = _FakeSecureKeyStorageBridge(
