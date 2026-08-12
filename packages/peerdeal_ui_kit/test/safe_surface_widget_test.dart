@@ -7,7 +7,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: SafeSurface(
           model: SafeSurfaceRenderModel(
@@ -30,7 +30,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: SafeSurface(
           model: SafeSurfaceRenderModel(

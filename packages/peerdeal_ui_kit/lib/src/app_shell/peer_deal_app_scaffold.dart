@@ -1,13 +1,13 @@
 import 'package:flutter/widgets.dart';
 
 class PeerDealAppScaffold extends StatelessWidget {
-  const PeerDealAppScaffold({
+  PeerDealAppScaffold({
     super.key,
     required this.title,
     this.subtitle,
-    this.actions = const <Widget>[],
+    List<Widget> actions = const <Widget>[],
     required this.child,
-  });
+  }) : actions = List<Widget>.unmodifiable(actions);
 
   final String title;
   final String? subtitle;

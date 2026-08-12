@@ -95,7 +95,7 @@ class _AppHoldemProductionSessionBootstrapRouteState
       future: _composition,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const PeerDealAppScaffold(
+          return PeerDealAppScaffold(
             title: 'Opening table',
             subtitle: 'Loading production session',
             child: Text('Loading table'),

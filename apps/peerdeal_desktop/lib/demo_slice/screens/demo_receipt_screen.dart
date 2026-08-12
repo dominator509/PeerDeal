@@ -84,7 +84,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
       future: _surface,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const PeerDealAppScaffold(
+          return PeerDealAppScaffold(
             title: 'Receipt review',
             subtitle: 'Safe receipt and recovery projection',
             child: Text('Loading receipt'),

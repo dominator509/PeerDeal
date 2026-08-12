@@ -1,12 +1,13 @@
 import 'safe_surface_capture_plan.dart';
 
 class SafeSurfaceRenderModel {
-  const SafeSurfaceRenderModel({
+  SafeSurfaceRenderModel({
     required this.shouldObscure,
     required this.shouldRequestNativeBlocking,
-    required this.warnings,
-    required this.nativeNotes,
-  });
+    required List<String> warnings,
+    required List<String> nativeNotes,
+  }) : warnings = List<String>.unmodifiable(warnings),
+       nativeNotes = List<String>.unmodifiable(nativeNotes);
 
   final bool shouldObscure;
   final bool shouldRequestNativeBlocking;

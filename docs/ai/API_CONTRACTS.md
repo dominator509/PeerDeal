@@ -229,6 +229,9 @@ navigation exists but no production action is currently launchable, the default
 home must render a stable production unavailable state.
 Shared safe-surface render models must scrub and bound injected capture warning
 and native-note text before exposing render state to app UI.
+`SafeSurfaceRenderModel` snapshots its warning and native-note lists at
+construction, and `PeerDealAppScaffold` snapshots its action-widget list;
+callers must treat these public collections as read-only after construction.
 Mounted table routes must scrub and bound injected bootstrap/recovery warning
 lists before passing load results into table surfaces.
 Mounted table routes must cap injected bootstrap candidate lists before passing

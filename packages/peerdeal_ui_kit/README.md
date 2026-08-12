@@ -19,6 +19,9 @@ Use `lib/peerdeal_ui_kit.dart`.
 - `SafeSurface`
 - `SafeSurfaceRenderModel`
 - `SafeSurfaceCapturePlan`
+- `SafeSurfaceRenderModel` snapshots warning and native-note collections, and
+  `PeerDealAppScaffold` snapshots action widgets at construction so later
+  caller list mutations cannot change an existing render model or scaffold.
 
 `SafeSurface` owns only shared rendering behavior. App packages still own
 capture-policy coordination, receipt/recovery projection, and navigation.

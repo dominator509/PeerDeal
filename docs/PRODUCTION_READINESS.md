@@ -2125,6 +2125,16 @@ gates pass. Android debug, Windows debug, and Windows native-host smoke builds
 and smoke validation pass. Product state provisioning, device/network
 validation, other-platform hosts, and release signing remain separate.
 
+The T186 follow-up closes shared UI collection ownership. `SafeSurfaceRenderModel`
+now snapshots warning and native-note lists, and `PeerDealAppScaffold` snapshots
+action-widget lists at construction. Focused `peerdeal_ui_kit` validation passed
+11 tests; the mirrored mobile and desktop app packages analyze cleanly. Full
+repository analyze, boundary, source-text, dependency-audit, test, and diff
+gates pass. Android debug, Windows debug, and Windows native-host smoke builds
+and smoke validation pass. Product visual/accessibility/navigation validation,
+product state provisioning, device/network validation, other-platform hosts,
+and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

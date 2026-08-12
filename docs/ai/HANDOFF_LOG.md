@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T186 Immutable Shared UI Collections
+
+Summary:
+- `SafeSurfaceRenderModel` snapshots warning and native-note lists before
+  exposing render state.
+- `PeerDealAppScaffold` snapshots action-widget lists at construction; the four
+  mirrored no-action const callsites were migrated without UI behavior changes.
+- The change stays inside the shared UI boundary and preserves app-owned capture
+  policy, navigation, and session orchestration.
+
+Validation:
+- Focused `peerdeal_ui_kit` suite: passed 11 tests, including two ownership
+  regressions; the shared kit and both app shells analyzed cleanly.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Product visual/accessibility/navigation validation, product state provisioning,
+  device/network validation, other-platform hosts, release signing, and durable
+  database replacement remain external or integration-owned.
+
 ### 2026-08-12 - Codex - T185 Immutable Mode Policy Collections
 
 Summary:

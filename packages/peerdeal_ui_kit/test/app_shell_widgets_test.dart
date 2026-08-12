@@ -4,6 +4,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 void main() {
+  test('app scaffold owns action collection', () {
+    final actions = <Widget>[const Text('Action')];
+    final scaffold = PeerDealAppScaffold(
+      title: 'PeerDeal',
+      actions: actions,
+      child: const Text('Body'),
+    );
+
+    actions.clear();
+
+    expect(scaffold.actions, hasLength(1));
+    expect(() => scaffold.actions.clear(), throwsUnsupportedError);
+  });
+
   testWidgets('app scaffold renders title, subtitle, actions, and body', (
     tester,
   ) async {

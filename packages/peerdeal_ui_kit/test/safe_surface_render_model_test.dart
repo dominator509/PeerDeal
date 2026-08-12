@@ -2,6 +2,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 void main() {
+  test('owns warning and native-note render collections', () {
+    final warnings = <String>['warning'];
+    final nativeNotes = <String>['native'];
+    final model = SafeSurfaceRenderModel(
+      shouldObscure: true,
+      shouldRequestNativeBlocking: true,
+      warnings: warnings,
+      nativeNotes: nativeNotes,
+    );
+
+    warnings.clear();
+    nativeNotes.clear();
+
+    expect(model.warnings, <String>['warning']);
+    expect(model.nativeNotes, <String>['native']);
+    expect(() => model.warnings.add('changed'), throwsUnsupportedError);
+    expect(() => model.nativeNotes.clear(), throwsUnsupportedError);
+  });
+
   test('scrubs capture plan warning and native note text', () {
     final model =
         SafeSurfaceRenderModel.fromCapturePlans(const <SafeSurfaceCapturePlan?>[
