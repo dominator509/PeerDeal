@@ -352,7 +352,7 @@ void main() {
       protocolVersion: currentProtocolVersion,
     );
     final report =
-        const ProtocolCatalog(
+        ProtocolCatalog.withEntries(
           entries: <ProtocolCatalogEntry>[entry, entry],
         ).validateLock(
           requiredKinds: <ProtocolArtifactKind>[ProtocolArtifactKind.command],
@@ -366,7 +366,7 @@ void main() {
   });
 
   test('protocol catalog lock detects missing artifact families', () {
-    final report = const ProtocolCatalog(
+    final report = ProtocolCatalog.withEntries(
       entries: <ProtocolCatalogEntry>[],
     ).validateLock();
 
@@ -660,7 +660,7 @@ void main() {
   });
 
   test('snapshot envelope includes catalog identity fields', () {
-    const snapshot = SnapshotEnvelope(
+    final snapshot = SnapshotEnvelope(
       snapshotId: 'snap_1',
       protocolVersion: '1.0.0',
       tableId: 'table_1',
@@ -676,7 +676,7 @@ void main() {
 
   test('event envelope round-trips through JSON', () {
     final event = EventEnvelope.fromJson(
-      const EventEnvelope(
+      EventEnvelope(
         eventId: 'evt_1',
         eventType: 'RecoveryEventPersisted',
         eventVersion: '1.0',
@@ -708,7 +708,7 @@ void main() {
 
   test('snapshot envelope round-trips through JSON', () {
     final snapshot = SnapshotEnvelope.fromJson(
-      const SnapshotEnvelope(
+      SnapshotEnvelope(
         snapshotId: 'snap_1',
         protocolVersion: '1.0.0',
         tableId: 'table_1',
@@ -726,7 +726,7 @@ void main() {
 
   test('rejects structurally oversized direct snapshot hydration', () {
     final oversized =
-        const SnapshotEnvelope(
+        SnapshotEnvelope(
             snapshotId: 'snap_1',
             protocolVersion: '1.0.0',
             tableId: 'table_1',
@@ -773,7 +773,7 @@ void main() {
 
   test('protocol catalog rejects typed unsupported event fail-safe', () {
     final result = ProtocolCatalog().checkEventEnvelope(
-      const EventEnvelope(
+      EventEnvelope(
         eventId: 'evt_unknown',
         eventType: 'UnknownEvent',
         eventVersion: '1.0',

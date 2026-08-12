@@ -155,7 +155,7 @@ void main() {
           }),
           payload: <String, Object?>{'phase': 'LIVE_ACTIVE'},
         ),
-        events: const <EventEnvelope>[
+        events: <EventEnvelope>[
           EventEnvelope(
             eventId: 'evt_10',
             eventType: 'IgnoredBecauseCoveredBySnapshot',
@@ -221,7 +221,7 @@ void main() {
           }),
           payload: <String, Object?>{'phase': 'LIVE_ACTIVE'},
         ),
-        events: const <EventEnvelope>[
+        events: <EventEnvelope>[
           EventEnvelope(
             eventId: 'evt_12',
             eventType: 'RecoveryPauseEnded',

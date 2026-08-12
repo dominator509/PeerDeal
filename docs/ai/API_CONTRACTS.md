@@ -18,6 +18,13 @@ All wire-ish protocol data lives in `peerdeal_protocol`.
 
 Unsupported protocol versions and unknown catalog identities fail closed.
 
+Envelope constructors recursively freeze caller-provided payload maps, lists,
+and sets before exposing them through `payload`; callers must treat the payload
+as a read-only wire projection. `ProtocolCatalog()` uses the immutable default
+entry set. Custom catalogs must use `ProtocolCatalog.withEntries(...)`, which
+copies the supplied entries before exposing them; lock reports likewise own
+their error lists.
+
 ## Protocol Catalog
 
 The default catalog owns supported artifact identities for:

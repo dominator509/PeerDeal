@@ -17,6 +17,8 @@ Owns:
 - Game File public schema contract
 - invite payload public schema contract
 - accepted and rejected protocol fixtures
+- envelope payload trees, custom catalog entries, and catalog lock errors are
+  defensively copied and recursively frozen at construction
 
 Must not own:
 - reducers

@@ -1,7 +1,8 @@
 import '../serialization/canonical_json.dart';
+import 'model_collection_ownership.dart';
 
 class SnapshotEnvelope {
-  const SnapshotEnvelope({
+  SnapshotEnvelope({
     required this.snapshotId,
     this.snapshotType = 'TableSnapshot',
     this.snapshotVersion = '1.0',
@@ -10,8 +11,8 @@ class SnapshotEnvelope {
     required this.sessionId,
     required this.snapshotBaseEventSeq,
     required this.snapshotHash,
-    required this.payload,
-  });
+    required Map<String, Object?> payload,
+  }) : payload = freezeProtocolObjectMap(payload);
 
   final String snapshotId;
   final String snapshotType;

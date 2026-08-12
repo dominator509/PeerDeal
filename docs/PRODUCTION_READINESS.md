@@ -1958,6 +1958,15 @@ pass. Product state provisioning, durable database replacement, device/network
 validation, other-platform hosts, release signing, and final UX remain
 separate.
 
+The T184 follow-up closes the protocol wire-model collection ownership gap.
+Command, event, and snapshot envelope constructors now recursively freeze
+caller-owned payload trees, custom catalogs use an explicit owned-entry
+constructor, and lock reports own their error lists. Focused protocol tests,
+the full repository gates, both app builds, and the Windows native-host smoke
+pass. Product state provisioning, durable database replacement, device/network
+validation, other-platform hosts, release signing, and final UX remain
+separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

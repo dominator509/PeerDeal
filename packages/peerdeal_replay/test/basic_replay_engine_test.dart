@@ -74,7 +74,7 @@ void main() {
           sessionId: 'session_1',
           protocolVersion: '1.0.0',
           scope: ReplayScope.session,
-          events: const <EventEnvelope>[
+          events: <EventEnvelope>[
             EventEnvelope(
               eventId: 'evt_2',
               eventType: 'HandStarted',
@@ -110,7 +110,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
         scope: ReplayScope.session,
-        events: const <EventEnvelope>[
+        events: <EventEnvelope>[
           EventEnvelope(
             eventId: 'evt_1',
             eventType: 'OpenTableSessionOpened',
@@ -618,7 +618,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
         scope: ReplayScope.session,
-        events: const <EventEnvelope>[
+        events: <EventEnvelope>[
           EventEnvelope(
             eventId: 'evt_1',
             eventType: 'OpenTableSessionOpened',
@@ -653,7 +653,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
         scope: ReplayScope.session,
-        events: const <EventEnvelope>[
+        events: <EventEnvelope>[
           EventEnvelope(
             eventId: 'evt_1',
             eventType: 'OpenTableSessionOpened',
@@ -687,7 +687,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
         scope: ReplayScope.session,
-        snapshot: const SnapshotEnvelope(
+        snapshot: SnapshotEnvelope(
           snapshotId: 'snap_1',
           protocolVersion: '1.0.0',
           tableId: 'table_1',
@@ -714,7 +714,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
         scope: ReplayScope.session,
-        events: const <EventEnvelope>[
+        events: <EventEnvelope>[
           EventEnvelope(
             eventId: 'evt_1',
             eventType: 'UnknownEvent',
@@ -749,7 +749,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
         scope: ReplayScope.session,
-        snapshot: const SnapshotEnvelope(
+        snapshot: SnapshotEnvelope(
           snapshotId: 'snap_1',
           snapshotType: 'UnknownSnapshot',
           snapshotVersion: '1.0',
@@ -779,7 +779,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
         scope: ReplayScope.session,
-        snapshot: const SnapshotEnvelope(
+        snapshot: SnapshotEnvelope(
           snapshotId: 'snap_1',
           protocolVersion: '1.0.0',
           tableId: 'table_1',
@@ -788,7 +788,7 @@ void main() {
           snapshotHash: 'snap_hash',
           payload: <String, Object?>{},
         ),
-        events: const <EventEnvelope>[
+        events: <EventEnvelope>[
           EventEnvelope(
             eventId: 'evt_4',
             eventType: 'PlayerCalled',
@@ -853,7 +853,7 @@ void main() {
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
         scope: ReplayScope.session,
-        events: const <EventEnvelope>[
+        events: <EventEnvelope>[
           EventEnvelope(
             eventId: 'evt_1',
             eventType: 'OpenTableSessionOpened',

@@ -1,7 +1,8 @@
 import '../serialization/canonical_json.dart';
+import 'model_collection_ownership.dart';
 
 class EventEnvelope {
-  const EventEnvelope({
+  EventEnvelope({
     required this.eventId,
     required this.eventType,
     required this.eventVersion,
@@ -12,10 +13,10 @@ class EventEnvelope {
     required this.handId,
     required this.emittedAt,
     required this.actorRef,
-    required this.payload,
+    required Map<String, Object?> payload,
     required this.prevEventHash,
     required this.eventHash,
-  });
+  }) : payload = freezeProtocolObjectMap(payload);
 
   final String eventId;
   final String eventType;

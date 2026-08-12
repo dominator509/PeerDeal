@@ -219,7 +219,7 @@ TableState projectAcceptedProtocolEventFixture(String fixturePath) {
 
 void main() {
   test('validator rejects open session command without table id', () {
-    const command = CommandEnvelope(
+    final command = CommandEnvelope(
       commandId: 'cmd_001',
       commandType: 'OpenTableSession',
       commandVersion: '1.0',
@@ -237,7 +237,7 @@ void main() {
   });
 
   test('validator rejects blank command envelope identity fields', () {
-    const command = CommandEnvelope(
+    final command = CommandEnvelope(
       commandId: ' ',
       commandType: 'OpenTableSession',
       commandVersion: ' ',
@@ -263,7 +263,7 @@ void main() {
   });
 
   test('validator rejects unsupported protocol command artifacts', () {
-    const command = CommandEnvelope(
+    final command = CommandEnvelope(
       commandId: 'cmd_unsupported',
       commandType: 'UnknownCommand',
       commandVersion: '1.0',
@@ -283,7 +283,7 @@ void main() {
   });
 
   test('validator rejects unsupported protocol versions', () {
-    const command = CommandEnvelope(
+    final command = CommandEnvelope(
       commandId: 'cmd_unsupported_protocol',
       commandType: 'OpenTableSession',
       commandVersion: '1.0',
@@ -303,7 +303,7 @@ void main() {
   });
 
   test('validator rejects padded and control-character identities', () {
-    const command = CommandEnvelope(
+    final command = CommandEnvelope(
       commandId: ' cmd_padded',
       commandType: 'OpenTableSession\n',
       commandVersion: '1.0',
@@ -1191,7 +1191,7 @@ void main() {
   });
 
   test('reducer is deterministic for same ordered events', () {
-    const event1 = EventEnvelope(
+    final event1 = EventEnvelope(
       eventId: 'evt_001',
       eventType: 'OpenTableSessionOpened',
       eventVersion: '1.0',
@@ -1207,7 +1207,7 @@ void main() {
       eventHash: 'hash_001',
     );
 
-    const event2 = EventEnvelope(
+    final event2 = EventEnvelope(
       eventId: 'evt_002',
       eventType: 'ParticipantAdmitted',
       eventVersion: '1.0',

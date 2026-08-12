@@ -545,7 +545,7 @@ TableState _openCoreState() {
       sessionId: 'sess_001',
       protocolVersion: '1.0.0',
     ),
-    const EventEnvelope(
+    EventEnvelope(
       eventId: 'evt_open',
       eventType: 'OpenTableSessionOpened',
       eventVersion: '1.0',

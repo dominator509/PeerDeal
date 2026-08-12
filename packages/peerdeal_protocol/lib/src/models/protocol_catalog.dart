@@ -38,7 +38,8 @@ class ProtocolCatalogEntry {
 }
 
 class ProtocolCatalogLockReport {
-  const ProtocolCatalogLockReport({required this.errors});
+  ProtocolCatalogLockReport({required List<String> errors})
+    : errors = List<String>.unmodifiable(errors);
 
   final List<String> errors;
 
@@ -76,8 +77,13 @@ class ProtocolCompatibilityResult {
 class ProtocolCatalog {
   const ProtocolCatalog({
     this.supportedProtocolVersion = currentProtocolVersion,
-    this.entries = defaultProtocolCatalogEntries,
-  });
+  }) : entries = defaultProtocolCatalogEntries;
+
+  /// Creates a catalog that owns its caller-supplied entry collection.
+  ProtocolCatalog.withEntries({
+    this.supportedProtocolVersion = currentProtocolVersion,
+    List<ProtocolCatalogEntry> entries = defaultProtocolCatalogEntries,
+  }) : entries = List<ProtocolCatalogEntry>.unmodifiable(entries);
 
   final ProtocolVersion supportedProtocolVersion;
   final List<ProtocolCatalogEntry> entries;

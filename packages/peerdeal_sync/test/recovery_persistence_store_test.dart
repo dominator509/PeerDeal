@@ -306,7 +306,7 @@ void main() {
 
     final result = store.saveSnapshot(
       scope: scope,
-      snapshot: const SnapshotEnvelope(
+      snapshot: SnapshotEnvelope(
         snapshotId: 'snapshot_1',
         protocolVersion: '1.0.0',
         tableId: 'table_1',
@@ -332,7 +332,7 @@ void main() {
 
     final result = store.saveSnapshot(
       scope: scope,
-      snapshot: const SnapshotEnvelope(
+      snapshot: SnapshotEnvelope(
         snapshotId: 'snapshot_1',
         protocolVersion: '1.0.0',
         tableId: 'table_1',

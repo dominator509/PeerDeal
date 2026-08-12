@@ -3,7 +3,7 @@ import 'package:peerdeal_replay/peerdeal_replay.dart';
 import 'package:test/test.dart';
 
 void main() {
-  const event = EventEnvelope(
+  final event = EventEnvelope(
     eventId: 'event_1',
     eventType: 'SessionOpened',
     eventVersion: '1.0',
