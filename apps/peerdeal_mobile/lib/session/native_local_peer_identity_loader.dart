@@ -7,11 +7,11 @@ class AppLocalPeerIdentity {
 }
 
 class AppLocalPeerIdentityLoadResult {
-  const AppLocalPeerIdentityLoadResult({
+  AppLocalPeerIdentityLoadResult({
     this.identity,
     this.revision = 0,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final AppLocalPeerIdentity? identity;
   final int revision;
@@ -52,7 +52,7 @@ class NativeLocalPeerIdentityLoader {
         !_isValidLabel(purpose) ||
         !_isValidLabel(algorithm) ||
         maxPeerIdLength < 1) {
-      return const AppLocalPeerIdentityLoadResult(
+      return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Local peer identity configuration is invalid.'],
       );
     }
@@ -67,13 +67,13 @@ class NativeLocalPeerIdentityLoader {
         snapshot = await bridge.loadKeyRing(namespace: namespace);
       }
     } on Object {
-      return const AppLocalPeerIdentityLoadResult(
+      return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Local peer identity storage could not be loaded.'],
       );
     }
 
     if (!snapshot.available) {
-      return const AppLocalPeerIdentityLoadResult(
+      return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Local peer identity storage is unavailable.'],
       );
     }
@@ -90,14 +90,14 @@ class NativeLocalPeerIdentityLoader {
       return AppLocalPeerIdentityLoadResult(revision: snapshot.revision);
     }
     if (matches.length != 1 || !matches.single.active) {
-      return const AppLocalPeerIdentityLoadResult(
+      return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Local peer identity records are ambiguous.'],
       );
     }
 
     final peerId = matches.single.secret;
     if (!_isValidPeerId(peerId)) {
-      return const AppLocalPeerIdentityLoadResult(
+      return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Persisted local peer identity is invalid.'],
       );
     }

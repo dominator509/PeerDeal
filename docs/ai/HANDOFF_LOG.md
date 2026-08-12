@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T171 Immutable Local-Identity Diagnostics
+
+Summary:
+- Mirrored local-identity loader and provisioner results now defensively copy
+  and freeze warning lists.
+- Focused mobile and desktop local-identity Flutter suites prove source-list
+  isolation and mutation rejection.
+
+Validation:
+- Mobile local-identity suite: passed 15 tests.
+- Desktop local-identity suite: passed 15 tests.
+- Full analyze, boundary-check, source-text, dependency-audit, and serialized
+  repository test gates passed.
+- Mobile debug APK and desktop Windows debug artifacts built successfully.
+- Windows native-host smoke passed app storage, capture, local-network,
+  transport, secure-key CAS/tombstone, and capture-release markers.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T170 Immutable Startup Diagnostics
 
 Summary:

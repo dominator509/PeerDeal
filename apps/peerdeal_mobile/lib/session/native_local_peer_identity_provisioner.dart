@@ -10,11 +10,11 @@ import 'native_local_peer_identity_writer.dart';
 typedef AppLocalPeerIdentityFactory = String Function();
 
 class AppLocalPeerIdentityProvisionResult {
-  const AppLocalPeerIdentityProvisionResult({
+  AppLocalPeerIdentityProvisionResult({
     this.identity,
-    this.warnings = const <String>[],
+    List<String> warnings = const <String>[],
     this.created = false,
-  });
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final AppLocalPeerIdentity? identity;
   final List<String> warnings;
@@ -93,7 +93,7 @@ class NativeLocalPeerIdentityProvisioner {
     try {
       peerId = _identityFactory();
     } on Object {
-      return const AppLocalPeerIdentityProvisionResult(
+      return AppLocalPeerIdentityProvisionResult(
         warnings: <String>['Local peer identity generation failed.'],
       );
     }
@@ -114,15 +114,13 @@ class NativeLocalPeerIdentityProvisioner {
         }
       }
       return AppLocalPeerIdentityProvisionResult(
-        warnings: <String>[
-          saved.warning ?? 'Local peer identity save failed.',
-        ],
+        warnings: <String>[saved.warning ?? 'Local peer identity save failed.'],
       );
     }
     final verified = await _loader.load(cancellation: cancellation);
     if (verified.warnings.isNotEmpty ||
         verified.identity?.peerId != identity.peerId) {
-      return const AppLocalPeerIdentityProvisionResult(
+      return AppLocalPeerIdentityProvisionResult(
         warnings: <String>[
           'Local peer identity persistence could not be verified.',
         ],

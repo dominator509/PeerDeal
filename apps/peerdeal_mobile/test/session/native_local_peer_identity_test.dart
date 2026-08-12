@@ -7,6 +7,24 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes local identity load warnings', () {
+    final warnings = <String>['warning_1'];
+    final result = AppLocalPeerIdentityLoadResult(warnings: warnings);
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
+  test('copies and freezes local identity provision warnings', () {
+    final warnings = <String>['warning_1'];
+    final result = AppLocalPeerIdentityProvisionResult(warnings: warnings);
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('loads one active local peer identity record', () async {
     final bridge = _MemorySecureKeyBridge(
       keys: const <SecureKeyRecord>[
@@ -107,9 +125,9 @@ void main() {
       'x' * 257,
     ]) {
       final bridge = _MemorySecureKeyBridge();
-      final result = await NativeLocalPeerIdentityWriter(bridge: bridge).save(
-        AppLocalPeerIdentity(peerId: peerId),
-      );
+      final result = await NativeLocalPeerIdentityWriter(
+        bridge: bridge,
+      ).save(AppLocalPeerIdentity(peerId: peerId));
 
       expect(result.isSuccess, isFalse);
       expect(result.warning, 'Local peer identity save request is invalid.');
@@ -138,22 +156,24 @@ void main() {
     expect(bridge.savedKeys, hasLength(1));
   });
 
-  test('uses a conditional native mutation when a storage revision is present',
-      () async {
-    final bridge = _ConditionalMemorySecureKeyBridge();
-    final provisioner = NativeLocalPeerIdentityProvisioner(
-      loader: NativeLocalPeerIdentityLoader(bridge: bridge),
-      writer: NativeLocalPeerIdentityWriter(bridge: bridge),
-      identityFactory: () => 'peer_revision_aware',
-    );
+  test(
+    'uses a conditional native mutation when a storage revision is present',
+    () async {
+      final bridge = _ConditionalMemorySecureKeyBridge();
+      final provisioner = NativeLocalPeerIdentityProvisioner(
+        loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+        writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+        identityFactory: () => 'peer_revision_aware',
+      );
 
-    final result = await provisioner.ensureIdentity();
+      final result = await provisioner.ensureIdentity();
 
-    expect(result.isSuccess, isTrue);
-    expect(result.identity?.peerId, 'peer_revision_aware');
-    expect(bridge.expectedSaveRevision, 0);
-    expect(bridge.revision, 1);
-  });
+      expect(result.isSuccess, isTrue);
+      expect(result.identity?.peerId, 'peer_revision_aware');
+      expect(bridge.expectedSaveRevision, 0);
+      expect(bridge.revision, 1);
+    },
+  );
 
   test('fails closed when native storage changes the saved identity', () async {
     final bridge = _MemorySecureKeyBridge(
