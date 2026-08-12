@@ -1516,6 +1516,52 @@ void main() {
     expect(find.text('Route: /holdem-stale'), findsNothing);
   });
 
+  testWidgets(
+    'ignores a stale loaded production session after factory removal',
+    (tester) async {
+      final staleLoad =
+          Completer<AppHoldemProductionSessionConfigurationLoadResult>();
+
+      await tester.pumpWidget(
+        PeerDealMobileApp(
+          runtime: PeerDealMobileRuntime(
+            enabledDemoRoutePaths: const <String>{
+              DemoSliceRoutes.home,
+              DemoSliceRoutes.join,
+            },
+            joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+              bootstrapCoordinator: FakeBootstrapCoordinator(),
+            ).create,
+            holdemProductionSessionConfigurationLoader: (_) => staleLoad.future,
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Join'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(
+        PeerDealMobileApp(
+          runtime: PeerDealMobileRuntime(
+            enabledDemoRoutePaths: const <String>{
+              DemoSliceRoutes.home,
+              DemoSliceRoutes.join,
+            },
+            joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+              bootstrapCoordinator: FakeBootstrapCoordinator(),
+            ).create,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      staleLoad.complete(_availableConfigurationLoadResult('/holdem-stale'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Route: /holdem-stale'), findsNothing);
+    },
+  );
+
   testWidgets('fails closed when typed configuration loader is unavailable', (
     tester,
   ) async {

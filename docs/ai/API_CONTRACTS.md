@@ -508,8 +508,9 @@ paths, passes the existing bootstrap route through native readiness gating, and
 renders the safe fallback for loader errors or unavailable results. Each
 asynchronous loaded-session handoff is generation-guarded by the shell, so late
 results from an older join/load cannot push stale fallback or production
-navigation after a newer handoff. The shell does not interpret warnings, select
-product state, or move this contract into a shared package.
+navigation after a newer handoff or after the generated configuration factory is
+removed or replaced. The shell does not interpret warnings, select product
+state, or move this contract into a shared package.
 
 The mirrored app runtimes also accept an optional
 `AppHoldemProductionSessionConfigurationFactory`. If no explicit

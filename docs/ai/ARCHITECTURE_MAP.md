@@ -104,7 +104,8 @@ Local Hold'em producer flow:
    concurrent retries resolve against the live pending queue, and accepted
    close/wipe retention clears pending checkpoint state. The app shell assigns
    generation tokens to asynchronous loaded-session handoffs so stale results
-   cannot navigate after a newer join or route configuration.
+   cannot navigate after a newer join, route configuration, or removal/replacement
+   of the generated configuration loader factory.
   atomic recovery transaction. It enforces the shared 4,096-event recovery
   window default before snapshot decoding or suffix materialization, and it
   honors route cancellation before recovery

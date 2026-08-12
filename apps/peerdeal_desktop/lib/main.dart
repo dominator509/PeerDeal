@@ -1132,6 +1132,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
     AppHoldemProductionSessionConfigurationFactory? configurationFactory,
   ) {
     if (configurationFactory == null) {
+      _invalidateProductionSessionLoad();
       _defaultJoinFlowSessionConfigurationFactory = null;
       _defaultJoinFlowSessionConfigurationLoaderFactory = null;
       return null;
@@ -1141,6 +1142,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       configurationFactory,
     )) {
       _defaultJoinFlowSessionConfigurationFactory = configurationFactory;
+      _invalidateProductionSessionLoad();
       _defaultJoinFlowSessionConfigurationLoaderFactory =
           AppHoldemProductionSessionConfigurationLoaderFactory(
             configurationFactory: configurationFactory,

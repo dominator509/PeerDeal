@@ -1132,6 +1132,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     AppHoldemProductionSessionConfigurationFactory? configurationFactory,
   ) {
     if (configurationFactory == null) {
+      _invalidateProductionSessionLoad();
       _defaultJoinFlowSessionConfigurationFactory = null;
       _defaultJoinFlowSessionConfigurationLoaderFactory = null;
       return null;
@@ -1141,6 +1142,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       configurationFactory,
     )) {
       _defaultJoinFlowSessionConfigurationFactory = configurationFactory;
+      _invalidateProductionSessionLoad();
       _defaultJoinFlowSessionConfigurationLoaderFactory =
           AppHoldemProductionSessionConfigurationLoaderFactory(
             configurationFactory: configurationFactory,

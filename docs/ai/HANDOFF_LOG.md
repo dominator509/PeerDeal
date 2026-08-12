@@ -2,6 +2,24 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T138 Production Configuration Lifecycle Hardening
+
+Summary:
+- Mirrored mobile and desktop app shells invalidate the active loaded-session
+  generation when the optional configuration factory is removed or replaced.
+- A delayed loader result from the previous runtime/widget contract cannot push
+  a stale route after rebuild.
+
+Files changed:
+- Mirrored app `main.dart` shells and app-shell widget tests.
+- `HANDOFF.md`, `PROJECT_STATE.md`, `HANDOFF_QUEUE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop app-shell Flutter suites pass, including delayed
+  stale completion after factory removal.
+- Full repository gates remain to be run before commit and push.
+
 ### 2026-08-11 - Codex - T137 Production Handoff Staleness Hardening
 
 Summary:

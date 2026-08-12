@@ -1196,6 +1196,23 @@ Remaining:
   cross-device validation, other-platform hosts, database persistence, and
   release signing remain separate.
 
+## Recent T138 Production Configuration Lifecycle Hardening
+
+- Mirrored mobile and desktop shells now invalidate the active loaded-session
+  generation when the optional configuration factory is removed or replaced.
+- A delayed result from the previous runtime/widget configuration cannot push a
+  stale production route after the app shell rebuilds.
+
+Tests and gates:
+- Focused mobile and desktop app-shell suites pass, including delayed stale
+  completion after factory removal.
+- Full repository gates remain required before commit and push.
+
+Remaining:
+- Product-owned concrete session source/state invocation, real device and
+  cross-device validation, other-platform hosts, database persistence, and
+  release signing remain separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints

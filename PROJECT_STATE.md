@@ -1163,6 +1163,17 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Product state/source selection, database persistence, device/network
   validation, other-platform hosts, and release signing remain open.
 
+## T138 Production Configuration Lifecycle Hardening
+
+- Mirrored app shells now invalidate the active asynchronous production-session
+  handoff when the optional configuration factory is removed or replaced.
+- Delayed results from a loader created under the previous configuration cannot
+  push a stale route after a runtime/widget rebuild changes that contract.
+- Focused mobile and desktop app-shell suites cover factory removal with a
+  delayed stale result.
+- Product state/source selection, database persistence, device/network
+  validation, other-platform hosts, and release signing remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

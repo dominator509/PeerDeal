@@ -1670,6 +1670,15 @@ before fallback or production navigation. Mirrored mobile and desktop
 app-shell suites cover delayed stale completion. This protects route
 orchestration only and does not create product session state or a database.
 
+The T138 follow-up closes the remaining app-shell configuration lifecycle edge.
+Removing or replacing the optional production-session configuration factory now
+invalidates any in-flight generated loader handoff before the next rebuild can
+expose the changed route contract. Mirrored mobile and desktop suites cover
+factory removal with a delayed stale completion. This remains app-shell route
+orchestration hardening; product source/state selection, database persistence,
+native host implementations, device validation, and release signing remain
+separate readiness work.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
