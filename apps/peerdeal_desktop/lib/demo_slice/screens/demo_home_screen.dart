@@ -6,18 +6,24 @@ import '../controllers/demo_slice_controller.dart';
 import '../models/demo_scenario.dart';
 
 class DemoHomeScreen extends StatelessWidget {
-  const DemoHomeScreen({
+  DemoHomeScreen({
     super.key,
     required this.controller,
-    required this.demoNavigationActions,
-    required this.productionNavigationActions,
+    required List<DemoHomeNavigationAction> demoNavigationActions,
+    required List<DemoHomeNavigationAction> productionNavigationActions,
     required this.onSelectScenario,
     this.hasProductionNavigation = false,
     this.title = 'PeerDeal demo',
     this.subtitle = 'Fixture-backed app orchestration',
     this.showDemoScenarios = true,
     this.nativeReadiness,
-  });
+  }) : demoNavigationActions = List<DemoHomeNavigationAction>.unmodifiable(
+         demoNavigationActions,
+       ),
+       productionNavigationActions =
+           List<DemoHomeNavigationAction>.unmodifiable(
+             productionNavigationActions,
+           );
 
   final DemoSliceController controller;
   final List<DemoHomeNavigationAction> demoNavigationActions;

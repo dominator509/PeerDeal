@@ -2171,6 +2171,17 @@ markers. Product state provisioning, durable database replacement,
 device/network validation, other-platform hosts, release signing, and final
 navigation/UX validation remain separate.
 
+The T190 follow-up closes mirrored route and home-policy collection ownership.
+`JoinFlowRoute` and `SetupFlowRoute` now snapshot their enabled mode sets at
+construction, and `DemoHomeScreen` snapshots demo and production navigation
+action lists before rendering. Focused mobile and desktop route suites passed
+36 tests each, including ownership regressions. Full repository gates and
+Android/Windows artifact validation passed. Android debug, Windows debug, and
+Windows native-host smoke validation passed, including all 16 native-host
+smoke markers. Product state provisioning, durable database replacement,
+device/network validation, other-platform hosts, release signing, and final
+navigation/UX validation remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

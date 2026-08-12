@@ -13,7 +13,7 @@ typedef SetupFlowIntentFactory = SetupIntent Function(SetupFlowDemoMode mode);
 const int _maxSetupMessages = 4;
 
 class SetupFlowRoute extends StatefulWidget {
-  const SetupFlowRoute({
+  SetupFlowRoute({
     super.key,
     this.initialMode = SetupFlowDemoMode.buildReady,
     Set<SetupFlowDemoMode>? enabledModes,
@@ -21,12 +21,13 @@ class SetupFlowRoute extends StatefulWidget {
     SetupFlowIntentFactory? setupIntentFactory,
   }) : _orchestratorFactory = orchestratorFactory,
        _setupIntentFactory = setupIntentFactory ?? _defaultSetupIntentFor,
-       _enabledModes =
-           enabledModes ??
-           const <SetupFlowDemoMode>{
-             SetupFlowDemoMode.buildReady,
-             SetupFlowDemoMode.invalid,
-           };
+       _enabledModes = Set<SetupFlowDemoMode>.unmodifiable(
+         enabledModes ??
+             const <SetupFlowDemoMode>{
+               SetupFlowDemoMode.buildReady,
+               SetupFlowDemoMode.invalid,
+             },
+       );
 
   final SetupFlowDemoMode initialMode;
   final SetupFlowOrchestratorFactory _orchestratorFactory;

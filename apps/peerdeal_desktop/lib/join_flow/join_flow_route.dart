@@ -27,7 +27,7 @@ typedef JoinFlowSessionReadyHandler =
 const int _maxJoinDiagnostics = 4;
 
 class JoinFlowRoute extends StatefulWidget {
-  const JoinFlowRoute({
+  JoinFlowRoute({
     super.key,
     this.initialMode = JoinFlowDemoMode.firstJoin,
     Set<JoinFlowDemoMode>? enabledModes,
@@ -37,15 +37,16 @@ class JoinFlowRoute extends StatefulWidget {
     this.onSessionReady,
   }) : _orchestratorFactory = orchestratorFactory,
        _inviteContextFactory = inviteContextFactory ?? _defaultInviteContextFor,
-       _enabledModes =
-           enabledModes ??
-           const <JoinFlowDemoMode>{
-             JoinFlowDemoMode.firstJoin,
-             JoinFlowDemoMode.ackRequired,
-             JoinFlowDemoMode.unsupportedProtocol,
-             JoinFlowDemoMode.roleDenied,
-             JoinFlowDemoMode.rejoin,
-           };
+       _enabledModes = Set<JoinFlowDemoMode>.unmodifiable(
+         enabledModes ??
+             const <JoinFlowDemoMode>{
+               JoinFlowDemoMode.firstJoin,
+               JoinFlowDemoMode.ackRequired,
+               JoinFlowDemoMode.unsupportedProtocol,
+               JoinFlowDemoMode.roleDenied,
+               JoinFlowDemoMode.rejoin,
+             },
+       );
 
   final JoinFlowDemoMode initialMode;
   final JoinFlowOrchestratorFactory _orchestratorFactory;

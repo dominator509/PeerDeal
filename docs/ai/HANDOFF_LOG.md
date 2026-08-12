@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T190 Immutable Route And Home Policy
+
+Summary:
+- Mirrored `JoinFlowRoute` and `SetupFlowRoute` now snapshot enabled mode sets
+  before route state can observe them.
+- `DemoHomeScreen` snapshots demo and production navigation action lists at
+  construction, keeping home policy stable across caller mutation.
+- Const fixtures were migrated without changing route behavior or navigation
+  labels.
+
+Validation:
+- Focused mirrored route suites passed 36 tests each, including three
+  ownership regressions per platform.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Full repository gates, Android/Windows host builds, and Windows native-host
+  smoke validation remain to be run for this change. Product state provisioning,
+  durable database replacement, device/network validation, other-platform
+  hosts, release signing, and final navigation/UX validation remain external or
+  integration-owned.
+
 ### 2026-08-12 - Codex - T189 Immutable App Output Models
 
 Summary:

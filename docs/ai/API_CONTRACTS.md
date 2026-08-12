@@ -172,6 +172,11 @@ and native-readiness route gates before exposing them to app-shell routing.
 Those public collections are read-only views; `withOverrides` applies the same
 snapshot boundary to replacement collections, so callers must not rely on
 mutating runtime configuration after construction.
+`JoinFlowRoute` and `SetupFlowRoute` independently snapshot their enabled mode
+sets before route state or asynchronous orchestration observes them.
+`DemoHomeScreen` snapshots both demo and production navigation action lists
+before rendering; callers must treat route mode policy and home navigation
+collections as read-only after construction.
 Mounted receipt surfaces scrub receipt/recovery status, messages, shareable
 fields, recommended actions, and diagnostics before rendering. Rendered receipt
 shareable fields and recovery diagnostics must be bounded with stable
