@@ -1847,6 +1847,15 @@ isolation and mutation rejection. Durable database replacement, real product
 state selection, device/network validation, other-platform hosts, release
 signing, and final UX remain separate.
 
+The T172 follow-up closes the native-readiness and transport-source diagnostic
+ownership gap. Mirrored readiness snapshots and transport poll/start results
+now defensively copy and freeze warning lists, preventing caller-owned
+diagnostics from changing across native readiness and live transport lifecycle
+boundaries. Focused mobile and desktop readiness and transport-source suites
+cover source-list isolation and mutation rejection. Durable database replacement,
+real product state selection, device/network validation, other-platform hosts,
+release signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

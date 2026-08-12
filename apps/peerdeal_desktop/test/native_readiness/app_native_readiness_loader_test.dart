@@ -5,6 +5,21 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes readiness warning diagnostics', () {
+    final warnings = <String>['warning_1'];
+    final result = AppNativeReadinessSnapshot(
+      captureProtectionReady: false,
+      localNetworkDiscoveryReady: false,
+      nativeTransportReady: false,
+      secureKeyStorageReady: false,
+      warnings: warnings,
+    );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('reports ready when all native capabilities are available', () async {
     final secureStorage = _FakeSecureKeyStorageBridge(
       snapshot: const SecureKeyStorageSnapshot(available: true, keys: []),

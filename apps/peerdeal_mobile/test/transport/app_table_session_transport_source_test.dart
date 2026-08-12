@@ -6,6 +6,28 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes transport poll warnings', () {
+    final warnings = <String>['warning_1'];
+    final result = AppTableSessionTransportPollResult.unavailable(
+      warnings: warnings,
+    );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
+  test('copies and freezes transport start warnings', () {
+    final warnings = <String>['warning_1'];
+    final result = AppTableSessionTransportSourceStartResult.unavailable(
+      warnings: warnings,
+    );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('polls a drain and counts accepted and rejected frames', () async {
     final source = AppTableSessionTransportSource(
       sessionId: 'session_1',
@@ -217,13 +239,9 @@ void main() {
         final start = source.start();
         final poll = await source.pollNow();
         expect(start.isSuccess, isFalse);
-        expect(start.warnings, [
-          'Native transport source scope is invalid.',
-        ]);
+        expect(start.warnings, ['Native transport source scope is invalid.']);
         expect(poll.available, isFalse);
-        expect(poll.warnings, [
-          'Native transport source scope is invalid.',
-        ]);
+        expect(poll.warnings, ['Native transport source scope is invalid.']);
         expect(drainCalls, 0);
       }
     },

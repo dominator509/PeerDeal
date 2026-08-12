@@ -4,13 +4,13 @@ const _defaultSecureKeyNamespace = 'peerdeal.receipts';
 const _defaultNativeTransportMaxPayloadBytes = 64 * 1024;
 
 class AppNativeReadinessSnapshot {
-  const AppNativeReadinessSnapshot({
+  AppNativeReadinessSnapshot({
     required this.captureProtectionReady,
     required this.localNetworkDiscoveryReady,
     required this.nativeTransportReady,
     required this.secureKeyStorageReady,
-    required this.warnings,
-  });
+    required List<String> warnings,
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool captureProtectionReady;
   final bool localNetworkDiscoveryReady;

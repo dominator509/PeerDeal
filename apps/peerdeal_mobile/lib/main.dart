@@ -709,7 +709,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       _nativeReadinessFuture = loader
           .load(cancellation: cancellation.future)
           .catchError(
-            (_) => const AppNativeReadinessSnapshot(
+            (_) => AppNativeReadinessSnapshot(
               captureProtectionReady: false,
               localNetworkDiscoveryReady: false,
               nativeTransportReady: false,

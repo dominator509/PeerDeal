@@ -22,20 +22,21 @@ typedef NativeTransportSourceTimerFactory =
 enum AppTableSessionTransportSourceState { idle, running, stopped, disposed }
 
 class AppTableSessionTransportPollResult {
-  const AppTableSessionTransportPollResult({
+  AppTableSessionTransportPollResult({
     required this.available,
     required this.receivedFrameCount,
     required this.acceptedFrameCount,
     required this.rejectedFrameCount,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
-  const AppTableSessionTransportPollResult.unavailable({
-    this.warnings = const <String>[],
+  AppTableSessionTransportPollResult.unavailable({
+    List<String> warnings = const <String>[],
   }) : available = false,
        receivedFrameCount = 0,
        acceptedFrameCount = 0,
-       rejectedFrameCount = 0;
+       rejectedFrameCount = 0,
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool available;
   final int receivedFrameCount;
@@ -47,26 +48,27 @@ class AppTableSessionTransportPollResult {
 }
 
 class AppTableSessionTransportSourceStartResult {
-  const AppTableSessionTransportSourceStartResult({
+  AppTableSessionTransportSourceStartResult({
     required this.started,
     required this.alreadyRunning,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
-  const AppTableSessionTransportSourceStartResult.started()
+  AppTableSessionTransportSourceStartResult.started()
     : started = true,
       alreadyRunning = false,
       warnings = const <String>[];
 
-  const AppTableSessionTransportSourceStartResult.alreadyRunning()
+  AppTableSessionTransportSourceStartResult.alreadyRunning()
     : started = false,
       alreadyRunning = true,
       warnings = const <String>[];
 
-  const AppTableSessionTransportSourceStartResult.unavailable({
-    this.warnings = const <String>[],
+  AppTableSessionTransportSourceStartResult.unavailable({
+    List<String> warnings = const <String>[],
   }) : started = false,
-       alreadyRunning = false;
+       alreadyRunning = false,
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool started;
   final bool alreadyRunning;
@@ -126,12 +128,12 @@ class AppTableSessionTransportSource {
 
   AppTableSessionTransportSourceStartResult start() {
     if (_state == AppTableSessionTransportSourceState.disposed) {
-      return const AppTableSessionTransportSourceStartResult.unavailable(
+      return AppTableSessionTransportSourceStartResult.unavailable(
         warnings: <String>['Native transport source is disposed.'],
       );
     }
     if (isRunning) {
-      return const AppTableSessionTransportSourceStartResult.alreadyRunning();
+      return AppTableSessionTransportSourceStartResult.alreadyRunning();
     }
 
     final configurationError = _configurationError;
@@ -147,11 +149,11 @@ class AppTableSessionTransportSource {
       });
       _state = AppTableSessionTransportSourceState.running;
       unawaited(pollNow());
-      return const AppTableSessionTransportSourceStartResult.started();
+      return AppTableSessionTransportSourceStartResult.started();
     } on Object {
       _timer = null;
       _state = AppTableSessionTransportSourceState.stopped;
-      return const AppTableSessionTransportSourceStartResult.unavailable(
+      return AppTableSessionTransportSourceStartResult.unavailable(
         warnings: <String>['Native transport source could not start.'],
       );
     }
@@ -177,7 +179,7 @@ class AppTableSessionTransportSource {
   Future<AppTableSessionTransportPollResult> pollNow() async {
     if (_state == AppTableSessionTransportSourceState.disposed) {
       return _remember(
-        const AppTableSessionTransportPollResult.unavailable(
+        AppTableSessionTransportPollResult.unavailable(
           warnings: <String>['Native transport source is disposed.'],
         ),
       );
@@ -230,7 +232,7 @@ class AppTableSessionTransportSource {
     unawaited(
       _disposeCancellation.future.then<void>((_) {
         completeValue(
-          const AppTableSessionTransportPollResult.unavailable(
+          AppTableSessionTransportPollResult.unavailable(
             warnings: <String>[_pollCancellationWarning],
           ),
         );
@@ -242,12 +244,12 @@ class AppTableSessionTransportSource {
       unawaited(
         cancellation.then<void>(
           (_) => completeValue(
-            const AppTableSessionTransportPollResult.unavailable(
+            AppTableSessionTransportPollResult.unavailable(
               warnings: <String>[_pollCancellationWarning],
             ),
           ),
           onError: (Object _, StackTrace _) => completeValue(
-            const AppTableSessionTransportPollResult.unavailable(
+            AppTableSessionTransportPollResult.unavailable(
               warnings: <String>[_pollCancellationWarning],
             ),
           ),
@@ -268,7 +270,7 @@ class AppTableSessionTransportSource {
 
     final drainResult = await _loadDrainResult();
     if (drainResult == null) {
-      return const AppTableSessionTransportPollResult.unavailable(
+      return AppTableSessionTransportPollResult.unavailable(
         warnings: <String>['Native transport source poll failed.'],
       );
     }

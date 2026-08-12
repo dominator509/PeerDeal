@@ -1327,6 +1327,16 @@ Remaining:
   validation, other-platform hosts, release signing, and final UX remain
   separate.
 
+## T172 Immutable Readiness/Transport Diagnostics
+
+- Mirrored native-readiness snapshots and transport-source poll/start result
+  constructors now defensively copy and freeze warning diagnostics.
+- Focused mobile and desktop readiness and transport-source tests prove
+  caller-owned warning lists cannot alter projected results.
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## T171 Immutable Local-Identity Diagnostics
 
 - Mirrored local-identity loader and provisioner result constructors now
