@@ -2202,6 +2202,15 @@ APK build passed after the manifest change. Real-device permission/runtime
 behavior, cross-device reachability, release signing, and the remaining
 product-state/database work remain separate.
 
+The T193 follow-up closes the Android native transport teardown delivery gap.
+Transport work that completed after handler closure could previously post its
+stale success payload on the main looper. Delivery now re-checks closure and
+returns the operation-specific unavailable payload for capability, send, and
+receive calls, matching the secure-key handler's fail-closed lifecycle rule.
+The Android debug APK build passed after the change. Real-device engine
+teardown behavior, cross-device reachability, release signing, and the
+remaining product-state/database work remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T193 Android Transport Teardown Delivery
+
+Summary:
+- Android native transport result delivery now re-checks handler closure on
+  the main looper before returning a worker result.
+- Late capability, send, and receive results return their existing
+  operation-specific unavailable payloads instead of stale success data.
+- The generic method-channel payload and package boundaries are unchanged.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Android debug APK build: passed.
+- `git diff --check`: passed.
+
+Risks:
+- Real-device engine teardown/runtime behavior and cross-device multicast
+  reachability remain external validation; product state provisioning, durable
+  database replacement, other-platform hosts, release signing, and final
+  navigation/UX remain separate.
+
+Next reviewer:
+- Continue with the next documented production gap without inventing platform
+  endpoint semantics.
+
 ### 2026-08-12 - Codex - T192 Android Multicast Permissions
 
 Summary:

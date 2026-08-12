@@ -95,7 +95,7 @@ internal class NativeTransportHandler(
         operation: () -> Map<String, Any?>,
     ) {
         if (closed) {
-            postResult(result, fallback())
+            postResult(result, fallback(), fallback)
             return
         }
         try {
@@ -105,15 +105,21 @@ internal class NativeTransportHandler(
                 } catch (_: Exception) {
                     fallback()
                 }
-                postResult(result, payload)
+                // Engine teardown can happen after worker completion but before
+                // the result reaches Flutter. Re-check closure at delivery.
+                postResult(result, payload, fallback)
             }
         } catch (_: RejectedExecutionException) {
-            postResult(result, fallback())
+            postResult(result, fallback(), fallback)
         }
     }
 
-    private fun postResult(result: MethodChannel.Result, payload: Map<String, Any?>) {
-        mainHandler.post { result.success(payload) }
+    private fun postResult(
+        result: MethodChannel.Result,
+        payload: Map<String, Any?>,
+        fallback: () -> Map<String, Any?>,
+    ) {
+        mainHandler.post { result.success(if (closed) fallback() else payload) }
     }
 
     private fun capabilityPayload(available: Boolean): Map<String, Any?> {

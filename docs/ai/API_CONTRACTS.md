@@ -332,6 +332,10 @@ no usable interface is available. This is host readiness behavior, not a
 discovery or endpoint advertisement protocol. The Android app manifest declares
 the Wi-Fi state and multicast-state permissions required by its existing
 `WifiManager.MulticastLock` path.
+Android native transport handlers must re-check handler closure when posting
+worker results back to the main looper; late capability, send, and receive
+results must return their operation-specific unavailable payloads rather than
+stale success data.
 The Android and Windows host implementations require strict UTF-8 for native
 session and peer identity fields and reject C1/control-bearing or padded values
 before queueing received frames or sending datagrams. Host input normalization
