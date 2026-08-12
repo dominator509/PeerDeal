@@ -49,6 +49,10 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       ..._validateReplayRange(request),
     ];
 
+    if (mismatches.isEmpty) {
+      mismatches.addAll(_validateSnapshotIntegrity(request));
+    }
+
     if (mismatches.isNotEmpty) {
       return ReplayResult<TState>(
         isSuccess: false,
@@ -95,13 +99,33 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       );
     }
 
+    if (request.snapshot != null &&
+        projector is! ReplaySnapshotStateProjector<TState>) {
+      return ReplayResult<TState>(
+        isSuccess: false,
+        state: null,
+        finalAppliedEventSeq: null,
+        reconstructedAnchor: null,
+        mismatches: <ReplayMismatch>[
+          ReplayMismatch(
+            code: 'ERR_REPLAY_SNAPSHOT_PROJECTOR_UNAVAILABLE',
+            message: 'Replay projector cannot hydrate the supplied snapshot.',
+          ),
+        ],
+      );
+    }
+
     late TState state;
     try {
-      state = projector.createBaseState(
-        tableId: request.tableId,
-        sessionId: request.sessionId,
-        protocolVersion: request.protocolVersion,
-      );
+      final snapshotProjector = projector;
+      state = request.snapshot == null
+          ? snapshotProjector.createBaseState(
+              tableId: request.tableId,
+              sessionId: request.sessionId,
+              protocolVersion: request.protocolVersion,
+            )
+          : (snapshotProjector as ReplaySnapshotStateProjector<TState>)
+                .createStateFromSnapshot(snapshot: request.snapshot!);
 
       for (final event in selectedEvents) {
         state = projector.applyEvent(state: state, event: event);
@@ -360,5 +384,44 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     }
 
     return mismatches;
+  }
+
+  List<ReplayMismatch> _validateSnapshotIntegrity(ReplayRequest request) {
+    final snapshot = request.snapshot;
+    if (snapshot == null) return const <ReplayMismatch>[];
+    if (snapshot.snapshotBaseEventSeq < 0) {
+      return <ReplayMismatch>[
+        ReplayMismatch(
+          code: 'ERR_REPLAY_SNAPSHOT_BASE_SEQUENCE_INVALID',
+          message: 'Replay snapshot base event sequence must not be negative.',
+          expected: '>=0',
+          actual: snapshot.snapshotBaseEventSeq,
+        ),
+      ];
+    }
+
+    late final String expectedHash;
+    try {
+      expectedHash = computeCanonicalHash(snapshot.payload);
+    } on Object catch (error) {
+      return <ReplayMismatch>[
+        ReplayMismatch(
+          code: 'ERR_REPLAY_SNAPSHOT_HASH_CALCULATION_FAILURE',
+          message: 'Replay snapshot hash calculation failed.',
+          actual: error.runtimeType.toString(),
+        ),
+      ];
+    }
+    if (snapshot.snapshotHash == expectedHash) {
+      return const <ReplayMismatch>[];
+    }
+    return <ReplayMismatch>[
+      ReplayMismatch(
+        code: 'ERR_REPLAY_SNAPSHOT_PAYLOAD_HASH_MISMATCH',
+        message: 'Replay snapshot payload hash does not match its contents.',
+        expected: expectedHash,
+        actual: snapshot.snapshotHash,
+      ),
+    ];
   }
 }

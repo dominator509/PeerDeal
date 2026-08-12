@@ -15,14 +15,17 @@ class FakeTableProjection {
   final List<String> appliedEventTypes;
 
   FakeTableProjection copyWithEvent(String eventType) => FakeTableProjection(
-        tableId: tableId,
-        sessionId: sessionId,
-        protocolVersion: protocolVersion,
-        appliedEventTypes: [...appliedEventTypes, eventType],
-      );
+    tableId: tableId,
+    sessionId: sessionId,
+    protocolVersion: protocolVersion,
+    appliedEventTypes: [...appliedEventTypes, eventType],
+  );
 }
 
-class FakeTableProjector implements ReplayStateProjector<FakeTableProjection> {
+class FakeTableProjector
+    implements
+        ReplayStateProjector<FakeTableProjection>,
+        ReplaySnapshotStateProjector<FakeTableProjection> {
   @override
   FakeTableProjection createBaseState({
     required String tableId,
@@ -34,6 +37,18 @@ class FakeTableProjector implements ReplayStateProjector<FakeTableProjection> {
       sessionId: sessionId,
       protocolVersion: protocolVersion,
       appliedEventTypes: const <String>[],
+    );
+  }
+
+  @override
+  FakeTableProjection createStateFromSnapshot({
+    required SnapshotEnvelope snapshot,
+  }) {
+    return FakeTableProjection(
+      tableId: snapshot.tableId,
+      sessionId: snapshot.sessionId,
+      protocolVersion: snapshot.protocolVersion,
+      appliedEventTypes: <String>['Snapshot:${snapshot.snapshotId}'],
     );
   }
 

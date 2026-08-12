@@ -17,9 +17,11 @@ Starter scaffold for PeerDeal replay, reconstruction, and mismatch diagnostics.
 - capture / receipt runtime behavior
 - canonical truth outside verified config + ordered events
 
-## Starter status
-This scaffold is aligned to the locked PeerDeal replay/recovery direction and is intended
-as the first package drop for Sprint 7. It is not yet a production reconstruction engine.
+## Status
+The generic replay boundary now verifies snapshot payload hashes and refuses to
+apply a snapshot unless the supplied projector implements the optional typed
+snapshot hydration contract. Product-owned projectors still own snapshot
+payload interpretation and must preserve the invite-scoped state contract.
 
 ## Hardened scaffold coverage
 - Replay rejects unsupported request, snapshot, and event protocol/catalog
@@ -40,3 +42,7 @@ as the first package drop for Sprint 7. It is not yet a production reconstructio
   table/session stream into verified state.
 - Replay now converts projector construction/application failures into an
   explicit failed result instead of letting reconstruction exceptions escape.
+- Snapshot replay recomputes the canonical payload hash and rejects negative
+  snapshot base sequences or tampered payloads before projection. Snapshot
+  requests require `ReplaySnapshotStateProjector` so the suffix is applied to
+  verified typed snapshot state rather than a fresh base state.

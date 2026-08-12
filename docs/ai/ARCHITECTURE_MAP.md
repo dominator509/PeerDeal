@@ -164,8 +164,11 @@ Recovery:
 
 1. Recovery request carries optional `SnapshotEnvelope` plus ordered events.
 2. Replay bounds the raw request event list, then validates ranges, event
-   windows, gaps, anchors, and unsupported versions before projection; anchor
-   hashing and snapshot suffix planning share the same event bound.
+   windows, gaps, anchors, unsupported versions, and canonical snapshot
+   payload hashes before projection; snapshot requests require a typed
+   `ReplaySnapshotStateProjector` before their verified contiguous suffix is
+   applied. Anchor hashing and snapshot suffix planning share the same event
+   bound.
 3. Sync bounds direct caller-provided event lists before conflict detection or
    snapshot/suffix projection, validates each event through the protocol codec
    and each snapshot through bounded canonical JSON, then detects conflicts and

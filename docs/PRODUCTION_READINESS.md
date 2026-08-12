@@ -2411,6 +2411,18 @@ crypto coverage passes. Provider-specific proof semantics, product
 verification wiring, real device/network validation, durable database
 persistence, other-platform hosts, and release signing remain separate.
 
+The T215 follow-up closes the replay snapshot trust and reconstruction gap.
+`BasicReplayEngine` now recomputes canonical snapshot payload hashes, rejects
+negative snapshot base sequences, and requires the optional
+`ReplaySnapshotStateProjector` contract before applying a verified contiguous
+suffix. Snapshot replay therefore hydrates typed product state through the
+projector boundary instead of silently discarding the snapshot and rebuilding
+from a fresh base state. Tampered snapshots and projectors without snapshot
+hydration fail closed with stable mismatch codes; no-snapshot replay remains
+compatible. Product-owned snapshot payload interpretation, durable database
+persistence, device/network validation, other-platform hosts, provider-specific
+proof semantics, release signing, and final UX remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

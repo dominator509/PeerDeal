@@ -2,6 +2,39 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T215 Verified Snapshot Replay Hydration
+
+Summary:
+- `BasicReplayEngine` now recomputes the canonical snapshot payload hash and
+  rejects negative snapshot base sequences before selection or projection.
+- Snapshot replay requires the optional `ReplaySnapshotStateProjector` contract
+  and applies the ordered suffix to typed hydrated snapshot state instead of
+  silently rebuilding from a fresh base state.
+- Existing no-snapshot replay remains compatible; projector absence and tampered
+  snapshot payloads return stable fail-closed mismatch codes.
+
+Files changed:
+- `packages/peerdeal_replay/lib/src/contracts/replay_state_projector.dart`
+- `packages/peerdeal_replay/lib/src/engine/basic_replay_engine.dart`
+- `packages/peerdeal_replay/test/fakes/fake_table_projector.dart`
+- `packages/peerdeal_replay/test/basic_replay_engine_test.dart`
+- `packages/peerdeal_replay/README.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/ai/HANDOFF_LOG.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused `peerdeal_replay` suite: 39 tests passed.
+- Full repository gates and app/native artifact validation remain required.
+
+Risks:
+- Product-owned snapshot payload projectors, durable database persistence,
+  device/network validation, other-platform hosts, provider-specific proof
+  semantics, and release signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T214 Fail-Closed Verification Input Boundary
 
 Summary:

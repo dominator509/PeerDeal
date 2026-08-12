@@ -77,6 +77,13 @@ bound for direct callers. `BasicReplayEngine` fails closed with
 `ERR_REPLAY_SELECTION_FAILURE` or `ERR_REPLAY_ANCHOR_CALCULATION_FAILURE` if an
 injected helper rejects input or canonical anchor materialization fails.
 
+When a request carries a snapshot, `BasicReplayEngine` recomputes the canonical
+payload hash and rejects negative snapshot base sequences or mismatches before
+projection. The supplied projector must also implement
+`ReplaySnapshotStateProjector` so the verified typed snapshot state is created
+before its contiguous suffix is applied; a projector that only supports fresh
+base state fails with `ERR_REPLAY_SNAPSHOT_PROJECTOR_UNAVAILABLE`.
+
 ## Mode Governance
 
 `DefaultGovernanceEngine` checks caller-provided governance context collections

@@ -354,7 +354,10 @@ void main() {
           tableId: first.tableId,
           sessionId: first.sessionId,
           snapshotBaseEventSeq: 3,
-          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          }),
           payload: const <String, Object?>{
             'hand_id': 'hand_holdem_001',
             'variant_id': 'holdem_nlhe',
@@ -372,6 +375,7 @@ void main() {
       contains('Replay used snapshot + suffix planning path.'),
     );
     expect(result.state!.appliedEventTypes, <String>[
+      'Snapshot:snap_holdem_showdown_revealed',
       'SettlementProjected',
       'HandSettled',
     ]);
@@ -397,7 +401,10 @@ void main() {
           tableId: first.tableId,
           sessionId: first.sessionId,
           snapshotBaseEventSeq: 3,
-          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          }),
           payload: const <String, Object?>{
             'hand_id': 'hand_holdem_001',
             'variant_id': 'holdem_nlhe',
@@ -566,7 +573,10 @@ void main() {
           tableId: first.tableId,
           sessionId: first.sessionId,
           snapshotBaseEventSeq: 3,
-          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          }),
           payload: const <String, Object?>{
             'hand_id': 'hand_holdem_001',
             'variant_id': 'holdem_nlhe',
@@ -785,7 +795,7 @@ void main() {
           tableId: 'table_1',
           sessionId: 'session_1',
           snapshotBaseEventSeq: 2,
-          snapshotHash: 'snap_hash',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{}),
           payload: <String, Object?>{},
         ),
         events: <EventEnvelope>[
@@ -813,6 +823,68 @@ void main() {
     expect(result.mismatches.single.code, 'ERR_REPLAY_SNAPSHOT_SUFFIX_GAP');
     expect(result.mismatches.single.expected, 3);
     expect(result.mismatches.single.actual, 4);
+  });
+
+  test('rejects tampered snapshot payload before projector hydration', () {
+    final failingEngine = BasicReplayEngine<FakeTableProjection>(
+      projector: const _ThrowingReplayProjector(throwOnCreate: true),
+    );
+    final result = failingEngine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 0,
+          snapshotHash: 'tampered',
+          payload: const <String, Object?>{'phase': 'OPEN_READY'},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(
+      result.mismatches.single.code,
+      'ERR_REPLAY_SNAPSHOT_PAYLOAD_HASH_MISMATCH',
+    );
+  });
+
+  test('rejects snapshots when the projector cannot hydrate them', () {
+    final result =
+        BasicReplayEngine<FakeTableProjection>(
+          projector: const _ThrowingReplayProjector(),
+        ).replay(
+          ReplayRequest(
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            protocolVersion: '1.0.0',
+            scope: ReplayScope.session,
+            snapshot: SnapshotEnvelope(
+              snapshotId: 'snap_1',
+              protocolVersion: '1.0.0',
+              tableId: 'table_1',
+              sessionId: 'session_1',
+              snapshotBaseEventSeq: 0,
+              snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+              payload: const <String, Object?>{},
+            ),
+            events: const <EventEnvelope>[],
+          ),
+        );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(
+      result.mismatches.single.code,
+      'ERR_REPLAY_SNAPSHOT_PROJECTOR_UNAVAILABLE',
+    );
   });
 
   test('fails closed when replay projector cannot create base state', () {
