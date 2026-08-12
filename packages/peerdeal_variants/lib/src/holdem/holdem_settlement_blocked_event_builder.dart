@@ -5,11 +5,12 @@ import 'holdem_showdown_coordinator.dart';
 
 @immutable
 class HoldemSettlementBlockedEventDraft {
-  const HoldemSettlementBlockedEventDraft({
+  HoldemSettlementBlockedEventDraft({
     required this.payload,
-    required this.reasonCodes,
-    required this.warnings,
-  });
+    required List<String> reasonCodes,
+    required List<String> warnings,
+  }) : reasonCodes = List<String>.unmodifiable(reasonCodes),
+       warnings = List<String>.unmodifiable(warnings);
 
   final Map<String, Object?> payload;
   final List<String> reasonCodes;

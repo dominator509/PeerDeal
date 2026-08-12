@@ -73,7 +73,7 @@ class HoldemAdapter implements VariantAdapter {
 
   @override
   HandPlan buildHandPlan() {
-    return const HandPlan(privateCardsPerSeat: 2, boardStages: <int>[3, 1, 1]);
+    return HandPlan(privateCardsPerSeat: 2, boardStages: <int>[3, 1, 1]);
   }
 
   ShowdownEvaluationResult evaluate(ShowdownEvaluationInput input) {

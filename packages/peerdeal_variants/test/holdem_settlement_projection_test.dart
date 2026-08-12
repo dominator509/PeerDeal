@@ -9,7 +9,7 @@ void main() {
 
     test('settles from showdown through contested pot slices', () {
       final showdown = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('fails closed before building too many contested commitments', () {
-      const showdown = ShowdownEvaluationResult(
+      final showdown = ShowdownEvaluationResult(
         results: <RankedShowdownResult>[
           RankedShowdownResult(seat: 1, rankIndex: 0, summary: 'winner'),
           RankedShowdownResult(seat: 2, rankIndex: 1, summary: 'runner-up'),
@@ -154,7 +154,7 @@ void main() {
 
     test('blocks settlement when a contested slice is unawardable', () {
       final showdown = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -192,7 +192,7 @@ void main() {
     });
 
     test('blocks settlement when a pot slice has no eligible contestant', () {
-      const showdown = ShowdownEvaluationResult(
+      final showdown = ShowdownEvaluationResult(
         results: <RankedShowdownResult>[
           RankedShowdownResult(
             seat: 1,
@@ -298,7 +298,7 @@ void main() {
     );
 
     test('blocks settlement when commitments are empty', () {
-      const showdown = ShowdownEvaluationResult(
+      final showdown = ShowdownEvaluationResult(
         results: <RankedShowdownResult>[
           RankedShowdownResult(
             seat: 1,
@@ -329,7 +329,7 @@ void main() {
     });
 
     test('blocks settlement when commitments produce no pot slices', () {
-      const showdown = ShowdownEvaluationResult(
+      final showdown = ShowdownEvaluationResult(
         results: <RankedShowdownResult>[
           RankedShowdownResult(
             seat: 1,
@@ -366,7 +366,7 @@ void main() {
     });
 
     test('blocks settlement with invalid showdown reason code', () {
-      const showdown = ShowdownEvaluationResult(
+      final showdown = ShowdownEvaluationResult(
         results: <RankedShowdownResult>[],
         warnings: <String>['ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'],
       );
@@ -394,7 +394,7 @@ void main() {
 
     test('blocks entire side-pot settlement when any slice is unawardable', () {
       final showdown = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -446,7 +446,7 @@ void main() {
     });
 
     test('settles odd-chip main pot and side pot deterministically', () {
-      const showdown = ShowdownEvaluationResult(
+      final showdown = ShowdownEvaluationResult(
         results: <RankedShowdownResult>[
           RankedShowdownResult(
             seat: 1,

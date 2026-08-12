@@ -1901,6 +1901,16 @@ Durable database replacement, real product state selection, device/network
 validation, other-platform hosts, release signing, and final UX remain
 separate.
 
+The T178 follow-up closes the variant-owned collection ownership gap. Variant
+validation and hand-plan models, showdown inputs/results/projections, Hold'em
+hand state and evaluation, transition/coordinator results, reducer/projection
+results, settlement emissions, and settlement drafts now defensively copy and
+freeze public collections, including nested showdown winner maps. A dedicated
+ownership regression and the full `peerdeal_variants` suite cover source-list
+isolation and mutation rejection. Durable database replacement, real product
+state selection, device/network validation, other-platform hosts, release
+signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

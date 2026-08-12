@@ -220,7 +220,7 @@ HoldemStateSnapshot _typedSnapshotAfterEvent() {
   );
 }
 
-HoldemHandState _handState() => const HoldemHandState(
+HoldemHandState _handState() => HoldemHandState(
   handId: 'hand_001',
   phase: HoldemHandPhase.handIdle,
   bettingRound: HoldemBettingRound.none,

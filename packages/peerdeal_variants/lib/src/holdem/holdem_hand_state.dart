@@ -69,23 +69,25 @@ class HoldemSeatState {
 
 @immutable
 class HoldemHandState {
-  const HoldemHandState({
+  HoldemHandState({
     required this.handId,
     required this.phase,
     required this.bettingRound,
-    required this.seats,
+    required List<HoldemSeatState> seats,
     required this.currentActorSeat,
     required this.buttonSeat,
     required this.smallBlindSeat,
     required this.bigBlindSeat,
     required this.currentBetToCall,
     required this.minimumRaiseAmount,
-    this.boardCards = const <String>[],
-    this.actedSeatsThisRound = const <int>[],
+    List<String> boardCards = const <String>[],
+    List<int> actedSeatsThisRound = const <int>[],
     this.pot = 0,
     this.lastAggressorSeat,
     this.lastActionSummary,
-  });
+  }) : seats = List<HoldemSeatState>.unmodifiable(seats),
+       boardCards = List<String>.unmodifiable(boardCards),
+       actedSeatsThisRound = List<int>.unmodifiable(actedSeatsThisRound);
 
   factory HoldemHandState.fromJson(Map<String, Object?> json) {
     canonicalJsonEncode(json);

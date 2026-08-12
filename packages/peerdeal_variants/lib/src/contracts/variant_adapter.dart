@@ -44,11 +44,12 @@ class VariantCapabilities {
 
 @immutable
 class VariantValidationResult {
-  const VariantValidationResult({
+  VariantValidationResult({
     required this.isValid,
-    this.warnings = const <String>[],
-    this.errors = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+    List<String> errors = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings),
+       errors = List<String>.unmodifiable(errors);
 
   final bool isValid;
   final List<String> warnings;
@@ -57,10 +58,8 @@ class VariantValidationResult {
 
 @immutable
 class HandPlan {
-  const HandPlan({
-    required this.privateCardsPerSeat,
-    required this.boardStages,
-  });
+  HandPlan({required this.privateCardsPerSeat, required List<int> boardStages})
+    : boardStages = List<int>.unmodifiable(boardStages);
 
   final int privateCardsPerSeat;
   final List<int> boardStages;

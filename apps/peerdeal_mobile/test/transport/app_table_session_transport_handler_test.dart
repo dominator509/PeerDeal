@@ -184,7 +184,7 @@ HoldemEventCursor _holdemCursor() {
 }
 
 HoldemHandState _holdemState() {
-  return const HoldemHandState(
+  return HoldemHandState(
     handId: 'hand_001',
     phase: HoldemHandPhase.bettingPreflop,
     bettingRound: HoldemBettingRound.preflop,

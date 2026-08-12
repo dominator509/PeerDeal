@@ -32,7 +32,7 @@ void main() {
     expect(result.appliedEventCount, 1);
     expect(result.coreState.phase, TablePhase.openReady);
     expect(result.coreState.eventSequence, 1);
-    expect(result.handState, _idleHand());
+    expect(result.handState.toJson(), _idleHand().toJson());
     expect(result.cursor.nextEventSeq, 2);
     expect(result.cursor.previousEventHash, issued.event.eventHash);
   });
@@ -95,7 +95,7 @@ HoldemEventCursor _cursor() => HoldemEventCursor(
   emittedAtFactory: () => '2026-08-10T00:00:00Z',
 );
 
-HoldemHandState _idleHand() => const HoldemHandState(
+HoldemHandState _idleHand() => HoldemHandState(
   handId: 'hand_001',
   phase: HoldemHandPhase.handIdle,
   bettingRound: HoldemBettingRound.none,

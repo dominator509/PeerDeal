@@ -113,7 +113,7 @@ HoldemSettlementProjectionGateResult _successfulSettlement(
 HoldemSettlementProjectionGateResult _successfulSplitSettlement(
   HoldemShowdownCoordinator coordinator,
 ) {
-  const splitEvaluation = ShowdownEvaluationResult(
+  final splitEvaluation = ShowdownEvaluationResult(
     results: <RankedShowdownResult>[
       RankedShowdownResult(seat: 1, rankIndex: 0, summary: 'pair: A-K-Q-J'),
       RankedShowdownResult(seat: 2, rankIndex: 0, summary: 'pair: A-K-Q-J'),
@@ -172,7 +172,7 @@ HoldemHandState _buildState({
   );
 }
 
-const _validInput = ShowdownEvaluationInput(
+final _validInput = ShowdownEvaluationInput(
   boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
   seats: <ShowdownSeatInput>[
     ShowdownSeatInput(

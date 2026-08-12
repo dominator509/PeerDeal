@@ -6,11 +6,11 @@ import 'holdem_state_machine.dart';
 
 @immutable
 class HoldemBlindPostingResult {
-  const HoldemBlindPostingResult({
+  HoldemBlindPostingResult({
     required this.isPosted,
     required this.state,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool isPosted;
   final HoldemHandState state;
@@ -124,8 +124,7 @@ class HoldemBlindPostingCoordinator {
     if (state.pot != 0 ||
         state.currentBetToCall != 0 ||
         state.seats.any(
-          (seat) =>
-              seat.committedThisRound != 0 || seat.committedThisHand != 0,
+          (seat) => seat.committedThisRound != 0 || seat.committedThisHand != 0,
         )) {
       warnings.add('ERR_HOLDEM_BLINDS_ALREADY_POSTED');
     }
@@ -141,10 +140,7 @@ class HoldemBlindPostingCoordinator {
         seat.stack > 0;
   }
 
-  int _blindContribution({
-    required HoldemSeatState seat,
-    required int amount,
-  }) {
+  int _blindContribution({required HoldemSeatState seat, required int amount}) {
     return seat.stack < amount ? seat.stack : amount;
   }
 

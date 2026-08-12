@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('round-trips HoldemHandState through JSON without losing fields', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingFlop,
       bettingRound: HoldemBettingRound.flop,

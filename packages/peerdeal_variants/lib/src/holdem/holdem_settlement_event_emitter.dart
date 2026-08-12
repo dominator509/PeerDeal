@@ -52,12 +52,12 @@ class HoldemSettlementEventEmissionPlan {
 
 @immutable
 class HoldemSettlementEventEmission {
-  const HoldemSettlementEventEmission({
-    required this.events,
+  HoldemSettlementEventEmission({
+    required List<EventEnvelope> events,
     this.settlementBlocked,
     this.settlementProjected,
     this.handSettled,
-  });
+  }) : events = List<EventEnvelope>.unmodifiable(events);
 
   final List<EventEnvelope> events;
   final EventEnvelope? settlementBlocked;

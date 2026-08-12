@@ -27,7 +27,7 @@ class ShowdownSettlementProjector {
     if (commitments.isEmpty || slices.isEmpty) {
       return ShowdownSettlementProjectionResult.blocked(
         slices: slices,
-        projection: const ShowdownSliceWinnerProjection(
+        projection: ShowdownSliceWinnerProjection(
           winningSeatIdsBySliceIndex: <int, List<String>>{},
           unawardableSliceIndexes: <int>[],
         ),
@@ -42,7 +42,7 @@ class ShowdownSettlementProjector {
     if (showdown.warnings.isNotEmpty || showdown.results.isEmpty) {
       return ShowdownSettlementProjectionResult.blocked(
         slices: slices,
-        projection: const ShowdownSliceWinnerProjection(
+        projection: ShowdownSliceWinnerProjection(
           winningSeatIdsBySliceIndex: <int, List<String>>{},
           unawardableSliceIndexes: <int>[],
         ),
@@ -105,7 +105,7 @@ class ShowdownSettlementProjector {
     if (commitments.isEmpty || slices.isEmpty) {
       return ShowdownSettlementProjectionResult.blocked(
         slices: slices,
-        projection: const ShowdownSliceWinnerProjection(
+        projection: ShowdownSliceWinnerProjection(
           winningSeatIdsBySliceIndex: <int, List<String>>{},
           unawardableSliceIndexes: <int>[],
         ),
@@ -168,7 +168,7 @@ class ShowdownSettlementProjector {
   ShowdownSettlementProjectionResult _blockedForCommitmentOverflow() {
     return ShowdownSettlementProjectionResult.blocked(
       slices: const <PotSlice>[],
-      projection: const ShowdownSliceWinnerProjection(
+      projection: ShowdownSliceWinnerProjection(
         winningSeatIdsBySliceIndex: <int, List<String>>{},
         unawardableSliceIndexes: <int>[],
       ),
@@ -205,14 +205,15 @@ class ShowdownSettlementProjector {
 
 @immutable
 class ShowdownSettlementProjectionResult {
-  const ShowdownSettlementProjectionResult._({
-    required this.slices,
+  ShowdownSettlementProjectionResult._({
+    required List<PotSlice> slices,
     required this.projection,
     required this.settlement,
-    required this.warnings,
-  });
+    required List<String> warnings,
+  }) : slices = List<PotSlice>.unmodifiable(slices),
+       warnings = List<String>.unmodifiable(warnings);
 
-  const ShowdownSettlementProjectionResult.blocked({
+  ShowdownSettlementProjectionResult.blocked({
     required List<PotSlice> slices,
     required ShowdownSliceWinnerProjection projection,
     List<String> warnings = const <String>[],
@@ -223,7 +224,7 @@ class ShowdownSettlementProjectionResult {
          warnings: warnings,
        );
 
-  const ShowdownSettlementProjectionResult.settled({
+  ShowdownSettlementProjectionResult.settled({
     required List<PotSlice> slices,
     required ShowdownSliceWinnerProjection projection,
     required SettlementResult settlement,

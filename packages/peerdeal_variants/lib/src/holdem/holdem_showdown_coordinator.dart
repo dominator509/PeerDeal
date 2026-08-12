@@ -10,12 +10,12 @@ import 'holdem_state_machine.dart';
 
 @immutable
 class HoldemShowdownRevealResult {
-  const HoldemShowdownRevealResult({
+  HoldemShowdownRevealResult({
     required this.isRevealed,
     required this.state,
     required this.evaluation,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool isRevealed;
   final HoldemHandState state;
@@ -25,12 +25,12 @@ class HoldemShowdownRevealResult {
 
 @immutable
 class HoldemSettlementPrepResult {
-  const HoldemSettlementPrepResult({
+  HoldemSettlementPrepResult({
     required this.isPrepared,
     required this.state,
     required this.evaluation,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool isPrepared;
   final HoldemHandState state;
@@ -40,13 +40,13 @@ class HoldemSettlementPrepResult {
 
 @immutable
 class HoldemSettlementProjectionGateResult {
-  const HoldemSettlementProjectionGateResult({
+  HoldemSettlementProjectionGateResult({
     required this.isProjected,
     required this.state,
     required this.evaluation,
     required this.projection,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool isProjected;
   final HoldemHandState state;
@@ -57,12 +57,12 @@ class HoldemSettlementProjectionGateResult {
 
 @immutable
 class HoldemHandCompletionGateResult {
-  const HoldemHandCompletionGateResult({
+  HoldemHandCompletionGateResult({
     required this.isCompleted,
     required this.state,
     required this.projection,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool isCompleted;
   final HoldemHandState state;
@@ -98,9 +98,7 @@ class HoldemShowdownCoordinator {
       return HoldemShowdownRevealResult(
         isRevealed: false,
         state: state,
-        evaluation: const ShowdownEvaluationResult(
-          results: <RankedShowdownResult>[],
-        ),
+        evaluation: ShowdownEvaluationResult(results: <RankedShowdownResult>[]),
         warnings: warnings,
       );
     }

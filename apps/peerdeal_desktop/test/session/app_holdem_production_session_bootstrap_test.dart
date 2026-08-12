@@ -201,7 +201,7 @@ AppHoldemProductionSessionInput _input({String tableId = 'table_001'}) {
   );
   return AppHoldemProductionSessionInput(
     initialTableState: tableState,
-    initialHandState: const HoldemHandState(
+    initialHandState: HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingPreflop,
       bettingRound: HoldemBettingRound.preflop,

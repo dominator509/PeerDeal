@@ -316,7 +316,7 @@ HoldemStateSnapshot _typedSnapshot() {
       sessionId: 'session_001',
       protocolVersion: '1.0.0',
     ),
-    handState: const HoldemHandState(
+    handState: HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.handIdle,
       bettingRound: HoldemBettingRound.none,

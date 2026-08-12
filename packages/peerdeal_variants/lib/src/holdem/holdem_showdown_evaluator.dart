@@ -14,7 +14,7 @@ class HoldemShowdownEvaluator {
 
   ShowdownEvaluationResult evaluate(ShowdownEvaluationInput input) {
     if (input.seats.length > maxSeats) {
-      return const ShowdownEvaluationResult(
+      return ShowdownEvaluationResult(
         results: <RankedShowdownResult>[],
         warnings: <String>['ERR_HOLDEM_SHOWDOWN_SEAT_COUNT'],
       );

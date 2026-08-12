@@ -69,7 +69,7 @@ void main() {
     test('builds invalid-showdown reason from showdown warnings', () {
       final settlement = coordinator.projectSettlement(
         state: _buildState(phase: HoldemHandPhase.settling),
-        evaluation: const ShowdownEvaluationResult(
+        evaluation: ShowdownEvaluationResult(
           results: <RankedShowdownResult>[],
           warnings: <String>['ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'],
         ),
@@ -216,7 +216,7 @@ HoldemHandState _buildState({
   );
 }
 
-const _validInput = ShowdownEvaluationInput(
+final _validInput = ShowdownEvaluationInput(
   boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
   seats: <ShowdownSeatInput>[
     ShowdownSeatInput(

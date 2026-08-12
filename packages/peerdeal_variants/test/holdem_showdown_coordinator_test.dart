@@ -39,7 +39,7 @@ void main() {
     );
   }
 
-  const validInput = ShowdownEvaluationInput(
+  final validInput = ShowdownEvaluationInput(
     boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
     seats: <ShowdownSeatInput>[
       ShowdownSeatInput(
@@ -94,7 +94,7 @@ void main() {
 
   test('fails closed when showdown evaluation reports warnings', () {
     final state = buildState();
-    const input = ShowdownEvaluationInput(
+    final input = ShowdownEvaluationInput(
       boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
       seats: <ShowdownSeatInput>[
         ShowdownSeatInput(
@@ -120,7 +120,7 @@ void main() {
 
   test('fails closed when showdown has fewer than two active seats', () {
     final state = buildState();
-    const input = ShowdownEvaluationInput(
+    final input = ShowdownEvaluationInput(
       boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
       seats: <ShowdownSeatInput>[
         ShowdownSeatInput(
@@ -180,7 +180,7 @@ void main() {
 
   test('settlement prep fails closed on empty evaluation', () {
     final state = buildState(phase: HoldemHandPhase.showdownReveal);
-    const evaluation = ShowdownEvaluationResult(
+    final evaluation = ShowdownEvaluationResult(
       results: <RankedShowdownResult>[],
     );
 
@@ -199,7 +199,7 @@ void main() {
 
   test('settlement prep carries evaluation warnings fail closed', () {
     final state = buildState(phase: HoldemHandPhase.showdownReveal);
-    const evaluation = ShowdownEvaluationResult(
+    final evaluation = ShowdownEvaluationResult(
       results: <RankedShowdownResult>[],
       warnings: <String>['ERR_HOLDEM_SHOWDOWN_CARD_FORMAT'],
     );

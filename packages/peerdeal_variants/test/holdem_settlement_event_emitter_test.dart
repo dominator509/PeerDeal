@@ -161,7 +161,7 @@ _SettlementChain _blockedChain(HoldemShowdownCoordinator coordinator) {
 }
 
 HoldemHandState _buildState() {
-  return const HoldemHandState(
+  return HoldemHandState(
     handId: 'hand_001',
     phase: HoldemHandPhase.showdownPrep,
     bettingRound: HoldemBettingRound.river,
@@ -191,7 +191,7 @@ HoldemHandState _buildState() {
   );
 }
 
-const _validInput = ShowdownEvaluationInput(
+final _validInput = ShowdownEvaluationInput(
   boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
   seats: <ShowdownSeatInput>[
     ShowdownSeatInput(

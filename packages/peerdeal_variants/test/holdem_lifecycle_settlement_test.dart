@@ -49,7 +49,7 @@ void main() {
 
     final reveal = showdownCoordinator.reveal(
       state: river.state,
-      input: const ShowdownEvaluationInput(
+      input: ShowdownEvaluationInput(
         boardCards: <String>['Ah', 'Kd', '2c', 'Jc', '7s'],
         seats: <ShowdownSeatInput>[
           ShowdownSeatInput(

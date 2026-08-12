@@ -240,7 +240,7 @@ AppHoldemProductionSessionInput _input({String path = '/holdem-live'}) {
   );
   return AppHoldemProductionSessionInput(
     initialTableState: tableState,
-    initialHandState: const HoldemHandState(
+    initialHandState: HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingPreflop,
       bettingRound: HoldemBettingRound.preflop,

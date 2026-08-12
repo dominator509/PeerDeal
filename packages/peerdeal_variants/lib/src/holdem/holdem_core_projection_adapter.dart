@@ -296,19 +296,20 @@ class HoldemEventCursorAcceptanceResult {
 
 @immutable
 class HoldemCoreProjectionResult {
-  const HoldemCoreProjectionResult({
+  HoldemCoreProjectionResult({
     required this.isApplied,
     required this.coreState,
     required this.handState,
     required this.cursor,
-    required this.events,
-    this.warnings = const <String>[],
+    required List<EventEnvelope> events,
+    List<String> warnings = const <String>[],
     this.reasonCode,
     this.actionResult,
     this.showdownResult,
     this.settlementResult,
     this.completionResult,
-  });
+  }) : events = List<EventEnvelope>.unmodifiable(events),
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool isApplied;
   final TableState coreState;

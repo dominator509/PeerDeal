@@ -137,7 +137,7 @@ HoldemEventCursor _initialCursor({String tableId = 'table_001'}) {
 }
 
 HoldemHandState _initialHandState() {
-  return const HoldemHandState(
+  return HoldemHandState(
     handId: 'hand_001',
     phase: HoldemHandPhase.bettingPreflop,
     bettingRound: HoldemBettingRound.preflop,

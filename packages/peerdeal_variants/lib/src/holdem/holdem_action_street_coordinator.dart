@@ -35,22 +35,22 @@ class HoldemActionStreetResult {
   }
 
   List<String> get warnings {
-    return <String>[
+    return List<String>.unmodifiable(<String>[
       ...?street?.warnings,
       ...?bettingRound?.warnings,
       ...?uncontestedSettlement?.warnings,
-    ];
+    ]);
   }
 }
 
 @immutable
 class HoldemUncontestedSettlementResult {
-  const HoldemUncontestedSettlementResult({
+  HoldemUncontestedSettlementResult({
     required this.isReady,
     required this.state,
     required this.winningSeat,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool isReady;
   final HoldemHandState state;

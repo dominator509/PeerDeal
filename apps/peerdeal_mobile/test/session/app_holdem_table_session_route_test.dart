@@ -502,7 +502,7 @@ AppHoldemTableSessionRuntime _runtime({HoldemHandState? initialHandState}) {
 }
 
 HoldemHandState _idleState() {
-  return const HoldemHandState(
+  return HoldemHandState(
     handId: 'hand_idle',
     phase: HoldemHandPhase.handIdle,
     bettingRound: HoldemBettingRound.none,
@@ -577,7 +577,7 @@ HoldemEventCursor _cursor() {
 }
 
 HoldemHandState _preflopState() {
-  return const HoldemHandState(
+  return HoldemHandState(
     handId: 'hand_001',
     phase: HoldemHandPhase.bettingPreflop,
     bettingRound: HoldemBettingRound.preflop,

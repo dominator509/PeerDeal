@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T178 Immutable Variant Collections
+
+Summary:
+- Variant validation/hand-plan, showdown, Hold'em state, evaluation,
+  transition, reducer, projection, settlement-emission, and diagnostic models
+  now defensively copy and freeze public collections, including nested showdown
+  winner maps.
+- Variant library, app, and test fixtures were migrated from invalid const
+  construction without changing package boundaries or poker rule behavior.
+
+Validation:
+- Dedicated variant ownership regression: passed 2 tests.
+- Full `peerdeal_variants` suite: passed 154 tests.
+- Full analyze, boundary-check, source-text, dependency-audit, and serialized
+  repository test gates passed. Dependency audit reported 0 actionable upgrades
+  and 11 newer toolchain-blocked versions.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T177 Immutable Replay Collections
 
 Summary:

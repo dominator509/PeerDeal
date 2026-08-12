@@ -20,11 +20,11 @@ class HoldemPhaseTransitionResult {
 
 @immutable
 class HoldemStreetAdvanceResult {
-  const HoldemStreetAdvanceResult({
+  HoldemStreetAdvanceResult({
     required this.isAdvanced,
     required this.state,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool isAdvanced;
   final HoldemHandState state;
@@ -33,11 +33,11 @@ class HoldemStreetAdvanceResult {
 
 @immutable
 class HoldemBettingRoundOpenResult {
-  const HoldemBettingRoundOpenResult({
+  HoldemBettingRoundOpenResult({
     required this.isOpened,
     required this.state,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final bool isOpened;
   final HoldemHandState state;

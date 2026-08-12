@@ -163,7 +163,7 @@ const _blockedPlan = HoldemSettlementEventEmissionPlan(
 );
 
 HoldemHandState _buildState() {
-  return const HoldemHandState(
+  return HoldemHandState(
     handId: 'hand_001',
     phase: HoldemHandPhase.showdownPrep,
     bettingRound: HoldemBettingRound.river,
@@ -193,7 +193,7 @@ HoldemHandState _buildState() {
   );
 }
 
-const _input = ShowdownEvaluationInput(
+final _input = ShowdownEvaluationInput(
   boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
   seats: <ShowdownSeatInput>[
     ShowdownSeatInput(

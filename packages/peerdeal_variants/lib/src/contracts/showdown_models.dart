@@ -4,11 +4,11 @@ import '../holdem/holdem_input_limits.dart';
 
 @immutable
 class ShowdownSeatInput {
-  const ShowdownSeatInput({
+  ShowdownSeatInput({
     required this.seat,
-    required this.holeCards,
+    required List<String> holeCards,
     required this.isFolded,
-  });
+  }) : holeCards = List<String>.unmodifiable(holeCards);
 
   final int seat;
   final List<String> holeCards;
@@ -17,10 +17,11 @@ class ShowdownSeatInput {
 
 @immutable
 class ShowdownEvaluationInput {
-  const ShowdownEvaluationInput({
-    required this.boardCards,
-    required this.seats,
-  });
+  ShowdownEvaluationInput({
+    required List<String> boardCards,
+    required List<ShowdownSeatInput> seats,
+  }) : boardCards = List<String>.unmodifiable(boardCards),
+       seats = List<ShowdownSeatInput>.unmodifiable(seats);
 
   final List<String> boardCards;
   final List<ShowdownSeatInput> seats;
@@ -41,7 +42,8 @@ class RankedShowdownResult {
 
 @immutable
 class ShowdownWinnerGroup {
-  const ShowdownWinnerGroup({required this.rankIndex, required this.seats});
+  ShowdownWinnerGroup({required this.rankIndex, required List<int> seats})
+    : seats = List<int>.unmodifiable(seats);
 
   final int rankIndex;
   final List<int> seats;
@@ -49,11 +51,17 @@ class ShowdownWinnerGroup {
 
 @immutable
 class ShowdownSliceWinnerProjection {
-  const ShowdownSliceWinnerProjection({
-    required this.winningSeatIdsBySliceIndex,
-    required this.unawardableSliceIndexes,
-    this.warnings = const <String>[],
-  });
+  ShowdownSliceWinnerProjection({
+    required Map<int, List<String>> winningSeatIdsBySliceIndex,
+    required List<int> unawardableSliceIndexes,
+    List<String> warnings = const <String>[],
+  }) : winningSeatIdsBySliceIndex = _freezeStringListMap(
+         winningSeatIdsBySliceIndex,
+       ),
+       unawardableSliceIndexes = List<int>.unmodifiable(
+         unawardableSliceIndexes,
+       ),
+       warnings = List<String>.unmodifiable(warnings);
 
   final Map<int, List<String>> winningSeatIdsBySliceIndex;
   final List<int> unawardableSliceIndexes;
@@ -65,10 +73,11 @@ class ShowdownSliceWinnerProjection {
 
 @immutable
 class ShowdownEvaluationResult {
-  const ShowdownEvaluationResult({
-    required this.results,
-    this.warnings = const <String>[],
-  });
+  ShowdownEvaluationResult({
+    required List<RankedShowdownResult> results,
+    List<String> warnings = const <String>[],
+  }) : results = List<RankedShowdownResult>.unmodifiable(results),
+       warnings = List<String>.unmodifiable(warnings);
 
   final List<RankedShowdownResult> results;
   final List<String> warnings;
@@ -229,3 +238,10 @@ class ShowdownEvaluationResult {
 }
 
 String _defaultSeatIdFor(int seat) => seat.toString();
+
+Map<int, List<String>> _freezeStringListMap(Map<int, List<String>> source) {
+  return Map<int, List<String>>.unmodifiable(<int, List<String>>{
+    for (final entry in source.entries)
+      entry.key: List<String>.unmodifiable(entry.value),
+  });
+}

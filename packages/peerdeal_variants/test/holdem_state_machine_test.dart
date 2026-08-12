@@ -23,7 +23,7 @@ void main() {
   });
 
   test('opening flop resets round-local betting state', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingPreflop,
       bettingRound: HoldemBettingRound.preflop,
@@ -72,7 +72,7 @@ void main() {
   });
 
   test('opening turn resets round-local betting state', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingFlop,
       bettingRound: HoldemBettingRound.flop,
@@ -122,7 +122,7 @@ void main() {
   });
 
   test('opening river resets round-local betting state', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingTurn,
       bettingRound: HoldemBettingRound.turn,
@@ -172,7 +172,7 @@ void main() {
   });
 
   test('advancing river to showdown prep requires no new board cards', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingRiver,
       bettingRound: HoldemBettingRound.river,
@@ -220,7 +220,7 @@ void main() {
   });
 
   test('opens flop betting round from dealt flop', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.dealingFlop,
       bettingRound: HoldemBettingRound.flop,
@@ -268,7 +268,7 @@ void main() {
   });
 
   test('opens turn and river betting rounds from dealt board state', () {
-    const turnState = HoldemHandState(
+    final turnState = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.dealingTurn,
       bettingRound: HoldemBettingRound.turn,
@@ -309,7 +309,7 @@ void main() {
     expect(turn.state.phase, HoldemHandPhase.bettingTurn);
     expect(turn.state.currentActorSeat, 3);
 
-    const riverState = HoldemHandState(
+    final riverState = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.dealingRiver,
       bettingRound: HoldemBettingRound.river,
@@ -352,7 +352,7 @@ void main() {
   });
 
   test('opening betting round skips folded and all-in seats', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.dealingFlop,
       bettingRound: HoldemBettingRound.flop,
@@ -402,7 +402,7 @@ void main() {
   });
 
   test('opening betting round fails closed on wrong phase', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingPreflop,
       bettingRound: HoldemBettingRound.preflop,
@@ -423,7 +423,7 @@ void main() {
   });
 
   test('opening betting round fails closed on board count mismatch', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.dealingFlop,
       bettingRound: HoldemBettingRound.flop,
@@ -453,7 +453,7 @@ void main() {
   });
 
   test('opening betting round fails closed when no seat can act', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.dealingFlop,
       bettingRound: HoldemBettingRound.flop,
@@ -490,7 +490,7 @@ void main() {
   });
 
   test('street advance fails closed on wrong board-card count', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingPreflop,
       bettingRound: HoldemBettingRound.preflop,
@@ -514,7 +514,7 @@ void main() {
   });
 
   test('street advance fails closed on malformed board-card identity', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingPreflop,
       bettingRound: HoldemBettingRound.preflop,
@@ -538,7 +538,7 @@ void main() {
   });
 
   test('street advance fails closed on duplicate board-card identity', () {
-    const state = HoldemHandState(
+    final state = HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.bettingFlop,
       bettingRound: HoldemBettingRound.flop,

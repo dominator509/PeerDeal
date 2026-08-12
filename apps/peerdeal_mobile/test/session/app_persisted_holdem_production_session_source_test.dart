@@ -880,7 +880,7 @@ HoldemStateSnapshot _typedSnapshot({
       sessionId: sessionId,
       protocolVersion: protocolVersion,
     ),
-    handState: const HoldemHandState(
+    handState: HoldemHandState(
       handId: 'hand_001',
       phase: HoldemHandPhase.handIdle,
       bettingRound: HoldemBettingRound.none,

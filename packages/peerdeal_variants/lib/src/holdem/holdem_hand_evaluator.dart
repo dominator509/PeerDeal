@@ -1,9 +1,9 @@
 class HoldemHandEvaluation {
-  const HoldemHandEvaluation({
+  HoldemHandEvaluation({
     required this.category,
     required this.categoryRank,
-    required this.tiebreakers,
-  });
+    required List<int> tiebreakers,
+  }) : tiebreakers = List<int>.unmodifiable(tiebreakers);
 
   final String category;
   final int categoryRank;

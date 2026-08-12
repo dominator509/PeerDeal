@@ -6,10 +6,10 @@ import 'holdem_showdown_coordinator.dart';
 
 @immutable
 class HoldemSettlementProjectedEventDraft {
-  const HoldemSettlementProjectedEventDraft({
+  HoldemSettlementProjectedEventDraft({
     required this.payload,
-    required this.awards,
-  });
+    required List<Map<String, Object?>> awards,
+  }) : awards = List<Map<String, Object?>>.unmodifiable(awards);
 
   final Map<String, Object?> payload;
   final List<Map<String, Object?>> awards;

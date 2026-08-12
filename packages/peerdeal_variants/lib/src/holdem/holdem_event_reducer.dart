@@ -14,14 +14,14 @@ enum HoldemEventReductionDisposition { applied, rejected }
 
 @immutable
 class HoldemEventReductionResult {
-  const HoldemEventReductionResult._({
+  HoldemEventReductionResult._({
     required this.disposition,
     required this.state,
     this.reasonCode,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
-  const HoldemEventReductionResult.applied({
+  HoldemEventReductionResult.applied({
     required HoldemHandState state,
     List<String> warnings = const <String>[],
   }) : this._(
@@ -30,7 +30,7 @@ class HoldemEventReductionResult {
          warnings: warnings,
        );
 
-  const HoldemEventReductionResult.rejected({
+  HoldemEventReductionResult.rejected({
     required HoldemHandState state,
     required String reasonCode,
     List<String> warnings = const <String>[],

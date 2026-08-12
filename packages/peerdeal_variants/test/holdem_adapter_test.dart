@@ -55,7 +55,7 @@ void main() {
 
     test('showdown ranks active seats by best five-card hand', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '2c'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -85,7 +85,7 @@ void main() {
 
     test('showdown evaluator fails safely on malformed active inputs', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -109,7 +109,7 @@ void main() {
 
     test('showdown fails safely on malformed card identities', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '1x'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -132,7 +132,7 @@ void main() {
 
     test('showdown fails safely on duplicate active card identities', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '2c'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -160,7 +160,7 @@ void main() {
 
     test('showdown fails safely with fewer than two active seats', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '2c'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -283,7 +283,7 @@ void main() {
 
     test('showdown evaluator applies kicker and tie ordering', () {
       final kickerResult = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Ad', '8s', '5c', '2d'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -304,7 +304,7 @@ void main() {
       expect(kickerResult.results.map((entry) => entry.rankIndex), <int>[0, 1]);
 
       final tieResult = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', 'Th'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -329,7 +329,7 @@ void main() {
       'showdown exposes deterministic winner groups for settlement input',
       () {
         final result = adapter.evaluate(
-          const ShowdownEvaluationInput(
+          ShowdownEvaluationInput(
             boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', 'Th'],
             seats: <ShowdownSeatInput>[
               ShowdownSeatInput(
@@ -360,7 +360,7 @@ void main() {
 
     test('showdown winner groups are empty for invalid evaluation', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', 'bad'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -378,7 +378,7 @@ void main() {
 
     test('showdown projects slice winners for core pot settlement', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -444,7 +444,7 @@ void main() {
 
     test('showdown projection respects side-pot eligibility', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -532,7 +532,7 @@ void main() {
 
     test('showdown contested-seat projection ignores unparseable seat ids', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -564,7 +564,7 @@ void main() {
 
     test('showdown projection reports unawardable contested slices', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -629,7 +629,7 @@ void main() {
 
     test('showdown projection fails closed on oversized slice collections', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -666,7 +666,7 @@ void main() {
 
     test('showdown projection fails closed on oversized slice seat IDs', () {
       final result = adapter.evaluate(
-        const ShowdownEvaluationInput(
+        ShowdownEvaluationInput(
           boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
           seats: <ShowdownSeatInput>[
             ShowdownSeatInput(
@@ -705,7 +705,7 @@ void main() {
       'showdown projection reports invalid evaluation slices unawardable',
       () {
         final result = adapter.evaluate(
-          const ShowdownEvaluationInput(
+          ShowdownEvaluationInput(
             boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', 'bad'],
             seats: <ShowdownSeatInput>[
               ShowdownSeatInput(

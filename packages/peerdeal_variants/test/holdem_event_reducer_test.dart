@@ -251,7 +251,7 @@ HoldemEventCursor _cursor() {
 }
 
 HoldemHandState _preflopState() {
-  return const HoldemHandState(
+  return HoldemHandState(
     handId: 'hand_001',
     phase: HoldemHandPhase.bettingPreflop,
     bettingRound: HoldemBettingRound.preflop,
@@ -293,7 +293,7 @@ HoldemHandState _preflopState() {
 }
 
 HoldemHandState _showdownState() {
-  return const HoldemHandState(
+  return HoldemHandState(
     handId: 'hand_001',
     phase: HoldemHandPhase.showdownPrep,
     bettingRound: HoldemBettingRound.river,
@@ -326,7 +326,7 @@ HoldemHandState _showdownState() {
   );
 }
 
-const _showdownInput = ShowdownEvaluationInput(
+final _showdownInput = ShowdownEvaluationInput(
   boardCards: <String>['Ah', 'Kd', 'Qs', 'Jc', '2h'],
   seats: <ShowdownSeatInput>[
     ShowdownSeatInput(
