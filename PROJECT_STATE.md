@@ -1152,6 +1152,19 @@ signing, and concrete product state wiring remain external or integration-owned.
   without mutating app state; focused mobile and desktop runtime suites cover
   overflow and invalid limits.
 
+## T136 Production Snapshot Retry Ordering Hardening
+
+- Mirrored mobile and desktop snapshot coordinators now retain newer accepted
+  checkpoints behind a failed older checkpoint in FIFO order, preserving the
+  latest state across repeated store failures.
+- Retry requests resolve the current pending queue only after their serialized
+  turn begins, preventing concurrent retry calls from writing an older
+  checkpoint after a newer checkpoint has completed.
+- Focused mobile and desktop coordinator suites cover repeated failure,
+  durable event-suffix retry, and concurrent retry ordering.
+- Product state/source selection, database persistence, device/network
+  validation, other-platform hosts, and release signing remain open.
+
 ## T135 Production Snapshot Checkpoint Wiring
 
 - Mirrored production session factories now share the existing typed snapshot

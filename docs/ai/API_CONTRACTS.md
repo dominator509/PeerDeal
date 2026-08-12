@@ -522,10 +522,13 @@ When the configuration factory creates the route, it shares one typed snapshot
 writer with its event-plus-snapshot persistence writer and serialized snapshot
 coordinator. The coordinator receives accepted local projection suffixes and
 accepted remote events, appends non-retention events before checkpointing, and
-retains failed checkpoints for ordered retry. Accepted close/wipe retention
-events discard pending checkpoint state after the retention operation. The
-route surface exposes this as a persistence-pending state and retry action; it
-does not turn recovery persistence into a product database.
+retains failed checkpoints for FIFO retry. A newer checkpoint is queued behind
+an older failed retry, and concurrent retry calls resolve the live pending
+queue after serialization so stale retry requests cannot write older state
+after newer state succeeds. Accepted close/wipe retention events discard
+pending checkpoint state after the retention operation. The route surface
+exposes this as a persistence-pending state and retry action; it does not turn
+recovery persistence into a product database.
 
 `AppHoldemProductionSessionSnapshotWriter.save(...)` is the app-owned typed
 snapshot persistence seam. It requires a caller-selected snapshot ID, current

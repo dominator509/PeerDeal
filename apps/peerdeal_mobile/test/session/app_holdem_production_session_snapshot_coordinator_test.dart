@@ -112,6 +112,42 @@ void main() {
     },
   );
 
+  test('retains newer checkpoints when an older retry fails again', () async {
+    final store = _ToggleSnapshotStore(failuresRemaining: 2);
+    final firstTyped = _typedSnapshot();
+    final newerTyped = _typedSnapshotAfterEvent();
+    final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+      persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+        store: store,
+      ),
+    );
+
+    final first = coordinator.persist(
+      tableState: firstTyped.tableState,
+      handState: firstTyped.handState,
+      eventCursor: firstTyped.eventCursor,
+    );
+    final newer = coordinator.persist(
+      tableState: newerTyped.tableState,
+      handState: newerTyped.handState,
+      eventCursor: newerTyped.eventCursor,
+      events: <EventEnvelope>[_event()],
+    );
+
+    expect((await first).isSuccess, isFalse);
+    expect((await newer).isSuccess, isFalse);
+    expect(coordinator.hasPending, isTrue);
+
+    store.failuresRemaining = 0;
+    final firstRetry = coordinator.retryPending();
+    final secondRetry = coordinator.retryPending();
+    expect((await firstRetry).isSuccess, isTrue);
+    expect((await secondRetry).isSuccess, isTrue);
+    expect(store.saveAttempts, 4);
+    expect(store.loadWindow(_scope()).snapshot?.snapshotBaseEventSeq, 1);
+    expect(coordinator.hasPending, isFalse);
+  });
+
   test(
     'discardPending prevents a terminal route from retrying old state',
     () async {

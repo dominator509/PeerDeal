@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T136 Production Snapshot Retry Ordering Hardening
+
+Summary:
+- Mirrored mobile and desktop snapshot coordinators retain newer accepted
+  checkpoints FIFO behind repeatedly failing older checkpoints.
+- Retry calls resolve the live pending queue after serialization, preventing a
+  concurrent stale retry from writing older state after a newer checkpoint.
+- Durable event suffix markers remain preserved so snapshot retries do not
+  append the same event sequence twice.
+
+Files changed:
+- Mirrored production snapshot coordinators and focused coordinator tests.
+- `HANDOFF.md`, `PROJECT_STATE.md`, `HANDOFF_QUEUE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop coordinator Flutter suites pass.
+- Full repository gates are required before commit and push.
+
+Remaining:
+- Product source/state invocation, production database persistence, real device
+  and cross-device validation, other-platform hosts, and release signing remain
+  external or product-owned.
+
 ### 2026-08-11 - Codex - T135 Production Snapshot Checkpoint Wiring
 
 Summary:

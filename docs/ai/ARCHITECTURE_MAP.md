@@ -99,9 +99,10 @@ Local Hold'em producer flow:
    `HoldemStateSnapshot` and the persisted configuration factory shares its
    typed snapshot writer with the event-plus-snapshot persistence writer and
    serialized route coordinator. Accepted local projection suffixes and remote
-   events are appended before checkpointing; failures remain ordered and
-   retryable, while accepted close/wipe retention clears pending checkpoint
-   state.
+   events are appended before checkpointing; failures remain FIFO ordered and
+   retryable, newer checkpoints are retained behind repeated older failures,
+   concurrent retries resolve against the live pending queue, and accepted
+   close/wipe retention clears pending checkpoint state.
   atomic recovery transaction. It enforces the shared 4,096-event recovery
   window default before snapshot decoding or suffix materialization, and it
   honors route cancellation before recovery

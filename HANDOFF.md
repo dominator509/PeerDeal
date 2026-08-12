@@ -1178,6 +1178,26 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T136 Production Snapshot Retry Ordering Hardening
+
+- Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints
+  behind a failing older retry in a FIFO queue instead of dropping newer
+  accepted state.
+- Retry requests are serialized against the live pending queue, so concurrent
+  retry calls cannot replay an already-completed older checkpoint after a newer
+  checkpoint has succeeded. Durable event suffixes remain marked and are not
+  re-appended during snapshot retry.
+
+Tests and gates:
+- Focused mobile and desktop coordinator suites pass, including repeated
+  failure, newer-checkpoint retention, and concurrent retry coverage.
+- Full repository gates remain required before commit and push.
+
+Remaining:
+- Product-owned concrete session source/state invocation, real device and
+  cross-device validation, other-platform hosts, database persistence, and
+  release signing remain separate.
+
 ## Recent T135 Production Snapshot Checkpoint Wiring
 
 - Mirrored mobile and desktop production session factories now create one

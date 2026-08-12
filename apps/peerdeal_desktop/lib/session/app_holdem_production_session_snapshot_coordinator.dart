@@ -24,10 +24,10 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   final AppHoldemProductionSessionPersistenceWriter _persistenceWriter;
   final AppHoldemProductionSnapshotIdFactory _snapshotIdFactory;
   Future<void> _tail = Future<void>.value();
-  _SnapshotCheckpoint? _pending;
+  final List<_SnapshotCheckpoint> _pending = <_SnapshotCheckpoint>[];
   RecoveryPersistenceResult? _lastResult;
 
-  bool get hasPending => _pending != null;
+  bool get hasPending => _pending.isNotEmpty;
   RecoveryPersistenceResult? get lastResult => _lastResult;
 
   Future<RecoveryPersistenceResult> persist({
@@ -47,13 +47,12 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   }
 
   Future<RecoveryPersistenceResult> retryPending() {
-    final pending = _pending;
-    if (pending == null) {
-      return Future<RecoveryPersistenceResult>.value(
-        const RecoveryPersistenceResult.success(),
-      );
-    }
-    return _enqueue(pending);
+    return _enqueueOperation(() {
+      if (_pending.isEmpty) {
+        return const RecoveryPersistenceResult.success();
+      }
+      return _persistCheckpoint(_pending.first);
+    });
   }
 
   /// Clears queued snapshot state after an accepted terminal retention event.
@@ -62,7 +61,7 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   /// cannot recreate recovery data after a successful close or wipe.
   Future<void> discardPending() {
     final operation = _tail.then<void>((_) {
-      _pending = null;
+      _pending.clear();
       _lastResult = const RecoveryPersistenceResult.success();
     });
     _tail = operation.then<void>(
@@ -73,8 +72,14 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   }
 
   Future<RecoveryPersistenceResult> _enqueue(_SnapshotCheckpoint checkpoint) {
+    return _enqueueOperation(() => _persistCheckpoint(checkpoint));
+  }
+
+  Future<RecoveryPersistenceResult> _enqueueOperation(
+    RecoveryPersistenceResult Function() operationCallback,
+  ) {
     final operation = _tail.then<RecoveryPersistenceResult>(
-      (_) => _persistCheckpoint(checkpoint),
+      (_) => operationCallback(),
     );
     _tail = operation.then<void>(
       (_) {},
@@ -84,21 +89,33 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   }
 
   RecoveryPersistenceResult _persistCheckpoint(_SnapshotCheckpoint checkpoint) {
-    final pending = _pending;
-    if (pending != null) {
+    while (_pending.isNotEmpty) {
+      final pending = _pending.first;
       final pendingResult = _save(pending);
       _lastResult = pendingResult;
-      if (!pendingResult.isSuccess) return pendingResult;
-      _pending = null;
+      if (!pendingResult.isSuccess) {
+        _pending[0] = pending.copyWith(
+          eventsAlreadyPersisted:
+              pending.eventsAlreadyPersisted ||
+              pendingResult.warnings.contains(
+                'Holdem snapshot checkpoint failed after event-log persistence.',
+              ),
+        );
+        if (!identical(pending, checkpoint)) _pending.add(checkpoint);
+        return pendingResult;
+      }
+      _pending.removeAt(0);
       if (identical(pending, checkpoint)) return pendingResult;
     }
 
     final result = _save(checkpoint);
     _lastResult = result;
     if (!result.isSuccess) {
-      _pending = checkpoint.copyWith(
-        eventsAlreadyPersisted: result.warnings.contains(
-          'Holdem snapshot checkpoint failed after event-log persistence.',
+      _pending.add(
+        checkpoint.copyWith(
+          eventsAlreadyPersisted: result.warnings.contains(
+            'Holdem snapshot checkpoint failed after event-log persistence.',
+          ),
         ),
       );
     }

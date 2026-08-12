@@ -1653,6 +1653,15 @@ snapshots cannot be recreated after retention. This does not claim a product
 session source, database, real-device storage, other-platform host, or release
 signing implementation.
 
+The T136 follow-up closes the remaining codable ordering gap in that retry
+surface. Both mirrored coordinators retain newer accepted checkpoints behind a
+repeatedly failing older checkpoint in FIFO order, preserve the durable-event
+suffix marker, and resolve concurrent retry requests against the live pending
+queue so an older retry cannot overwrite newer accepted state. Focused mobile
+and desktop coordinator suites cover these paths. This remains route-level
+recovery persistence, not product database persistence or cross-platform/device
+validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
