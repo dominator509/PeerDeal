@@ -93,6 +93,16 @@ void main() {
     );
   });
 
+  test('fails closed for an invalid pending checkpoint byte limit', () async {
+    final result = await _create(maxPendingCheckpointBytes: 0);
+
+    expect(result.isAvailable, isFalse);
+    expect(
+      result.warnings,
+      contains('Holdem production session configuration is unavailable.'),
+    );
+  });
+
   test('fails closed when route policy composition throws', () async {
     final result = await _create(
       routePolicyFactory: (_) => throw StateError('route policy unavailable'),
@@ -167,12 +177,15 @@ Future<AppHoldemProductionSessionConfigurationLoadResult> _create({
   int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   int maxPendingCheckpoints = AppHoldemProductionSessionSnapshotCoordinator
       .defaultMaxPendingCheckpoints,
+  int maxPendingCheckpointBytes = AppHoldemProductionSessionSnapshotCoordinator
+      .defaultMaxPendingCheckpointBytes,
 }) {
   return _configurationFactory(
     rootDirectoryFactory: rootDirectoryFactory,
     routePolicyFactory: routePolicyFactory,
     maxRecoveryEvents: maxRecoveryEvents,
     maxPendingCheckpoints: maxPendingCheckpoints,
+    maxPendingCheckpointBytes: maxPendingCheckpointBytes,
   ).create();
 }
 
@@ -184,6 +197,8 @@ AppHoldemProductionSessionConfigurationFactory _configurationFactory({
   int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   int maxPendingCheckpoints = AppHoldemProductionSessionSnapshotCoordinator
       .defaultMaxPendingCheckpoints,
+  int maxPendingCheckpointBytes = AppHoldemProductionSessionSnapshotCoordinator
+      .defaultMaxPendingCheckpointBytes,
 }) {
   return AppHoldemProductionSessionConfigurationFactory(
     recoveryStoreFactory: AppRecoveryPersistenceStoreFactory(
@@ -196,6 +211,7 @@ AppHoldemProductionSessionConfigurationFactory _configurationFactory({
     eventHashFactory: (_) => 'hash',
     maxRecoveryEvents: maxRecoveryEvents,
     maxPendingCheckpoints: maxPendingCheckpoints,
+    maxPendingCheckpointBytes: maxPendingCheckpointBytes,
   );
 }
 

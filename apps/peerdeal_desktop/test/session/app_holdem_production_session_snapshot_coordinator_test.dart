@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_persistence_writer.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_session_snapshot_coordinator.dart';
@@ -138,6 +140,52 @@ void main() {
       ),
       throwsArgumentError,
     );
+  });
+
+  test('rejects a non-positive pending checkpoint byte limit', () {
+    expect(
+      () => AppHoldemProductionSessionSnapshotCoordinator(
+        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+          store: _ToggleSnapshotStore(),
+        ),
+        maxPendingCheckpointBytes: 0,
+      ),
+      throwsArgumentError,
+    );
+  });
+
+  test('bounds queued checkpoints by serialized byte budget', () async {
+    final store = _ToggleSnapshotStore(failuresRemaining: 10);
+    final typed = _typedSnapshot();
+    final checkpointBytes = utf8
+        .encode(canonicalJsonEncode(typed.toJson()))
+        .length;
+    final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+      persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+        store: store,
+      ),
+      maxPendingCheckpointBytes: checkpointBytes,
+    );
+
+    final first = await coordinator.persist(
+      tableState: typed.tableState,
+      handState: typed.handState,
+      eventCursor: typed.eventCursor,
+    );
+    final second = await coordinator.persist(
+      tableState: typed.tableState,
+      handState: typed.handState,
+      eventCursor: typed.eventCursor,
+    );
+
+    expect(first.isSuccess, isFalse);
+    expect(second.isSuccess, isFalse);
+    expect(
+      second.warnings,
+      contains('Holdem snapshot checkpoint byte budget is full.'),
+    );
+    expect(coordinator.hasPending, isTrue);
+    expect(store.saveAttempts, 2);
   });
 
   test(

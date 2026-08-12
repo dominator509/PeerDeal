@@ -68,6 +68,9 @@ class AppHoldemProductionSessionConfigurationFactory {
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
     int maxPendingCheckpoints = AppHoldemProductionSessionSnapshotCoordinator
         .defaultMaxPendingCheckpoints,
+    int maxPendingCheckpointBytes =
+        AppHoldemProductionSessionSnapshotCoordinator
+            .defaultMaxPendingCheckpointBytes,
     AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
   }) : _recoveryStoreFactory = recoveryStoreFactory,
        _routePolicyFactory = routePolicyFactory,
@@ -84,6 +87,7 @@ class AppHoldemProductionSessionConfigurationFactory {
        _sourceLoadTimeout = sourceLoadTimeout,
        _maxRecoveryEvents = maxRecoveryEvents,
        _maxPendingCheckpoints = maxPendingCheckpoints,
+       _maxPendingCheckpointBytes = maxPendingCheckpointBytes,
        _initialSnapshotLoader = initialSnapshotLoader;
 
   final AppRecoveryPersistenceStoreFactory _recoveryStoreFactory;
@@ -102,6 +106,7 @@ class AppHoldemProductionSessionConfigurationFactory {
   final Duration _sourceLoadTimeout;
   final int _maxRecoveryEvents;
   final int _maxPendingCheckpoints;
+  final int _maxPendingCheckpointBytes;
   final AppHoldemProductionSessionInitialSnapshotLoader? _initialSnapshotLoader;
 
   Future<AppHoldemProductionSessionConfigurationLoadResult> create({
@@ -133,6 +138,7 @@ class AppHoldemProductionSessionConfigurationFactory {
         persistenceWriter: persistenceWriter,
         maxRecoveryEvents: _maxRecoveryEvents,
         maxPendingCheckpoints: _maxPendingCheckpoints,
+        maxPendingCheckpointBytes: _maxPendingCheckpointBytes,
       );
       final configuration =
           await AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(

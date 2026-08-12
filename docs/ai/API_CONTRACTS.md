@@ -631,6 +631,10 @@ Malformed or oversized checkpoint input therefore cannot create a durable
 partial suffix. The mounted coordinator records when an event suffix is
 already durable after a checkpoint failure and retries only the snapshot, so a
 transient snapshot failure cannot append the same event sequence twice.
+The mirrored snapshot coordinator also bounds queued failed checkpoints by
+count and serialized typed-state/event bytes; overflow fails before durable
+persistence, while successful retry and terminal discard release the tracked
+budget without changing FIFO ordering.
 
 `fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
 callers that require pre-provisioned identity. The lazy production adapter is

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
@@ -16,25 +18,33 @@ typedef AppHoldemProductionSnapshotIdFactory =
 /// caller-owned by [AppHoldemProductionSessionPersistenceWriter].
 class AppHoldemProductionSessionSnapshotCoordinator {
   static const int defaultMaxPendingCheckpoints = 64;
+  static const int defaultMaxPendingCheckpointBytes =
+      RecoveryEventWindowLimits.defaultMaxSnapshotBytes;
 
   AppHoldemProductionSessionSnapshotCoordinator({
     required AppHoldemProductionSessionPersistenceWriter persistenceWriter,
     AppHoldemProductionSnapshotIdFactory? snapshotIdFactory,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
     int maxPendingCheckpoints = defaultMaxPendingCheckpoints,
+    int maxPendingCheckpointBytes = defaultMaxPendingCheckpointBytes,
   }) : _persistenceWriter = persistenceWriter,
        _snapshotIdFactory = snapshotIdFactory ?? _defaultSnapshotId,
        _maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
        _maxPendingCheckpoints = _validateMaxPendingCheckpoints(
          maxPendingCheckpoints,
+       ),
+       _maxPendingCheckpointBytes = _validateMaxPendingCheckpointBytes(
+         maxPendingCheckpointBytes,
        );
 
   final AppHoldemProductionSessionPersistenceWriter _persistenceWriter;
   final AppHoldemProductionSnapshotIdFactory _snapshotIdFactory;
   final int _maxRecoveryEvents;
   final int _maxPendingCheckpoints;
+  final int _maxPendingCheckpointBytes;
   Future<void> _tail = Future<void>.value();
   final List<_SnapshotCheckpoint> _pending = <_SnapshotCheckpoint>[];
+  int _pendingBytes = 0;
   RecoveryPersistenceResult? _lastResult;
 
   bool get hasPending => _pending.isNotEmpty;
@@ -73,6 +83,34 @@ class AppHoldemProductionSessionSnapshotCoordinator {
         return result;
       }
 
+      final int serializedBytes;
+      try {
+        serializedBytes = _measureCheckpointBytes(
+          tableState: tableState,
+          handState: handState,
+          eventCursor: eventCursor,
+          events: capturedEvents,
+        );
+      } on _PendingCheckpointTooLarge {
+        final result = RecoveryPersistenceResult(
+          isSuccess: false,
+          warnings: <String>[
+            'Holdem snapshot checkpoint exceeds the configured pending byte limit.',
+          ],
+        );
+        _lastResult = result;
+        return result;
+      } on Object {
+        final result = RecoveryPersistenceResult(
+          isSuccess: false,
+          warnings: <String>[
+            'Holdem snapshot checkpoint serialization is unavailable.',
+          ],
+        );
+        _lastResult = result;
+        return result;
+      }
+
       return _persistCheckpoint(
         _SnapshotCheckpoint(
           snapshotId: snapshotId,
@@ -80,6 +118,7 @@ class AppHoldemProductionSessionSnapshotCoordinator {
           handState: handState,
           eventCursor: eventCursor,
           events: capturedEvents,
+          serializedBytes: serializedBytes,
         ),
       );
     });
@@ -101,6 +140,7 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   Future<void> discardPending() {
     final operation = _tail.then<void>((_) {
       _pending.clear();
+      _pendingBytes = 0;
       _lastResult = RecoveryPersistenceResult.success();
     });
     _tail = operation.then<void>(
@@ -137,22 +177,24 @@ class AppHoldemProductionSessionSnapshotCoordinator {
               ),
         );
         if (!identical(pending, checkpoint)) {
-          if (_pending.length >= _maxPendingCheckpoints) {
-            return _queueFullResult(pendingResult);
+          if (!_canQueue(checkpoint)) {
+            return _queueLimitResult(pendingResult);
           }
           _pending.add(checkpoint);
+          _pendingBytes += checkpoint.serializedBytes;
         }
         return pendingResult;
       }
       _pending.removeAt(0);
+      _pendingBytes -= pending.serializedBytes;
       if (identical(pending, checkpoint)) return pendingResult;
     }
 
     final result = _save(checkpoint);
     _lastResult = result;
     if (!result.isSuccess) {
-      if (_pending.length >= _maxPendingCheckpoints) {
-        return _queueFullResult(result);
+      if (!_canQueue(checkpoint)) {
+        return _queueLimitResult(result);
       }
       _pending.add(
         checkpoint.copyWith(
@@ -161,21 +203,74 @@ class AppHoldemProductionSessionSnapshotCoordinator {
           ),
         ),
       );
+      _pendingBytes += checkpoint.serializedBytes;
     }
     return result;
   }
 
-  RecoveryPersistenceResult _queueFullResult(RecoveryPersistenceResult result) {
+  bool _canQueue(_SnapshotCheckpoint checkpoint) {
+    if (_pending.length >= _maxPendingCheckpoints) return false;
+    return checkpoint.serializedBytes <=
+        _maxPendingCheckpointBytes - _pendingBytes;
+  }
+
+  RecoveryPersistenceResult _queueLimitResult(
+    RecoveryPersistenceResult result,
+  ) {
+    final warning = _pending.length >= _maxPendingCheckpoints
+        ? 'Holdem snapshot checkpoint queue is full.'
+        : 'Holdem snapshot checkpoint byte budget is full.';
     final bounded = RecoveryPersistenceResult(
       isSuccess: false,
       conflicts: result.conflicts,
-      warnings: <String>[
-        ...result.warnings,
-        'Holdem snapshot checkpoint queue is full.',
-      ],
+      warnings: <String>[...result.warnings, warning],
     );
     _lastResult = bounded;
     return bounded;
+  }
+
+  int _measureCheckpointBytes({
+    required TableState tableState,
+    required HoldemHandState handState,
+    required HoldemEventCursor eventCursor,
+    required List<EventEnvelope> events,
+  }) {
+    try {
+      var bytes = utf8
+          .encode(
+            canonicalJsonEncode(
+              HoldemStateSnapshot(
+                tableState: tableState,
+                handState: handState,
+                eventCursor: eventCursor,
+              ).toJson(),
+              limits: CanonicalJsonLimits(
+                maxEncodedBytes: _maxPendingCheckpointBytes,
+              ),
+            ),
+          )
+          .length;
+      if (bytes > _maxPendingCheckpointBytes) {
+        throw const _PendingCheckpointTooLarge();
+      }
+      const codec = EventEnvelopeCodec(
+        maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
+      );
+      for (final event in events) {
+        final eventBytes = codec.encode(event).length;
+        if (eventBytes > _maxPendingCheckpointBytes - bytes) {
+          throw const _PendingCheckpointTooLarge();
+        }
+        bytes += eventBytes;
+      }
+      return bytes;
+    } on FormatException catch (error) {
+      if (error.message == 'Canonical JSON payload is too large.' ||
+          error.message == 'Event envelope wire payload is too large.') {
+        throw const _PendingCheckpointTooLarge();
+      }
+      rethrow;
+    }
   }
 
   RecoveryPersistenceResult _save(_SnapshotCheckpoint checkpoint) {
@@ -226,6 +321,21 @@ int _validateMaxPendingCheckpoints(int value) {
   return value;
 }
 
+int _validateMaxPendingCheckpointBytes(int value) {
+  if (value <= 0) {
+    throw ArgumentError.value(
+      value,
+      'maxPendingCheckpointBytes',
+      'Pending snapshot checkpoint byte limit must be positive.',
+    );
+  }
+  return value;
+}
+
+class _PendingCheckpointTooLarge implements Exception {
+  const _PendingCheckpointTooLarge();
+}
+
 class _SnapshotCheckpoint {
   _SnapshotCheckpoint({
     required this.snapshotId,
@@ -233,6 +343,7 @@ class _SnapshotCheckpoint {
     required this.handState,
     required this.eventCursor,
     required List<EventEnvelope> events,
+    required this.serializedBytes,
     this.eventsAlreadyPersisted = false,
   }) : events = List<EventEnvelope>.unmodifiable(events);
 
@@ -243,6 +354,7 @@ class _SnapshotCheckpoint {
       handState: handState,
       eventCursor: eventCursor,
       events: events,
+      serializedBytes: serializedBytes,
       eventsAlreadyPersisted:
           eventsAlreadyPersisted ?? this.eventsAlreadyPersisted,
     );
@@ -253,5 +365,6 @@ class _SnapshotCheckpoint {
   final HoldemHandState handState;
   final HoldemEventCursor eventCursor;
   final List<EventEnvelope> events;
+  final int serializedBytes;
   final bool eventsAlreadyPersisted;
 }

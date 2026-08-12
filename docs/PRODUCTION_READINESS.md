@@ -2226,6 +2226,14 @@ concurrent arrivals from reordering drained frames or bypassing the bounded
 receive fact. The Android debug APK build passed after the change; real-device
 transport behavior and cross-device reachability remain separate.
 
+The T196 follow-up closes the app-owned pending-checkpoint resource gap.
+Mirrored Hold'em snapshot coordinators now bound queued failed checkpoints by
+both count and the serialized typed-state/event byte budget, reject invalid
+byte-budget configuration, and release tracked bytes on successful retry or
+terminal discard. FIFO retry ordering and the existing event-plus-snapshot
+write policy are unchanged. This bounds coordinator-held recovery data; it does
+not replace product-owned durable database persistence.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

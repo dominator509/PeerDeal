@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T196 Bound Pending Checkpoint Resources
+
+Summary:
+- Mirrored mobile and desktop Hold'em snapshot coordinators now bound pending
+  failed checkpoints by both count and serialized typed-state/event bytes.
+- Invalid or oversized checkpoint byte budgets fail closed before durable
+  persistence; successful retry and terminal discard release tracked bytes.
+- Configuration factories expose the byte budget while preserving app-owned
+  state, event identity, snapshot identity, and database boundaries.
+
+Files changed:
+- Mirrored Hold'em snapshot coordinators, configuration factories, and tests.
+
+Validation:
+- Focused mobile session tests passed.
+- Focused desktop session tests passed.
+
+Risks:
+- Real-device transport behavior, other platform hosts, release signing,
+  product-owned session/database wiring, and final navigation/UX remain open.
+
+Next reviewer:
+- Run the full repository gates, then continue with the next documented
+  production gap without inventing platform endpoint semantics.
+
 ### 2026-08-12 - Codex - T195 Android Receive Queue Serialization
 
 Summary:
