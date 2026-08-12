@@ -1740,6 +1740,16 @@ build, and native-host smoke jobs are unchanged. This improves gate coverage;
 it does not claim that GitHub-hosted execution, release credentials, device
 reachability, or product state provisioning are complete.
 
+The T147 follow-up closes a mounted-surface lifecycle gap. Mirrored production
+Hold'em surfaces now clear pending projection/retry state when their runtime,
+snapshot coordinator, peer, or local seat identity changes. Generation guards
+ignore late persistence, transport, retry, and disposal completions from the
+previous surface owner. Focused mobile and desktop route suites cover delayed
+native-send completion after runtime replacement. Full repository gates plus
+Android debug, Windows debug, and Windows native-host smoke validation pass;
+product state provisioning, device/network validation, other-platform hosts,
+and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

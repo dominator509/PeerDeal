@@ -35,7 +35,8 @@ hydration, T58 deterministic persisted recovery-suffix replay, T59 app-owned
 local peer identity persistence, T60 provisioned-identity persisted-source
 composition, T61 single-flight local identity provisioning, T62 post-save
 identity verification, and T63 typed join-to-session context handoff
-and T75 Android/Windows local-network host registration
+and T75 Android/Windows local-network host registration and T147 production
+table lifecycle invalidation
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1351,6 +1352,24 @@ Remaining:
 - Product state/database provisioning, Android device/runtime validation,
   cross-device networking, other-platform hosts, release signing credentials,
   and GitHub-hosted workflow execution remain separate.
+
+## Recent T147 Production Table Lifecycle Invalidation
+
+- Mirrored production Hold'em table surfaces now invalidate pending projection
+  retries when their runtime, snapshot coordinator, peer, or local seat is
+  replaced.
+- Generation guards prevent late persistence or transport completions from
+  repopulating busy, status, or retry state after replacement or disposal.
+- Focused mobile and desktop route suites cover a delayed native send completing
+  after runtime replacement.
+- Full analyze, boundary-check, source-text, test, dependency-audit, Android
+  debug build, Windows debug build, Windows native-host smoke, and diff-check
+  gates pass.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
 
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 

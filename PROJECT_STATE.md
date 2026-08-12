@@ -1253,6 +1253,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   jobs are unchanged; hosted workflow execution and operator-owned release
   credentials remain external.
 
+## T147 Production Table Lifecycle Invalidation
+
+- Mirrored production Hold'em surfaces reset pending projection/retry state when
+  the runtime, coordinator, peer, or local seat identity changes.
+- Generation guards prevent late persistence, transport, retry, and disposal
+  completions from mutating a replacement session's UI state.
+- Focused mobile and desktop route tests cover delayed native-send completion
+  after runtime replacement.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

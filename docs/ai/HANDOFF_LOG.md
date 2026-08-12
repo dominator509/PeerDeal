@@ -91,6 +91,30 @@ Validation:
 - Workflow-only change; local repository gates and YAML/source-text checks are
   required before push. GitHub-hosted execution remains external.
 
+### 2026-08-11 - Codex - T147 Production Table Lifecycle Invalidation
+
+Summary:
+- Mirrored production Hold'em surfaces reset pending projection state when the
+  runtime, snapshot coordinator, peer, or local seat identity changes.
+- Generation guards ignore late persistence, transport, retry, and disposal
+  completions after replacement.
+
+Files changed:
+- Mirrored production table surfaces and route regression tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop production route suites passed.
+- Full analyze, boundary-check, source-text, test, dependency-audit, Android
+  debug build, Windows debug build, Windows native-host smoke, and diff-check
+  gates passed.
+
+Risks:
+- Product state/database provisioning, device/runtime validation, other-platform
+  hosts, cross-device networking, and release signing remain external or
+  caller-owned boundaries.
+
 ### 2026-08-11 - Codex - T143 Native App-Storage Path Boundary Hardening
 
 Summary:

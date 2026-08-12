@@ -245,6 +245,52 @@ void main() {
     expect(find.text('Action synchronized'), findsOneWidget);
   });
 
+  testWidgets('drops a stale projection completion after runtime replacement', (
+    tester,
+  ) async {
+    final oldRuntime = _runtime();
+    final projection = const HoldemCoreProjectionAdapter().startHand(
+      coreState: oldRuntime.coreState,
+      handState: oldRuntime.handState,
+      cursor: oldRuntime.cursor,
+    );
+    final oldBridge = _BlockingNativeTransportBridge(
+      receiveFrame: NativeTransportFrame(
+        sessionId: 'sess_001',
+        senderPeerId: 'peer_remote',
+        recipientPeerId: 'peer_local',
+        sequence: projection.events.single.eventSeq,
+        payloadBytes: const EventEnvelopeCodec().encode(
+          projection.events.single,
+        ),
+      ),
+    );
+    final newBridge = _BlockingNativeTransportBridge();
+
+    await tester.pumpWidget(
+      _productionSurfaceRoute(runtime: oldRuntime, bridge: oldBridge),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Call'));
+    await tester.pump();
+    await tester.pump();
+    expect(oldBridge.sendCalls, 1);
+    expect(find.text('Synchronizing'), findsNWidgets(2));
+
+    await tester.pumpWidget(
+      _productionSurfaceRoute(runtime: _runtime(), bridge: newBridge),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Your turn'), findsNWidgets(2));
+    oldBridge.completeSend();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sync pending'), findsNothing);
+    expect(find.text('Action synchronized'), findsNothing);
+  });
+
   testWidgets('keeps the production surface mounted when transport is absent', (
     tester,
   ) async {
@@ -267,6 +313,28 @@ void main() {
     expect(find.text('unavailable'), findsOneWidget);
     expect(runtime.coreState.eventSequence, 1);
   });
+}
+
+Widget _productionSurfaceRoute({
+  required AppHoldemTableSessionRuntime runtime,
+  required NativeTransportBridge bridge,
+}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: AppHoldemTableSessionRoute(
+      runtime: runtime,
+      peerId: 'peer_remote',
+      nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
+      timerFactory: (interval, callback) =>
+          Timer(const Duration(hours: 1), () {}),
+      surfaceBuilder: (context, routeContext) =>
+          AppHoldemProductionTableSurface(
+            routeContext: routeContext,
+            localPeerId: 'peer_local',
+            localSeat: 1,
+          ),
+    ),
+  );
 }
 
 AppHoldemProductionRouteRegistration _registration() {
@@ -556,6 +624,59 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
     lastSentFrame = frame;
     sendCalls++;
     return const NativeTransportSendResult(isSuccess: true);
+  }
+}
+
+class _BlockingNativeTransportBridge implements NativeTransportBridge {
+  _BlockingNativeTransportBridge({this.receiveFrame});
+
+  final NativeTransportFrame? receiveFrame;
+  final Completer<NativeTransportSendResult> _sendCompletion = Completer();
+  int sendCalls = 0;
+  bool _served = false;
+
+  void completeSend() {
+    if (!_sendCompletion.isCompleted) {
+      _sendCompletion.complete(
+        const NativeTransportSendResult(isSuccess: true),
+      );
+    }
+  }
+
+  @override
+  Future<NativeTransportCapability> getCapability() async {
+    return const NativeTransportCapability(
+      available: true,
+      sendSupported: true,
+      receiveSupported: true,
+      maxPayloadBytes: 4096,
+      notes: 'blocking test transport',
+    );
+  }
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+  }) async {
+    final frame = receiveFrame;
+    if (frame != null && !_served) {
+      _served = true;
+      return NativeTransportReceiveSnapshot(
+        available: true,
+        frames: <NativeTransportFrame>[frame],
+      );
+    }
+    return const NativeTransportReceiveSnapshot(
+      available: true,
+      frames: <NativeTransportFrame>[],
+    );
+  }
+
+  @override
+  Future<NativeTransportSendResult> sendFrame(NativeTransportFrame frame) {
+    sendCalls++;
+    return _sendCompletion.future;
   }
 }
 

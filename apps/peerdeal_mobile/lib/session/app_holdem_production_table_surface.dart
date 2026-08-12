@@ -34,6 +34,36 @@ class _AppHoldemProductionTableSurfaceState
   int _pendingEventIndex = 0;
   String? _statusMessage;
   bool _busy = false;
+  int _operationGeneration = 0;
+
+  @override
+  void didUpdateWidget(AppHoldemProductionTableSurface oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldContext = oldWidget.routeContext;
+    final newContext = widget.routeContext;
+    if (identical(oldContext.runtime, newContext.runtime) &&
+        identical(
+          oldContext.snapshotCoordinator,
+          newContext.snapshotCoordinator,
+        ) &&
+        oldContext.peerId == newContext.peerId &&
+        oldWidget.localPeerId == widget.localPeerId &&
+        oldWidget.localSeat == widget.localSeat) {
+      return;
+    }
+
+    _operationGeneration += 1;
+    _pendingProjection = null;
+    _pendingEventIndex = 0;
+    _statusMessage = null;
+    _busy = false;
+  }
+
+  @override
+  void dispose() {
+    _operationGeneration += 1;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -278,6 +308,7 @@ class _AppHoldemProductionTableSurfaceState
   }
 
   Future<void> _startHand() async {
+    final operationGeneration = _operationGeneration;
     final publisher = widget.routeContext.createProjectionPublisher(
       localPeerId: widget.localPeerId,
     );
@@ -294,9 +325,13 @@ class _AppHoldemProductionTableSurfaceState
     });
     try {
       final result = widget.routeContext.runtime.startHand();
-      await _finishProjection(result, acceptedLabel: 'Hand start');
+      await _finishProjection(
+        result,
+        acceptedLabel: 'Hand start',
+        operationGeneration: operationGeneration,
+      );
     } on Object {
-      if (mounted) {
+      if (_isCurrentOperation(operationGeneration)) {
         setState(() {
           _busy = false;
           _statusMessage = 'Hand start was rejected';
@@ -306,6 +341,7 @@ class _AppHoldemProductionTableSurfaceState
   }
 
   Future<void> _submitAction(HoldemTableAction action) async {
+    final operationGeneration = _operationGeneration;
     final publisher = widget.routeContext.createProjectionPublisher(
       localPeerId: widget.localPeerId,
     );
@@ -328,9 +364,13 @@ class _AppHoldemProductionTableSurfaceState
       final result = widget.routeContext.runtime.applyAction(
         action: normalizedAction,
       );
-      await _finishProjection(result, acceptedLabel: 'Action');
+      await _finishProjection(
+        result,
+        acceptedLabel: 'Action',
+        operationGeneration: operationGeneration,
+      );
     } on Object {
-      if (mounted) {
+      if (_isCurrentOperation(operationGeneration)) {
         setState(() {
           _busy = false;
           _statusMessage = 'Action was rejected';
@@ -342,8 +382,9 @@ class _AppHoldemProductionTableSurfaceState
   Future<void> _finishProjection(
     AppHoldemProjectionResult projection, {
     required String acceptedLabel,
+    required int operationGeneration,
   }) async {
-    if (!mounted) return;
+    if (!_isCurrentOperation(operationGeneration)) return;
     if (projection.isRejected) {
       setState(() {
         _busy = false;
@@ -364,12 +405,13 @@ class _AppHoldemProductionTableSurfaceState
         eventCursor: widget.routeContext.runtime.cursor,
         events: projection.events,
       );
-      if (!mounted) return;
+      if (!_isCurrentOperation(operationGeneration)) return;
       if (!persistenceResult.isSuccess) {
         _setPendingProjection(
           projection,
           nextEventIndex: 0,
           message: '$acceptedLabel accepted locally; persistence is pending',
+          operationGeneration: operationGeneration,
         );
         return;
       }
@@ -380,13 +422,14 @@ class _AppHoldemProductionTableSurfaceState
         projection,
         nextEventIndex: 0,
         message: '$acceptedLabel accepted locally; synchronization is pending',
+        operationGeneration: operationGeneration,
       );
       return;
     }
 
     try {
       final publishResult = await publisher.publish(projection);
-      if (!mounted) return;
+      if (!_isCurrentOperation(operationGeneration)) return;
       if (publishResult.isComplete) {
         setState(() {
           _busy = false;
@@ -400,23 +443,26 @@ class _AppHoldemProductionTableSurfaceState
           nextEventIndex: publishResult.sentEventCount,
           message:
               '$acceptedLabel accepted locally; synchronization is pending',
+          operationGeneration: operationGeneration,
         );
       }
     } on Object {
-      if (mounted) {
+      if (_isCurrentOperation(operationGeneration)) {
         _setPendingProjection(
           projection,
           nextEventIndex: 0,
           message:
               '$acceptedLabel accepted locally; synchronization is pending',
+          operationGeneration: operationGeneration,
         );
       }
     }
-    if (!mounted) return;
+    if (!_isCurrentOperation(operationGeneration)) return;
     widget.routeContext.refresh();
   }
 
   Future<void> _retryPending() async {
+    final operationGeneration = _operationGeneration;
     final projection = _pendingProjection;
     if (projection == null || _busy) return;
     setState(() {
@@ -427,7 +473,7 @@ class _AppHoldemProductionTableSurfaceState
       final coordinator = widget.routeContext.snapshotCoordinator;
       if (coordinator != null && coordinator.hasPending) {
         final persistenceResult = await coordinator.retryPending();
-        if (!mounted) return;
+        if (!_isCurrentOperation(operationGeneration)) return;
         if (!persistenceResult.isSuccess) {
           setState(() {
             _busy = false;
@@ -441,18 +487,20 @@ class _AppHoldemProductionTableSurfaceState
         localPeerId: widget.localPeerId,
       );
       if (publisher == null) {
-        setState(() {
-          _busy = false;
-          _statusMessage =
-              'Transport is unavailable; synchronization is pending';
-        });
+        if (_isCurrentOperation(operationGeneration)) {
+          setState(() {
+            _busy = false;
+            _statusMessage =
+                'Transport is unavailable; synchronization is pending';
+          });
+        }
         return;
       }
       final result = await publisher.publish(
         projection,
         startEventIndex: _pendingEventIndex,
       );
-      if (!mounted) return;
+      if (!_isCurrentOperation(operationGeneration)) return;
       setState(() {
         _busy = false;
         if (result.isComplete) {
@@ -465,7 +513,7 @@ class _AppHoldemProductionTableSurfaceState
         }
       });
     } on Object {
-      if (mounted) {
+      if (_isCurrentOperation(operationGeneration)) {
         setState(() {
           _busy = false;
           _statusMessage = 'Synchronization is still pending';
@@ -475,6 +523,7 @@ class _AppHoldemProductionTableSurfaceState
   }
 
   Future<void> _retryPersistence() async {
+    final operationGeneration = _operationGeneration;
     final coordinator = widget.routeContext.snapshotCoordinator;
     if (coordinator == null || !coordinator.hasPending || _busy) return;
     setState(() {
@@ -482,7 +531,7 @@ class _AppHoldemProductionTableSurfaceState
       _statusMessage = null;
     });
     final result = await coordinator.retryPending();
-    if (!mounted) return;
+    if (!_isCurrentOperation(operationGeneration)) return;
     setState(() {
       _busy = false;
       _statusMessage = result.isSuccess
@@ -496,14 +545,19 @@ class _AppHoldemProductionTableSurfaceState
     AppHoldemProjectionResult projection, {
     required int nextEventIndex,
     required String message,
+    required int operationGeneration,
   }) {
-    if (!mounted) return;
+    if (!_isCurrentOperation(operationGeneration)) return;
     setState(() {
       _busy = false;
       _pendingProjection = projection;
       _pendingEventIndex = nextEventIndex;
       _statusMessage = message;
     });
+  }
+
+  bool _isCurrentOperation(int operationGeneration) {
+    return mounted && operationGeneration == _operationGeneration;
   }
 
   HoldemSeatState? _seatFor(HoldemHandState hand, int seatNumber) {
