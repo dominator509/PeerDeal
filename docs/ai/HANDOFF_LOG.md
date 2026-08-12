@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T210 Snapshot Coordinator Pre-Queue Boundary
+
+Summary:
+- Mirrored mobile and desktop snapshot coordinators now validate factory-
+  produced snapshot IDs before checkpoint measurement, persistence, or pending
+  queue insertion.
+- Unsafe C1 and oversized IDs fail closed without a store attempt or retained
+  retry checkpoint.
+
+Files changed:
+- Mirrored snapshot writers, coordinators, and coordinator regression tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Mobile and desktop snapshot coordinator suites: 14 tests passed each.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Durable database choice, product state hydration, native/device and
+  cross-device validation, other-platform hosts, and release signing remain
+  external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T209 Snapshot Metadata Text Boundary
 
 Summary:

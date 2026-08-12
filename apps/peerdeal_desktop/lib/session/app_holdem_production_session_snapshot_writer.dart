@@ -17,6 +17,15 @@ class AppHoldemProductionSessionSnapshotWriter {
 
   final RecoveryPersistenceStore _store;
 
+  static bool isSafeSnapshotMetadata(String value) {
+    return value.isNotEmpty &&
+        value.trim() == value &&
+        utf8.encode(value).length <= const CanonicalJsonLimits().maxTextBytes &&
+        !value.runes.any(
+          (rune) => rune < 0x20 || (rune >= 0x7F && rune <= 0x9F),
+        );
+  }
+
   /// Validates all snapshot inputs without touching persistence.
   ///
   /// Combined event-and-snapshot writes use this as a preflight so malformed
@@ -170,12 +179,7 @@ class AppHoldemProductionSessionSnapshotWriter {
     String value, {
     required String warning,
   }) {
-    if (value.isEmpty ||
-        value.trim() != value ||
-        utf8.encode(value).length > const CanonicalJsonLimits().maxTextBytes ||
-        value.runes.any(
-          (rune) => rune < 0x20 || (rune >= 0x7F && rune <= 0x9F),
-        )) {
+    if (!isSafeSnapshotMetadata(value)) {
       return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>[warning],

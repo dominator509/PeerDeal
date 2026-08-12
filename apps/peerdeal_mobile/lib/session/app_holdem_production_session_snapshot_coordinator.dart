@@ -6,6 +6,7 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
 import 'app_holdem_production_session_persistence_writer.dart';
+import 'app_holdem_production_session_snapshot_writer.dart';
 
 typedef AppHoldemProductionSnapshotIdFactory =
     String Function(TableState tableState, HoldemEventCursor eventCursor);
@@ -78,6 +79,16 @@ class AppHoldemProductionSessionSnapshotCoordinator {
         final result = RecoveryPersistenceResult(
           isSuccess: false,
           warnings: <String>['Holdem snapshot ID could not be created.'],
+        );
+        _lastResult = result;
+        return result;
+      }
+      if (!AppHoldemProductionSessionSnapshotWriter.isSafeSnapshotMetadata(
+        snapshotId,
+      )) {
+        final result = RecoveryPersistenceResult(
+          isSuccess: false,
+          warnings: <String>['Holdem snapshot identity is invalid.'],
         );
         _lastResult = result;
         return result;

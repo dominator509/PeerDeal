@@ -2357,6 +2357,15 @@ builds pass: analyze, boundary, source-text, serialized test,
 dependency-audit, and diff gates are green; Android debug APK and Windows
 debug artifacts build successfully.
 
+The T210 follow-up closes the app-owned snapshot coordinator pre-queue
+identity boundary. Mirrored mobile and desktop coordinators now apply the
+writer's snapshot metadata validator to factory-produced snapshot IDs before
+checkpoint byte measurement, persistence, or pending-queue insertion. Unsafe
+or oversized IDs therefore cannot consume retry budget or cause repeated
+store attempts. Focused mobile and desktop coordinator suites pass; full
+analyze, boundary, source-text, serialized test, dependency-audit, and diff
+gates pass; Android debug APK and Windows debug artifacts build successfully.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

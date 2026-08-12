@@ -55,6 +55,33 @@ void main() {
     expect(store.saveAttempts, 0);
   });
 
+  test('rejects unsafe factory snapshot IDs before queueing', () async {
+    for (final snapshotId in <String>[
+      'snapshot_${String.fromCharCode(0x85)}',
+      'x' * (const CanonicalJsonLimits().maxTextBytes + 1),
+    ]) {
+      final store = _ToggleSnapshotStore(failuresRemaining: 10);
+      final typed = _typedSnapshot();
+      final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+          store: store,
+        ),
+        snapshotIdFactory: (_, _) => snapshotId,
+      );
+
+      final result = await coordinator.persist(
+        tableState: typed.tableState,
+        handState: typed.handState,
+        eventCursor: typed.eventCursor,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warnings, ['Holdem snapshot identity is invalid.']);
+      expect(coordinator.hasPending, isFalse);
+      expect(store.saveAttempts, 0);
+    }
+  });
+
   test(
     'rejects an oversized event suffix before copying or persisting',
     () async {
