@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T180 Immutable Crypto Verification Collections
+
+Summary:
+- `DealProofBundle` now defensively copies and recursively freezes normalized
+  and raw proof maps at the crypto boundary while preserving the normalizer's
+  shared immutable view for identical inputs.
+- `VerificationPayload` owns evidence/warning lists and `VerificationResult`
+  owns its layer collection; no crypto verification result exposes caller-owned
+  mutable collections.
+
+Validation:
+- Focused `peerdeal_crypto` suite: passed 14 tests, including the new ownership
+  regression; package analyzer passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Provider-specific proof semantics, product verification wiring, durable
+  database replacement, device/network validation, other-platform hosts,
+  release signing, and final UX remain external or integration-owned.
+
 ### 2026-08-12 - Codex - T179 Immutable Wizard Collections
 
 Summary:

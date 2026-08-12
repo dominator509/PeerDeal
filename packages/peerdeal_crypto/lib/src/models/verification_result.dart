@@ -5,13 +5,13 @@ import 'verification_state.dart';
 import 'verification_summary.dart';
 
 class VerificationResult {
-  const VerificationResult({
+  VerificationResult({
     required this.state,
     required this.reasonCode,
-    required this.layers,
+    required List<VerificationLayerResult> layers,
     required this.summary,
     required this.payload,
-  });
+  }) : layers = List<VerificationLayerResult>.unmodifiable(layers);
 
   final VerificationState state;
   final VerificationReasonCode reasonCode;

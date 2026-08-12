@@ -263,7 +263,8 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 - Receipt authorization checks pseudonymous user/session binding.
 - Provider-proof verification lives in `peerdeal_crypto`; its default
   normalizer bounds JSON-safe proof structure and canonical UTF-8 size before
-  creating a proof bundle.
+  creating a proof bundle, and crypto proof/verification result models freeze
+  caller-owned maps and collections at the package boundary.
 
 ## Risk Areas
 

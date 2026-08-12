@@ -1921,6 +1921,16 @@ rejection. Durable database replacement, real product state selection,
 device/network validation, other-platform hosts, release signing, and final
 UX remain separate.
 
+The T180 follow-up closes the crypto-owned verification collection gap.
+`DealProofBundle` now owns normalized and raw proof maps, preserving one shared
+immutable view when both inputs are the same bounded payload; verification
+payload evidence/warnings and verification result layers are also defensively
+copied at construction. Focused crypto ownership regressions, the full
+repository test matrix, both app builds, and the native-host smoke gate pass.
+Provider-specific proof semantics, product verification wiring, durable
+database replacement, device/network validation, other-platform hosts, release
+signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

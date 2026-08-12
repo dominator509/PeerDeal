@@ -1,12 +1,18 @@
 class VerificationPayload {
-  const VerificationPayload({
-    required this.verificationLayersPassed,
-    required this.verificationLayersFailed,
+  VerificationPayload({
+    required List<String> verificationLayersPassed,
+    required List<String> verificationLayersFailed,
     this.replayAnchor,
     this.fairDealAnchor,
     this.settlementAnchor,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : verificationLayersPassed = List<String>.unmodifiable(
+         verificationLayersPassed,
+       ),
+       verificationLayersFailed = List<String>.unmodifiable(
+         verificationLayersFailed,
+       ),
+       warnings = List<String>.unmodifiable(warnings);
 
   final List<String> verificationLayersPassed;
   final List<String> verificationLayersFailed;

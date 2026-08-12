@@ -13,13 +13,14 @@ class DefaultVerificationEngine implements VerificationEngine {
   @override
   VerificationResult verify(VerificationRequest request) {
     if (request.isWiped) {
-      return const VerificationResult(
+      return VerificationResult(
         state: VerificationState.wiped,
         reasonCode: VerificationReasonCode.errVerificationWiped,
         layers: <VerificationLayerResult>[],
         summary: VerificationSummary(
           headline: 'Wiped',
-          detail: 'Verification detail is no longer viewable in supported clients.',
+          detail:
+              'Verification detail is no longer viewable in supported clients.',
         ),
         payload: VerificationPayload(
           verificationLayersPassed: <String>[],
@@ -28,9 +29,13 @@ class DefaultVerificationEngine implements VerificationEngine {
       );
     }
 
-    final replayOk = request.expectedReplayAnchor != null && request.expectedReplayAnchor!.isNotEmpty;
+    final replayOk =
+        request.expectedReplayAnchor != null &&
+        request.expectedReplayAnchor!.isNotEmpty;
     final proofOk = request.dealProofBundle != null;
-    final settlementOk = request.expectedSettlementAnchor != null && request.expectedSettlementAnchor!.isNotEmpty;
+    final settlementOk =
+        request.expectedSettlementAnchor != null &&
+        request.expectedSettlementAnchor!.isNotEmpty;
 
     final layers = <VerificationLayerResult>[
       VerificationLayerResult(
@@ -50,8 +55,14 @@ class DefaultVerificationEngine implements VerificationEngine {
       ),
     ];
 
-    final passed = layers.where((l) => l.passed).map((l) => l.layerId).toList(growable: false);
-    final failed = layers.where((l) => !l.passed).map((l) => l.layerId).toList(growable: false);
+    final passed = layers
+        .where((l) => l.passed)
+        .map((l) => l.layerId)
+        .toList(growable: false);
+    final failed = layers
+        .where((l) => !l.passed)
+        .map((l) => l.layerId)
+        .toList(growable: false);
 
     if (replayOk && proofOk && settlementOk) {
       return VerificationResult(
@@ -81,7 +92,8 @@ class DefaultVerificationEngine implements VerificationEngine {
         layers: layers,
         summary: const VerificationSummary(
           headline: 'Partial',
-          detail: 'Replay and settlement passed, but provider proof was unavailable.',
+          detail:
+              'Replay and settlement passed, but provider proof was unavailable.',
         ),
         payload: VerificationPayload(
           verificationLayersPassed: passed,
@@ -99,8 +111,8 @@ class DefaultVerificationEngine implements VerificationEngine {
       reasonCode: !replayOk
           ? VerificationReasonCode.errVerificationReplayMismatch
           : !proofOk
-              ? VerificationReasonCode.errVerificationDealProofFailed
-              : VerificationReasonCode.errVerificationSettlementMismatch,
+          ? VerificationReasonCode.errVerificationDealProofFailed
+          : VerificationReasonCode.errVerificationSettlementMismatch,
       layers: layers,
       summary: const VerificationSummary(
         headline: 'Failed',
