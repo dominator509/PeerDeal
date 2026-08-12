@@ -131,14 +131,13 @@ class _AppHoldemTableSessionRouteState
       pollInterval: widget.pollInterval,
       timerFactory: widget.timerFactory,
       cancellation: _transportCancellation.future,
-      onEventAccepted: (_) {
-        final acceptedEvent = runtime.sessionRuntime.lastAcceptedEvent;
+      onEventAccepted: (result) {
         unawaited(
           _checkpointAcceptedEvent(
             lifecycleGeneration: lifecycleGeneration,
             runtime: runtime,
             coordinator: coordinator,
-            acceptedEvent: acceptedEvent,
+            acceptedEvent: result.acceptedEvent,
           ),
         );
         if (_isCurrentLifecycle(lifecycleGeneration)) setState(() {});

@@ -1327,6 +1327,20 @@ Remaining:
   validation, other-platform hosts, release signing, and final UX remain
   separate.
 
+## T168 Inbound Event Checkpoint Identity
+
+- Mirrored app session event results now carry the exact accepted
+  `EventEnvelope` for successful single-event projection.
+- Mirrored Hold'em table routes pass that callback-owned event into snapshot
+  checkpointing instead of rereading mutable runtime `lastAcceptedEvent` state.
+- Focused mobile and desktop runtime and transport-handler tests cover the
+  event identity fields after canonical transport decoding.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## T166 Persisted Snapshot Hash Verification
 
 - Mirrored persisted Hold'em sources now verify the canonical payload hash in

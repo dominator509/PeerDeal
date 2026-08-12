@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T168 Inbound Event Checkpoint Identity
+
+Summary:
+- Mirrored app session results now carry the exact accepted `EventEnvelope`.
+- Mirrored Hold'em table routes checkpoint that callback-owned event instead of
+  rereading mutable `lastAcceptedEvent` runtime state after inbound transport.
+
+Files changed:
+- Mirrored app session runtimes and Hold'em table routes.
+- Mirrored runtime and transport-handler focused tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop runtime and transport-handler suites passed.
+- Full repository gates and Android/Windows artifact validation remain
+  required for this slice.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T167 Shared Sync Snapshot Hash Verification
 
 Summary:

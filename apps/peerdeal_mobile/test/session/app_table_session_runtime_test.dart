@@ -32,12 +32,15 @@ void main() {
           .isApplied,
       isTrue,
     );
-    final result = runtime.applyEvent(
-      _event(type: 'SessionClosed', seq: 3, prevHash: 'hash_2'),
-      now: closedAt,
+    final closingEvent = _event(
+      type: 'SessionClosed',
+      seq: 3,
+      prevHash: 'hash_2',
     );
+    final result = runtime.applyEvent(closingEvent, now: closedAt);
 
     expect(result.isApplied, isTrue);
+    expect(result.acceptedEvent, same(closingEvent));
     expect(result.recoveryResult!.isSuccess, isTrue);
     expect(runtime.state.phase, TablePhase.closed);
     expect(runtime.acceptedEventCount, 3);

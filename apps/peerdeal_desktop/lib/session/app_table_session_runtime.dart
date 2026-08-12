@@ -10,6 +10,7 @@ class AppTableSessionEventResult {
   const AppTableSessionEventResult._({
     required this.disposition,
     required this.state,
+    this.acceptedEvent,
     this.recoveryResult,
     this.reasonCode,
     this.warnings = const <String>[],
@@ -17,11 +18,13 @@ class AppTableSessionEventResult {
 
   const AppTableSessionEventResult.applied({
     required TableState state,
+    required EventEnvelope acceptedEvent,
     AppRecoverySessionCloseEventResult? recoveryResult,
     List<String> warnings = const <String>[],
   }) : this._(
          disposition: AppTableSessionEventDisposition.applied,
          state: state,
+         acceptedEvent: acceptedEvent,
          recoveryResult: recoveryResult,
          warnings: warnings,
        );
@@ -41,6 +44,7 @@ class AppTableSessionEventResult {
 
   final AppTableSessionEventDisposition disposition;
   final TableState state;
+  final EventEnvelope? acceptedEvent;
   final AppRecoverySessionCloseEventResult? recoveryResult;
   final String? reasonCode;
   final List<String> warnings;
@@ -176,6 +180,7 @@ class AppTableSessionRuntime {
     _acceptedEventCount++;
     return AppTableSessionEventResult.applied(
       state: _state,
+      acceptedEvent: event,
       recoveryResult: recoveryResult,
     );
   }

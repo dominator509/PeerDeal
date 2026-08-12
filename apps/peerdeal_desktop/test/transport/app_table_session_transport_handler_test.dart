@@ -17,11 +17,14 @@ void main() {
     final runtime = _runtime();
     final handler = AppTableSessionTransportHandler(runtime: runtime);
     final receiver = ValidatingTransportFrameReceiver(handler: handler);
+    final event = _event();
 
-    final result = await receiver.receive(_frame(_event()));
+    final result = await receiver.receive(_frame(event));
 
     expect(result.accepted, isTrue);
     expect(handler.lastResult!.isApplied, isTrue);
+    expect(handler.lastResult!.acceptedEvent!.eventId, event.eventId);
+    expect(handler.lastResult!.acceptedEvent!.eventSeq, event.eventSeq);
     expect(runtime.state.eventSequence, 1);
     expect(runtime.state.phase, TablePhase.openReady);
   });

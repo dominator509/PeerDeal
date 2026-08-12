@@ -37,8 +37,8 @@ composition, T61 single-flight local identity provisioning, T62 post-save
 identity verification, and T63 typed join-to-session context handoff
 and T75 Android/Windows local-network host registration, T147 production
 table lifecycle invalidation, T148 inbound checkpoint lifecycle invalidation,
-and T149 cancelled native receive suppression, and T150 source-owned drain
-disposal cancellation
+and T149 cancelled native receive suppression, T150 source-owned drain
+disposal cancellation, and T168 exact inbound-event checkpoint identity
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1447,6 +1447,20 @@ Remaining:
 Remaining:
 - Product state/database provisioning, Android device/runtime validation,
   cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
+## Recent T168 Inbound Event Checkpoint Identity
+
+- Mirrored `AppTableSessionEventResult` values now carry the exact accepted
+  `EventEnvelope` for every accepted single event.
+- Production Hold'em routes use that callback-owned event for checkpointing
+  instead of rereading mutable `lastAcceptedEvent` runtime state.
+- Focused mobile and desktop runtime and transport-handler suites verify the
+  accepted event sequence and identity fields across the decoded frame path.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
   separate.
 
 ## Recent T167 Shared Sync Snapshot Hash Verification
