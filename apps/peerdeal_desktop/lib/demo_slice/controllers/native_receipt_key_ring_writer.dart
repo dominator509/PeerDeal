@@ -204,31 +204,28 @@ class NativeReceiptKeyRingWriter {
   }
 
   static bool _isValidNamespace(String namespace) =>
-      namespace.trim().isNotEmpty && namespace.trim() == namespace;
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        namespace,
+        NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes,
+      );
 
   static bool _isValidKeyId(String keyId, int maxLength) =>
       maxLength > 0 &&
       keyId.length <= maxLength &&
-      keyId.trim().isNotEmpty &&
-      keyId.trim() == keyId &&
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        keyId,
+        NativeBridgePayloadLimits.maxSecureKeyIdBytes,
+      ) &&
       !keyId.contains(':') &&
-      !_hasControlCharacter(keyId);
+      keyId.isNotEmpty;
 
   static bool _isValidSecret(String secret, int maxLength) =>
       maxLength > 0 &&
       secret.length <= maxLength &&
-      secret.trim().isNotEmpty &&
-      secret.trim() == secret &&
-      !_hasControlCharacter(secret);
-
-  static bool _hasControlCharacter(String value) {
-    for (final codeUnit in value.codeUnits) {
-      if (codeUnit < 0x20 || codeUnit == 0x7F) {
-        return true;
-      }
-    }
-    return false;
-  }
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        secret,
+        NativeBridgePayloadLimits.maxSecureKeySecretBytes,
+      );
 
   static String _safeNativeWarning(
     String? warning, {

@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T163 Receipt Key-Ring Native Text Bound
+
+Summary:
+- Mirrored receipt key-ring loaders and writers now reuse the locked native
+  secure-key UTF-8/C1 and byte limits for namespaces, key IDs, and secrets.
+- C1-bearing or byte-oversized namespaces fail closed before native load,
+  save, or delete; invalid key metadata cannot become a receipt key-ring entry.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_receipt_key_ring_writer.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- `apps/peerdeal_desktop/lib/demo_slice/controllers/native_receipt_key_ring_writer.dart`
+- Mirrored receipt loader/writer tests and readiness/handoff records.
+
+Validation:
+- Focused mobile and desktop receipt loader/writer suites passed.
+- Mobile and desktop package analysis passed.
+- Full repository gates and platform artifact validation remain required.
+
+Remaining:
+- Android/Windows runtime key-store validation, cross-device networking,
+  other-platform hosts, product state/database provisioning, and release
+  signing remain external or integration-owned.
+
 ### 2026-08-11 - Codex - T139 Android Secure-Key UTF-8 Boundary Hardening
 
 Summary:

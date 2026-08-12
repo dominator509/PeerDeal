@@ -96,6 +96,35 @@ void main() {
   });
 
   test(
+    'fails closed before native load for C1 or byte-oversized namespace',
+    () async {
+      for (final namespace in <String>[
+        'peerdeal${String.fromCharCode(0x85)}receipts',
+        'x' * (NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes + 1),
+      ]) {
+        final bridge = _FakeSecureKeyStorageBridge(
+          snapshot: const SecureKeyStorageSnapshot(
+            available: true,
+            keys: <SecureKeyRecord>[],
+          ),
+        );
+
+        final result = await NativeReceiptKeyRingLoader(
+          bridge: bridge,
+          namespace: namespace,
+        ).load();
+
+        expect(result.hasSigningKey, isFalse);
+        expect(result.hasEncryptionKey, isFalse);
+        expect(result.warnings, <String>[
+          'Secure receipt key namespace is invalid.',
+        ]);
+        expect(bridge.namespace, isNull);
+      }
+    },
+  );
+
+  test(
     'fails closed before native load for invalid key record limit',
     () async {
       final bridge = _FakeSecureKeyStorageBridge(

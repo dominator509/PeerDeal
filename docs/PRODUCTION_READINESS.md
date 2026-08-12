@@ -1769,6 +1769,16 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
+Mirrored receipt key-ring loaders and writers now reuse the locked native
+secure-key UTF-8 validator and byte limits for namespaces, key IDs, and
+secrets, rejecting C1-bearing or oversized values before native load, delete,
+save, or receipt-key projection. Focused mobile and desktop receipt suites
+cover C1 and byte-oversized namespace rejection. Full repository gates remain
+required; Android and Windows runtime key-store validation, device/network
+validation, product state/database provisioning, other-platform hosts, and
+release signing remain separate.
+
 The T162 follow-up closes the remaining app-owned production-session peer
 identity boundary gap. Mirrored local identity loaders and writers, persisted
 Hold'em route policies, and production-session factories now reuse the shared

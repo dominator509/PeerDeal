@@ -74,6 +74,34 @@ void main() {
     expect(bridge.savedKeys, isEmpty);
   });
 
+  test(
+    'fails closed before native mutation for C1 or byte-oversized namespace',
+    () async {
+      for (final namespace in <String>[
+        'peerdeal${String.fromCharCode(0x85)}receipts',
+        'x' * (NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes + 1),
+      ]) {
+        final bridge = _RecordingSecureKeyStorageBridge();
+        final writer = NativeReceiptKeyRingWriter(
+          bridge: bridge,
+          namespace: namespace,
+        );
+
+        final result = await writer.saveSigningKey(
+          const ReceiptSigningKey(
+            keyId: 'receipt_signing_1',
+            secret: 'signing',
+          ),
+          active: true,
+        );
+
+        expect(result.isSuccess, isFalse);
+        expect(result.warning, 'Secure receipt key namespace is invalid.');
+        expect(bridge.savedKeys, isEmpty);
+      }
+    },
+  );
+
   test('fails closed before native save for oversized key ids', () async {
     final bridge = _RecordingSecureKeyStorageBridge();
     final writer = NativeReceiptKeyRingWriter(

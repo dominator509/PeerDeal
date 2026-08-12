@@ -1449,6 +1449,20 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T163 Receipt Key-Ring Native Text Bound
+
+- Mirrored receipt key-ring loaders and writers now reuse the locked native
+  secure-key UTF-8/C1 and byte limits for namespaces, key IDs, and secrets.
+- C1-bearing or byte-oversized namespaces fail closed before native load,
+  save, or delete; invalid key metadata cannot become a receipt key-ring entry.
+- Focused mobile and desktop receipt loader/writer suites and package analysis
+  pass.
+
+Remaining:
+- Full repository gates, Android/Windows runtime key-store validation,
+  cross-device networking, other-platform hosts, product state/database
+  provisioning, and release signing remain separate.
+
 ## Recent T162 Production Session Peer Identity Bound
 
 - Mirrored local identity loaders and writers now reuse the shared native

@@ -195,29 +195,25 @@ class NativeReceiptKeyRingLoader
   }
 
   static bool _isValidNamespace(String namespace) =>
-      namespace.trim().isNotEmpty && namespace.trim() == namespace;
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        namespace,
+        NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes,
+      );
 
   bool _isValidKeyId(String keyId) =>
       keyId.length <= maxKeyIdLength &&
-      keyId.trim().isNotEmpty &&
-      keyId.trim() == keyId &&
-      !keyId.contains(':') &&
-      !_hasControlCharacter(keyId);
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        keyId,
+        NativeBridgePayloadLimits.maxSecureKeyIdBytes,
+      ) &&
+      !keyId.contains(':');
 
   bool _isValidSecret(String secret) =>
       secret.length <= maxKeySecretLength &&
-      secret.trim().isNotEmpty &&
-      secret.trim() == secret &&
-      !_hasControlCharacter(secret);
-
-  static bool _hasControlCharacter(String value) {
-    for (final codeUnit in value.codeUnits) {
-      if (codeUnit < 0x20 || codeUnit == 0x7F) {
-        return true;
-      }
-    }
-    return false;
-  }
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        secret,
+        NativeBridgePayloadLimits.maxSecureKeySecretBytes,
+      );
 
   ReceiptSigningKey? _activeSigningKey(List<SecureKeyRecord> records) {
     for (final record in records.where((record) => record.active)) {
