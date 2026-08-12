@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T195 Android Receive Queue Serialization
+
+Summary:
+- Android native transport receive drain/requeue now shares the lifecycle lock
+  used by the receiver thread.
+- Concurrent arrivals cannot reorder the drained queue or bypass the bounded
+  512-frame queue invariant.
+- Closed receivers return the existing unavailable receive fact; generic channel
+  payloads and package boundaries are unchanged.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Android debug APK build: passed.
+
+Risks:
+- Real-device transport behavior and cross-device multicast reachability remain
+  external validation; product state provisioning, durable database replacement,
+  other-platform hosts, release signing, and final navigation/UX remain
+  separate.
+
+Next reviewer:
+- Continue with the next documented production gap without inventing platform
+  endpoint semantics.
+
 ### 2026-08-12 - Codex - T194 Android Multicast Readiness
 
 Summary:

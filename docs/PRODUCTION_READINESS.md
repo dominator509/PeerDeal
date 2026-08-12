@@ -2219,6 +2219,13 @@ build passed after the change. Real-device lock behavior, cross-device
 reachability, release signing, and the remaining product-state/database work
 remain separate.
 
+The T195 follow-up closes the Android native receive-queue concurrency gap.
+Receive drain/requeue now shares the receiver lifecycle lock, preventing
+concurrent arrivals from reordering drained frames or bypassing the bounded
+512-frame queue invariant. Closed receivers return the existing unavailable
+receive fact. The Android debug APK build passed after the change; real-device
+transport behavior and cross-device reachability remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

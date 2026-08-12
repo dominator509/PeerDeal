@@ -335,6 +335,9 @@ the Wi-Fi state and multicast-state permissions required by its existing
 Android receiver availability must not be published until that multicast lock
 exists and is held; missing or unheld lock state returns the existing generic
 unavailable capability/receive facts.
+Android native receive enqueue and receive drain/requeue must share the host
+ lifecycle lock so concurrent arrivals preserve the bounded 512-frame queue
+ invariant and closed receivers return unavailable facts.
 Android native transport handlers must re-check handler closure when posting
 worker results back to the main looper; late capability, send, and receive
 results must return their operation-specific unavailable payloads rather than

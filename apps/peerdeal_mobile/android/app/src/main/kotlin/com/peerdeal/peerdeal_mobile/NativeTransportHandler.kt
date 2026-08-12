@@ -180,22 +180,27 @@ internal class NativeTransportHandler(
             )
         }
 
-        val selected = ArrayList<Map<String, Any?>>(MAX_BATCH_SIZE)
-        val retained = ArrayList<TransportFrame>()
-        val scanCount = frames.size
-        repeat(scanCount) {
-            val frame = frames.poll() ?: return@repeat
-            if (selected.size < MAX_BATCH_SIZE &&
-                frame.sessionId == sessionId &&
-                frame.recipientPeerId == peerId
-            ) {
-                selected.add(frame.toPayload())
-            } else {
-                retained.add(frame)
+        return synchronized(lifecycleLock) {
+            if (closed || !receiverAvailable) {
+                return@synchronized receiveUnavailablePayload()
             }
+            val selected = ArrayList<Map<String, Any?>>(MAX_BATCH_SIZE)
+            val retained = ArrayList<TransportFrame>()
+            val scanCount = frames.size
+            repeat(scanCount) {
+                val frame = frames.poll() ?: return@repeat
+                if (selected.size < MAX_BATCH_SIZE &&
+                    frame.sessionId == sessionId &&
+                    frame.recipientPeerId == peerId
+                ) {
+                    selected.add(frame.toPayload())
+                } else {
+                    retained.add(frame)
+                }
+            }
+            retained.forEach(frames::offer)
+            mapOf("available" to true, "frames" to selected)
         }
-        retained.forEach(frames::offer)
-        return mapOf("available" to true, "frames" to selected)
     }
 
     private fun receiveUnavailablePayload(): Map<String, Any?> = mapOf(
