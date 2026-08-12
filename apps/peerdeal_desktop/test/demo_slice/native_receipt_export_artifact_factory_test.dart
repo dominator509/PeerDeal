@@ -50,7 +50,7 @@ void main() {
     'uses existing native-backed keys without provisioning writes',
     () async {
       final bridge = _ExportBridge(
-        snapshot: const SecureKeyStorageSnapshot(
+        snapshot: SecureKeyStorageSnapshot(
           available: true,
           keys: <SecureKeyRecord>[
             SecureKeyRecord(
@@ -174,9 +174,12 @@ NativeReceiptExportArtifactFactory _factory(_ExportBridge bridge) {
 
 class _ExportBridge implements SecureKeyStorageMutationBridge {
   _ExportBridge({
-    this.snapshot = const SecureKeyStorageSnapshot(available: true, keys: []),
+    SecureKeyStorageSnapshot? snapshot,
     this.saveResult = const SecureKeyStorageMutationResult(isSuccess: true),
-  }) : _currentSnapshot = snapshot;
+  }) : snapshot =
+           snapshot ?? SecureKeyStorageSnapshot(available: true, keys: []),
+       _currentSnapshot =
+           snapshot ?? SecureKeyStorageSnapshot(available: true, keys: []);
 
   final SecureKeyStorageSnapshot snapshot;
   final SecureKeyStorageMutationResult saveResult;

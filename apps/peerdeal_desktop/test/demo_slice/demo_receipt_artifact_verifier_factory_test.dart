@@ -30,7 +30,7 @@ const _keyRing = ReceiptKeyRingSnapshot(
 
 const _signer = HmacSha256ReceiptSigner(keyProvider: _keyRing);
 
-const _availableSnapshot = SecureKeyStorageSnapshot(
+final _availableSnapshot = SecureKeyStorageSnapshot(
   available: true,
   keys: <SecureKeyRecord>[
     SecureKeyRecord(

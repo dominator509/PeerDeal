@@ -37,7 +37,7 @@ void main() {
         broadcastSupported: true,
         notes: 'local-network-ready',
       ),
-      discovery: const LocalNetworkDiscoverySnapshot(
+      discovery: LocalNetworkDiscoverySnapshot(
         permissionGranted: true,
         foundEndpoints: <String>[' peer-a ', 'peer-b', 'peer-a', ''],
         interfaceHints: <String>['wifi', ' wifi ', ''],
@@ -64,7 +64,7 @@ void main() {
     'projects documented native endpoint locations into candidates',
     () async {
       final result = await NativeBootstrapCandidateLoader(
-        bridge: const _FakeLocalNetworkBridge(
+        bridge: _FakeLocalNetworkBridge(
           capability: LocalNetworkCapability(
             discoverySupported: true,
             permissionPromptSupported: true,
@@ -104,7 +104,7 @@ void main() {
     'drops malformed endpoint locations without exposing raw values',
     () async {
       final result = await NativeBootstrapCandidateLoader(
-        bridge: const _FakeLocalNetworkBridge(
+        bridge: _FakeLocalNetworkBridge(
           capability: LocalNetworkCapability(
             discoverySupported: true,
             permissionPromptSupported: true,
@@ -138,7 +138,7 @@ void main() {
     () async {
       final provider = _RecordingBootstrapCandidateProvider();
       final result = await NativeBootstrapCandidateLoader(
-        bridge: const _FakeLocalNetworkBridge(
+        bridge: _FakeLocalNetworkBridge(
           capability: LocalNetworkCapability(
             discoverySupported: true,
             permissionPromptSupported: true,
@@ -277,7 +277,7 @@ void main() {
         capability: const LocalNetworkCapability.unavailable(
           warning: 'permission unavailable',
         ),
-        discovery: const LocalNetworkDiscoverySnapshot(
+        discovery: LocalNetworkDiscoverySnapshot(
           permissionGranted: true,
           foundEndpoints: <String>['peer-a'],
           interfaceHints: <String>[],
@@ -301,7 +301,7 @@ void main() {
           notes: '${'local '.padRight(120, 'x')}\nsecret',
           warning: 'permission_failed: C:\\secret\\network.log',
         ),
-        discovery: const LocalNetworkDiscoverySnapshot(
+        discovery: LocalNetworkDiscoverySnapshot(
           permissionGranted: true,
           foundEndpoints: <String>[],
           interfaceHints: <String>['wifi\nsecret'],
@@ -340,7 +340,7 @@ void main() {
           broadcastSupported: true,
           notes: 'local-network-ready',
         ),
-        discovery: const LocalNetworkDiscoverySnapshot(
+        discovery: LocalNetworkDiscoverySnapshot(
           permissionGranted: true,
           foundEndpoints: <String>['peer-a'],
           interfaceHints: <String>[],
@@ -404,7 +404,7 @@ class _CountingLocalNetworkBridge implements LocalNetworkBridge {
   @override
   Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
     discoveryLookups += 1;
-    return const LocalNetworkDiscoverySnapshot(
+    return LocalNetworkDiscoverySnapshot(
       permissionGranted: true,
       foundEndpoints: <String>['peer-a'],
       interfaceHints: <String>[],

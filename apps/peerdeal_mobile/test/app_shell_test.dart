@@ -79,7 +79,7 @@ void main() {
                 notes: 'ready',
               ),
             ),
-            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+            secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
               snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
             ),
           ),
@@ -115,7 +115,7 @@ void main() {
                 warning: 'password transport-secret',
               ),
             ),
-            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+            secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
               snapshot: SecureKeyStorageSnapshot.unavailable(
                 warning: 'secret keychain detail',
               ),
@@ -1042,7 +1042,7 @@ void main() {
                 notes: 'ready',
               ),
             ),
-            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+            secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
               snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
             ),
           ),
@@ -1085,7 +1085,7 @@ void main() {
                   notes: 'ready',
                 ),
               ),
-              secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
                 snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
               ),
             ),
@@ -1136,7 +1136,7 @@ void main() {
                   warning: 'password transport-secret',
                 ),
               ),
-              secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
                 snapshot: SecureKeyStorageSnapshot.unavailable(
                   warning: 'secret keychain detail',
                 ),
@@ -1181,7 +1181,7 @@ void main() {
             nativeTransportBridge: const _StaticNativeTransportBridge(
               capability: NativeTransportCapability.unavailable(),
             ),
-            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+            secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
               snapshot: SecureKeyStorageSnapshot.unavailable(),
             ),
           ),
@@ -1399,7 +1399,7 @@ void main() {
                   notes: 'ready',
                 ),
               ),
-              secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+              secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
                 snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
               ),
             ),
@@ -1777,7 +1777,7 @@ void main() {
             nativeTransportBridge: const _StaticNativeTransportBridge(
               capability: NativeTransportCapability.unavailable(),
             ),
-            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+            secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
               snapshot: SecureKeyStorageSnapshot.unavailable(),
             ),
           ),
@@ -1832,7 +1832,7 @@ void main() {
                 notes: 'ready',
               ),
             ),
-            secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+            secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
               snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
             ),
           ),
@@ -2269,7 +2269,7 @@ AppNativeReadinessLoader _readyNativeReadinessLoader() {
         notes: 'ready',
       ),
     ),
-    secureKeyStorageBridge: const _StaticSecureKeyStorageBridge(
+    secureKeyStorageBridge: _StaticSecureKeyStorageBridge(
       snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
     ),
   );
@@ -2338,7 +2338,7 @@ class _StaticLocalNetworkBridge implements LocalNetworkBridge {
 
   @override
   Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
-    return const LocalNetworkDiscoverySnapshot(
+    return LocalNetworkDiscoverySnapshot(
       permissionGranted: true,
       foundEndpoints: <String>['peer-a', 'peer-b'],
       interfaceHints: <String>['wifi'],
@@ -2366,7 +2366,7 @@ class _StaticNativeTransportBridge implements NativeTransportBridge {
     required String sessionId,
     required String peerId,
   }) async {
-    return const NativeTransportReceiveSnapshot(available: true, frames: []);
+    return NativeTransportReceiveSnapshot(available: true, frames: []);
   }
 }
 

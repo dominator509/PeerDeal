@@ -183,7 +183,7 @@ void main() {
     final handler = _RecordingTransportFrameHandler();
     final drain = NativeTransportFrameDrain(
       bridge: _FakeNativeTransportBridge(
-        receiveFrames: const <NativeTransportFrame>[
+        receiveFrames: <NativeTransportFrame>[
           NativeTransportFrame(
             sessionId: 'session_1',
             senderPeerId: 'peer_a',

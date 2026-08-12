@@ -20,7 +20,7 @@ void main() {
 
   test('maps native secure key records into receipt key ring', () async {
     final bridge = _FakeSecureKeyStorageBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[
           SecureKeyRecord(
@@ -89,7 +89,7 @@ void main() {
 
   test('fails closed before native load for invalid namespace', () async {
     final bridge = _FakeSecureKeyStorageBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[],
       ),
@@ -116,7 +116,7 @@ void main() {
         'x' * (NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes + 1),
       ]) {
         final bridge = _FakeSecureKeyStorageBridge(
-          snapshot: const SecureKeyStorageSnapshot(
+          snapshot: SecureKeyStorageSnapshot(
             available: true,
             keys: <SecureKeyRecord>[],
           ),
@@ -141,7 +141,7 @@ void main() {
     'fails closed before native load for invalid key record limit',
     () async {
       final bridge = _FakeSecureKeyStorageBridge(
-        snapshot: const SecureKeyStorageSnapshot(
+        snapshot: SecureKeyStorageSnapshot(
           available: true,
           keys: <SecureKeyRecord>[],
         ),
@@ -165,7 +165,7 @@ void main() {
     'fails closed before native load for invalid key metadata limit',
     () async {
       final bridge = _FakeSecureKeyStorageBridge(
-        snapshot: const SecureKeyStorageSnapshot(
+        snapshot: SecureKeyStorageSnapshot(
           available: true,
           keys: <SecureKeyRecord>[],
         ),
@@ -189,7 +189,7 @@ void main() {
     'fails closed before native load for invalid key material limit',
     () async {
       final bridge = _FakeSecureKeyStorageBridge(
-        snapshot: const SecureKeyStorageSnapshot(
+        snapshot: SecureKeyStorageSnapshot(
           available: true,
           keys: <SecureKeyRecord>[],
         ),
@@ -241,7 +241,7 @@ void main() {
 
   test('fails closed when native key snapshot has unsafe metadata', () async {
     final bridge = _FakeSecureKeyStorageBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[
           SecureKeyRecord(
@@ -267,7 +267,7 @@ void main() {
 
   test('fails closed when native key ids exceed metadata limit', () async {
     final bridge = _FakeSecureKeyStorageBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[
           SecureKeyRecord(
@@ -296,7 +296,7 @@ void main() {
 
   test('fails closed when native key snapshot has unsafe material', () async {
     final bridge = _FakeSecureKeyStorageBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[
           SecureKeyRecord(
@@ -353,7 +353,7 @@ void main() {
     'fails closed when native storage has multiple active receipt keys',
     () async {
       final bridge = _FakeSecureKeyStorageBridge(
-        snapshot: const SecureKeyStorageSnapshot(
+        snapshot: SecureKeyStorageSnapshot(
           available: true,
           keys: <SecureKeyRecord>[
             SecureKeyRecord(
@@ -413,7 +413,7 @@ void main() {
 
   test('forwards route cancellation to a cancellable native bridge', () async {
     final bridge = _CancellableSecureKeyStorageBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[],
       ),

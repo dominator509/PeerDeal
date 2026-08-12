@@ -25,7 +25,7 @@ void main() {
   test('maps native discovery endpoints into join bootstrap plan', () async {
     final provider = _RecordingBootstrapCandidateProvider();
     final coordinator = NativeJoinBootstrapCoordinator(
-      bridge: const _StaticLocalNetworkBridge(
+      bridge: _StaticLocalNetworkBridge(
         capability: LocalNetworkCapability(
           discoverySupported: true,
           permissionPromptSupported: true,
@@ -59,7 +59,7 @@ void main() {
     () async {
       final provider = _RecordingBootstrapCandidateProvider();
       final coordinator = NativeJoinBootstrapCoordinator(
-        bridge: const _StaticLocalNetworkBridge(
+        bridge: _StaticLocalNetworkBridge(
           capability: LocalNetworkCapability(
             discoverySupported: true,
             permissionPromptSupported: true,
@@ -96,7 +96,7 @@ void main() {
     'caps and normalizes provider candidates before join bootstrap',
     () async {
       final coordinator = NativeJoinBootstrapCoordinator(
-        bridge: const _StaticLocalNetworkBridge(
+        bridge: _StaticLocalNetworkBridge(
           capability: LocalNetworkCapability(
             discoverySupported: true,
             permissionPromptSupported: true,
@@ -282,7 +282,7 @@ void main() {
 
   test('keeps relay fallback when provider resolution fails', () async {
     final coordinator = NativeJoinBootstrapCoordinator(
-      bridge: const _StaticLocalNetworkBridge(
+      bridge: _StaticLocalNetworkBridge(
         capability: LocalNetworkCapability(
           discoverySupported: true,
           permissionPromptSupported: true,
@@ -371,7 +371,7 @@ class _CountingLocalNetworkBridge implements LocalNetworkBridge {
   @override
   Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
     discoveryLookups += 1;
-    return const LocalNetworkDiscoverySnapshot(
+    return LocalNetworkDiscoverySnapshot(
       permissionGranted: true,
       foundEndpoints: <String>['peer-a'],
       interfaceHints: <String>[],
@@ -402,7 +402,7 @@ class _RecordingCancellableLocalNetworkBridge
     Future<void>? cancellation,
   }) async {
     discoveryCancellation = cancellation;
-    return const LocalNetworkDiscoverySnapshot(
+    return LocalNetworkDiscoverySnapshot(
       permissionGranted: true,
       foundEndpoints: <String>['peer-a'],
       interfaceHints: <String>[],

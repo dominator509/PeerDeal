@@ -464,7 +464,7 @@ AppNativeReadinessLoader _readyReadinessLoader() {
     captureProtectionBridge: const _ReadyCaptureProtectionBridge(),
     localNetworkBridge: const _ReadyLocalNetworkBridge(),
     nativeTransportBridge: _FakeNativeTransportBridge(
-      receiveFrame: const NativeTransportFrame(
+      receiveFrame: NativeTransportFrame(
         sessionId: 'sess_001',
         senderPeerId: 'peer_remote',
         recipientPeerId: 'peer_local',
@@ -695,7 +695,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   }) async {
     receiveCalls++;
     if (_served) {
-      return const NativeTransportReceiveSnapshot(
+      return NativeTransportReceiveSnapshot(
         available: true,
         frames: <NativeTransportFrame>[],
       );
@@ -757,7 +757,7 @@ class _BlockingNativeTransportBridge implements NativeTransportBridge {
         frames: <NativeTransportFrame>[frame],
       );
     }
-    return const NativeTransportReceiveSnapshot(
+    return NativeTransportReceiveSnapshot(
       available: true,
       frames: <NativeTransportFrame>[],
     );
@@ -811,7 +811,7 @@ class _BlockingReceiveNativeTransportBridge implements NativeTransportBridge {
     final frame = receiveFrame;
     if (frame == null) {
       return Future<NativeTransportReceiveSnapshot>.value(
-        const NativeTransportReceiveSnapshot(
+        NativeTransportReceiveSnapshot(
           available: true,
           frames: <NativeTransportFrame>[],
         ),
@@ -887,7 +887,7 @@ class _ReadyLocalNetworkBridge implements LocalNetworkBridge {
 
   @override
   Future<LocalNetworkDiscoverySnapshot> discoverPeers() async {
-    return const LocalNetworkDiscoverySnapshot(
+    return LocalNetworkDiscoverySnapshot(
       permissionGranted: true,
       foundEndpoints: <String>[],
       interfaceHints: <String>[],
@@ -902,6 +902,6 @@ class _ReadySecureKeyStorageBridge implements SecureKeyStorageBridge {
   Future<SecureKeyStorageSnapshot> loadKeyRing({
     required String namespace,
   }) async {
-    return const SecureKeyStorageSnapshot(available: true, keys: []);
+    return SecureKeyStorageSnapshot(available: true, keys: []);
   }
 }

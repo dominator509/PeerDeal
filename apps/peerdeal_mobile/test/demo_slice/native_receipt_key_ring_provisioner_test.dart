@@ -22,7 +22,7 @@ void main() {
 
   test('keeps existing active receipt keys without native writes', () async {
     final bridge = _ProvisioningBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[
           SecureKeyRecord(
@@ -122,7 +122,7 @@ void main() {
 
   test('creates only the missing active encryption key', () async {
     final bridge = _ProvisioningBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[
           SecureKeyRecord(
@@ -172,7 +172,7 @@ void main() {
 
   test('does not provision over ambiguous active native keys', () async {
     final bridge = _ProvisioningBridge(
-      snapshot: const SecureKeyStorageSnapshot(
+      snapshot: SecureKeyStorageSnapshot(
         available: true,
         keys: <SecureKeyRecord>[
           SecureKeyRecord(
@@ -277,11 +277,14 @@ NativeReceiptKeyRingProvisioner _provisioner(_ProvisioningBridge bridge) {
 
 class _ProvisioningBridge implements SecureKeyStorageMutationBridge {
   _ProvisioningBridge({
-    this.snapshot = const SecureKeyStorageSnapshot(available: true, keys: []),
+    SecureKeyStorageSnapshot? snapshot,
     this.saveResult = const SecureKeyStorageMutationResult(isSuccess: true),
     this.loadGate,
     this.persistSavedKeys = true,
-  }) : _currentSnapshot = snapshot;
+  }) : snapshot =
+           snapshot ?? SecureKeyStorageSnapshot(available: true, keys: []),
+       _currentSnapshot =
+           snapshot ?? SecureKeyStorageSnapshot(available: true, keys: []);
 
   final SecureKeyStorageSnapshot snapshot;
   final SecureKeyStorageMutationResult saveResult;

@@ -333,7 +333,7 @@ class _RecordingSecureKeyStorageBridge
   Future<SecureKeyStorageSnapshot> loadKeyRing({
     required String namespace,
   }) async {
-    return const SecureKeyStorageSnapshot(available: true, keys: []);
+    return SecureKeyStorageSnapshot(available: true, keys: []);
   }
 
   @override

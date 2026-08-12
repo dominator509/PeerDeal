@@ -56,7 +56,7 @@ class RecordingReceiptKeyStorageBridge implements SecureKeyStorageBridge {
     required String namespace,
   }) async {
     namespaces.add(namespace);
-    return const SecureKeyStorageSnapshot(
+    return SecureKeyStorageSnapshot(
       available: true,
       keys: <SecureKeyRecord>[
         SecureKeyRecord(

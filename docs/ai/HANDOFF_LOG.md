@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T174 Immutable Native-Bridge Collections
+
+Summary:
+- Generic native bridge models now defensively copy and freeze local-network
+  discovery lists, secure-key record lists, native receive frame lists, and
+  transport frame payload bytes.
+- Shared test fixtures were migrated from invalid const construction without
+  changing package boundaries or runtime behavior.
+
+Validation:
+- Focused native bridge contract and method-channel suites: passed 68 tests.
+- Affected mobile Flutter suites: passed 227 tests.
+- Affected desktop Flutter suites: passed 227 tests.
+- Full analyze, boundary-check, source-text, dependency-audit, and serialized
+  repository test gates passed. Dependency audit reported 0 actionable upgrades
+  and 11 newer toolchain-blocked versions.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all native-host smoke markers passed.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T173 Immutable App-Boundary Collections
 
 Summary:

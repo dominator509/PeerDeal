@@ -36,12 +36,12 @@ class SecureKeyRecord {
 }
 
 class SecureKeyStorageSnapshot {
-  const SecureKeyStorageSnapshot({
+  SecureKeyStorageSnapshot({
     required this.available,
-    required this.keys,
+    required List<SecureKeyRecord> keys,
     this.revision = 0,
     this.warning,
-  });
+  }) : keys = List<SecureKeyRecord>.unmodifiable(keys);
 
   const SecureKeyStorageSnapshot.unavailable({this.warning, this.revision = 0})
     : available = false,

@@ -261,7 +261,7 @@ void main() {
     final bridge = MethodChannelNativeTransportBridge(channel: channel);
 
     final send = await bridge.sendFrame(
-      const NativeTransportFrame(
+      NativeTransportFrame(
         sessionId: 'session_1',
         senderPeerId: 'peer_a',
         recipientPeerId: 'peer_a',
@@ -271,7 +271,7 @@ void main() {
     );
     final receive = await bridge.receiveFrames(sessionId: '', peerId: 'peer_b');
     final paddedSend = await bridge.sendFrame(
-      const NativeTransportFrame(
+      NativeTransportFrame(
         sessionId: ' session_1 ',
         senderPeerId: 'peer_a',
         recipientPeerId: 'peer_b',
@@ -284,7 +284,7 @@ void main() {
       peerId: ' peer_b ',
     );
     final controlSend = await bridge.sendFrame(
-      const NativeTransportFrame(
+      NativeTransportFrame(
         sessionId: 'session\n_1',
         senderPeerId: 'peer_a',
         recipientPeerId: 'peer_b',
@@ -297,7 +297,7 @@ void main() {
       peerId: 'peer_b',
     );
     final zeroSequenceSend = await bridge.sendFrame(
-      const NativeTransportFrame(
+      NativeTransportFrame(
         sessionId: 'session_1',
         senderPeerId: 'peer_a',
         recipientPeerId: 'peer_b',
@@ -306,7 +306,7 @@ void main() {
       ),
     );
     final invalidPayloadSend = await bridge.sendFrame(
-      const NativeTransportFrame(
+      NativeTransportFrame(
         sessionId: 'session_1',
         senderPeerId: 'peer_a',
         recipientPeerId: 'peer_b',
@@ -328,7 +328,7 @@ void main() {
 }
 
 NativeTransportFrame _frame() {
-  return const NativeTransportFrame(
+  return NativeTransportFrame(
     sessionId: 'session_1',
     senderPeerId: 'peer_a',
     recipientPeerId: 'peer_b',

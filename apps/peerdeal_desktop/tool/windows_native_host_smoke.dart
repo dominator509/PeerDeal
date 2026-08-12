@@ -95,7 +95,7 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
   );
   _pass('transport.capability');
   final sendResult = await transport.sendFrame(
-    const NativeTransportFrame(
+    NativeTransportFrame(
       sessionId: 'windows_runtime_smoke',
       senderPeerId: 'peer_runtime_smoke_sender',
       recipientPeerId: 'peer_runtime_smoke_recipient',

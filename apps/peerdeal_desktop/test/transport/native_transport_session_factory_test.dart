@@ -289,7 +289,7 @@ void main() {
     final handler = _RecordingTransportFrameHandler();
     final drain = NativeTransportSessionFactory(
       bridge: _FakeNativeTransportBridge(
-        receiveFrames: const <NativeTransportFrame>[
+        receiveFrames: <NativeTransportFrame>[
           NativeTransportFrame(
             sessionId: 'session_1',
             senderPeerId: '',
@@ -347,7 +347,7 @@ TransportFrame _frame() {
 }
 
 NativeTransportFrame _nativeFrame() {
-  return const NativeTransportFrame(
+  return NativeTransportFrame(
     sessionId: 'session_1',
     senderPeerId: 'peer_a',
     recipientPeerId: 'peer_b',

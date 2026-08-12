@@ -172,7 +172,7 @@ void main() {
   );
 }
 
-const _availableSnapshot = SecureKeyStorageSnapshot(
+final _availableSnapshot = SecureKeyStorageSnapshot(
   available: true,
   keys: <SecureKeyRecord>[
     SecureKeyRecord(
@@ -192,7 +192,7 @@ const _availableSnapshot = SecureKeyStorageSnapshot(
   ],
 );
 
-const _signingOnlySnapshot = SecureKeyStorageSnapshot(
+final _signingOnlySnapshot = SecureKeyStorageSnapshot(
   available: true,
   keys: <SecureKeyRecord>[
     SecureKeyRecord(

@@ -172,7 +172,7 @@ void main() {
 
       result.source!.dispose();
       bridge.receiveResult.complete(
-        const NativeTransportReceiveSnapshot(
+        NativeTransportReceiveSnapshot(
           available: true,
           frames: <NativeTransportFrame>[],
         ),
@@ -236,7 +236,7 @@ RetentionPolicy _policy() {
 }
 
 NativeTransportFrame _nativeFrame() {
-  return const NativeTransportFrame(
+  return NativeTransportFrame(
     sessionId: 'session_1',
     senderPeerId: 'peer_a',
     recipientPeerId: 'peer_b',

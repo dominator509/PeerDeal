@@ -22,7 +22,7 @@ void main() {
 
   test('reports ready when all native capabilities are available', () async {
     final secureStorage = _FakeSecureKeyStorageBridge(
-      snapshot: const SecureKeyStorageSnapshot(available: true, keys: []),
+      snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
     );
     final loader = AppNativeReadinessLoader(
       captureProtectionBridge: _FakeCaptureProtectionBridge(
@@ -172,7 +172,7 @@ void main() {
         ),
       ),
       secureKeyStorageBridge: _FakeSecureKeyStorageBridge(
-        snapshot: const SecureKeyStorageSnapshot(available: true, keys: []),
+        snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
       ),
       nativeTransportMaxPayloadBytes: 1024,
     );
@@ -206,7 +206,7 @@ void main() {
         ),
         nativeTransportBridge: nativeTransport,
         secureKeyStorageBridge: _FakeSecureKeyStorageBridge(
-          snapshot: const SecureKeyStorageSnapshot(available: true, keys: []),
+          snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
         ),
         nativeTransportMaxPayloadBytes: 0,
       );
@@ -231,7 +231,7 @@ void main() {
         'peerdeal::receipts',
       ]) {
         final secureStorage = _FakeSecureKeyStorageBridge(
-          snapshot: const SecureKeyStorageSnapshot(available: true, keys: []),
+          snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
         );
         final loader = AppNativeReadinessLoader(
           captureProtectionBridge: _FakeCaptureProtectionBridge(
@@ -328,7 +328,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
     required String sessionId,
     required String peerId,
   }) async {
-    return const NativeTransportReceiveSnapshot(available: true, frames: []);
+    return NativeTransportReceiveSnapshot(available: true, frames: []);
   }
 }
 

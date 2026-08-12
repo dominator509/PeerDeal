@@ -149,7 +149,7 @@ const _receipt = PeerDealReceipt(
   opaquePayload: 'opaque_77',
 );
 
-const _availableKeySnapshot = SecureKeyStorageSnapshot(
+final _availableKeySnapshot = SecureKeyStorageSnapshot(
   available: true,
   keys: <SecureKeyRecord>[
     SecureKeyRecord(

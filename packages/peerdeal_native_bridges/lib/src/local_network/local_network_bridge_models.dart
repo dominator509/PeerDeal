@@ -21,12 +21,13 @@ class LocalNetworkCapability {
 }
 
 class LocalNetworkDiscoverySnapshot {
-  const LocalNetworkDiscoverySnapshot({
+  LocalNetworkDiscoverySnapshot({
     required this.permissionGranted,
-    required this.foundEndpoints,
-    required this.interfaceHints,
+    required List<String> foundEndpoints,
+    required List<String> interfaceHints,
     this.warning,
-  });
+  }) : foundEndpoints = List<String>.unmodifiable(foundEndpoints),
+       interfaceHints = List<String>.unmodifiable(interfaceHints);
 
   const LocalNetworkDiscoverySnapshot.unavailable({this.warning})
     : permissionGranted = false,

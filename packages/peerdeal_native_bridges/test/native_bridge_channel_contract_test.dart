@@ -5,6 +5,66 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('local network discovery snapshot owns and freezes collections', () {
+    final endpoints = <String>['peer_a'];
+    final interfaces = <String>['wifi'];
+    final snapshot = LocalNetworkDiscoverySnapshot(
+      permissionGranted: true,
+      foundEndpoints: endpoints,
+      interfaceHints: interfaces,
+    );
+
+    endpoints.add('peer_b');
+    interfaces.add('ethernet');
+
+    expect(snapshot.foundEndpoints, <String>['peer_a']);
+    expect(snapshot.interfaceHints, <String>['wifi']);
+    expect(() => snapshot.foundEndpoints.add('peer_c'), throwsUnsupportedError);
+    expect(() => snapshot.interfaceHints.clear(), throwsUnsupportedError);
+  });
+
+  test('transport frame and receive snapshot own and freeze collections', () {
+    final payload = <int>[1, 2, 3];
+    final frame = NativeTransportFrame(
+      sessionId: 'session_1',
+      senderPeerId: 'peer_a',
+      recipientPeerId: 'peer_b',
+      sequence: 1,
+      payloadBytes: payload,
+    );
+    final frames = <NativeTransportFrame>[frame];
+    final snapshot = NativeTransportReceiveSnapshot(
+      available: true,
+      frames: frames,
+    );
+
+    payload.add(4);
+    frames.clear();
+
+    expect(frame.payloadBytes, <int>[1, 2, 3]);
+    expect(snapshot.frames, <NativeTransportFrame>[frame]);
+    expect(() => frame.payloadBytes.add(4), throwsUnsupportedError);
+    expect(() => snapshot.frames.clear(), throwsUnsupportedError);
+  });
+
+  test('secure key snapshot owns and freezes key collections', () {
+    final keys = <SecureKeyRecord>[
+      const SecureKeyRecord(
+        keyId: 'receipt_v1',
+        purpose: 'receipt-signing',
+        algorithm: 'hmac-sha256',
+        secret: 'secret',
+        active: true,
+      ),
+    ];
+    final snapshot = SecureKeyStorageSnapshot(available: true, keys: keys);
+
+    keys.clear();
+
+    expect(snapshot.keys, hasLength(1));
+    expect(() => snapshot.keys.clear(), throwsUnsupportedError);
+  });
+
   test('app storage directory channel contract decodes fixture payload', () {
     final fixture = _loadFixture('app_storage_directory_bridge_contract.json');
     final methods = fixture['methods'] as Map<String, Object?>;
@@ -292,13 +352,14 @@ void main() {
     expect(snapshot.foundEndpoints, isEmpty);
     expect(snapshot.interfaceHints, ['wifi']);
 
-    final controlSnapshot =
-        LocalNetworkChannelContract.decodeDiscoverySnapshot(<String, Object?>{
-          'permissionGranted': true,
-          'foundEndpoints': <Object?>['peer_a\nendpoint', 'peer_b'],
-          'interfaceHints': <Object?>['wifi\u0085', 'ethernet'],
-          'warning': 'network\nwarning',
-        });
+    final controlSnapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(
+      <String, Object?>{
+        'permissionGranted': true,
+        'foundEndpoints': <Object?>['peer_a\nendpoint', 'peer_b'],
+        'interfaceHints': <Object?>['wifi\u0085', 'ethernet'],
+        'warning': 'network\nwarning',
+      },
+    );
 
     expect(controlSnapshot.permissionGranted, isTrue);
     expect(controlSnapshot.foundEndpoints, ['peer_b']);
@@ -647,26 +708,27 @@ void main() {
     expect(oversizedFrame.isUsable, isFalse);
     expect(NativeTransportChannelContract.encodeFrame(oversizedFrame), isEmpty);
 
-    final controlFrame =
-        NativeTransportChannelContract.decodeReceiveSnapshot(<String, Object?>{
-          'available': true,
-          'frames': <Object?>[
-            <String, Object?>{
-              'sessionId': 'session\n_1',
-              'senderPeerId': 'peer_a',
-              'recipientPeerId': 'peer_b',
-              'sequence': 1,
-              'payloadBytes': <int>[1],
-            },
-          ],
-          'warning': 'transport\u0085warning',
-        });
+    final controlFrame = NativeTransportChannelContract.decodeReceiveSnapshot(
+      <String, Object?>{
+        'available': true,
+        'frames': <Object?>[
+          <String, Object?>{
+            'sessionId': 'session\n_1',
+            'senderPeerId': 'peer_a',
+            'recipientPeerId': 'peer_b',
+            'sequence': 1,
+            'payloadBytes': <int>[1],
+          },
+        ],
+        'warning': 'transport\u0085warning',
+      },
+    );
 
     expect(controlFrame.available, isTrue);
     expect(controlFrame.frames, isEmpty);
     expect(controlFrame.warning, isNull);
     expect(
-      const NativeTransportFrame(
+      NativeTransportFrame(
         sessionId: 'session\u0001_1',
         senderPeerId: 'peer_a',
         recipientPeerId: 'peer_b',
@@ -679,7 +741,7 @@ void main() {
 
   test('native transport channel contract encodes frames', () {
     final payload = NativeTransportChannelContract.encodeFrame(
-      const NativeTransportFrame(
+      NativeTransportFrame(
         sessionId: 'session_1',
         senderPeerId: 'peer_a',
         recipientPeerId: 'peer_b',

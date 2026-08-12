@@ -26,13 +26,13 @@ class NativeTransportCapability {
 }
 
 class NativeTransportFrame {
-  const NativeTransportFrame({
+  NativeTransportFrame({
     required this.sessionId,
     required this.senderPeerId,
     required this.recipientPeerId,
     required this.sequence,
-    required this.payloadBytes,
-  });
+    required List<int> payloadBytes,
+  }) : payloadBytes = List<int>.unmodifiable(payloadBytes);
 
   final String sessionId;
   final String senderPeerId;
@@ -72,11 +72,11 @@ class NativeTransportSendResult {
 }
 
 class NativeTransportReceiveSnapshot {
-  const NativeTransportReceiveSnapshot({
+  NativeTransportReceiveSnapshot({
     required this.available,
-    required this.frames,
+    required List<NativeTransportFrame> frames,
     this.warning,
-  });
+  }) : frames = List<NativeTransportFrame>.unmodifiable(frames);
 
   const NativeTransportReceiveSnapshot.unavailable({this.warning})
     : available = false,
