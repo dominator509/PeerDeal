@@ -2399,6 +2399,18 @@ debug artifacts build successfully. Product-owned database persistence,
 native/device, cross-device, other-platform, and release-signing validation
 remain separate.
 
+The T214 follow-up closes the generic crypto verification input boundary.
+`DefaultVerificationEngine` now rejects unsafe or oversized request identity and
+anchor text, invalid positive ordered event windows, hand-scoped requests
+without a hand identity, and provider proof metadata or maps that exceed the
+configured `DealProofLimits`. The normalizer applies the same safe-text rule to
+provider ID, version, and reference while preserving bounded arbitrary proof
+JSON text. Malformed inputs return a scrubbed `errVerificationDataIncomplete`
+result before evidence projection, without echoing untrusted values. Focused
+crypto coverage passes. Provider-specific proof semantics, product
+verification wiring, real device/network validation, durable database
+persistence, other-platform hosts, and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

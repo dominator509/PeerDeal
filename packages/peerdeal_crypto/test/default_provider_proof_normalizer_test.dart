@@ -144,6 +144,27 @@ void main() {
     );
   });
 
+  test('normalizer rejects unsafe provider metadata', () {
+    const normalizer = DefaultProviderProofNormalizer();
+
+    expect(
+      () => normalizer.normalize(
+        providerId: ' provider',
+        providerVersion: '1.0.0',
+        rawProof: const {},
+      ),
+      throwsA(isA<FormatException>()),
+    );
+    expect(
+      () => normalizer.normalize(
+        providerId: 'provider',
+        providerVersion: '1.0.0',
+        rawProof: {'proof_ref': 'proof\u0085'},
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('limits reject invalid configuration', () {
     expect(
       () => const DealProofLimits(maxNodes: 0).validate(),

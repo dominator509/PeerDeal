@@ -2,6 +2,43 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T214 Fail-Closed Verification Input Boundary
+
+Summary:
+- `DefaultVerificationEngine` now validates request identity, anchors, hand
+  scope shape, and positive ordered event windows before projecting evidence
+  layers.
+- Directly constructed proof bundles now receive the same bounded canonical
+  JSON and provider metadata checks as normalized bundles through configurable
+  `DealProofLimits`.
+- The normalizer now applies safe text checks to provider ID, version, and
+  proof reference while preserving bounded arbitrary JSON text in proof fields.
+- Malformed verifier inputs return scrubbed `errVerificationDataIncomplete`
+  failures without echoing untrusted values; provider-specific proof semantics
+  remain intentionally outside this generic package boundary.
+
+Files changed:
+- `packages/peerdeal_crypto/lib/src/services/default_verification_engine.dart`
+- `packages/peerdeal_crypto/lib/src/services/default_provider_proof_normalizer.dart`
+- `packages/peerdeal_crypto/test/default_verification_engine_test.dart`
+- `packages/peerdeal_crypto/test/default_provider_proof_normalizer_test.dart`
+- `packages/peerdeal_crypto/README.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/ARCHITECTURE_MAP.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused `peerdeal_crypto` suite: 18 tests passed after the metadata alignment.
+- Full repository gates, app builds, and Windows native-host smoke remain
+  required for this change.
+
+Risks:
+- Provider-specific proof cryptography, product verification wiring, real
+  device/network validation, durable database persistence, other-platform
+  hosts, and release signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T213 Persistence Snapshot Integrity
 
 Summary:

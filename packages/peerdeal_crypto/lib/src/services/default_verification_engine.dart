@@ -1,14 +1,22 @@
+import 'dart:convert';
+
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import '../contracts/verification_engine.dart';
+import '../models/deal_proof_limits.dart';
 import '../models/verification_layer_result.dart';
 import '../models/verification_payload.dart';
 import '../models/verification_reason_code.dart';
 import '../models/verification_request.dart';
 import '../models/verification_result.dart';
+import '../models/verification_scope.dart';
 import '../models/verification_state.dart';
 import '../models/verification_summary.dart';
 
 class DefaultVerificationEngine implements VerificationEngine {
-  const DefaultVerificationEngine();
+  const DefaultVerificationEngine({this.proofLimits = const DealProofLimits()});
+
+  final DealProofLimits proofLimits;
 
   @override
   VerificationResult verify(VerificationRequest request) {
@@ -27,6 +35,10 @@ class DefaultVerificationEngine implements VerificationEngine {
           verificationLayersFailed: <String>[],
         ),
       );
+    }
+
+    if (!_isValidRequest(request)) {
+      return _malformedRequestResult();
     }
 
     final replayOk =
@@ -124,6 +136,126 @@ class DefaultVerificationEngine implements VerificationEngine {
         replayAnchor: request.expectedReplayAnchor,
         fairDealAnchor: request.expectedFairDealAnchor,
         settlementAnchor: request.expectedSettlementAnchor,
+      ),
+    );
+  }
+
+  bool _isValidRequest(VerificationRequest request) {
+    if (!_isSafeRequiredText(request.tableId) ||
+        !_isSafeRequiredText(request.sessionId) ||
+        !_isSafeRequiredText(request.protocolVersion) ||
+        (request.handId != null && !_isSafeRequiredText(request.handId!))) {
+      return false;
+    }
+
+    if (request.scope == VerificationScope.hand && request.handId == null) {
+      return false;
+    }
+
+    final hasStart = request.eventSeqStart != null;
+    final hasEnd = request.eventSeqEnd != null;
+    if (hasStart != hasEnd ||
+        (hasStart &&
+            (request.eventSeqStart! < 1 ||
+                request.eventSeqEnd! < request.eventSeqStart!))) {
+      return false;
+    }
+
+    for (final anchor in <String?>[
+      request.expectedReplayAnchor,
+      request.expectedFairDealAnchor,
+      request.expectedSettlementAnchor,
+    ]) {
+      if (anchor != null && !_isSafeRequiredText(anchor)) {
+        return false;
+      }
+    }
+
+    final bundle = request.dealProofBundle;
+    if (bundle == null) {
+      return true;
+    }
+    if (!_isSafeBoundedText(
+          bundle.providerId,
+          proofLimits.maxProviderIdBytes,
+        ) ||
+        !_isSafeBoundedText(
+          bundle.providerVersion,
+          proofLimits.maxProviderVersionBytes,
+        ) ||
+        !_isSafeBoundedText(
+          bundle.proofReference,
+          proofLimits.maxProofReferenceBytes,
+        )) {
+      return false;
+    }
+
+    final limits = CanonicalJsonLimits(
+      maxMapEntries: proofLimits.maxMapEntries,
+      maxListItems: proofLimits.maxListItems,
+      maxDepth: proofLimits.maxDepth,
+      maxTextBytes: proofLimits.maxTextBytes,
+      maxNodes: proofLimits.maxNodes,
+      maxEncodedBytes: proofLimits.maxProofBytes,
+    );
+    try {
+      canonicalJsonEncode(bundle.normalizedFields, limits: limits);
+      if (bundle.rawPayload != null) {
+        canonicalJsonEncode(bundle.rawPayload, limits: limits);
+      }
+    } on Object {
+      return false;
+    }
+    return true;
+  }
+
+  bool _isSafeRequiredText(String value) => _isSafeBoundedText(value, 256);
+
+  bool _isSafeBoundedText(String value, int maxBytes) {
+    if (value.trim().isEmpty || value.trim() != value) {
+      return false;
+    }
+    if (utf8.encode(value).length > maxBytes) {
+      return false;
+    }
+    return value.codeUnits.every(
+      (codeUnit) => codeUnit >= 0x20 && !(codeUnit >= 0x7f && codeUnit <= 0x9f),
+    );
+  }
+
+  VerificationResult _malformedRequestResult() {
+    const failedLayers = <String>[
+      'replay_integrity',
+      'deal_provider_integrity',
+      'settlement_integrity',
+    ];
+    return VerificationResult(
+      state: VerificationState.failed,
+      reasonCode: VerificationReasonCode.errVerificationDataIncomplete,
+      layers: const <VerificationLayerResult>[
+        VerificationLayerResult(
+          layerId: 'replay_integrity',
+          passed: false,
+          reason: 'Verification request is malformed.',
+        ),
+        VerificationLayerResult(
+          layerId: 'deal_provider_integrity',
+          passed: false,
+          reason: 'Verification request is malformed.',
+        ),
+        VerificationLayerResult(
+          layerId: 'settlement_integrity',
+          passed: false,
+          reason: 'Verification request is malformed.',
+        ),
+      ],
+      summary: const VerificationSummary(
+        headline: 'Failed',
+        detail: 'Verification request data was malformed.',
+      ),
+      payload: VerificationPayload(
+        verificationLayersPassed: const <String>[],
+        verificationLayersFailed: failedLayers,
       ),
     );
   }

@@ -265,9 +265,14 @@ public Dart package barrels, such as `lib/peerdeal_core.dart` and
 - Governance/roles live in mode policy.
 - Receipt authorization checks pseudonymous user/session binding.
 - Provider-proof verification lives in `peerdeal_crypto`; its default
-  normalizer bounds JSON-safe proof structure and canonical UTF-8 size before
-  creating a proof bundle, and crypto proof/verification result models freeze
-  caller-owned maps and collections at the package boundary.
+  normalizer bounds JSON-safe proof structure and canonical UTF-8 size, and
+  validates provider ID/version/reference metadata before creating a proof
+  bundle. The default verifier rejects unsafe request
+  identity, anchors, sequence windows, and proof metadata or maps before
+  presence-based layer projection. Crypto proof/verification result models
+  freeze caller-owned maps and collections at the package boundary; malformed
+  verification inputs fail closed without echoing their values. Provider-
+  specific proof semantics remain outside this generic boundary.
 
 ## Risk Areas
 

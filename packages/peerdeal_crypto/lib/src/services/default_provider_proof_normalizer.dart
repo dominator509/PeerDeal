@@ -18,12 +18,12 @@ class DefaultProviderProofNormalizer implements ProviderProofNormalizer {
     required Map<String, Object?> rawProof,
   }) {
     limits.validate();
-    _requireTextWithinLimit(
+    _requireSafeTextWithinLimit(
       providerId,
       limits.maxProviderIdBytes,
       'Provider id',
     );
-    _requireTextWithinLimit(
+    _requireSafeTextWithinLimit(
       providerVersion,
       limits.maxProviderVersionBytes,
       'Provider version',
@@ -35,7 +35,7 @@ class DefaultProviderProofNormalizer implements ProviderProofNormalizer {
                 boundedProof['proofReference'] ??
                 'unknown')
             .toString();
-    _requireTextWithinLimit(
+    _requireSafeTextWithinLimit(
       proofReference,
       limits.maxProofReferenceBytes,
       'Proof reference',
@@ -68,6 +68,22 @@ class DefaultProviderProofNormalizer implements ProviderProofNormalizer {
   ) {
     if (utf8.encode(value).length > maxBytes) {
       throw FormatException('$label exceeds its configured byte limit.');
+    }
+  }
+
+  static void _requireSafeTextWithinLimit(
+    String value,
+    int maxBytes,
+    String label,
+  ) {
+    _requireTextWithinLimit(value, maxBytes, label);
+    if (value.trim().isEmpty || value.trim() != value) {
+      throw FormatException('$label must be non-empty and unpadded.');
+    }
+    if (value.codeUnits.any(
+      (codeUnit) => codeUnit < 0x20 || (codeUnit >= 0x7f && codeUnit <= 0x9f),
+    )) {
+      throw FormatException('$label contains a control character.');
     }
   }
 }

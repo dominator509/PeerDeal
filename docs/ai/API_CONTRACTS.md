@@ -999,8 +999,15 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - No central auth token/session contract exists in the scaffold.
 - Receipt authorization is based on session/user binding.
 - Provider-proof verification belongs to `peerdeal_crypto`. Its default
-  normalizer accepts bounded JSON-safe proof maps through `DealProofLimits` and
-  fails closed with `FormatException` for unsupported values or limit overflow.
+  normalizer accepts bounded JSON-safe proof maps through `DealProofLimits`,
+  requires safe provider ID/version/reference metadata, and fails closed with
+  `FormatException` for unsupported values or limit overflow.
+  The default verifier also rejects unsafe or oversized request identity and
+  anchor text, invalid positive ordered event windows, hand-scoped requests
+  without a hand identity, and proof metadata or maps outside the configured
+  `DealProofLimits`, returning `errVerificationDataIncomplete` without echoing
+  malformed values. Provider-specific proof semantics remain outside this
+  generic boundary.
 - Mode governance owns role and seat authority.
 
 ## Frontend Expectations
