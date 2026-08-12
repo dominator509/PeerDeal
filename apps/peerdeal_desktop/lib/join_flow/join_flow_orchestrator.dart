@@ -164,7 +164,7 @@ class JoinFlowOrchestrator {
         state: JoinFlowState.ackRequired,
         resultCode: 'ACK_REQUIRED',
       );
-      return const JoinFlowOutcome(
+      return JoinFlowOutcome(
         state: JoinFlowState.ackRequired,
         status: JoinDecisionStatus.ackRequired,
         resultCode: 'ACK_REQUIRED',
@@ -201,7 +201,7 @@ class JoinFlowOrchestrator {
         state: JoinFlowState.joinRejected,
         resultCode: 'ERR_ROLE_DENIED',
       );
-      return const JoinFlowOutcome(
+      return JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.roleDenied,
         resultCode: 'ERR_ROLE_DENIED',
@@ -432,7 +432,7 @@ class JoinFlowOrchestrator {
         diagnostics: diagnostics,
         message: 'Invite context is invalid.',
       );
-      return const JoinFlowOutcome(
+      return JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.rejected,
         resultCode: resultCode,
@@ -449,7 +449,7 @@ class JoinFlowOrchestrator {
         state: JoinFlowState.joinRejected,
         resultCode: resultCode,
       );
-      return const JoinFlowOutcome(
+      return JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.rejoinRejected,
         resultCode: resultCode,
@@ -503,7 +503,7 @@ class JoinFlowOrchestrator {
   }
 
   JoinFlowOutcome _cancelledOutcome() {
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.rejected,
       resultCode: 'ERR_JOIN_FLOW_CANCELLED',

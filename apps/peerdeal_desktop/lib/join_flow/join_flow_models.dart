@@ -110,19 +110,20 @@ class NegotiationResult {
 }
 
 class RoleGrant {
-  const RoleGrant({required this.grantedRole, required this.permissions});
+  RoleGrant({required this.grantedRole, required List<String> permissions})
+    : permissions = List<String>.unmodifiable(permissions);
 
   final RequestedRole grantedRole;
   final List<String> permissions;
 }
 
 class BootstrapPlan {
-  const BootstrapPlan({
+  BootstrapPlan({
     required this.requiresBootstrap,
-    required this.peerCandidates,
+    required List<String> peerCandidates,
     required this.relayFallbackAllowed,
     this.selectedPeerId,
-  });
+  }) : peerCandidates = List<String>.unmodifiable(peerCandidates);
 
   final bool requiresBootstrap;
   final List<String> peerCandidates;
@@ -145,15 +146,15 @@ class GovernanceCommitResult {
 }
 
 class JoinFlowOutcome {
-  const JoinFlowOutcome({
+  JoinFlowOutcome({
     required this.state,
     required this.status,
     required this.resultCode,
-    this.diagnostics = const <ProtocolDiagnostic>[],
+    List<ProtocolDiagnostic> diagnostics = const <ProtocolDiagnostic>[],
     this.message,
     this.resolvedInvite,
     this.sessionContext,
-  });
+  }) : diagnostics = List<ProtocolDiagnostic>.unmodifiable(diagnostics);
 
   final JoinFlowState state;
   final JoinDecisionStatus status;

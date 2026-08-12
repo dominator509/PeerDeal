@@ -413,7 +413,7 @@ class _BlockingCancellableBootstrapCoordinator
   }) async {
     started.complete();
     if (cancellation != null) await cancellation;
-    return const BootstrapPlan(
+    return BootstrapPlan(
       requiresBootstrap: true,
       peerCandidates: <String>['peer_a'],
       relayFallbackAllowed: true,

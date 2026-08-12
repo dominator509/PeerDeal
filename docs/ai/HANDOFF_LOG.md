@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T187 Immutable Join Handoff Collections
+
+Summary:
+- Mirrored mobile and desktop `RoleGrant` models now snapshot authorization
+  permissions before exposing accepted role state.
+- `BootstrapPlan` snapshots peer candidates, and `JoinFlowOutcome` snapshots
+  protocol diagnostics, protecting accepted handoff and fail-closed UI state
+  from caller-owned list mutation.
+- Const fixtures were migrated without changing join result codes, governance
+  flow, cancellation behavior, or native bridge contracts.
+
+Validation:
+- Focused mobile join-flow suite: passed 46 tests, including two ownership
+  regressions; focused desktop suite: passed 46 tests.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Product state provisioning, durable database replacement, device/network
+  validation, other-platform hosts, release signing, and final navigation/UX
+  validation remain external or integration-owned.
+
 ### 2026-08-12 - Codex - T186 Immutable Shared UI Collections
 
 Summary:

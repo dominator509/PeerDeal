@@ -2135,6 +2135,17 @@ and smoke validation pass. Product visual/accessibility/navigation validation,
 product state provisioning, device/network validation, other-platform hosts,
 and release signing remain separate.
 
+The T187 follow-up closes mirrored app join-flow collection ownership.
+`RoleGrant` now snapshots authorization permissions, `BootstrapPlan` snapshots
+reachable peer candidates, and `JoinFlowOutcome` snapshots protocol diagnostics
+before exposing accepted or rejected join state. Focused mobile and desktop join
+flow suites passed 46 tests each, including ownership regressions. Full
+repository analyze, boundary, source-text, dependency-audit, test, and diff
+gates pass. Android debug, Windows debug, and Windows native-host smoke builds
+and smoke validation pass. Product state provisioning, device/network
+validation, other-platform hosts, release signing, and final navigation/UX
+validation remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

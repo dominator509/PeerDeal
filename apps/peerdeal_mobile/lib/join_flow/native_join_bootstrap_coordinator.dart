@@ -33,7 +33,7 @@ class NativeJoinBootstrapCoordinator
   }) async {
     if (!_isValidScope(resolvedInvite.sessionId) ||
         !_isValidScope(resolvedInvite.tableId)) {
-      return const BootstrapPlan(
+      return BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],
         relayFallbackAllowed: true,
@@ -41,7 +41,7 @@ class NativeJoinBootstrapCoordinator
     }
 
     if (_maxPeerCandidates < 1) {
-      return const BootstrapPlan(
+      return BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],
         relayFallbackAllowed: true,
@@ -50,7 +50,7 @@ class NativeJoinBootstrapCoordinator
 
     final capability = await _safeCapability(cancellation: cancellation);
     if (!capability.discoverySupported) {
-      return const BootstrapPlan(
+      return BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],
         relayFallbackAllowed: true,
@@ -59,7 +59,7 @@ class NativeJoinBootstrapCoordinator
 
     final discovery = await _safeDiscovery(cancellation: cancellation);
     if (!discovery.permissionGranted) {
-      return const BootstrapPlan(
+      return BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],
         relayFallbackAllowed: true,
@@ -71,7 +71,7 @@ class NativeJoinBootstrapCoordinator
       maxValues: _maxPeerCandidates,
     );
     if (peerIds.isEmpty) {
-      return const BootstrapPlan(
+      return BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],
         relayFallbackAllowed: true,
@@ -90,7 +90,7 @@ class NativeJoinBootstrapCoordinator
         ),
       );
     } on Object {
-      return const BootstrapPlan(
+      return BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],
         relayFallbackAllowed: true,

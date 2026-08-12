@@ -153,7 +153,7 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
     required Future<void> cancellation,
   }) async {
     if (!_isModeEnabled(mode)) {
-      return const JoinFlowOutcome(
+      return JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.rejected,
         resultCode: 'ERR_JOIN_FLOW_MODE_DISABLED',
@@ -180,7 +180,7 @@ class _JoinFlowRouteState extends State<JoinFlowRoute> {
               cancellation: cancellation,
             );
     } on Object {
-      return const JoinFlowOutcome(
+      return JoinFlowOutcome(
         state: JoinFlowState.joinRejected,
         status: JoinDecisionStatus.rejected,
         resultCode: 'ERR_JOIN_FLOW_UNAVAILABLE',
@@ -267,7 +267,7 @@ JoinFlowOutcome? _invalidInviteContextOutcome(
 ) {
   if (context.inviteCode.trim().isEmpty ||
       context.inviteCode.trim() != context.inviteCode) {
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.rejected,
       resultCode: 'ERR_INVITE_CONTEXT_INVALID',
@@ -286,7 +286,7 @@ JoinFlowOutcome? _invalidInviteContextOutcome(
       (rejoinToken == null ||
           rejoinToken.trim().isEmpty ||
           rejoinToken.trim() != rejoinToken)) {
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.rejoinRejected,
       resultCode: 'ERR_REJOIN_TOKEN_REQUIRED',
@@ -306,7 +306,7 @@ InviteContext _defaultInviteContextFor(JoinFlowDemoMode mode) {
 
 JoinFlowOutcome _safeJoinOutcome(JoinFlowOutcome outcome) {
   if (!_isSafeJoinToken(outcome.resultCode)) {
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.rejected,
       resultCode: 'ERR_JOIN_OUTCOME_INVALID',

@@ -103,7 +103,7 @@ class FakeBootstrapCoordinator implements BootstrapCoordinator {
     required ResolvedInvite resolvedInvite,
     required RoleGrant roleGrant,
   }) async {
-    return const BootstrapPlan(
+    return BootstrapPlan(
       requiresBootstrap: true,
       peerCandidates: <String>['peer_a', 'peer_b'],
       relayFallbackAllowed: true,

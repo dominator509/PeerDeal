@@ -256,6 +256,10 @@ replacement or route disposal. Concrete join orchestration checks it between
 pre-commit stages and native join bootstrap forwards it to
 `CancellableLocalNetworkBridge` when available; the legacy bridge and bootstrap
 contracts remain valid, and already-dispatched calls remain owner-hosted.
+`RoleGrant` snapshots its permissions, `BootstrapPlan` snapshots its peer
+candidate list, and `JoinFlowOutcome` snapshots its protocol diagnostics at
+construction. Callers must treat these public collections as read-only after
+the accepted authorization or handoff result is created.
 Setup routes and setup flow orchestration reject blank or padded app-owned
 setup intent and host identities before wizard/setup dependencies run. Setup
 routes also scrub app-owned setup outcome result codes, errors, warnings, and

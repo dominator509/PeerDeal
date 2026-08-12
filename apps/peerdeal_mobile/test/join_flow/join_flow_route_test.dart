@@ -513,7 +513,7 @@ class _LeakyJoinFlowOrchestrator implements JoinFlowOrchestrator {
     InviteContext context, {
     Future<void>? cancellation,
   }) async {
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.roleDenied,
       resultCode: 'ERR_ROLE_DENIED',
@@ -543,7 +543,7 @@ class _CancellableRouteOrchestrator implements JoinFlowOrchestrator {
   }) async {
     this.cancellation = cancellation;
     if (cancellation != null) await cancellation;
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.joinRejected,
       status: JoinDecisionStatus.rejected,
       resultCode: 'ERR_JOIN_FLOW_CANCELLED',
@@ -565,7 +565,7 @@ class _UnsafeResultJoinFlowOrchestrator implements JoinFlowOrchestrator {
     InviteContext context, {
     Future<void>? cancellation,
   }) async {
-    return const JoinFlowOutcome(
+    return JoinFlowOutcome(
       state: JoinFlowState.joinReady,
       status: JoinDecisionStatus.okJoinReady,
       resultCode: r'OK C:\secret',

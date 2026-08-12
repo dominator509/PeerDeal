@@ -320,7 +320,7 @@ const _resolvedInvite = ResolvedInvite(
   requiresCaptureAck: true,
 );
 
-const _roleGrant = RoleGrant(
+final _roleGrant = RoleGrant(
   grantedRole: RequestedRole.player,
   permissions: <String>['participate'],
 );
