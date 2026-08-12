@@ -140,6 +140,28 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T158 Native Transport Send Model Bound
+
+Summary:
+- Mirrored app-native transport sinks now validate converted
+  `NativeTransportFrame` values before injected bridge calls.
+- Outbound native identity, sequence, and payload invariants cannot be
+  bypassed by trim-only network validation.
+
+Files changed:
+- Mirrored mobile and desktop native transport frame adapters and tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop transport-adapter suites passed, 15 tests each.
+- Full repository analyze, boundary, source-text, dependency-audit, and test
+  gates passed.
+
+Risks:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  external or operator-owned boundaries.
+
 ### 2026-08-11 - Codex - T157 Native Transport Receive Scope Bound
 
 Summary:

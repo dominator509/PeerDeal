@@ -19,7 +19,11 @@ class NativeTransportFrameSink implements TransportFrameSink {
       throw StateError('Native transport frame rejected.');
     }
 
-    final result = await _bridge.sendFrame(_toNativeFrame(frame));
+    final nativeFrame = _toNativeFrame(frame);
+    if (!nativeFrame.isUsable) {
+      throw StateError('Native transport frame rejected.');
+    }
+    final result = await _bridge.sendFrame(nativeFrame);
     if (!result.isSuccess) {
       throw StateError('Native transport send failed.');
     }

@@ -1449,6 +1449,22 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T158 Native Transport Send Model Bound
+
+- Mirrored app-native transport sinks now validate the converted
+  `NativeTransportFrame` before calling an injected native bridge.
+- Network-layer trim validation can no longer bypass native UTF-8/control,
+  identity, sequence, or payload invariants at the outbound bridge seam.
+- Focused mobile and desktop transport-adapter suites cover C0, C1, and
+  oversized identity rejection without a bridge send.
+- Full repository analyze, boundary, source-text, dependency-audit, and test
+  gates passed; diff validation is clean.
+
+Remaining:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  separate.
+
 ## Recent T157 Native Transport Receive Scope Bound
 
 - Mirrored app-native transport drains now reuse the shared native bridge

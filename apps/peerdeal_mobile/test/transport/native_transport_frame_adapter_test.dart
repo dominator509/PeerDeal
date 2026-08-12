@@ -65,6 +65,43 @@ void main() {
     },
   );
 
+  test(
+    'sink rejects native identity violations before an injected bridge call',
+    () async {
+      final bridge = _FakeNativeTransportBridge();
+      final sink = NativeTransportFrameSink(bridge: bridge);
+      final invalidFrames = <TransportFrame>[
+        TransportFrame(
+          sessionId: 'session_${String.fromCharCode(1)}',
+          fromPeerId: 'peer_a',
+          toPeerId: 'peer_b',
+          sequence: 1,
+          payload: const <int>[1],
+        ),
+        TransportFrame(
+          sessionId: 'session_1',
+          fromPeerId: 'peer_${String.fromCharCode(0x85)}',
+          toPeerId: 'peer_b',
+          sequence: 1,
+          payload: const <int>[1],
+        ),
+        TransportFrame(
+          sessionId: 'session_1',
+          fromPeerId: 'x' * 257,
+          toPeerId: 'peer_b',
+          sequence: 1,
+          payload: const <int>[1],
+        ),
+      ];
+
+      for (final frame in invalidFrames) {
+        await expectLater(sink.sendFrame(frame), throwsStateError);
+      }
+
+      expect(bridge.sentFrames, isEmpty);
+    },
+  );
+
   test('converts native send failure into network send rejection', () async {
     final bridge = _FakeNativeTransportBridge(sendWarning: 'socket closed');
     final sender = ValidatingTransportFrameSender(
