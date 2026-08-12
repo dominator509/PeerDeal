@@ -1262,6 +1262,15 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Focused mobile and desktop route tests cover delayed native-send completion
   after runtime replacement.
 
+## T148 Inbound Checkpoint Lifecycle Invalidation
+
+- Mirrored table routes capture accepted inbound events with their owning
+  runtime, snapshot coordinator, and lifecycle generation.
+- Replaced or disposed transport callbacks cannot checkpoint a replacement
+  route or refresh its UI state.
+- Focused mobile and desktop route tests cover delayed inbound completion after
+  runtime replacement.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

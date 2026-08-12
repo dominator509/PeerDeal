@@ -35,8 +35,9 @@ hydration, T58 deterministic persisted recovery-suffix replay, T59 app-owned
 local peer identity persistence, T60 provisioned-identity persisted-source
 composition, T61 single-flight local identity provisioning, T62 post-save
 identity verification, and T63 typed join-to-session context handoff
-and T75 Android/Windows local-network host registration and T147 production
-table lifecycle invalidation
+and T75 Android/Windows local-network host registration, T147 production
+table lifecycle invalidation, and T148 inbound checkpoint lifecycle
+invalidation
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1362,6 +1363,23 @@ Remaining:
   repopulating busy, status, or retry state after replacement or disposal.
 - Focused mobile and desktop route suites cover a delayed native send completing
   after runtime replacement.
+- Full analyze, boundary-check, source-text, test, dependency-audit, Android
+  debug build, Windows debug build, Windows native-host smoke, and diff-check
+  gates pass.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
+## Recent T148 Inbound Checkpoint Lifecycle Invalidation
+
+- Mirrored table routes now capture the accepted inbound event, owning runtime,
+  snapshot coordinator, and lifecycle generation at transport callback time.
+- Late callbacks from a replaced or disposed route cannot checkpoint a
+  replacement session or refresh its UI state.
+- Focused mobile and desktop route suites cover a delayed inbound frame after
+  runtime replacement.
 - Full analyze, boundary-check, source-text, test, dependency-audit, Android
   debug build, Windows debug build, Windows native-host smoke, and diff-check
   gates pass.

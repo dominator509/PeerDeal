@@ -9,6 +9,8 @@ import 'package:peerdeal_desktop/recovery/app_recovery_retention_coordinator.dar
 import 'package:peerdeal_desktop/recovery/app_recovery_session_close_coordinator.dart';
 import 'package:peerdeal_desktop/recovery/app_recovery_session_close_event_adapter.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_route_registration.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_persistence_writer.dart';
+import 'package:peerdeal_desktop/session/app_holdem_production_session_snapshot_coordinator.dart';
 import 'package:peerdeal_desktop/session/app_holdem_production_table_surface.dart';
 import 'package:peerdeal_desktop/session/app_holdem_table_session_route.dart';
 import 'package:peerdeal_desktop/session/app_holdem_table_session_runtime.dart';
@@ -291,6 +293,60 @@ void main() {
     expect(find.text('Action synchronized'), findsNothing);
   });
 
+  testWidgets('drops a stale inbound checkpoint after runtime replacement', (
+    tester,
+  ) async {
+    final oldRuntime = _runtime();
+    final projection = const HoldemCoreProjectionAdapter().startHand(
+      coreState: oldRuntime.coreState,
+      handState: oldRuntime.handState,
+      cursor: oldRuntime.cursor,
+    );
+    final oldBridge = _BlockingReceiveNativeTransportBridge(
+      receiveFrame: NativeTransportFrame(
+        sessionId: 'sess_001',
+        senderPeerId: 'peer_remote',
+        recipientPeerId: 'peer_local',
+        sequence: projection.events.single.eventSeq,
+        payloadBytes: const EventEnvelopeCodec().encode(
+          projection.events.single,
+        ),
+      ),
+    );
+    final oldStore = _RecordingRecoveryStore();
+    final newStore = _RecordingRecoveryStore();
+    final oldCoordinator = _snapshotCoordinator(oldStore);
+    final newCoordinator = _snapshotCoordinator(newStore);
+
+    await tester.pumpWidget(
+      _productionSurfaceRouteWithCoordinator(
+        runtime: oldRuntime,
+        bridge: oldBridge,
+        snapshotCoordinator: oldCoordinator,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(oldBridge.receiveCalls, 1);
+
+    await tester.pumpWidget(
+      _productionSurfaceRouteWithCoordinator(
+        runtime: _runtime(),
+        bridge: _BlockingReceiveNativeTransportBridge(),
+        snapshotCoordinator: newCoordinator,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    oldBridge.completeReceive();
+    await tester.pumpAndSettle();
+
+    expect(oldRuntime.coreState.eventSequence, 2);
+    expect(oldStore.appendEventsCalls, 0);
+    expect(oldStore.saveSnapshotCalls, 0);
+    expect(newStore.appendEventsCalls, 0);
+    expect(newStore.saveSnapshotCalls, 0);
+  });
+
   testWidgets('keeps the production surface mounted when transport is absent', (
     tester,
   ) async {
@@ -333,6 +389,40 @@ Widget _productionSurfaceRoute({
             localPeerId: 'peer_local',
             localSeat: 1,
           ),
+    ),
+  );
+}
+
+Widget _productionSurfaceRouteWithCoordinator({
+  required AppHoldemTableSessionRuntime runtime,
+  required NativeTransportBridge bridge,
+  required AppHoldemProductionSessionSnapshotCoordinator snapshotCoordinator,
+}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: AppHoldemTableSessionRoute(
+      runtime: runtime,
+      peerId: 'peer_remote',
+      nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
+      snapshotCoordinator: snapshotCoordinator,
+      timerFactory: (interval, callback) =>
+          Timer(const Duration(hours: 1), () {}),
+      surfaceBuilder: (context, routeContext) =>
+          AppHoldemProductionTableSurface(
+            routeContext: routeContext,
+            localPeerId: 'peer_local',
+            localSeat: 1,
+          ),
+    ),
+  );
+}
+
+AppHoldemProductionSessionSnapshotCoordinator _snapshotCoordinator(
+  RecoveryPersistenceStore store,
+) {
+  return AppHoldemProductionSessionSnapshotCoordinator(
+    persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+      store: store,
     ),
   );
 }
@@ -678,6 +768,95 @@ class _BlockingNativeTransportBridge implements NativeTransportBridge {
     sendCalls++;
     return _sendCompletion.future;
   }
+}
+
+class _BlockingReceiveNativeTransportBridge implements NativeTransportBridge {
+  _BlockingReceiveNativeTransportBridge({this.receiveFrame});
+
+  final NativeTransportFrame? receiveFrame;
+  final Completer<NativeTransportReceiveSnapshot> _receiveCompletion =
+      Completer();
+  int receiveCalls = 0;
+
+  void completeReceive() {
+    if (!_receiveCompletion.isCompleted) {
+      _receiveCompletion.complete(
+        NativeTransportReceiveSnapshot(
+          available: true,
+          frames: receiveFrame == null
+              ? const <NativeTransportFrame>[]
+              : <NativeTransportFrame>[receiveFrame!],
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<NativeTransportCapability> getCapability() async {
+    return const NativeTransportCapability(
+      available: true,
+      sendSupported: true,
+      receiveSupported: true,
+      maxPayloadBytes: 4096,
+      notes: 'blocking receive test transport',
+    );
+  }
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+  }) {
+    receiveCalls++;
+    final frame = receiveFrame;
+    if (frame == null) {
+      return Future<NativeTransportReceiveSnapshot>.value(
+        const NativeTransportReceiveSnapshot(
+          available: true,
+          frames: <NativeTransportFrame>[],
+        ),
+      );
+    }
+    return _receiveCompletion.future;
+  }
+
+  @override
+  Future<NativeTransportSendResult> sendFrame(
+    NativeTransportFrame frame,
+  ) async {
+    return const NativeTransportSendResult(isSuccess: true);
+  }
+}
+
+class _RecordingRecoveryStore implements RecoveryPersistenceStore {
+  int appendEventsCalls = 0;
+  int saveSnapshotCalls = 0;
+
+  @override
+  RecoveryPersistenceResult saveSnapshot({
+    required RecoveryPersistenceScope scope,
+    required SnapshotEnvelope snapshot,
+  }) {
+    saveSnapshotCalls++;
+    return const RecoveryPersistenceResult.success();
+  }
+
+  @override
+  RecoveryPersistenceResult appendEvents({
+    required RecoveryPersistenceScope scope,
+    required List<EventEnvelope> events,
+  }) {
+    appendEventsCalls++;
+    return const RecoveryPersistenceResult.success();
+  }
+
+  @override
+  RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope}) =>
+      const RecoveryPersistenceResult.success();
+
+  @override
+  PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) =>
+      const PersistedRecoveryWindow(events: <EventEnvelope>[]);
 }
 
 class _ReadyCaptureProtectionBridge implements CaptureProtectionBridge {

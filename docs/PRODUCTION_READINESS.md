@@ -1750,6 +1750,16 @@ Android debug, Windows debug, and Windows native-host smoke validation pass;
 product state provisioning, device/network validation, other-platform hosts,
 and release signing remain separate.
 
+The T148 follow-up closes the corresponding inbound-route lifecycle gap.
+Mirrored table routes now capture accepted inbound events with their owning
+runtime, snapshot coordinator, and lifecycle generation. Replaced or disposed
+transport callbacks cannot checkpoint a replacement route or refresh its UI
+state. Focused mobile and desktop route suites cover delayed inbound completion
+after runtime replacement. Full repository gates plus Android debug, Windows
+debug, and Windows native-host smoke validation pass; product state
+provisioning, device/network validation, other-platform hosts, and release
+signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

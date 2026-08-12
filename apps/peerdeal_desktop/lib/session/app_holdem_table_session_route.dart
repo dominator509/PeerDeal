@@ -76,6 +76,7 @@ class _AppHoldemTableSessionRouteState
     extends State<AppHoldemTableSessionRoute> {
   late Completer<void> _transportCancellation;
   late Future<AppTableSessionTransportProvisionResult> _transportFuture;
+  int _lifecycleGeneration = 0;
 
   @override
   void initState() {
@@ -95,6 +96,7 @@ class _AppHoldemTableSessionRouteState
         oldWidget.timerFactory == widget.timerFactory) {
       return;
     }
+    _lifecycleGeneration += 1;
     _cancelTransportLoad();
     _transportCancellation = Completer<void>();
     _transportFuture = _loadTransport();
@@ -102,6 +104,7 @@ class _AppHoldemTableSessionRouteState
 
   @override
   void dispose() {
+    _lifecycleGeneration += 1;
     _cancelTransportLoad();
     super.dispose();
   }
@@ -118,38 +121,57 @@ class _AppHoldemTableSessionRouteState
   }
 
   Future<AppTableSessionTransportProvisionResult> _loadTransport() {
+    final lifecycleGeneration = _lifecycleGeneration;
+    final runtime = widget.runtime;
+    final coordinator = widget.snapshotCoordinator;
     return AppTableSessionTransportProvisioner(
-      runtime: widget.runtime.sessionRuntime,
-      holdemRuntime: widget.runtime,
+      runtime: runtime.sessionRuntime,
+      holdemRuntime: runtime,
       nativeSessionFactory: widget.nativeSessionFactory,
       pollInterval: widget.pollInterval,
       timerFactory: widget.timerFactory,
       cancellation: _transportCancellation.future,
       onEventAccepted: (_) {
-        unawaited(_checkpointAcceptedEvent());
-        if (mounted) setState(() {});
+        final acceptedEvent = runtime.sessionRuntime.lastAcceptedEvent;
+        unawaited(
+          _checkpointAcceptedEvent(
+            lifecycleGeneration: lifecycleGeneration,
+            runtime: runtime,
+            coordinator: coordinator,
+            acceptedEvent: acceptedEvent,
+          ),
+        );
+        if (_isCurrentLifecycle(lifecycleGeneration)) setState(() {});
       },
     ).load(peerId: widget.peerId);
   }
 
-  Future<void> _checkpointAcceptedEvent() async {
-    final coordinator = widget.snapshotCoordinator;
+  Future<void> _checkpointAcceptedEvent({
+    required int lifecycleGeneration,
+    required AppHoldemTableSessionRuntime runtime,
+    required AppHoldemProductionSessionSnapshotCoordinator? coordinator,
+    required EventEnvelope? acceptedEvent,
+  }) async {
     if (coordinator == null) return;
-    final acceptedEvent = widget.runtime.sessionRuntime.lastAcceptedEvent;
     if (acceptedEvent == null) return;
+    if (!_isCurrentLifecycle(lifecycleGeneration)) return;
 
     if (acceptedEvent.eventType == 'SessionClosed' ||
         acceptedEvent.eventType == 'SessionWiped') {
       await coordinator.discardPending();
     } else {
       await coordinator.persist(
-        tableState: widget.runtime.coreState,
-        handState: widget.runtime.handState,
-        eventCursor: widget.runtime.cursor,
+        tableState: runtime.coreState,
+        handState: runtime.handState,
+        eventCursor: runtime.cursor,
         events: <EventEnvelope>[acceptedEvent],
       );
     }
-    if (mounted) setState(() {});
+    if (_isCurrentLifecycle(lifecycleGeneration)) setState(() {});
+  }
+
+  bool _isCurrentLifecycle(int lifecycleGeneration) {
+    return mounted && lifecycleGeneration == _lifecycleGeneration;
   }
 
   void _cancelTransportLoad() {

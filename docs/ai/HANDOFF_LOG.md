@@ -115,6 +115,31 @@ Risks:
   hosts, cross-device networking, and release signing remain external or
   caller-owned boundaries.
 
+### 2026-08-11 - Codex - T148 Inbound Checkpoint Lifecycle Invalidation
+
+Summary:
+- Mirrored table routes capture accepted inbound events with the owning
+  runtime, snapshot coordinator, and lifecycle generation.
+- Late callbacks from replaced or disposed transports cannot checkpoint a
+  replacement route or refresh its UI state.
+
+Files changed:
+- Mirrored table session routes and route regression tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop route suites passed, including delayed inbound
+  completion after runtime replacement.
+- Full analyze, boundary-check, source-text, test, dependency-audit, Android
+  debug build, Windows debug build, Windows native-host smoke, and diff-check
+  gates passed.
+
+Risks:
+- Product state/database provisioning, device/runtime validation, other-platform
+  hosts, cross-device networking, and release signing remain external or
+  caller-owned boundaries.
+
 ### 2026-08-11 - Codex - T143 Native App-Storage Path Boundary Hardening
 
 Summary:
