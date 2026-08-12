@@ -40,3 +40,6 @@ app orchestration.
   Tournament reentry behavior while rejecting unsupported reload policy strings.
 - `DefaultGovernanceEngine` bounds participant, seat, and waitlist collections
   before traversal and prevents waitlist growth beyond configured capacity.
+- `GovernanceContext`, `GovernanceDecision`, and `ValidationResult` snapshot
+  caller-provided participant, seat, waitlist, note, warning, and error lists at
+  construction so policy decisions cannot change through external list mutation.

@@ -38,15 +38,17 @@ class SeatSnapshot {
 }
 
 class GovernanceContext {
-  const GovernanceContext({
+  GovernanceContext({
     required this.modeId,
-    required this.participants,
-    required this.seats,
-    this.waitlistOrdering = const <String>[],
+    required List<ParticipantSnapshot> participants,
+    required List<SeatSnapshot> seats,
+    List<String> waitlistOrdering = const <String>[],
     this.allowSpectators = true,
     this.allowCohosts = true,
     this.allowMidSessionSeatPromotion = true,
-  });
+  }) : participants = List<ParticipantSnapshot>.unmodifiable(participants),
+       seats = List<SeatSnapshot>.unmodifiable(seats),
+       waitlistOrdering = List<String>.unmodifiable(waitlistOrdering);
 
   final String modeId;
   final List<ParticipantSnapshot> participants;

@@ -1,9 +1,10 @@
 class ValidationResult {
-  const ValidationResult({
+  ValidationResult({
     required this.isValid,
-    this.warnings = const <String>[],
-    this.errors = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+    List<String> errors = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings),
+       errors = List<String>.unmodifiable(errors);
 
   final bool isValid;
   final List<String> warnings;
@@ -73,10 +74,7 @@ class LedgerPolicy {
 }
 
 class ReloadPolicy {
-  const ReloadPolicy({
-    required this.policyType,
-    required this.allowed,
-  });
+  const ReloadPolicy({required this.policyType, required this.allowed});
 
   final String policyType;
   final bool allowed;

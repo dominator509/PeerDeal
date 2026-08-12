@@ -1,13 +1,14 @@
 class GovernanceDecision {
-  const GovernanceDecision({
+  GovernanceDecision({
     required this.allowed,
     required this.resultCode,
     this.nextParticipantState,
     this.nextParticipantRole,
     this.nextSeatState,
-    this.nextWaitlistOrdering = const <String>[],
-    this.notes = const <String>[],
-  });
+    List<String> nextWaitlistOrdering = const <String>[],
+    List<String> notes = const <String>[],
+  }) : nextWaitlistOrdering = List<String>.unmodifiable(nextWaitlistOrdering),
+       notes = List<String>.unmodifiable(notes);
 
   final bool allowed;
   final String resultCode;

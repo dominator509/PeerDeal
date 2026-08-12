@@ -88,6 +88,11 @@ lower positive limits for a mode. Oversized collections deny with
 configured capacity also denies rather than returning an oversized next
 ordering.
 
+`GovernanceContext` snapshots participant, seat, and waitlist collections at
+construction. `GovernanceDecision` snapshots its next waitlist ordering and
+notes, and `ValidationResult` snapshots warnings and errors. These public
+collections are read-only views and must not be mutated by callers.
+
 ## Wizard Setup
 
 `DefaultPresetResolver` rejects oversized preset layers, per-layer values,

@@ -2115,6 +2115,16 @@ gates pass. Android debug, Windows debug, and Windows native-host smoke builds
 and smoke validation pass. Product state provisioning, device/network
 validation, other-platform hosts, and release signing remain separate.
 
+The T185 follow-up closes mode policy collection ownership. `GovernanceContext`
+now snapshots participant, seat, and waitlist input collections;
+`GovernanceDecision` snapshots next-ordering and note collections; and
+`ValidationResult` snapshots warning and error collections. Focused
+`peerdeal_modes` validation passed 28 tests and package analysis. Full
+repository analyze, boundary, source-text, dependency-audit, test, and diff
+gates pass. Android debug, Windows debug, and Windows native-host smoke builds
+and smoke validation pass. Product state provisioning, device/network
+validation, other-platform hosts, and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

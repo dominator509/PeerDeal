@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T185 Immutable Mode Policy Collections
+
+Summary:
+- `GovernanceContext` snapshots participant, seat, and waitlist inputs at
+  construction, preventing caller mutation from changing policy traversal.
+- `GovernanceDecision` owns next-waitlist and note collections, while
+  `ValidationResult` owns warning and error collections.
+- The change stays inside `peerdeal_modes` and preserves governance bounds,
+  result codes, and package ownership.
+
+Validation:
+- Focused `peerdeal_modes` suite: passed 28 tests, including two collection
+  ownership regressions; package analyzer passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Product state provisioning, durable database replacement, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T184 Immutable Protocol Wire Models
 
 Summary:
