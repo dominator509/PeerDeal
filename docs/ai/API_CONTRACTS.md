@@ -505,9 +505,11 @@ inputs. When no explicit join handler or prebuilt production session route is
 configured, the shell accepts only an available result with configuration,
 persistence writer, and snapshot writer; it rejects unsafe or colliding dynamic
 paths, passes the existing bootstrap route through native readiness gating, and
-renders the safe fallback for loader errors or unavailable results. The shell
-does not interpret warnings, select product state, or move this contract into a
-shared package.
+renders the safe fallback for loader errors or unavailable results. Each
+asynchronous loaded-session handoff is generation-guarded by the shell, so late
+results from an older join/load cannot push stale fallback or production
+navigation after a newer handoff. The shell does not interpret warnings, select
+product state, or move this contract into a shared package.
 
 The mirrored app runtimes also accept an optional
 `AppHoldemProductionSessionConfigurationFactory`. If no explicit

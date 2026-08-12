@@ -379,6 +379,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   _defaultJoinFlowSessionConfigurationFactory;
   AppHoldemProductionSessionConfigurationLoaderFactory?
   _defaultJoinFlowSessionConfigurationLoaderFactory;
+  Object? _activeProductionSessionLoad;
 
   PeerDealMobileRuntime get _runtime {
     return (widget._runtime ?? const PeerDealMobileRuntime()).withOverrides(
@@ -554,6 +555,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
 
   @override
   void dispose() {
+    _invalidateProductionSessionLoad();
     _cancelNativeReadiness();
     super.dispose();
   }
@@ -1080,10 +1082,17 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
 
   JoinFlowSessionReadyHandler? get _joinFlowSessionReadyHandler {
     final configured = _runtime.joinFlowSessionReadyHandler;
-    if (configured != null) return configured;
-    if (_runtime.joinFlowReadyHandler != null) return null;
+    if (configured != null) {
+      _invalidateProductionSessionLoad();
+      return configured;
+    }
+    if (_runtime.joinFlowReadyHandler != null) {
+      _invalidateProductionSessionLoad();
+      return null;
+    }
     final registration = _productionSessionRouteRegistration();
     if (registration != null) {
+      _invalidateProductionSessionLoad();
       if (!identical(_defaultJoinFlowReadyRegistration, registration)) {
         _defaultJoinFlowReadyRegistration = registration;
         _defaultJoinFlowSessionReadyHandler = (context, sessionContext) {
@@ -1104,8 +1113,15 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     if (!identical(_defaultJoinFlowSessionConfigurationLoader, loader)) {
       _defaultJoinFlowSessionConfigurationLoader = loader;
       _defaultJoinFlowSessionReadyHandler = (context, sessionContext) {
+        final loadToken = Object();
+        _activeProductionSessionLoad = loadToken;
         unawaited(
-          _openLoadedProductionSession(context, loader, sessionContext),
+          _openLoadedProductionSession(
+            context,
+            loader,
+            sessionContext,
+            loadToken,
+          ),
         );
       };
     }
@@ -1137,15 +1153,18 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     BuildContext context,
     AppHoldemProductionSessionConfigurationLoader loader,
     JoinFlowSessionContext sessionContext,
+    Object loadToken,
   ) async {
     late AppHoldemProductionSessionConfigurationLoadResult result;
     try {
       result = await loader(sessionContext);
     } on Object {
-      if (mounted) _pushRouteFallback(context);
+      if (_isActiveProductionSessionLoad(loadToken)) {
+        _pushRouteFallback(context);
+      }
       return;
     }
-    if (!mounted) return;
+    if (!_isActiveProductionSessionLoad(loadToken)) return;
 
     final configuration = result.configuration;
     if (!result.isAvailable ||
@@ -1162,6 +1181,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       return;
     }
 
+    _invalidateProductionSessionLoad();
     Navigator.of(context).push(
       PageRouteBuilder<void>(
         settings: RouteSettings(
@@ -1177,6 +1197,14 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
         },
       ),
     );
+  }
+
+  bool _isActiveProductionSessionLoad(Object loadToken) {
+    return mounted && identical(_activeProductionSessionLoad, loadToken);
+  }
+
+  void _invalidateProductionSessionLoad() {
+    _activeProductionSessionLoad = null;
   }
 
   bool _canMountLoadedProductionRoute(String path) {

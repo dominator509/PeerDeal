@@ -1152,6 +1152,17 @@ signing, and concrete product state wiring remain external or integration-owned.
   without mutating app state; focused mobile and desktop runtime suites cover
   overflow and invalid limits.
 
+## T137 Production Handoff Staleness Hardening
+
+- Mirrored app shells now associate each asynchronous loaded production-session
+  handoff with a private generation token.
+- Late results from an older join/load are ignored after a newer handoff, and
+  disposal or a higher-precedence configured route invalidates the token before
+  any fallback or production navigation is pushed.
+- Focused mobile and desktop app-shell suites cover delayed stale completion.
+- Product state/source selection, database persistence, device/network
+  validation, other-platform hosts, and release signing remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

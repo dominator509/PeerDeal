@@ -1178,6 +1178,24 @@ Remaining:
 - Product persistence/source wiring, platform key storage, runtime/device
   validation, other-platform hosts, and release signing remain separate.
 
+## Recent T137 Production Handoff Staleness Hardening
+
+- Mirrored mobile and desktop shells now assign a private generation token to
+  each asynchronous loaded production-session handoff.
+- A late success or failure from an older join/load is ignored after a newer
+  handoff, and disposal or a higher-precedence route configuration invalidates
+  the pending token before navigation can occur.
+
+Tests and gates:
+- Focused mobile and desktop app-shell suites pass, including delayed stale
+  loader completion after a newer join.
+- Full repository gates remain required before commit and push.
+
+Remaining:
+- Product-owned concrete session source/state invocation, real device and
+  cross-device validation, other-platform hosts, database persistence, and
+  release signing remain separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints

@@ -1662,6 +1662,14 @@ and desktop coordinator suites cover these paths. This remains route-level
 recovery persistence, not product database persistence or cross-platform/device
 validation.
 
+The T137 follow-up closes the codable app-shell handoff race. Each asynchronous
+loaded production-session handoff now carries a private generation token; late
+success or failure from an older join/load is ignored after a newer handoff,
+and disposal or higher-precedence route configuration invalidates the token
+before fallback or production navigation. Mirrored mobile and desktop
+app-shell suites cover delayed stale completion. This protects route
+orchestration only and does not create product session state or a database.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

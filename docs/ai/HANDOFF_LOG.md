@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T137 Production Handoff Staleness Hardening
+
+Summary:
+- Mirrored mobile and desktop shells assign a private generation token to each
+  asynchronous loaded production-session handoff.
+- Late success or failure from an older join/load is ignored after a newer
+  handoff; disposal and higher-precedence route configuration invalidate the
+  token before navigation.
+
+Files changed:
+- Mirrored app `main.dart` shells and app-shell widget tests.
+- `HANDOFF.md`, `PROJECT_STATE.md`, `HANDOFF_QUEUE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop app-shell Flutter suites pass, including delayed
+  stale loader completion.
+- Full repository gates are required before commit and push.
+
+Remaining:
+- Product source/state invocation, production database persistence, real device
+  and cross-device validation, other-platform hosts, and release signing remain
+  external or product-owned.
+
 ### 2026-08-11 - Codex - T136 Production Snapshot Retry Ordering Hardening
 
 Summary:

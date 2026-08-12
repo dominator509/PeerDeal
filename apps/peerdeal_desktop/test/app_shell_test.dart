@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -1467,6 +1468,54 @@ void main() {
     expect(find.text('Route: /holdem-loaded'), findsOneWidget);
   });
 
+  testWidgets('ignores a stale loaded production session after a newer join', (
+    tester,
+  ) async {
+    final staleLoad =
+        Completer<AppHoldemProductionSessionConfigurationLoadResult>();
+    final currentResult = _availableConfigurationLoadResult('/holdem-current');
+    var loadCount = 0;
+
+    await tester.pumpWidget(
+      PeerDealDesktopApp(
+        runtime: PeerDealDesktopRuntime(
+          enabledDemoRoutePaths: const <String>{
+            DemoSliceRoutes.home,
+            DemoSliceRoutes.join,
+          },
+          joinFlowOrchestratorFactory: DemoJoinFlowOrchestratorFactory(
+            bootstrapCoordinator: FakeBootstrapCoordinator(),
+          ).create,
+          holdemProductionSessionConfigurationLoader: (_) {
+            loadCount += 1;
+            return loadCount == 1
+                ? staleLoad.future
+                : Future<
+                    AppHoldemProductionSessionConfigurationLoadResult
+                  >.value(currentResult);
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.text('Join flow'))).pop();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Join'));
+    await tester.pumpAndSettle();
+
+    expect(loadCount, 2);
+    expect(find.text('Route: /holdem-current'), findsOneWidget);
+
+    staleLoad.complete(_availableConfigurationLoadResult('/holdem-stale'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Route: /holdem-current'), findsOneWidget);
+    expect(find.text('Route: /holdem-stale'), findsNothing);
+  });
+
   testWidgets('fails closed when typed configuration loader is unavailable', (
     tester,
   ) async {
@@ -2197,6 +2246,21 @@ AppHoldemProductionSessionConfigurationFactory _productionConfigurationFactory(
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-11T00:00:00Z',
     eventHashFactory: (_) => 'hash',
+  );
+}
+
+AppHoldemProductionSessionConfigurationLoadResult
+_availableConfigurationLoadResult(String path) {
+  final store = InMemoryRecoveryPersistenceStore();
+  return AppHoldemProductionSessionConfigurationLoadResult.available(
+    configuration: AppHoldemProductionSessionConfiguration.fromSource(
+      path: path,
+      source: _FailingProductionSessionSource(),
+    ),
+    persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+      store: store,
+    ),
+    snapshotWriter: AppHoldemProductionSessionSnapshotWriter(store: store),
   );
 }
 
