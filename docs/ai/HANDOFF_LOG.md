@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T166 Persisted Snapshot Hash Verification
+
+Summary:
+- Mirrored persisted Hold'em sources now recompute the canonical snapshot
+  payload hash and reject mismatches before typed hydration.
+- Tampered or malformed snapshot payloads fail closed before identity or route
+  work; canonical snapshots continue to load.
+
+Files changed:
+- Mirrored persisted Hold'em source implementations and focused source tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop source/configuration suites passed (32 tests
+  each), including tampered-hash rejection.
+- Full repository analyze, boundary, source-text, dependency-audit, and
+  serialized test gates passed.
+- Android and Windows debug artifacts built successfully; Windows native-host
+  smoke passed all bridge checkpoints.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T165 Orphaned Recovery Event Guard
 
 Summary:

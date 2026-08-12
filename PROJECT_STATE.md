@@ -1313,6 +1313,19 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## T166 Persisted Snapshot Hash Verification
+
+- Mirrored persisted Hold'em sources now verify the canonical payload hash in
+  each persisted snapshot envelope before decoding typed state.
+- Hash mismatches fail closed before identity provisioning or route input
+  construction; canonical snapshot fixtures remain valid.
+- Focused mobile and desktop source suites cover the integrity boundary.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## T165 Orphaned Recovery Event Guard
 
 - Mirrored persisted Hold'em sources now fail closed when durable recovery

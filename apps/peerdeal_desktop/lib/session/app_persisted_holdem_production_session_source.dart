@@ -436,6 +436,9 @@ class AppPersistedHoldemProductionSessionSource
         'Persisted Holdem state snapshot scope mismatches invite.',
       );
     }
+    if (!_hasValidSnapshotHash(envelope)) {
+      throw StateError('Persisted Holdem snapshot hash is invalid.');
+    }
     final state = HoldemStateSnapshot.fromJson(
       envelope.payload,
       eventIdFactory: _eventIdFactory,
@@ -504,6 +507,14 @@ class AppPersistedHoldemProductionSessionSource
         snapshot.eventCursor.nextEventSeq != 1 ||
         snapshot.eventCursor.previousEventHash != genesisEventHash) {
       throw StateError('Initial Holdem state does not match the invite.');
+    }
+  }
+
+  static bool _hasValidSnapshotHash(SnapshotEnvelope envelope) {
+    try {
+      return envelope.snapshotHash == computeCanonicalHash(envelope.payload);
+    } on Object {
+      return false;
     }
   }
 

@@ -1792,6 +1792,16 @@ existing suffix remains unchanged. Durable database replacement, real product
 state selection, device/network validation, other-platform hosts, release
 signing, and final UX remain separate.
 
+The T166 follow-up closes the persisted snapshot-integrity gap in the
+app-owned Hold'em recovery source. Before typed hydration, mirrored sources
+now recompute the canonical hash of the snapshot payload and require it to
+match the persisted envelope `snapshot_hash`; malformed or tampered payloads
+fail closed before local identity provisioning or route input construction.
+Focused mobile and desktop source suites cover tampered-hash rejection while
+canonical snapshots continue to load. Durable database replacement, real
+product state selection, device/network validation, other-platform hosts,
+release signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

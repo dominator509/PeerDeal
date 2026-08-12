@@ -662,6 +662,31 @@ void main() {
     expect(() => _source(store).load(_invite()), throwsA(isA<StateError>()));
   });
 
+  test(
+    'fails closed on a tampered persisted snapshot hash before identity work',
+    () async {
+      final store = InMemoryRecoveryPersistenceStore();
+      _persist(store, _typedSnapshot(), snapshotHash: 'tampered_hash');
+      var identityCalls = 0;
+      final source = _source(
+        store,
+        identityLoader: ({cancellation}) async => identityCalls += 1,
+      );
+
+      await expectLater(
+        source.load(_invite()),
+        throwsA(
+          predicate(
+            (error) =>
+                error is StateError &&
+                error.message == 'Persisted Holdem snapshot hash is invalid.',
+          ),
+        ),
+      );
+      expect(identityCalls, 0);
+    },
+  );
+
   test('fails closed on an unsupported recovery suffix event', () {
     final store = InMemoryRecoveryPersistenceStore();
     _persist(store, _typedSnapshot());
@@ -821,7 +846,11 @@ EventEnvelope _event(int eventSeq) {
   );
 }
 
-void _persist(RecoveryPersistenceStore store, HoldemStateSnapshot state) {
+void _persist(
+  RecoveryPersistenceStore store,
+  HoldemStateSnapshot state, {
+  String? snapshotHash,
+}) {
   final scope = _scope();
   final result = store.saveSnapshot(
     scope: scope,
@@ -833,7 +862,7 @@ void _persist(RecoveryPersistenceStore store, HoldemStateSnapshot state) {
       tableId: scope.tableId,
       sessionId: scope.sessionId,
       snapshotBaseEventSeq: state.tableState.eventSequence,
-      snapshotHash: 'hash_001',
+      snapshotHash: snapshotHash ?? computeCanonicalHash(state.toJson()),
       payload: state.toJson(),
     ),
   );
