@@ -97,6 +97,9 @@ to observe local device capabilities.
   frame fields and is filtered by session and recipient peer on receive. Host
   decoders require strict UTF-8 and reject malformed, padded, or control-bearing
   session/peer identities before queueing or sending.
+- Android receiver availability is reported only after its
+  `WifiManager.MulticastLock` exists and is held; missing or failed lock state
+  returns the existing unavailable transport facts.
 - Host socket availability does not prove local-network reachability. Device,
   firewall, multicast, other-platform, and product endpoint validation remain
   app/platform integration work.

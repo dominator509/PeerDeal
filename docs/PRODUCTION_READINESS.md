@@ -2211,6 +2211,14 @@ The Android debug APK build passed after the change. Real-device engine
 teardown behavior, cross-device reachability, release signing, and the
 remaining product-state/database work remain separate.
 
+The T194 follow-up closes the Android multicast-readiness false-positive gap.
+The Android receiver now requires a created and held `WifiManager.MulticastLock`
+before publishing transport availability; missing or unheld multicast state
+closes the receiver instead of claiming receive support. The Android debug APK
+build passed after the change. Real-device lock behavior, cross-device
+reachability, release signing, and the remaining product-state/database work
+remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

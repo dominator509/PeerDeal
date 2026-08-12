@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T194 Android Multicast Readiness
+
+Summary:
+- Android native transport receiver startup now requires a created and held
+  `WifiManager.MulticastLock` before publishing availability.
+- Missing Wi-Fi service, missing lock creation, failed acquisition, or an
+  unheld lock closes the candidate socket and returns the existing unavailable
+  capability/receive facts.
+- The generic method-channel payload and package boundaries are unchanged.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `packages/peerdeal_native_bridges/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Tests run:
+- Android debug APK build: passed.
+
+Risks:
+- Real-device lock behavior and cross-device multicast reachability remain
+  external validation; product state provisioning, durable database replacement,
+  other-platform hosts, release signing, and final navigation/UX remain
+  separate.
+
+Next reviewer:
+- Continue with the next documented production gap without inventing platform
+  endpoint semantics.
+
 ### 2026-08-12 - Codex - T193 Android Transport Teardown Delivery
 
 Summary:

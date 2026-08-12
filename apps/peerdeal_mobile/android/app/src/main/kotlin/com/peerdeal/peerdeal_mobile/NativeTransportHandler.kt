@@ -222,10 +222,13 @@ internal class NativeTransportHandler(
                 joinGroup(InetAddress.getByName(MULTICAST_ADDRESS))
             }
             val wifiManager = appContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-            candidateLock = wifiManager?.createMulticastLock("peerdeal-transport")
-            if (candidateLock != null) {
-                candidateLock?.setReferenceCounted(false)
-                candidateLock?.acquire()
+                ?: throw IllegalStateException("Wi-Fi service is unavailable.")
+            candidateLock = wifiManager.createMulticastLock("peerdeal-transport")
+                ?: throw IllegalStateException("Wi-Fi multicast lock is unavailable.")
+            candidateLock?.setReferenceCounted(false)
+            candidateLock?.acquire()
+            if (candidateLock?.isHeld != true) {
+                throw IllegalStateException("Wi-Fi multicast lock was not acquired.")
             }
 
             var published = false
