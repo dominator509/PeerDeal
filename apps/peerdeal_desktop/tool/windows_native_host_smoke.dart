@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -46,9 +47,11 @@ Future<void> main() async {
 Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
   final appStorage = MethodChannelAppStorageDirectoryBridge();
   final appStorageSnapshot = await appStorage.getAppSupportDirectory();
+  final directoryPath = appStorageSnapshot.directoryPath;
   _require(
     appStorageSnapshot.available &&
-        (appStorageSnapshot.directoryPath?.trim().isNotEmpty ?? false),
+        directoryPath != null &&
+        _isSafeStoragePath(directoryPath),
     'app storage directory unavailable',
   );
   _pass('app_storage.lookup');
@@ -228,4 +231,12 @@ void _warn(String checkpoint, String message) {
 
 void _require(bool condition, String message) {
   if (!condition) throw StateError(message);
+}
+
+bool _isSafeStoragePath(String value) {
+  if (value.isEmpty || value.trim() != value) return false;
+  if (utf8.encode(value).length > 4096) return false;
+  return value.codeUnits.every(
+    (unit) => unit >= 0x20 && (unit < 0x7f || unit > 0x9f),
+  );
 }

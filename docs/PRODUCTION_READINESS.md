@@ -1707,6 +1707,15 @@ paths and warnings now reject padded or C0/C1-control-bearing UTF-8 text before
 native dispatch or app-policy projection. This closes shared Dart contract
 drift without claiming other-platform hosts or runtime reachability.
 
+The T143 follow-up closes the native app-support path contract mismatch. Android
+no-backup storage and Windows `LocalAppData` results now fail closed unless the
+path is valid UTF-8, non-padded, free of C0/C1 controls, and at most 4096 UTF-8
+bytes. Android debug compilation and Windows debug compilation pass, and the
+Windows native-host smoke asserts the returned path through the generic bridge.
+This closes host boundary validation only; it does not claim production database
+persistence, device/runtime reachability, other-platform hosts, or release
+signing.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

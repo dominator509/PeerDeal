@@ -1215,6 +1215,16 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Other-platform hosts, Android/Windows device and network validation, database
   persistence, and release signing remain open.
 
+## T143 Native App-Storage Path Boundary Hardening
+
+- Android no-backup and Windows `LocalAppData` host results now enforce the
+  shared 4096-byte safe UTF-8 path boundary, rejecting padding and C0/C1
+  controls before returning an available directory.
+- Android debug compilation, Windows debug compilation, and the Windows native
+  host smoke pass; the smoke target asserts the returned path contract.
+- Production database persistence, device/runtime reachability, other-platform
+  hosts, and release signing remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

@@ -70,6 +70,9 @@ to observe local device capabilities.
 - Transport identities and receive scopes, local-network values, capture
   diagnostics, and app-storage paths/warnings reject padded or C0/C1-control-
   bearing UTF-8 text before native dispatch or app-policy projection.
+- Android no-backup and Windows `LocalAppData` app-support results enforce the
+  same safe UTF-8 path boundary, including the 4096-byte limit, before the
+  generic bridge reports an available directory.
 - App-support directory method-channel lookup uses a bounded five-second
   default deadline and an additive cancellation capability; timeout or
   cancellation returns an unavailable fact without throwing through app code.

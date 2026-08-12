@@ -6,7 +6,9 @@
 #include <shlobj.h>
 
 #include <climits>
+#include <cstdint>
 #include <cwchar>
+#include <cwctype>
 #include <optional>
 #include <string>
 #include <utility>
@@ -17,9 +19,38 @@ namespace {
 
 constexpr char kChannelName[] = "peerdeal/native_bridges/app_storage";
 constexpr char kGetAppSupportDirectoryMethod[] = "getAppSupportDirectory";
+constexpr std::size_t kMaxPathBytes = 4096;
 
 using flutter::EncodableMap;
 using flutter::EncodableValue;
+
+bool Utf8ToWide(const std::string& value, std::wstring* output) {
+  if (value.empty() || value.size() > INT_MAX) return false;
+  const int input_size = static_cast<int>(value.size());
+  const int output_size = ::MultiByteToWideChar(
+      CP_UTF8, MB_ERR_INVALID_CHARS, value.data(), input_size, nullptr, 0);
+  if (output_size <= 0) return false;
+  output->resize(static_cast<std::size_t>(output_size));
+  return ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, value.data(),
+                               input_size, output->data(), output_size) ==
+         output_size;
+}
+
+bool IsSafePath(const std::string& value) {
+  if (value.empty() || value.size() > kMaxPathBytes) return false;
+  std::wstring wide;
+  if (!Utf8ToWide(value, &wide) || wide.empty() ||
+      std::iswspace(wide.front()) || std::iswspace(wide.back())) {
+    return false;
+  }
+  for (const wchar_t character : wide) {
+    const auto code_point = static_cast<std::uint32_t>(character);
+    if (code_point < 0x20 || (code_point >= 0x7f && code_point <= 0x9f)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 std::optional<std::string> LocalAppDataPath() {
   PWSTR wide_path = nullptr;
@@ -51,7 +82,7 @@ std::optional<std::string> LocalAppDataPath() {
       CP_UTF8, WC_ERR_INVALID_CHARS, wide_path, input_size, path.data(),
       output_size, nullptr, nullptr);
   ::CoTaskMemFree(wide_path);
-  if (converted != output_size || path.empty()) {
+  if (converted != output_size || !IsSafePath(path)) {
     return std::nullopt;
   }
   return path;

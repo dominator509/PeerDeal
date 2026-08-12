@@ -12,6 +12,7 @@ internal class AppStorageDirectoryHandler(
         const val CHANNEL_NAME = "peerdeal/native_bridges/app_storage"
 
         private const val GET_APP_SUPPORT_DIRECTORY = "getAppSupportDirectory"
+        private const val MAX_PATH_BYTES = 4096
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
@@ -29,13 +30,21 @@ internal class AppStorageDirectoryHandler(
             null
         }
         val path = directory?.absolutePath
-        if (path.isNullOrBlank() || path.trim() != path) {
+        if (path == null || !isSafePath(path)) {
             return failurePayload()
         }
         return mapOf(
             "available" to true,
             "directoryPath" to path,
         )
+    }
+
+    private fun isSafePath(value: String): Boolean {
+        if (value.isEmpty() || value.trim() != value) return false
+        if (value.toByteArray(Charsets.UTF_8).size > MAX_PATH_BYTES) return false
+        return value.all { character ->
+            character.code >= 0x20 && character.code !in 0x7f..0x9f
+        }
     }
 
     private fun failurePayload(): Map<String, Any> =

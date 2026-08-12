@@ -1282,6 +1282,25 @@ Remaining:
 - Other-platform hosts, Android/Windows device and network validation, database
   persistence, and release signing remain separate.
 
+## Recent T143 Native App-Storage Path Boundary Hardening
+
+- Android no-backup storage and Windows `LocalAppData` host results now reject
+  invalid or padded UTF-8 paths, C0/C1 controls, and paths above 4096 UTF-8
+  bytes before returning an available directory.
+- The Windows native-host smoke target now asserts the returned path against the
+  same safe-text and byte-limit contract.
+
+Tests and host verification:
+- Android debug APK compilation passed.
+- Windows debug host compilation passed.
+- The Windows native-host smoke passed app storage, capture, local-network,
+  transport, and secure-key checkpoints.
+
+Remaining:
+- Production database persistence, Android device/runtime behavior,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints

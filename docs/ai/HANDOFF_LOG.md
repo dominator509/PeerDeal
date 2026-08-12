@@ -40,6 +40,23 @@ Validation:
 - Full repository analyze, boundary, source-text, test, dependency-audit, and
   diff-check gates passed before commit and push.
 
+### 2026-08-11 - Codex - T143 Native App-Storage Path Boundary Hardening
+
+Summary:
+- Android no-backup and Windows `LocalAppData` host results now reject invalid,
+  padded, C0/C1-control-bearing, or over-4096-byte UTF-8 paths.
+- The Windows native-host smoke target asserts the returned path contract.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/AppStorageDirectoryHandler.kt`
+- `apps/peerdeal_desktop/windows/runner/windows_app_storage.cpp`
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart`
+- Readiness and handoff records.
+
+Validation:
+- Android debug APK and Windows debug host builds passed.
+- Windows native-host smoke passed all required checkpoints.
+
 ### 2026-08-11 - Codex - T142 Generic Native Bridge Text Boundary Hardening
 
 Summary:

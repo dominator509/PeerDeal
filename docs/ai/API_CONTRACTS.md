@@ -718,10 +718,11 @@ available for non-variant sessions.
 When no explicit recovery root is configured, the mobile and desktop app shells
 may call the generic `AppStorageDirectoryBridge.getAppSupportDirectory()`
 contract. Android returns private no-backup app storage and Windows returns
-`LocalAppData`; the app shell appends its own `PeerDeal/recovery` scope and the
-native bridge owns no recovery or receipt semantics. Missing, malformed, or
-failed native directory results return no default factory and therefore fail
-closed.
+`LocalAppData`; both hosts and the Dart decoder require a valid, non-padded,
+control-free UTF-8 path at most 4096 bytes. The app shell appends its own
+`PeerDeal/recovery` scope and the native bridge owns no recovery or receipt
+semantics. Missing, malformed, or failed native directory results return no
+default factory and therefore fail closed.
 The method-channel lookup uses a bounded five-second default deadline and
 returns a stable unavailable fact on timeout. The additive
 `CancellableAppStorageDirectoryBridge` capability lets app-owned startup or
