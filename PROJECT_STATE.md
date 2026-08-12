@@ -1313,6 +1313,20 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## T167 Shared Sync Snapshot Hash Verification
+
+- `peerdeal_sync` conflict planning and snapshot application now recompute the
+  canonical payload hash and reject envelope mismatches before recovery state
+  projection.
+- The stable fatal code is `ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH`; canonical
+  snapshot fixtures remain valid.
+- The full shared sync package suite passes.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## T166 Persisted Snapshot Hash Verification
 
 - Mirrored persisted Hold'em sources now verify the canonical payload hash in

@@ -159,6 +159,10 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
       if (snapshotEncodingConflict != null) {
         return <SyncConflict>[snapshotEncodingConflict];
       }
+      final snapshotHashConflict = _snapshotHashConflict(snapshot);
+      if (snapshotHashConflict != null) {
+        return <SyncConflict>[snapshotHashConflict];
+      }
     }
 
     if (snapshot == null && request.events.isEmpty) {
@@ -359,6 +363,21 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
         expected: isTooLarge ? '${snapshotLimits.maxEncodedBytes}' : null,
       );
     }
+  }
+
+  SyncConflict? _snapshotHashConflict(SnapshotEnvelope snapshot) {
+    try {
+      if (snapshot.snapshotHash == computeCanonicalHash(snapshot.payload)) {
+        return null;
+      }
+    } on Object {
+      // Normalize hash computation failures into the same fatal contract.
+    }
+    return const SyncConflict(
+      code: 'ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH',
+      message: 'Snapshot payload hash does not match the snapshot envelope.',
+      severity: SyncConflictSeverity.fatal,
+    );
   }
 
   SyncConflict _projectorFailureConflict({

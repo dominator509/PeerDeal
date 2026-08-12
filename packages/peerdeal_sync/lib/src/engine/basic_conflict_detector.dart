@@ -143,6 +143,12 @@ class BasicConflictDetector implements ConflictDetector {
           ),
         );
       }
+      if (conflicts.isEmpty) {
+        final snapshotHashConflict = _snapshotHashConflict(snapshot);
+        if (snapshotHashConflict != null) {
+          conflicts.add(snapshotHashConflict);
+        }
+      }
     }
 
     for (final event in request.events) {
@@ -373,5 +379,20 @@ class BasicConflictDetector implements ConflictDetector {
         expected: isTooLarge ? '${snapshotLimits.maxEncodedBytes}' : null,
       );
     }
+  }
+
+  SyncConflict? _snapshotHashConflict(SnapshotEnvelope snapshot) {
+    try {
+      if (snapshot.snapshotHash == computeCanonicalHash(snapshot.payload)) {
+        return null;
+      }
+    } on Object {
+      // Normalize hash computation failures into the same fatal contract.
+    }
+    return const SyncConflict(
+      code: 'ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH',
+      message: 'Snapshot payload hash does not match the snapshot envelope.',
+      severity: SyncConflictSeverity.fatal,
+    );
   }
 }

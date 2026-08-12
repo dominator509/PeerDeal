@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T167 Shared Sync Snapshot Hash Verification
+
+Summary:
+- `peerdeal_sync` conflict planning and snapshot application now verify the
+  canonical snapshot payload hash before recovery planning or projection.
+- Tampered envelopes fail with `ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH`; valid
+  canonical snapshots continue through the existing path.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/engine/basic_conflict_detector.dart`
+- `packages/peerdeal_sync/lib/src/engine/basic_snapshot_applier.dart`
+- Shared sync detector, applier, and coordinator tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Full `peerdeal_sync` package suite passed (72 tests), including tampered
+  detector/applier cases.
+- Full repository analyze, boundary, source-text, dependency-audit, and
+  serialized test gates passed.
+- Android and Windows debug artifacts built successfully; Windows native-host
+  smoke passed all bridge checkpoints.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T166 Persisted Snapshot Hash Verification
 
 Summary:

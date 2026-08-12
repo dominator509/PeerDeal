@@ -105,6 +105,35 @@ void main() {
     expect(result.conflicts.single.code, 'ERR_RECOVERY_SNAPSHOT_INVALID');
   });
 
+  test('rejects a tampered snapshot payload hash before projection', () {
+    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+      projector: FakeSnapshotProjector(),
+    );
+
+    final result = applier.apply(
+      SnapshotApplyRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 0,
+          snapshotHash: 'tampered_hash',
+          payload: const <String, Object?>{'phase': 'LIVE_ACTIVE'},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.appliedEventCount, 0);
+    expect(result.state.snapshotApplied, isFalse);
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH');
+  });
+
   test('applies snapshot first and only replays suffix events', () {
     final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
@@ -115,13 +144,15 @@ void main() {
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
-        snapshot: const SnapshotEnvelope(
+        snapshot: SnapshotEnvelope(
           snapshotId: 'snap_1',
           protocolVersion: '1.0.0',
           tableId: 'table_1',
           sessionId: 'session_1',
           snapshotBaseEventSeq: 10,
-          snapshotHash: 'snap_hash',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'phase': 'LIVE_ACTIVE',
+          }),
           payload: <String, Object?>{'phase': 'LIVE_ACTIVE'},
         ),
         events: const <EventEnvelope>[
@@ -179,13 +210,15 @@ void main() {
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
-        snapshot: const SnapshotEnvelope(
+        snapshot: SnapshotEnvelope(
           snapshotId: 'snap_1',
           protocolVersion: '1.0.0',
           tableId: 'table_1',
           sessionId: 'session_1',
           snapshotBaseEventSeq: 10,
-          snapshotHash: 'snap_hash',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'phase': 'LIVE_ACTIVE',
+          }),
           payload: <String, Object?>{'phase': 'LIVE_ACTIVE'},
         ),
         events: const <EventEnvelope>[

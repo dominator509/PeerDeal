@@ -80,7 +80,7 @@ void main() {
       );
 
       final result = coordinator.recover(
-        const RecoveryRequest(
+        RecoveryRequest(
           tableId: 'table_1',
           sessionId: 'session_1',
           protocolVersion: '1.0.0',
@@ -91,7 +91,7 @@ void main() {
             tableId: 'table_1',
             sessionId: 'session_1',
             snapshotBaseEventSeq: 2,
-            snapshotHash: 'snap_hash',
+            snapshotHash: computeCanonicalHash(const <String, Object?>{}),
             payload: <String, Object?>{},
           ),
           events: <EventEnvelope>[
@@ -147,7 +147,10 @@ void main() {
           tableId: first.tableId,
           sessionId: first.sessionId,
           snapshotBaseEventSeq: 3,
-          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          }),
           payload: const <String, Object?>{
             'hand_id': 'hand_holdem_001',
             'variant_id': 'holdem_nlhe',
@@ -200,7 +203,11 @@ void main() {
           tableId: first.tableId,
           sessionId: first.sessionId,
           snapshotBaseEventSeq: 3,
-          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+            'last_event_hash': 'hash_holdem_003',
+          }),
           payload: const <String, Object?>{
             'hand_id': 'hand_holdem_001',
             'variant_id': 'holdem_nlhe',
@@ -255,7 +262,10 @@ void main() {
           tableId: first.tableId,
           sessionId: first.sessionId,
           snapshotBaseEventSeq: 3,
-          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          }),
           payload: const <String, Object?>{
             'hand_id': 'hand_holdem_001',
             'variant_id': 'holdem_nlhe',
@@ -317,7 +327,11 @@ void main() {
               tableId: first.tableId,
               sessionId: first.sessionId,
               snapshotBaseEventSeq: 3,
-              snapshotHash: 'snap_hash_holdem_showdown_revealed',
+              snapshotHash: computeCanonicalHash(const <String, Object?>{
+                'hand_id': 'hand_holdem_001',
+                'variant_id': 'holdem_nlhe',
+                'last_event_hash': 'hash_holdem_003',
+              }),
               payload: const <String, Object?>{
                 'hand_id': 'hand_holdem_001',
                 'variant_id': 'holdem_nlhe',
@@ -452,7 +466,10 @@ void main() {
           tableId: first.tableId,
           sessionId: first.sessionId,
           snapshotBaseEventSeq: 3,
-          snapshotHash: 'snap_hash_holdem_showdown_revealed',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{
+            'hand_id': 'hand_holdem_001',
+            'variant_id': 'holdem_nlhe',
+          }),
           payload: const <String, Object?>{
             'hand_id': 'hand_holdem_001',
             'variant_id': 'holdem_nlhe',
@@ -481,7 +498,7 @@ void main() {
     );
 
     final result = coordinator.recover(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -492,7 +509,7 @@ void main() {
           tableId: 'table_1',
           sessionId: 'session_1',
           snapshotBaseEventSeq: 2,
-          snapshotHash: 'snap_hash',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{}),
           payload: <String, Object?>{},
         ),
         events: <EventEnvelope>[

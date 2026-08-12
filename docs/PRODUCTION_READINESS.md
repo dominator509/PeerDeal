@@ -1802,6 +1802,15 @@ canonical snapshots continue to load. Durable database replacement, real
 product state selection, device/network validation, other-platform hosts,
 release signing, and final UX remain separate.
 
+The T167 follow-up closes the corresponding package-level snapshot-integrity
+bypass in `peerdeal_sync`. `BasicConflictDetector` and
+`BasicSnapshotApplier` now recompute the canonical snapshot payload hash and
+reject mismatches with `ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH` before recovery
+planning or projector access. The shared sync suite covers tampered hashes and
+canonical valid snapshots. Durable database replacement, real product state
+selection, device/network validation, other-platform hosts, release signing,
+and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

@@ -1449,6 +1449,20 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T167 Shared Sync Snapshot Hash Verification
+
+- `BasicConflictDetector` and `BasicSnapshotApplier` now verify canonical
+  snapshot payload hashes before recovery planning or projector access.
+- Mismatches return the fatal `ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH` conflict;
+  valid canonical snapshots continue through the existing sync path.
+- The full `peerdeal_sync` suite covers detector/applier tamper rejection and
+  canonical recovery fixtures.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## Recent T166 Persisted Snapshot Hash Verification
 
 - Mirrored persisted Hold'em sources now recompute and verify the canonical

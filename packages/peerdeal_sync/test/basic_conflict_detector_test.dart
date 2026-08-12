@@ -128,7 +128,7 @@ void main() {
               tableId: 'table_1',
               sessionId: 'session_1',
               snapshotBaseEventSeq: 1,
-              snapshotHash: 'snap_hash',
+              snapshotHash: computeCanonicalHash(const <String, Object?>{}),
               payload: <String, Object?>{'oversized': 'x' * 4096},
             ),
             events: const <EventEnvelope>[],
@@ -137,6 +137,30 @@ void main() {
 
     expect(result.conflicts.single.code, 'ERR_RECOVERY_SNAPSHOT_TOO_LARGE');
     expect(result.conflicts.single.expected, '256');
+  });
+
+  test('rejects a tampered snapshot payload hash before recovery planning', () {
+    final result = detector.detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 0,
+          snapshotHash: 'tampered_hash',
+          payload: const <String, Object?>{'phase': 'LIVE_ACTIVE'},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH');
+    expect(result.conflicts.single.isFatal, isTrue);
   });
 
   test(
@@ -291,7 +315,7 @@ void main() {
 
   test('flags fatal snapshot suffix gap', () {
     final result = detector.detect(
-      const RecoveryRequest(
+      RecoveryRequest(
         tableId: 'table_1',
         sessionId: 'session_1',
         protocolVersion: '1.0.0',
@@ -302,7 +326,7 @@ void main() {
           tableId: 'table_1',
           sessionId: 'session_1',
           snapshotBaseEventSeq: 2,
-          snapshotHash: 'snap_hash',
+          snapshotHash: computeCanonicalHash(const <String, Object?>{}),
           payload: <String, Object?>{},
         ),
         events: <EventEnvelope>[
