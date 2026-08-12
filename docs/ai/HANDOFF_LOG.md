@@ -140,6 +140,28 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T157 Native Transport Receive Scope Bound
+
+Summary:
+- Mirrored app-native transport drains now reuse the shared native bridge
+  safe UTF-8/control-free validator for receive session and peer scopes.
+- Direct drain callers cannot pass empty, padded, control-bearing, or
+  over-256-byte scope identities to an injected native bridge.
+
+Files changed:
+- Mirrored mobile and desktop native transport frame adapters and tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop transport-adapter suites passed, 14 tests each.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+
+Risks:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  external or operator-owned boundaries.
+
 ### 2026-08-11 - Codex - T156 Native Bootstrap Provider Output Bound
 
 Summary:

@@ -1449,6 +1449,22 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T157 Native Transport Receive Scope Bound
+
+- Mirrored app-native transport drains now reuse the shared native bridge
+  validator for receive session and peer scopes.
+- Direct drain callers can no longer pass C0/C1-control-bearing, padded,
+  empty, or over-256-byte UTF-8 scope identities to an injected native bridge.
+- Focused mobile and desktop transport-adapter suites cover control and
+  oversized scope rejection before native receive.
+- Full repository analyze, boundary, source-text, dependency-audit, and test
+  gates passed; diff validation is clean.
+
+Remaining:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  separate.
+
 ## Recent T156 Native Bootstrap Provider Output Bound
 
 - Mirrored native join bootstrap coordinators now apply the configured peer

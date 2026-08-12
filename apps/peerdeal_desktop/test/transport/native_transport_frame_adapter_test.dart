@@ -165,6 +165,40 @@ void main() {
     expect(handler.frames, isEmpty);
   });
 
+  test(
+    'rejects control-bearing and oversized receive scopes before native receive',
+    () async {
+      final bridge = _FakeNativeTransportBridge(
+        receiveFrames: [_nativeFrame()],
+      );
+      final handler = _RecordingTransportFrameHandler();
+      final drain = NativeTransportFrameDrain(
+        bridge: bridge,
+        receiver: ValidatingTransportFrameReceiver(handler: handler),
+      );
+
+      final invalidScopes = <List<String>>[
+        <String>['session_${String.fromCharCode(1)}', 'peer_b'],
+        <String>['session_1', 'peer_${String.fromCharCode(0x85)}'],
+        <String>['x' * 257, 'peer_b'],
+      ];
+      for (final scopes in invalidScopes) {
+        final result = await drain.drain(
+          sessionId: scopes[0],
+          peerId: scopes[1],
+        );
+        expect(result.available, isFalse);
+        expect(result.results, isEmpty);
+        expect(result.warnings, [
+          'Native transport receive scope is invalid.',
+        ]);
+      }
+
+      expect(bridge.receiveLookups, 0);
+      expect(handler.frames, isEmpty);
+    },
+  );
+
   test('rejects invalid receive batch limit before native receive', () async {
     final bridge = _FakeNativeTransportBridge(receiveFrames: [_nativeFrame()]);
     final handler = _RecordingTransportFrameHandler();

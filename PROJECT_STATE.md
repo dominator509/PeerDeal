@@ -1313,6 +1313,22 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## T157 Native Transport Receive Scope Bound
+
+- Mirrored app-native transport drains now enforce the shared native bridge
+  safe UTF-8/control-free transport identity boundary before invoking receive.
+- Direct drain callers cannot bypass the 256-byte transport identity limit or
+  inject C0/C1-control-bearing, padded, or empty session/peer scope values.
+- Focused mobile and desktop transport-adapter suites cover rejection before
+  native receive lookup.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+
+Remaining:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  separate.
+
 ## T156 Native Bootstrap Provider Output Bound
 
 - Mirrored native join bootstrap coordinators now cap, normalize, and

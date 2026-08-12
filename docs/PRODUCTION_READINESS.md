@@ -1769,6 +1769,16 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T157 follow-up closes a direct native transport receive-scope boundary gap.
+Mirrored app transport drains now reuse the shared native bridge safe UTF-8
+validator before invoking an injected native bridge, rejecting empty, padded,
+C0/C1-control-bearing, or over-256-byte session and peer scopes. Focused mobile
+and desktop transport-adapter suites cover rejection before native receive.
+Full repository analyze, boundary, source-text, dependency-audit, test, and
+diff gates pass. Android/Windows runtime and cross-device network validation,
+other-platform hosts, product state/database provisioning, and release signing
+remain separate.
+
 The T156 follow-up closes a native bootstrap output-boundary gap. Mirrored join
 bootstrap coordinators now apply the configured peer candidate cap to reachable
 results returned by the injected provider, normalize and deduplicate provider
