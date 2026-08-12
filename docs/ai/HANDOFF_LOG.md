@@ -2,6 +2,24 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-11 - Codex - T139 Android Secure-Key UTF-8 Boundary Hardening
+
+Summary:
+- Android secure-key host validation now enforces UTF-8 byte limits for
+  namespaces and record fields, matching the Dart contract and Windows host.
+- Shared channel-contract tests cover oversized multibyte key material.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- Readiness and handoff records.
+
+Validation:
+- Focused Flutter secure-key channel-contract test passed.
+- Android `:app:assembleDebug` passed.
+- Full repository analyze, boundary, source-text, test, dependency-audit, and
+  diff-check gates passed before commit and push.
+
 ### 2026-08-11 - Codex - T138 Production Configuration Lifecycle Hardening
 
 Summary:

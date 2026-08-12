@@ -531,7 +531,12 @@ internal class SecureKeyStorageHandler(context: Context) :
             !keyId.contains(':')
 
     private fun isValidText(value: String, maxLength: Int): Boolean {
-        if (value.isEmpty() || value.length > maxLength || value.trim() != value) return false
+        if (value.isEmpty() ||
+            value.toByteArray(StandardCharsets.UTF_8).size > maxLength ||
+            value.trim() != value
+        ) {
+            return false
+        }
         return value.none { character ->
             character.code < 0x20 || character.code in 0x7F..0x9F
         }
@@ -577,7 +582,7 @@ internal class SecureKeyStorageHandler(context: Context) :
 
         private fun isValidTextValue(value: String, maxLength: Int): Boolean =
             value.isNotEmpty() &&
-                value.length <= maxLength &&
+                value.toByteArray(StandardCharsets.UTF_8).size <= maxLength &&
                 value.trim() == value &&
                 value.none { character ->
                     character.code < 0x20 || character.code in 0x7F..0x9F

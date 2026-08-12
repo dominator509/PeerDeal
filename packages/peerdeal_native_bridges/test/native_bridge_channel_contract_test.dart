@@ -368,11 +368,33 @@ void main() {
         ],
       },
     );
+    final oversizedUtf8Key = SecureKeyStorageChannelContract.decodeSnapshot(
+      <String, Object?>{
+        'available': true,
+        'revision': 1,
+        'keys': <Object?>[
+          <String, Object?>{
+            'keyId': 'key',
+            'purpose': 'purpose',
+            'algorithm': 'algorithm',
+            'secret': String.fromCharCodes(
+              List<int>.filled(
+                NativeBridgePayloadLimits.maxSecureKeySecretBytes ~/ 4 + 1,
+                0x1F600,
+              ),
+            ),
+            'active': true,
+          },
+        ],
+      },
+    );
 
     expect(tooManyRecords.available, isFalse);
     expect(tooManyRecords.keys, isEmpty);
     expect(oversizedKey.available, isTrue);
     expect(oversizedKey.keys, isEmpty);
+    expect(oversizedUtf8Key.available, isTrue);
+    expect(oversizedUtf8Key.keys, isEmpty);
   });
 
   test('secure key storage channel contract encodes key records', () {

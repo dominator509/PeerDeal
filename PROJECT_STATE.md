@@ -1174,6 +1174,15 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Product state/source selection, database persistence, device/network
   validation, other-platform hosts, and release signing remain open.
 
+## T139 Android Secure-Key UTF-8 Boundary Hardening
+
+- Android secure-key namespaces and record fields now enforce UTF-8 byte
+  limits, matching the locked Dart channel contract and Windows host behavior.
+- Shared native-bridge tests cover oversized multibyte secure-key material.
+- Android debug APK compilation passes after the host change.
+- Android device/runtime validation, cross-device networking, other-platform
+  hosts, database persistence, and release signing remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

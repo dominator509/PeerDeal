@@ -1213,6 +1213,23 @@ Remaining:
   cross-device validation, other-platform hosts, database persistence, and
   release signing remain separate.
 
+## Recent T139 Android Secure-Key UTF-8 Boundary Hardening
+
+- Android secure-key host validation now applies UTF-8 byte limits to
+  namespaces and record fields, matching the Dart contract and Windows host.
+- The shared native-bridge contract suite covers oversized multibyte key
+  material.
+
+Tests and gates:
+- Focused secure-key channel-contract Flutter test passes.
+- Android `:app:assembleDebug` passes after the Kotlin host change.
+- Full repository analyze, boundary, source-text, test, dependency-audit, and
+  diff-check gates pass before commit and push.
+
+Remaining:
+- Android device/runtime validation, cross-device networking, other-platform
+  hosts, database persistence, and release signing remain separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints

@@ -1679,6 +1679,13 @@ orchestration hardening; product source/state selection, database persistence,
 native host implementations, device validation, and release signing remain
 separate readiness work.
 
+The T139 follow-up closes a native contract-boundary mismatch in the Android
+secure-key host. Android secure-key namespaces and record fields now enforce
+the locked UTF-8 byte limits used by the Dart contract and the Windows host,
+including multibyte values. The shared channel-contract suite covers the
+multibyte rejection path, and Android debug compilation passes. This improves
+host input hardening but does not replace Android device/runtime validation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
