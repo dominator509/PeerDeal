@@ -1361,6 +1361,16 @@ Remaining:
   selection, device/network validation, other-platform hosts, release signing,
   and final UX.
 
+## T177 Immutable Replay Collections
+
+- Replay requests, snapshot suffix plans, and replay results now defensively
+  copy and freeze event windows, warning diagnostics, and replay mismatches.
+- Focused replay ownership, engine, mismatch, suffix, and anchor suites prove
+  caller-owned collections cannot alter deterministic replay results.
+- Remaining work is unchanged: durable database replacement, real product state
+  selection, device/network validation, other-platform hosts, release signing,
+  and final UX.
+
 ## T173 Immutable App-Boundary Collections
 
 - Mirrored native bootstrap candidate, native transport session/drain, and

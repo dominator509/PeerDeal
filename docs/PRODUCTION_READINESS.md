@@ -1892,6 +1892,15 @@ isolation and mutation rejection. Durable database replacement, real product
 state selection, device/network validation, other-platform hosts, release
 signing, and final UX remain separate.
 
+The T177 follow-up closes the deterministic replay collection ownership gap.
+Replay requests, snapshot suffix plans, and replay results now defensively copy
+and freeze event windows, warning diagnostics, and replay mismatches before
+crossing the replay boundary. Focused replay ownership, engine, mismatch,
+suffix, and anchor suites cover source-list isolation and mutation rejection.
+Durable database replacement, real product state selection, device/network
+validation, other-platform hosts, release signing, and final UX remain
+separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

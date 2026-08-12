@@ -6,17 +6,17 @@ import 'replay_scope.dart';
 
 @immutable
 class ReplayRequest {
-  const ReplayRequest({
+  ReplayRequest({
     required this.tableId,
     required this.sessionId,
     required this.protocolVersion,
     required this.scope,
-    required this.events,
+    required List<EventEnvelope> events,
     this.snapshot,
     this.expectedAnchor,
     this.fromEventSeq,
     this.toEventSeq,
-  });
+  }) : events = List<EventEnvelope>.unmodifiable(events);
 
   final String tableId;
   final String sessionId;

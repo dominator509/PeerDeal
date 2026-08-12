@@ -42,8 +42,8 @@ disposal cancellation, T168 exact inbound-event checkpoint identity, T169
 immutable app-session diagnostics, T170 immutable startup diagnostics, T171
 immutable local-identity diagnostics, T172 immutable readiness/transport
 diagnostics, T173 immutable app-boundary collections, T174 immutable
-native-bridge collections, T175 immutable network collections, and T176
-immutable sync/recovery collections
+native-bridge collections, T175 immutable network collections, T176
+immutable sync/recovery collections, and T177 immutable replay collections
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1487,6 +1487,18 @@ Remaining:
   persistence results, and reconciliation notes.
 - Focused sync ownership, conflict, snapshot, and coordinator suites cover
   source-list isolation and immutable recovery results.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
+## Recent T177 Immutable Replay Collections
+
+- Replay requests, snapshot suffix plans, and replay results now defensively
+  copy and freeze event windows, warning diagnostics, and replay mismatches.
+- Focused replay ownership, engine, mismatch, suffix, and anchor suites cover
+  source-list isolation and immutable replay results.
 
 Remaining:
 - Durable database replacement, real product state selection, device/network

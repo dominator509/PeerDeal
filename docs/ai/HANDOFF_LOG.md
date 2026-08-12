@@ -2,6 +2,26 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T177 Immutable Replay Collections
+
+Summary:
+- Replay requests, snapshot suffix plans, and replay results now defensively
+  copy and freeze event windows, warning diagnostics, and replay mismatches.
+
+Validation:
+- Focused replay ownership, engine, mismatch, suffix, and anchor suites: passed
+  34 tests.
+- Full analyze, boundary-check, source-text, dependency-audit, and serialized
+  repository test gates passed. Dependency audit reported 0 actionable upgrades
+  and 11 newer toolchain-blocked versions.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T176 Immutable Sync/Recovery Collections
 
 Summary:

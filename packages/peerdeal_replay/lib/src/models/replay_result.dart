@@ -6,14 +6,15 @@ import 'replay_mismatch.dart';
 
 @immutable
 class ReplayResult<TState> {
-  const ReplayResult({
+  ReplayResult({
     required this.isSuccess,
     required this.state,
     required this.finalAppliedEventSeq,
     required this.reconstructedAnchor,
-    this.warnings = const <String>[],
-    this.mismatches = const <ReplayMismatch>[],
-  });
+    List<String> warnings = const <String>[],
+    List<ReplayMismatch> mismatches = const <ReplayMismatch>[],
+  }) : warnings = List<String>.unmodifiable(warnings),
+       mismatches = List<ReplayMismatch>.unmodifiable(mismatches);
 
   final bool isSuccess;
   final TState? state;
