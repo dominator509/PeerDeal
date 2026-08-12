@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T209 Snapshot Metadata Text Boundary
+
+Summary:
+- Mirrored mobile and desktop Hold'em snapshot writers now enforce the
+  protocol canonical-JSON 4,096-byte UTF-8 text bound on snapshot IDs, types,
+  and versions.
+- C0/C1/DEL controls fail closed before snapshot persistence.
+
+Files changed:
+- Mirrored `app_holdem_production_session_snapshot_writer.dart` files.
+- Mirrored snapshot-writer focused tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Mobile snapshot-writer suite: 6 tests passed.
+- Desktop snapshot-writer suite: 6 tests passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Durable database choice, product state hydration, native/device and
+  cross-device validation, other-platform hosts, and release signing remain
+  external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T208 Hydrated Session Identity Boundary
 
 Summary:

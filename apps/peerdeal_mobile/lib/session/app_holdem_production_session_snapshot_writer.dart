@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
@@ -170,7 +172,10 @@ class AppHoldemProductionSessionSnapshotWriter {
   }) {
     if (value.isEmpty ||
         value.trim() != value ||
-        RegExp(r'[\x00-\x1F\x7F]').hasMatch(value)) {
+        utf8.encode(value).length > const CanonicalJsonLimits().maxTextBytes ||
+        value.runes.any(
+          (rune) => rune < 0x20 || (rune >= 0x7F && rune <= 0x9F),
+        )) {
       return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>[warning],

@@ -77,6 +77,53 @@ void main() {
     expect(result.warnings, contains('Holdem snapshot identity is invalid.'));
     expect(store.loadWindow(_scope()).snapshot, isNull);
   });
+
+  test('rejects control-bearing and oversized snapshot metadata', () {
+    final state = _typedSnapshot();
+    final invalidValues = <String>[
+      'snapshot_${String.fromCharCode(0x85)}',
+      'x' * (const CanonicalJsonLimits().maxTextBytes + 1),
+    ];
+
+    for (final value in invalidValues) {
+      final writer = AppHoldemProductionSessionSnapshotWriter(
+        store: InMemoryRecoveryPersistenceStore(),
+      );
+      for (final result in <RecoveryPersistenceResult>[
+        writer.save(
+          snapshotId: value,
+          tableState: state.tableState,
+          handState: state.handState,
+          eventCursor: state.eventCursor,
+        ),
+        writer.save(
+          snapshotId: 'snapshot_001',
+          snapshotType: value,
+          tableState: state.tableState,
+          handState: state.handState,
+          eventCursor: state.eventCursor,
+        ),
+        writer.save(
+          snapshotId: 'snapshot_001',
+          snapshotVersion: value,
+          tableState: state.tableState,
+          handState: state.handState,
+          eventCursor: state.eventCursor,
+        ),
+      ]) {
+        expect(result.isSuccess, isFalse, reason: value);
+        expect(
+          result.warnings,
+          anyOf(
+            contains('Holdem snapshot identity is invalid.'),
+            contains('Holdem snapshot type is invalid.'),
+            contains('Holdem snapshot version is invalid.'),
+          ),
+          reason: value,
+        );
+      }
+    }
+  });
 }
 
 HoldemStateSnapshot _typedSnapshot() {

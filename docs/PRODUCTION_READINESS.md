@@ -2348,6 +2348,15 @@ production-factory suites pass; full analyze, boundary, source-text,
 serialized test, dependency-audit, and diff gates pass; Android debug APK and
 Windows debug artifacts build successfully.
 
+The T209 follow-up closes the app-owned snapshot metadata text boundary.
+Mirrored mobile and desktop Hold'em snapshot writers now reject C0/C1/DEL
+controls and text exceeding the protocol canonical-JSON 4,096-byte limit for
+snapshot IDs, types, and versions before persistence. Focused mobile and
+desktop snapshot-writer suites pass; full repository gates and debug artifact
+builds pass: analyze, boundary, source-text, serialized test,
+dependency-audit, and diff gates are green; Android debug APK and Windows
+debug artifacts build successfully.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
