@@ -1,12 +1,15 @@
 import 'package:meta/meta.dart';
 
+import 'model_collection_ownership.dart';
+
 @immutable
 class ValidationResult {
-  const ValidationResult({
+  ValidationResult({
     required this.isValid,
-    this.warnings = const <String>[],
-    this.errors = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+    List<String> errors = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings),
+       errors = List<String>.unmodifiable(errors);
 
   final bool isValid;
   final List<String> warnings;
@@ -15,15 +18,16 @@ class ValidationResult {
 
 @immutable
 class ValidatedSetupPlan {
-  const ValidatedSetupPlan({
+  ValidatedSetupPlan({
     required this.planId,
     required this.modeId,
     required this.variantId,
-    required this.policyProfileIds,
-    required this.resolvedFields,
+    required Map<String, String> policyProfileIds,
+    required Map<String, Object?> resolvedFields,
     required this.validationResult,
     required this.buildReady,
-  });
+  }) : policyProfileIds = Map<String, String>.unmodifiable(policyProfileIds),
+       resolvedFields = freezeWizardObjectMap(resolvedFields);
 
   final String planId;
   final String modeId;

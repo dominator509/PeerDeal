@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T179 Immutable Wizard Collections
+
+Summary:
+- Wizard setup intents, helper suggestions, resolved drafts, preset
+  layers/results, validation plans, and Game File compile results now own and
+  recursively freeze public maps/lists/sets at construction boundaries.
+- Mirrored mobile and desktop setup-flow callsites and wizard fixtures were
+  migrated from invalid const construction without changing wizard policy or
+  package boundaries.
+
+Validation:
+- Focused `peerdeal_wizard` suite: passed 27 tests, including the new ownership
+  regression.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T178 Immutable Variant Collections
 
 Summary:

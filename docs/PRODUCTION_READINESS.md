@@ -1911,6 +1911,16 @@ isolation and mutation rejection. Durable database replacement, real product
 state selection, device/network validation, other-platform hosts, release
 signing, and final UX remain separate.
 
+The T179 follow-up closes the wizard-owned collection ownership gap. Setup
+intents, helper suggestions, resolved drafts, preset layers/results, validation
+plans, and Game File compile results now defensively copy and recursively freeze
+public JSON-like maps/lists/sets and diagnostic collections before they cross
+the wizard boundary. A dedicated wizard ownership regression and the full
+repository test matrix cover source-collection isolation and mutation
+rejection. Durable database replacement, real product state selection,
+device/network validation, other-platform hosts, release signing, and final
+UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

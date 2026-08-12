@@ -5,7 +5,7 @@ void main() {
   group('DefaultGameFileCompiler', () {
     test('compiles build-ready validated plan into canonical root shape', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: 'plan_demo',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
@@ -34,7 +34,7 @@ void main() {
 
     test('throws when plan is not build-ready', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: 'plan_bad',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
@@ -52,7 +52,7 @@ void main() {
 
     test('compile rejects build-ready plans with blank plan identity', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: '   ',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
@@ -72,7 +72,7 @@ void main() {
 
     test('tryCompile returns compiled result for build-ready plan', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: 'plan_demo',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
@@ -104,7 +104,7 @@ void main() {
 
     test('tryCompile rejects invalid plan without throwing', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: 'plan_bad',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
@@ -128,7 +128,7 @@ void main() {
 
     test('tryCompile rejects non-build-ready plan with default error', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: 'plan_not_ready',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
@@ -146,7 +146,7 @@ void main() {
 
     test('tryCompile rejects build-ready plans with blank plan identity', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: '   ',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
@@ -170,7 +170,7 @@ void main() {
 
     test('tryCompile rejects build-ready unsupported variant plan', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: 'plan_unsupported_variant',
         modeId: 'open_table',
         variantId: 'omaha_plo',
@@ -194,7 +194,7 @@ void main() {
 
     test('tryCompile rejects build-ready unsupported mode plan', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: 'plan_unsupported_mode',
         modeId: 'cash_private',
         variantId: 'holdem_nlhe',
@@ -231,7 +231,7 @@ void main() {
           )
             'field-$index': index,
         },
-        validationResult: const ValidationResult(isValid: true),
+        validationResult: ValidationResult(isValid: true),
         buildReady: true,
       );
 
@@ -244,7 +244,7 @@ void main() {
 
     test('tryCompile rejects direct plans with unsupported nested values', () {
       const compiler = DefaultGameFileCompiler();
-      const plan = ValidatedSetupPlan(
+      final plan = ValidatedSetupPlan(
         planId: 'plan_invalid_fields',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',

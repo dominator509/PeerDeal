@@ -5,7 +5,7 @@ void main() {
   group('DefaultPresetResolver', () {
     test('later layers override earlier layers deterministically', () {
       const resolver = DefaultPresetResolver();
-      const layers = <PresetLayer>[
+      final layers = <PresetLayer>[
         PresetLayer(
           presetId: 'builtin_open_table',
           priority: 1,
@@ -46,7 +46,7 @@ void main() {
 
     test('fails closed when a preset value map exceeds its limit', () {
       const resolver = DefaultPresetResolver(maxPresetValues: 1);
-      final result = resolver.mergeLayers(const <PresetLayer>[
+      final result = resolver.mergeLayers(<PresetLayer>[
         PresetLayer(
           presetId: 'preset-1',
           priority: 1,
@@ -60,7 +60,7 @@ void main() {
 
     test('rejects unsupported nested preset values before merging', () {
       const resolver = DefaultPresetResolver();
-      final result = resolver.mergeLayers(const <PresetLayer>[
+      final result = resolver.mergeLayers(<PresetLayer>[
         PresetLayer(
           presetId: 'preset-1',
           priority: 1,
@@ -74,7 +74,7 @@ void main() {
 
     test('fails closed when merged values exceed their limit', () {
       const resolver = DefaultPresetResolver(maxMergedValues: 1);
-      final result = resolver.mergeLayers(const <PresetLayer>[
+      final result = resolver.mergeLayers(<PresetLayer>[
         PresetLayer(
           presetId: 'preset-1',
           priority: 1,
@@ -88,7 +88,7 @@ void main() {
 
     test('rejects unsupported partial settings before resolution', () {
       const resolver = DefaultPresetResolver();
-      const intent = SetupIntent(
+      final intent = SetupIntent(
         intentId: 'intent_partial_invalid',
         sourceType: SetupSurface.simple,
         hostPseudonymousId: 'host_1',
@@ -97,7 +97,7 @@ void main() {
 
       final draft = resolver.resolveIntent(
         intent: intent,
-        presetLayers: const <PresetLayer>[],
+        presetLayers: <PresetLayer>[],
       );
 
       expect(draft.unresolvedIssues, [
@@ -129,7 +129,7 @@ void main() {
 
       final draft = resolver.resolveIntent(
         intent: intent,
-        presetLayers: const <PresetLayer>[],
+        presetLayers: <PresetLayer>[],
       );
 
       expect(draft.unresolvedIssues, [
@@ -166,7 +166,7 @@ void main() {
 
     test('rejects unsupported variants before Game File compilation', () {
       const resolver = DefaultPresetResolver();
-      const draft = ResolvedSetupDraft(
+      final draft = ResolvedSetupDraft(
         intentId: 'intent_unsupported_variant',
         modeId: 'open_table',
         variantId: 'omaha_plo',
@@ -187,7 +187,7 @@ void main() {
 
     test('rejects malformed setup identity before Game File compilation', () {
       const resolver = DefaultPresetResolver();
-      const intent = SetupIntent(
+      final intent = SetupIntent(
         intentId: '   ',
         sourceType: SetupSurface.simple,
         hostPseudonymousId: '   ',
@@ -198,7 +198,7 @@ void main() {
 
       final draft = resolver.resolveIntent(
         intent: intent,
-        presetLayers: const <PresetLayer>[],
+        presetLayers: <PresetLayer>[],
       );
       final result = resolver.validateDraft(draft);
 
@@ -213,7 +213,7 @@ void main() {
 
     test('accepts supported Holdem variant draft', () {
       const resolver = DefaultPresetResolver();
-      const draft = ResolvedSetupDraft(
+      final draft = ResolvedSetupDraft(
         intentId: 'intent_holdem',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',

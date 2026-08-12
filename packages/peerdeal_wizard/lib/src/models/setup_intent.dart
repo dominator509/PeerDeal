@@ -1,11 +1,12 @@
 import 'package:meta/meta.dart';
 
 import 'helper_suggestion.dart';
+import 'model_collection_ownership.dart';
 import 'setup_surface.dart';
 
 @immutable
 class SetupIntent {
-  const SetupIntent({
+  SetupIntent({
     required this.intentId,
     required this.sourceType,
     required this.hostPseudonymousId,
@@ -16,12 +17,17 @@ class SetupIntent {
     this.speedPreference,
     this.privacyPreference,
     this.capturePreference,
-    this.partialSettings = const <String, Object?>{},
-    this.presetRefs = const <String>[],
+    Map<String, Object?> partialSettings = const <String, Object?>{},
+    List<String> presetRefs = const <String>[],
     this.helperEnabled = false,
-    this.helperSuggestions = const <HelperSuggestion>[],
-    this.ambiguities = const <String>[],
-  });
+    List<HelperSuggestion> helperSuggestions = const <HelperSuggestion>[],
+    List<String> ambiguities = const <String>[],
+  }) : partialSettings = freezeWizardObjectMap(partialSettings),
+       presetRefs = List<String>.unmodifiable(presetRefs),
+       helperSuggestions = List<HelperSuggestion>.unmodifiable(
+         helperSuggestions,
+       ),
+       ambiguities = List<String>.unmodifiable(ambiguities);
 
   final String intentId;
   final SetupSurface sourceType;

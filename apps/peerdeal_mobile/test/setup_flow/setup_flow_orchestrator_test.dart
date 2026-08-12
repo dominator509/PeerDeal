@@ -20,7 +20,7 @@ void main() {
     const orchestrator = SetupFlowOrchestrator();
 
     final result = orchestrator.compileSetup(
-      intent: const SetupIntent(
+      intent: SetupIntent(
         intentId: 'intent_invalid',
         sourceType: SetupSurface.simple,
         hostPseudonymousId: 'host_1',
@@ -39,7 +39,7 @@ void main() {
     );
 
     final result = orchestrator.compileSetup(
-      intent: const SetupIntent(
+      intent: SetupIntent(
         intentId: '   ',
         sourceType: SetupSurface.simple,
         hostPseudonymousId: '   ',
@@ -61,7 +61,7 @@ void main() {
     );
 
     final result = orchestrator.compileSetup(
-      intent: const SetupIntent(
+      intent: SetupIntent(
         intentId: ' intent_open_table',
         sourceType: SetupSurface.simple,
         hostPseudonymousId: 'host_1 ',
@@ -94,7 +94,7 @@ void main() {
 }
 
 SetupIntent _validIntent() {
-  return const SetupIntent(
+  return SetupIntent(
     intentId: 'intent_open_table',
     sourceType: SetupSurface.simple,
     hostPseudonymousId: 'host_1',

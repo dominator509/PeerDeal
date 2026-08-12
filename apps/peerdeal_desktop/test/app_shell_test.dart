@@ -814,7 +814,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       PeerDealDesktopApp(
-        setupFlowIntentFactory: (_) => const SetupIntent(
+        setupFlowIntentFactory: (_) => SetupIntent(
           intentId: 'intent_shell_invalid',
           sourceType: SetupSurface.simple,
           hostPseudonymousId: 'host_shell',
@@ -838,7 +838,7 @@ void main() {
     await tester.pumpWidget(
       PeerDealDesktopApp(
         runtime: PeerDealDesktopRuntime(
-          setupFlowIntentFactory: (_) => const SetupIntent(
+          setupFlowIntentFactory: (_) => SetupIntent(
             intentId: '   ',
             sourceType: SetupSurface.simple,
             hostPseudonymousId: '   ',

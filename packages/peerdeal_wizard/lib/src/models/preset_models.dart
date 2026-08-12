@@ -1,13 +1,15 @@
 import 'package:meta/meta.dart';
 
+import 'model_collection_ownership.dart';
+
 @immutable
 class PresetLayer {
-  const PresetLayer({
+  PresetLayer({
     required this.presetId,
     required this.priority,
-    required this.values,
+    required Map<String, Object?> values,
     this.isLockedBuiltin = false,
-  });
+  }) : values = freezeWizardObjectMap(values);
 
   final String presetId;
   final int priority;
@@ -17,12 +19,15 @@ class PresetLayer {
 
 @immutable
 class PresetResolutionResult {
-  const PresetResolutionResult({
-    required this.mergedValues,
-    required this.appliedPresetIds,
-    this.conflicts = const <String>[],
-    this.errors = const <String>[],
-  });
+  PresetResolutionResult({
+    required Map<String, Object?> mergedValues,
+    required List<String> appliedPresetIds,
+    List<String> conflicts = const <String>[],
+    List<String> errors = const <String>[],
+  }) : mergedValues = freezeWizardObjectMap(mergedValues),
+       appliedPresetIds = List<String>.unmodifiable(appliedPresetIds),
+       conflicts = List<String>.unmodifiable(conflicts),
+       errors = List<String>.unmodifiable(errors);
 
   final Map<String, Object?> mergedValues;
   final List<String> appliedPresetIds;

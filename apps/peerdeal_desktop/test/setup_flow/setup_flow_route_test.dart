@@ -73,7 +73,7 @@ void main() {
         color: const Color(0xFF1B5E20),
         builder: (_, _) => SetupFlowRoute(
           orchestratorFactory: () => const SetupFlowOrchestrator(),
-          setupIntentFactory: (_) => const SetupIntent(
+          setupIntentFactory: (_) => SetupIntent(
             intentId: 'intent_injected_invalid',
             sourceType: SetupSurface.simple,
             hostPseudonymousId: 'host_injected',
@@ -106,7 +106,7 @@ void main() {
 
     await tester.pumpWidget(
       routeWith(
-        (_) => const SetupIntent(
+        (_) => SetupIntent(
           intentId: 'intent_open_table',
           sourceType: SetupSurface.simple,
           hostPseudonymousId: 'host_demo',
@@ -123,7 +123,7 @@ void main() {
 
     await tester.pumpWidget(
       routeWith(
-        (_) => const SetupIntent(
+        (_) => SetupIntent(
           intentId: 'intent_injected_invalid',
           sourceType: SetupSurface.simple,
           hostPseudonymousId: 'host_injected',
@@ -151,7 +151,7 @@ void main() {
             orchestratorCreated = true;
             return const SetupFlowOrchestrator();
           },
-          setupIntentFactory: (_) => const SetupIntent(
+          setupIntentFactory: (_) => SetupIntent(
             intentId: '   ',
             sourceType: SetupSurface.simple,
             hostPseudonymousId: '   ',
@@ -185,7 +185,7 @@ void main() {
             orchestratorCreated = true;
             throw StateError('setup dependency should not run');
           },
-          setupIntentFactory: (_) => const SetupIntent(
+          setupIntentFactory: (_) => SetupIntent(
             intentId: ' intent_open_table ',
             sourceType: SetupSurface.simple,
             hostPseudonymousId: ' host_demo ',

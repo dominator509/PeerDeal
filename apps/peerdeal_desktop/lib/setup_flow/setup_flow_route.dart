@@ -214,14 +214,14 @@ bool _isSafeSetupTokenCodeUnit(int codeUnit) {
 
 SetupIntent _defaultSetupIntentFor(SetupFlowDemoMode mode) {
   if (mode == SetupFlowDemoMode.invalid) {
-    return const SetupIntent(
+    return SetupIntent(
       intentId: 'intent_invalid',
       sourceType: SetupSurface.simple,
       hostPseudonymousId: 'host_demo',
     );
   }
 
-  return const SetupIntent(
+  return SetupIntent(
     intentId: 'intent_open_table',
     sourceType: SetupSurface.simple,
     hostPseudonymousId: 'host_demo',
