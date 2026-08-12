@@ -271,6 +271,61 @@ void main() {
         );
       },
     );
+
+    test('freezes settlement event draft payload trees', () {
+      final projectedPayload = <String, Object?>{
+        'awards': <Object?>[
+          <String, Object?>{'seat_id': 'seat-1'},
+        ],
+      };
+      final projectedAwards = <Map<String, Object?>>[
+        <String, Object?>{'seat_id': 'seat-1'},
+      ];
+      final projectedDraft = HoldemSettlementProjectedEventDraft(
+        payload: projectedPayload,
+        awards: projectedAwards,
+      );
+      (projectedPayload['awards']! as List<Object?>).clear();
+      projectedAwards.single['seat_id'] = 'seat-2';
+
+      expect(projectedDraft.payload['awards'], <Object?>[
+        <String, Object?>{'seat_id': 'seat-1'},
+      ]);
+      expect(projectedDraft.awards, <Map<String, Object?>>[
+        <String, Object?>{'seat_id': 'seat-1'},
+      ]);
+      expect(
+        () => (projectedDraft.payload['awards']! as List<Object?>).clear(),
+        throwsUnsupportedError,
+      );
+      expect(
+        () => (projectedDraft.awards.single['seat_id'] = 'mutate'),
+        throwsUnsupportedError,
+      );
+
+      final blockedWarnings = <String>['ERR_TEST'];
+      final blockedPayload = <String, Object?>{'warnings': blockedWarnings};
+      final blockedDraft = HoldemSettlementBlockedEventDraft(
+        payload: blockedPayload,
+        reasonCodes: <String>['ERR_TEST'],
+        warnings: blockedWarnings,
+      );
+      blockedWarnings.clear();
+      expect(blockedDraft.payload['warnings'], <String>['ERR_TEST']);
+      expect(
+        () => (blockedDraft.payload['warnings']! as List<Object?>).clear(),
+        throwsUnsupportedError,
+      );
+
+      final settledPayload = <String, Object?>{'settlement_id': 'settlement-1'};
+      final settledDraft = HoldemHandSettledEventDraft(payload: settledPayload);
+      settledPayload['settlement_id'] = 'mutate';
+      expect(settledDraft.payload['settlement_id'], 'settlement-1');
+      expect(
+        () => settledDraft.payload['settlement_id'] = 'mutate',
+        throwsUnsupportedError,
+      );
+    });
   });
 }
 

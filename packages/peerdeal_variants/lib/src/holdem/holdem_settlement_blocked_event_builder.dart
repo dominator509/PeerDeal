@@ -6,10 +6,11 @@ import 'holdem_showdown_coordinator.dart';
 @immutable
 class HoldemSettlementBlockedEventDraft {
   HoldemSettlementBlockedEventDraft({
-    required this.payload,
+    required Map<String, Object?> payload,
     required List<String> reasonCodes,
     required List<String> warnings,
-  }) : reasonCodes = List<String>.unmodifiable(reasonCodes),
+  }) : payload = freezeProtocolObjectMap(payload),
+       reasonCodes = List<String>.unmodifiable(reasonCodes),
        warnings = List<String>.unmodifiable(warnings);
 
   final Map<String, Object?> payload;

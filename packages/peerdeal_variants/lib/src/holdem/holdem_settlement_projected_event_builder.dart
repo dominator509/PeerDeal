@@ -7,9 +7,12 @@ import 'holdem_showdown_coordinator.dart';
 @immutable
 class HoldemSettlementProjectedEventDraft {
   HoldemSettlementProjectedEventDraft({
-    required this.payload,
+    required Map<String, Object?> payload,
     required List<Map<String, Object?>> awards,
-  }) : awards = List<Map<String, Object?>>.unmodifiable(awards);
+  }) : payload = freezeProtocolObjectMap(payload),
+       awards = List<Map<String, Object?>>.unmodifiable(
+         awards.map(freezeProtocolObjectMap),
+       );
 
   final Map<String, Object?> payload;
   final List<Map<String, Object?>> awards;

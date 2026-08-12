@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T201 Hold'em Settlement Draft Ownership
+
+Summary:
+- Hold'em projected, blocked, and completed settlement event drafts now
+  deep-freeze payload trees at construction.
+- Projected award maps are independently owned, preventing post-construction
+  mutation from changing event draft state before emission.
+- The existing protocol collection-ownership helper is now available through
+  the public protocol barrel for variant consumers.
+
+Files changed:
+- `packages/peerdeal_protocol/lib/peerdeal_protocol.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_settlement_projected_event_builder.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_settlement_blocked_event_builder.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_hand_settled_event_builder.dart`
+- `packages/peerdeal_variants/test/variant_model_ownership_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused variant ownership and settlement-builder suites passed.
+- Full analyze, boundary-check, source-text, dependency-audit, and repository
+  test gates passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Product state/database wiring, native/device validation, other-platform
+  hosts, and release signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T200 Secure-Key Snapshot Integrity
 
 Summary:

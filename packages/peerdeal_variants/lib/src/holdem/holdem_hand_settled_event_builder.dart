@@ -5,7 +5,8 @@ import 'holdem_showdown_coordinator.dart';
 
 @immutable
 class HoldemHandSettledEventDraft {
-  const HoldemHandSettledEventDraft({required this.payload});
+  HoldemHandSettledEventDraft({required Map<String, Object?> payload})
+    : payload = freezeProtocolObjectMap(payload);
 
   final Map<String, Object?> payload;
 }

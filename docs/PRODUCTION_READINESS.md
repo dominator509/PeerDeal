@@ -2270,6 +2270,13 @@ bridge contract coverage, full repository gates, Android debug, Windows debug,
 and Windows native-host smoke validation pass. Platform/device behavior,
 other-platform storage, product state, and release signing remain separate.
 
+The T201 follow-up closes immutable-model leaks in the Hold'em settlement event
+drafts. Projected, blocked, and completed settlement drafts now deep-freeze
+payload trees, and projected award maps are independently owned before event
+emission. Focused variant ownership and settlement-builder suites pass; native
+platform, product state, durable database, and release-signing validation
+remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
