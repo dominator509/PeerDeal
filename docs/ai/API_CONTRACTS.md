@@ -382,6 +382,12 @@ IDs, and `SettlementResult` freezes slices, awards, ledger deltas, and warning
 lists. Callers must treat these public collections as read-only projections;
 core reducers and settlement policies remain the owners of replacement state.
 
+`CoreReducer()` uses the immutable baseline invariant-guard set.
+`CoreReducer.withInvariantGuards(...)` is the explicit custom-policy
+constructor; it copies the supplied guard list before exposing it. The public
+`invariantGuards` collection is read-only, so changing a caller's source list
+cannot alter a reducer after construction.
+
 `HoldemEventCursor.toJson/fromJson` persist and restore the cursor's exact
 scope, next sequence, previous hash, actor, and last-event state. Hydration
 requires caller-owned event-id and timestamp factories and accepts an optional

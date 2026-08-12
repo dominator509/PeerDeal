@@ -1949,6 +1949,15 @@ and the Windows native-host smoke pass. Product state provisioning, durable
 database replacement, device/network validation, other-platform hosts, release
 signing, and final UX remain separate.
 
+The T183 follow-up closes the configurable reducer-policy ownership gap.
+`CoreReducer()` retains the immutable baseline guard set, while
+`CoreReducer.withInvariantGuards(...)` snapshots caller-supplied guards into an
+unmodifiable collection before deterministic projection. Focused core tests,
+the full repository gates, both app builds, and the Windows native-host smoke
+pass. Product state provisioning, durable database replacement, device/network
+validation, other-platform hosts, release signing, and final UX remain
+separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

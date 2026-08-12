@@ -8,10 +8,14 @@ import '../models/table_phase.dart';
 import '../models/table_state.dart';
 
 class CoreReducer {
-  const CoreReducer({
+  const CoreReducer({this.protocolCatalog = const ProtocolCatalog()})
+    : invariantGuards = baselineInvariantGuards;
+
+  /// Creates a reducer with caller-supplied guards owned by the reducer.
+  CoreReducer.withInvariantGuards({
     this.protocolCatalog = const ProtocolCatalog(),
-    this.invariantGuards = baselineInvariantGuards,
-  });
+    List<InvariantGuard> invariantGuards = baselineInvariantGuards,
+  }) : invariantGuards = List<InvariantGuard>.unmodifiable(invariantGuards);
 
   final ProtocolCatalog protocolCatalog;
   final List<InvariantGuard> invariantGuards;

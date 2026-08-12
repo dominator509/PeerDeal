@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T183 Immutable Reducer Guard Configuration
+
+Summary:
+- `CoreReducer()` now owns the immutable baseline guard set without accepting
+  a mutable collection through the default constructor.
+- `CoreReducer.withInvariantGuards(...)` snapshots caller-supplied guards into
+  an unmodifiable list before deterministic projection.
+- Existing app and variant default construction remains `const CoreReducer()`;
+  no package boundary or reducer behavior moved.
+
+Validation:
+- Focused `peerdeal_core` suite: passed 57 tests, including the reducer guard
+  ownership regression; package analyzer passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Product state provisioning, durable database replacement, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T182 Immutable Core Collections
 
 Summary:

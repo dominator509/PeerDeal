@@ -66,6 +66,16 @@ void main() {
       expect(() => result.ledgerDeltas.clear(), throwsUnsupportedError);
       expect(() => result.warnings.clear(), throwsUnsupportedError);
     });
+
+    test('CoreReducer owns caller-supplied invariant guards', () {
+      final guards = <InvariantGuard>[const TableIdentityMustBePresentGuard()];
+      final reducer = CoreReducer.withInvariantGuards(invariantGuards: guards);
+
+      guards.clear();
+
+      expect(reducer.invariantGuards, hasLength(1));
+      expect(() => reducer.invariantGuards.clear(), throwsUnsupportedError);
+    });
   });
 }
 
