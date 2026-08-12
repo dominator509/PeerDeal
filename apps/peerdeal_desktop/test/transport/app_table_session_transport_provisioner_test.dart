@@ -112,6 +112,26 @@ void main() {
   });
 
   test(
+    'fails closed when cancellation signals during session creation',
+    () async {
+      final cancellation = Completer<void>();
+      final factory = _CancellationDuringLoadNativeTransportSessionFactory(
+        cancellation,
+      );
+
+      final result = await AppTableSessionTransportProvisioner(
+        runtime: _runtime(),
+        nativeSessionFactory: factory,
+        cancellation: cancellation.future,
+      ).load(peerId: 'peer_b');
+
+      expect(result.available, isFalse);
+      expect(result.source, isNull);
+      expect(result.warnings, ['Native transport session load cancelled.']);
+    },
+  );
+
+  test(
     'propagates route cancellation into a provisioned source poll',
     () async {
       final cancellation = Completer<void>();
@@ -284,6 +304,31 @@ class _DelayedNativeTransportSessionFactory
     required TransportFrameHandler handler,
   }) {
     return result.future;
+  }
+}
+
+class _CancellationDuringLoadNativeTransportSessionFactory
+    extends NativeTransportSessionFactory {
+  _CancellationDuringLoadNativeTransportSessionFactory(this.cancellation)
+    : super(bridge: _FakeNativeTransportBridge());
+
+  final Completer<void> cancellation;
+
+  @override
+  Future<NativeTransportSessionLoadResult> loadSession({
+    required TransportFrameHandler handler,
+  }) {
+    cancellation.complete();
+    return Future<NativeTransportSessionLoadResult>.value(
+      NativeTransportSessionLoadResult.available(
+        session: NativeTransportSession(
+          sender: createSender(),
+          drain: createDrain(handler: handler),
+          maxPayloadBytes: 4096,
+          nativeNotes: 'test',
+        ),
+      ),
+    );
   }
 }
 

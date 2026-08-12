@@ -140,6 +140,31 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T151 Transport Provisioning Cancellation Recheck
+
+Summary:
+- Mirrored transport provisioners now recheck route cancellation after native
+  session creation and before returning an available session/source.
+- Cancellation during session creation fails closed instead of exposing a
+  source to a replaced route.
+
+Files changed:
+- Mirrored transport provisioners and focused provisioner regression tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop provisioner, source, drain, and session-factory
+  suites passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all checks.
+
+Risks:
+- Already-dispatched native host work remains host-owned; product state/database
+  provisioning, device/runtime validation, other-platform hosts,
+  cross-device networking, and release signing remain external boundaries.
+
 ### 2026-08-11 - Codex - T150 Source-Owned Drain Disposal Cancellation
 
 Summary:

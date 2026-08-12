@@ -1280,6 +1280,20 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Focused mobile and desktop transport/route tests cover late receive
   suppression.
 
+## T151 Transport Provisioning Cancellation Recheck
+
+- Mirrored `AppTableSessionTransportProvisioner` implementations now perform a
+  post-load cancellation recheck before constructing and returning a source.
+- A cancellation signaled during native session creation fails closed with the
+  existing stable session-load cancellation warning.
+- Focused mobile and desktop provisioner, source, drain, and session-factory
+  suites cover the cancellation race.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## T150 Source-Owned Drain Disposal Cancellation
 
 - Mirrored transport sources expose an additive cancellable drain callback and

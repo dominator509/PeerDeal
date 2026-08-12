@@ -1408,6 +1408,25 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T151 Transport Provisioning Cancellation Recheck
+
+- Mirrored transport provisioners now recheck their route cancellation signal
+  after native session creation and before returning an available session/source.
+- Cancellation that arrives during native session creation now fails closed and
+  cannot expose a source to a replaced production route.
+- Focused mobile and desktop provisioner, source, drain, and session-factory
+  suites cover the race.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all app-storage, capture, local-network,
+  transport, and secure-key checks.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T150 Source-Owned Drain Disposal Cancellation
 
 - Mirrored transport sources now expose an additive cancellable drain seam and

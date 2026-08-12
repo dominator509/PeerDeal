@@ -1769,6 +1769,17 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T151 follow-up closes the transport provisioning cancellation race.
+Mirrored transport provisioners now recheck route cancellation after native
+session creation and before returning an available session/source, so
+cancellation during session creation fails closed instead of exposing a source
+to a replaced route. Focused mobile and desktop provisioner, source,
+transport-drain, and session-factory suites cover the race. Full repository
+analyze, boundary, source-text, dependency-audit, test, and diff gates pass.
+Android debug, Windows debug, and Windows native-host smoke builds and smoke
+validation pass. Product state provisioning, device/network validation,
+other-platform hosts, and release signing remain separate.
+
 The T150 follow-up closes the standalone source lifecycle gap. Mirrored
 transport sources now expose an additive cancellable drain callback and
 complete its signal on source disposal or external route cancellation; native

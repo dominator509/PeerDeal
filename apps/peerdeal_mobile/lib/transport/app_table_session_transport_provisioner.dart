@@ -62,6 +62,12 @@ class AppTableSessionTransportProvisioner {
       );
     }
 
+    if (await _isCancellationSignaled()) {
+      return const AppTableSessionTransportProvisionResult.unavailable(
+        warnings: <String>['Native transport session load cancelled.'],
+      );
+    }
+
     final session = loaded.session;
     if (!loaded.available || session == null) {
       return AppTableSessionTransportProvisionResult.unavailable(
@@ -122,6 +128,19 @@ class AppTableSessionTransportProvisioner {
       ),
     );
     return result.future;
+  }
+
+  Future<bool> _isCancellationSignaled() async {
+    final cancellation = _cancellation;
+    if (cancellation == null) return false;
+
+    var signaled = false;
+    cancellation.then<void>(
+      (_) => signaled = true,
+      onError: (Object _, StackTrace _) => signaled = true,
+    );
+    await Future<void>.value();
+    return signaled;
   }
 
   static bool _isValidIdentity(String value) {
