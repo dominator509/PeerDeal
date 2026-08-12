@@ -1205,6 +1205,16 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Android device/runtime validation, cross-device networking, other-platform
   hosts, database persistence, and release signing remain open.
 
+## T142 Generic Native Bridge Text Boundary Hardening
+
+- Shared Dart bridge validation now rejects padded or C0/C1-control-bearing
+  transport identities and receive scopes, local-network values, capture
+  diagnostics, and app-storage paths/warnings.
+- Focused contract and transport preflight tests plus the full native bridge
+  Flutter package suite pass.
+- Other-platform hosts, Android/Windows device and network validation, database
+  persistence, and release signing remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

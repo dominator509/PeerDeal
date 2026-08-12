@@ -62,7 +62,7 @@ class LocalNetworkChannelContract {
 
   static String? _boundedStringValue(Object? value, int maxBytes) {
     if (value is! String ||
-        !NativeBridgePayloadLimits.isWithinUtf8Limit(value, maxBytes)) {
+        !NativeBridgePayloadLimits.isSafeUtf8Text(value, maxBytes)) {
       return null;
     }
     return value;
@@ -76,12 +76,10 @@ class LocalNetworkChannelContract {
     return value
         .whereType<String>()
         .where(
-          (item) =>
-              item.isNotEmpty &&
-              NativeBridgePayloadLimits.isWithinUtf8Limit(
-                item,
-                NativeBridgePayloadLimits.maxDiscoveryValueBytes,
-              ),
+          (item) => NativeBridgePayloadLimits.isSafeUtf8Text(
+            item,
+            NativeBridgePayloadLimits.maxDiscoveryValueBytes,
+          ),
         )
         .toList(growable: false);
   }

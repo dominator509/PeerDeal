@@ -1264,6 +1264,24 @@ Remaining:
 - Android device/runtime validation, cross-device networking, other-platform
   hosts, database persistence, and release signing remain separate.
 
+## Recent T142 Generic Native Bridge Text Boundary Hardening
+
+- Shared Dart bridge validation now rejects padded or C0/C1-control-bearing
+  transport identities and receive scopes, local-network values, capture
+  diagnostics, and app-storage paths/warnings.
+- The boundary now matches the existing Android and Windows host text rules
+  without adding platform policy to `peerdeal_native_bridges`.
+
+Tests and gates:
+- Focused native bridge contract and transport preflight tests pass.
+- Full native bridge Flutter package tests pass.
+- Full repository analyze, boundary, source-text, test, dependency-audit, and
+  diff-check gates pass before commit and push.
+
+Remaining:
+- Other-platform hosts, Android/Windows device and network validation, database
+  persistence, and release signing remain separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints

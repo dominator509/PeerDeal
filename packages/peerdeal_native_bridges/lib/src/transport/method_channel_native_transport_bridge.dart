@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
+import '../native_bridge_payload_limits.dart';
 import 'native_transport_bridge.dart';
 import 'native_transport_bridge_models.dart';
 import 'native_transport_channel_contract.dart';
@@ -161,7 +162,10 @@ class MethodChannelNativeTransportBridge
   }
 
   bool _isValidReceiveScope(String value) =>
-      value.trim().isNotEmpty && value.trim() == value;
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        value,
+        NativeBridgePayloadLimits.maxTransportIdentityBytes,
+      );
 
   static Duration _validateTimeout(Duration timeout) {
     if (timeout.compareTo(Duration.zero) <= 0) {

@@ -37,23 +37,20 @@ class AppStorageDirectoryChannelContract {
   }
 
   static bool _isValidPath(String value) {
-    return value.trim().isNotEmpty &&
-        value.trim() == value &&
-        NativeBridgePayloadLimits.isWithinUtf8Limit(
-          value,
-          NativeBridgePayloadLimits.maxAppStoragePathBytes,
-        ) &&
-        !value.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f);
+    return NativeBridgePayloadLimits.isSafeUtf8Text(
+      value,
+      NativeBridgePayloadLimits.maxAppStoragePathBytes,
+    );
   }
 
   static String? _stringValue(Object? value) {
     if (value is! String ||
-        !NativeBridgePayloadLimits.isWithinUtf8Limit(
+        !NativeBridgePayloadLimits.isSafeUtf8Text(
           value,
           NativeBridgePayloadLimits.maxDiagnosticBytes,
         )) {
       return null;
     }
-    return value.trim().isNotEmpty ? value : null;
+    return value;
   }
 }

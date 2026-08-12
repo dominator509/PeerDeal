@@ -144,7 +144,7 @@ class NativeTransportChannelContract {
 
   static String? _boundedStringValue(Object? value, int maxBytes) {
     if (value is! String ||
-        !NativeBridgePayloadLimits.isWithinUtf8Limit(value, maxBytes)) {
+        !NativeBridgePayloadLimits.isSafeUtf8Text(value, maxBytes)) {
       return null;
     }
     return value;

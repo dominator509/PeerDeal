@@ -1700,6 +1700,13 @@ purposes, algorithms, secrets, namespaces, and delete requests before native
 dispatch. The method-channel and channel-contract suites cover multibyte and
 control-character rejection without weakening the generic bridge boundary.
 
+The T142 follow-up aligns the remaining generic native bridge text boundaries
+with the Android and Windows host rules. Transport identities and receive
+scopes, local-network discovery values, capture diagnostics, and app-storage
+paths and warnings now reject padded or C0/C1-control-bearing UTF-8 text before
+native dispatch or app-policy projection. This closes shared Dart contract
+drift without claiming other-platform hosts or runtime reachability.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

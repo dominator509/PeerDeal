@@ -783,11 +783,12 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 - Generic native bridge decoders bound transport frame batches, discovery
   collections, secure-key record lists, frame payloads, identities, discovery
   values, key fields, and diagnostics before iteration or model construction;
-  oversized values fail closed through existing unavailable or empty results.
-- Generic app-storage directory decoding bounds paths to 4096 UTF-8 bytes, and
-  capture capability/action decoding bounds notes and warnings to 512 UTF-8
-  bytes before exposing them to app orchestration; oversized values fail
-  closed.
+  oversized, padded, or C0/C1-control-bearing values fail closed through
+  existing unavailable or empty results.
+- Generic app-storage directory decoding bounds paths to 4096 UTF-8 bytes and
+  rejects padded or C0/C1-control-bearing paths and warnings; capture
+  capability/action decoding applies the same safe-text rule to notes and
+  warnings before exposing them to app orchestration.
 - Android and Windows local-network hosts bound interface/adapter enumeration
   before serializing `interfaceHints`; Windows also bounds the adapter address
   buffer and each unicast-address scan. Host-side overflow fails closed.

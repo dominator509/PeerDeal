@@ -41,24 +41,18 @@ class NativeTransportFrame {
   final List<int> payloadBytes;
 
   bool get isUsable =>
-      NativeBridgePayloadLimits.isWithinUtf8Limit(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
         sessionId,
         NativeBridgePayloadLimits.maxTransportIdentityBytes,
       ) &&
-      sessionId.trim().isNotEmpty &&
-      sessionId.trim() == sessionId &&
-      NativeBridgePayloadLimits.isWithinUtf8Limit(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
         senderPeerId,
         NativeBridgePayloadLimits.maxTransportIdentityBytes,
       ) &&
-      senderPeerId.trim().isNotEmpty &&
-      senderPeerId.trim() == senderPeerId &&
-      NativeBridgePayloadLimits.isWithinUtf8Limit(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
         recipientPeerId,
         NativeBridgePayloadLimits.maxTransportIdentityBytes,
       ) &&
-      recipientPeerId.trim().isNotEmpty &&
-      recipientPeerId.trim() == recipientPeerId &&
       senderPeerId != recipientPeerId &&
       sequence >= 1 &&
       payloadBytes.isNotEmpty &&

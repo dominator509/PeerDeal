@@ -63,6 +63,22 @@ void main() {
       oversizedPath.warning,
       'Native app storage directory is unavailable.',
     );
+
+    final controlBearingPath =
+        AppStorageDirectoryChannelContract.decodeAppSupportDirectory(
+          <String, Object?>{
+            'available': true,
+            'directoryPath': 'C:\\PeerDeal\\data\u0085',
+            'warning': 'storage\nwarning',
+          },
+        );
+
+    expect(controlBearingPath.available, isFalse);
+    expect(controlBearingPath.directoryPath, isNull);
+    expect(
+      controlBearingPath.warning,
+      'Native app storage directory is unavailable.',
+    );
   });
 
   test('capture protection channel contract decodes fixture payload', () {
@@ -149,6 +165,25 @@ void main() {
     expect(capability.notes, 'unavailable');
     expect(capability.warning, isNull);
     expect(action.warning, isNull);
+
+    final controlCapability =
+        CaptureProtectionChannelContract.decodeCapability(<String, Object?>{
+          'blockingSupported': true,
+          'obscuringSupported': true,
+          'notes': 'capture\nnote',
+          'warning': 'capture\u0085warning',
+        });
+    final controlAction = CaptureProtectionChannelContract.decodeActionResult(
+      <String, Object?>{
+        'success': false,
+        'blockingEnabled': false,
+        'warning': 'capture\u0001warning',
+      },
+    );
+
+    expect(controlCapability.notes, 'unavailable');
+    expect(controlCapability.warning, isNull);
+    expect(controlAction.warning, isNull);
   });
 
   test('local network channel contract decodes fixture payloads', () {
@@ -256,6 +291,19 @@ void main() {
     expect(snapshot.permissionGranted, isTrue);
     expect(snapshot.foundEndpoints, isEmpty);
     expect(snapshot.interfaceHints, ['wifi']);
+
+    final controlSnapshot =
+        LocalNetworkChannelContract.decodeDiscoverySnapshot(<String, Object?>{
+          'permissionGranted': true,
+          'foundEndpoints': <Object?>['peer_a\nendpoint', 'peer_b'],
+          'interfaceHints': <Object?>['wifi\u0085', 'ethernet'],
+          'warning': 'network\nwarning',
+        });
+
+    expect(controlSnapshot.permissionGranted, isTrue);
+    expect(controlSnapshot.foundEndpoints, ['peer_b']);
+    expect(controlSnapshot.interfaceHints, ['ethernet']);
+    expect(controlSnapshot.warning, isNull);
   });
 
   test('secure key storage channel contract decodes fixture payload', () {
@@ -598,6 +646,35 @@ void main() {
     expect(oversizedPayload.frames, isEmpty);
     expect(oversizedFrame.isUsable, isFalse);
     expect(NativeTransportChannelContract.encodeFrame(oversizedFrame), isEmpty);
+
+    final controlFrame =
+        NativeTransportChannelContract.decodeReceiveSnapshot(<String, Object?>{
+          'available': true,
+          'frames': <Object?>[
+            <String, Object?>{
+              'sessionId': 'session\n_1',
+              'senderPeerId': 'peer_a',
+              'recipientPeerId': 'peer_b',
+              'sequence': 1,
+              'payloadBytes': <int>[1],
+            },
+          ],
+          'warning': 'transport\u0085warning',
+        });
+
+    expect(controlFrame.available, isTrue);
+    expect(controlFrame.frames, isEmpty);
+    expect(controlFrame.warning, isNull);
+    expect(
+      const NativeTransportFrame(
+        sessionId: 'session\u0001_1',
+        senderPeerId: 'peer_a',
+        recipientPeerId: 'peer_b',
+        sequence: 1,
+        payloadBytes: <int>[1],
+      ).isUsable,
+      isFalse,
+    );
   });
 
   test('native transport channel contract encodes frames', () {

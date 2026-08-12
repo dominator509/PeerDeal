@@ -40,6 +40,30 @@ Validation:
 - Full repository analyze, boundary, source-text, test, dependency-audit, and
   diff-check gates passed before commit and push.
 
+### 2026-08-11 - Codex - T142 Generic Native Bridge Text Boundary Hardening
+
+Summary:
+- Shared Dart bridge validation now rejects padded or C0/C1-control-bearing
+  transport identities and receive scopes, local-network values, capture
+  diagnostics, and app-storage paths/warnings.
+- The generic contract now matches the existing Android and Windows host text
+  rules without adding platform policy to the native bridge package.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_bridge_models.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_channel_contract.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/method_channel_native_transport_bridge.dart`
+- `packages/peerdeal_native_bridges/lib/src/local_network/local_network_channel_contract.dart`
+- `packages/peerdeal_native_bridges/lib/src/capture_protection/capture_protection_channel_contract.dart`
+- `packages/peerdeal_native_bridges/lib/src/app_storage/app_storage_directory_channel_contract.dart`
+- Native bridge contract and transport tests.
+
+Validation:
+- Focused native bridge contract and transport preflight Flutter tests passed.
+- Full native bridge Flutter package tests passed.
+- Full repository analyze, boundary, source-text, test, dependency-audit, and
+  diff-check gates passed before commit and push.
+
 ### 2026-08-11 - Codex - T140 Dart Secure-Key Namespace Boundary Hardening
 
 Summary:
