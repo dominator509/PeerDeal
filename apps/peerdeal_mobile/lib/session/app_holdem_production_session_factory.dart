@@ -1,4 +1,5 @@
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
@@ -143,9 +144,10 @@ class AppHoldemProductionSessionFactory {
   }
 
   static void _validatePeerIdentity(String value, String name) {
-    if (value.trim().isEmpty ||
-        value != value.trim() ||
-        _containsControlCharacter(value)) {
+    if (!NativeBridgePayloadLimits.isSafeUtf8Text(
+      value,
+      NativeBridgePayloadLimits.maxTransportIdentityBytes,
+    )) {
       throw ArgumentError.value(
         value,
         name,

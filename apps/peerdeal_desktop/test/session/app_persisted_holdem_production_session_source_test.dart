@@ -311,14 +311,20 @@ void main() {
   });
 
   test('rejects an unsafe dynamic peer override before input construction', () {
-    expect(
-      () => _routePolicy().buildInput(
-        snapshot: _typedSnapshot(),
-        localPeerId: 'peer_local',
-        remotePeerId: ' peer_selected',
-      ),
-      throwsArgumentError,
-    );
+    for (final peerId in <String>[
+      ' peer_selected',
+      'peer_${String.fromCharCode(0x85)}',
+      'x' * 257,
+    ]) {
+      expect(
+        () => _routePolicy().buildInput(
+          snapshot: _typedSnapshot(),
+          localPeerId: 'peer_local',
+          remotePeerId: peerId,
+        ),
+        throwsArgumentError,
+      );
+    }
   });
 
   test(

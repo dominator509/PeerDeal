@@ -1449,6 +1449,20 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T162 Production Session Peer Identity Bound
+
+- Mirrored local identity loaders and writers now reuse the shared native
+  transport safe UTF-8/control-free validator with the 256-byte identity limit.
+- Persisted Hold'em route policies and production-session factories apply the
+  same boundary before dynamic peer overrides, route construction, or native
+  transport composition.
+- C1-bearing and UTF-8-byte oversized identities fail closed before native save
+  or route construction; focused mobile and desktop suites cover the paths.
+- Full repository analyze, boundary, source-text, dependency-audit, and test
+  gates remain required; Android/Windows runtime and cross-device network
+  validation, other-platform hosts, product state/database provisioning, and
+  release signing remain separate.
+
 ## Recent T161 Hold'em Projection Publisher Peer Bound
 
 - Mirrored app Hold'em projection publishers now validate local and remote peer

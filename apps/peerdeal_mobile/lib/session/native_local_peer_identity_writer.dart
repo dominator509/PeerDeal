@@ -118,9 +118,10 @@ class NativeLocalPeerIdentityWriter {
   bool _isValidPeerId(String value) =>
       maxPeerIdLength > 0 &&
       value.length <= maxPeerIdLength &&
-      value.trim().isNotEmpty &&
-      value.trim() == value &&
-      !value.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f);
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        value,
+        NativeBridgePayloadLimits.maxTransportIdentityBytes,
+      );
 
   static bool _isValidNamespace(String value) =>
       _isValidLabel(value) && !value.contains('::');

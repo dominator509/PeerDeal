@@ -1,3 +1,4 @@
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
@@ -107,9 +108,10 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
   }
 
   static void _validatePeerId(String peerId, String fieldName) {
-    if (peerId.trim().isEmpty ||
-        peerId != peerId.trim() ||
-        _containsControlCharacter(peerId)) {
+    if (!NativeBridgePayloadLimits.isSafeUtf8Text(
+      peerId,
+      NativeBridgePayloadLimits.maxTransportIdentityBytes,
+    )) {
       throw ArgumentError.value(
         peerId,
         fieldName,

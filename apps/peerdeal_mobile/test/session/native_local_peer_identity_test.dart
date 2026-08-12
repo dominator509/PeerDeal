@@ -75,6 +75,48 @@ void main() {
     ]);
   });
 
+  test('rejects C1 and byte-oversized persisted peer identities', () async {
+    for (final peerId in <String>[
+      'peer_${String.fromCharCode(0x85)}',
+      'x' * 257,
+    ]) {
+      final result = await NativeLocalPeerIdentityLoader(
+        bridge: _MemorySecureKeyBridge(
+          keys: <SecureKeyRecord>[
+            SecureKeyRecord(
+              keyId: 'local_peer_id',
+              purpose: 'peer_identity',
+              algorithm: 'opaque-peer-id',
+              secret: peerId,
+              active: true,
+            ),
+          ],
+        ),
+      ).load();
+
+      expect(result.isAvailable, isFalse);
+      expect(result.warnings, <String>[
+        'Persisted local peer identity is invalid.',
+      ]);
+    }
+  });
+
+  test('rejects C1 and byte-oversized identities before native save', () async {
+    for (final peerId in <String>[
+      'peer_${String.fromCharCode(0x85)}',
+      'x' * 257,
+    ]) {
+      final bridge = _MemorySecureKeyBridge();
+      final result = await NativeLocalPeerIdentityWriter(bridge: bridge).save(
+        AppLocalPeerIdentity(peerId: peerId),
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Local peer identity save request is invalid.');
+      expect(bridge.savedKeys, isEmpty);
+    }
+  });
+
   test('provisions once and reuses the persisted identity', () async {
     final bridge = _MemorySecureKeyBridge();
     final provisioner = NativeLocalPeerIdentityProvisioner(

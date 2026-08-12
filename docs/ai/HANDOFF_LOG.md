@@ -140,6 +140,29 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T162 Production Session Peer Identity Bound
+
+Summary:
+- Mirrored local identity loaders and writers, persisted Hold'em route policies,
+  and production-session factories now reuse the shared 256-byte safe
+  UTF-8/control-free native transport identity validator.
+- C1-bearing and UTF-8-byte oversized peer identities fail closed before native
+  save or route construction.
+
+Files changed:
+- Mirrored mobile and desktop local identity, persisted route-policy, and
+  production-session factory implementations and tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop identity, route-policy, and factory suites passed.
+- Mobile and desktop package analysis passed.
+
+Risks:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  external or operator-owned boundaries.
+
 ### 2026-08-11 - Codex - T161 Hold'em Projection Publisher Peer Bound
 
 Summary:

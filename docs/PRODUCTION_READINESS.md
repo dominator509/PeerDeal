@@ -1769,6 +1769,17 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T162 follow-up closes the remaining app-owned production-session peer
+identity boundary gap. Mirrored local identity loaders and writers, persisted
+Hold'em route policies, and production-session factories now reuse the shared
+256-byte safe UTF-8/control-free validator before native identity save, dynamic
+peer override, or route construction. C1-bearing and UTF-8-byte oversized peer
+identities fail closed. Focused mobile and desktop identity, route-policy, and
+factory suites cover the boundary. Full repository analyze, boundary,
+source-text, dependency-audit, test, and diff gates remain required. Android
+and Windows runtime/network validation, other-platform hosts, product
+state/database provisioning, and release signing remain separate.
+
 The T161 follow-up closes the Hold'em projection-publisher peer boundary gap.
 Mirrored app publishers now reuse the shared 256-byte safe UTF-8/control-free
 validator before handing canonical projection frames to the sender, rejecting

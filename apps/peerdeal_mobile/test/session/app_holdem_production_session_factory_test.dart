@@ -49,6 +49,13 @@ void main() {
 
   test('rejects unsafe identity and runtime composition inputs', () {
     expect(() => _create(peerId: 'peer_local'), throwsArgumentError);
+    for (final peerId in <String>[
+      'peer_${String.fromCharCode(0x85)}',
+      'x' * 257,
+    ]) {
+      expect(() => _create(peerId: peerId), throwsArgumentError);
+      expect(() => _create(localPeerId: peerId), throwsArgumentError);
+    }
     expect(() => _create(localSeat: 4), throwsArgumentError);
     expect(
       () => _create(pollInterval: const Duration(milliseconds: 50)),

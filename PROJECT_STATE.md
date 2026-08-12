@@ -1313,6 +1313,21 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## T162 Production Session Peer Identity Bound
+
+- Mirrored local identity loaders and writers now enforce the shared 256-byte
+  safe UTF-8/control-free native transport identity boundary.
+- Persisted Hold'em route policies and production-session factories reject
+  invalid C1-bearing or byte-oversized peer identities before native save or
+  route construction.
+- Focused mobile and desktop identity, route-policy, and factory suites cover
+  the boundary.
+
+Remaining:
+- Full repository gates, Android/Windows runtime and cross-device network
+  validation, other-platform hosts, product state/database provisioning, and
+  release signing remain separate.
+
 ## T161 Hold'em Projection Publisher Peer Bound
 
 - Mirrored app Hold'em projection publishers now enforce the shared 256-byte
