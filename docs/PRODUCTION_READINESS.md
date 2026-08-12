@@ -2284,6 +2284,17 @@ emission. Focused variant ownership and settlement-builder suites pass; native
 platform, product state, durable database, and release-signing validation
 remain separate.
 
+The T203 follow-up closes a durable recovery-load fail-open gap. The sync file
+and in-memory stores now expose an additive load-result contract, so invalid
+scope, lock, corruption, size, and other read failures remain observable while
+the legacy window projection stays compatible. Mirrored mobile and desktop
+persisted Hold'em sources reject unsuccessful loads before initial snapshot or
+identity provisioning. Focused sync, mobile, and desktop suites passed; full
+analyze, boundary, source-text, test, dependency-audit, and diff gates passed;
+Android debug APK and Windows debug artifacts built successfully. This does
+not replace product-owned database persistence or prove native/device,
+cross-device, other-platform, or release-signing readiness.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

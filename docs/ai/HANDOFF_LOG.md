@@ -2,6 +2,43 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T203 Durable Recovery Load Fail-Closed
+
+Summary:
+- Added an additive `RecoveryPersistenceLoadResultStore` contract and immutable
+  `RecoveryPersistenceLoadResult` model for stores that can report read failure.
+- The JSON file store now surfaces invalid scope, lock, corruption, size, and
+  generic load failures instead of exposing them as an empty production window;
+  the legacy `loadWindow` projection remains compatible.
+- Mirrored mobile and desktop persisted Hold'em sources reject unsuccessful
+  recovery loads before initial snapshot loading or local identity provisioning.
+
+Files changed:
+- `packages/peerdeal_sync/lib/src/models/recovery_persistence_load_result.dart`
+- `packages/peerdeal_sync/lib/src/contracts/recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- Mirrored persisted Hold'em sources and focused tests in both app shells.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused sync persistence suite: 29 tests passed.
+- Mirrored mobile and desktop persisted-session suites: 26 tests passed each.
+- Full analyze, boundary-check, source-text, serialized test, dependency-audit,
+  and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifacts built successfully.
+- Dependency audit reports 0 actionable upgrades and 11 newer toolchain-blocked
+  versions.
+
+Risks:
+- Legacy callers that only use `loadWindow` retain the compatibility empty
+  projection; production persisted Hold'em sources now use the explicit result
+  seam. Product database persistence, native/device validation, cross-device
+  reachability, other-platform hosts, and release signing remain external or
+  integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T202 Diagnostic Payload Ownership
 
 Summary:

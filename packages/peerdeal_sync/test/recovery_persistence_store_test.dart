@@ -267,6 +267,13 @@ void main() {
       wipe.conflicts.single.code,
       'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
     );
+    final load = store.loadWindowResult(invalidScope);
+
+    expect(load.isSuccess, isFalse);
+    expect(
+      load.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID',
+    );
     expect(store.loadWindow(invalidScope).events, isEmpty);
   });
 
@@ -681,6 +688,11 @@ void main() {
       'ERR_RECOVERY_PERSISTENCE_LOCK_FAILED',
     );
 
+    final load = writer.loadWindowResult(scope);
+
+    expect(load.isSuccess, isFalse);
+    expect(load.conflicts.single.code, 'ERR_RECOVERY_PERSISTENCE_LOCK_FAILED');
+
     Directory(lockFile.path).deleteSync(recursive: true);
     expect(writer.loadWindow(scope).events.map((event) => event.eventSeq), [1]);
   });
@@ -846,6 +858,11 @@ void main() {
       result.conflicts.single.code,
       'ERR_RECOVERY_PERSISTENCE_FILE_CORRUPT',
     );
+    final load = writer.loadWindowResult(scope);
+
+    expect(load.isSuccess, isFalse);
+    expect(load.conflicts.single.code, 'ERR_RECOVERY_PERSISTENCE_FILE_CORRUPT');
+    expect(load.window.events, isEmpty);
     expect(writer.loadWindow(scope).events, isEmpty);
   });
 

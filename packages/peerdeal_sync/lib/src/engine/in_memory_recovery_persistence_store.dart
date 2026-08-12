@@ -2,13 +2,15 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/recovery_persistence_store.dart';
 import '../models/persisted_recovery_window.dart';
+import '../models/recovery_persistence_load_result.dart';
 import '../models/recovery_persistence_result.dart';
 import '../models/recovery_persistence_scope.dart';
 import '../models/recovery_event_window_limits.dart';
 import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 
-class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
+class InMemoryRecoveryPersistenceStore
+    implements RecoveryPersistenceStore, RecoveryPersistenceLoadResultStore {
   InMemoryRecoveryPersistenceStore({
     int maxEvents = defaultMaxEvents,
     int maxEventBytes = defaultMaxEventBytes,
@@ -184,6 +186,17 @@ class InMemoryRecoveryPersistenceStore implements RecoveryPersistenceStore {
         record?.events ?? const <EventEnvelope>[],
       ),
     );
+  }
+
+  @override
+  RecoveryPersistenceLoadResult loadWindowResult(
+    RecoveryPersistenceScope scope,
+  ) {
+    final scopeConflicts = _validateScopeIdentity(scope);
+    if (scopeConflicts.isNotEmpty) {
+      return RecoveryPersistenceLoadResult.failure(conflicts: scopeConflicts);
+    }
+    return RecoveryPersistenceLoadResult.success(loadWindow(scope));
   }
 
   List<SyncConflict> _validateScopeIdentity(RecoveryPersistenceScope scope) {

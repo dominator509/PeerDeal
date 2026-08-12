@@ -395,6 +395,21 @@ void main() {
     expect(() => source.load(_invite()), throwsA(isA<StateError>()));
   });
 
+  test('fails closed when recovery loading reports unavailable', () async {
+    var initialSnapshotLoaderCalls = 0;
+    final source = _source(
+      _UnavailableRecoveryLoadStore(),
+      initialSnapshotLoader: (_, {cancellation}) async {
+        initialSnapshotLoaderCalls += 1;
+        return _typedSnapshot();
+      },
+    );
+
+    await expectLater(source.load(_invite()), throwsStateError);
+
+    expect(initialSnapshotLoaderCalls, 0);
+  });
+
   test(
     'hydrates and checkpoints an injected initial snapshot before first join',
     () async {
@@ -854,6 +869,24 @@ class _OversizedRecoveryStore implements RecoveryPersistenceStore {
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) =>
       PersistedRecoveryWindow(events: <EventEnvelope>[_event(1), _event(2)]);
+}
+
+class _UnavailableRecoveryLoadStore extends _OversizedRecoveryStore
+    implements RecoveryPersistenceLoadResultStore {
+  @override
+  RecoveryPersistenceLoadResult loadWindowResult(
+    RecoveryPersistenceScope scope,
+  ) {
+    return RecoveryPersistenceLoadResult.failure(
+      conflicts: <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_FILE_CORRUPT',
+          message: 'Recovery persistence file could not be decoded.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ],
+    );
+  }
 }
 
 class _FailingSnapshotStore extends _OversizedRecoveryStore {

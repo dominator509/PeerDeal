@@ -1,6 +1,7 @@
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../models/persisted_recovery_window.dart';
+import '../models/recovery_persistence_load_result.dart';
 import '../models/recovery_persistence_result.dart';
 import '../models/recovery_persistence_scope.dart';
 
@@ -22,4 +23,12 @@ abstract interface class RecoveryPersistenceStore {
   RecoveryPersistenceResult wipe({required RecoveryPersistenceScope scope});
 
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope);
+}
+
+/// Optional additive read-result contract for stores that can report why a
+/// persisted recovery window was unavailable.
+abstract interface class RecoveryPersistenceLoadResultStore {
+  RecoveryPersistenceLoadResult loadWindowResult(
+    RecoveryPersistenceScope scope,
+  );
 }

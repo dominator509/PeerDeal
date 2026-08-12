@@ -392,12 +392,20 @@ class AppPersistedHoldemProductionSessionSource
       throw StateError('Resolved invite persistence scope is invalid.');
     }
 
-    final PersistedRecoveryWindow window;
+    final RecoveryPersistenceLoadResult loadResult;
     try {
-      window = _store.loadWindow(scope);
+      loadResult = _store is RecoveryPersistenceLoadResultStore
+          ? (_store as RecoveryPersistenceLoadResultStore).loadWindowResult(
+              scope,
+            )
+          : RecoveryPersistenceLoadResult.success(_store.loadWindow(scope));
     } on Object {
       throw StateError('Resolved invite persistence window is unavailable.');
     }
+    if (!loadResult.isSuccess) {
+      throw StateError('Resolved invite persistence window is unavailable.');
+    }
+    final window = loadResult.window;
     if (window.events.length > maxRecoveryEvents) {
       throw StateError(
         'Persisted Holdem recovery event window exceeds the configured limit.',

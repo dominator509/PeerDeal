@@ -5,6 +5,7 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/recovery_persistence_store.dart';
 import '../models/persisted_recovery_window.dart';
+import '../models/recovery_persistence_load_result.dart';
 import '../models/recovery_persistence_result.dart';
 import '../models/recovery_persistence_scope.dart';
 import '../models/recovery_event_window_limits.dart';
@@ -12,7 +13,8 @@ import '../models/sync_conflict.dart';
 import '../models/sync_conflict_severity.dart';
 import 'in_memory_recovery_persistence_store.dart';
 
-class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
+class JsonFileRecoveryPersistenceStore
+    implements RecoveryPersistenceStore, RecoveryPersistenceLoadResultStore {
   JsonFileRecoveryPersistenceStore({
     required Directory rootDirectory,
     int maxFileBytes = defaultMaxFileBytes,
@@ -137,20 +139,51 @@ class JsonFileRecoveryPersistenceStore implements RecoveryPersistenceStore {
 
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
+    return loadWindowResult(scope).window;
+  }
+
+  @override
+  RecoveryPersistenceLoadResult loadWindowResult(
+    RecoveryPersistenceScope scope,
+  ) {
     if (!scope.hasValidStorageIdentity) {
-      return PersistedRecoveryWindow(events: <EventEnvelope>[]);
+      final result = _validateScopeIdentity(scope);
+      return RecoveryPersistenceLoadResult.failure(
+        conflicts: result.conflicts,
+        warnings: result.warnings,
+      );
     }
 
     try {
       return _withScopeLock(scope, () {
         final hydrate = _hydrate(scope);
         if (!hydrate.result.isSuccess) {
-          return PersistedRecoveryWindow(events: <EventEnvelope>[]);
+          return RecoveryPersistenceLoadResult.failure(
+            conflicts: hydrate.result.conflicts,
+            warnings: hydrate.result.warnings,
+          );
         }
-        return hydrate.store.loadWindow(scope);
+        return RecoveryPersistenceLoadResult.success(
+          hydrate.store.loadWindow(scope),
+          warnings: hydrate.result.warnings,
+        );
       }, createRoot: false);
+    } on _RecoveryPersistenceLockException {
+      final result = _lockFailure();
+      return RecoveryPersistenceLoadResult.failure(
+        conflicts: result.conflicts,
+        warnings: result.warnings,
+      );
     } on Object {
-      return PersistedRecoveryWindow(events: <EventEnvelope>[]);
+      return RecoveryPersistenceLoadResult.failure(
+        conflicts: <SyncConflict>[
+          SyncConflict(
+            code: 'ERR_RECOVERY_PERSISTENCE_LOAD_FAILED',
+            message: 'Recovery persistence file could not be loaded.',
+            severity: SyncConflictSeverity.fatal,
+          ),
+        ],
+      );
     }
   }
 
