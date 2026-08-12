@@ -11,11 +11,11 @@ typedef ReceiptKeySecretFactory = String Function();
 typedef ReceiptKeyIdFactory = String Function(String purpose);
 
 class ReceiptKeyRingProvisionResult {
-  const ReceiptKeyRingProvisionResult({
+  ReceiptKeyRingProvisionResult({
     required this.keyRing,
-    this.warnings = const <String>[],
+    List<String> warnings = const <String>[],
     this.keysCreated = 0,
-  });
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final ReceiptKeyRingSnapshot keyRing;
   final List<String> warnings;

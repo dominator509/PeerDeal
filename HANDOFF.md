@@ -40,8 +40,8 @@ table lifecycle invalidation, T148 inbound checkpoint lifecycle invalidation,
 and T149 cancelled native receive suppression, T150 source-owned drain
 disposal cancellation, T168 exact inbound-event checkpoint identity, T169
 immutable app-session diagnostics, T170 immutable startup diagnostics, T171
-immutable local-identity diagnostics, and T172 immutable readiness/transport
-diagnostics
+immutable local-identity diagnostics, T172 immutable readiness/transport
+diagnostics, and T173 immutable app-boundary collections
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1450,6 +1450,19 @@ Remaining:
 Remaining:
 - Product state/database provisioning, Android device/runtime validation,
   cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
+## Recent T173 Immutable App-Boundary Collections
+
+- Mirrored native bootstrap candidate, native transport session/drain, and
+  receipt key-ring result constructors now defensively copy and freeze exposed
+  collection diagnostics.
+- Focused mobile and desktop transport, bootstrap, and receipt suites cover
+  source-list isolation and immutable result collections.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
   separate.
 
 ## Recent T172 Immutable Readiness/Transport Diagnostics

@@ -2,9 +2,22 @@ import 'dart:async';
 
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_loader.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes receipt key-ring load warnings', () {
+    final warnings = <String>['warning_1'];
+    final result = ReceiptKeyRingLoadResult(
+      keyRing: const ReceiptKeyRingSnapshot(),
+      warnings: warnings,
+    );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('maps native secure key records into receipt key ring', () async {
     final bridge = _FakeSecureKeyStorageBridge(
       snapshot: const SecureKeyStorageSnapshot(

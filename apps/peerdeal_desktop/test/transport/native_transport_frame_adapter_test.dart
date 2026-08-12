@@ -6,6 +6,25 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes native frame drain collections', () {
+    final results = <TransportFrameReceiveResult>[
+      const TransportFrameReceiveResult.accepted(),
+    ];
+    final warnings = <String>['warning_1'];
+    final result = NativeTransportFrameDrainResult(
+      available: true,
+      results: results,
+      warnings: warnings,
+    );
+
+    results.clear();
+    warnings.add('warning_2');
+    expect(result.results, hasLength(1));
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.results.clear(), throwsUnsupportedError);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('sends validated network frames through native transport', () async {
     final bridge = _FakeNativeTransportBridge();
     final sender = ValidatingTransportFrameSender(
@@ -226,9 +245,7 @@ void main() {
         );
         expect(result.available, isFalse);
         expect(result.results, isEmpty);
-        expect(result.warnings, [
-          'Native transport receive scope is invalid.',
-        ]);
+        expect(result.warnings, ['Native transport receive scope is invalid.']);
       }
 
       expect(bridge.receiveLookups, 0);

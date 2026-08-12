@@ -4,6 +4,17 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes native session load warnings', () {
+    final warnings = <String>['warning_1'];
+    final result = NativeTransportSessionLoadResult.unavailable(
+      warnings: warnings,
+    );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test(
     'loads available session only when native transport supports it',
     () async {

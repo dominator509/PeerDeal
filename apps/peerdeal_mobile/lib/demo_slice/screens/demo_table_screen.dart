@@ -113,7 +113,7 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
         await loader.load(sessionId: scope.sessionId, tableId: scope.tableId),
       );
     } on Object {
-      return const NativeBootstrapCandidateLoadResult.unavailable(
+      return NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: 'unavailable',
         warnings: <String>['Local network bootstrap loader unavailable.'],
       );

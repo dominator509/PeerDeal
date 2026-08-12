@@ -1856,6 +1856,15 @@ cover source-list isolation and mutation rejection. Durable database replacement
 real product state selection, device/network validation, other-platform hosts,
 release signing, and final UX remain separate.
 
+The T173 follow-up closes the remaining app-boundary collection ownership gap.
+Mirrored native bootstrap candidate, native transport session/frame-drain, and
+receipt key-ring result constructors now defensively copy and freeze exposed
+candidate, receive-result, and warning collections. Focused mobile and desktop
+transport, bootstrap, and receipt suites cover source-list isolation and
+mutation rejection. Durable database replacement, real product state
+selection, device/network validation, other-platform hosts, release signing,
+and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

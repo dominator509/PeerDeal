@@ -71,9 +71,7 @@ void main() {
 
         expect(result.available, isFalse);
         expect(result.source, isNull);
-        expect(result.warnings, [
-          'Native transport peer identity is invalid.',
-        ]);
+        expect(result.warnings, ['Native transport peer identity is invalid.']);
       }
       expect(bridge.capabilityLookups, 0);
     },
@@ -129,9 +127,7 @@ void main() {
     expect(result.available, isFalse);
     expect(result.warnings, ['Native transport session load cancelled.']);
 
-    factory.result.complete(
-      const NativeTransportSessionLoadResult.unavailable(),
-    );
+    factory.result.complete(NativeTransportSessionLoadResult.unavailable());
   });
 
   test(

@@ -27,7 +27,7 @@ void main() {
             confidence: NetworkConfidence.stable,
             recoveryRecommended: false,
           ),
-          bootstrap: const NativeBootstrapCandidateLoadResult(
+          bootstrap: NativeBootstrapCandidateLoadResult(
             discoveryAvailable: true,
             nativeNotes: 'ready',
             candidates: <BootstrapCandidate>[
@@ -79,7 +79,7 @@ void main() {
             confidence: NetworkConfidence.stable,
             recoveryRecommended: false,
           ),
-          bootstrap: const NativeBootstrapCandidateLoadResult.unavailable(
+          bootstrap: NativeBootstrapCandidateLoadResult.unavailable(
             nativeNotes: 'unavailable',
             warnings: <String>['Local network bootstrap loader unavailable.'],
           ),
@@ -205,7 +205,7 @@ void main() {
     final source = AppTableSessionTransportSource(
       sessionId: 'session_1',
       peerId: 'peer_b',
-      drain: () async => const NativeTransportFrameDrainResult(
+      drain: () async => NativeTransportFrameDrainResult(
         available: true,
         results: <TransportFrameReceiveResult>[],
       ),

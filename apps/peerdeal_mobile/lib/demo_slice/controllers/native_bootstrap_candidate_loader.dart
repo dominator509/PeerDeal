@@ -7,18 +7,20 @@ typedef NativeBootstrapCandidateLoaderFactory =
     NativeBootstrapCandidateLoader Function();
 
 class NativeBootstrapCandidateLoadResult {
-  const NativeBootstrapCandidateLoadResult({
+  NativeBootstrapCandidateLoadResult({
     required this.discoveryAvailable,
     required this.nativeNotes,
-    required this.candidates,
-    required this.warnings,
-  });
+    required List<BootstrapCandidate> candidates,
+    required List<String> warnings,
+  }) : candidates = List<BootstrapCandidate>.unmodifiable(candidates),
+       warnings = List<String>.unmodifiable(warnings);
 
-  const NativeBootstrapCandidateLoadResult.unavailable({
+  NativeBootstrapCandidateLoadResult.unavailable({
     required this.nativeNotes,
-    this.warnings = const <String>[],
+    List<String> warnings = const <String>[],
   }) : discoveryAvailable = false,
-       candidates = const <BootstrapCandidate>[];
+       candidates = const <BootstrapCandidate>[],
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool discoveryAvailable;
   final String nativeNotes;
@@ -74,14 +76,14 @@ class NativeBootstrapCandidateLoader {
     required String tableId,
   }) async {
     if (!_isValidScope(sessionId) || !_isValidScope(tableId)) {
-      return const NativeBootstrapCandidateLoadResult.unavailable(
+      return NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: 'unavailable',
         warnings: <String>['Local network bootstrap scope is invalid.'],
       );
     }
 
     if (_maxPeerCandidates < 1) {
-      return const NativeBootstrapCandidateLoadResult.unavailable(
+      return NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: 'unavailable',
         warnings: <String>['Local network peer candidate limit is invalid.'],
       );
@@ -91,7 +93,7 @@ class NativeBootstrapCandidateLoader {
     try {
       capability = await _bridge.getCapability();
     } catch (_) {
-      return const NativeBootstrapCandidateLoadResult.unavailable(
+      return NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: 'unavailable',
         warnings: <String>['Local network capability could not be loaded.'],
       );

@@ -243,7 +243,7 @@ class _CancellationRecordingProvisioner
   }) async {
     receivedCancellation = cancellation;
     if (cancellation != null) await cancellation;
-    return const ReceiptKeyRingProvisionResult(
+    return ReceiptKeyRingProvisionResult(
       keyRing: ReceiptKeyRingSnapshot(),
       warnings: <String>['cancelled'],
     );

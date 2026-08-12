@@ -26,7 +26,7 @@ class NativeTransportSessionFactory {
     required TransportFrameHandler handler,
   }) async {
     if (_maxPayloadBytes < 1) {
-      return const NativeTransportSessionLoadResult.unavailable(
+      return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>['App transport payload limit is invalid.'],
       );
     }
@@ -36,7 +36,7 @@ class NativeTransportSessionFactory {
     try {
       capability = await bridge.getCapability();
     } on Object {
-      return const NativeTransportSessionLoadResult.unavailable(
+      return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>['Native transport capability could not be loaded.'],
       );
     }
@@ -54,12 +54,12 @@ class NativeTransportSessionFactory {
       );
     }
     if (capability.maxPayloadBytes < 1) {
-      return const NativeTransportSessionLoadResult.unavailable(
+      return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>['Native transport payload limit is invalid.'],
       );
     }
     if (capability.maxPayloadBytes > _maxPayloadBytes) {
-      return const NativeTransportSessionLoadResult.unavailable(
+      return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>[
           'Native transport payload limit exceeds app validator limit.',
         ],
@@ -112,7 +112,7 @@ class NativeTransportSessionFactory {
     required TransportFrameHandler handler,
   }) {
     if (_maxPayloadBytes < 1) {
-      return const NativeTransportFrameDrain.unavailable(
+      return NativeTransportFrameDrain.unavailable(
         warnings: <String>['App transport payload limit is invalid.'],
       );
     }
@@ -220,18 +220,18 @@ class NativeTransportSession {
 }
 
 class NativeTransportSessionLoadResult {
-  const NativeTransportSessionLoadResult({
+  NativeTransportSessionLoadResult({
     required this.available,
     required this.session,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
-  const NativeTransportSessionLoadResult.available({
+  NativeTransportSessionLoadResult.available({
     required NativeTransportSession session,
     List<String> warnings = const <String>[],
   }) : this(available: true, session: session, warnings: warnings);
 
-  const NativeTransportSessionLoadResult.unavailable({
+  NativeTransportSessionLoadResult.unavailable({
     List<String> warnings = const <String>[],
   }) : this(available: false, session: null, warnings: warnings);
 

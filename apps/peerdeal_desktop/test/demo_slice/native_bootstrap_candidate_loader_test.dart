@@ -4,6 +4,31 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes bootstrap candidates and warnings', () {
+    final candidates = <BootstrapCandidate>[
+      const BootstrapCandidate(
+        peerId: 'peer_a',
+        routeClass: NetworkRouteClass.lanDirect,
+        reachable: true,
+        priority: 0,
+      ),
+    ];
+    final warnings = <String>['warning_1'];
+    final result = NativeBootstrapCandidateLoadResult(
+      discoveryAvailable: true,
+      nativeNotes: 'available',
+      candidates: candidates,
+      warnings: warnings,
+    );
+
+    candidates.clear();
+    warnings.add('warning_2');
+    expect(result.candidates, hasLength(1));
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.candidates.clear(), throwsUnsupportedError);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('maps native discovery endpoints into bootstrap candidates', () async {
     final bridge = _FakeLocalNetworkBridge(
       capability: const LocalNetworkCapability(

@@ -40,11 +40,11 @@ class NativeTransportFrameDrain {
        _maxFramesPerDrain = maxFramesPerDrain,
        _unavailableWarnings = null;
 
-  const NativeTransportFrameDrain.unavailable({required List<String> warnings})
+  NativeTransportFrameDrain.unavailable({required List<String> warnings})
     : _bridge = null,
       _receiver = null,
       _maxFramesPerDrain = 0,
-      _unavailableWarnings = warnings;
+      _unavailableWarnings = List<String>.unmodifiable(warnings);
 
   final NativeTransportBridge? _bridge;
   final TransportFrameReceiver? _receiver;
@@ -64,12 +64,12 @@ class NativeTransportFrameDrain {
     }
 
     if (!_isValidReceiveScope(sessionId) || !_isValidReceiveScope(peerId)) {
-      return const NativeTransportFrameDrainResult.unavailable(
+      return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive scope is invalid.'],
       );
     }
     if (_maxFramesPerDrain < 1) {
-      return const NativeTransportFrameDrainResult.unavailable(
+      return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive batch limit is invalid.'],
       );
     }
@@ -81,12 +81,12 @@ class NativeTransportFrameDrain {
         cancellation,
       );
     } on Object {
-      return const NativeTransportFrameDrainResult.unavailable(
+      return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive failed.'],
       );
     }
     if (snapshot == null) {
-      return const NativeTransportFrameDrainResult.unavailable(
+      return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive cancelled.'],
       );
     }
@@ -110,7 +110,7 @@ class NativeTransportFrameDrain {
           cancellation,
         );
         if (result == null) {
-          return const NativeTransportFrameDrainResult.unavailable(
+          return NativeTransportFrameDrainResult.unavailable(
             warnings: <String>['Native transport receive cancelled.'],
           );
         }
@@ -190,16 +190,18 @@ Future<T?> _awaitOrCancel<T>(Future<T> operation, Future<void>? cancellation) {
 }
 
 class NativeTransportFrameDrainResult {
-  const NativeTransportFrameDrainResult({
+  NativeTransportFrameDrainResult({
     required this.available,
-    required this.results,
-    this.warnings = const <String>[],
-  });
+    required List<TransportFrameReceiveResult> results,
+    List<String> warnings = const <String>[],
+  }) : results = List<TransportFrameReceiveResult>.unmodifiable(results),
+       warnings = List<String>.unmodifiable(warnings);
 
-  const NativeTransportFrameDrainResult.unavailable({
-    this.warnings = const <String>[],
+  NativeTransportFrameDrainResult.unavailable({
+    List<String> warnings = const <String>[],
   }) : available = false,
-       results = const <TransportFrameReceiveResult>[];
+       results = const <TransportFrameReceiveResult>[],
+       warnings = List<String>.unmodifiable(warnings);
 
   final bool available;
   final List<TransportFrameReceiveResult> results;

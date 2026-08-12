@@ -72,7 +72,7 @@ void main() {
     expect(drainCalls, 1);
 
     completer.complete(
-      const NativeTransportFrameDrainResult(
+      NativeTransportFrameDrainResult(
         available: true,
         results: <TransportFrameReceiveResult>[],
       ),
@@ -115,7 +115,7 @@ void main() {
 
       source.dispose();
       drainResult.complete(
-        const NativeTransportFrameDrainResult(
+        NativeTransportFrameDrainResult(
           available: true,
           results: <TransportFrameReceiveResult>[],
         ),
@@ -139,7 +139,7 @@ void main() {
     expect(result.warnings, ['Native transport source poll cancelled.']);
 
     drainResult.complete(
-      const NativeTransportFrameDrainResult(
+      NativeTransportFrameDrainResult(
         available: true,
         results: <TransportFrameReceiveResult>[],
       ),
@@ -172,7 +172,7 @@ void main() {
     expect(result.warnings, ['Native transport source poll cancelled.']);
 
     drainResult.complete(
-      const NativeTransportFrameDrainResult(
+      NativeTransportFrameDrainResult(
         available: true,
         results: <TransportFrameReceiveResult>[],
       ),
@@ -183,7 +183,7 @@ void main() {
     var drainCalls = 0;
     Future<NativeTransportFrameDrainResult> drain() async {
       drainCalls += 1;
-      return const NativeTransportFrameDrainResult(
+      return NativeTransportFrameDrainResult(
         available: true,
         results: <TransportFrameReceiveResult>[],
       );
@@ -229,7 +229,7 @@ void main() {
           peerId: scopes[1],
           drain: () async {
             drainCalls += 1;
-            return const NativeTransportFrameDrainResult(
+            return NativeTransportFrameDrainResult(
               available: true,
               results: <TransportFrameReceiveResult>[],
             );
@@ -289,7 +289,7 @@ void main() {
       },
       drain: () async {
         drainCalls += 1;
-        return const NativeTransportFrameDrainResult(
+        return NativeTransportFrameDrainResult(
           available: true,
           results: <TransportFrameReceiveResult>[],
         );
@@ -316,7 +316,7 @@ void main() {
     final source = AppTableSessionTransportSource(
       sessionId: 'session_1',
       peerId: 'peer_b',
-      drain: () async => const NativeTransportFrameDrainResult(
+      drain: () async => NativeTransportFrameDrainResult(
         available: true,
         results: <TransportFrameReceiveResult>[],
       ),

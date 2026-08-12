@@ -52,7 +52,7 @@ AppTableSessionTransportSource _source() {
   return AppTableSessionTransportSource(
     sessionId: 'session_1',
     peerId: 'peer_b',
-    drain: () async => const NativeTransportFrameDrainResult(
+    drain: () async => NativeTransportFrameDrainResult(
       available: true,
       results: <TransportFrameReceiveResult>[],
     ),

@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T173 Immutable App-Boundary Collections
+
+Summary:
+- Mirrored native bootstrap candidate, native transport session/drain, and
+  receipt key-ring result constructors now defensively copy and freeze exposed
+  collection diagnostics.
+- Focused mobile and desktop transport, bootstrap, and receipt Flutter suites
+  prove source-list isolation and mutation rejection.
+
+Validation:
+- Mobile focused suites: passed 73 tests.
+- Desktop focused suites: passed 73 tests.
+- Full analyze, boundary-check, source-text, dependency-audit, and serialized
+  repository test gates passed.
+- Mobile debug APK and desktop Windows debug artifacts built successfully.
+- Windows native-host smoke passed app storage, capture, local-network,
+  transport, secure-key CAS/tombstone, and capture-release markers.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T172 Immutable Readiness/Transport Diagnostics
 
 Summary:

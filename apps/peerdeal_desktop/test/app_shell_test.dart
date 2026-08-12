@@ -2402,7 +2402,7 @@ class _UnsafeBootstrapLoader extends NativeBootstrapCandidateLoader {
     required String sessionId,
     required String tableId,
   }) async {
-    return const NativeBootstrapCandidateLoadResult.unavailable(
+    return NativeBootstrapCandidateLoadResult.unavailable(
       nativeNotes: 'unavailable',
       warnings: <String>[
         r'C:\secret\peers.log',

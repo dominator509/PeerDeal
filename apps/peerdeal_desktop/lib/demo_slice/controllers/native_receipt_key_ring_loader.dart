@@ -2,11 +2,11 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
 class ReceiptKeyRingLoadResult {
-  const ReceiptKeyRingLoadResult({
+  ReceiptKeyRingLoadResult({
     required this.keyRing,
     this.revision = 0,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
   final ReceiptKeyRingSnapshot keyRing;
   final int revision;
@@ -57,25 +57,25 @@ class NativeReceiptKeyRingLoader
 
   Future<ReceiptKeyRingLoadResult> _load({Future<void>? cancellation}) async {
     if (!_isValidNamespace(namespace)) {
-      return const ReceiptKeyRingLoadResult(
+      return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key namespace is invalid.'],
       );
     }
     if (maxKeyRecords < 1) {
-      return const ReceiptKeyRingLoadResult(
+      return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key record limit is invalid.'],
       );
     }
     if (maxKeyIdLength < 1) {
-      return const ReceiptKeyRingLoadResult(
+      return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key metadata limit is invalid.'],
       );
     }
     if (maxKeySecretLength < 1) {
-      return const ReceiptKeyRingLoadResult(
+      return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key material limit is invalid.'],
       );
@@ -90,7 +90,7 @@ class NativeReceiptKeyRingLoader
             )
           : await _bridge.loadKeyRing(namespace: namespace);
     } on Object {
-      return const ReceiptKeyRingLoadResult(
+      return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key storage could not be loaded.'],
       );
@@ -108,19 +108,19 @@ class NativeReceiptKeyRingLoader
       );
     }
     if (snapshot.keys.length > maxKeyRecords) {
-      return const ReceiptKeyRingLoadResult(
+      return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key record limit reached.'],
       );
     }
     if (snapshot.keys.any((record) => !_isValidKeyId(record.keyId))) {
-      return const ReceiptKeyRingLoadResult(
+      return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key record metadata is invalid.'],
       );
     }
     if (snapshot.keys.any((record) => !_isValidSecret(record.secret))) {
-      return const ReceiptKeyRingLoadResult(
+      return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key material is invalid.'],
       );

@@ -122,7 +122,7 @@ void main() {
   test('scrubs unsafe key-ring loader warning diagnostics', () async {
     final verifier = DemoReceiptArtifactVerifier(
       keyRingLoader: _StaticKeyRingLoader(
-        result: const ReceiptKeyRingLoadResult(
+        result: ReceiptKeyRingLoadResult(
           keyRing: ReceiptKeyRingSnapshot(),
           warnings: <String>[
             'secret=abc123',
@@ -313,7 +313,7 @@ class _RecordingCancellableKeyRingLoader implements NativeReceiptKeyRingLoader {
 
   @override
   Future<ReceiptKeyRingLoadResult> load() async {
-    return const ReceiptKeyRingLoadResult(keyRing: ReceiptKeyRingSnapshot());
+    return ReceiptKeyRingLoadResult(keyRing: ReceiptKeyRingSnapshot());
   }
 
   @override

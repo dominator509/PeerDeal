@@ -1327,6 +1327,17 @@ Remaining:
   validation, other-platform hosts, release signing, and final UX remain
   separate.
 
+## T173 Immutable App-Boundary Collections
+
+- Mirrored native bootstrap candidate, native transport session/drain, and
+  receipt key-ring result constructors now defensively copy and freeze exposed
+  collection diagnostics.
+- Focused mobile and desktop transport, bootstrap, and receipt suites prove
+  caller-owned collections cannot alter projected results.
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  separate.
+
 ## T172 Immutable Readiness/Transport Diagnostics
 
 - Mirrored native-readiness snapshots and transport-source poll/start result
