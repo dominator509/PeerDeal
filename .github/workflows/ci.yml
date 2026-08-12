@@ -3,7 +3,8 @@ name: peerdeal-ci
 on:
   pull_request:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, 'retrofit/**', 'hardening/**' ]
+  workflow_dispatch:
 
 jobs:
   bootstrap-checks:

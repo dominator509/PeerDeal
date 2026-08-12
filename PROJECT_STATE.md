@@ -1244,6 +1244,15 @@ signing, and concrete product state wiring remain external or integration-owned.
   composition path; product state/database provisioning and platform/runtime
   validation remain open.
 
+## T146 CI Branch Gate Coverage
+
+- `.github/workflows/ci.yml` now runs on direct pushes to `retrofit/**` and
+  `hardening/**`, in addition to `main` and `master`, and supports manual
+  `workflow_dispatch` runs.
+- Existing repository, Android, Windows, signing-guard, and native-host smoke
+  jobs are unchanged; hosted workflow execution and operator-owned release
+  credentials remain external.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

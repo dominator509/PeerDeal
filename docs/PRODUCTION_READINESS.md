@@ -1732,6 +1732,14 @@ warnings alongside the stable unavailable message. Exception detail remains
 suppressed; this improves operator-visible truth without selecting product state
 or changing persistence ownership.
 
+The T146 follow-up closes a CI trigger gap. The repository workflow now runs on
+direct pushes to `retrofit/**` and `hardening/**` in addition to `main` and
+`master`, and supports manual `workflow_dispatch` runs. The existing analyze,
+boundary, source-text, test, dependency, Android debug/signing-guard, Windows
+build, and native-host smoke jobs are unchanged. This improves gate coverage;
+it does not claim that GitHub-hosted execution, release credentials, device
+reachability, or product state provisioning are complete.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

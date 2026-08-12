@@ -1335,6 +1335,23 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T146 CI Branch Gate Coverage
+
+- The repository workflow now runs on direct pushes to `retrofit/**` and
+  `hardening/**`, in addition to `main` and `master`.
+- Manual `workflow_dispatch` execution is available for operator-controlled
+  reruns; the existing gate jobs and their fail-closed signing/native checks
+  are unchanged.
+
+Tests:
+- Repository source-text, analysis, boundary, test, dependency, and build
+  gates remain required after this workflow-only change.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, release signing credentials,
+  and GitHub-hosted workflow execution remain separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints

@@ -74,6 +74,23 @@ Validation:
 - Focused mobile and desktop configuration Flutter suites cover the fail-closed
   composition path; full repository gates remain required before commit.
 
+### 2026-08-11 - Codex - T146 CI Branch Gate Coverage
+
+Summary:
+- CI now runs on direct pushes to `retrofit/**` and `hardening/**`, alongside
+  `main` and `master`.
+- Manual `workflow_dispatch` execution is enabled without changing existing
+  repository, host-build, signing-guard, or native-smoke jobs.
+
+Files changed:
+- `.github/workflows/ci.yml`
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Validation:
+- Workflow-only change; local repository gates and YAML/source-text checks are
+  required before push. GitHub-hosted execution remains external.
+
 ### 2026-08-11 - Codex - T143 Native App-Storage Path Boundary Hardening
 
 Summary:
