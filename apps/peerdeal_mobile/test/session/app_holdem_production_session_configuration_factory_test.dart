@@ -70,6 +70,18 @@ void main() {
     );
   });
 
+  test('fails closed when route policy composition throws', () async {
+    final result = await _create(
+      routePolicyFactory: (_) => throw StateError('route policy unavailable'),
+    );
+
+    expect(result.isAvailable, isFalse);
+    expect(
+      result.warnings,
+      contains('Holdem production session configuration is unavailable.'),
+    );
+  });
+
   test(
     'propagates the recovery event limit into the persistence writer',
     () async {

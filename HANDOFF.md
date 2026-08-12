@@ -1318,6 +1318,23 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T145 Production Configuration Warning Preservation
+
+- Mirrored production-session configuration factories now retain any recovery
+  store warnings when route-policy or persisted-source composition fails after
+  a store was created.
+- The stable unavailable warning remains present, and exception detail is still
+  suppressed at the app boundary.
+
+Tests:
+- Focused mobile and desktop configuration Flutter suites cover route-policy
+  composition failure and fail-closed results.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints

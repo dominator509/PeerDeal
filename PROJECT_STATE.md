@@ -1234,6 +1234,16 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Focused mobile and desktop configuration suites pass; product state/database
   provisioning and platform/runtime validation remain open.
 
+## T145 Production Configuration Warning Preservation
+
+- Mirrored production-session configuration factories retain recovery-store
+  warnings when route-policy or persisted-source composition fails after store
+  creation, while preserving the stable unavailable result and suppressing
+  exception detail.
+- Focused mobile and desktop configuration suites cover the fail-closed
+  composition path; product state/database provisioning and platform/runtime
+  validation remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

@@ -58,6 +58,22 @@ Files changed:
 Validation:
 - Focused mobile and desktop configuration Flutter suites passed.
 
+### 2026-08-11 - Codex - T145 Production Configuration Warning Preservation
+
+Summary:
+- Mirrored configuration factories now retain recovery-store warnings when
+  route-policy or persisted-source composition fails after store creation.
+- Stable unavailable messaging and exception suppression remain unchanged.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_configuration_factory.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_configuration_factory.dart`
+- Mirrored focused configuration tests and readiness records.
+
+Validation:
+- Focused mobile and desktop configuration Flutter suites cover the fail-closed
+  composition path; full repository gates remain required before commit.
+
 ### 2026-08-11 - Codex - T143 Native App-Storage Path Boundary Hardening
 
 Summary:

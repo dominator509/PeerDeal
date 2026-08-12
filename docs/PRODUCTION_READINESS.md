@@ -1725,6 +1725,13 @@ path. Focused mobile and desktop configuration suites cover the loader handoff;
 this enables product-owned context policy but does not supply product state,
 database persistence, device validation, other-platform hosts, or signing.
 
+The T145 follow-up hardens the same factory's failure projection. If recovery
+store creation succeeds with warnings but route-policy or persisted-source
+composition later fails, the mirrored mobile and desktop factories retain those
+warnings alongside the stable unavailable message. Exception detail remains
+suppressed; this improves operator-visible truth without selecting product state
+or changing persistence ownership.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -150,8 +150,9 @@ class AppHoldemProductionSessionConfigurationFactory {
         warnings: persistence.warnings,
       );
     } on Object {
-      return const AppHoldemProductionSessionConfigurationLoadResult.unavailable(
+      return AppHoldemProductionSessionConfigurationLoadResult.unavailable(
         warnings: <String>[
+          ...persistence.warnings,
           'Holdem production session configuration is unavailable.',
         ],
       );

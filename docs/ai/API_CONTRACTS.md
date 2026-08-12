@@ -497,7 +497,9 @@ route metadata before source composition. It forwards deterministic
 event/replay and session dependencies and fails closed on invalid policy or
 composition errors. The factory does not create product snapshots, select
 peers/seats, or own retention policy. Native identity provisioning remains lazy
-until a valid invite-scoped snapshot load reaches the source.
+until a valid invite-scoped snapshot load reaches the source. If composition
+fails after recovery-store creation, the unavailable result retains the
+store's stable warnings while suppressing exception detail.
 
 Both app shells expose an optional
 `AppHoldemProductionSessionConfigurationLoader` callback for the successful
