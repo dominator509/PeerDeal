@@ -411,9 +411,10 @@ the gates below are satisfied.
 - Native secure key storage contracts now lock generic save/delete mutation
   methods and fail-closed mutation results without adding receipt semantics to
   the native bridge package.
-- Native secure key storage method-channel wrappers now reject blank or padded
-  namespaces, key ids, and key record fields before platform load/save/delete
-  calls, keeping malformed generic secure-storage requests out of native code.
+- Native secure key storage method-channel wrappers now reject blank, padded, or
+  oversized UTF-8 namespaces, key ids, and key record fields before platform
+  load/save/delete calls, keeping malformed generic secure-storage requests out
+  of native code.
 - Generic secure-key method-channel load, save, and delete calls now use a
   bounded five-second default deadline and return stable fail-closed timeout
   results instead of leaving receipt key flows indefinitely pending.
@@ -1685,6 +1686,13 @@ the locked UTF-8 byte limits used by the Dart contract and the Windows host,
 including multibyte values. The shared channel-contract suite covers the
 multibyte rejection path, and Android debug compilation passes. This improves
 host input hardening but does not replace Android device/runtime validation.
+
+The T140 follow-up closes the corresponding Dart request-boundary gap. The
+shared native-bridge contract now defines the 128-byte secure-key namespace
+limit, and the method-channel wrapper rejects oversized UTF-8 namespaces before
+dispatching to Android or Windows. Focused secure-key bridge coverage exercises
+the multibyte rejection path. This keeps host and Dart request limits aligned;
+device/runtime validation remains separate.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate

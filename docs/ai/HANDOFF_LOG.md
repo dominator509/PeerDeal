@@ -20,6 +20,25 @@ Validation:
 - Full repository analyze, boundary, source-text, test, dependency-audit, and
   diff-check gates passed before commit and push.
 
+### 2026-08-11 - Codex - T140 Dart Secure-Key Namespace Boundary Hardening
+
+Summary:
+- The shared native-bridge contract now defines a 128-byte UTF-8 secure-key
+  namespace limit.
+- Dart secure-key method-channel requests reject oversized multibyte namespaces
+  before platform dispatch, matching Android and Windows host validation.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/native_bridge_payload_limits.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/method_channel_secure_key_storage_bridge.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_secure_key_storage_bridge_test.dart`
+- Readiness and handoff records.
+
+Validation:
+- Focused secure-key method-channel Flutter tests passed.
+- Full repository analyze, boundary, source-text, test, dependency-audit, and
+  diff-check gates passed before commit and push.
+
 ### 2026-08-11 - Codex - T138 Production Configuration Lifecycle Hardening
 
 Summary:

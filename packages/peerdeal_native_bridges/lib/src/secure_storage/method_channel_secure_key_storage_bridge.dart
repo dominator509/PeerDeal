@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
+import '../native_bridge_payload_limits.dart';
 import 'secure_key_storage_bridge.dart';
 import 'secure_key_storage_bridge_models.dart';
 import 'secure_key_storage_channel_contract.dart';
@@ -269,7 +270,12 @@ class MethodChannelSecureKeyStorageBridge
   }
 
   bool _isValidNamespace(String namespace) =>
-      namespace.trim().isNotEmpty && namespace.trim() == namespace;
+      NativeBridgePayloadLimits.isWithinUtf8Limit(
+        namespace,
+        NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes,
+      ) &&
+      namespace.trim().isNotEmpty &&
+      namespace.trim() == namespace;
 
   bool _isValidKeyId(String keyId) =>
       keyId.trim().isNotEmpty && keyId.trim() == keyId && !keyId.contains(':');

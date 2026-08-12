@@ -1183,6 +1183,17 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Android device/runtime validation, cross-device networking, other-platform
   hosts, database persistence, and release signing remain open.
 
+## T140 Dart Secure-Key Namespace Boundary Hardening
+
+- The shared native-bridge contract now defines a 128-byte UTF-8 secure-key
+  namespace limit.
+- Dart method-channel requests reject oversized multibyte namespaces before
+  platform dispatch, matching Android and Windows host validation.
+- Focused secure-key bridge tests cover the rejection path without a platform
+  call.
+- Android device/runtime validation, cross-device networking, other-platform
+  hosts, database persistence, and release signing remain open.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

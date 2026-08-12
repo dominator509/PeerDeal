@@ -148,6 +148,24 @@ void main() {
     expect(log, isEmpty);
   });
 
+  test('rejects oversized UTF-8 namespaces before calling platform', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+          log.add(call);
+          return <String, Object?>{'available': true, 'keys': <Object?>[]};
+        });
+
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final snapshot = await bridge.loadKeyRing(
+      namespace: String.fromCharCodes(List<int>.filled(33, 0x1F600)),
+    );
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.keys, isEmpty);
+    expect(snapshot.warning, 'Secure key storage load request is invalid.');
+    expect(log, isEmpty);
+  });
+
   test('saves secure key records over the method channel', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {

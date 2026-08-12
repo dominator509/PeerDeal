@@ -1230,6 +1230,23 @@ Remaining:
 - Android device/runtime validation, cross-device networking, other-platform
   hosts, database persistence, and release signing remain separate.
 
+## Recent T140 Dart Secure-Key Namespace Boundary Hardening
+
+- The shared native-bridge contract now defines a 128-byte UTF-8 secure-key
+  namespace limit.
+- Dart method-channel load/save/delete requests reject oversized multibyte
+  namespaces before platform dispatch, matching Android and Windows hosts.
+
+Tests and gates:
+- Focused secure-key method-channel Flutter tests pass, including oversized
+  multibyte namespace rejection with no platform call.
+- Full repository analyze, boundary, source-text, test, dependency-audit, and
+  diff-check gates pass before commit and push.
+
+Remaining:
+- Android device/runtime validation, cross-device networking, other-platform
+  hosts, database persistence, and release signing remain separate.
+
 ## Recent T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer checkpoints
