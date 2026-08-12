@@ -32,6 +32,29 @@ void main() {
     },
   );
 
+  test('persists configured snapshot metadata', () async {
+    final store = _ToggleSnapshotStore();
+    final typed = _typedSnapshot();
+    final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+      persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+        store: store,
+      ),
+      snapshotType: 'HoldemStateSnapshotV2',
+      snapshotVersion: '2.0',
+    );
+
+    final result = await coordinator.persist(
+      tableState: typed.tableState,
+      handState: typed.handState,
+      eventCursor: typed.eventCursor,
+    );
+
+    final snapshot = store.loadWindow(_scope()).snapshot;
+    expect(result.isSuccess, isTrue);
+    expect(snapshot?.snapshotType, 'HoldemStateSnapshotV2');
+    expect(snapshot?.snapshotVersion, '2.0');
+  });
+
   test('fails closed when the snapshot ID factory throws', () async {
     final store = _ToggleSnapshotStore();
     final typed = _typedSnapshot();
@@ -77,6 +100,43 @@ void main() {
 
       expect(result.isSuccess, isFalse);
       expect(result.warnings, ['Holdem snapshot identity is invalid.']);
+      expect(coordinator.hasPending, isFalse);
+      expect(store.saveAttempts, 0);
+    }
+  });
+
+  test('rejects unsafe configured snapshot metadata before queueing', () async {
+    final typed = _typedSnapshot();
+    final cases = <({String type, String version, String warning})>[
+      (
+        type: 'HoldemStateSnapshot',
+        version: '2.${String.fromCharCode(0x85)}',
+        warning: 'Holdem snapshot version is invalid.',
+      ),
+      (
+        type: 'x' * (const CanonicalJsonLimits().maxTextBytes + 1),
+        version: '1.0',
+        warning: 'Holdem snapshot type is invalid.',
+      ),
+    ];
+    for (final testCase in cases) {
+      final store = _ToggleSnapshotStore(failuresRemaining: 10);
+      final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+          store: store,
+        ),
+        snapshotType: testCase.type,
+        snapshotVersion: testCase.version,
+      );
+
+      final result = await coordinator.persist(
+        tableState: typed.tableState,
+        handState: typed.handState,
+        eventCursor: typed.eventCursor,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warnings, [testCase.warning]);
       expect(coordinator.hasPending, isFalse);
       expect(store.saveAttempts, 0);
     }
@@ -184,9 +244,7 @@ void main() {
   test('bounds queued checkpoints by serialized byte budget', () async {
     final store = _ToggleSnapshotStore(failuresRemaining: 10);
     final typed = _typedSnapshot();
-    final checkpointBytes = utf8
-        .encode(canonicalJsonEncode(typed.toJson()))
-        .length;
+    final checkpointBytes = _serializedCheckpointBytes(typed);
     final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
       persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
         store: store,
@@ -462,3 +520,26 @@ RecoveryPersistenceScope _scope() => const RecoveryPersistenceScope(
   sessionId: 'session_001',
   protocolVersion: '1.0.0',
 );
+
+int _serializedCheckpointBytes(HoldemStateSnapshot typed) {
+  final payload = typed.toJson();
+  final snapshot = SnapshotEnvelope(
+    snapshotId: 'snapshot_session_001_0',
+    snapshotType: 'HoldemStateSnapshot',
+    snapshotVersion: '1.0',
+    protocolVersion: typed.tableState.protocolVersion,
+    tableId: typed.tableState.tableId,
+    sessionId: typed.tableState.sessionId,
+    snapshotBaseEventSeq: typed.eventCursor.nextEventSeq - 1,
+    snapshotHash: computeCanonicalHash(payload),
+    payload: payload,
+  );
+  return utf8
+      .encode(
+        canonicalJsonEncode(<String, Object?>{
+          'snapshot': snapshot.toJson(),
+          'events': const <Object?>[],
+        }),
+      )
+      .length;
+}

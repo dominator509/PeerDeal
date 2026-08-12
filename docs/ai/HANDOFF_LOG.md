@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T211 Exact Recovery Window Budget
+
+Summary:
+- Mirrored mobile and desktop snapshot coordinators now measure the exact
+  canonical persisted recovery window, including snapshot envelope metadata
+  and event JSON, before retaining failed checkpoints.
+- Configured snapshot type and version now flow from the configuration factory
+  through coordinator measurement and persistence.
+- Unsafe configured metadata fails closed before store access or queueing.
+
+Files changed:
+- Mirrored snapshot coordinators and configuration factories.
+- Mirrored coordinator regression tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Mobile and desktop coordinator suites: 17 tests passed each.
+- Mobile and desktop configuration-factory suites: 11 tests passed each.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Durable database choice, product state hydration, native/device and
+  cross-device validation, other-platform hosts, and release signing remain
+  external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T210 Snapshot Coordinator Pre-Queue Boundary
 
 Summary:

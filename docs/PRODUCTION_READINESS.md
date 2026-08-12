@@ -2366,6 +2366,17 @@ store attempts. Focused mobile and desktop coordinator suites pass; full
 analyze, boundary, source-text, serialized test, dependency-audit, and diff
 gates pass; Android debug APK and Windows debug artifacts build successfully.
 
+The T211 follow-up closes the app-owned recovery-window budget and metadata
+propagation gap. Mirrored snapshot coordinators now measure the canonical
+persisted recovery window, including the complete snapshot envelope and event
+JSON, rather than an optimistic payload-plus-wire estimate. They also carry
+configured snapshot type and version through measurement and persistence, with
+unsafe configured metadata rejected before queueing. Focused mobile and
+desktop coordinator and configuration-factory suites pass; full repository
+gates and debug artifact builds pass: analyze, boundary, source-text,
+serialized test, dependency-audit, and diff gates are green; Android debug APK
+and Windows debug artifacts build successfully.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -143,6 +143,8 @@ class AppHoldemProductionSessionConfigurationFactory {
       );
       final snapshotCoordinator = AppHoldemProductionSessionSnapshotCoordinator(
         persistenceWriter: persistenceWriter,
+        snapshotType: _snapshotType,
+        snapshotVersion: _snapshotVersion,
         maxRecoveryEvents: _maxRecoveryEvents,
         maxPendingCheckpoints: _maxPendingCheckpoints,
         maxPendingCheckpointBytes: _maxPendingCheckpointBytes,

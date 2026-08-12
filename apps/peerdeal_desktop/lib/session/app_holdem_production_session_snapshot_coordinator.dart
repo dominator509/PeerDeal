@@ -25,11 +25,15 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   AppHoldemProductionSessionSnapshotCoordinator({
     required AppHoldemProductionSessionPersistenceWriter persistenceWriter,
     AppHoldemProductionSnapshotIdFactory? snapshotIdFactory,
+    String snapshotType = 'HoldemStateSnapshot',
+    String snapshotVersion = '1.0',
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
     int maxPendingCheckpoints = defaultMaxPendingCheckpoints,
     int maxPendingCheckpointBytes = defaultMaxPendingCheckpointBytes,
   }) : _persistenceWriter = persistenceWriter,
        _snapshotIdFactory = snapshotIdFactory ?? _defaultSnapshotId,
+       _snapshotType = snapshotType,
+       _snapshotVersion = snapshotVersion,
        _maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
        _maxPendingCheckpoints = _validateMaxPendingCheckpoints(
          maxPendingCheckpoints,
@@ -40,6 +44,8 @@ class AppHoldemProductionSessionSnapshotCoordinator {
 
   final AppHoldemProductionSessionPersistenceWriter _persistenceWriter;
   final AppHoldemProductionSnapshotIdFactory _snapshotIdFactory;
+  final String _snapshotType;
+  final String _snapshotVersion;
   final int _maxRecoveryEvents;
   final int _maxPendingCheckpoints;
   final int _maxPendingCheckpointBytes;
@@ -93,10 +99,31 @@ class AppHoldemProductionSessionSnapshotCoordinator {
         _lastResult = result;
         return result;
       }
+      if (!AppHoldemProductionSessionSnapshotWriter.isSafeSnapshotMetadata(
+            _snapshotType,
+          ) ||
+          !AppHoldemProductionSessionSnapshotWriter.isSafeSnapshotMetadata(
+            _snapshotVersion,
+          )) {
+        final result = RecoveryPersistenceResult(
+          isSuccess: false,
+          warnings: <String>[
+            if (!AppHoldemProductionSessionSnapshotWriter.isSafeSnapshotMetadata(
+              _snapshotType,
+            ))
+              'Holdem snapshot type is invalid.'
+            else
+              'Holdem snapshot version is invalid.',
+          ],
+        );
+        _lastResult = result;
+        return result;
+      }
 
       final int serializedBytes;
       try {
         serializedBytes = _measureCheckpointBytes(
+          snapshotId: snapshotId,
           tableState: tableState,
           handState: handState,
           eventCursor: eventCursor,
@@ -241,40 +268,50 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   }
 
   int _measureCheckpointBytes({
+    required String snapshotId,
     required TableState tableState,
     required HoldemHandState handState,
     required HoldemEventCursor eventCursor,
     required List<EventEnvelope> events,
   }) {
     try {
-      var bytes = utf8
+      const codec = EventEnvelopeCodec(
+        maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
+      );
+      for (final event in events) {
+        codec.encode(event);
+      }
+      final payload = HoldemStateSnapshot(
+        tableState: tableState,
+        handState: handState,
+        eventCursor: eventCursor,
+      ).toJson();
+      final snapshot = SnapshotEnvelope(
+        snapshotId: snapshotId,
+        snapshotType: _snapshotType,
+        snapshotVersion: _snapshotVersion,
+        protocolVersion: tableState.protocolVersion,
+        tableId: tableState.tableId,
+        sessionId: tableState.sessionId,
+        snapshotBaseEventSeq: eventCursor.nextEventSeq - 1,
+        snapshotHash: computeCanonicalHash(payload),
+        payload: payload,
+      );
+      return utf8
           .encode(
             canonicalJsonEncode(
-              HoldemStateSnapshot(
-                tableState: tableState,
-                handState: handState,
-                eventCursor: eventCursor,
-              ).toJson(),
+              <String, Object?>{
+                'snapshot': snapshot.toJson(),
+                'events': events
+                    .map((event) => event.toJson())
+                    .toList(growable: false),
+              },
               limits: CanonicalJsonLimits(
                 maxEncodedBytes: _maxPendingCheckpointBytes,
               ),
             ),
           )
           .length;
-      if (bytes > _maxPendingCheckpointBytes) {
-        throw const _PendingCheckpointTooLarge();
-      }
-      const codec = EventEnvelopeCodec(
-        maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
-      );
-      for (final event in events) {
-        final eventBytes = codec.encode(event).length;
-        if (eventBytes > _maxPendingCheckpointBytes - bytes) {
-          throw const _PendingCheckpointTooLarge();
-        }
-        bytes += eventBytes;
-      }
-      return bytes;
     } on FormatException catch (error) {
       if (error.message == 'Canonical JSON payload is too large.' ||
           error.message == 'Event envelope wire payload is too large.') {
@@ -288,6 +325,8 @@ class AppHoldemProductionSessionSnapshotCoordinator {
     try {
       return _persistenceWriter.persist(
         snapshotId: checkpoint.snapshotId,
+        snapshotType: _snapshotType,
+        snapshotVersion: _snapshotVersion,
         tableState: checkpoint.tableState,
         handState: checkpoint.handState,
         eventCursor: checkpoint.eventCursor,
