@@ -1,3 +1,4 @@
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
@@ -150,9 +151,10 @@ class AppHoldemProjectionTransportPublisher {
   }
 
   static bool _isValidPeerId(String value) {
-    return value.trim().isNotEmpty &&
-        value == value.trim() &&
-        !value.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f);
+    return NativeBridgePayloadLimits.isSafeUtf8Text(
+      value,
+      NativeBridgePayloadLimits.maxTransportIdentityBytes,
+    );
   }
 
   static String _safeReasonCode(String value) {

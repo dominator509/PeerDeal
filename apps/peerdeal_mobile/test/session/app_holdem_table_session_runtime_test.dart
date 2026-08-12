@@ -64,6 +64,27 @@ void main() {
     },
   );
 
+  test('rejects unsafe peer identities before sending projection frames', () async {
+    final projection = _runtime(_preflopState()).startHand();
+    for (final peers in <List<String>>[
+      <String>['peer_${String.fromCharCode(0x85)}', 'peer_remote'],
+      <String>['peer_local', 'x' * 257],
+    ]) {
+      final sender = _RecordingTransportSender();
+      final publisher = AppHoldemProjectionTransportPublisher(
+        sender: sender,
+        localPeerId: peers[0],
+        remotePeerId: peers[1],
+      );
+
+      final result = await publisher.publish(projection);
+
+      expect(result.isComplete, isFalse);
+      expect(result.reasonCode, 'ERR_HOLDEM_PROJECTION_PEER_ID_INVALID');
+      expect(sender.frames, isEmpty);
+    }
+  });
+
   test('reports partial publication without replaying variant rules', () async {
     final runtime = _runtime(_showdownState());
     expect(runtime.startHand().isApplied, isTrue);

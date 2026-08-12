@@ -1449,6 +1449,22 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T161 Hold'em Projection Publisher Peer Bound
+
+- Mirrored app Hold'em projection publishers now validate local and remote peer
+  IDs with the shared native transport safe UTF-8/control-free contract before
+  handing canonical projection frames to the sender.
+- C1-bearing and oversized peer IDs fail closed without sender frames.
+- Focused mobile and desktop Hold'em runtime suites cover rejection before
+  sender calls.
+- Full repository analyze, boundary, source-text, dependency-audit, and test
+  gates passed; diff validation is clean.
+
+Remaining:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  separate.
+
 ## Recent T160 Native Readiness Secure-Key Namespace Bound
 
 - Mirrored app-native readiness loaders now validate secure-key namespaces

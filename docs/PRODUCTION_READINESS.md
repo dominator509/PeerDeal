@@ -1769,6 +1769,16 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T161 follow-up closes the Hold'em projection-publisher peer boundary gap.
+Mirrored app publishers now reuse the shared 256-byte safe UTF-8/control-free
+validator before handing canonical projection frames to the sender, rejecting
+empty, padded, C0/C1-control-bearing, or oversized local/remote peer identities.
+Focused mobile and desktop Hold'em runtime suites cover rejection before sender
+calls. Full repository analyze, boundary, source-text, dependency-audit, test,
+and diff gates pass. Android and Windows runtime/network validation,
+other-platform hosts, product state/database provisioning, and release signing
+remain separate.
+
 The T160 follow-up closes the native readiness secure-key namespace gap.
 Mirrored app-native readiness loaders now reuse the shared 128-byte safe UTF-8
 validator before secure-key storage lookup, rejecting empty, padded,

@@ -140,6 +140,27 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T161 Hold'em Projection Publisher Peer Bound
+
+Summary:
+- Mirrored app Hold'em projection publishers now reuse the shared 256-byte
+  safe UTF-8/control-free transport identity validator.
+- Invalid C1-bearing and oversized peer identities fail closed before sender
+  calls.
+
+Files changed:
+- Mirrored mobile and desktop Hold'em projection publishers and runtime tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop Hold'em runtime suites passed.
+- Mobile and desktop package analysis passed.
+
+Risks:
+- Android/Windows runtime and cross-device network validation, other-platform
+  hosts, product state/database provisioning, and release signing remain
+  external or operator-owned boundaries.
+
 ### 2026-08-11 - Codex - T160 Native Readiness Secure-Key Namespace Bound
 
 Summary:
