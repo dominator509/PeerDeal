@@ -68,7 +68,8 @@ class NativeJoinBootstrapCoordinator
 
     final peerIds = _normalizedUnique(
       discovery.foundEndpoints,
-    ).take(_maxPeerCandidates).toList();
+      maxValues: _maxPeerCandidates,
+    );
     if (peerIds.isEmpty) {
       return const BootstrapPlan(
         requiresBootstrap: true,
@@ -96,10 +97,12 @@ class NativeJoinBootstrapCoordinator
       );
     }
 
-    final reachablePeerIds = candidates
-        .where((candidate) => candidate.reachable)
-        .map((candidate) => candidate.peerId)
-        .toList(growable: false);
+    final reachablePeerIds = _normalizedUnique(
+      candidates
+          .where((candidate) => candidate.reachable)
+          .map((candidate) => candidate.peerId),
+      maxValues: _maxPeerCandidates,
+    );
     return BootstrapPlan(
       requiresBootstrap: true,
       peerCandidates: reachablePeerIds,
@@ -142,10 +145,14 @@ class NativeJoinBootstrapCoordinator
     }
   }
 
-  static List<String> _normalizedUnique(List<String> values) {
+  static List<String> _normalizedUnique(
+    Iterable<String> values, {
+    required int maxValues,
+  }) {
     final seen = <String>{};
     final result = <String>[];
     for (final value in values) {
+      if (result.length == maxValues) break;
       final normalized = _safeNativeText(value);
       if (normalized.isEmpty || !seen.add(normalized)) {
         continue;

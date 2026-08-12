@@ -1449,6 +1449,27 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T156 Native Bootstrap Provider Output Bound
+
+- Mirrored native join bootstrap coordinators now apply the configured peer
+  candidate cap to reachable candidates returned by the injected provider,
+  not only to native discovery input.
+- Provider peer IDs are normalized and deduplicated before the bounded plan is
+  returned, preventing malformed or oversized provider output from reaching
+  governance handoff.
+- Focused mobile and desktop native-bootstrap suites cover provider output
+  capacity and normalization.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds
+  passed; the smoke run passed all app-storage, capture, local-network,
+  transport, and secure-key checks.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T153 Snapshot Serialization Preflight Hardening
 
 - Mirrored snapshot writers now canonical-encode typed snapshots during

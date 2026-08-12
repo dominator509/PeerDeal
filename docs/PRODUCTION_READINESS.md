@@ -1769,6 +1769,17 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T156 follow-up closes a native bootstrap output-boundary gap. Mirrored join
+bootstrap coordinators now apply the configured peer candidate cap to reachable
+results returned by the injected provider, normalize and deduplicate provider
+peer IDs, and pass only the bounded safe list into `BootstrapPlan`. Focused
+mobile and desktop native-bootstrap suites cover provider output capacity and
+normalization. Full repository analyze, boundary, source-text, dependency-audit,
+test, and diff gates pass. Android debug, Windows debug, and Windows native-host
+smoke builds and smoke validation pass. Product state provisioning, durable
+database replacement, device/network validation, other-platform hosts, and
+release signing remain separate.
+
 The T155 follow-up closes an unbounded recovery-failure queue. Mirrored snapshot
 coordinators now retain at most 64 failed checkpoints by default, accept a
 positive caller-owned pending-checkpoint limit, and fail closed with a stable

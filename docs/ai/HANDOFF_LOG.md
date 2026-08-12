@@ -140,6 +140,30 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T156 Native Bootstrap Provider Output Bound
+
+Summary:
+- Mirrored native join bootstrap coordinators now cap reachable candidates
+  returned by the injected provider at the configured peer limit.
+- Provider peer IDs are normalized and deduplicated before the bounded list
+  reaches `BootstrapPlan` and the accepted join handoff.
+
+Files changed:
+- Mirrored native join bootstrap coordinators and focused tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop native-bootstrap suites passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds
+  passed; the smoke run passed all bridge checks.
+
+Risks:
+- Product state/database provisioning, device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  external boundaries.
+
 ### 2026-08-11 - Codex - T155 Snapshot Checkpoint Queue Bound
 
 Summary:

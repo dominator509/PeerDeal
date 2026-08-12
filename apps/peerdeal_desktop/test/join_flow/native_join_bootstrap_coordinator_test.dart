@@ -92,6 +92,58 @@ void main() {
     },
   );
 
+  test(
+    'caps and normalizes provider candidates before join bootstrap',
+    () async {
+      final coordinator = NativeJoinBootstrapCoordinator(
+        bridge: const _StaticLocalNetworkBridge(
+          capability: LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: true,
+            notes: 'local-network-ready',
+          ),
+          discovery: LocalNetworkDiscoverySnapshot(
+            permissionGranted: true,
+            foundEndpoints: <String>['peer-a'],
+            interfaceHints: <String>[],
+          ),
+        ),
+        provider: _StaticBootstrapCandidateProvider(
+          candidates: <BootstrapCandidate>[
+            BootstrapCandidate(
+              peerId: ' peer-a ',
+              routeClass: NetworkRouteClass.lanDirect,
+              reachable: true,
+              priority: 3,
+            ),
+            BootstrapCandidate(
+              peerId: 'peer-b',
+              routeClass: NetworkRouteClass.p2pRemote,
+              reachable: true,
+              priority: 2,
+            ),
+            BootstrapCandidate(
+              peerId: 'peer-c',
+              routeClass: NetworkRouteClass.p2pRemote,
+              reachable: true,
+              priority: 1,
+            ),
+          ],
+        ),
+        maxPeerCandidates: 2,
+      );
+
+      final plan = await coordinator.buildPlan(
+        resolvedInvite: _resolvedInvite,
+        roleGrant: _roleGrant,
+      );
+
+      expect(plan.peerCandidates, <String>['peer-a', 'peer-b']);
+      expect(plan.selectedPeerId, 'peer-a');
+    },
+  );
+
   test('scrubs native discovery endpoints before join bootstrap', () async {
     final provider = _RecordingBootstrapCandidateProvider();
     final coordinator = NativeJoinBootstrapCoordinator(
@@ -378,6 +430,17 @@ class _RecordingBootstrapCandidateProvider
         )
         .toList(growable: false);
   }
+}
+
+class _StaticBootstrapCandidateProvider implements BootstrapCandidateProvider {
+  const _StaticBootstrapCandidateProvider({required this.candidates});
+
+  final List<BootstrapCandidate> candidates;
+
+  @override
+  Future<List<BootstrapCandidate>> resolveCandidates(
+    BootstrapResolutionRequest request,
+  ) async => candidates;
 }
 
 class _ThrowingBootstrapCandidateProvider
