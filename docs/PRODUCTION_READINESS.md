@@ -2411,6 +2411,12 @@ crypto coverage passes. Provider-specific proof semantics, product
 verification wiring, real device/network validation, durable database
 persistence, other-platform hosts, and release signing remain separate.
 
+The T217 follow-up closes the remaining public-input traversal gap in the
+endpoint boundary. `parseAll` now bounds inspection of caller-provided
+discovery values, and `projectCandidates` bounds both endpoint and candidate
+iterables before producing an immutable projection. Malformed or excess
+values therefore cannot force unbounded traversal through the network API.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

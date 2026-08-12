@@ -53,6 +53,15 @@ void main() {
     expect(endpoints.map((endpoint) => endpoint.peerId), ['peer-a', 'peer-e']);
   });
 
+  test('bounds direct caller traversal while finding valid endpoints', () {
+    final values = <String>[
+      ...List<String>.filled(NetworkInputLimits.defaultMaxCandidates, ''),
+      'peer-after-boundary',
+    ];
+
+    expect(DiscoveredPeerEndpointParser.parseAll(values), isEmpty);
+  });
+
   test(
     'projects discovered host and port without overriding provider values',
     () {
@@ -84,4 +93,32 @@ void main() {
       expect(candidates[1].port, 40444);
     },
   );
+
+  test('bounds endpoint traversal during candidate projection', () {
+    final endpoints = <DiscoveredPeerEndpoint>[
+      ...List<DiscoveredPeerEndpoint>.generate(
+        NetworkInputLimits.defaultMaxCandidates,
+        (index) => DiscoveredPeerEndpoint(
+          peerId: 'peer-$index',
+          host: 'host-$index.example',
+        ),
+      ),
+      const DiscoveredPeerEndpoint(
+        peerId: 'peer-after-boundary',
+        host: 'after-boundary.example',
+      ),
+    ];
+
+    final projected =
+        DiscoveredPeerEndpointParser.projectCandidates(<BootstrapCandidate>[
+          const BootstrapCandidate(
+            peerId: 'peer-after-boundary',
+            routeClass: NetworkRouteClass.lanDirect,
+            reachable: true,
+            priority: 1,
+          ),
+        ], endpoints);
+
+    expect(projected.single.host, isNull);
+  });
 }

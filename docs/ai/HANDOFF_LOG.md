@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T217 Bound Endpoint Parser Traversal
+
+Summary:
+- Bounded direct traversal of caller-provided discovery values in
+  `DiscoveredPeerEndpointParser.parseAll`.
+- Bounded both endpoint and candidate traversal in
+  `DiscoveredPeerEndpointParser.projectCandidates`, preserving immutable
+  output and existing provider metadata precedence.
+- Added regressions for values and endpoint metadata after the inspection
+  boundary.
+
+Verification:
+- Focused network parser and bootstrap-provider tests passed.
+- Full repository analyze, boundary, source-text, dependency, and test gates
+  passed.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, durable product state, other-platform hosts, and release
+  signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T216 Preserve Bootstrap Endpoint Handoff
 
 Summary:

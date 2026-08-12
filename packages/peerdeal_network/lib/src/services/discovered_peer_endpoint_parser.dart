@@ -12,9 +12,16 @@ class DiscoveredPeerEndpointParser {
     int maxValues = NetworkInputLimits.defaultMaxPeerIds,
   }) {
     if (maxValues < 1) return const <DiscoveredPeerEndpoint>[];
+    final maxInspectedValues =
+        maxValues > NetworkInputLimits.defaultMaxCandidates
+        ? maxValues
+        : NetworkInputLimits.defaultMaxCandidates;
     final seen = <String>{};
     final result = <DiscoveredPeerEndpoint>[];
+    var inspectedValues = 0;
     for (final value in values) {
+      if (inspectedValues == maxInspectedValues) break;
+      inspectedValues += 1;
       if (result.length == maxValues) break;
       final endpoint = parse(value);
       if (endpoint == null || !seen.add(endpoint.peerId)) continue;
@@ -47,27 +54,40 @@ class DiscoveredPeerEndpointParser {
 
   static List<BootstrapCandidate> projectCandidates(
     Iterable<BootstrapCandidate> candidates,
-    Iterable<DiscoveredPeerEndpoint> endpoints,
-  ) {
-    final byPeerId = <String, DiscoveredPeerEndpoint>{
-      for (final endpoint in endpoints)
-        if (endpoint.host.isNotEmpty) endpoint.peerId: endpoint,
-    };
-    return candidates
-        .map((candidate) {
-          final endpoint = byPeerId[candidate.peerId];
-          if (endpoint == null) return candidate;
-          return BootstrapCandidate(
-            peerId: candidate.peerId,
-            routeClass: candidate.routeClass,
-            reachable: candidate.reachable,
-            priority: candidate.priority,
-            host: candidate.host ?? endpoint.host,
-            port: candidate.port ?? endpoint.port,
-            reason: candidate.reason,
-          );
-        })
-        .toList(growable: false);
+    Iterable<DiscoveredPeerEndpoint> endpoints, {
+    int maxValues = NetworkInputLimits.defaultMaxCandidates,
+  }) {
+    if (maxValues < 1) return const <BootstrapCandidate>[];
+    final byPeerId = <String, DiscoveredPeerEndpoint>{};
+    var inspectedEndpoints = 0;
+    for (final endpoint in endpoints) {
+      if (inspectedEndpoints == maxValues) break;
+      inspectedEndpoints += 1;
+      if (endpoint.host.isNotEmpty) byPeerId[endpoint.peerId] = endpoint;
+    }
+    final result = <BootstrapCandidate>[];
+    var inspectedCandidates = 0;
+    for (final candidate in candidates) {
+      if (inspectedCandidates == maxValues) break;
+      inspectedCandidates += 1;
+      final endpoint = byPeerId[candidate.peerId];
+      if (endpoint == null) {
+        result.add(candidate);
+        continue;
+      }
+      result.add(
+        BootstrapCandidate(
+          peerId: candidate.peerId,
+          routeClass: candidate.routeClass,
+          reachable: candidate.reachable,
+          priority: candidate.priority,
+          host: candidate.host ?? endpoint.host,
+          port: candidate.port ?? endpoint.port,
+          reason: candidate.reason,
+        ),
+      );
+    }
+    return List<BootstrapCandidate>.unmodifiable(result);
   }
 
   static String _normalize(String value) => value
