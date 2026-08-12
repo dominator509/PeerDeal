@@ -317,7 +317,7 @@ class _LeakySetupFlowOrchestrator extends SetupFlowOrchestrator {
     required SetupIntent intent,
     List<PresetLayer> presetLayers = const <PresetLayer>[],
   }) {
-    return const SetupFlowOutcome(
+    return SetupFlowOutcome(
       status: SetupFlowStatus.compiled,
       resultCode: 'OK_GAME_FILE_COMPILED',
       gameFile: <String, Object?>{'game_file_version': r'C:\secret\gamefile'},
@@ -335,7 +335,7 @@ class _UnsafeResultSetupFlowOrchestrator extends SetupFlowOrchestrator {
     required SetupIntent intent,
     List<PresetLayer> presetLayers = const <PresetLayer>[],
   }) {
-    return const SetupFlowOutcome(
+    return SetupFlowOutcome(
       status: SetupFlowStatus.compiled,
       resultCode: r'OK C:\secret',
       errors: <String>[r'C:\secret\setup.log'],

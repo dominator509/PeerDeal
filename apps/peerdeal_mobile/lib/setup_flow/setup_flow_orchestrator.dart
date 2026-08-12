@@ -51,7 +51,7 @@ class SetupFlowOrchestrator {
         warnings: compileResult.warnings,
       );
     } on Object {
-      return const SetupFlowOutcome(
+      return SetupFlowOutcome(
         status: SetupFlowStatus.rejected,
         resultCode: 'ERR_SETUP_FLOW_FAILED',
         errors: <String>['setup_flow_failed'],

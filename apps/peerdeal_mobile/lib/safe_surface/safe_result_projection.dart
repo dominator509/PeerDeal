@@ -4,11 +4,11 @@ import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 class SafeReceiptScanVm {
-  const SafeReceiptScanVm({
+  SafeReceiptScanVm({
     required this.status,
     required this.message,
-    required this.shareableFields,
-  });
+    required Map<String, Object?> shareableFields,
+  }) : shareableFields = _freezeSafeObjectMap(shareableFields);
 
   final String status;
   final String message;
@@ -16,13 +16,13 @@ class SafeReceiptScanVm {
 }
 
 class SafeRecoveryVm {
-  const SafeRecoveryVm({
+  SafeRecoveryVm({
     required this.canResume,
     required this.requiresRecovery,
     required this.safeCloseRecommended,
     required this.recommendedAction,
-    required this.diagnostics,
-  });
+    required List<ProtocolDiagnostic> diagnostics,
+  }) : diagnostics = List<ProtocolDiagnostic>.unmodifiable(diagnostics);
 
   final bool canResume;
   final bool requiresRecovery;
@@ -33,6 +33,30 @@ class SafeRecoveryVm {
   List<Map<String, Object?>> get diagnosticsJson => diagnostics
       .map((diagnostic) => diagnostic.toJson())
       .toList(growable: false);
+}
+
+Object? _freezeSafeValue(Object? value) {
+  if (value is Map) {
+    final frozenEntries = <Object?, Object?>{};
+    for (final entry in value.entries) {
+      frozenEntries[entry.key] = _freezeSafeValue(entry.value);
+    }
+    return Map<Object?, Object?>.unmodifiable(frozenEntries);
+  }
+  if (value is List) {
+    return List<Object?>.unmodifiable(value.map<Object?>(_freezeSafeValue));
+  }
+  if (value is Set) {
+    return Set<Object?>.unmodifiable(value.map<Object?>(_freezeSafeValue));
+  }
+  return value;
+}
+
+Map<String, Object?> _freezeSafeObjectMap(Map<String, Object?> source) {
+  return Map<String, Object?>.unmodifiable(<String, Object?>{
+    for (final entry in source.entries)
+      entry.key: _freezeSafeValue(entry.value),
+  });
 }
 
 class SafeResultProjection {

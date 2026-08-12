@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T189 Immutable App Output Models
+
+Summary:
+- Mirrored `SetupFlowOutcome` models now deep-freeze compiled Game File maps
+  and snapshot setup errors and warnings at construction.
+- `SafeReceiptScanVm` deep-freezes nested shareable receipt fields, while
+  `SafeRecoveryVm` snapshots protocol diagnostics before safe-surface use.
+- Const fixtures were migrated without changing setup result codes, receipt
+  presentation, or safe-surface behavior.
+
+Validation:
+- Focused mirrored setup, safe-projection, and receipt-screen suites passed
+  30 tests each; both app packages analyzed cleanly.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Product state provisioning, durable database replacement, device/network
+  validation, other-platform hosts, release signing, and final navigation/UX
+  validation remain external or integration-owned.
+
 ### 2026-08-12 - Codex - T188 Immutable App Runtime Configuration
 
 Summary:

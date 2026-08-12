@@ -97,7 +97,7 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
 
   Future<SetupFlowOutcome> _run(SetupFlowDemoMode mode) async {
     if (!_isModeEnabled(mode)) {
-      return const SetupFlowOutcome(
+      return SetupFlowOutcome(
         status: SetupFlowStatus.rejected,
         resultCode: 'ERR_SETUP_FLOW_MODE_DISABLED',
         errors: <String>['setup_flow_mode_disabled'],
@@ -113,7 +113,7 @@ class _SetupFlowRouteState extends State<SetupFlowRoute> {
         widget._orchestratorFactory().compileSetup(intent: intent),
       );
     } on Object {
-      return const SetupFlowOutcome(
+      return SetupFlowOutcome(
         status: SetupFlowStatus.rejected,
         resultCode: 'ERR_SETUP_FLOW_UNAVAILABLE',
         errors: <String>['setup_flow_unavailable'],
@@ -157,7 +157,7 @@ SetupFlowOutcome? _invalidSetupIntentOutcome(SetupIntent intent) {
 
 SetupFlowOutcome _safeSetupOutcome(SetupFlowOutcome outcome) {
   if (!_isSafeSetupToken(outcome.resultCode)) {
-    return const SetupFlowOutcome(
+    return SetupFlowOutcome(
       status: SetupFlowStatus.rejected,
       resultCode: 'ERR_SETUP_OUTCOME_INVALID',
       errors: <String>['setup_outcome_invalid'],

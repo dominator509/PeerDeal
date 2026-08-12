@@ -2158,6 +2158,19 @@ validation also passed, including all 16 native-host smoke markers. Product
 state provisioning, device/network validation, other-platform hosts, release
 signing, and final navigation/UX validation remain separate.
 
+The T189 follow-up closes mirrored app output collection ownership.
+`SetupFlowOutcome` now deep-freezes compiled Game File maps and snapshots
+setup errors and warnings; `SafeReceiptScanVm` deep-freezes nested shareable
+receipt fields, and `SafeRecoveryVm` snapshots protocol diagnostics before
+exposing safe-surface state. Focused mirrored setup, safe-projection, and
+receipt-screen suites passed 30 tests each, and both app packages analyze
+cleanly. Full repository analyze, boundary, source-text, dependency-audit,
+test, and diff gates passed. Android debug, Windows debug, and Windows
+native-host smoke validation also passed, including all 16 native-host smoke
+markers. Product state provisioning, durable database replacement,
+device/network validation, other-platform hosts, release signing, and final
+navigation/UX validation remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -381,7 +381,7 @@ DemoReceiptSurfaceVm _surface({required bool shouldObscure}) {
   );
 
   return DemoReceiptSurfaceVm(
-    receipt: const SafeReceiptScanVm(
+    receipt: SafeReceiptScanVm(
       status: 'ok',
       message: 'Receipt resolved.',
       shareableFields: {'receipt_token': '<redacted>'},
@@ -440,7 +440,7 @@ DemoReceiptSurfaceVm _leakySurface() {
   );
 
   return DemoReceiptSurfaceVm(
-    receipt: const SafeReceiptScanVm(
+    receipt: SafeReceiptScanVm(
       status: r'ok C:\secret',
       message: 'token sk-demo-secret',
       shareableFields: {
@@ -450,7 +450,7 @@ DemoReceiptSurfaceVm _leakySurface() {
     ),
     receiptCapturePlan: plan,
     safeSurface: SafeSurfaceRenderModel.fromCapturePlans([plan]),
-    recovery: const SafeRecoveryVm(
+    recovery: SafeRecoveryVm(
       canResume: false,
       requiresRecovery: true,
       safeCloseRecommended: true,

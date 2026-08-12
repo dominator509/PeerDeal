@@ -233,7 +233,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
     );
 
     return DemoReceiptSurfaceVm(
-      receipt: const SafeReceiptScanVm(
+      receipt: SafeReceiptScanVm(
         status: 'rejected',
         message: 'Receipt presentation failed closed.',
         shareableFields: <String, Object?>{},

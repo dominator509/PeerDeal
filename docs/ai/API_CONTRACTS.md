@@ -271,6 +271,10 @@ setup intent and host identities before wizard/setup dependencies run. Setup
 routes also scrub app-owned setup outcome result codes, errors, warnings, and
 displayed Game File versions before rendering. Rendered setup errors and
 warnings must be bounded with stable truncation markers.
+`SetupFlowOutcome` snapshots its errors and warnings and deep-freezes an injected
+Game File map before exposing compiled or rejected setup state. Safe app view
+models likewise deep-freeze nested receipt shareable fields and snapshot
+recovery diagnostics; callers must treat these public collections as read-only.
 Setup routes must reload their async outcome when app-owned orchestrator,
 setup-intent, initial-mode, or enabled-mode dependencies change.
 

@@ -1,4 +1,5 @@
 import 'package:peerdeal_mobile/safe_surface/safe_surface.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
@@ -63,6 +64,47 @@ void main() {
       'expected': '<redacted>',
       'actual': '<redacted>',
     });
+    expect(
+      () => result.diagnostics.add(result.diagnostics.single),
+      throwsUnsupportedError,
+    );
+  });
+
+  test('receipt view model freezes nested shareable fields', () {
+    final nested = <String, Object?>{'value': 'original'};
+    final result = SafeReceiptScanVm(
+      status: 'ok',
+      message: 'Receipt resolved.',
+      shareableFields: <String, Object?>{'nested': nested},
+    );
+
+    nested['value'] = 'changed';
+
+    expect(result.shareableFields['nested'], {'value': 'original'});
+    expect(
+      () =>
+          (result.shareableFields['nested']!
+                  as Map<Object?, Object?>)['value'] =
+              'changed',
+      throwsUnsupportedError,
+    );
+  });
+
+  test('recovery view model owns diagnostics', () {
+    final diagnostics = <ProtocolDiagnostic>[
+      const ProtocolDiagnostic(code: 'ERR_ONE', message: 'One'),
+    ];
+    final result = SafeRecoveryVm(
+      canResume: false,
+      requiresRecovery: true,
+      safeCloseRecommended: true,
+      recommendedAction: 'safe_close',
+      diagnostics: diagnostics,
+    );
+
+    diagnostics.clear();
+
+    expect(result.diagnostics, hasLength(1));
     expect(
       () => result.diagnostics.add(result.diagnostics.single),
       throwsUnsupportedError,
