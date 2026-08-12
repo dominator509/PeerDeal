@@ -1760,6 +1760,15 @@ debug, and Windows native-host smoke validation pass; product state
 provisioning, device/network validation, other-platform hosts, and release
 signing remain separate.
 
+The T149 follow-up closes the lower transport cancellation gap. Mirrored native
+frame drains now receive the source cancellation signal and fail closed before
+delivering late native frames; native sessions forward route cancellation into
+the drain. Focused mobile and desktop transport/route suites cover late
+receive suppression. Full repository gates plus Android debug, Windows debug,
+and Windows native-host smoke validation pass; product state provisioning,
+device/network validation, other-platform hosts, and release signing remain
+separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

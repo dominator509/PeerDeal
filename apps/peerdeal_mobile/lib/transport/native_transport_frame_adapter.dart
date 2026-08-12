@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 
@@ -48,6 +50,7 @@ class NativeTransportFrameDrain {
   Future<NativeTransportFrameDrainResult> drain({
     required String sessionId,
     required String peerId,
+    Future<void>? cancellation,
   }) async {
     final unavailableWarnings = _unavailableWarnings;
     if (unavailableWarnings != null) {
@@ -67,15 +70,20 @@ class NativeTransportFrameDrain {
       );
     }
 
-    final NativeTransportReceiveSnapshot snapshot;
+    final NativeTransportReceiveSnapshot? snapshot;
     try {
-      snapshot = await _bridge!.receiveFrames(
-        sessionId: sessionId,
-        peerId: peerId,
+      snapshot = await _awaitOrCancel(
+        _bridge!.receiveFrames(sessionId: sessionId, peerId: peerId),
+        cancellation,
       );
     } on Object {
       return const NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive failed.'],
+      );
+    }
+    if (snapshot == null) {
+      return const NativeTransportFrameDrainResult.unavailable(
+        warnings: <String>['Native transport receive cancelled.'],
       );
     }
 
@@ -93,7 +101,16 @@ class NativeTransportFrameDrain {
     final results = <TransportFrameReceiveResult>[];
     for (final frame in snapshot.frames.take(_maxFramesPerDrain)) {
       try {
-        results.add(await _receiver!.receive(_fromNativeFrame(frame)));
+        final result = await _awaitOrCancel(
+          _receiver!.receive(_fromNativeFrame(frame)),
+          cancellation,
+        );
+        if (result == null) {
+          return const NativeTransportFrameDrainResult.unavailable(
+            warnings: <String>['Native transport receive cancelled.'],
+          );
+        }
+        results.add(result);
       } on Object {
         results.add(
           const TransportFrameReceiveResult.rejected(
@@ -133,6 +150,37 @@ class NativeTransportFrameDrain {
     final trimmed = value.trim();
     return trimmed.isNotEmpty && trimmed == value;
   }
+}
+
+Future<T?> _awaitOrCancel<T>(Future<T> operation, Future<void>? cancellation) {
+  if (cancellation == null) return operation.then<T?>((value) => value);
+
+  final result = Completer<T?>();
+  void completeValue(T? value) {
+    if (!result.isCompleted) result.complete(value);
+  }
+
+  void completeError(Object error, StackTrace stackTrace) {
+    if (!result.isCompleted) result.completeError(error, stackTrace);
+  }
+
+  unawaited(
+    operation.then<void>(
+      completeValue,
+      onError: (Object error, StackTrace stackTrace) {
+        completeError(error, stackTrace);
+      },
+    ),
+  );
+  unawaited(
+    cancellation.then<void>(
+      (_) => completeValue(null),
+      onError: (Object error, StackTrace stackTrace) {
+        completeValue(null);
+      },
+    ),
+  );
+  return result.future;
 }
 
 class NativeTransportFrameDrainResult {

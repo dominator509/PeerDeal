@@ -200,7 +200,11 @@ class NativeTransportSession {
     Future<void>? cancellation,
   }) {
     return AppTableSessionTransportSource(
-      drain: () => drain.drain(sessionId: sessionId, peerId: peerId),
+      drain: () => drain.drain(
+        sessionId: sessionId,
+        peerId: peerId,
+        cancellation: cancellation ?? this.cancellation,
+      ),
       sessionId: sessionId,
       peerId: peerId,
       pollInterval: pollInterval,

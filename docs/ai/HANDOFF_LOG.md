@@ -115,6 +115,31 @@ Risks:
   hosts, cross-device networking, and release signing remain external or
   caller-owned boundaries.
 
+### 2026-08-11 - Codex - T149 Cancelled Native Receive Suppression
+
+Summary:
+- Mirrored native frame drains now race native receive and frame-handler work
+  against source cancellation and fail closed before late frame delivery.
+- Native sessions forward route cancellation into the drain, preventing old
+  runtimes from mutating after route replacement or disposal.
+
+Files changed:
+- Mirrored native frame adapters, native session factories, and transport/route
+  regression tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Validation:
+- Focused mobile and desktop transport/route suites passed.
+- Full analyze, boundary-check, source-text, test, dependency-audit, Android
+  debug build, Windows debug build, Windows native-host smoke, and diff-check
+  gates passed.
+
+Risks:
+- Already-dispatched native host work remains host-owned; product state/database
+  provisioning, device/runtime validation, other-platform hosts,
+  cross-device networking, and release signing remain external boundaries.
+
 ### 2026-08-11 - Codex - T148 Inbound Checkpoint Lifecycle Invalidation
 
 Summary:

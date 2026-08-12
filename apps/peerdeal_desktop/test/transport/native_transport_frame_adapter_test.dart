@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_desktop/transport/native_transport_frame_adapter.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
@@ -89,6 +91,36 @@ void main() {
     expect(result.results.single.accepted, isTrue);
     expect(handler.frames.single.fromPeerId, 'peer_a');
     expect(handler.frames.single.payload, [1, 2, 3]);
+  });
+
+  test('does not deliver a late receive after cancellation', () async {
+    final cancellation = Completer<void>();
+    final receive = Completer<NativeTransportReceiveSnapshot>();
+    final handler = _RecordingTransportFrameHandler();
+    final drain = NativeTransportFrameDrain(
+      bridge: _BlockingReceiveBridge(receive.future),
+      receiver: ValidatingTransportFrameReceiver(handler: handler),
+    );
+
+    final result = drain.drain(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      cancellation: cancellation.future,
+    );
+    cancellation.complete();
+
+    final cancelled = await result;
+    expect(cancelled.available, isFalse);
+    expect(cancelled.warnings, ['Native transport receive cancelled.']);
+
+    receive.complete(
+      NativeTransportReceiveSnapshot(
+        available: true,
+        frames: <NativeTransportFrame>[_nativeFrame()],
+      ),
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(handler.frames, isEmpty);
   });
 
   test('rejects invalid native frames through network receiver', () async {
@@ -294,5 +326,35 @@ class _RecordingTransportFrameHandler implements TransportFrameHandler {
   @override
   Future<void> handleFrame(TransportFrame frame) async {
     frames.add(frame);
+  }
+}
+
+class _BlockingReceiveBridge implements NativeTransportBridge {
+  _BlockingReceiveBridge(this.receive);
+
+  final Future<NativeTransportReceiveSnapshot> receive;
+
+  @override
+  Future<NativeTransportCapability> getCapability() async {
+    return const NativeTransportCapability(
+      available: true,
+      sendSupported: true,
+      receiveSupported: true,
+      maxPayloadBytes: 4096,
+      notes: 'test',
+    );
+  }
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+  }) => receive;
+
+  @override
+  Future<NativeTransportSendResult> sendFrame(
+    NativeTransportFrame frame,
+  ) async {
+    return const NativeTransportSendResult(isSuccess: true);
   }
 }

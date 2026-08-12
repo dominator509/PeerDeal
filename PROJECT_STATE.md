@@ -1271,6 +1271,15 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Focused mobile and desktop route tests cover delayed inbound completion after
   runtime replacement.
 
+## T149 Cancelled Native Receive Suppression
+
+- Mirrored native frame drains race native receive and frame-handler work
+  against source cancellation and fail closed before late frame delivery.
+- Native sessions forward route cancellation into the drain, preventing old
+  runtimes from mutating after route replacement or disposal.
+- Focused mobile and desktop transport/route tests cover late receive
+  suppression.
+
 ## T136 Production Snapshot Retry Ordering Hardening
 
 - Mirrored mobile and desktop snapshot coordinators now retain newer accepted

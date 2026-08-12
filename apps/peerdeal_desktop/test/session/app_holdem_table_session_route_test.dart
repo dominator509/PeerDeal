@@ -340,7 +340,7 @@ void main() {
     oldBridge.completeReceive();
     await tester.pumpAndSettle();
 
-    expect(oldRuntime.coreState.eventSequence, 2);
+    expect(oldRuntime.coreState.eventSequence, 1);
     expect(oldStore.appendEventsCalls, 0);
     expect(oldStore.saveSnapshotCalls, 0);
     expect(newStore.appendEventsCalls, 0);

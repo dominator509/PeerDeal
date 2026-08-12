@@ -36,8 +36,8 @@ local peer identity persistence, T60 provisioned-identity persisted-source
 composition, T61 single-flight local identity provisioning, T62 post-save
 identity verification, and T63 typed join-to-session context handoff
 and T75 Android/Windows local-network host registration, T147 production
-table lifecycle invalidation, and T148 inbound checkpoint lifecycle
-invalidation
+table lifecycle invalidation, T148 inbound checkpoint lifecycle invalidation,
+and T149 cancelled native receive suppression
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -1380,6 +1380,24 @@ Remaining:
   replacement session or refresh its UI state.
 - Focused mobile and desktop route suites cover a delayed inbound frame after
   runtime replacement.
+- Full analyze, boundary-check, source-text, test, dependency-audit, Android
+  debug build, Windows debug build, Windows native-host smoke, and diff-check
+  gates pass.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
+## Recent T149 Cancelled Native Receive Suppression
+
+- Mirrored native frame drains now race receive and frame-handler work against
+  the route cancellation signal and fail closed before delivering a late frame.
+- Native transport sessions forward their source cancellation into the drain,
+  preventing replaced/disposed routes from mutating the old runtime after an
+  in-flight receive completes.
+- Focused mobile and desktop transport/route suites cover late receive
+  suppression.
 - Full analyze, boundary-check, source-text, test, dependency-audit, Android
   debug build, Windows debug build, Windows native-host smoke, and diff-check
   gates pass.
