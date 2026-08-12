@@ -18,11 +18,14 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   AppHoldemProductionSessionSnapshotCoordinator({
     required AppHoldemProductionSessionPersistenceWriter persistenceWriter,
     AppHoldemProductionSnapshotIdFactory? snapshotIdFactory,
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) : _persistenceWriter = persistenceWriter,
-       _snapshotIdFactory = snapshotIdFactory ?? _defaultSnapshotId;
+       _snapshotIdFactory = snapshotIdFactory ?? _defaultSnapshotId,
+       _maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents);
 
   final AppHoldemProductionSessionPersistenceWriter _persistenceWriter;
   final AppHoldemProductionSnapshotIdFactory _snapshotIdFactory;
+  final int _maxRecoveryEvents;
   Future<void> _tail = Future<void>.value();
   final List<_SnapshotCheckpoint> _pending = <_SnapshotCheckpoint>[];
   RecoveryPersistenceResult? _lastResult;
@@ -36,6 +39,19 @@ class AppHoldemProductionSessionSnapshotCoordinator {
     required HoldemEventCursor eventCursor,
     List<EventEnvelope> events = const <EventEnvelope>[],
   }) {
+    if (events.length > _maxRecoveryEvents) {
+      return _enqueueOperation(() {
+        const result = RecoveryPersistenceResult(
+          isSuccess: false,
+          warnings: <String>[
+            'Holdem snapshot event suffix exceeds the configured recovery event limit.',
+          ],
+        );
+        _lastResult = result;
+        return result;
+      });
+    }
+
     final capturedEvents = List<EventEnvelope>.unmodifiable(events);
     return _enqueueOperation(() {
       final String snapshotId;
@@ -158,6 +174,17 @@ class AppHoldemProductionSessionSnapshotCoordinator {
   ) {
     return 'snapshot_${tableState.sessionId}_${eventCursor.nextEventSeq - 1}';
   }
+}
+
+int _validateMaxRecoveryEvents(int value) {
+  if (value <= 0) {
+    throw ArgumentError.value(
+      value,
+      'maxRecoveryEvents',
+      'Recovery event limit must be positive.',
+    );
+  }
+  return value;
 }
 
 class _SnapshotCheckpoint {

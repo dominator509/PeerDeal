@@ -140,6 +140,30 @@ Risks:
   provisioning, device/runtime validation, other-platform hosts,
   cross-device networking, and release signing remain external boundaries.
 
+### 2026-08-11 - Codex - T154 Snapshot Coordinator Recovery Bound
+
+Summary:
+- Mirrored snapshot coordinators now enforce the configured recovery-event
+  limit before copying event suffixes or entering persistence.
+- Configuration factories pass one validated limit into both persistence writer
+  and snapshot coordinator, preventing default drift.
+
+Files changed:
+- Mirrored snapshot coordinators, configuration factories, and focused tests.
+- `HANDOFF_QUEUE.md`, `HANDOFF.md`, `PROJECT_STATE.md`, and readiness records.
+
+Validation:
+- Focused mobile and desktop coordinator and configuration suites passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all checks.
+
+Risks:
+- Product state/database provisioning, device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  external boundaries.
+
 ### 2026-08-11 - Codex - T153 Snapshot Serialization Preflight Hardening
 
 Summary:

@@ -1408,6 +1408,25 @@ Remaining:
   cross-device networking, other-platform hosts, and release signing remain
   separate.
 
+## Recent T154 Snapshot Coordinator Recovery Bound
+
+- Mirrored snapshot coordinators now enforce the configured recovery-event
+  limit before copying event suffixes or entering checkpoint persistence.
+- Configuration factories pass their validated recovery limit into the
+  coordinator, preventing coordinator/persistence default drift.
+- Focused mobile and desktop coordinator and configuration suites cover the
+  bound and invalid-limit failure.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke builds passed;
+  the native-host smoke run passed all app-storage, capture, local-network,
+  transport, and secure-key checks.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## Recent T153 Snapshot Serialization Preflight Hardening
 
 - Mirrored snapshot writers now canonical-encode typed snapshots during

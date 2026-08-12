@@ -123,6 +123,7 @@ class AppHoldemProductionSessionConfigurationFactory {
       );
       final snapshotCoordinator = AppHoldemProductionSessionSnapshotCoordinator(
         persistenceWriter: persistenceWriter,
+        maxRecoveryEvents: _maxRecoveryEvents,
       );
       final configuration =
           await AppHoldemProductionSessionConfiguration.fromPersistedLocalIdentity(

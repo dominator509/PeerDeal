@@ -1280,6 +1280,19 @@ signing, and concrete product state wiring remain external or integration-owned.
 - Focused mobile and desktop transport/route tests cover late receive
   suppression.
 
+## T154 Snapshot Coordinator Recovery Bound
+
+- Mirrored snapshot coordinators now reject event suffixes above their
+  configured recovery limit before copying input or persisting state.
+- Persisted configuration composition passes one validated recovery limit into
+  the persistence writer and snapshot coordinator.
+- Focused mobile and desktop coordinator/configuration suites cover the bound.
+
+Remaining:
+- Product state/database provisioning, Android device/runtime validation,
+  cross-device networking, other-platform hosts, and release signing remain
+  separate.
+
 ## T153 Snapshot Serialization Preflight Hardening
 
 - Mirrored snapshot writers now preflight canonical serialization of typed

@@ -30,31 +30,72 @@ void main() {
     },
   );
 
+  test('fails closed when the snapshot ID factory throws', () async {
+    final store = _ToggleSnapshotStore();
+    final typed = _typedSnapshot();
+    final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+      persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+        store: store,
+      ),
+      snapshotIdFactory: (_, _) => throw StateError('snapshot id failed'),
+    );
+
+    final result = await coordinator.persist(
+      tableState: typed.tableState,
+      handState: typed.handState,
+      eventCursor: typed.eventCursor,
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warnings, ['Holdem snapshot ID could not be created.']);
+    expect(coordinator.lastResult, same(result));
+    expect(coordinator.hasPending, isFalse);
+    expect(store.saveAttempts, 0);
+  });
+
   test(
-    'fails closed when the snapshot ID factory throws',
+    'rejects an oversized event suffix before copying or persisting',
     () async {
       final store = _ToggleSnapshotStore();
-      final typed = _typedSnapshot();
+      final typed = _typedSnapshotAfterEvent();
       final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
         persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
           store: store,
+          maxRecoveryEvents: 1,
         ),
-        snapshotIdFactory: (_, _) => throw StateError('snapshot id failed'),
+        maxRecoveryEvents: 1,
       );
 
       final result = await coordinator.persist(
         tableState: typed.tableState,
         handState: typed.handState,
         eventCursor: typed.eventCursor,
+        events: <EventEnvelope>[_event(), _event()],
       );
 
       expect(result.isSuccess, isFalse);
-      expect(result.warnings, ['Holdem snapshot ID could not be created.']);
-      expect(coordinator.lastResult, same(result));
+      expect(
+        result.warnings,
+        contains(
+          'Holdem snapshot event suffix exceeds the configured recovery event limit.',
+        ),
+      );
       expect(coordinator.hasPending, isFalse);
       expect(store.saveAttempts, 0);
     },
   );
+
+  test('rejects a non-positive coordinator recovery event limit', () {
+    expect(
+      () => AppHoldemProductionSessionSnapshotCoordinator(
+        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+          store: _ToggleSnapshotStore(),
+        ),
+        maxRecoveryEvents: 0,
+      ),
+      throwsArgumentError,
+    );
+  });
 
   test(
     'persists the accepted event suffix before its snapshot checkpoint',

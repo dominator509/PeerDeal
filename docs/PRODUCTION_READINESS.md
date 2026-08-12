@@ -1769,6 +1769,16 @@ and Windows native-host smoke validation pass; product state provisioning,
 device/network validation, other-platform hosts, and release signing remain
 separate.
 
+The T154 follow-up closes the snapshot coordinator recovery-bound mismatch.
+Mirrored snapshot coordinators now enforce the configured recovery-event limit
+before copying event suffixes or entering persistence, and configuration
+factories pass one validated limit into both the persistence writer and
+coordinator. Focused mobile and desktop coordinator/configuration suites cover
+the bound and invalid-limit failure. Full repository gates plus Android debug,
+Windows debug, and Windows native-host smoke validation pass. Product state
+provisioning, device/network validation, other-platform hosts, and release
+signing remain separate.
+
 The T153 follow-up closes the snapshot serialization preflight boundary.
 Mirrored snapshot writers now canonical-encode typed snapshots during
 validation before appending event suffixes; serialization and hashing failures
