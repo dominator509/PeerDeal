@@ -2194,6 +2194,14 @@ markers. Product state provisioning, durable database replacement,
 device/network validation, other-platform hosts, release signing, and final
 navigation/UX validation remain separate.
 
+The T192 follow-up closes the Android multicast permission deployment gap. The
+mobile manifest now declares the existing native transport's required Wi-Fi
+state and multicast-state permissions alongside `INTERNET`, so the Android
+host can acquire its bounded multicast lock on real devices. The Android debug
+APK build passed after the manifest change. Real-device permission/runtime
+behavior, cross-device reachability, release signing, and the remaining
+product-state/database work remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

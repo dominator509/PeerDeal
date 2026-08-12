@@ -154,6 +154,9 @@ socket/Winsock initialization. The generic method-channel capability, send, and
   blocking calls use the same bounded default deadline, accept additive caller
   cancellation, and fail closed on timeout; receipt-route teardown leaves the
   release action uncancelled so native blocking can be disabled.
+The Android manifest declares the Wi-Fi state and multicast-state permissions
+required by its existing multicast lock; this aligns deployment configuration
+with the host implementation without changing the generic bridge contract.
 Device/network
 reachability, real platform discovery, and other-platform transport remain open.
 

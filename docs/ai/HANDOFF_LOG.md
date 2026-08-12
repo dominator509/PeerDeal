@@ -2,6 +2,24 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T192 Android Multicast Permissions
+
+Summary:
+- The mobile Android manifest now declares `ACCESS_WIFI_STATE` and
+  `CHANGE_WIFI_MULTICAST_STATE` for the existing native multicast transport;
+  `INTERNET` remains declared for socket traffic.
+- No transport or protocol behavior changed; the patch aligns deployment
+  permissions with the locked Android host implementation.
+
+Validation:
+- Android debug APK built successfully after the manifest change.
+- Real-device permission behavior and cross-device multicast reachability still
+  require operator/device validation.
+
+Remaining:
+- Product state provisioning, durable database replacement, other-platform
+  hosts, release signing, and final navigation/UX validation remain separate.
+
 ### 2026-08-12 - Codex - T191 Immutable Table Warning Results
 
 Summary:

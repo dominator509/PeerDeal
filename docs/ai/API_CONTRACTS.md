@@ -329,7 +329,9 @@ before validating or encoding the host-private datagram envelope.
 Android and Windows host transports must select a usable operational IPv4
 multicast interface for host membership and outbound sends, and fail closed when
 no usable interface is available. This is host readiness behavior, not a
-discovery or endpoint advertisement protocol.
+discovery or endpoint advertisement protocol. The Android app manifest declares
+the Wi-Fi state and multicast-state permissions required by its existing
+`WifiManager.MulticastLock` path.
 The Android and Windows host implementations require strict UTF-8 for native
 session and peer identity fields and reject C1/control-bearing or padded values
 before queueing received frames or sending datagrams. Host input normalization
