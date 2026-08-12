@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T206 Native Readiness Cancellation Short-Circuit
+
+Summary:
+- Mirrored mobile and desktop native-readiness loaders now check route/startup
+  cancellation before and between capability lookups.
+- Cancellation returns the existing stable all-unavailable readiness warning
+  projection and prevents later legacy non-cancellable bridge calls.
+- Already-dispatched host calls remain host-owned; current method-channel
+  bridges continue to receive the cancellation signal directly.
+
+Files changed:
+- Mirrored `app_native_readiness_loader.dart` implementations.
+- Mirrored native-readiness focused tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Mobile native-readiness suite: 10 tests passed.
+- Desktop native-readiness suite: 10 tests passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Non-cancellable work already in flight cannot be interrupted by the app
+  shell. Device/runtime capability truth, cross-device reachability,
+  production database/state wiring, other-platform hosts, and release signing
+  remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T205 Production Session Load Cancellation
 
 Summary:

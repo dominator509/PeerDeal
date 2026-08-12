@@ -81,6 +81,32 @@ void main() {
     ]);
   });
 
+  test('does not invoke later readiness bridges after cancellation', () async {
+    final cancellation = Completer<void>();
+    final localNetwork = _CountingLocalNetworkBridge();
+    final nativeTransport = _CountingNativeTransportBridge();
+    final secureStorage = _CountingSecureKeyStorageBridge();
+    final loader = AppNativeReadinessLoader(
+      captureProtectionBridge: _CancellingCaptureProtectionBridge(cancellation),
+      localNetworkBridge: localNetwork,
+      nativeTransportBridge: nativeTransport,
+      secureKeyStorageBridge: secureStorage,
+    );
+
+    final snapshot = await loader.load(cancellation: cancellation.future);
+
+    expect(snapshot.allCapabilitiesReady, isFalse);
+    expect(snapshot.warnings, <String>[
+      'native capture protection unavailable',
+      'native local-network discovery unavailable',
+      'native transport unavailable',
+      'native secure-key storage unavailable',
+    ]);
+    expect(localNetwork.capabilityLookups, 0);
+    expect(nativeTransport.capabilityLookups, 0);
+    expect(secureStorage.loadLookups, 0);
+  });
+
   test(
     'fails closed with stable warnings when native capabilities are absent',
     () async {
@@ -344,6 +370,76 @@ class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
   }) async {
     namespaces.add(namespace);
     return snapshot;
+  }
+}
+
+class _CancellingCaptureProtectionBridge implements CaptureProtectionBridge {
+  _CancellingCaptureProtectionBridge(this.cancellation);
+
+  final Completer<void> cancellation;
+
+  @override
+  Future<CaptureProtectionCapability> getCapability() async {
+    if (!cancellation.isCompleted) cancellation.complete();
+    return const CaptureProtectionCapability(
+      blockingSupported: true,
+      obscuringSupported: true,
+      notes: 'ready',
+    );
+  }
+}
+
+class _CountingLocalNetworkBridge extends _FakeLocalNetworkBridge {
+  _CountingLocalNetworkBridge()
+    : super(
+        capability: const LocalNetworkCapability(
+          discoverySupported: true,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: 'ready',
+        ),
+      );
+
+  int capabilityLookups = 0;
+
+  @override
+  Future<LocalNetworkCapability> getCapability() async {
+    capabilityLookups += 1;
+    return super.getCapability();
+  }
+}
+
+class _CountingNativeTransportBridge extends _FakeNativeTransportBridge {
+  _CountingNativeTransportBridge()
+    : super(
+        capability: const NativeTransportCapability(
+          available: true,
+          sendSupported: true,
+          receiveSupported: true,
+          maxPayloadBytes: 1024,
+          notes: 'ready',
+        ),
+      );
+
+  @override
+  Future<NativeTransportCapability> getCapability() async {
+    capabilityLookups += 1;
+    return super.getCapability();
+  }
+}
+
+class _CountingSecureKeyStorageBridge extends _FakeSecureKeyStorageBridge {
+  _CountingSecureKeyStorageBridge()
+    : super(snapshot: SecureKeyStorageSnapshot(available: true, keys: []));
+
+  int loadLookups = 0;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    loadLookups += 1;
+    return super.loadKeyRing(namespace: namespace);
   }
 }
 

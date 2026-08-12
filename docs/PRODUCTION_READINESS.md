@@ -2320,6 +2320,15 @@ successfully.
 This does not supply product-owned state/database inputs or prove native/device,
 cross-device, other-platform, or release-signing readiness.
 
+The T206 follow-up closes the remaining app-native-readiness cancellation
+traversal gap. Mirrored readiness loaders now check cancellation before and
+between capability lookups, return the existing stable all-unavailable warning
+projection, and avoid invoking later legacy non-cancellable bridges after a
+stale loader is cancelled. An already-dispatched host call remains host-owned.
+Focused mobile and desktop readiness suites pass; full analyze, boundary,
+source-text, serialized test, dependency-audit, and diff gates pass; Android
+debug APK and Windows debug artifacts build successfully.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

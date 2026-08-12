@@ -64,22 +64,38 @@ class AppNativeReadinessLoader {
   Future<AppNativeReadinessSnapshot> load({Future<void>? cancellation}) async {
     final warnings = <String>[];
 
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledSnapshot(warnings);
+    }
+
     final captureProtectionReady = await _loadCaptureProtection(
       warnings,
       cancellation: cancellation,
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledSnapshot(warnings);
+    }
     final localNetworkDiscoveryReady = await _loadLocalNetwork(
       warnings,
       cancellation: cancellation,
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledSnapshot(warnings);
+    }
     final nativeTransportReady = await _loadNativeTransport(
       warnings,
       cancellation: cancellation,
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledSnapshot(warnings);
+    }
     final secureKeyStorageReady = await _loadSecureKeyStorage(
       warnings,
       cancellation: cancellation,
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledSnapshot(warnings);
+    }
 
     return AppNativeReadinessSnapshot(
       captureProtectionReady: captureProtectionReady,
@@ -87,6 +103,25 @@ class AppNativeReadinessLoader {
       nativeTransportReady: nativeTransportReady,
       secureKeyStorageReady: secureKeyStorageReady,
       warnings: List<String>.unmodifiable(warnings),
+    );
+  }
+
+  AppNativeReadinessSnapshot _cancelledSnapshot(List<String> warnings) {
+    const unavailableWarnings = <String>[
+      'native capture protection unavailable',
+      'native local-network discovery unavailable',
+      'native transport unavailable',
+      'native secure-key storage unavailable',
+    ];
+    for (final warning in unavailableWarnings) {
+      if (!warnings.contains(warning)) warnings.add(warning);
+    }
+    return AppNativeReadinessSnapshot(
+      captureProtectionReady: false,
+      localNetworkDiscoveryReady: false,
+      nativeTransportReady: false,
+      secureKeyStorageReady: false,
+      warnings: warnings,
     );
   }
 
@@ -198,5 +233,16 @@ class AppNativeReadinessLoader {
     }
     if (namespace.contains('::')) return false;
     return true;
+  }
+
+  Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+    if (cancellation == null) return false;
+    var requested = false;
+    cancellation.then<void>(
+      (_) => requested = true,
+      onError: (Object _, StackTrace _) => requested = true,
+    );
+    await Future<void>.value();
+    return requested;
   }
 }
