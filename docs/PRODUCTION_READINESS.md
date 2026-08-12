@@ -2339,6 +2339,15 @@ mobile and desktop bootstrap suites pass; full analyze, boundary, source-text,
 serialized test, dependency-audit, and diff gates pass; Android debug APK and
 Windows debug artifacts build successfully.
 
+The T208 follow-up closes the app-owned hydrated-session identity boundary.
+Mirrored mobile and desktop production-session factories now apply the shared
+native transport UTF-8, control-character, and byte-size validator to hydrated
+table, session, and protocol identities before constructing the app runtime,
+persistence, or native transport route. Focused mobile and desktop
+production-factory suites pass; full analyze, boundary, source-text,
+serialized test, dependency-audit, and diff gates pass; Android debug APK and
+Windows debug artifacts build successfully.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

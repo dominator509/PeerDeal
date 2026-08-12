@@ -56,6 +56,32 @@ void main() {
       expect(() => _create(peerId: peerId), throwsArgumentError);
       expect(() => _create(localPeerId: peerId), throwsArgumentError);
     }
+    for (final tableId in <String>[
+      'table_${String.fromCharCode(0x85)}',
+      'x' * 257,
+    ]) {
+      expect(
+        () => _create(
+          initialTableState: _initialTableState(tableId: tableId),
+          initialCursor: _initialCursor(tableId: tableId),
+        ),
+        throwsArgumentError,
+      );
+    }
+    expect(
+      () => _create(
+        initialTableState: _initialTableState(sessionId: 'session_\n001'),
+        initialCursor: _initialCursor(sessionId: 'session_\n001'),
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => _create(
+        initialTableState: _initialTableState(protocolVersion: 'x' * 257),
+        initialCursor: _initialCursor(protocolVersion: 'x' * 257),
+      ),
+      throwsArgumentError,
+    );
     expect(() => _create(localSeat: 4), throwsArgumentError);
     expect(
       () => _create(pollInterval: const Duration(milliseconds: 50)),
@@ -115,19 +141,27 @@ EventEnvelope _event({required int seq, String prevHash = ''}) {
   );
 }
 
-TableState _initialTableState() {
+TableState _initialTableState({
+  String tableId = 'table_001',
+  String sessionId = 'session_001',
+  String protocolVersion = '1.0.0',
+}) {
   return TableState.initial(
-    tableId: 'table_001',
-    sessionId: 'session_001',
-    protocolVersion: '1.0.0',
+    tableId: tableId,
+    sessionId: sessionId,
+    protocolVersion: protocolVersion,
   );
 }
 
-HoldemEventCursor _initialCursor({String tableId = 'table_001'}) {
+HoldemEventCursor _initialCursor({
+  String tableId = 'table_001',
+  String sessionId = 'session_001',
+  String protocolVersion = '1.0.0',
+}) {
   return HoldemEventCursor(
-    protocolVersion: '1.0.0',
+    protocolVersion: protocolVersion,
     tableId: tableId,
-    sessionId: 'session_001',
+    sessionId: sessionId,
     nextEventSeq: 1,
     previousEventHash: genesisEventHash,
     actorRef: 'peer_local',

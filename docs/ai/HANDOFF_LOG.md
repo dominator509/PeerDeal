@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T208 Hydrated Session Identity Boundary
+
+Summary:
+- Mirrored mobile and desktop production-session factories now validate
+  hydrated table, session, and protocol identities against the shared native
+  transport UTF-8, control-character, and byte-size bound.
+- Unsafe or oversized product state fails before app runtime, persistence, or
+  native transport composition.
+
+Files changed:
+- Mirrored `app_holdem_production_session_factory.dart` implementations.
+- Mirrored production-factory focused tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Mobile production-factory suite: 3 tests passed.
+- Desktop production-factory suite: 3 tests passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Product-owned state hydration, durable database choice, native/device and
+  cross-device validation, other-platform hosts, and release signing remain
+  external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T207 Bootstrap Scope Validation
 
 Summary:

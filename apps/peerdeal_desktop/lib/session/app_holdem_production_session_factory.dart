@@ -57,6 +57,18 @@ class AppHoldemProductionSessionFactory {
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
   }) {
     _validateRouteMetadata(path: path, navigationLabel: navigationLabel);
+    _validateTransportIdentity(
+      initialTableState.tableId,
+      'initialTableState.tableId',
+    );
+    _validateTransportIdentity(
+      initialTableState.sessionId,
+      'initialTableState.sessionId',
+    );
+    _validateTransportIdentity(
+      initialTableState.protocolVersion,
+      'initialTableState.protocolVersion',
+    );
     _validatePeerIdentity(peerId, 'peerId');
     _validatePeerIdentity(localPeerId, 'localPeerId');
     if (peerId == localPeerId) {
@@ -144,6 +156,10 @@ class AppHoldemProductionSessionFactory {
   }
 
   static void _validatePeerIdentity(String value, String name) {
+    _validateTransportIdentity(value, name);
+  }
+
+  static void _validateTransportIdentity(String value, String name) {
     if (!NativeBridgePayloadLimits.isSafeUtf8Text(
       value,
       NativeBridgePayloadLimits.maxTransportIdentityBytes,
