@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T204 Demo Recovery Read Fail-Closed
+
+Summary:
+- Mirrored mobile and desktop demo table routes now consume
+  `RecoveryPersistenceLoadResultStore` when available.
+- Corrupt, locked, oversized, or otherwise unavailable recovery windows now
+  render as unavailable in the demo surface instead of appearing as zero
+  persisted events.
+- Compatibility remains for legacy stores that only implement `loadWindow`.
+
+Files changed:
+- Mirrored `demo_table_screen.dart` implementations and focused tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Mobile demo-table suite: 7 tests passed.
+- Desktop demo-table suite: 7 tests passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- The compatibility fallback remains for externally supplied legacy stores.
+  Product database/state wiring, native/device validation, cross-device
+  reachability, other-platform hosts, and release signing remain external or
+  integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T203 Durable Recovery Load Fail-Closed
 
 Summary:

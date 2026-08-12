@@ -2295,6 +2295,16 @@ Android debug APK and Windows debug artifacts built successfully. This does
 not replace product-owned database persistence or prove native/device,
 cross-device, other-platform, or release-signing readiness.
 
+The T204 follow-up closes the remaining user-facing demo recovery read path.
+Mirrored mobile and desktop demo table routes now consume the explicit sync
+load-result contract and render recovery persistence as unavailable when a
+stored window cannot be read, instead of projecting an empty window as zero
+events. Focused mobile and desktop demo-table suites passed; full analyze,
+boundary, source-text, test, dependency-audit, and diff gates passed; Android
+debug APK and Windows debug artifacts built successfully. Native/device,
+cross-device, product-state/database, other-platform, and release-signing
+validation remain separate production-boundary work.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

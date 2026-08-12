@@ -146,7 +146,18 @@ class _DemoTableRouteState extends State<DemoTableRoute> {
         );
       }
 
-      final window = store.loadWindow(scope);
+      final RecoveryPersistenceLoadResult loadResult =
+          store is RecoveryPersistenceLoadResultStore
+          ? (store as RecoveryPersistenceLoadResultStore).loadWindowResult(
+              scope,
+            )
+          : RecoveryPersistenceLoadResult.success(store.loadWindow(scope));
+      if (!loadResult.isSuccess) {
+        return DemoRecoveryPersistenceLoadResult.unavailable(
+          warnings: <String>['Recovery persistence window unavailable.'],
+        );
+      }
+      final window = loadResult.window;
       final persistedEventCount = _safePersistedEventCount(window);
       return DemoRecoveryPersistenceLoadResult.available(
         persistedEventCount: persistedEventCount,

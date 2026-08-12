@@ -247,6 +247,31 @@ void main() {
     expect(source.state, AppTableSessionTransportSourceState.disposed);
   });
 
+  testWidgets('fails closed when recovery loading reports unavailable', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _tableRoute(
+        recoveryPersistenceStoreFactory: _UnavailableRecoveryFactory(),
+        runtimeScopeFactory: (_) => const RecoveryPersistenceScope(
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          protocolVersion: '1.x',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Recovery persistence: unavailable'), findsOneWidget);
+    expect(
+      find.text(
+        'Recovery persistence warning: '
+        'Recovery persistence window unavailable.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('cancels bootstrap loaders on replacement and disposal', (
     tester,
   ) async {
@@ -359,5 +384,34 @@ class _TrackingNativeBootstrapCandidateLoader
   void cancel() {
     cancelled = true;
     super.cancel();
+  }
+}
+
+class _UnavailableRecoveryFactory extends AppRecoveryPersistenceStoreFactory {
+  _UnavailableRecoveryFactory()
+    : super(rootDirectoryFactory: () => Directory.systemTemp);
+
+  @override
+  AppRecoveryPersistenceStoreLoadResult create() {
+    return AppRecoveryPersistenceStoreLoadResult.available(
+      store: _UnavailableRecoveryStore(),
+    );
+  }
+}
+
+class _UnavailableRecoveryStore extends InMemoryRecoveryPersistenceStore {
+  @override
+  RecoveryPersistenceLoadResult loadWindowResult(
+    RecoveryPersistenceScope scope,
+  ) {
+    return RecoveryPersistenceLoadResult.failure(
+      conflicts: <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_FILE_CORRUPT',
+          message: 'Recovery persistence file could not be decoded.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ],
+    );
   }
 }
