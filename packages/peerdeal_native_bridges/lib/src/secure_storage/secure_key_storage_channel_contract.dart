@@ -39,11 +39,15 @@ class SecureKeyStorageChannelContract {
     }
 
     final keys = <SecureKeyRecord>[];
+    final keyIds = <String>{};
     for (final keyPayload in keyPayloads) {
       final key = _decodeKey(keyPayload);
-      if (key != null && key.isUsable) {
-        keys.add(key);
+      if (key == null || !keyIds.add(key.keyId)) {
+        return const SecureKeyStorageSnapshot.unavailable(
+          warning: 'Secure key storage snapshot is invalid.',
+        );
       }
+      keys.add(key);
     }
 
     return SecureKeyStorageSnapshot(
@@ -81,7 +85,8 @@ class SecureKeyStorageChannelContract {
     if (keyId is! String ||
         purpose is! String ||
         algorithm is! String ||
-        secret is! String) {
+        secret is! String ||
+        active is! bool) {
       return null;
     }
 

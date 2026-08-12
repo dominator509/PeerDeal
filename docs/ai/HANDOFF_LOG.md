@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T200 Secure-Key Snapshot Integrity
+
+Summary:
+- The shared secure-key method-channel decoder now fails closed when a native
+  snapshot contains malformed records or duplicate key IDs.
+- Invalid records are no longer silently discarded, preventing partial key-ring
+  state from reaching receipt provisioning or verification.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused native bridge channel-contract suite passed.
+- Full analyze, boundary-check, source-text, dependency-audit, and repository
+  test gates passed.
+- Android debug APK, Windows debug, and Windows native-host smoke validation
+  passed, including secure-key CAS/read-back/delete markers.
+
+Risks:
+- Real-device/native host behavior on other platforms, product state/database
+  wiring, and release signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T199 Android Secure-Key Atomic Replacement
 
 Summary:
@@ -10528,6 +10554,26 @@ Risks:
 - Cross-process/native storage atomicity, runtime/device persistence,
   operator-owned release signing, and product database/state wiring remain
   external or integration-owned.
+
+---
+
+### 2026-08-12 - Codex - Secure-Key Snapshot Integrity
+
+Summary:
+- The shared secure-key method-channel decoder now fails closed when a native
+  snapshot contains malformed records or duplicate key IDs.
+- Invalid records are no longer silently discarded, preventing partial key-ring
+  state from reaching receipt provisioning or verification.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused `peerdeal_native_bridges` channel-contract suite: passed.
+- Full repository gates remain required before commit.
+
 
 ---
 

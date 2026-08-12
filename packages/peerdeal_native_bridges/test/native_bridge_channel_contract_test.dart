@@ -409,7 +409,7 @@ void main() {
     expect(snapshot.warning, contains('unavailable'));
   });
 
-  test('secure key storage channel contract tolerates malformed fields', () {
+  test('secure key storage channel contract rejects malformed fields', () {
     final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(
       const <String, Object?>{
         'available': true,
@@ -433,11 +433,9 @@ void main() {
       },
     );
 
-    expect(snapshot.available, isTrue);
-    expect(snapshot.warning, isNull);
-    expect(snapshot.keys, hasLength(1));
-    expect(snapshot.keys.single.keyId, 'receipt_signing_1');
-    expect(snapshot.keys.single.active, isFalse);
+    expect(snapshot.available, isFalse);
+    expect(snapshot.warning, 'Secure key storage snapshot is invalid.');
+    expect(snapshot.keys, isEmpty);
   });
 
   test('secure key storage channel contract bounds records and key fields', () {
@@ -500,10 +498,39 @@ void main() {
 
     expect(tooManyRecords.available, isFalse);
     expect(tooManyRecords.keys, isEmpty);
-    expect(oversizedKey.available, isTrue);
+    expect(oversizedKey.available, isFalse);
     expect(oversizedKey.keys, isEmpty);
-    expect(oversizedUtf8Key.available, isTrue);
+    expect(oversizedUtf8Key.available, isFalse);
     expect(oversizedUtf8Key.keys, isEmpty);
+  });
+
+  test('secure key storage channel contract rejects duplicate key ids', () {
+    final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(
+      <String, Object?>{
+        'available': true,
+        'revision': 1,
+        'keys': <Object?>[
+          <String, Object?>{
+            'keyId': 'receipt_signing_1',
+            'purpose': 'receipt_signing',
+            'algorithm': 'hmac-sha256',
+            'secret': 'signing_secret_1',
+            'active': true,
+          },
+          <String, Object?>{
+            'keyId': 'receipt_signing_1',
+            'purpose': 'receipt_signing',
+            'algorithm': 'hmac-sha256',
+            'secret': 'replacement_secret',
+            'active': false,
+          },
+        ],
+      },
+    );
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.warning, 'Secure key storage snapshot is invalid.');
+    expect(snapshot.keys, isEmpty);
   });
 
   test('secure key storage channel contract encodes key records', () {

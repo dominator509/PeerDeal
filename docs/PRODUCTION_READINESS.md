@@ -2262,6 +2262,14 @@ and enables subsequent receipt-key updates and rotations after the first save.
 Focused mobile receipt/key-ring suites and the Android debug APK build pass;
 real-device secure-key persistence remains external validation.
 
+The T200 follow-up closes a secure-key channel integrity gap. The shared
+method-channel decoder now rejects malformed or duplicate native key records
+as an unavailable snapshot instead of silently dropping records and exposing
+partial key-ring state to receipt provisioning or verification. Focused native
+bridge contract coverage, full repository gates, Android debug, Windows debug,
+and Windows native-host smoke validation pass. Platform/device behavior,
+other-platform storage, product state, and release signing remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
