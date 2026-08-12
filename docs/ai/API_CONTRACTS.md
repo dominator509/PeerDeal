@@ -166,6 +166,12 @@ Production navigation labels and paths must also not collide
 case-insensitively with enabled demo home navigation entries.
 Production navigation and home composition remain app-shell work and should
 replace or extend app routes without moving route policy into shared packages.
+Mirrored mobile and desktop runtime constructors snapshot join/setup mode gates,
+enabled demo paths, production route maps, production navigation descriptors,
+and native-readiness route gates before exposing them to app-shell routing.
+Those public collections are read-only views; `withOverrides` applies the same
+snapshot boundary to replacement collections, so callers must not rely on
+mutating runtime configuration after construction.
 Mounted receipt surfaces scrub receipt/recovery status, messages, shareable
 fields, recommended actions, and diagnostics before rendering. Rendered receipt
 shareable fields and recovery diagnostics must be bounded with stable

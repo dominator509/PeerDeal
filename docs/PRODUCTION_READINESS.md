@@ -2146,6 +2146,18 @@ and smoke validation pass. Product state provisioning, device/network
 validation, other-platform hosts, release signing, and final navigation/UX
 validation remain separate.
 
+The T188 follow-up closes mirrored app runtime configuration ownership.
+`PeerDealMobileRuntime` and `PeerDealDesktopRuntime` now snapshot join/setup
+mode gates, enabled demo paths, production route maps, production navigation,
+and native-readiness route gates at construction; `withOverrides` applies the
+same snapshot boundary to replacement collections. Focused mobile and desktop
+runtime ownership tests passed, and both full app-shell suites passed. Full
+repository analyze, boundary, source-text, dependency-audit, test, and diff
+gates passed. Android debug, Windows debug, and Windows native-host smoke
+validation also passed, including all 16 native-host smoke markers. Product
+state provisioning, device/network validation, other-platform hosts, release
+signing, and final navigation/UX validation remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -774,7 +774,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const PeerDealDesktopApp(
+      PeerDealDesktopApp(
         runtime: PeerDealDesktopRuntime(
           setupFlowEnabledModes: <SetupFlowDemoMode>{
             SetupFlowDemoMode.buildReady,
@@ -947,7 +947,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const PeerDealDesktopApp(
+      PeerDealDesktopApp(
         runtime: PeerDealDesktopRuntime(
           enabledDemoRoutePaths: <String>{
             DemoSliceRoutes.home,
@@ -973,7 +973,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const PeerDealDesktopApp(
+      PeerDealDesktopApp(
         runtime: PeerDealDesktopRuntime(
           enabledDemoRoutePaths: <String>{
             DemoSliceRoutes.home,
@@ -1881,7 +1881,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(
-      const PeerDealDesktopApp(
+      PeerDealDesktopApp(
         runtime: PeerDealDesktopRuntime(
           productionNavigation: <PeerDealAppNavigationEntry>[
             PeerDealAppNavigationEntry(label: 'Missing', path: '/missing'),
@@ -1978,7 +1978,7 @@ void main() {
 
   testWidgets('rejects initial routes that are not mounted', (tester) async {
     await tester.pumpWidget(
-      const PeerDealDesktopApp(
+      PeerDealDesktopApp(
         runtime: PeerDealDesktopRuntime(
           enabledDemoRoutePaths: <String>{DemoSliceRoutes.home},
           initialRoute: DemoSliceRoutes.receipt,

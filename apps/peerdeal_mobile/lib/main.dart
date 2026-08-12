@@ -79,7 +79,7 @@ Future<void> main() async {
 }
 
 class PeerDealMobileRuntime {
-  const PeerDealMobileRuntime({
+  PeerDealMobileRuntime({
     this.receiptPresenter,
     this.receiptArtifactVerifierFactory,
     this.receiptExportArtifact,
@@ -88,12 +88,12 @@ class PeerDealMobileRuntime {
     this.receiptFactory,
     this.joinFlowOrchestratorFactory,
     this.joinFlowInviteContextFactory,
-    this.joinFlowEnabledModes,
+    Set<JoinFlowDemoMode>? joinFlowEnabledModes,
     this.joinFlowReadyHandler,
     this.joinFlowSessionReadyHandler,
     this.setupFlowOrchestratorFactory,
     this.setupFlowIntentFactory,
-    this.setupFlowEnabledModes,
+    Set<SetupFlowDemoMode>? setupFlowEnabledModes,
     this.bootstrapCandidateLoaderFactory,
     this.recoveryPersistenceStoreFactory,
     this.tableRuntimeScopeFactory,
@@ -103,14 +103,34 @@ class PeerDealMobileRuntime {
     this.holdemProductionSession,
     this.holdemProductionSessionConfigurationFactory,
     this.holdemProductionSessionConfigurationLoader,
-    this.enabledDemoRoutePaths,
-    this.productionRoutes,
-    this.productionNavigation,
+    Set<String>? enabledDemoRoutePaths,
+    PeerDealAppRouteMap? productionRoutes,
+    List<PeerDealAppNavigationEntry>? productionNavigation,
     this.homeSurfaceBuilder,
     this.nativeReadinessLoader,
-    this.nativeReadinessRequiredRoutePaths,
+    Set<String>? nativeReadinessRequiredRoutePaths,
     this.initialRoute,
-  });
+  }) : joinFlowEnabledModes = joinFlowEnabledModes == null
+           ? null
+           : Set<JoinFlowDemoMode>.unmodifiable(joinFlowEnabledModes),
+       setupFlowEnabledModes = setupFlowEnabledModes == null
+           ? null
+           : Set<SetupFlowDemoMode>.unmodifiable(setupFlowEnabledModes),
+       enabledDemoRoutePaths = enabledDemoRoutePaths == null
+           ? null
+           : Set<String>.unmodifiable(enabledDemoRoutePaths),
+       productionRoutes = productionRoutes == null
+           ? null
+           : Map<String, WidgetBuilder>.unmodifiable(productionRoutes),
+       productionNavigation = productionNavigation == null
+           ? null
+           : List<PeerDealAppNavigationEntry>.unmodifiable(
+               productionNavigation,
+             ),
+       nativeReadinessRequiredRoutePaths =
+           nativeReadinessRequiredRoutePaths == null
+           ? null
+           : Set<String>.unmodifiable(nativeReadinessRequiredRoutePaths);
 
   final DemoReceiptSurfacePresenter? receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory;
@@ -382,7 +402,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   Object? _activeProductionSessionLoad;
 
   PeerDealMobileRuntime get _runtime {
-    return (widget._runtime ?? const PeerDealMobileRuntime()).withOverrides(
+    return (widget._runtime ?? PeerDealMobileRuntime()).withOverrides(
       receiptPresenter: widget._receiptPresenter,
       receiptArtifactVerifierFactory: widget._receiptArtifactVerifierFactory,
       receiptExportArtifact: widget._receiptExportArtifact,

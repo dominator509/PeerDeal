@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T188 Immutable App Runtime Configuration
+
+Summary:
+- Mirrored mobile and desktop runtime objects now snapshot join/setup mode
+  gates, enabled demo paths, production route maps, production navigation,
+  and native-readiness route gates at construction.
+- `withOverrides` re-enters the same ownership boundary, so caller mutation
+  cannot change mounted route or readiness policy after runtime composition.
+- Only app-shell runtime construction and its mirrored tests changed; package
+  boundaries and native bridge contracts are unchanged.
+
+Validation:
+- Focused mobile and desktop runtime ownership suites passed two tests each.
+- Full mobile and desktop app-shell suites passed 83 tests each.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Product state provisioning, durable database replacement, device/network
+  validation, other-platform hosts, release signing, and final navigation/UX
+  validation remain external or integration-owned.
+
 ### 2026-08-12 - Codex - T187 Immutable Join Handoff Collections
 
 Summary:
