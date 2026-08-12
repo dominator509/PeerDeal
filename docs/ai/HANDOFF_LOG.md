@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T207 Bootstrap Scope Validation
+
+Summary:
+- Mirrored mobile and desktop join bootstrap coordinators now validate direct
+  session/table scope inputs with the shared native transport identity bound.
+- Blank, padded, control-bearing, and oversized UTF-8 scope values preserve
+  relay fallback before native capability lookup, local discovery, or provider
+  resolution.
+
+Files changed:
+- Mirrored `native_join_bootstrap_coordinator.dart` implementations.
+- Mirrored native-join focused tests.
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Mobile bootstrap-coordinator suite: 12 tests passed.
+- Desktop bootstrap-coordinator suite: 12 tests passed.
+- Full analyze, boundary-check, source-text, serialized test,
+  dependency-audit, and `git diff --check` gates passed.
+- Android debug APK and Windows debug artifact builds passed.
+
+Risks:
+- Native/device behavior, cross-device reachability, product state/database
+  wiring, other-platform hosts, and release signing remain external or
+  integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T206 Native Readiness Cancellation Short-Circuit
 
 Summary:

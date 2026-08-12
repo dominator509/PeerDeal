@@ -2329,6 +2329,16 @@ Focused mobile and desktop readiness suites pass; full analyze, boundary,
 source-text, serialized test, dependency-audit, and diff gates pass; Android
 debug APK and Windows debug artifacts build successfully.
 
+The T207 follow-up closes the app-owned bootstrap scope boundary. Mirrored
+mobile and desktop join coordinators now apply the shared native transport
+identity UTF-8, control-character, and byte-size validator to direct
+session/table scope inputs before native capability lookup, local discovery, or
+provider resolution. Unsafe or oversized scope therefore preserves relay
+fallback without crossing the app-owned native/network boundary. Focused
+mobile and desktop bootstrap suites pass; full analyze, boundary, source-text,
+serialized test, dependency-audit, and diff gates pass; Android debug APK and
+Windows debug artifacts build successfully.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

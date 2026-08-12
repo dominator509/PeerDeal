@@ -265,6 +265,43 @@ void main() {
     },
   );
 
+  test(
+    'keeps relay fallback before native lookup for unsafe or oversized scope',
+    () async {
+      for (final tableId in <String>[
+        'table-1\nsecret',
+        'x' * (NativeBridgePayloadLimits.maxTransportIdentityBytes + 1),
+      ]) {
+        final provider = _RecordingBootstrapCandidateProvider();
+        final bridge = _CountingLocalNetworkBridge();
+        final coordinator = NativeJoinBootstrapCoordinator(
+          bridge: bridge,
+          provider: provider,
+        );
+
+        final plan = await coordinator.buildPlan(
+          resolvedInvite: ResolvedInvite(
+            inviteId: 'invite-1',
+            tableId: tableId,
+            sessionId: 'sess-1',
+            modeType: 'open_table',
+            protocolVersion: '1.0.0',
+            requiresReceiptAck: true,
+            requiresRetentionAck: true,
+            requiresCaptureAck: true,
+          ),
+          roleGrant: _roleGrant,
+        );
+
+        expect(plan.peerCandidates, isEmpty, reason: tableId);
+        expect(plan.relayFallbackAllowed, isTrue, reason: tableId);
+        expect(provider.request, isNull, reason: tableId);
+        expect(bridge.capabilityLookups, 0, reason: tableId);
+        expect(bridge.discoveryLookups, 0, reason: tableId);
+      }
+    },
+  );
+
   test('keeps relay fallback when local discovery is unavailable', () async {
     final coordinator = NativeJoinBootstrapCoordinator(
       bridge: _ThrowingLocalNetworkBridge(),
