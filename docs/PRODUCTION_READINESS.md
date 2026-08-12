@@ -1821,6 +1821,14 @@ frame decoding. Durable database replacement, real product state selection,
 device/network validation, other-platform hosts, release signing, and final UX
 remain separate.
 
+The T169 follow-up closes the app-session diagnostic ownership gap. Mirrored
+`AppTableSessionEventResult` and `AppHoldemInboundEventResult` constructors now
+defensively copy and freeze warning lists, so caller-owned input cannot mutate
+projected diagnostics and result warning collections reject mutation. Focused
+mobile and desktop runtime suites cover both properties. Durable database
+replacement, real product state selection, device/network validation,
+other-platform hosts, release signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

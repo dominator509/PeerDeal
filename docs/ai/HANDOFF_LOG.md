@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T169 Immutable App-Session Diagnostics
+
+Summary:
+- Mirrored app session and Hold'em inbound result constructors now defensively
+  copy and freeze warning lists.
+- Focused mobile and desktop Flutter runtime suites prove source-list isolation
+  and mutation rejection on projected diagnostics.
+
+Validation:
+- Focused mobile suite: passed 18 tests.
+- Focused desktop suite: passed 18 tests.
+- Full analyze, boundary-check, source-text, dependency-audit, and serialized
+  repository test gates passed.
+- Mobile debug APK and desktop Windows debug artifacts built successfully.
+- Windows native-host smoke passed app storage, capture, local-network,
+  transport, secure-key CAS/tombstone, and capture-release markers.
+
+Remaining:
+- Durable database replacement, real product state selection, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T168 Inbound Event Checkpoint Identity
 
 Summary:

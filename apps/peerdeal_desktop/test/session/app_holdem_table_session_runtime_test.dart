@@ -13,6 +13,21 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('copies and freezes inbound warning diagnostics', () {
+    final runtime = _runtime(_preflopState());
+    final warnings = <String>['warning_1'];
+    final result = AppHoldemInboundEventResult.rejected(
+      handState: runtime.handState,
+      cursor: runtime.cursor,
+      reasonCode: 'ERR_TEST',
+      warnings: warnings,
+    );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('commits start and action projections through the app session', () {
     final runtime = _runtime(_preflopState());
 
@@ -38,49 +53,55 @@ void main() {
     expect(runtime.cursor.nextEventSeq, 4);
   });
 
-  test('publishes accepted projections as canonical transport frames', () async {
-    final runtime = _runtime(_preflopState());
-    final projection = runtime.startHand();
-    final sender = _RecordingTransportSender();
-    final publisher = AppHoldemProjectionTransportPublisher(
-      sender: sender,
-      localPeerId: 'peer_local',
-      remotePeerId: 'peer_remote',
-    );
-
-    final result = await publisher.publish(projection);
-
-    expect(result.isComplete, isTrue);
-    expect(result.sentEventCount, 1);
-    expect(sender.frames.single.fromPeerId, 'peer_local');
-    expect(sender.frames.single.toPeerId, 'peer_remote');
-    expect(sender.frames.single.sequence, projection.events.single.eventSeq);
-    expect(
-      const EventEnvelopeCodec().decode(sender.frames.single.payload).eventId,
-      projection.events.single.eventId,
-    );
-  });
-
-  test('rejects unsafe peer identities before sending projection frames', () async {
-    final projection = _runtime(_preflopState()).startHand();
-    for (final peers in <List<String>>[
-      <String>['peer_${String.fromCharCode(0x85)}', 'peer_remote'],
-      <String>['peer_local', 'x' * 257],
-    ]) {
+  test(
+    'publishes accepted projections as canonical transport frames',
+    () async {
+      final runtime = _runtime(_preflopState());
+      final projection = runtime.startHand();
       final sender = _RecordingTransportSender();
       final publisher = AppHoldemProjectionTransportPublisher(
         sender: sender,
-        localPeerId: peers[0],
-        remotePeerId: peers[1],
+        localPeerId: 'peer_local',
+        remotePeerId: 'peer_remote',
       );
 
       final result = await publisher.publish(projection);
 
-      expect(result.isComplete, isFalse);
-      expect(result.reasonCode, 'ERR_HOLDEM_PROJECTION_PEER_ID_INVALID');
-      expect(sender.frames, isEmpty);
-    }
-  });
+      expect(result.isComplete, isTrue);
+      expect(result.sentEventCount, 1);
+      expect(sender.frames.single.fromPeerId, 'peer_local');
+      expect(sender.frames.single.toPeerId, 'peer_remote');
+      expect(sender.frames.single.sequence, projection.events.single.eventSeq);
+      expect(
+        const EventEnvelopeCodec().decode(sender.frames.single.payload).eventId,
+        projection.events.single.eventId,
+      );
+    },
+  );
+
+  test(
+    'rejects unsafe peer identities before sending projection frames',
+    () async {
+      final projection = _runtime(_preflopState()).startHand();
+      for (final peers in <List<String>>[
+        <String>['peer_${String.fromCharCode(0x85)}', 'peer_remote'],
+        <String>['peer_local', 'x' * 257],
+      ]) {
+        final sender = _RecordingTransportSender();
+        final publisher = AppHoldemProjectionTransportPublisher(
+          sender: sender,
+          localPeerId: peers[0],
+          remotePeerId: peers[1],
+        );
+
+        final result = await publisher.publish(projection);
+
+        expect(result.isComplete, isFalse);
+        expect(result.reasonCode, 'ERR_HOLDEM_PROJECTION_PEER_ID_INVALID');
+        expect(sender.frames, isEmpty);
+      }
+    },
+  );
 
   test('reports partial publication without replaying variant rules', () async {
     final runtime = _runtime(_showdownState());
@@ -168,44 +189,47 @@ void main() {
     expect(runtime.cursor.nextEventSeq, 4);
   });
 
-  test('keeps variant and cursor state unchanged when core rejects inbound event', () {
-    const adapter = HoldemCoreProjectionAdapter();
-    final initial = _preflopState();
-    final started = adapter.startHand(
-      coreState: _openCoreState(),
-      handState: initial,
-      cursor: _cursor(),
-    );
-    final action = adapter.applyAction(
-      coreState: started.coreState,
-      handState: started.handState,
-      cursor: started.cursor,
-      action: const HoldemTableAction(
-        actorSeat: 1,
-        type: HoldemTableActionType.call,
-      ),
-      dealtBoardCards: const <String>['Ah', 'Kd', '2c'],
-      openNextBettingRound: true,
-    );
-    final event = _cursor()
-        .issue(
-          eventType: action.events.single.eventType,
-          handId: initial.handId,
-          payload: action.events.single.payload,
-        )
-        .event;
-    final runtime = _runtime(initial);
-    final handBefore = runtime.handState;
-    final cursorBefore = runtime.cursor;
+  test(
+    'keeps variant and cursor state unchanged when core rejects inbound event',
+    () {
+      const adapter = HoldemCoreProjectionAdapter();
+      final initial = _preflopState();
+      final started = adapter.startHand(
+        coreState: _openCoreState(),
+        handState: initial,
+        cursor: _cursor(),
+      );
+      final action = adapter.applyAction(
+        coreState: started.coreState,
+        handState: started.handState,
+        cursor: started.cursor,
+        action: const HoldemTableAction(
+          actorSeat: 1,
+          type: HoldemTableActionType.call,
+        ),
+        dealtBoardCards: const <String>['Ah', 'Kd', '2c'],
+        openNextBettingRound: true,
+      );
+      final event = _cursor()
+          .issue(
+            eventType: action.events.single.eventType,
+            handId: initial.handId,
+            payload: action.events.single.payload,
+          )
+          .event;
+      final runtime = _runtime(initial);
+      final handBefore = runtime.handState;
+      final cursorBefore = runtime.cursor;
 
-    final result = runtime.applyRemoteEvent(event);
+      final result = runtime.applyRemoteEvent(event);
 
-    expect(result.isRejected, isTrue);
-    expect(result.reasonCode, 'ERR_HAND_EVENT_WITHOUT_ACTIVE_HAND');
-    expect(runtime.handState, same(handBefore));
-    expect(runtime.cursor, same(cursorBefore));
-    expect(runtime.coreState.eventSequence, 1);
-  });
+      expect(result.isRejected, isTrue);
+      expect(result.reasonCode, 'ERR_HAND_EVENT_WITHOUT_ACTIVE_HAND');
+      expect(runtime.handState, same(handBefore));
+      expect(runtime.cursor, same(cursorBefore));
+      expect(runtime.coreState.eventSequence, 1);
+    },
+  );
 
   test('rejects invalid actions without advancing app or variant state', () {
     final runtime = _runtime(_preflopState());

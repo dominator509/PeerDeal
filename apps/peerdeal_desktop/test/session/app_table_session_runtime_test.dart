@@ -16,6 +16,20 @@ void main() {
   );
   final closedAt = DateTime.utc(2026, 8, 9, 12);
 
+  test('copies and freezes single-event warning diagnostics', () {
+    final runtime = _runtime(scope: scope, store: _FakeRecoveryStore());
+    final warnings = <String>['warning_1'];
+    final result = AppTableSessionEventResult.rejected(
+      state: runtime.state,
+      reasonCode: 'ERR_TEST',
+      warnings: warnings,
+    );
+
+    warnings.add('warning_2');
+    expect(result.warnings, ['warning_1']);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('projects ordered events through core and enforces close retention', () {
     final store = _FakeRecoveryStore();
     final runtime = _runtime(scope: scope, store: store);

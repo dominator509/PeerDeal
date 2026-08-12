@@ -47,16 +47,16 @@ class AppHoldemProjectionResult {
 enum AppHoldemInboundEventDisposition { applied, rejected }
 
 class AppHoldemInboundEventResult {
-  const AppHoldemInboundEventResult._({
+  AppHoldemInboundEventResult._({
     required this.disposition,
     required this.handState,
     required this.cursor,
     this.sessionResult,
     this.reasonCode,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
-  const AppHoldemInboundEventResult.applied({
+  AppHoldemInboundEventResult.applied({
     required HoldemHandState handState,
     required HoldemEventCursor cursor,
     required AppTableSessionEventResult sessionResult,
@@ -67,7 +67,7 @@ class AppHoldemInboundEventResult {
          sessionResult: sessionResult,
        );
 
-  const AppHoldemInboundEventResult.rejected({
+  AppHoldemInboundEventResult.rejected({
     required HoldemHandState handState,
     required HoldemEventCursor cursor,
     required String reasonCode,

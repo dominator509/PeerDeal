@@ -7,16 +7,16 @@ import '../recovery/app_recovery_session_close_event_adapter.dart';
 enum AppTableSessionEventDisposition { applied, rejected }
 
 class AppTableSessionEventResult {
-  const AppTableSessionEventResult._({
+  AppTableSessionEventResult._({
     required this.disposition,
     required this.state,
     this.acceptedEvent,
     this.recoveryResult,
     this.reasonCode,
-    this.warnings = const <String>[],
-  });
+    List<String> warnings = const <String>[],
+  }) : warnings = List<String>.unmodifiable(warnings);
 
-  const AppTableSessionEventResult.applied({
+  AppTableSessionEventResult.applied({
     required TableState state,
     required EventEnvelope acceptedEvent,
     AppRecoverySessionCloseEventResult? recoveryResult,
@@ -29,7 +29,7 @@ class AppTableSessionEventResult {
          warnings: warnings,
        );
 
-  const AppTableSessionEventResult.rejected({
+  AppTableSessionEventResult.rejected({
     required TableState state,
     required String reasonCode,
     AppRecoverySessionCloseEventResult? recoveryResult,

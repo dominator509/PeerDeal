@@ -1327,6 +1327,16 @@ Remaining:
   validation, other-platform hosts, release signing, and final UX remain
   separate.
 
+## T169 Immutable App-Session Diagnostics
+
+- Mirrored app session and Hold'em inbound result constructors now defensively
+  copy and freeze warning diagnostics.
+- Focused mobile and desktop runtime tests prove caller-owned warning lists are
+  isolated and result warning collections reject mutation.
+- Remaining work is unchanged: durable database replacement, real product state
+  selection, device/network validation, other-platform hosts, release signing,
+  and final UX.
+
 ## T168 Inbound Event Checkpoint Identity
 
 - Mirrored app session event results now carry the exact accepted
