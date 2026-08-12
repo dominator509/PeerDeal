@@ -275,7 +275,7 @@ void main() {
 }
 
 PotSlice _potSlice() {
-  return const PotSlice(
+  return PotSlice(
     sliceIndex: 0,
     amount: 1,
     contestedBySeatIds: <String>['seat-1'],

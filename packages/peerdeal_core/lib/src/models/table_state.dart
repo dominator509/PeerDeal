@@ -1,11 +1,12 @@
 import 'package:meta/meta.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
+import 'model_collection_ownership.dart';
 import 'table_phase.dart';
 
 @immutable
 class TableState {
-  const TableState({
+  TableState({
     required this.tableId,
     required this.sessionId,
     required this.phase,
@@ -15,8 +16,8 @@ class TableState {
     required this.playersConnected,
     required this.playersSeated,
     required this.activeHandId,
-    required this.metadata,
-  });
+    required Map<String, Object?> metadata,
+  }) : metadata = freezeCoreObjectMap(metadata);
 
   factory TableState.initial({
     String tableId = 'table_1',
@@ -170,7 +171,7 @@ class TableState {
       }
       entries.add(MapEntry(entry.key as String, entry.value));
     }
-    return Map<String, Object?>.unmodifiable(<String, Object?>{
+    return freezeCoreObjectMap(<String, Object?>{
       for (final entry in entries) entry.key: entry.value,
     });
   }

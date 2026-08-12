@@ -1,9 +1,9 @@
 class PotSlice {
-  const PotSlice({
+  PotSlice({
     required this.sliceIndex,
     required this.amount,
-    required this.contestedBySeatIds,
-  });
+    required List<String> contestedBySeatIds,
+  }) : contestedBySeatIds = List<String>.unmodifiable(contestedBySeatIds);
 
   final int sliceIndex;
   final int amount;

@@ -376,6 +376,12 @@ per slice by default. Overflow returns blocked `SettlementResult` warnings
 `ERR_CORE_SETTLEMENT_WINNER_SLICE_COUNT`, or
 `ERR_CORE_SETTLEMENT_WINNER_COUNT`.
 
+Core truth models own caller-provided collections at construction:
+`TableState` recursively freezes metadata, `PotSlice` freezes contested seat
+IDs, and `SettlementResult` freezes slices, awards, ledger deltas, and warning
+lists. Callers must treat these public collections as read-only projections;
+core reducers and settlement policies remain the owners of replacement state.
+
 `HoldemEventCursor.toJson/fromJson` persist and restore the cursor's exact
 scope, next sequence, previous hash, actor, and last-event state. Hydration
 requires caller-owned event-id and timestamp factories and accepts an optional

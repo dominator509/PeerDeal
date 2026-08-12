@@ -14,12 +14,15 @@ class PotAward {
 }
 
 class SettlementResult {
-  const SettlementResult({
-    required this.slices,
-    required this.awards,
-    required this.ledgerDeltas,
-    this.warnings = const <String>[],
-  });
+  SettlementResult({
+    required List<PotSlice> slices,
+    required List<PotAward> awards,
+    required List<LedgerDelta> ledgerDeltas,
+    List<String> warnings = const <String>[],
+  }) : slices = List<PotSlice>.unmodifiable(slices),
+       awards = List<PotAward>.unmodifiable(awards),
+       ledgerDeltas = List<LedgerDelta>.unmodifiable(ledgerDeltas),
+       warnings = List<String>.unmodifiable(warnings);
 
   final List<PotSlice> slices;
   final List<PotAward> awards;

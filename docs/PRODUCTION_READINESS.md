@@ -1940,6 +1940,15 @@ pass. Platform-secure storage, provider-specific proof semantics, product
 verification wiring, durable database replacement, device/network validation,
 other-platform hosts, release signing, and final UX remain separate.
 
+The T182 follow-up closes the remaining core state and settlement collection
+ownership gap. `TableState` now recursively freezes caller-owned metadata,
+`PotSlice` owns its contested-seat list, and `SettlementResult` owns slices,
+awards, ledger deltas, and warnings at construction. Focused core ownership
+coverage, the full `peerdeal_core` suite, the repository gates, both app builds,
+and the Windows native-host smoke pass. Product state provisioning, durable
+database replacement, device/network validation, other-platform hosts, release
+signing, and final UX remain separate.
+
 The T163 follow-up closes the app-owned receipt key-ring text-boundary gap.
 Mirrored receipt key-ring loaders and writers now reuse the locked native
 secure-key UTF-8 validator and byte limits for namespaces, key IDs, and

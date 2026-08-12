@@ -32,6 +32,8 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
   identity boundaries
 - variant-agnostic pot settlement bounds before side-pot or award traversal:
   64 commitments, 64 winning slice-map entries, and 64 winners per slice
+- public table-state metadata and pot-settlement result collections are
+  defensively copied and recursively frozen at construction
 
 ## Intended next implementation moves
 1. wire real Hold'em hand lifecycle state machine output into core projection

@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T182 Immutable Core Collections
+
+Summary:
+- `TableState` now recursively freezes caller-owned metadata before exposing
+  deterministic state.
+- `PotSlice` owns its contested-seat collection, and `SettlementResult` owns
+  slices, awards, ledger deltas, and warning collections at construction.
+- The change stays inside `peerdeal_core`; no reducer, variant-rule, receipt,
+  native, or app policy boundaries were moved.
+
+Validation:
+- Focused `peerdeal_core` suite: passed 56 tests, including the new ownership
+  regression; package and affected-package analysis passed.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates passed; dependency audit reports zero actionable upgrades.
+- Android debug APK, Windows debug, and dedicated Windows native-host smoke
+  artifacts built successfully; all 16 native-host smoke markers passed.
+
+Remaining:
+- Product state provisioning, durable database replacement, device/network
+  validation, other-platform hosts, release signing, and final UX remain
+  external or integration-owned.
+
 ### 2026-08-12 - Codex - T181 Immutable Receipt Collections
 
 Summary:
