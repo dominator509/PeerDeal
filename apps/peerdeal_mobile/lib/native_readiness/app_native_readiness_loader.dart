@@ -2,6 +2,8 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 
 const _defaultSecureKeyNamespace = 'peerdeal.receipts';
 const _defaultNativeTransportMaxPayloadBytes = 64 * 1024;
+const _maximumWarningCount = 4;
+const _maximumWarningLength = 160;
 
 class AppNativeReadinessSnapshot {
   AppNativeReadinessSnapshot({
@@ -10,7 +12,7 @@ class AppNativeReadinessSnapshot {
     required this.nativeTransportReady,
     required this.secureKeyStorageReady,
     required List<String> warnings,
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeNativeReadinessWarnings(warnings);
 
   final bool captureProtectionReady;
   final bool localNetworkDiscoveryReady;
@@ -102,7 +104,7 @@ class AppNativeReadinessLoader {
       localNetworkDiscoveryReady: localNetworkDiscoveryReady,
       nativeTransportReady: nativeTransportReady,
       secureKeyStorageReady: secureKeyStorageReady,
-      warnings: List<String>.unmodifiable(warnings),
+      warnings: warnings,
     );
   }
 
@@ -245,4 +247,28 @@ class AppNativeReadinessLoader {
     await Future<void>.value();
     return requested;
   }
+}
+
+List<String> _safeNativeReadinessWarnings(List<String> warnings) {
+  final truncated = warnings.length > _maximumWarningCount;
+  final valueLimit = truncated
+      ? _maximumWarningCount - 1
+      : _maximumWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Native readiness warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Native readiness warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }

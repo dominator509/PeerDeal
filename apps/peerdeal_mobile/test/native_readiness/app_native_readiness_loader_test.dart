@@ -20,6 +20,29 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct readiness warnings', () {
+    final result = AppNativeReadinessSnapshot(
+      captureProtectionReady: false,
+      localNetworkDiscoveryReady: false,
+      nativeTransportReady: false,
+      secureKeyStorageReady: false,
+      warnings: <String>[
+        'warning_1',
+        ' warning_2',
+        'line\nfeed',
+        'warning_4',
+        'warning_5',
+      ],
+    );
+
+    expect(result.warnings, [
+      'warning_1',
+      'Native readiness warning unavailable.',
+      'Native readiness warning unavailable.',
+      'Native readiness warnings truncated.',
+    ]);
+  });
+
   test('reports ready when all native capabilities are available', () async {
     final secureStorage = _FakeSecureKeyStorageBridge(
       snapshot: SecureKeyStorageSnapshot(available: true, keys: []),

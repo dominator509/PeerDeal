@@ -2453,6 +2453,11 @@ models now apply the same text and collection limits before warnings reach the
 provisioner or transport source, preserving fail-closed behavior for direct
 callers without changing the generic native bridge contract.
 
+The T223 follow-up closes the native-readiness aggregate warning boundary.
+Mirrored `AppNativeReadinessSnapshot` construction now applies the same
+control-free text and four-entry collection budget to direct callers while
+preserving the loader's stable capability warning vocabulary.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

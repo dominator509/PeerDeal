@@ -49,6 +49,28 @@ Risks:
 
 ---
 
+### 2026-08-12 - Codex - T223 Bound Native Readiness Warnings
+
+Summary:
+- Mirrored `AppNativeReadinessSnapshot` constructors now scrub control-bearing,
+  padded, and oversized warning text at the app-shell aggregate boundary.
+- Direct readiness snapshots cap warnings at four entries with a stable
+  truncation marker; loader-produced capability warnings remain unchanged.
+- Added mirrored direct-snapshot regression coverage.
+
+Verification:
+- Mirrored mobile and desktop native-readiness suites passed.
+- Full repository analyze, boundary, source-text, dependency, and test gates
+  passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, durable product state, other-platform hosts, and release
+  signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:
