@@ -39,7 +39,7 @@ class AppTableSessionTransportProvisioner {
     required String peerId,
   }) async {
     if (!_isValidIdentity(peerId)) {
-      return const AppTableSessionTransportProvisionResult.unavailable(
+      return AppTableSessionTransportProvisionResult.unavailable(
         warnings: <String>['Native transport peer identity is invalid.'],
       );
     }
@@ -53,19 +53,19 @@ class AppTableSessionTransportProvisioner {
     try {
       final loadedResult = await _loadSession(handler: handler);
       if (loadedResult == null) {
-        return const AppTableSessionTransportProvisionResult.unavailable(
+        return AppTableSessionTransportProvisionResult.unavailable(
           warnings: <String>['Native transport session load cancelled.'],
         );
       }
       loaded = loadedResult;
     } on Object {
-      return const AppTableSessionTransportProvisionResult.unavailable(
+      return AppTableSessionTransportProvisionResult.unavailable(
         warnings: <String>['Native transport session could not be loaded.'],
       );
     }
 
     if (await _isCancellationSignaled()) {
-      return const AppTableSessionTransportProvisionResult.unavailable(
+      return AppTableSessionTransportProvisionResult.unavailable(
         warnings: <String>['Native transport session load cancelled.'],
       );
     }
@@ -153,25 +153,10 @@ class AppTableSessionTransportProvisioner {
   }
 
   static List<String> _safeWarnings(
-    Iterable<String> warnings, {
+    List<String> warnings, {
     required String fallback,
   }) {
-    const maximumWarningCount = 4;
-    const maximumWarningLength = 160;
-    final safe = <String>[];
-    for (final warning in warnings) {
-      if (safe.length == maximumWarningCount) break;
-      final trimmed = warning.trim();
-      safe.add(
-        trimmed.isEmpty ||
-                trimmed != warning ||
-                warning.length > maximumWarningLength ||
-                warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
-            ? fallback
-            : warning,
-      );
-    }
-    return List<String>.unmodifiable(safe);
+    return _safeTransportProvisionWarnings(warnings, fallback: fallback);
   }
 }
 
@@ -183,7 +168,10 @@ class AppTableSessionTransportProvisionResult {
     this.session,
     this.source,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeTransportProvisionWarnings(
+         warnings,
+         fallback: 'Native transport session warning unavailable.',
+       );
 
   AppTableSessionTransportProvisionResult.available({
     required AppTableSessionRuntime runtime,
@@ -200,13 +188,17 @@ class AppTableSessionTransportProvisionResult {
          warnings: warnings,
        );
 
-  const AppTableSessionTransportProvisionResult.unavailable({
-    this.warnings = const <String>[],
+  AppTableSessionTransportProvisionResult.unavailable({
+    List<String> warnings = const <String>[],
   }) : available = false,
        runtime = null,
        handler = null,
        session = null,
-       source = null;
+       source = null,
+       warnings = _safeTransportProvisionWarnings(
+         warnings,
+         fallback: 'Native transport session warning unavailable.',
+       );
 
   final bool available;
   final AppTableSessionRuntime? runtime;
@@ -214,4 +206,31 @@ class AppTableSessionTransportProvisionResult {
   final NativeTransportSession? session;
   final AppTableSessionTransportSource? source;
   final List<String> warnings;
+}
+
+List<String> _safeTransportProvisionWarnings(
+  List<String> warnings, {
+  required String fallback,
+}) {
+  const maximumWarningCount = 4;
+  const maximumWarningLength = 160;
+  final truncated = warnings.length > maximumWarningCount;
+  final valueLimit = truncated ? maximumWarningCount - 1 : maximumWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? fallback
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Native transport session warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }

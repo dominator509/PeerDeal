@@ -2439,6 +2439,14 @@ markers, and normalize negative counts to zero. Screen-level scrubbing remains
 in place, but direct callers can no longer bypass the app-owned collection and
 counter budgets before rendering.
 
+The T221 follow-up closes the mirrored transport-result warning boundary.
+Native frame-drain, transport-source, and transport-provision result models now
+scrub control-bearing, padded, and oversized warning text at construction,
+bound warning collections to four entries, and preserve explicit truncation
+markers. Lower-layer markers are translated at the source boundary so callers
+receive stable source-level diagnostics without retaining unbounded bridge
+payloads.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

@@ -14,6 +14,21 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('bounds direct transport provision warnings', () {
+    final warnings = List<String>.generate(5, (index) => 'warning_$index');
+    final result = AppTableSessionTransportProvisionResult.unavailable(
+      warnings: warnings,
+    );
+
+    expect(result.warnings, [
+      'warning_0',
+      'warning_1',
+      'warning_2',
+      'Native transport session warnings truncated.',
+    ]);
+    expect(() => result.warnings.add('warning_6'), throwsUnsupportedError);
+  });
+
   test(
     'provisions a handler and scoped source from a loaded session',
     () async {

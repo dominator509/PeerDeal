@@ -28,7 +28,7 @@ class AppTableSessionTransportPollResult {
     required this.acceptedFrameCount,
     required this.rejectedFrameCount,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeTransportSourceWarnings(warnings);
 
   AppTableSessionTransportPollResult.unavailable({
     List<String> warnings = const <String>[],
@@ -36,7 +36,7 @@ class AppTableSessionTransportPollResult {
        receivedFrameCount = 0,
        acceptedFrameCount = 0,
        rejectedFrameCount = 0,
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _safeTransportSourceWarnings(warnings);
 
   final bool available;
   final int receivedFrameCount;
@@ -52,7 +52,7 @@ class AppTableSessionTransportSourceStartResult {
     required this.started,
     required this.alreadyRunning,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeTransportSourceWarnings(warnings);
 
   AppTableSessionTransportSourceStartResult.started()
     : started = true,
@@ -68,7 +68,7 @@ class AppTableSessionTransportSourceStartResult {
     List<String> warnings = const <String>[],
   }) : started = false,
        alreadyRunning = false,
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _safeTransportSourceWarnings(warnings);
 
   final bool started;
   final bool alreadyRunning;
@@ -290,7 +290,7 @@ class AppTableSessionTransportSource {
       receivedFrameCount: drainResult.results.length,
       acceptedFrameCount: acceptedFrameCount,
       rejectedFrameCount: rejectedFrameCount,
-      warnings: _safeWarnings(drainResult.warnings),
+      warnings: _safeTransportSourceWarnings(drainResult.warnings),
     );
   }
 
@@ -330,34 +330,41 @@ class AppTableSessionTransportSource {
     return null;
   }
 
-  static List<String> _safeWarnings(List<String> warnings) {
-    final safe = <String>[];
-    for (final warning in warnings) {
-      if (safe.length == _maximumWarningCount) break;
-      final trimmed = warning.trim();
-      if (trimmed.isEmpty ||
-          trimmed != warning ||
-          _hasControlCharacter(warning)) {
-        safe.add('Native transport source warning unavailable.');
-        continue;
-      }
-      safe.add(
-        warning.length > _maximumWarningLength
-            ? 'Native transport source warning unavailable.'
-            : warning,
-      );
-    }
-    return List<String>.unmodifiable(safe);
-  }
-
   static bool _isValidScope(String value) {
     return NativeBridgePayloadLimits.isSafeUtf8Text(
       value,
       NativeBridgePayloadLimits.maxTransportIdentityBytes,
     );
   }
+}
 
-  static bool _hasControlCharacter(String value) {
-    return value.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f);
+List<String> _safeTransportSourceWarnings(List<String> warnings) {
+  final truncated = warnings.length > _maximumWarningCount;
+  final valueLimit = truncated
+      ? _maximumWarningCount - 1
+      : _maximumWarningCount;
+  final safe = <String>[];
+  var lowerLayerTruncated = false;
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    if (warning == 'Native transport warnings truncated.') {
+      lowerLayerTruncated = true;
+      continue;
+    }
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Native transport source warning unavailable.'
+          : warning == 'Native transport warning unavailable.'
+          ? 'Native transport source warning unavailable.'
+          : warning,
+    );
   }
+  if (truncated || lowerLayerTruncated) {
+    safe.add('Native transport source warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }

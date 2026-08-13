@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 
+const _maximumWarningCount = 4;
+const _maximumWarningLength = 160;
+
 class NativeTransportFrameSink implements TransportFrameSink {
   const NativeTransportFrameSink({
     required NativeTransportBridge bridge,
@@ -44,7 +47,10 @@ class NativeTransportFrameDrain {
     : _bridge = null,
       _receiver = null,
       _maxFramesPerDrain = 0,
-      _unavailableWarnings = List<String>.unmodifiable(warnings);
+      _unavailableWarnings = _safeNativeTransportWarnings(
+        warnings,
+        fallback: 'Native transport warning unavailable.',
+      );
 
   final NativeTransportBridge? _bridge;
   final TransportFrameReceiver? _receiver;
@@ -195,17 +201,50 @@ class NativeTransportFrameDrainResult {
     required List<TransportFrameReceiveResult> results,
     List<String> warnings = const <String>[],
   }) : results = List<TransportFrameReceiveResult>.unmodifiable(results),
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _safeNativeTransportWarnings(
+         warnings,
+         fallback: 'Native transport warning unavailable.',
+       );
 
   NativeTransportFrameDrainResult.unavailable({
     List<String> warnings = const <String>[],
   }) : available = false,
        results = const <TransportFrameReceiveResult>[],
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _safeNativeTransportWarnings(
+         warnings,
+         fallback: 'Native transport warning unavailable.',
+       );
 
   final bool available;
   final List<TransportFrameReceiveResult> results;
   final List<String> warnings;
+}
+
+List<String> _safeNativeTransportWarnings(
+  List<String> warnings, {
+  required String fallback,
+}) {
+  final truncated = warnings.length > _maximumWarningCount;
+  final valueLimit = truncated
+      ? _maximumWarningCount - 1
+      : _maximumWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? fallback
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Native transport warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }
 
 NativeTransportFrame _toNativeFrame(TransportFrame frame) {

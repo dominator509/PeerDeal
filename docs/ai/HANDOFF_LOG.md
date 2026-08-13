@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-12 - Codex - T221 Bound Transport Result Warnings
+
+Summary:
+- Mirrored native frame-drain, transport-source, and transport-provision result
+  models now scrub unsafe warning text at construction.
+- Warning collections are capped at four entries with stable truncation markers;
+  source-level markers preserve the existing diagnostic contract across the
+  lower-level frame boundary.
+- Added mirrored direct-constructor regressions for bounds, scrubbing, and
+  immutable outputs.
+
+Verification:
+- Mirrored mobile and desktop transport-focused suites passed.
+- Full repository analyze, boundary, source-text, dependency, and test gates
+  passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, durable product state, other-platform hosts, and release
+  signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:

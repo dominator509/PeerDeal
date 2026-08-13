@@ -28,6 +28,24 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds direct transport result warnings', () {
+    final warnings = List<String>.generate(5, (index) => 'warning_$index');
+    final poll = AppTableSessionTransportPollResult.unavailable(
+      warnings: warnings,
+    );
+    final start = AppTableSessionTransportSourceStartResult.unavailable(
+      warnings: warnings,
+    );
+
+    expect(poll.warnings, [
+      'warning_0',
+      'warning_1',
+      'warning_2',
+      'Native transport source warnings truncated.',
+    ]);
+    expect(start.warnings, poll.warnings);
+  });
+
   test('polls a drain and counts accepted and rejected frames', () async {
     final source = AppTableSessionTransportSource(
       sessionId: 'session_1',
@@ -272,7 +290,7 @@ void main() {
       'Native transport source warning unavailable.',
       'Native transport source warning unavailable.',
       'Native transport source warning unavailable.',
-      'warning_1',
+      'Native transport source warnings truncated.',
     ]);
   });
 

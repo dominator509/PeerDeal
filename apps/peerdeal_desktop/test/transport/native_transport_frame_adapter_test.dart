@@ -25,6 +25,27 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct native frame drain warnings', () {
+    final result = NativeTransportFrameDrainResult(
+      available: false,
+      results: const <TransportFrameReceiveResult>[],
+      warnings: <String>[
+        'warning_1',
+        ' warning_2',
+        'line\nfeed',
+        'warning_4',
+        'warning_5',
+      ],
+    );
+
+    expect(result.warnings, [
+      'warning_1',
+      'Native transport warning unavailable.',
+      'Native transport warning unavailable.',
+      'Native transport warnings truncated.',
+    ]);
+  });
+
   test('sends validated network frames through native transport', () async {
     final bridge = _FakeNativeTransportBridge();
     final sender = ValidatingTransportFrameSender(

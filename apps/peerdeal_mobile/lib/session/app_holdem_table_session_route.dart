@@ -209,11 +209,11 @@ class _AppHoldemTableSessionRouteState
     AsyncSnapshot<AppTableSessionTransportProvisionResult> snapshot,
   ) {
     if (snapshot.hasError) {
-      return const AppTableSessionTransportProvisionResult.unavailable(
+      return AppTableSessionTransportProvisionResult.unavailable(
         warnings: <String>['Production table transport unavailable.'],
       );
     }
-    return const AppTableSessionTransportProvisionResult.unavailable();
+    return AppTableSessionTransportProvisionResult.unavailable();
   }
 }
 
