@@ -1,5 +1,8 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 
+const _maximumWarningCount = 4;
+const _maximumWarningLength = 160;
+
 class AppLocalPeerIdentity {
   const AppLocalPeerIdentity({required this.peerId});
 
@@ -11,7 +14,7 @@ class AppLocalPeerIdentityLoadResult {
     this.identity,
     this.revision = 0,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeLocalIdentityWarnings(warnings);
 
   final AppLocalPeerIdentity? identity;
   final int revision;
@@ -19,6 +22,30 @@ class AppLocalPeerIdentityLoadResult {
 
   bool get isAvailable => identity != null && warnings.isEmpty;
   bool get isMissing => identity == null && warnings.isEmpty;
+}
+
+List<String> _safeLocalIdentityWarnings(List<String> warnings) {
+  final truncated = warnings.length > _maximumWarningCount;
+  final valueLimit = truncated
+      ? _maximumWarningCount - 1
+      : _maximumWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Local peer identity warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Local peer identity warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }
 
 /// Maps one generic secure-key record into the app-owned local peer identity.

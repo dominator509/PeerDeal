@@ -71,6 +71,31 @@ Risks:
 
 ---
 
+### 2026-08-12 - Codex - T224 Bound Local Identity Warnings
+
+Summary:
+- Mirrored local identity load and provision result constructors now scrub
+  control-bearing, padded, and oversized warning text.
+- Both result types cap direct warning collections at four entries with stable
+  labels and truncation markers while preserving existing success/missing
+  semantics.
+- Added mirrored direct-result regression coverage alongside existing
+  cancellation, single-flight, revision, and persistence read-back tests.
+
+Verification:
+- Mirrored mobile and desktop local-identity suites passed.
+- Full repository analyze, boundary, source-text, dependency, and test gates
+  passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, cross-process/device persistence, durable product state,
+  other-platform hosts, and release signing remain external or
+  integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:

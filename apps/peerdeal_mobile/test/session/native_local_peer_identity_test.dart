@@ -25,6 +25,40 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct local identity warnings', () {
+    final load = AppLocalPeerIdentityLoadResult(
+      warnings: <String>[
+        'warning_1',
+        ' warning_2',
+        'line\nfeed',
+        'warning_4',
+        'warning_5',
+      ],
+    );
+    final provision = AppLocalPeerIdentityProvisionResult(
+      warnings: <String>[
+        'warning_1',
+        ' warning_2',
+        'line\nfeed',
+        'warning_4',
+        'warning_5',
+      ],
+    );
+
+    expect(load.warnings, [
+      'warning_1',
+      'Local peer identity warning unavailable.',
+      'Local peer identity warning unavailable.',
+      'Local peer identity warnings truncated.',
+    ]);
+    expect(provision.warnings, [
+      'warning_1',
+      'Local peer identity provisioning warning unavailable.',
+      'Local peer identity provisioning warning unavailable.',
+      'Local peer identity provisioning warnings truncated.',
+    ]);
+  });
+
   test('loads one active local peer identity record', () async {
     final bridge = _MemorySecureKeyBridge(
       keys: const <SecureKeyRecord>[

@@ -2458,6 +2458,11 @@ Mirrored `AppNativeReadinessSnapshot` construction now applies the same
 control-free text and four-entry collection budget to direct callers while
 preserving the loader's stable capability warning vocabulary.
 
+The T224 follow-up closes the local identity result warning boundary. Mirrored
+load and provision result constructors now scrub unsafe warning text and cap
+direct warning collections at four entries with stable labels, before identity
+diagnostics reach persisted-session composition or route surfaces.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

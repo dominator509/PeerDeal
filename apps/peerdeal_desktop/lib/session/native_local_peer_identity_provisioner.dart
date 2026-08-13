@@ -7,6 +7,9 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'native_local_peer_identity_loader.dart';
 import 'native_local_peer_identity_writer.dart';
 
+const _maximumWarningCount = 4;
+const _maximumWarningLength = 160;
+
 typedef AppLocalPeerIdentityFactory = String Function();
 
 class AppLocalPeerIdentityProvisionResult {
@@ -14,13 +17,37 @@ class AppLocalPeerIdentityProvisionResult {
     this.identity,
     List<String> warnings = const <String>[],
     this.created = false,
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeLocalIdentityProvisionWarnings(warnings);
 
   final AppLocalPeerIdentity? identity;
   final List<String> warnings;
   final bool created;
 
   bool get isSuccess => identity != null && warnings.isEmpty;
+}
+
+List<String> _safeLocalIdentityProvisionWarnings(List<String> warnings) {
+  final truncated = warnings.length > _maximumWarningCount;
+  final valueLimit = truncated
+      ? _maximumWarningCount - 1
+      : _maximumWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Local peer identity provisioning warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Local peer identity provisioning warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }
 
 class NativeLocalPeerIdentityProvisioner {
