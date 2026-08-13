@@ -2432,6 +2432,13 @@ the shared safe UTF-8 transport-identity limit before any native capability
 lookup or provider resolution. Control-bearing, padded, empty, or oversized
 scope values fail closed consistently with the production join coordinator.
 
+The T220 follow-up closes the direct demo-table result materialization gap.
+Mirrored bootstrap and recovery result models now cap candidates, warnings,
+and persisted-event display counts at construction, preserve stable truncation
+markers, and normalize negative counts to zero. Screen-level scrubbing remains
+in place, but direct callers can no longer bypass the app-owned collection and
+counter budgets before rendering.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

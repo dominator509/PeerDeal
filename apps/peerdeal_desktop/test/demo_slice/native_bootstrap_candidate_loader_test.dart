@@ -4,6 +4,31 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('bounds directly constructed bootstrap result collections', () {
+    final result = NativeBootstrapCandidateLoadResult(
+      discoveryAvailable: true,
+      nativeNotes: 'available',
+      candidates: List<BootstrapCandidate>.generate(
+        NativeBootstrapCandidateLoadResult.maxCandidateCount + 4,
+        (index) => BootstrapCandidate(
+          peerId: 'peer_$index',
+          routeClass: NetworkRouteClass.lanDirect,
+          reachable: true,
+          priority: index,
+        ),
+      ),
+      warnings: List<String>.generate(12, (index) => 'warning_$index'),
+    );
+
+    expect(
+      result.candidates,
+      hasLength(NativeBootstrapCandidateLoadResult.maxCandidateCount),
+    );
+    expect(result.warnings, hasLength(8));
+    expect(result.warnings.first, 'Bootstrap candidates truncated.');
+    expect(result.warnings.last, 'Bootstrap warnings truncated.');
+  });
+
   test('copies and freezes bootstrap candidates and warnings', () {
     final candidates = <BootstrapCandidate>[
       const BootstrapCandidate(

@@ -15,6 +15,28 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 void main() {
+  test('bounds directly constructed recovery result state', () {
+    final result = DemoRecoveryPersistenceLoadResult.available(
+      persistedEventCount: 999,
+      hasSnapshot: true,
+      warnings: List<String>.generate(12, (index) => 'warning_$index'),
+    );
+
+    expect(
+      result.persistedEventCount,
+      DemoRecoveryPersistenceLoadResult.maxPersistedEventCount,
+    );
+    expect(result.warnings, hasLength(8));
+    expect(result.warnings.first, 'Recovery persistence events truncated.');
+    expect(result.warnings.last, 'Recovery persistence warnings truncated.');
+
+    final negative = DemoRecoveryPersistenceLoadResult.available(
+      persistedEventCount: -1,
+      hasSnapshot: false,
+    );
+    expect(negative.persistedEventCount, 0);
+  });
+
   test('snapshots demo recovery warning lists', () {
     final availableWarnings = <String>['available_warning'];
     final available = DemoRecoveryPersistenceLoadResult.available(

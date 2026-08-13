@@ -48,6 +48,29 @@ Risks:
 
 ---
 
+### 2026-08-12 - Codex - T220 Bound Demo Table Result Models
+
+Summary:
+- Mirrored `NativeBootstrapCandidateLoadResult` constructors now cap candidate
+  and warning collections and retain stable truncation markers.
+- Mirrored `DemoRecoveryPersistenceLoadResult` constructors now cap warnings,
+  normalize negative counts, and cap persisted-event display counts with an
+  explicit truncation marker.
+- Screen-level warning scrubbing remains the final presentation boundary.
+
+Verification:
+- Mirrored mobile and desktop bootstrap/table focused suites passed.
+- Full repository analyze, boundary, source-text, dependency, and test gates
+  passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, durable product state, other-platform hosts, and release
+  signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T217 Bound Endpoint Parser Traversal
 
 Summary:

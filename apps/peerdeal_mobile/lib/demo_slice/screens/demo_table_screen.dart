@@ -190,18 +190,17 @@ RecoveryPersistenceScope _defaultRuntimeScopeFor(
 }
 
 int _safePersistedEventCount(PersistedRecoveryWindow window) {
-  const maxRecoveryPersistenceDisplayEvents = 128;
-  return window.events.length > maxRecoveryPersistenceDisplayEvents
-      ? maxRecoveryPersistenceDisplayEvents
+  return window.events.length >
+          DemoRecoveryPersistenceLoadResult.maxPersistedEventCount
+      ? DemoRecoveryPersistenceLoadResult.maxPersistedEventCount
       : window.events.length;
 }
 
 NativeBootstrapCandidateLoadResult _safeBootstrapLoadResult(
   NativeBootstrapCandidateLoadResult result,
 ) {
-  const maxBootstrapCandidates = 32;
   final candidates = result.candidates
-      .take(maxBootstrapCandidates)
+      .take(NativeBootstrapCandidateLoadResult.maxCandidateCount)
       .toList(growable: false);
   return NativeBootstrapCandidateLoadResult(
     discoveryAvailable: result.discoveryAvailable,
@@ -212,8 +211,6 @@ NativeBootstrapCandidateLoadResult _safeBootstrapLoadResult(
         result.warnings,
         fallback: 'Local network bootstrap warning unavailable.',
       ),
-      if (result.candidates.length > maxBootstrapCandidates)
-        'Bootstrap candidates truncated.',
     ],
   );
 }
@@ -340,22 +337,52 @@ String _safeTableWarning(String warning, {required String fallback}) {
 }
 
 class DemoRecoveryPersistenceLoadResult {
+  static const maxPersistedEventCount = 128;
+  static const maxWarningCount = 8;
+
   DemoRecoveryPersistenceLoadResult.available({
-    required this.persistedEventCount,
+    required int persistedEventCount,
     required this.hasSnapshot,
     List<String> warnings = const <String>[],
   }) : isAvailable = true,
-       warnings = List<String>.unmodifiable(warnings);
+       persistedEventCount = _boundedEventCount(persistedEventCount),
+       warnings = _boundedWarnings(
+         warnings,
+         eventsTruncated: persistedEventCount > maxPersistedEventCount,
+       );
 
   DemoRecoveryPersistenceLoadResult.unavailable({
     required List<String> warnings,
   }) : isAvailable = false,
        persistedEventCount = 0,
        hasSnapshot = false,
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _boundedWarnings(warnings);
 
   final bool isAvailable;
   final int persistedEventCount;
   final bool hasSnapshot;
   final List<String> warnings;
+
+  static int _boundedEventCount(int value) {
+    if (value < 0) return 0;
+    return value > maxPersistedEventCount ? maxPersistedEventCount : value;
+  }
+
+  static List<String> _boundedWarnings(
+    List<String> warnings, {
+    bool eventsTruncated = false,
+  }) {
+    final warningsTruncated = warnings.length > maxWarningCount;
+    final markerCount = (eventsTruncated ? 1 : 0) + (warningsTruncated ? 1 : 0);
+    final result = warnings
+        .take(maxWarningCount - markerCount)
+        .toList(growable: true);
+    if (eventsTruncated) {
+      result.insert(0, 'Recovery persistence events truncated.');
+    }
+    if (warningsTruncated) {
+      result.add('Recovery persistence warnings truncated.');
+    }
+    return List<String>.unmodifiable(result);
+  }
 }

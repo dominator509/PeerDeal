@@ -7,20 +7,26 @@ typedef NativeBootstrapCandidateLoaderFactory =
     NativeBootstrapCandidateLoader Function();
 
 class NativeBootstrapCandidateLoadResult {
+  static const maxCandidateCount = 32;
+  static const maxWarningCount = 8;
+
   NativeBootstrapCandidateLoadResult({
     required this.discoveryAvailable,
     required this.nativeNotes,
     required List<BootstrapCandidate> candidates,
     required List<String> warnings,
-  }) : candidates = List<BootstrapCandidate>.unmodifiable(candidates),
-       warnings = List<String>.unmodifiable(warnings);
+  }) : candidates = _boundedCandidates(candidates),
+       warnings = _boundedWarnings(
+         warnings,
+         candidatesTruncated: candidates.length > maxCandidateCount,
+       );
 
   NativeBootstrapCandidateLoadResult.unavailable({
     required this.nativeNotes,
     List<String> warnings = const <String>[],
   }) : discoveryAvailable = false,
        candidates = const <BootstrapCandidate>[],
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _boundedWarnings(warnings);
 
   final bool discoveryAvailable;
   final String nativeNotes;
@@ -28,6 +34,30 @@ class NativeBootstrapCandidateLoadResult {
   final List<String> warnings;
 
   bool get hasCandidates => candidates.isNotEmpty;
+
+  static List<BootstrapCandidate> _boundedCandidates(
+    List<BootstrapCandidate> candidates,
+  ) =>
+      List<BootstrapCandidate>.unmodifiable(candidates.take(maxCandidateCount));
+
+  static List<String> _boundedWarnings(
+    List<String> warnings, {
+    bool candidatesTruncated = false,
+  }) {
+    final warningsTruncated = warnings.length > maxWarningCount;
+    final markerCount =
+        (candidatesTruncated ? 1 : 0) + (warningsTruncated ? 1 : 0);
+    final result = warnings
+        .take(maxWarningCount - markerCount)
+        .toList(growable: true);
+    if (candidatesTruncated) {
+      result.insert(0, 'Bootstrap candidates truncated.');
+    }
+    if (warningsTruncated) {
+      result.add('Bootstrap warnings truncated.');
+    }
+    return List<String>.unmodifiable(result);
+  }
 }
 
 class NativeBootstrapCandidateLoader {
