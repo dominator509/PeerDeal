@@ -4,6 +4,9 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'app_table_session_transport_source.dart';
 import 'native_transport_frame_adapter.dart';
 
+const _maximumWarningCount = 4;
+const _maximumWarningLength = 160;
+
 class NativeTransportSessionFactory {
   NativeTransportSessionFactory({
     NativeTransportBridge? bridge,
@@ -165,7 +168,7 @@ class NativeTransportSessionFactory {
 
 class _UnavailableTransportFrameSender implements TransportFrameSender {
   _UnavailableTransportFrameSender({required List<String> warnings})
-    : warnings = List<String>.unmodifiable(warnings);
+    : warnings = _safeNativeTransportWarnings(warnings);
 
   final List<String> warnings;
 
@@ -225,7 +228,7 @@ class NativeTransportSessionLoadResult {
     required this.available,
     required this.session,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeNativeTransportWarnings(warnings);
 
   NativeTransportSessionLoadResult.available({
     required NativeTransportSession session,
@@ -239,4 +242,28 @@ class NativeTransportSessionLoadResult {
   final bool available;
   final NativeTransportSession? session;
   final List<String> warnings;
+}
+
+List<String> _safeNativeTransportWarnings(List<String> warnings) {
+  final truncated = warnings.length > _maximumWarningCount;
+  final valueLimit = truncated
+      ? _maximumWarningCount - 1
+      : _maximumWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Native transport session warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Native transport session warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }

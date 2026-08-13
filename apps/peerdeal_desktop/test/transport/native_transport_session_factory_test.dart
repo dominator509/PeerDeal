@@ -15,6 +15,25 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct native session load warnings', () {
+    final result = NativeTransportSessionLoadResult.unavailable(
+      warnings: <String>[
+        'warning_1',
+        ' warning_2',
+        'line\nfeed',
+        'warning_4',
+        'warning_5',
+      ],
+    );
+
+    expect(result.warnings, [
+      'warning_1',
+      'Native transport session warning unavailable.',
+      'Native transport session warning unavailable.',
+      'Native transport session warnings truncated.',
+    ]);
+  });
+
   test(
     'loads available session only when native transport supports it',
     () async {

@@ -26,6 +26,29 @@ Risks:
 
 ---
 
+### 2026-08-12 - Codex - T222 Bound Native Session Factory Warnings
+
+Summary:
+- Mirrored `NativeTransportSessionLoadResult` and unavailable sender models now
+  scrub unsafe warning text at construction.
+- Warning collections are capped at four entries with stable truncation markers
+  before results reach the app transport provisioner or source.
+- Added mirrored direct-load-result regressions while preserving the generic
+  native bridge contract and existing fail-closed behavior.
+
+Verification:
+- Mirrored mobile and desktop transport suites passed.
+- Full repository analyze, boundary, source-text, dependency, and test gates
+  passed.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Native discovery advertisement, real endpoint provisioning, device/network
+  reachability, durable product state, other-platform hosts, and release
+  signing remain external or integration-owned.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:

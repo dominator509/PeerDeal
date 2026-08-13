@@ -2447,6 +2447,12 @@ markers. Lower-layer markers are translated at the source boundary so callers
 receive stable source-level diagnostics without retaining unbounded bridge
 payloads.
 
+The T222 follow-up extends that warning boundary through native transport
+session loading. Mirrored session-factory load results and unavailable sender
+models now apply the same text and collection limits before warnings reach the
+provisioner or transport source, preserving fail-closed behavior for direct
+callers without changing the generic native bridge contract.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and
