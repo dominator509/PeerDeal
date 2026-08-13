@@ -2463,6 +2463,14 @@ load and provision result constructors now scrub unsafe warning text and cap
 direct warning collections at four entries with stable labels, before identity
 diagnostics reach persisted-session composition or route surfaces.
 
+The T225 follow-up closes the receipt key-ring load and provision warning
+boundary. Mirrored receipt result constructors now scrub control-bearing,
+padded, and oversized warning text and cap direct warning collections at four
+entries with stable lower-layer markers. The receipt artifact verifier
+translates those markers back to its stable public diagnostic vocabulary while
+preserving fail-closed signing and encryption-key behavior; the generic native
+secure-key bridge remains receipt-agnostic.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

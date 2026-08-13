@@ -96,6 +96,43 @@ Risks:
 
 ---
 
+### 2026-08-12 - Codex - T225 Bound Receipt Key-Ring Warnings
+
+Summary:
+- Mirrored receipt key-ring load and provision result constructors now scrub
+  control-bearing, padded, and oversized warning text.
+- Direct warning collections are capped at four entries with stable
+  lower-layer fallback and truncation markers before receipt verification or
+  provisioning surfaces receive them.
+- The receipt artifact verifier translates lower-layer markers into its stable
+  public diagnostics without changing the generic native secure-key contract or
+  fail-closed signing/encryption behavior.
+
+Files changed:
+- Mirrored mobile and desktop receipt key-ring loaders, provisioners, verifier
+  adapters, and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile receipt loader, provisioner, and verifier suite passed (37
+  tests).
+- Focused desktop receipt loader, provisioner, and verifier suite passed (37
+  tests).
+- Full `melos run test`, analyze, boundary-check, source-text, and dependency
+  audit gates passed; actionable upgrades: 0.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Native secure-key storage still needs real-device/platform validation;
+  cross-device reachability, other-platform hosts, durable product state and
+  database wiring, and release signing remain external or integration-owned.
+
+Next reviewer:
+- Continue with the next documented production gap after the committed green
+  T225 change; keep receipt semantics in the app and receipt packages.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:

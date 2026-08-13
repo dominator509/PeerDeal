@@ -90,14 +90,26 @@ List<String> _safeDiagnostics(
   bool fallbackOnEmpty = true,
 }) {
   const fallback = 'Secure receipt key storage is unavailable.';
+  const lowerLayerFallback = 'Secure receipt key warning unavailable.';
+  const lowerLayerTruncation = 'Secure receipt key warnings truncated.';
+  const truncation = 'Secure receipt key diagnostics truncated.';
   const maxDiagnostics = 4;
   const maxDiagnosticLength = 160;
   if (warnings.isEmpty) {
     return fallbackOnEmpty ? const <String>[fallback] : const <String>[];
   }
   final sanitized = <String>[];
+  var lowerLayerTruncated = false;
   for (final warning in warnings.take(maxDiagnostics)) {
     final trimmed = warning.trim();
+    if (trimmed == lowerLayerTruncation) {
+      lowerLayerTruncated = true;
+      continue;
+    }
+    if (trimmed == lowerLayerFallback) {
+      sanitized.add(fallback);
+      continue;
+    }
     if (trimmed.isEmpty ||
         trimmed.length > maxDiagnosticLength ||
         !_isSafeDiagnostic(trimmed)) {
@@ -106,8 +118,8 @@ List<String> _safeDiagnostics(
       sanitized.add(trimmed);
     }
   }
-  if (warnings.length > maxDiagnostics) {
-    sanitized.add('Secure receipt key diagnostics truncated.');
+  if (warnings.length > maxDiagnostics || lowerLayerTruncated) {
+    sanitized.add(truncation);
   }
   return sanitized;
 }

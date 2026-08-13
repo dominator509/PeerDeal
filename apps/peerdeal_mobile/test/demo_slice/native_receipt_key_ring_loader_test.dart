@@ -18,6 +18,26 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct receipt key-ring load warnings', () {
+    final result = ReceiptKeyRingLoadResult(
+      keyRing: ReceiptKeyRingSnapshot(),
+      warnings: <String>[
+        'warning_1',
+        ' warning_2',
+        'line\nfeed',
+        'warning_4',
+        'warning_5',
+      ],
+    );
+
+    expect(result.warnings, [
+      'warning_1',
+      'Secure receipt key warning unavailable.',
+      'Secure receipt key warning unavailable.',
+      'Secure receipt key warnings truncated.',
+    ]);
+  });
+
   test('maps native secure key records into receipt key ring', () async {
     final bridge = _FakeSecureKeyStorageBridge(
       snapshot: SecureKeyStorageSnapshot(

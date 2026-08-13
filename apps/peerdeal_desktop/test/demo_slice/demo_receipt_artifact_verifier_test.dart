@@ -144,7 +144,6 @@ void main() {
       'Secure receipt key storage is unavailable.',
       'Secure receipt key storage is unavailable.',
       'Secure receipt key storage is unavailable.',
-      'safe warning',
       'Secure receipt key diagnostics truncated.',
     ]);
   });

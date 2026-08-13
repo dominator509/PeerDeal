@@ -7,6 +7,9 @@ import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'native_receipt_key_ring_loader.dart';
 import 'native_receipt_key_ring_writer.dart';
 
+const _maximumWarningCount = 4;
+const _maximumWarningLength = 160;
+
 typedef ReceiptKeySecretFactory = String Function();
 typedef ReceiptKeyIdFactory = String Function(String purpose);
 
@@ -15,7 +18,7 @@ class ReceiptKeyRingProvisionResult {
     required this.keyRing,
     List<String> warnings = const <String>[],
     this.keysCreated = 0,
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeReceiptProvisionWarnings(warnings);
 
   final ReceiptKeyRingSnapshot keyRing;
   final List<String> warnings;
@@ -25,6 +28,30 @@ class ReceiptKeyRingProvisionResult {
       warnings.isEmpty &&
       keyRing.activeSigningKey() != null &&
       keyRing.activeEncryptionKey() != null;
+}
+
+List<String> _safeReceiptProvisionWarnings(List<String> warnings) {
+  final truncated = warnings.length > _maximumWarningCount;
+  final valueLimit = truncated
+      ? _maximumWarningCount - 1
+      : _maximumWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Secure receipt key provisioning warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Secure receipt key provisioning warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }
 
 class NativeReceiptKeyRingProvisioner {

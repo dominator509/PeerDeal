@@ -1,12 +1,15 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
+const _maximumWarningCount = 4;
+const _maximumWarningLength = 160;
+
 class ReceiptKeyRingLoadResult {
   ReceiptKeyRingLoadResult({
     required this.keyRing,
     this.revision = 0,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeReceiptLoadWarnings(warnings);
 
   final ReceiptKeyRingSnapshot keyRing;
   final int revision;
@@ -14,6 +17,30 @@ class ReceiptKeyRingLoadResult {
 
   bool get hasSigningKey => keyRing.activeSigningKey() != null;
   bool get hasEncryptionKey => keyRing.activeEncryptionKey() != null;
+}
+
+List<String> _safeReceiptLoadWarnings(List<String> warnings) {
+  final truncated = warnings.length > _maximumWarningCount;
+  final valueLimit = truncated
+      ? _maximumWarningCount - 1
+      : _maximumWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Secure receipt key warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Secure receipt key warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }
 
 /// Optional route-lifecycle cancellation capability for native key loads.
