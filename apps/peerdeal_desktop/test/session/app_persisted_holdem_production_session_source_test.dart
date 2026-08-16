@@ -375,6 +375,21 @@ void main() {
     }
   });
 
+  test('rejects C1 control-bearing route policy metadata', () {
+    expect(
+      () => _routePolicy(
+        path: '/holdem-${String.fromCharCode(0x85)}live',
+      ).validate(),
+      throwsArgumentError,
+    );
+    expect(
+      () => _routePolicy(
+        navigationLabel: 'Live ${String.fromCharCode(0x9F)}Holdem',
+      ).validate(),
+      throwsArgumentError,
+    );
+  });
+
   test(
     'rejects a non-positive dynamic seat override before input construction',
     () {
@@ -893,10 +908,13 @@ void main() {
   });
 }
 
-AppPersistedHoldemProductionSessionRoutePolicy _routePolicy() {
+AppPersistedHoldemProductionSessionRoutePolicy _routePolicy({
+  String path = '/holdem-live',
+  String navigationLabel = 'Live Holdem',
+}) {
   return AppPersistedHoldemProductionSessionRoutePolicy(
-    path: '/holdem-live',
-    navigationLabel: 'Live Holdem',
+    path: path,
+    navigationLabel: navigationLabel,
     remotePeerId: 'peer_remote',
     localSeat: 1,
     closeEventAdapterFactory: (scope) => _closeAdapter(

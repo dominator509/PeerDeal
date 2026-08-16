@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T249 Harden App Production-Session Text Boundaries
+
+Summary:
+- Mirrored mobile and desktop production-session bootstrap invite identities,
+  persisted route-policy metadata, and final route metadata now reject blank,
+  padded, and C0/C1-control-bearing values before source or native route use.
+- Product source/state ownership, persistence policy, transport contracts, and
+  authentication scope remain unchanged.
+
+Files:
+- Mirrored files under `apps/peerdeal_mobile/lib/session` and
+  `apps/peerdeal_desktop/lib/session`, with focused session tests.
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+
+Verification:
+- Focused mobile and desktop production-session suites pass (42 tests each).
+- Full analyze, boundary-check, source-text, serialized test, dependency-audit,
+  format, and diff checks pass; actionable dependency upgrades: 0.
+
+Remaining:
+- Concrete product source/state selection, durable database persistence,
+  real-device/network validation, remaining platform hosts, signing, and final
+  UX remain separate readiness work.
+
 ### 2026-08-16 - Codex - T248 Align Protocol/Core Text Boundaries
 
 Summary:

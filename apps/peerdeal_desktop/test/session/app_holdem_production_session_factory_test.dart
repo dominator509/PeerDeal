@@ -89,6 +89,14 @@ void main() {
     );
     expect(() => _create(path: '/holdem-live/'), throwsArgumentError);
     expect(
+      () => _create(path: '/holdem-${String.fromCharCode(0x85)}live'),
+      throwsArgumentError,
+    );
+    expect(
+      () => _create(navigationLabel: 'Live ${String.fromCharCode(0x9F)}Holdem'),
+      throwsArgumentError,
+    );
+    expect(
       () => _create(initialCursor: _initialCursor(tableId: 'table_other')),
       throwsArgumentError,
     );

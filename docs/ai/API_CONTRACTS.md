@@ -525,6 +525,10 @@ and `AppHoldemProductionRouteRegistration`; it does not derive IDs, persistence,
 or game state. It fails closed on unsafe metadata, reused peer identities,
 missing local seats, invalid polling intervals, and runtime cursor/session
 composition errors.
+Route paths, navigation labels, and invite identities at the bootstrap and
+persisted-route-policy boundaries must be nonblank, unpadded, and free of C0/C1
+control characters before a production route or native transport can be
+composed.
 
 `AppHoldemProductionSessionSource` and
 `AppHoldemProductionSessionBootstrap` are the app-owned handoff above that

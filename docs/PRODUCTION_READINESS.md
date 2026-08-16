@@ -2639,6 +2639,14 @@ compatible. Product-owned snapshot payload interpretation, durable database
 persistence, device/network validation, other-platform hosts, provider-specific
 proof semantics, release signing, and final UX remain separate.
 
+The T249 follow-up aligns the mirrored app production-session text boundary.
+Bootstrap invite identities, persisted route-policy paths and labels, and final
+production route metadata now reject blank, padded, and C0/C1-control-bearing
+values before source handoff or native route composition. Mobile and desktop
+focused session suites cover the new rejection paths. This preserves app-owned
+source/state policy and does not claim a concrete product source, database, or
+device validation.
+
 The T248 follow-up aligns the remaining protocol/core text boundary. Invite
 required text and core command/scope identities now reject blank, padded, and
 C0/C1-control-bearing values at their existing package-owned validation seams,

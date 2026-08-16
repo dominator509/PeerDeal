@@ -300,7 +300,8 @@ class AppHoldemProductionSessionBootstrap {
     if (value.trim().isEmpty ||
         value != value.trim() ||
         value.codeUnits.any(
-          (codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F,
+          (codeUnit) =>
+              codeUnit <= 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
         )) {
       throw ArgumentError.value(
         value,

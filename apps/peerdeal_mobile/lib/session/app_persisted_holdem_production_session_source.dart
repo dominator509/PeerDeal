@@ -144,11 +144,14 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
     }
   }
 
-  static bool _containsControlCharacter(String value) =>
-      value.codeUnits.any((codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F);
+  static bool _containsControlCharacter(String value) => value.codeUnits.any(
+    (codeUnit) => codeUnit <= 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
+  );
 
   static bool _containsLabelControlCharacter(String value) =>
-      value.codeUnits.any((codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F);
+      value.codeUnits.any(
+        (codeUnit) => codeUnit < 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
+      );
 }
 
 /// Loads a typed Hold'em production state from the existing recovery store.

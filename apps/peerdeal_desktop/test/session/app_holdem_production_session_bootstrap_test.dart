@@ -86,6 +86,30 @@ void main() {
     expect(source.loadedInvite, isNull);
   });
 
+  test(
+    'rejects C1 control-bearing invite identity before source load',
+    () async {
+      final source = _Source(_input());
+
+      await expectLater(
+        AppHoldemProductionSessionBootstrap(source: source).createForInvite(
+          const ResolvedInvite(
+            inviteId: 'inv_\u0085_001',
+            tableId: 'table_001',
+            sessionId: 'session_001',
+            modeType: 'open_table',
+            protocolVersion: '1.0.0',
+            requiresReceiptAck: true,
+            requiresRetentionAck: true,
+            requiresCaptureAck: true,
+          ),
+        ),
+        throwsArgumentError,
+      );
+      expect(source.loadedInvite, isNull);
+    },
+  );
+
   test('bounds product source loading', () async {
     final source = _Source(
       _input(),
