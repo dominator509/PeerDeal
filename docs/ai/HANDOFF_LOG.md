@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T233 Close Transport Replacement Race
+
+Summary:
+- Mirrored mobile and desktop production table surfaces now invalidate pending
+  projection work when the transport session/source identity changes, so a
+  stale send completion cannot publish through a replacement transport.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_table_surface.dart`
+- `apps/peerdeal_mobile/test/session/app_holdem_table_session_route_test.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_table_surface.dart`
+- `apps/peerdeal_desktop/test/session/app_holdem_table_session_route_test.dart`
+- `docs/PRODUCTION_READINESS.md`, `docs/ARCHITECTURE.md`, and
+  `docs/ai/API_CONTRACTS.md`.
+
+Verification:
+- Focused mobile and desktop stale-completion regressions passed.
+- Full repository gates are pending after this handoff update.
+
+Risks:
+- This is app lifecycle hardening only; protocol, native bridge, runtime state,
+  and transport contracts are unchanged.
+
 ### 2026-08-16 - Codex - T232 Close Transport and State Invariant Gaps
 
 Summary:

@@ -41,6 +41,12 @@ class _AppHoldemProductionTableSurfaceState
     super.didUpdateWidget(oldWidget);
     final oldContext = oldWidget.routeContext;
     final newContext = widget.routeContext;
+    final oldTransport = oldContext.transport;
+    final newTransport = newContext.transport;
+    final transportUnchanged =
+        oldTransport.available == newTransport.available &&
+        identical(oldTransport.session, newTransport.session) &&
+        identical(oldTransport.source, newTransport.source);
     if (identical(oldContext.runtime, newContext.runtime) &&
         identical(
           oldContext.snapshotCoordinator,
@@ -48,7 +54,8 @@ class _AppHoldemProductionTableSurfaceState
         ) &&
         oldContext.peerId == newContext.peerId &&
         oldWidget.localPeerId == widget.localPeerId &&
-        oldWidget.localSeat == widget.localSeat) {
+        oldWidget.localSeat == widget.localSeat &&
+        transportUnchanged) {
       return;
     }
 

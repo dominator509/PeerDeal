@@ -2537,6 +2537,14 @@ pot. These checks do not provide cryptographic peer authenticity; that remains
 an explicit protocol/session-auth contract gap rather than an invented wire
 extension.
 
+The T233 follow-up closes the mirrored app-surface transport replacement race.
+A pending Hold'em projection is now bound to the transport session/source that
+created it. Replacing that transport invalidates the surface operation
+generation and pending projection before the old send can complete, so a stale
+completion cannot publish through the replacement session or duplicate events.
+Focused mobile and desktop route regressions pass; protocol, native bridge,
+runtime state, and transport contracts remain unchanged.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

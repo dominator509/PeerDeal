@@ -328,6 +328,9 @@ scope. Its configured transport handler rejects mismatched `fromPeerId` or
 `toPeerId` before decoding or applying the event. These existing frame fields
 bind route scope but are not cryptographic sender authentication; no keyed wire
 contract exists in this scaffold.
+The app-owned production table surface must invalidate pending projection work
+when its transport session or source is replaced; stale completions must not
+publish through the replacement sender. This is an app-owned lifecycle rule.
 App-owned native transport drains must cap receive-frame batches before session
 handlers see platform frames, and invalid app batch limits must fail closed
 before native receive calls.

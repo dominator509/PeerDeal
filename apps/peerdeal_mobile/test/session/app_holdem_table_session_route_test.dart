@@ -295,6 +295,53 @@ void main() {
     expect(find.text('Action synchronized'), findsNothing);
   });
 
+  testWidgets(
+    'drops a stale projection completion after transport replacement',
+    (tester) async {
+      final runtime = _runtime();
+      final projection = const HoldemCoreProjectionAdapter().startHand(
+        coreState: runtime.coreState,
+        handState: runtime.handState,
+        cursor: runtime.cursor,
+      );
+      final oldBridge = _BlockingNativeTransportBridge(
+        receiveFrame: NativeTransportFrame(
+          sessionId: 'sess_001',
+          senderPeerId: 'peer_remote',
+          recipientPeerId: 'peer_local',
+          sequence: projection.events.single.eventSeq,
+          payloadBytes: const EventEnvelopeCodec().encode(
+            projection.events.single,
+          ),
+        ),
+      );
+      final newBridge = _BlockingNativeTransportBridge(blockSends: false);
+
+      await tester.pumpWidget(
+        _productionSurfaceRoute(runtime: runtime, bridge: oldBridge),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Call'), findsOneWidget);
+      await tester.tap(find.text('Call'));
+      await tester.pump();
+      await tester.pump();
+      expect(oldBridge.sendCalls, 1);
+
+      await tester.pumpWidget(
+        _productionSurfaceRoute(runtime: runtime, bridge: newBridge),
+      );
+      await tester.pumpAndSettle();
+
+      oldBridge.completeSend();
+      await tester.pumpAndSettle();
+
+      expect(newBridge.sendCalls, 0);
+      expect(find.text('Action synchronized'), findsNothing);
+      expect(find.text('Sync pending'), findsNothing);
+    },
+  );
+
   testWidgets('drops a stale inbound checkpoint after runtime replacement', (
     tester,
   ) async {
@@ -724,9 +771,10 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
 }
 
 class _BlockingNativeTransportBridge implements NativeTransportBridge {
-  _BlockingNativeTransportBridge({this.receiveFrame});
+  _BlockingNativeTransportBridge({this.receiveFrame, this.blockSends = true});
 
   final NativeTransportFrame? receiveFrame;
+  final bool blockSends;
   final Completer<NativeTransportSendResult> _sendCompletion = Completer();
   int sendCalls = 0;
   bool _served = false;
@@ -772,6 +820,11 @@ class _BlockingNativeTransportBridge implements NativeTransportBridge {
   @override
   Future<NativeTransportSendResult> sendFrame(NativeTransportFrame frame) {
     sendCalls++;
+    if (!blockSends) {
+      return Future<NativeTransportSendResult>.value(
+        const NativeTransportSendResult(isSuccess: true),
+      );
+    }
     return _sendCompletion.future;
   }
 }
