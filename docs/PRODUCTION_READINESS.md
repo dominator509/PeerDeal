@@ -2569,6 +2569,12 @@ settles, so a cancelled load never returns a production session input. An
 already-started checkpoint remains owned by the persistence boundary until it
 settles; no package, snapshot, or native bridge contract changed.
 
+The T237 follow-up hardens the Windows native-host smoke gate itself. Once the
+smoke key is written, the harness now removes it from a terminal cleanup path
+when a later assertion fails, preventing failed validation from leaving test
+credentials in the host key store. The native secure-key contract and host
+implementation remain unchanged.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

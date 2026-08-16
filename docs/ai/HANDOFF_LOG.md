@@ -2,6 +2,26 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T237 Make Native Smoke Key Cleanup Failure-Safe
+
+Summary:
+- The Windows native-host smoke harness now tracks successful smoke-key writes
+  and removes the key in a terminal cleanup path if a later checkpoint fails.
+  Successful conditional deletion clears the cleanup marker before read-back.
+
+Files changed:
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart`
+- `docs/PRODUCTION_READINESS.md` and `docs/ai/HANDOFF_LOG.md`.
+
+Verification:
+- Focused Dart analysis, Windows smoke-target build, and native-host smoke pass.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass.
+
+Risks:
+- Cleanup failure remains a smoke failure; the secure-key native contract and
+  production host implementation are unchanged.
+
 ### 2026-08-16 - Codex - T236 Guard Initial Snapshot Checkpoint Cancellation
 
 Summary:

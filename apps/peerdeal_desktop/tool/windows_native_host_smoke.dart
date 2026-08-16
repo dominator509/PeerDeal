@@ -121,104 +121,117 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
   final keyStorage = MethodChannelSecureKeyStorageBridge();
   final conditionalStorage =
       keyStorage as ConditionalSecureKeyStorageMutationBridge;
-  var snapshot = await keyStorage.loadKeyRing(namespace: _secureKeyNamespace);
-  _require(snapshot.available, 'secure key storage unavailable');
+  var smokeKeyWritten = false;
+  try {
+    var snapshot = await keyStorage.loadKeyRing(namespace: _secureKeyNamespace);
+    _require(snapshot.available, 'secure key storage unavailable');
 
-  if (snapshot.keys.any((key) => key.keyId == _secureKeyId)) {
-    final cleanup = await keyStorage.deleteKey(
+    if (snapshot.keys.any((key) => key.keyId == _secureKeyId)) {
+      final cleanup = await keyStorage.deleteKey(
+        namespace: _secureKeyNamespace,
+        keyId: _secureKeyId,
+      );
+      _require(cleanup.isSuccess, 'secure key smoke cleanup failed');
+      snapshot = await keyStorage.loadKeyRing(namespace: _secureKeyNamespace);
+      _require(snapshot.available, 'secure key storage reload unavailable');
+    }
+    _pass('secure_key.baseline');
+
+    const record = SecureKeyRecord(
+      keyId: _secureKeyId,
+      purpose: 'runtime_smoke',
+      algorithm: 'opaque',
+      secret: 'windows-runtime-smoke-secret',
+      active: true,
+    );
+    final saveResult = await keyStorage.saveKey(
+      namespace: _secureKeyNamespace,
+      key: record,
+    );
+    smokeKeyWritten = saveResult.isSuccess;
+    _require(saveResult.isSuccess, 'secure key save failed');
+    final savedRevision = saveResult.revision;
+    _require(
+      savedRevision != null && savedRevision > snapshot.revision,
+      'secure key save did not advance revision',
+    );
+    _pass('secure_key.save');
+
+    final savedSnapshot = await keyStorage.loadKeyRing(
+      namespace: _secureKeyNamespace,
+    );
+    _require(
+      savedSnapshot.available &&
+          savedSnapshot.revision == savedRevision &&
+          savedSnapshot.keys.any(
+            (key) =>
+                key.keyId == record.keyId &&
+                key.secret == record.secret &&
+                key.active,
+          ),
+      'secure key read-back failed',
+    );
+    _pass('secure_key.read_back');
+
+    final staleResult = await conditionalStorage.saveKeyIfRevision(
+      namespace: _secureKeyNamespace,
+      key: record,
+      expectedRevision: snapshot.revision,
+    );
+    _require(
+      staleResult.isConflict && !staleResult.isSuccess,
+      'CAS conflict missing',
+    );
+    _pass('secure_key.stale_writer_conflict');
+
+    const replacement = SecureKeyRecord(
+      keyId: _secureKeyId,
+      purpose: 'runtime_smoke',
+      algorithm: 'opaque',
+      secret: 'windows-runtime-smoke-replacement',
+      active: true,
+    );
+    final replacementResult = await conditionalStorage.saveKeyIfRevision(
+      namespace: _secureKeyNamespace,
+      key: replacement,
+      expectedRevision: savedSnapshot.revision,
+    );
+    _require(replacementResult.isSuccess, 'conditional secure key save failed');
+    final replacementRevisionValue = replacementResult.revision;
+    _require(
+      replacementRevisionValue != null &&
+          replacementRevisionValue > savedSnapshot.revision,
+      'conditional secure key save did not advance revision',
+    );
+    final replacementRevision = replacementRevisionValue!;
+    _pass('secure_key.conditional_save');
+
+    final deleteResult = await conditionalStorage.deleteKeyIfRevision(
       namespace: _secureKeyNamespace,
       keyId: _secureKeyId,
+      expectedRevision: replacementRevision,
     );
-    _require(cleanup.isSuccess, 'secure key smoke cleanup failed');
-    snapshot = await keyStorage.loadKeyRing(namespace: _secureKeyNamespace);
-    _require(snapshot.available, 'secure key storage reload unavailable');
+    _require(deleteResult.isSuccess, 'conditional secure key delete failed');
+    smokeKeyWritten = false;
+    _pass('secure_key.conditional_delete');
+    final finalSnapshot = await keyStorage.loadKeyRing(
+      namespace: _secureKeyNamespace,
+    );
+    _require(
+      finalSnapshot.available &&
+          finalSnapshot.keys.every((key) => key.keyId != _secureKeyId),
+      'secure key delete read-back failed',
+    );
+    _pass('secure_key.delete_read_back');
+  } finally {
+    if (smokeKeyWritten) {
+      final cleanup = await keyStorage.deleteKey(
+        namespace: _secureKeyNamespace,
+        keyId: _secureKeyId,
+      );
+      _require(cleanup.isSuccess, 'secure key smoke cleanup failed');
+    }
   }
-  _pass('secure_key.baseline');
-
-  const record = SecureKeyRecord(
-    keyId: _secureKeyId,
-    purpose: 'runtime_smoke',
-    algorithm: 'opaque',
-    secret: 'windows-runtime-smoke-secret',
-    active: true,
-  );
-  final saveResult = await keyStorage.saveKey(
-    namespace: _secureKeyNamespace,
-    key: record,
-  );
-  _require(saveResult.isSuccess, 'secure key save failed');
-  final savedRevision = saveResult.revision;
-  _require(
-    savedRevision != null && savedRevision > snapshot.revision,
-    'secure key save did not advance revision',
-  );
-  _pass('secure_key.save');
-
-  final savedSnapshot = await keyStorage.loadKeyRing(
-    namespace: _secureKeyNamespace,
-  );
-  _require(
-    savedSnapshot.available &&
-        savedSnapshot.revision == savedRevision &&
-        savedSnapshot.keys.any(
-          (key) =>
-              key.keyId == record.keyId &&
-              key.secret == record.secret &&
-              key.active,
-        ),
-    'secure key read-back failed',
-  );
-  _pass('secure_key.read_back');
-
-  final staleResult = await conditionalStorage.saveKeyIfRevision(
-    namespace: _secureKeyNamespace,
-    key: record,
-    expectedRevision: snapshot.revision,
-  );
-  _require(
-    staleResult.isConflict && !staleResult.isSuccess,
-    'CAS conflict missing',
-  );
-  _pass('secure_key.stale_writer_conflict');
-
-  const replacement = SecureKeyRecord(
-    keyId: _secureKeyId,
-    purpose: 'runtime_smoke',
-    algorithm: 'opaque',
-    secret: 'windows-runtime-smoke-replacement',
-    active: true,
-  );
-  final replacementResult = await conditionalStorage.saveKeyIfRevision(
-    namespace: _secureKeyNamespace,
-    key: replacement,
-    expectedRevision: savedSnapshot.revision,
-  );
-  _require(replacementResult.isSuccess, 'conditional secure key save failed');
-  final replacementRevisionValue = replacementResult.revision;
-  _require(
-    replacementRevisionValue != null &&
-        replacementRevisionValue > savedSnapshot.revision,
-    'conditional secure key save did not advance revision',
-  );
-  final replacementRevision = replacementRevisionValue!;
-  _pass('secure_key.conditional_save');
-
-  final deleteResult = await conditionalStorage.deleteKeyIfRevision(
-    namespace: _secureKeyNamespace,
-    keyId: _secureKeyId,
-    expectedRevision: replacementRevision,
-  );
-  _require(deleteResult.isSuccess, 'conditional secure key delete failed');
-  _pass('secure_key.conditional_delete');
-  final finalSnapshot = await keyStorage.loadKeyRing(
-    namespace: _secureKeyNamespace,
-  );
-  _require(
-    finalSnapshot.available &&
-        finalSnapshot.keys.every((key) => key.keyId != _secureKeyId),
-    'secure key delete read-back failed',
-  );
-  _pass('secure_key.delete_read_back');
 }
 
 void _pass(String checkpoint) {
