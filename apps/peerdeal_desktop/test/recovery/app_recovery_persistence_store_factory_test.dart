@@ -19,6 +19,28 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct recovery warning diagnostics', () {
+    final warnings = <String>[
+      'warning_1',
+      ' padded ',
+      'warning_2',
+      'warning_3',
+      'warning_4',
+    ];
+    final result = AppRecoveryPersistenceStoreLoadResult.unavailable(
+      warnings: warnings,
+    );
+
+    warnings[0] = 'mutated';
+    expect(result.warnings, [
+      'warning_1',
+      'Recovery persistence warning unavailable.',
+      'warning_2',
+      'Recovery persistence warnings truncated.',
+    ]);
+    expect(() => result.warnings.add('warning_5'), throwsUnsupportedError);
+  });
+
   const scope = RecoveryPersistenceScope(
     tableId: 'table_1',
     sessionId: 'session_1',

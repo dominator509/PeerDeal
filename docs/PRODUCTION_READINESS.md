@@ -2493,6 +2493,13 @@ warning sanitization, preserve stable truncation markers, and expose immutable
 diagnostics. Universal and Hold'em runtime behavior, reducer ownership, event
 identity, and transport contracts remain unchanged.
 
+The T229 follow-up closes the remaining raw app diagnostic constructors.
+Mirrored `SetupFlowOutcome` constructors now apply the existing four-entry
+setup token policy to direct errors and warnings, while
+`AppRecoveryPersistenceStoreLoadResult` applies bounded control-free recovery
+warning handling with a stable truncation marker. Setup orchestration, recovery
+storage, and route ownership remain unchanged.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

@@ -7,16 +7,43 @@ typedef RecoveryPersistenceRootDirectoryFactory = Directory Function();
 
 const peerDealRecoveryRootEnvironmentVariable = 'PEERDEAL_RECOVERY_ROOT';
 
+const _maximumRecoveryWarningCount = 4;
+const _maximumRecoveryWarningLength = 160;
+
+List<String> _safeRecoveryWarnings(Iterable<String> warnings) {
+  final truncated = warnings.length > _maximumRecoveryWarningCount;
+  final valueLimit = truncated
+      ? _maximumRecoveryWarningCount - 1
+      : _maximumRecoveryWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumRecoveryWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Recovery persistence warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Recovery persistence warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
+}
+
 class AppRecoveryPersistenceStoreLoadResult {
   AppRecoveryPersistenceStoreLoadResult.available({
     required this.store,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeRecoveryWarnings(warnings);
 
   AppRecoveryPersistenceStoreLoadResult.unavailable({
     required List<String> warnings,
   }) : store = null,
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _safeRecoveryWarnings(warnings);
 
   final RecoveryPersistenceStore? store;
   final List<String> warnings;

@@ -241,6 +241,43 @@ Next reviewer:
 
 ---
 
+### 2026-08-16 - Codex - T229 Bound Setup and Recovery Diagnostics
+
+Summary:
+- Mirrored `SetupFlowOutcome` constructors now apply the existing four-entry
+  setup token policy to direct error and warning collections, preserving stable
+  fallback and truncation markers with immutable output.
+- Mirrored `AppRecoveryPersistenceStoreLoadResult` constructors now scrub
+  control-bearing, padded, and oversized warning text and cap direct warning
+  collections at four entries.
+- Setup orchestration, recovery storage, route ownership, and package
+  boundaries are unchanged.
+
+Files changed:
+- Mirrored mobile and desktop setup-flow models and recovery-store factories.
+- Mirrored setup model-ownership and recovery-factory regression suites.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile setup/recovery suites passed (16 tests).
+- Focused desktop setup/recovery suites passed (16 tests).
+- Full `melos run test`, analyze, boundary-check, source-text, and dependency
+  audit gates passed; actionable upgrades: 0.
+- Android debug APK and Windows debug artifacts built successfully.
+- `git diff --check` passed.
+
+Risks:
+- Concrete product state/database source wiring, native runtime/device
+  validation, cross-device reachability, other-platform hosts, and release
+  signing remain external or product-owned boundaries.
+
+Next reviewer:
+- Move to the concrete product-owned session/state source and durable event-log
+  integration; do not invent a database or move game truth across the existing
+  package boundaries.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:

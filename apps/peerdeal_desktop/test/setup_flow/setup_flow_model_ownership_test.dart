@@ -35,4 +35,46 @@ void main() {
     expect(() => outcome.errors.add('changed'), throwsUnsupportedError);
     expect(() => outcome.warnings.add('changed'), throwsUnsupportedError);
   });
+
+  test('bounds and scrubs direct setup diagnostics', () {
+    final errors = <String>[
+      'error_1',
+      ' bad ',
+      'error_2',
+      'error_3',
+      'error_4',
+    ];
+    final warnings = <String>[
+      'warning_1',
+      ' bad ',
+      'warning_2',
+      'warning_3',
+      'warning_4',
+    ];
+    final outcome = SetupFlowOutcome(
+      status: SetupFlowStatus.rejected,
+      resultCode: 'ERR_SETUP_NOT_BUILD_READY',
+      errors: errors,
+      warnings: warnings,
+    );
+
+    errors[0] = 'mutated';
+    warnings[0] = 'mutated';
+    expect(outcome.errors, [
+      'error_1',
+      'setup_error_unavailable',
+      'error_2',
+      'error_3',
+      'setup_errors_truncated',
+    ]);
+    expect(outcome.warnings, [
+      'warning_1',
+      'setup_warning_unavailable',
+      'warning_2',
+      'warning_3',
+      'setup_warnings_truncated',
+    ]);
+    expect(() => outcome.errors.add('error_5'), throwsUnsupportedError);
+    expect(() => outcome.warnings.add('warning_5'), throwsUnsupportedError);
+  });
 }
