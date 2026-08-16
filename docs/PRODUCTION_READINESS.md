@@ -137,10 +137,12 @@ the gates below are satisfied.
   atomically through `AppTableSessionRuntime` before advancing Hold'em state or
   its event cursor. `HoldemEventCursor.accept` and the variant-owned
   `HoldemEventReducer` now validate and reconstruct canonical remote action,
-  street, public showdown, and settlement events. Both app runtimes can apply
-  those events atomically, and transport handlers/provisioners can opt into the
-  variant path. Private showdown cards are intentionally not reconstructed from
-  public events.
+  street, public showdown, and settlement events. The reducer also rejects
+  padded, blank, or C0/C1 control-bearing public text before projection while
+  preserving its existing specific rejection codes. Both app runtimes can
+  apply those events atomically, and transport handlers/provisioners can opt
+  into the variant path. Private showdown cards are intentionally not
+  reconstructed from public events.
 - Mirrored `AppHoldemTableSessionRoute` owners now provision the validated
   transport/source seam, refresh the supplied surface after accepted inbound
   events, and expose `AppHoldemProjectionTransportPublisher` for canonical

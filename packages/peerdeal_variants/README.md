@@ -98,8 +98,10 @@ remain unchanged.
 `HoldemEventCursor.accept(...)` verifies a remote envelope's exact scope,
 sequence, hash link, catalog identity, and canonical hash before advancing.
 `HoldemEventReducer.apply(...)` reconstructs the adapter's action/street state
-and the public showdown/settlement lifecycle. It does not infer private hole
-cards from `ShowdownRevealed`; those remain local participant/session data.
+and the public showdown/settlement lifecycle. Required public text fields and
+identities reject padded, blank, or C0/C1 control-bearing values before state
+projection. It does not infer private hole cards from `ShowdownRevealed`; those
+remain local participant/session data.
 
 ## Hold'em street advancement
 `HoldemStateMachine.advanceAfterBettingRound(...)` advances from a completed

@@ -334,7 +334,7 @@ class HoldemEventReducer {
           rankIndex is! int ||
           rankIndex < 0 ||
           summary is! String ||
-          summary.trim().isEmpty ||
+          !_isSafeText(summary) ||
           !seats.add(seat) ||
           state.findSeat(seat) == null) {
         throw const _HoldemPayloadFailure(
@@ -352,7 +352,7 @@ class HoldemEventReducer {
     for (final rawAward in rawAwards) {
       if (rawAward is! Map ||
           rawAward['seat_id'] is! String ||
-          (rawAward['seat_id'] as String).trim().isEmpty ||
+          !_isSafeText(rawAward['seat_id'] as String) ||
           rawAward['amount'] is! int ||
           (rawAward['amount'] as int) <= 0) {
         throw const _HoldemPayloadFailure(
@@ -393,7 +393,7 @@ class HoldemEventReducer {
 
   String _requiredString(Map<String, Object?> payload, String key) {
     final value = payload[key];
-    if (value is! String || value.trim().isEmpty || value != value.trim()) {
+    if (value is! String || !_isSafeText(value)) {
       throw _HoldemPayloadFailure('ERR_HOLDEM_EVENT_PAYLOAD_INVALID');
     }
     return value;
@@ -414,7 +414,7 @@ class HoldemEventReducer {
     }
     final strings = <String>[];
     for (final item in value) {
-      if (item is! String || item.trim().isEmpty || item != item.trim()) {
+      if (item is! String || !_isSafeText(item)) {
         throw _HoldemPayloadFailure('ERR_HOLDEM_EVENT_PAYLOAD_INVALID');
       }
       strings.add(item);
@@ -423,9 +423,17 @@ class HoldemEventReducer {
   }
 
   void _requireIdentity(String value) {
-    if (value.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)) {
+    if (!_isSafeText(value)) {
       throw const _HoldemPayloadFailure('ERR_HOLDEM_EVENT_PAYLOAD_INVALID');
     }
+  }
+
+  bool _isSafeText(String value) {
+    return value.trim().isNotEmpty &&
+        value.trim() == value &&
+        value.codeUnits.every(
+          (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
+        );
   }
 
   bool _isBettingPhase(HoldemHandPhase phase) {

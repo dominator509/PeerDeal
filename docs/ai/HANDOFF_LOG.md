@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T247 Harden Hold’em Event Text Boundaries
+
+Summary:
+- Hardened `HoldemEventReducer` required public text, board-card lists,
+  showdown summaries, settlement IDs, and award seat IDs against blank,
+  padded, and C0/C1 control-bearing values.
+- Preserved existing variant-specific rejection codes and input-state
+  immutability; no protocol fields, wire authentication, or package boundaries
+  changed.
+
+Files:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_event_reducer.dart`
+- `packages/peerdeal_variants/test/holdem_event_reducer_test.dart`
+- `packages/peerdeal_variants/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+
+Verification:
+- Focused Hold’em event reducer tests pass.
+- Full analyze, boundary-check, source-text, serialized test, dependency-audit,
+  and diff checks remain required before commit.
+
+Risks:
+- Cryptographic session authentication, provider-specific proof semantics,
+  product persistence, live device/network validation, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-16 - Codex - T246 Reject Unsafe Transport Identities
 
 Summary:

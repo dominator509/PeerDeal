@@ -301,6 +301,93 @@ void main() {
     expect(result.reasonCode, 'ERR_HOLDEM_SETTLEMENT_AWARDS_POT_MISMATCH');
     expect(result.state, same(prepared.state));
   });
+
+  test('rejects control-bearing showdown summaries without mutating state', () {
+    final initial = _showdownState();
+    final event = EventEnvelope(
+      eventId: 'evt_unsafe_showdown',
+      eventType: 'ShowdownRevealed',
+      eventVersion: '1.0',
+      protocolVersion: '1.0.0',
+      eventSeq: 3,
+      tableId: 'tbl_001',
+      sessionId: 'sess_001',
+      handId: 'hand_001',
+      emittedAt: '2026-08-10T00:00:03Z',
+      actorRef: 'system',
+      payload: const <String, Object?>{
+        'variant_id': holdemNlheVariantId,
+        'results': <Object?>[
+          <String, Object?>{
+            'seat': 1,
+            'rank_index': 0,
+            'summary': 'winner\u0001',
+          },
+        ],
+      },
+      prevEventHash: 'hash_showdown',
+      eventHash: 'hash_unsafe_showdown',
+    );
+
+    final result = reducer.apply(state: initial, event: event);
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_SHOWDOWN_RESULTS_INVALID');
+    expect(result.state, same(initial));
+  });
+
+  test('rejects control-bearing board and award identities', () {
+    final initial = _showdownState();
+    final unsafeBoardEvent = EventEnvelope(
+      eventId: 'evt_unsafe_board',
+      eventType: 'ShowdownStarted',
+      eventVersion: '1.0',
+      protocolVersion: '1.0.0',
+      eventSeq: 2,
+      tableId: 'tbl_001',
+      sessionId: 'sess_001',
+      handId: 'hand_001',
+      emittedAt: '2026-08-10T00:00:02Z',
+      actorRef: 'system',
+      payload: const <String, Object?>{
+        'variant_id': holdemNlheVariantId,
+        'board_cards': <Object?>['Ah', 'Kd', 'Q\u0085s', 'Jc', '2h'],
+      },
+      prevEventHash: 'hash_showdown_start',
+      eventHash: 'hash_unsafe_board',
+    );
+    final unsafeAwardEvent = EventEnvelope(
+      eventId: 'evt_unsafe_award',
+      eventType: 'SettlementProjected',
+      eventVersion: '1.0',
+      protocolVersion: '1.0.0',
+      eventSeq: 5,
+      tableId: 'tbl_001',
+      sessionId: 'sess_001',
+      handId: 'hand_001',
+      emittedAt: '2026-08-10T00:00:05Z',
+      actorRef: 'system',
+      payload: const <String, Object?>{
+        'variant_id': holdemNlheVariantId,
+        'projection_id': 'projection_001',
+        'awards': <Object?>[
+          <String, Object?>{'seat_id': 'seat-1\u0001', 'amount': 200},
+        ],
+      },
+      prevEventHash: 'hash_settlement',
+      eventHash: 'hash_unsafe_award',
+    );
+
+    final boardResult = reducer.apply(state: initial, event: unsafeBoardEvent);
+    final awardResult = reducer.apply(state: initial, event: unsafeAwardEvent);
+
+    expect(boardResult.isRejected, isTrue);
+    expect(boardResult.reasonCode, 'ERR_HOLDEM_EVENT_PAYLOAD_INVALID');
+    expect(boardResult.state, same(initial));
+    expect(awardResult.isRejected, isTrue);
+    expect(awardResult.reasonCode, 'ERR_HOLDEM_SETTLEMENT_AWARDS_INVALID');
+    expect(awardResult.state, same(initial));
+  });
 }
 
 void _expectSameHandState(HoldemHandState actual, HoldemHandState expected) {

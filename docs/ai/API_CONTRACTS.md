@@ -435,6 +435,10 @@ or core projection leaves its hand state and cursor unchanged. The mirrored
 transport handler and provisioner accept an optional `holdemRuntime` to use
 this path; the generic runtime path remains the contract for non-variant
 sessions.
+The reducer's required public text fields, board-card lists, showdown
+summaries, settlement IDs, and award seat IDs must be nonblank, unpadded, and
+free of C0/C1 control characters. Violations preserve the input hand state and
+use the existing variant-specific rejection codes.
 
 `HoldemShowdownEvaluator` rejects direct `ShowdownEvaluationInput` values with
 more than the shared nine-seat Hold'em launch limit before sorting seats,
