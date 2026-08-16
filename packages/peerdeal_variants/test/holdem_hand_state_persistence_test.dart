@@ -96,6 +96,48 @@ void main() {
     );
   });
 
+  test('rejects impossible persisted monetary and seat state', () {
+    final cases = <Map<String, Object?>>[
+      _stateJson()..['pot'] = -1,
+      _stateJson()..['current_bet_to_call'] = -1,
+      _stateJson()..['minimum_raise_amount'] = 0,
+      _stateJson()
+        ..['seats'] = <Object?>[
+          <String, Object?>{..._seatJson(), 'stack': -1},
+        ],
+      _stateJson()
+        ..['seats'] = <Object?>[
+          <String, Object?>{..._seatJson(), 'all_in': true, 'stack': 1},
+        ],
+      _stateJson()..['seats'] = <Object?>[_seatJson(), _seatJson()],
+    ];
+
+    for (final state in cases) {
+      expect(
+        () => HoldemHandState.fromJson(state),
+        throwsA(isA<FormatException>()),
+      );
+    }
+  });
+
+  test('rejects unsafe and duplicate persisted board state', () {
+    final unsafeHandId = _stateJson()..['hand_id'] = ' hand_001';
+    final unsafeSummary = _stateJson()..['last_action_summary'] = 'bad\ntext';
+    final duplicateBoard = _stateJson()
+      ..['board_cards'] = <Object?>['Ah', 'Ah'];
+
+    for (final state in <Map<String, Object?>>[
+      unsafeHandId,
+      unsafeSummary,
+      duplicateBoard,
+    ]) {
+      expect(
+        () => HoldemHandState.fromJson(state),
+        throwsA(isA<FormatException>()),
+      );
+    }
+  });
+
   test(
     'rejects structurally oversized Holdem collections during hydration',
     () {
@@ -137,4 +179,14 @@ Map<String, Object?> _stateJson() => <String, Object?>{
   'pot': 0,
   'last_aggressor_seat': null,
   'last_action_summary': null,
+};
+
+Map<String, Object?> _seatJson() => <String, Object?>{
+  'seat': 0,
+  'stack': 100,
+  'in_hand': true,
+  'folded': false,
+  'all_in': false,
+  'committed_this_round': 0,
+  'committed_this_hand': 0,
 };

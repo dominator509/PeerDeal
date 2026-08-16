@@ -69,6 +69,31 @@ void main() {
     );
   });
 
+  test('rejects semantically invalid persisted hand state', () {
+    final snapshot = HoldemStateSnapshot(
+      tableState: TableState.initial(
+        tableId: 'table_001',
+        sessionId: 'session_001',
+        protocolVersion: '1.0.0',
+      ),
+      handState: _handState(),
+      eventCursor: _cursor(),
+    ).toJson();
+    final handState = Map<String, Object?>.from(snapshot['hand_state']! as Map)
+      ..['pot'] = -1;
+    final malformed = Map<String, Object?>.from(snapshot)
+      ..['hand_state'] = handState;
+
+    expect(
+      () => HoldemStateSnapshot.fromJson(
+        malformed,
+        eventIdFactory: (_, eventSeq) => 'event-$eventSeq',
+        emittedAtFactory: () => 'timestamp',
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('rejects structurally oversized snapshot roots during hydration', () {
     final oversized =
         HoldemStateSnapshot(

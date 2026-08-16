@@ -18,7 +18,7 @@ class HoldemSeatState {
 
   factory HoldemSeatState.fromJson(Map<String, Object?> json) {
     canonicalJsonEncode(json);
-    return HoldemSeatState(
+    final state = HoldemSeatState(
       seat: _requiredInt(json, 'seat'),
       stack: _requiredInt(json, 'stack'),
       inHand: _requiredBool(json, 'in_hand'),
@@ -27,6 +27,25 @@ class HoldemSeatState {
       committedThisRound: _requiredInt(json, 'committed_this_round'),
       committedThisHand: _requiredInt(json, 'committed_this_hand'),
     );
+    if (state.seat < 0) {
+      throw const FormatException('Holdem seat id cannot be negative.');
+    }
+    if (state.stack < 0 ||
+        state.committedThisRound < 0 ||
+        state.committedThisHand < 0) {
+      throw const FormatException('Holdem monetary state cannot be negative.');
+    }
+    if (state.committedThisRound > state.committedThisHand) {
+      throw const FormatException(
+        'Holdem round commitment cannot exceed hand commitment.',
+      );
+    }
+    if (state.allIn && state.stack != 0) {
+      throw const FormatException(
+        'Holdem all-in state must have zero remaining stack.',
+      );
+    }
+    return state;
   }
 
   final int seat;
@@ -92,7 +111,7 @@ class HoldemHandState {
   factory HoldemHandState.fromJson(Map<String, Object?> json) {
     canonicalJsonEncode(json);
     final seats = _requiredList(json, 'seats');
-    return HoldemHandState(
+    final state = HoldemHandState(
       handId: _requiredString(json, 'hand_id'),
       phase: _enumByName(HoldemHandPhase.values, json['phase'], 'phase'),
       bettingRound: _enumByName(
@@ -122,6 +141,8 @@ class HoldemHandState {
       lastAggressorSeat: _nullableInt(json, 'last_aggressor_seat'),
       lastActionSummary: _nullableString(json, 'last_action_summary'),
     );
+    _validatePersistedState(state);
+    return state;
   }
 
   final String handId;
@@ -198,6 +219,63 @@ class HoldemHandState {
       lastActionSummary: lastActionSummary ?? this.lastActionSummary,
     );
   }
+}
+
+void _validatePersistedState(HoldemHandState state) {
+  if (!_isSafeText(state.handId)) {
+    throw const FormatException('Holdem hand id is invalid.');
+  }
+  if (state.currentBetToCall < 0 ||
+      state.minimumRaiseAmount <= 0 ||
+      state.pot < 0) {
+    throw const FormatException('Holdem monetary state is invalid.');
+  }
+
+  final seatIds = <int>{};
+  for (final seat in state.seats) {
+    if (!seatIds.add(seat.seat)) {
+      throw const FormatException('Holdem seat ids must be unique.');
+    }
+  }
+
+  final actedSeatIds = <int>{};
+  for (final seat in state.actedSeatsThisRound) {
+    if (seat < 0 || !actedSeatIds.add(seat)) {
+      throw const FormatException(
+        'Holdem acted seat ids must be unique and non-negative.',
+      );
+    }
+  }
+
+  final boardCards = <String>{};
+  for (final card in state.boardCards) {
+    if (!_isSafeText(card) || !boardCards.add(card)) {
+      throw const FormatException(
+        'Holdem board cards must be unique and safe.',
+      );
+    }
+  }
+  if (state.boardCards.length > 5) {
+    throw const FormatException(
+      'Holdem board cannot contain more than five cards.',
+    );
+  }
+
+  if (state.lastAggressorSeat != null && state.lastAggressorSeat! < 0) {
+    throw const FormatException('Holdem aggressor seat cannot be negative.');
+  }
+  if (state.lastActionSummary != null &&
+      !_isSafeText(state.lastActionSummary!)) {
+    throw const FormatException('Holdem action summary is invalid.');
+  }
+}
+
+bool _isSafeText(String value) {
+  return value.trim().isNotEmpty &&
+      value.trim() == value &&
+      value.codeUnits.every(
+        (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
+      );
 }
 
 Map<String, Object?> _requiredObject(Object? value, String key) {
