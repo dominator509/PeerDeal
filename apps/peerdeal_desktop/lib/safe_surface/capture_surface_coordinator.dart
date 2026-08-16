@@ -156,7 +156,7 @@ class CaptureSurfaceCoordinator {
 
   static String _safeNotes(String notes) {
     final normalized = notes
-        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F-\x9F]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
     if (normalized.isEmpty) {

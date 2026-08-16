@@ -71,14 +71,15 @@ class NativeLocalPeerIdentityWriter {
       );
       if (expectedRevision != null &&
           bridge is CancellableConditionalSecureKeyStorageMutationBridge) {
-        result = await (bridge
-                  as CancellableConditionalSecureKeyStorageMutationBridge)
-            .saveKeyIfRevision(
-              namespace: namespace,
-              key: key,
-              expectedRevision: expectedRevision,
-              cancellation: cancellation,
-            );
+        result =
+            await (bridge
+                    as CancellableConditionalSecureKeyStorageMutationBridge)
+                .saveKeyIfRevision(
+                  namespace: namespace,
+                  key: key,
+                  expectedRevision: expectedRevision,
+                  cancellation: cancellation,
+                );
       } else if (expectedRevision != null &&
           bridge is ConditionalSecureKeyStorageMutationBridge) {
         result = await (bridge as ConditionalSecureKeyStorageMutationBridge)
@@ -104,9 +105,7 @@ class NativeLocalPeerIdentityWriter {
     }
 
     if (result.isSuccess) {
-      return AppLocalPeerIdentityWriteResult.success(
-        revision: result.revision,
-      );
+      return AppLocalPeerIdentityWriteResult.success(revision: result.revision);
     }
     return AppLocalPeerIdentityWriteResult.failure(
       warning: 'Local peer identity save failed.',
@@ -132,5 +131,7 @@ class NativeLocalPeerIdentityWriter {
   static bool _isValidLabel(String value) =>
       value.trim().isNotEmpty &&
       value.trim() == value &&
-      !value.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f);
+      !value.codeUnits.any(
+        (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+      );
 }

@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T250 Align App Diagnostic Text Boundaries
+
+Summary:
+- Mirrored mobile and desktop app warning, diagnostic, fallback, route, safe
+  display, recovery, identity, transport, receipt, bootstrap, join, and demo
+  helpers now reject or scrub C0/C1-control-bearing text consistently.
+- Preserved app/package ownership, native bridge contracts, route policy, and
+  stable fail-closed diagnostics.
+
+Files:
+- Mirrored app files under `apps/peerdeal_mobile/lib` and
+  `apps/peerdeal_desktop/lib`, with focused regression fixtures.
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Focused mobile and desktop app suites pass (106 tests each).
+- Full `analyze`, `boundary-check`, `source-text`, serialized `test`,
+  `dependency-audit`, formatter, and `git diff --check` gates pass.
+- Dependency audit reports 0 actionable upgrades and 11 newer-resolvable
+  versions below the current toolchain ceiling.
+
+Remaining:
+- Concrete product source/state selection, durable database persistence,
+  real-device/network validation, remaining platform hosts, signing, and final
+  UX remain separate readiness work.
+
 ### 2026-08-16 - Codex - T249 Harden App Production-Session Text Boundaries
 
 Summary:

@@ -244,7 +244,7 @@ class NativeBootstrapCandidateLoader {
 
   static String _safeNativeText(String value) {
     final normalized = value
-        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F-\x9F]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
     if (normalized.isEmpty) {
@@ -280,7 +280,7 @@ class NativeBootstrapCandidateLoader {
 
   static String _safePeerId(String value) {
     final normalized = value
-        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F-\x9F]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
     if (normalized.isEmpty) {

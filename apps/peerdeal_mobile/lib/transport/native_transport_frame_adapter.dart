@@ -236,7 +236,9 @@ List<String> _safeNativeTransportWarnings(
       trimmed.isEmpty ||
               trimmed != warning ||
               warning.length > _maximumWarningLength ||
-              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+              warning.codeUnits.any(
+                (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+              )
           ? fallback
           : warning,
     );

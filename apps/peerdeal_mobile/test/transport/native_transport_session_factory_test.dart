@@ -20,7 +20,7 @@ void main() {
       warnings: <String>[
         'warning_1',
         ' warning_2',
-        'line\nfeed',
+        'line\n${String.fromCharCode(0x85)}feed',
         'warning_4',
         'warning_5',
       ],
@@ -96,7 +96,8 @@ void main() {
           sendSupported: true,
           receiveSupported: true,
           maxPayloadBytes: 4096,
-          notes: '${'native '.padRight(120, 'x')}\nsecret',
+          notes:
+              '${'native '.padRight(120, 'x')}\n${String.fromCharCode(0x85)}secret',
           warning: 'transport_error: C:\\secret\\transport.log',
         ),
       ),

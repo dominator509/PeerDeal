@@ -145,7 +145,7 @@ class NativeTransportSessionFactory {
 
   static String _safeNativeNotes(String notes) {
     final normalized = notes
-        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F-\x9F]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
     if (normalized.isEmpty) {
@@ -257,7 +257,9 @@ List<String> _safeNativeTransportWarnings(List<String> warnings) {
       trimmed.isEmpty ||
               trimmed != warning ||
               warning.length > _maximumWarningLength ||
-              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+              warning.codeUnits.any(
+                (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+              )
           ? 'Native transport session warning unavailable.'
           : warning,
     );

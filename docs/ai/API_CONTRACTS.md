@@ -184,6 +184,11 @@ Production navigation labels and paths must also not collide
 case-insensitively with enabled demo home navigation entries.
 Production navigation and home composition remain app-shell work and should
 replace or extend app routes without moving route policy into shared packages.
+Across the mirrored app shells, app-owned warning, diagnostic, fallback, and
+safe-display text must be bounded and free of C0/C1 controls before rendering,
+route composition, or app-owned handoff. Native detail, exception text, and
+unsafe display values fail closed or use stable unavailable text; this policy
+does not move native or product semantics into shared packages.
 Mirrored mobile and desktop runtime constructors snapshot join/setup mode gates,
 enabled demo paths, production route maps, production navigation descriptors,
 and native-readiness route gates before exposing them to app-shell routing.

@@ -97,7 +97,8 @@ class NativeReceiptKeyRingWriter {
 
     final SecureKeyStorageMutationResult result;
     try {
-      result = expectedRevision != null &&
+      result =
+          expectedRevision != null &&
               _bridge is CancellableConditionalSecureKeyStorageMutationBridge
           ? await (_bridge
                     as CancellableConditionalSecureKeyStorageMutationBridge)
@@ -152,7 +153,8 @@ class NativeReceiptKeyRingWriter {
 
     final SecureKeyStorageMutationResult result;
     try {
-      result = expectedRevision != null &&
+      result =
+          expectedRevision != null &&
               _bridge is CancellableConditionalSecureKeyStorageMutationBridge
           ? await (_bridge
                     as CancellableConditionalSecureKeyStorageMutationBridge)

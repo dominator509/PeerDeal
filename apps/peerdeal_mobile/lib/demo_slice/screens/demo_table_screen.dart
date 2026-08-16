@@ -331,7 +331,10 @@ String _safeTableWarning(String warning, {required String fallback}) {
     return fallback;
   }
   final isPrintable = warning.codeUnits.every(
-    (codeUnit) => codeUnit >= 0x20 && codeUnit != 0x5C && codeUnit != 0x7F,
+    (codeUnit) =>
+        codeUnit >= 0x20 &&
+        codeUnit != 0x5C &&
+        !(codeUnit >= 0x7F && codeUnit <= 0x9F),
   );
   return isPrintable ? warning : fallback;
 }

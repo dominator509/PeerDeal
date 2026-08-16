@@ -175,7 +175,9 @@ class AppHoldemProjectionTransportPublisher {
       if (warning.isEmpty ||
           warning.length > 160 ||
           warning.trim() != warning ||
-          warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)) {
+          warning.codeUnits.any(
+            (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+          )) {
         safe.add('Holdem projection transport warning unavailable.');
       } else {
         safe.add(warning);

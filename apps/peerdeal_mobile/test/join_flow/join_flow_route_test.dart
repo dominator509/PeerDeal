@@ -519,7 +519,7 @@ class _LeakyJoinFlowOrchestrator implements JoinFlowOrchestrator {
       resultCode: 'ERR_ROLE_DENIED',
       diagnostics: <ProtocolDiagnostic>[
         ProtocolDiagnostic(
-          code: r'ERR C:\secret\join.log',
+          code: 'ERR ${String.fromCharCode(0x85)} C:\\secret\\join.log',
           message: 'token sk-demo-secret',
         ),
       ],

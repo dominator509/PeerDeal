@@ -381,7 +381,7 @@ bool _isSafeJoinIdentity(String value) {
     return false;
   }
   return value.codeUnits.every(
-    (codeUnit) => codeUnit > 0x20 && codeUnit != 0x7F,
+    (codeUnit) => codeUnit > 0x20 && !(codeUnit >= 0x7F && codeUnit <= 0x9F),
   );
 }
 
@@ -471,7 +471,10 @@ bool _isSafeJoinMessage(String? value) {
   final lower = value.toLowerCase();
   if (lower.contains('secret') || lower.contains('token')) return false;
   return value.codeUnits.every(
-    (codeUnit) => codeUnit >= 0x20 && codeUnit != 0x5C && codeUnit != 0x7F,
+    (codeUnit) =>
+        codeUnit >= 0x20 &&
+        codeUnit != 0x5C &&
+        !(codeUnit >= 0x7F && codeUnit <= 0x9F),
   );
 }
 

@@ -93,6 +93,7 @@ void main() {
       () => DemoSliceRoutes.enabledMountedRoutes(const <String>{
         DemoSliceRoutes.home,
         '/demo/missing-secret-token',
+        '/demo/missing-\u0085-route',
       }),
       throwsA(
         isA<StateError>().having(
@@ -245,10 +246,12 @@ void main() {
                 route.label.length > 48 ||
                 route.surface.length > 64 ||
                 route.label.codeUnits.any(
-                  (codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F,
+                  (codeUnit) =>
+                      codeUnit < 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
                 ) ||
                 route.surface.codeUnits.any(
-                  (codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F,
+                  (codeUnit) =>
+                      codeUnit < 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
                 ),
           )
           .toList(),

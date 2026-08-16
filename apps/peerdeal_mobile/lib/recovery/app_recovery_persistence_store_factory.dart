@@ -23,7 +23,9 @@ List<String> _safeRecoveryWarnings(Iterable<String> warnings) {
       trimmed.isEmpty ||
               trimmed != warning ||
               warning.length > _maximumRecoveryWarningLength ||
-              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+              warning.codeUnits.any(
+                (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+              )
           ? 'Recovery persistence warning unavailable.'
           : warning,
     );
@@ -131,6 +133,6 @@ class AppRecoveryPersistenceStoreFactory {
     final normalized = path.trim();
     return normalized.isNotEmpty &&
         normalized == path &&
-        !RegExp(r'[\x00-\x1F\x7F]').hasMatch(normalized);
+        !RegExp(r'[\x00-\x1F\x7F-\x9F]').hasMatch(normalized);
   }
 }

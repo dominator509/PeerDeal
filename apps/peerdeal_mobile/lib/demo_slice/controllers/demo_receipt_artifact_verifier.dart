@@ -133,7 +133,7 @@ bool _isSafeDiagnostic(String value) {
     return false;
   }
   for (final unit in value.codeUnits) {
-    if (unit < 0x20 || unit == 0x7f) {
+    if (unit < 0x20 || (unit >= 0x7f && unit <= 0x9f)) {
       return false;
     }
   }

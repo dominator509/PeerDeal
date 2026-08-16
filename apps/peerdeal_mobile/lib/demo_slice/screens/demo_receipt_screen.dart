@@ -326,7 +326,10 @@ String _safeReceiptMessage(Object? value) {
     return 'Receipt detail unavailable.';
   }
   final isSafe = value.codeUnits.every(
-    (codeUnit) => codeUnit >= 0x20 && codeUnit != 0x5C && codeUnit != 0x7F,
+    (codeUnit) =>
+        codeUnit >= 0x20 &&
+        codeUnit != 0x5C &&
+        !(codeUnit >= 0x7F && codeUnit <= 0x9F),
   );
   return isSafe ? value : 'Receipt detail unavailable.';
 }

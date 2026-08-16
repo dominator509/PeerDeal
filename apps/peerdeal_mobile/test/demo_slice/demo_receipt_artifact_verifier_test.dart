@@ -126,7 +126,7 @@ void main() {
           keyRing: ReceiptKeyRingSnapshot(),
           warnings: <String>[
             'secret=abc123',
-            'native\nexception',
+            'native\n${String.fromCharCode(0x85)}exception',
             '',
             'safe warning',
             'extra warning',
@@ -159,7 +159,9 @@ void main() {
       );
 
       final result = await verifier.inspect(
-        _artifactWithFormatVersion('secret\nformat'),
+        _artifactWithFormatVersion(
+          'secret\n${String.fromCharCode(0x85)}format',
+        ),
       );
 
       expect(result.status, 'rejected');

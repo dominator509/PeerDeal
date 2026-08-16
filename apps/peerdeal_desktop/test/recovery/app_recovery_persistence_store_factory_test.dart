@@ -23,7 +23,7 @@ void main() {
     final warnings = <String>[
       'warning_1',
       ' padded ',
-      'warning_2',
+      'warning_${String.fromCharCode(0x85)}_2',
       'warning_3',
       'warning_4',
     ];
@@ -35,7 +35,7 @@ void main() {
     expect(result.warnings, [
       'warning_1',
       'Recovery persistence warning unavailable.',
-      'warning_2',
+      'Recovery persistence warning unavailable.',
       'Recovery persistence warnings truncated.',
     ]);
     expect(() => result.warnings.add('warning_5'), throwsUnsupportedError);

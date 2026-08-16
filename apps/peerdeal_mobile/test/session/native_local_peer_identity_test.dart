@@ -30,7 +30,7 @@ void main() {
       warnings: <String>[
         'warning_1',
         ' warning_2',
-        'line\nfeed',
+        'line\n${String.fromCharCode(0x85)}feed',
         'warning_4',
         'warning_5',
       ],

@@ -46,10 +46,7 @@ void main() {
       );
 
       final result = await presenter.present(
-        receipt: ReceiptScanResult(
-          status: 'ok',
-          message: 'Receipt resolved.',
-        ),
+        receipt: ReceiptScanResult(status: 'ok', message: 'Receipt resolved.'),
         recovery: RecoveryResult<Object?>(
           isSuccess: false,
           reconciliation: ReconciliationResult(

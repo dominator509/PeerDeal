@@ -1068,11 +1068,13 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     throw StateError('Initial app route is not mounted.');
   }
 
-  bool _containsUnsafeRoutePathCharacter(String value) =>
-      value.codeUnits.any((codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F);
+  bool _containsUnsafeRoutePathCharacter(String value) => value.codeUnits.any(
+    (codeUnit) => codeUnit <= 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
+  );
 
-  bool _containsUnsafeLabelCharacter(String value) =>
-      value.codeUnits.any((codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F);
+  bool _containsUnsafeLabelCharacter(String value) => value.codeUnits.any(
+    (codeUnit) => codeUnit < 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
+  );
 
   DemoReceiptArtifactVerifierFactory get _receiptArtifactVerifierFactory {
     return _runtime.receiptArtifactVerifierFactory ??

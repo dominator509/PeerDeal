@@ -2639,6 +2639,14 @@ compatible. Product-owned snapshot payload interpretation, durable database
 persistence, device/network validation, other-platform hosts, provider-specific
 proof semantics, release signing, and final UX remain separate.
 
+The T250 follow-up aligns the mirrored app diagnostic and safe-display text
+boundary. Native readiness, transport, recovery, receipt-key, local-identity,
+session, route, safe-surface, bootstrap, join, and demo display helpers now
+reject or scrub C0/C1 control-bearing text consistently before app UI, route
+composition, or app-owned handoff. This preserves the original app/package
+boundaries and does not claim native platform reachability, product state, or
+durable database behavior.
+
 The T249 follow-up aligns the mirrored app production-session text boundary.
 Bootstrap invite identities, persisted route-policy paths and labels, and final
 production route metadata now reject blank, padded, and C0/C1-control-bearing

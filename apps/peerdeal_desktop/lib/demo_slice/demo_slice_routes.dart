@@ -161,7 +161,8 @@ class DemoSliceRoutes {
           path.contains('//') ||
           path.contains(r'\') ||
           path.codeUnits.any(
-            (codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F,
+            (codeUnit) =>
+                codeUnit <= 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
           )) {
         throw StateError('Allowed extra route paths contain invalid metadata.');
       }
@@ -218,14 +219,20 @@ class DemoSliceRoutes {
         !path.contains('#') &&
         !path.contains('//') &&
         !path.contains(r'\') &&
-        !path.codeUnits.any((codeUnit) => codeUnit <= 0x20 || codeUnit == 0x7F);
+        !path.codeUnits.any(
+          (codeUnit) =>
+              codeUnit <= 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
+        );
   }
 
   static bool _isCanonicalRouteText(String value, int maxLength) {
     return value.trim() == value &&
         value.isNotEmpty &&
         value.length <= maxLength &&
-        !value.codeUnits.any((codeUnit) => codeUnit < 0x20 || codeUnit == 0x7F);
+        !value.codeUnits.any(
+          (codeUnit) =>
+              codeUnit < 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),
+        );
   }
 }
 

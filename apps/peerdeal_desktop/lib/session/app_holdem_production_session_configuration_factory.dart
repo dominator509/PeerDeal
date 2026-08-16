@@ -61,7 +61,9 @@ List<String> _safeConfigurationWarnings(List<String> warnings) {
       trimmed.isEmpty ||
               trimmed != warning ||
               warning.length > _maximumConfigurationWarningLength ||
-              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+              warning.codeUnits.any(
+                (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+              )
           ? 'Holdem production session warning unavailable.'
           : warning,
     );

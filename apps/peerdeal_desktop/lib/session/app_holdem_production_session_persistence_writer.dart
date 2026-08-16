@@ -55,8 +55,7 @@ class AppHoldemProductionSessionPersistenceWriter {
     );
     if (snapshotValidation != null) return snapshotValidation;
 
-    RecoveryPersistenceResult eventResult =
-        RecoveryPersistenceResult.success();
+    RecoveryPersistenceResult eventResult = RecoveryPersistenceResult.success();
     if (events.isNotEmpty && !eventsAlreadyPersisted) {
       final scope = RecoveryPersistenceScope(
         tableId: tableState.tableId,
