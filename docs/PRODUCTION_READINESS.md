@@ -93,7 +93,7 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
-- The workspace and CI now use Melos 8.2.2, and dependency audit reports zero actionable upgrades; newer `meta` and `test` versions remain toolchain-blocked.
+- The workspace and CI now use Melos 8.3.0, and dependency audit reports zero actionable upgrades; newer `meta` and `test` versions remain toolchain-blocked.
 - The v1 scaffold protocol catalog is locked across command, event, snapshot,
   Game File, invite payload, and public result-code identities, with accepted
   fixture parity and fail-closed unsupported-version checks.
@@ -2470,6 +2470,14 @@ entries with stable lower-layer markers. The receipt artifact verifier
 translates those markers back to its stable public diagnostic vocabulary while
 preserving fail-closed signing and encryption-key behavior; the generic native
 secure-key bridge remains receipt-agnostic.
+
+The T226 follow-up closes the production-session configuration warning
+boundary. Mirrored `AppHoldemProductionSessionConfigurationLoadResult`
+constructors now scrub control-bearing, padded, and oversized warning text and
+cap direct warning collections at four entries before configuration failures
+reach app-shell route loading. The existing app-owned source, recovery store,
+identity, and route policy seams remain unchanged. The workspace also aligns
+its existing Melos dev dependency to the newest resolvable 8.3.0 release.
 
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`

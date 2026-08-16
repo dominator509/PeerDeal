@@ -133,6 +133,42 @@ Next reviewer:
 
 ---
 
+### 2026-08-16 - Codex - T226 Bound Production Configuration Warnings
+
+Summary:
+- Mirrored `AppHoldemProductionSessionConfigurationLoadResult` constructors
+  now scrub control-bearing, padded, and oversized warning text.
+- Direct configuration warning collections are capped at four entries with a
+  stable fallback and truncation marker before route loading receives them.
+- The existing Melos dev dependency is aligned from 8.2.2 to the newest
+  resolvable 8.3.0 release; no package boundary or runtime architecture
+  changed.
+
+Files changed:
+- Mirrored mobile and desktop production-session configuration factories and
+  focused tests.
+- Root `pubspec.yaml` and `pubspec.lock`.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile production-session configuration suite passed (11 tests).
+- Focused desktop production-session configuration suite passed (11 tests).
+- Full `melos run test`, analyze, boundary-check, and source-text gates passed.
+- Dependency audit passed with 0 actionable upgrades and 11 newer versions
+  below the current toolchain ceiling.
+- Android debug APK and Windows debug artifacts built successfully.
+
+Risks:
+- Concrete product state/database source wiring, native runtime/device
+  validation, cross-device reachability, other-platform hosts, and release
+  signing remain external or product-owned boundaries.
+
+Next reviewer:
+- Continue with the next production gap without inventing product state or
+  moving session truth out of the established app/core boundaries.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:

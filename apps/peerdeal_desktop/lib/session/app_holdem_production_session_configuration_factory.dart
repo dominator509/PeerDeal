@@ -11,6 +11,9 @@ import 'app_holdem_production_session_snapshot_writer.dart';
 import 'app_persisted_holdem_production_session_source.dart';
 import 'native_local_peer_identity_provisioner.dart';
 
+const _maximumConfigurationWarningCount = 4;
+const _maximumConfigurationWarningLength = 160;
+
 typedef AppHoldemProductionSessionRoutePolicyFactory =
     AppPersistedHoldemProductionSessionRoutePolicy Function(
       RecoveryPersistenceStore store,
@@ -28,14 +31,14 @@ class AppHoldemProductionSessionConfigurationLoadResult {
     required this.persistenceWriter,
     required this.snapshotWriter,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeConfigurationWarnings(warnings);
 
   AppHoldemProductionSessionConfigurationLoadResult.unavailable({
     required List<String> warnings,
   }) : configuration = null,
        persistenceWriter = null,
        snapshotWriter = null,
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _safeConfigurationWarnings(warnings);
 
   final AppHoldemProductionSessionConfiguration? configuration;
   final AppHoldemProductionSessionPersistenceWriter? persistenceWriter;
@@ -43,6 +46,30 @@ class AppHoldemProductionSessionConfigurationLoadResult {
   final List<String> warnings;
 
   bool get isAvailable => configuration != null;
+}
+
+List<String> _safeConfigurationWarnings(List<String> warnings) {
+  final truncated = warnings.length > _maximumConfigurationWarningCount;
+  final valueLimit = truncated
+      ? _maximumConfigurationWarningCount - 1
+      : _maximumConfigurationWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumConfigurationWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Holdem production session warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Holdem production session warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
 }
 
 /// Composes the app-owned persisted Hold'em route from its real storage and

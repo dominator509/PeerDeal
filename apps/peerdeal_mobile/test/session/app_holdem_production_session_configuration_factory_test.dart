@@ -25,6 +25,26 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct configuration warning diagnostics', () {
+    final result =
+        AppHoldemProductionSessionConfigurationLoadResult.unavailable(
+          warnings: <String>[
+            'warning_1',
+            ' warning_2',
+            'line\nfeed',
+            'warning_4',
+            'warning_5',
+          ],
+        );
+
+    expect(result.warnings, [
+      'warning_1',
+      'Holdem production session warning unavailable.',
+      'Holdem production session warning unavailable.',
+      'Holdem production session warnings truncated.',
+    ]);
+  });
+
   test('fails closed when the recovery root is unavailable', () async {
     final result = await _create(rootDirectoryFactory: () => Directory(' '));
 
