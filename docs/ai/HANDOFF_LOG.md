@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T240 Cancel Queued Stale Checkpoints
+
+Summary:
+- Mirrored mobile and desktop production table surfaces now bind checkpoint
+  persistence to the current route operation generation.
+- The existing app snapshot coordinators check that predicate before queueing
+  and again inside the serialized callback, preventing a replaced route from
+  writing stale typed state while preserving FIFO retry and the existing
+  persistence ownership of already-running store calls.
+
+Files changed:
+- Mirrored `app_holdem_production_session_snapshot_coordinator.dart`,
+  `app_holdem_production_table_surface.dart`, and production route tests.
+- `docs/ARCHITECTURE.md`, `docs/PRODUCTION_READINESS.md`,
+  `docs/ai/API_CONTRACTS.md`, and this handoff log.
+
+Verification:
+- Focused mobile and desktop production route suites pass, including the
+  stale-checkpoint replacement regression.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass; Android debug APK, Windows debug, and all 16 Windows native-host
+  smoke markers pass.
+
+Risks:
+- Already-dispatched recovery-store calls remain host/store-owned. This change
+  does not add network acknowledgements, an outbound durable sync queue, or a
+  new protocol contract.
+
 ### 2026-08-16 - Codex - T239 Wire Native Receipt Flow Into App Startup
 
 Summary:

@@ -62,9 +62,18 @@ class AppHoldemProductionSessionSnapshotCoordinator {
     required HoldemHandState handState,
     required HoldemEventCursor eventCursor,
     List<EventEnvelope> events = const <EventEnvelope>[],
+    bool Function()? shouldPersist,
   }) {
+    if (shouldPersist != null && !shouldPersist()) {
+      return Future<RecoveryPersistenceResult>.value(
+        RecoveryPersistenceResult.success(),
+      );
+    }
     if (events.length > _maxRecoveryEvents) {
       return _enqueueOperation(() {
+        if (shouldPersist != null && !shouldPersist()) {
+          return RecoveryPersistenceResult.success();
+        }
         final result = RecoveryPersistenceResult(
           isSuccess: false,
           warnings: <String>[
@@ -78,6 +87,9 @@ class AppHoldemProductionSessionSnapshotCoordinator {
 
     final capturedEvents = List<EventEnvelope>.unmodifiable(events);
     return _enqueueOperation(() {
+      if (shouldPersist != null && !shouldPersist()) {
+        return RecoveryPersistenceResult.success();
+      }
       final String snapshotId;
       try {
         snapshotId = _snapshotIdFactory(tableState, eventCursor);

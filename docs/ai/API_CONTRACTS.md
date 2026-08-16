@@ -666,6 +666,13 @@ The mirrored snapshot coordinator also bounds queued failed checkpoints by
 count and serialized typed-state/event bytes; overflow fails before durable
 persistence, while successful retry and terminal discard release the tracked
 budget without changing FIFO ordering.
+The coordinator's optional app-owned `shouldPersist` predicate is evaluated
+before queueing and again inside the serialized callback. The mirrored
+production table surfaces bind it to the current route operation generation,
+so a route replacement can suppress a queued stale checkpoint before it writes
+recovery state. This predicate does not cancel an already-running store call,
+and it does not create a network acknowledgement or durable outbound-sync
+queue.
 
 `fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
 callers that require pre-provisioned identity. The lazy production adapter is

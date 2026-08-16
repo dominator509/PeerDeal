@@ -419,6 +419,7 @@ class _AppHoldemProductionTableSurfaceState
         handState: widget.routeContext.runtime.handState,
         eventCursor: widget.routeContext.runtime.cursor,
         events: projection.events,
+        shouldPersist: () => _isCurrentOperation(operationGeneration),
       );
       if (!_isCurrentOperation(operationGeneration)) return;
       if (!persistenceResult.isSuccess) {

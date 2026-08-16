@@ -372,6 +372,38 @@ void main() {
     },
   );
 
+  testWidgets(
+    'does not checkpoint a stale projection after runtime replacement',
+    (tester) async {
+      final oldStore = _RecordingRecoveryStore();
+      final newStore = _RecordingRecoveryStore();
+
+      await tester.pumpWidget(
+        _productionSurfaceRouteWithCoordinator(
+          runtime: _runtime(),
+          bridge: _BlockingNativeTransportBridge(blockSends: false),
+          snapshotCoordinator: _snapshotCoordinator(oldStore),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Call'));
+      await tester.pumpWidget(
+        _productionSurfaceRouteWithCoordinator(
+          runtime: _runtime(),
+          bridge: _BlockingNativeTransportBridge(blockSends: false),
+          snapshotCoordinator: _snapshotCoordinator(newStore),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(oldStore.appendEventsCalls, 0);
+      expect(oldStore.saveSnapshotCalls, 0);
+      expect(newStore.appendEventsCalls, 0);
+      expect(newStore.saveSnapshotCalls, 0);
+    },
+  );
+
   testWidgets('drops a stale inbound checkpoint after runtime replacement', (
     tester,
   ) async {

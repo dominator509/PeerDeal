@@ -2590,6 +2590,16 @@ caller injection. Tests and explicit product integrations can still override the
 app-owned factories; the generic native bridge and receipt policy boundaries are
 unchanged.
 
+The T240 follow-up closes the queued stale-checkpoint gap in the mirrored
+production table surfaces. A local projection whose route is replaced before
+the serialized snapshot callback runs now returns without writing stale typed
+state into recovery storage, while existing post-await generation checks still
+prevent publication through the replacement transport. Focused mobile and
+desktop route regressions and the full repository gates pass; Android debug,
+Windows debug, and all 16 Windows native-host smoke markers also pass.
+Already-running store calls remain owned by the existing persistence boundary,
+and no sync acknowledgement or outbound durable queue was invented.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and
