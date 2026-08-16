@@ -13,17 +13,17 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
 
     if (frame.sessionId.trim().isEmpty) {
       warnings.add('ERR_TRANSPORT_FRAME_SESSION_REQUIRED');
-    } else if (frame.sessionId.trim() != frame.sessionId) {
+    } else if (!_isSafeIdentity(frame.sessionId)) {
       warnings.add('ERR_TRANSPORT_FRAME_SESSION_MALFORMED');
     }
     if (frame.fromPeerId.trim().isEmpty) {
       warnings.add('ERR_TRANSPORT_FRAME_SENDER_REQUIRED');
-    } else if (frame.fromPeerId.trim() != frame.fromPeerId) {
+    } else if (!_isSafeIdentity(frame.fromPeerId)) {
       warnings.add('ERR_TRANSPORT_FRAME_SENDER_MALFORMED');
     }
     if (frame.toPeerId.trim().isEmpty) {
       warnings.add('ERR_TRANSPORT_FRAME_RECIPIENT_REQUIRED');
-    } else if (frame.toPeerId.trim() != frame.toPeerId) {
+    } else if (!_isSafeIdentity(frame.toPeerId)) {
       warnings.add('ERR_TRANSPORT_FRAME_RECIPIENT_MALFORMED');
     }
     if (frame.fromPeerId == frame.toPeerId) {
@@ -50,5 +50,13 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
       isValid: false,
       warnings: List<String>.unmodifiable(warnings),
     );
+  }
+
+  bool _isSafeIdentity(String value) {
+    return value.trim() == value &&
+        value.codeUnits.every(
+          (codeUnit) =>
+              codeUnit >= 0x20 && !(codeUnit >= 0x7f && codeUnit <= 0x9f),
+        );
   }
 }

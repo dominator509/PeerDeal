@@ -314,6 +314,9 @@ call platform sinks or session handlers.
 Transport frame payload entries must be byte values from 0 through 255;
 out-of-range entries fail with `ERR_TRANSPORT_FRAME_PAYLOAD_BYTE_INVALID`
 before a transport sink or platform adapter is called.
+Session and peer identities must also be trimmed, nonblank, and free of C0/C1
+control characters; unsafe values use the existing malformed-identity result
+codes before a sink or handler is called.
 
 Mobile and desktop `NativeTransportSessionFactory` instances own the app
 payload limit used by the default `BasicTransportFrameValidator`. Session

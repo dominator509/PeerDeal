@@ -62,6 +62,24 @@ void main() {
     );
   });
 
+  test('rejects control-bearing frame identities', () {
+    const validator = BasicTransportFrameValidator();
+
+    final result = validator.validate(
+      TransportFrame(
+        sessionId: 'session\u0001_1',
+        fromPeerId: 'peer\u0085_a',
+        toPeerId: 'peer_b',
+        sequence: 1,
+        payload: <int>[1],
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.warnings, contains('ERR_TRANSPORT_FRAME_SESSION_MALFORMED'));
+    expect(result.warnings, contains('ERR_TRANSPORT_FRAME_SENDER_MALFORMED'));
+  });
+
   test(
     'rejects self-send frames before transport implementation sees them',
     () {

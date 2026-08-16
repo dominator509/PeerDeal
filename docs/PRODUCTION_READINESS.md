@@ -237,7 +237,9 @@ the gates below are satisfied.
   platform sinks or session handlers.
 - Network transport frame validation now rejects payload entries outside the
   0-through-255 byte range before native transport adapters receive them;
-  native bridge byte validation remains a second fail-closed boundary.
+  native bridge byte validation remains a second fail-closed boundary. The
+  same network gate rejects C0/C1 control-bearing frame identities before
+  adapter or session-handler calls.
 - Network bootstrap candidate resolution now drops blank, padded,
   control-character-bearing, or duplicate peer ids before assigning candidate
   route class and priority, keeping malformed discovery identities out of path

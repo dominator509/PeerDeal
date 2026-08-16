@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T246 Reject Unsafe Transport Identities
+
+Summary:
+- Hardened `BasicTransportFrameValidator` so session and peer identities reject
+  embedded C0/C1 control characters as malformed before transport sinks or
+  session handlers are called.
+- Reused the existing malformed-identity diagnostics and preserved the
+  `TransportFrame` shape, native bridge contract, and package boundaries.
+
+Files:
+- `packages/peerdeal_network/lib/src/services/basic_transport_frame_validator.dart`
+- `packages/peerdeal_network/test/basic_transport_frame_validator_test.dart`
+- `packages/peerdeal_network/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+
+Verification:
+- Focused network validator tests and full repository gates remain required
+  before commit.
+
+Risks:
+- Cryptographic session authentication, product persistence, live device and
+  network validation, release signing, and final UX remain separate readiness
+  work.
+
 ### 2026-08-16 - Codex - T245 Enforce Network Transport Byte Range
 
 Summary:
