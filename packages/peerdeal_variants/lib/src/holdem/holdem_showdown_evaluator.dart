@@ -7,12 +7,13 @@ class HoldemShowdownEvaluator {
   const HoldemShowdownEvaluator({
     this.evaluator = const HoldemHandEvaluator(),
     this.maxSeats = HoldemInputLimits.defaultMaxSeats,
-  }) : assert(maxSeats > 0, 'maxSeats must be positive');
+  });
 
   final HoldemHandEvaluator evaluator;
   final int maxSeats;
 
   ShowdownEvaluationResult evaluate(ShowdownEvaluationInput input) {
+    _validatePositiveLimit(maxSeats, 'maxSeats');
     if (input.seats.length > maxSeats) {
       return ShowdownEvaluationResult(
         results: <RankedShowdownResult>[],
@@ -83,6 +84,12 @@ class HoldemShowdownEvaluator {
       ],
       warnings: warnings,
     );
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }
 

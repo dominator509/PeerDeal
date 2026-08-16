@@ -2,6 +2,37 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T230 Enforce Release Limit Invariants
+
+Summary:
+- Replaced assert-only positive-limit checks with explicit runtime
+  `ArgumentError` validation at public operations in core, sync, network,
+  variants, modes, and wizard services.
+- Receipt signing-key and key-ring snapshot constructors now validate limits at
+  runtime as well; existing const APIs and bounded input result contracts are
+  preserved.
+- Added focused regression tests for the const-configured service boundaries
+  and updated receipt expectations from debug-only assertions to runtime
+  argument errors.
+
+Verification:
+- Focused release-configuration tests passed for core, network, sync, variants,
+  modes, and wizard.
+- Focused receipt signer and key-ring snapshot suites passed.
+- Full analyze, boundary-check, source-text, serialized test, and dependency
+  audit gates passed; actionable upgrades: 0.
+- Android debug APK, Windows debug build, and `git diff --check` passed.
+
+Risks:
+- Native runtime/device validation, real local-network discovery and endpoint
+  provisioning, other-platform secure storage, durable product state/database
+  wiring, operator release signing, and final UI/accessibility validation
+  remain external or integration-owned gaps.
+
+Next reviewer:
+- Continue only with product-owned state or externally validated runtime work;
+  preserve the existing architecture and package boundaries.
+
 ### 2026-08-12 - Codex - T221 Bound Transport Result Warnings
 
 Summary:

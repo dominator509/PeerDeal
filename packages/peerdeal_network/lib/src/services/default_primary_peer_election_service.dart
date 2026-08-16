@@ -11,7 +11,7 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
   const DefaultPrimaryPeerElectionService({
     required this.confidenceClassifier,
     this.maxSnapshots = NetworkInputLimits.defaultMaxPeerMetrics,
-  }) : assert(maxSnapshots > 0, 'maxSnapshots must be positive');
+  });
 
   final ConfidenceClassifier confidenceClassifier;
   final int maxSnapshots;
@@ -23,6 +23,7 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
     required String expectedAnchorHash,
     String? currentPrimaryPeerId,
   }) {
+    _validatePositiveLimit(maxSnapshots, 'maxSnapshots');
     final validCurrentPrimaryPeerId = _validPeerIdOrNull(currentPrimaryPeerId);
     final boundedSnapshots = <PeerMetricSnapshot>[];
     for (final snapshot in snapshots) {
@@ -154,5 +155,11 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
   bool _isValidPeerId(String peerId) {
     if (peerId.isEmpty || peerId.trim() != peerId) return false;
     return peerId.runes.every((rune) => rune > 0x1f && rune != 0x7f);
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }

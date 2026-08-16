@@ -6,9 +6,12 @@ class StaticReceiptSigningKeyProvider implements ReceiptSigningKeyProvider {
   StaticReceiptSigningKeyProvider({
     required this.activeKey,
     List<ReceiptSigningKey> verificationKeys = const <ReceiptSigningKey>[],
-    this.maxVerificationKeys =
+    int maxVerificationKeys =
         ReceiptKeyRingInputLimits.defaultMaxVerificationKeys,
-  }) : assert(maxVerificationKeys > 0, 'maxVerificationKeys must be positive'),
+  }) : maxVerificationKeys = _validatePositiveLimit(
+         maxVerificationKeys,
+         'maxVerificationKeys',
+       ),
        verificationKeys = List<ReceiptSigningKey>.unmodifiable(
          verificationKeys,
        );
@@ -40,4 +43,11 @@ class StaticReceiptSigningKeyProvider implements ReceiptSigningKeyProvider {
 
     return null;
   }
+}
+
+int _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
+  }
+  return value;
 }

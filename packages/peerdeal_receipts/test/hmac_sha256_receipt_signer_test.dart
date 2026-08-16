@@ -88,7 +88,7 @@ void main() {
         activeKey: activeKey,
         maxVerificationKeys: 0,
       ),
-      throwsA(isA<AssertionError>()),
+      throwsArgumentError,
     );
   });
 

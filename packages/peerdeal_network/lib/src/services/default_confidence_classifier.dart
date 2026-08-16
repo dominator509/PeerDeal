@@ -6,12 +6,13 @@ import 'confidence_classifier.dart';
 class DefaultConfidenceClassifier implements ConfidenceClassifier {
   const DefaultConfidenceClassifier({
     this.maxSnapshots = NetworkInputLimits.defaultMaxPeerMetrics,
-  }) : assert(maxSnapshots > 0, 'maxSnapshots must be positive');
+  });
 
   final int maxSnapshots;
 
   @override
   NetworkConfidence classify(Iterable<PeerMetricSnapshot> snapshots) {
+    _validatePositiveLimit(maxSnapshots, 'maxSnapshots');
     final items = <PeerMetricSnapshot>[];
     for (final snapshot in snapshots) {
       if (items.length >= maxSnapshots) {
@@ -44,5 +45,11 @@ class DefaultConfidenceClassifier implements ConfidenceClassifier {
     if (allFast) return NetworkConfidence.high;
 
     return NetworkConfidence.stable;
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }

@@ -8,7 +8,7 @@ class ShowdownSettlementProjector {
   const ShowdownSettlementProjector({
     this.engine = const PotEngine(),
     this.maxCommitments = HoldemInputLimits.defaultMaxCommitments,
-  }) : assert(maxCommitments > 0, 'maxCommitments must be positive');
+  });
 
   final PotEngine engine;
   final int maxCommitments;
@@ -19,6 +19,7 @@ class ShowdownSettlementProjector {
     required int? Function(String seatId) seatForId,
     SettlementPolicy policy = const SettlementPolicy(),
   }) {
+    _validatePositiveLimit(maxCommitments, 'maxCommitments');
     if (commitments.length > maxCommitments) {
       return _blockedForCommitmentOverflow();
     }
@@ -97,6 +98,7 @@ class ShowdownSettlementProjector {
     required int? Function(String seatId) seatForId,
     SettlementPolicy policy = const SettlementPolicy(),
   }) {
+    _validatePositiveLimit(maxCommitments, 'maxCommitments');
     if (commitments.length > maxCommitments) {
       return _blockedForCommitmentOverflow();
     }
@@ -200,6 +202,12 @@ class ShowdownSettlementProjector {
     }
 
     return List<String>.unmodifiable(warnings);
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }
 

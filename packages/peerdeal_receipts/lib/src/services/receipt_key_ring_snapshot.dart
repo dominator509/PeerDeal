@@ -12,11 +12,17 @@ class ReceiptKeyRingSnapshot
         const <ReceiptSigningKey>[],
     this.activeEncryption,
     List<ReceiptEncryptionKey> decryptionKeys = const <ReceiptEncryptionKey>[],
-    this.maxVerificationKeys =
+    int maxVerificationKeys =
         ReceiptKeyRingInputLimits.defaultMaxVerificationKeys,
-    this.maxDecryptionKeys = ReceiptKeyRingInputLimits.defaultMaxDecryptionKeys,
-  }) : assert(maxVerificationKeys > 0, 'maxVerificationKeys must be positive'),
-       assert(maxDecryptionKeys > 0, 'maxDecryptionKeys must be positive'),
+    int maxDecryptionKeys = ReceiptKeyRingInputLimits.defaultMaxDecryptionKeys,
+  }) : maxVerificationKeys = _validatePositiveLimit(
+         maxVerificationKeys,
+         'maxVerificationKeys',
+       ),
+       maxDecryptionKeys = _validatePositiveLimit(
+         maxDecryptionKeys,
+         'maxDecryptionKeys',
+       ),
        verificationSigningKeys = List<ReceiptSigningKey>.unmodifiable(
          verificationSigningKeys,
        ),
@@ -80,4 +86,11 @@ class ReceiptKeyRingSnapshot
 
     return null;
   }
+}
+
+int _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
+  }
+  return value;
 }

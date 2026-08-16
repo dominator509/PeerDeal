@@ -2500,6 +2500,25 @@ setup token policy to direct errors and warnings, while
 warning handling with a stable truncation marker. Setup orchestration, recovery
 storage, and route ownership remain unchanged.
 
+The T230 follow-up closes a release-build configuration invariant gap. Public
+limit-bearing services in `peerdeal_core`, `peerdeal_sync`,
+`peerdeal_network`, `peerdeal_variants`, `peerdeal_modes`, and
+`peerdeal_wizard` now validate positive limits at their operational entry
+points instead of relying only on Dart `assert`, which is removed from release
+builds. Receipt key-ring constructors now perform the same explicit
+`ArgumentError` validation. Existing `const` constructors, bounded result
+codes, package boundaries, event truth ownership, and native contracts remain
+unchanged.
+
+Verification:
+- Focused release-configuration tests passed for core, network, sync, variants,
+  modes, and wizard; receipt signer and key-ring snapshot regressions passed.
+- Full `melos run analyze`, `boundary-check`, `source-text`, and serialized
+  `test` gates passed.
+- Dependency audit passed with 0 actionable upgrades and 11 newer versions
+  below the current toolchain ceiling.
+- Android debug APK and Windows debug builds passed; `git diff --check` passed.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

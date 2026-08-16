@@ -5,11 +5,12 @@ import 'pot_slice.dart';
 class SidePotBuilder {
   const SidePotBuilder({
     this.maxCommitments = CoreInputLimits.defaultMaxCommitments,
-  }) : assert(maxCommitments > 0, 'maxCommitments must be positive');
+  });
 
   final int maxCommitments;
 
   List<PotSlice> build(List<PotCommitment> commitments) {
+    _validatePositiveLimit(maxCommitments, 'maxCommitments');
     if (commitments.length > maxCommitments) {
       return const <PotSlice>[];
     }
@@ -51,5 +52,11 @@ class SidePotBuilder {
     }
 
     return slices;
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }

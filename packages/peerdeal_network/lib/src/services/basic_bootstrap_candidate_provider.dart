@@ -7,7 +7,7 @@ import '../models/network_route_class.dart';
 class BasicBootstrapCandidateProvider implements BootstrapCandidateProvider {
   const BasicBootstrapCandidateProvider({
     this.maxPeerIds = NetworkInputLimits.defaultMaxPeerIds,
-  }) : assert(maxPeerIds > 0, 'maxPeerIds must be positive');
+  });
 
   final int maxPeerIds;
 
@@ -15,6 +15,7 @@ class BasicBootstrapCandidateProvider implements BootstrapCandidateProvider {
   Future<List<BootstrapCandidate>> resolveCandidates(
     BootstrapResolutionRequest request,
   ) async {
+    _validatePositiveLimit(maxPeerIds, 'maxPeerIds');
     if (request.peerIds.length > maxPeerIds) {
       return const <BootstrapCandidate>[];
     }
@@ -53,5 +54,11 @@ class BasicBootstrapCandidateProvider implements BootstrapCandidateProvider {
   bool _isValidPeerId(String peerId) {
     if (peerId.isEmpty || peerId.trim() != peerId) return false;
     return peerId.runes.every((rune) => rune > 0x1f && rune != 0x7f);
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }

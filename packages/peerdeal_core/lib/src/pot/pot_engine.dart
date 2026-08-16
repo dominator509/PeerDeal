@@ -13,12 +13,7 @@ class PotEngine {
     this.maxCommitments = CoreInputLimits.defaultMaxCommitments,
     this.maxWinningSliceEntries = CoreInputLimits.defaultMaxWinningSliceEntries,
     this.maxWinnersPerSlice = CoreInputLimits.defaultMaxWinnersPerSlice,
-  }) : assert(maxCommitments > 0, 'maxCommitments must be positive'),
-       assert(
-         maxWinningSliceEntries > 0,
-         'maxWinningSliceEntries must be positive',
-       ),
-       assert(maxWinnersPerSlice > 0, 'maxWinnersPerSlice must be positive');
+  });
 
   final SidePotBuilder sidePotBuilder;
   final LedgerDeltaHook ledgerDeltaHook;
@@ -31,6 +26,7 @@ class PotEngine {
     required Map<int, List<String>> winningSeatIdsBySliceIndex,
     SettlementPolicy policy = const SettlementPolicy(),
   }) {
+    _validateConfiguration();
     final inputWarning = _inputLimitWarning(
       commitments: commitments,
       winningSeatIdsBySliceIndex: winningSeatIdsBySliceIndex,
@@ -107,6 +103,12 @@ class PotEngine {
     );
   }
 
+  void _validateConfiguration() {
+    _validatePositiveLimit(maxCommitments, 'maxCommitments');
+    _validatePositiveLimit(maxWinningSliceEntries, 'maxWinningSliceEntries');
+    _validatePositiveLimit(maxWinnersPerSlice, 'maxWinnersPerSlice');
+  }
+
   List<String> _validateWinnersBySlice({
     required List<PotSlice> slices,
     required Map<int, List<String>> winningSeatIdsBySliceIndex,
@@ -159,5 +161,11 @@ class PotEngine {
       return 'ERR_CORE_SETTLEMENT_WINNER_COUNT';
     }
     return null;
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }

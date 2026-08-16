@@ -14,9 +14,7 @@ class DefaultGovernanceEngine implements GovernanceEngine {
     this.maxParticipants = ModeInputLimits.defaultMaxParticipants,
     this.maxSeats = ModeInputLimits.defaultMaxSeats,
     this.maxWaitlistEntries = ModeInputLimits.defaultMaxWaitlistEntries,
-  }) : assert(maxParticipants > 0, 'maxParticipants must be positive'),
-       assert(maxSeats > 0, 'maxSeats must be positive'),
-       assert(maxWaitlistEntries > 0, 'maxWaitlistEntries must be positive');
+  });
 
   final int maxParticipants;
   final int maxSeats;
@@ -27,6 +25,7 @@ class DefaultGovernanceEngine implements GovernanceEngine {
     required GovernanceContext context,
     required GovernanceAction action,
   }) {
+    _validateConfiguration();
     final inputError = _inputLimitError(context);
     if (inputError != null) {
       return GovernanceDecision.deny(inputError);
@@ -252,6 +251,12 @@ class DefaultGovernanceEngine implements GovernanceEngine {
     }
   }
 
+  void _validateConfiguration() {
+    _validatePositiveLimit(maxParticipants, 'maxParticipants');
+    _validatePositiveLimit(maxSeats, 'maxSeats');
+    _validatePositiveLimit(maxWaitlistEntries, 'maxWaitlistEntries');
+  }
+
   bool _canManageWaitlist(ParticipantSnapshot? actor) {
     return actor != null &&
         (actor.canManageWaitlist ||
@@ -275,6 +280,12 @@ class DefaultGovernanceEngine implements GovernanceEngine {
       return GovernanceResultCodes.errWaitlistCountTooLarge;
     }
     return null;
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }
 

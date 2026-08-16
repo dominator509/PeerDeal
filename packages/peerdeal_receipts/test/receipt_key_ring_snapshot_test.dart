@@ -123,11 +123,11 @@ void main() {
   test('requires positive retained-key limits', () {
     expect(
       () => ReceiptKeyRingSnapshot(maxVerificationKeys: 0),
-      throwsA(isA<AssertionError>()),
+      throwsArgumentError,
     );
     expect(
       () => ReceiptKeyRingSnapshot(maxDecryptionKeys: 0),
-      throwsA(isA<AssertionError>()),
+      throwsArgumentError,
     );
   });
 }

@@ -18,17 +18,7 @@ class DefaultPresetResolver implements PresetResolver {
     this.maxPartialSettings = WizardInputLimits.defaultMaxPartialSettings,
     this.maxAmbiguities = WizardInputLimits.defaultMaxAmbiguities,
     this.maxResolvedFields = WizardInputLimits.defaultMaxResolvedFields,
-  }) : assert(maxPresetLayers > 0, 'maxPresetLayers must be positive'),
-       assert(maxPresetValues > 0, 'maxPresetValues must be positive'),
-       assert(maxMergedValues > 0, 'maxMergedValues must be positive'),
-       assert(maxConflicts > 0, 'maxConflicts must be positive'),
-       assert(
-         maxHelperSuggestions > 0,
-         'maxHelperSuggestions must be positive',
-       ),
-       assert(maxPartialSettings > 0, 'maxPartialSettings must be positive'),
-       assert(maxAmbiguities > 0, 'maxAmbiguities must be positive'),
-       assert(maxResolvedFields > 0, 'maxResolvedFields must be positive');
+  });
 
   final int maxPresetLayers;
   final int maxPresetValues;
@@ -41,6 +31,7 @@ class DefaultPresetResolver implements PresetResolver {
 
   @override
   PresetResolutionResult mergeLayers(List<PresetLayer> layers) {
+    _validateConfiguration();
     if (layers.length > maxPresetLayers) {
       return _blockedResolution(WizardResultCodes.presetLayerCountTooLarge);
     }
@@ -92,6 +83,7 @@ class DefaultPresetResolver implements PresetResolver {
     required SetupIntent intent,
     required List<PresetLayer> presetLayers,
   }) {
+    _validateConfiguration();
     final intentId = intent.intentId.trim();
     final hostPseudonymousId = intent.hostPseudonymousId.trim();
     final intentInputError = _intentInputError(intent);
@@ -184,6 +176,7 @@ class DefaultPresetResolver implements PresetResolver {
 
   @override
   ValidatedSetupPlan validateDraft(ResolvedSetupDraft draft) {
+    _validateConfiguration();
     final errors = <String>[];
     final warnings = <String>[];
 
@@ -249,6 +242,17 @@ class DefaultPresetResolver implements PresetResolver {
     );
   }
 
+  void _validateConfiguration() {
+    _validatePositiveLimit(maxPresetLayers, 'maxPresetLayers');
+    _validatePositiveLimit(maxPresetValues, 'maxPresetValues');
+    _validatePositiveLimit(maxMergedValues, 'maxMergedValues');
+    _validatePositiveLimit(maxConflicts, 'maxConflicts');
+    _validatePositiveLimit(maxHelperSuggestions, 'maxHelperSuggestions');
+    _validatePositiveLimit(maxPartialSettings, 'maxPartialSettings');
+    _validatePositiveLimit(maxAmbiguities, 'maxAmbiguities');
+    _validatePositiveLimit(maxResolvedFields, 'maxResolvedFields');
+  }
+
   PresetResolutionResult _blockedResolution(String code) {
     return PresetResolutionResult(
       mergedValues: const <String, Object?>{},
@@ -304,5 +308,11 @@ class DefaultPresetResolver implements PresetResolver {
     } on Object {
       return false;
     }
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }

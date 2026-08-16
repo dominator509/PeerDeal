@@ -18,7 +18,7 @@ class BasicConflictDetector implements ConflictDetector {
     this.snapshotLimits = const CanonicalJsonLimits(
       maxEncodedBytes: RecoveryEventWindowLimits.defaultMaxSnapshotBytes,
     ),
-  }) : assert(maxEvents > 0, 'maxEvents must be positive');
+  });
 
   final ProtocolCatalog protocolCatalog;
   final int maxEvents;
@@ -27,6 +27,7 @@ class BasicConflictDetector implements ConflictDetector {
 
   @override
   ConflictDetectionResult detect(RecoveryRequest request) {
+    _validatePositiveLimit(maxEvents, 'maxEvents');
     final conflicts = <SyncConflict>[];
 
     if (!RecoveryPersistenceScope(
@@ -394,5 +395,11 @@ class BasicConflictDetector implements ConflictDetector {
       message: 'Snapshot payload hash does not match the snapshot envelope.',
       severity: SyncConflictSeverity.fatal,
     );
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }

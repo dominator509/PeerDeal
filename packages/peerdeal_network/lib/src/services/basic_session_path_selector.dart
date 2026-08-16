@@ -7,7 +7,7 @@ import '../models/session_path_descriptor.dart';
 class BasicSessionPathSelector implements SessionPathSelector {
   const BasicSessionPathSelector({
     this.maxCandidates = NetworkInputLimits.defaultMaxCandidates,
-  }) : assert(maxCandidates > 0, 'maxCandidates must be positive');
+  });
 
   final int maxCandidates;
 
@@ -18,6 +18,7 @@ class BasicSessionPathSelector implements SessionPathSelector {
     required bool relayAllowed,
     String? electedPrimaryPeerId,
   }) {
+    _validatePositiveLimit(maxCandidates, 'maxCandidates');
     final primaryPeerId = _validPeerIdOrNull(electedPrimaryPeerId);
     if (candidates.length > maxCandidates) {
       return SessionPathDescriptor(
@@ -128,5 +129,11 @@ class BasicSessionPathSelector implements SessionPathSelector {
       if (test(candidate)) return candidate;
     }
     return null;
+  }
+}
+
+void _validatePositiveLimit(int value, String name) {
+  if (value <= 0) {
+    throw ArgumentError.value(value, name, 'must be positive');
   }
 }
