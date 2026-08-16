@@ -33,6 +33,29 @@ Next reviewer:
 - Continue only with product-owned state or externally validated runtime work;
   preserve the existing architecture and package boundaries.
 
+### 2026-08-16 - Codex - T231 Align CI Toolchain Baseline
+
+Summary:
+- Updated GitHub Actions to activate Melos `8.3.0`, matching the root
+  workspace dependency and lockfile.
+- Updated `docs/ai/REPO_BRIEF.md` to report the current Melos baseline.
+- No package boundary, runtime, or architecture behavior changed.
+
+Verification:
+- Windows native-host smoke passed all required storage, capture, transport,
+  discovery, and secure-key checkpoints.
+- Local analyze, boundary, source-text, serialized test, dependency-audit,
+  Android debug, Windows debug, and diff gates were green for T230.
+
+Risks:
+- CI platform execution still requires GitHub-hosted runner validation; real
+  Android device/network reachability, other-platform hosts, product database
+  wiring, release signing, and final UX validation remain open.
+
+Next reviewer:
+- Keep CI toolchain pins synchronized with the root lockfile when dependencies
+  change; continue only with existing app-owned production seams.
+
 ### 2026-08-12 - Codex - T221 Bound Transport Result Warnings
 
 Summary:

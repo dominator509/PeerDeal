@@ -2519,6 +2519,12 @@ Verification:
   below the current toolchain ceiling.
 - Android debug APK and Windows debug builds passed; `git diff --check` passed.
 
+The T231 follow-up removes CI/toolchain drift. GitHub Actions now activates
+the same Melos `8.3.0` baseline declared by the root workspace and lockfile,
+and the stable AI repository brief reports that same version. This changes no
+package boundary or runtime behavior; it keeps CI orchestration aligned with
+the local production gate commands.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and
