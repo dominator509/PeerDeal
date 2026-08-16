@@ -373,18 +373,24 @@ void main() {
     expect(result.reasonCode, 'ERR_BET_BELOW_MINIMUM');
   });
 
-  test('rejects negative raise amount', () {
-    final result = validator.validate(
-      state: buildState(),
-      action: const HoldemTableAction(
-        actorSeat: 2,
-        type: HoldemTableActionType.raise,
-        amount: -1,
-      ),
-    );
+  test('rejects negative action amounts for every action type', () {
+    for (final type in HoldemTableActionType.values) {
+      final result = validator.validate(
+        state: buildState(),
+        action: HoldemTableAction(
+          actorSeat: 2,
+          type: type,
+          amount: -1,
+        ),
+      );
 
-    expect(result.isValid, isFalse);
-    expect(result.reasonCode, 'ERR_RAISE_BELOW_MINIMUM');
+      expect(result.isValid, isFalse, reason: '$type should be rejected');
+      expect(
+        result.reasonCode,
+        'ERR_NEGATIVE_ACTION_AMOUNT',
+        reason: '$type should use the input-boundary error',
+      );
+    }
   });
 
   test('accepts opening bet for exact remaining stack', () {

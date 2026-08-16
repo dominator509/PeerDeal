@@ -34,6 +34,14 @@ class BasicHoldemActionValidator implements HoldemActionValidator {
     required HoldemHandState state,
     required HoldemTableAction action,
   }) {
+    if (action.amount < 0) {
+      return const HoldemActionValidationResult(
+        isValid: false,
+        reasonCode: 'ERR_NEGATIVE_ACTION_AMOUNT',
+        message: 'Action amount cannot be negative.',
+      );
+    }
+
     const bettingPhases = <HoldemHandPhase>{
       HoldemHandPhase.bettingPreflop,
       HoldemHandPhase.bettingFlop,
