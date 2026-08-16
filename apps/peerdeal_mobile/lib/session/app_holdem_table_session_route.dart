@@ -167,6 +167,7 @@ class _AppHoldemTableSessionRouteState
         handState: runtime.handState,
         eventCursor: runtime.cursor,
         events: <EventEnvelope>[acceptedEvent],
+        shouldPersist: () => _isCurrentLifecycle(lifecycleGeneration),
       );
     }
     if (_isCurrentLifecycle(lifecycleGeneration)) setState(() {});

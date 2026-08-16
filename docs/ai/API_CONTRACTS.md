@@ -673,6 +673,9 @@ so a route replacement can suppress a queued stale checkpoint before it writes
 recovery state. This predicate does not cancel an already-running store call,
 and it does not create a network acknowledgement or durable outbound-sync
 queue.
+The mounted production route passes the same predicate when checkpointing an
+accepted inbound event. Replaced transport callbacks therefore cannot enqueue
+remote state into the replacement route's recovery lifecycle.
 
 `fromProvisionedLocalIdentity(...)` remains the explicit eager adapter for
 callers that require pre-provisioned identity. The lazy production adapter is

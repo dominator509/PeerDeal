@@ -85,6 +85,9 @@ generation, so a queued checkpoint from a replaced route returns without
 writing stale typed state; an already-running recovery-store call remains
 owned by the persistence boundary. This closes route-queue ordering without
 adding cancellation or acknowledgement semantics to shared sync contracts.
+The production table route applies the same predicate to accepted inbound
+event checkpoints, so transport callbacks cannot queue recovery writes after
+the route lifecycle has been replaced.
 Typed `AppHoldemProductionRouteRegistration` owners now merge that seam into
 the mobile and desktop production route maps, auto-register navigation, and
 require native readiness before mounting; product callers still own session

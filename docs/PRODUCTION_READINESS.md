@@ -2600,6 +2600,13 @@ Windows debug, and all 16 Windows native-host smoke markers also pass.
 Already-running store calls remain owned by the existing persistence boundary,
 and no sync acknowledgement or outbound durable queue was invented.
 
+The T241 follow-up closes the mirrored inbound-event version of that gap.
+`AppHoldemTableSessionRoute` now binds accepted remote-event checkpointing to
+the current transport lifecycle generation, so a replaced route cannot queue
+stale inbound state after its callback has been invalidated. Deterministic
+mobile and desktop coordinator and route regressions pass; protocol, sync, and
+native contracts remain unchanged.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

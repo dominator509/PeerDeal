@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T241 Cancel Queued Inbound Checkpoints
+
+Summary:
+- Mirrored mobile and desktop `AppHoldemTableSessionRoute` instances now pass
+  their current transport lifecycle generation into inbound-event checkpoint
+  persistence.
+- The existing snapshot coordinator suppresses a queued accepted-remote-event
+  checkpoint after route replacement while preserving the ownership of any
+  already-running recovery-store call.
+
+Files changed:
+- Mirrored `app_holdem_table_session_route.dart` files and snapshot coordinator
+  regression tests.
+- `docs/ARCHITECTURE.md`, `docs/PRODUCTION_READINESS.md`,
+  `docs/ai/API_CONTRACTS.md`, and this handoff log.
+
+Verification:
+- Focused mobile and desktop route and snapshot-coordinator suites pass.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass; Android debug APK, Windows debug, and all 16 Windows native-host
+  smoke markers pass.
+
+Risks:
+- This closes app lifecycle queueing only; it does not add transport
+  acknowledgements, cryptographic session authentication, or a durable
+  outbound-sync queue.
+
 ### 2026-08-16 - Codex - T240 Cancel Queued Stale Checkpoints
 
 Summary:

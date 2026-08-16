@@ -10,6 +10,34 @@ import 'package:test/test.dart';
 
 void main() {
   test(
+    'skips a queued checkpoint when its persistence predicate is stale',
+    () async {
+      final store = _ToggleSnapshotStore();
+      final typed = _typedSnapshot();
+      final coordinator = AppHoldemProductionSessionSnapshotCoordinator(
+        persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+          store: store,
+        ),
+      );
+      var shouldPersist = true;
+
+      final resultFuture = coordinator.persist(
+        tableState: typed.tableState,
+        handState: typed.handState,
+        eventCursor: typed.eventCursor,
+        shouldPersist: () => shouldPersist,
+      );
+      shouldPersist = false;
+
+      final result = await resultFuture;
+
+      expect(result.isSuccess, isTrue);
+      expect(store.saveAttempts, 0);
+      expect(coordinator.hasPending, isFalse);
+    },
+  );
+
+  test(
     'checkpoints a typed snapshot and clears pending state on success',
     () async {
       final store = _ToggleSnapshotStore();
