@@ -2525,6 +2525,18 @@ and the stable AI repository brief reports that same version. This changes no
 package boundary or runtime behavior; it keeps CI orchestration aligned with
 the local production gate commands.
 
+The T232 follow-up closes three source-backed fail-closed gaps without changing
+the protocol or native bridge contracts. Mirrored app production routes now
+carry the local recipient identity separately from the remote peer identity;
+native receive filtering uses the local identity, and configured app handlers
+reject frames whose sender or recipient does not match the route. Event
+decoding stops consuming an iterable once the protocol byte limit is exceeded.
+Core `SessionWiped` now requires a prior `SessionClosed` event, and inbound
+Hold'em `SettlementProjected` awards must be non-empty and conserve the current
+pot. These checks do not provide cryptographic peer authenticity; that remains
+an explicit protocol/session-auth contract gap rather than an invented wire
+extension.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

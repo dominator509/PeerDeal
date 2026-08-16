@@ -238,6 +238,14 @@ class CoreReducer {
   }
 
   void _ensureEventCanAdvanceState(TableState current, EventEnvelope event) {
+    if (event.eventType == 'SessionWiped' &&
+        current.phase != TablePhase.closed) {
+      throw InvariantViolation(
+        code: CoreInvariantCodes.sessionWipedBeforeClose,
+        message: 'SessionWiped requires a prior SessionClosed event.',
+      );
+    }
+
     if (current.phase == TablePhase.wiped ||
         (current.phase == TablePhase.closed &&
             event.eventType != 'SessionWiped')) {

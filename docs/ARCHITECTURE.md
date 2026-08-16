@@ -56,6 +56,12 @@ sends without rerunning variant rules. Android and Windows hosts now provide
 the generic native byte transport through a host-private bounded multicast
 envelope; device/network reachability and product route integration remain
 outside this seam.
+The app-owned production route keeps remote-peer identity separate from the
+local recipient identity: native receive scope is filtered to the local peer,
+and the app handler rejects configured sender/recipient mismatches before
+event decode or state mutation. This is an existing-frame routing and
+authorization binding, not a cryptographic authentication protocol; session
+authentication remains an explicit product/protocol contract.
 Typed `AppHoldemProductionRouteRegistration` owners now merge that seam into
 the mobile and desktop production route maps, auto-register navigation, and
 require native readiness before mounting; product callers still own session

@@ -14,10 +14,14 @@ class AppTableSessionTransportHandler implements TransportFrameHandler {
     AppTableSessionEventObserver? onEventAccepted,
     EventEnvelopeCodec codec = const EventEnvelopeCodec(),
     TransportFrameValidator? validator,
+    String? expectedRemotePeerId,
+    String? expectedLocalPeerId,
   }) : _runtime = runtime,
        _holdemRuntime = holdemRuntime,
        _onEventAccepted = onEventAccepted,
        _codec = codec,
+       _expectedRemotePeerId = expectedRemotePeerId,
+       _expectedLocalPeerId = expectedLocalPeerId,
        _validator =
            validator ??
            BasicTransportFrameValidator(maxPayloadBytes: codec.maxBytes) {
@@ -33,6 +37,8 @@ class AppTableSessionTransportHandler implements TransportFrameHandler {
   final AppHoldemTableSessionRuntime? _holdemRuntime;
   final AppTableSessionEventObserver? _onEventAccepted;
   final EventEnvelopeCodec _codec;
+  final String? _expectedRemotePeerId;
+  final String? _expectedLocalPeerId;
   final TransportFrameValidator _validator;
   AppTableSessionEventResult? _lastResult;
 
@@ -48,6 +54,15 @@ class AppTableSessionTransportHandler implements TransportFrameHandler {
     }
     if (frame.sessionId != _runtime.state.sessionId) {
       throw StateError('Transport frame session does not match runtime.');
+    }
+    final expectedRemotePeerId = _expectedRemotePeerId;
+    if (expectedRemotePeerId != null &&
+        frame.fromPeerId != expectedRemotePeerId) {
+      throw StateError('Transport frame sender does not match remote peer.');
+    }
+    final expectedLocalPeerId = _expectedLocalPeerId;
+    if (expectedLocalPeerId != null && frame.toPeerId != expectedLocalPeerId) {
+      throw StateError('Transport frame recipient does not match local peer.');
     }
 
     final EventEnvelope event;

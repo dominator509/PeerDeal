@@ -49,6 +49,20 @@ void main() {
     );
   });
 
+  test('stops consuming a decoded iterable at the wire limit', () {
+    var consumed = 0;
+    final bytes = Iterable<int>.generate(100, (_) {
+      consumed += 1;
+      return 65;
+    });
+
+    expect(
+      () => const EventEnvelopeCodec(maxBytes: 8).decode(bytes),
+      throwsFormatException,
+    );
+    expect(consumed, 9);
+  });
+
   test(
     'rejects structurally oversized event payloads before wire encoding',
     () {

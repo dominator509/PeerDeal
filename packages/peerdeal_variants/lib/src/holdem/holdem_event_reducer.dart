@@ -250,7 +250,7 @@ class HoldemEventReducer {
   ) {
     _requireVariant(event.payload);
     _requireIdentity(_requiredString(event.payload, 'projection_id'));
-    _validateAwards(event.payload['awards']);
+    _validateAwards(state, event.payload['awards']);
     return _advancePhase(state, HoldemHandPhase.settling);
   }
 
@@ -344,10 +344,11 @@ class HoldemEventReducer {
     }
   }
 
-  void _validateAwards(Object? rawAwards) {
-    if (rawAwards is! List) {
+  void _validateAwards(HoldemHandState state, Object? rawAwards) {
+    if (rawAwards is! List || rawAwards.isEmpty) {
       throw const _HoldemPayloadFailure('ERR_HOLDEM_SETTLEMENT_AWARDS_INVALID');
     }
+    var totalAwarded = 0;
     for (final rawAward in rawAwards) {
       if (rawAward is! Map ||
           rawAward['seat_id'] is! String ||
@@ -358,6 +359,12 @@ class HoldemEventReducer {
           'ERR_HOLDEM_SETTLEMENT_AWARDS_INVALID',
         );
       }
+      totalAwarded += rawAward['amount'] as int;
+    }
+    if (totalAwarded != state.pot) {
+      throw const _HoldemPayloadFailure(
+        'ERR_HOLDEM_SETTLEMENT_AWARDS_POT_MISMATCH',
+      );
     }
   }
 

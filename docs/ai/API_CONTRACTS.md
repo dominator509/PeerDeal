@@ -322,6 +322,12 @@ Native transport payload lists must contain only byte values from 0 through 255;
 invalid outbound payloads fail before platform sends.
 Native transport receive frame maps must carry exact field keys; platform maps
 whose keys merely stringify to expected field names are dropped.
+The app-owned production Hold'em route treats `peerId` as the expected remote
+sender and passes its separate `localPeerId` as the native receive recipient
+scope. Its configured transport handler rejects mismatched `fromPeerId` or
+`toPeerId` before decoding or applying the event. These existing frame fields
+bind route scope but are not cryptographic sender authentication; no keyed wire
+contract exists in this scaffold.
 App-owned native transport drains must cap receive-frame batches before session
 handlers see platform frames, and invalid app batch limits must fail closed
 before native receive calls.

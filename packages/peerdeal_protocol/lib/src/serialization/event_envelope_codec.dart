@@ -34,7 +34,13 @@ class EventEnvelopeCodec {
 
   EventEnvelope decode(Iterable<int> bytes) {
     _validateLimit();
-    final raw = List<int>.from(bytes, growable: false);
+    final raw = <int>[];
+    for (final byte in bytes) {
+      if (raw.length == maxBytes) {
+        _ensureWithinLimit(raw.length + 1);
+      }
+      raw.add(byte);
+    }
     if (raw.isEmpty) {
       throw const FormatException('Event envelope wire payload is empty.');
     }

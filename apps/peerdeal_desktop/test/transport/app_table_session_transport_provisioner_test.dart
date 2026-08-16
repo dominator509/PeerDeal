@@ -40,7 +40,7 @@ void main() {
         runtime: runtime,
         nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
         pollInterval: const Duration(milliseconds: 100),
-      ).load(peerId: 'peer_b');
+      ).load(peerId: 'peer_b', recipientPeerId: 'peer_local');
 
       expect(result.available, isTrue);
       expect(result.runtime, same(runtime));
@@ -49,6 +49,7 @@ void main() {
       expect(result.source, isNotNull);
 
       final poll = await result.source!.pollNow();
+      expect(bridge.lastReceivePeerId, 'peer_local');
       expect(poll.available, isTrue);
       expect(poll.rejectedFrameCount, 1);
       expect(bridge.receiveLookups, 1);
@@ -62,7 +63,7 @@ void main() {
       final result = await AppTableSessionTransportProvisioner(
         runtime: _runtime(),
         nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
-      ).load(peerId: ' peer_b');
+      ).load(peerId: ' peer_b', recipientPeerId: 'peer_local');
 
       expect(result.available, isFalse);
       expect(result.source, isNull);
@@ -82,7 +83,7 @@ void main() {
         final result = await AppTableSessionTransportProvisioner(
           runtime: _runtime(),
           nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
-        ).load(peerId: peerId);
+        ).load(peerId: peerId, recipientPeerId: 'peer_local');
 
         expect(result.available, isFalse);
         expect(result.source, isNull);
@@ -103,7 +104,7 @@ void main() {
       final result = await AppTableSessionTransportProvisioner(
         runtime: _runtime(),
         nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
-      ).load(peerId: 'peer_b');
+      ).load(peerId: 'peer_b', recipientPeerId: 'peer_local');
 
       expect(result.available, isFalse);
       expect(result.source, isNull);
@@ -119,7 +120,7 @@ void main() {
       nativeSessionFactory: NativeTransportSessionFactory(
         bridge: _ThrowingCapabilityTransportBridge(),
       ),
-    ).load(peerId: 'peer_b');
+    ).load(peerId: 'peer_b', recipientPeerId: 'peer_local');
 
     expect(result.available, isFalse);
     expect(result.warnings, [
@@ -134,7 +135,7 @@ void main() {
       runtime: _runtime(),
       nativeSessionFactory: factory,
       cancellation: cancellation.future,
-    ).load(peerId: 'peer_b');
+    ).load(peerId: 'peer_b', recipientPeerId: 'peer_local');
 
     cancellation.complete();
 
@@ -157,7 +158,7 @@ void main() {
         runtime: _runtime(),
         nativeSessionFactory: factory,
         cancellation: cancellation.future,
-      ).load(peerId: 'peer_b');
+      ).load(peerId: 'peer_b', recipientPeerId: 'peer_local');
 
       expect(result.available, isFalse);
       expect(result.source, isNull);
@@ -175,7 +176,7 @@ void main() {
         nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
         pollInterval: const Duration(milliseconds: 100),
         cancellation: cancellation.future,
-      ).load(peerId: 'peer_b');
+      ).load(peerId: 'peer_b', recipientPeerId: 'peer_local');
 
       expect(result.available, isTrue);
       final poll = result.source!.pollNow();
@@ -276,6 +277,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
   final List<NativeTransportFrame> _receiveFrames;
   int capabilityLookups = 0;
   int receiveLookups = 0;
+  String? lastReceivePeerId;
 
   @override
   Future<NativeTransportCapability> getCapability() async {
@@ -289,6 +291,7 @@ class _FakeNativeTransportBridge implements NativeTransportBridge {
     required String peerId,
   }) async {
     receiveLookups += 1;
+    lastReceivePeerId = peerId;
     return NativeTransportReceiveSnapshot(
       available: true,
       frames: _receiveFrames,

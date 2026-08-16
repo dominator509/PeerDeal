@@ -37,8 +37,9 @@ class AppTableSessionTransportProvisioner {
 
   Future<AppTableSessionTransportProvisionResult> load({
     required String peerId,
+    required String recipientPeerId,
   }) async {
-    if (!_isValidIdentity(peerId)) {
+    if (!_isValidIdentity(peerId) || !_isValidIdentity(recipientPeerId)) {
       return AppTableSessionTransportProvisionResult.unavailable(
         warnings: <String>['Native transport peer identity is invalid.'],
       );
@@ -48,6 +49,8 @@ class AppTableSessionTransportProvisioner {
       runtime: _runtime,
       holdemRuntime: _holdemRuntime,
       onEventAccepted: _onEventAccepted,
+      expectedRemotePeerId: peerId,
+      expectedLocalPeerId: recipientPeerId,
     );
     NativeTransportSessionLoadResult loaded;
     try {
@@ -82,7 +85,7 @@ class AppTableSessionTransportProvisioner {
 
     final source = session.createSource(
       sessionId: _runtime.state.sessionId,
-      peerId: peerId,
+      peerId: recipientPeerId,
       pollInterval: _pollInterval,
       timerFactory: _timerFactory,
       cancellation: _cancellation,

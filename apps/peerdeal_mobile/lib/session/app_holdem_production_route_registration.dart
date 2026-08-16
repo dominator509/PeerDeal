@@ -18,6 +18,7 @@ class AppHoldemProductionRouteRegistration {
     required this.navigationLabel,
     required this.runtime,
     required this.peerId,
+    required this.localPeerId,
     required this.surfaceBuilder,
     this.nativeSessionFactory,
     this.snapshotCoordinator,
@@ -45,6 +46,7 @@ class AppHoldemProductionRouteRegistration {
          navigationLabel: navigationLabel,
          runtime: runtime,
          peerId: peerId,
+         localPeerId: localPeerId,
          surfaceBuilder: (_, routeContext) => AppHoldemProductionTableSurface(
            routeContext: routeContext,
            localPeerId: localPeerId,
@@ -60,6 +62,7 @@ class AppHoldemProductionRouteRegistration {
   final String navigationLabel;
   final AppHoldemTableSessionRuntime runtime;
   final String peerId;
+  final String localPeerId;
   final AppHoldemTableSessionSurfaceBuilder surfaceBuilder;
   final NativeTransportSessionFactory? nativeSessionFactory;
   final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
@@ -70,6 +73,7 @@ class AppHoldemProductionRouteRegistration {
     return (context) => AppHoldemTableSessionRoute(
       runtime: runtime,
       peerId: peerId,
+      localPeerId: localPeerId,
       surfaceBuilder: surfaceBuilder,
       nativeSessionFactory: nativeSessionFactory,
       snapshotCoordinator: snapshotCoordinator,

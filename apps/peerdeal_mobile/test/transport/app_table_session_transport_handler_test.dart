@@ -13,6 +13,23 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('rejects frames outside the configured peer identities', () async {
+    final runtime = _runtime();
+    final handler = AppTableSessionTransportHandler(
+      runtime: runtime,
+      expectedRemotePeerId: 'peer_a',
+      expectedLocalPeerId: 'peer_b',
+    );
+    final receiver = ValidatingTransportFrameReceiver(handler: handler);
+
+    final result = await receiver.receive(
+      _frame(_event(), fromPeerId: 'peer_attacker'),
+    );
+
+    expect(result.accepted, isFalse);
+    expect(runtime.state.eventSequence, 0);
+  });
+
   test('decodes a canonical event frame into the session runtime', () async {
     final runtime = _runtime();
     final handler = AppTableSessionTransportHandler(runtime: runtime);
@@ -137,12 +154,14 @@ AppTableSessionRuntime _runtime() {
 TransportFrame _frame(
   EventEnvelope event, {
   String sessionId = 'session_1',
+  String fromPeerId = 'peer_a',
+  String toPeerId = 'peer_b',
   int sequence = 1,
 }) {
   return TransportFrame(
     sessionId: sessionId,
-    fromPeerId: 'peer_a',
-    toPeerId: 'peer_b',
+    fromPeerId: fromPeerId,
+    toPeerId: toPeerId,
     sequence: sequence,
     payload: const EventEnvelopeCodec().encode(event),
   );

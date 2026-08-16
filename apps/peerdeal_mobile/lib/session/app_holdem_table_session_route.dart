@@ -52,6 +52,7 @@ class AppHoldemTableSessionRoute extends StatefulWidget {
     super.key,
     required this.runtime,
     required this.peerId,
+    required this.localPeerId,
     required this.surfaceBuilder,
     this.nativeSessionFactory,
     this.snapshotCoordinator,
@@ -61,6 +62,7 @@ class AppHoldemTableSessionRoute extends StatefulWidget {
 
   final AppHoldemTableSessionRuntime runtime;
   final String peerId;
+  final String localPeerId;
   final AppHoldemTableSessionSurfaceBuilder surfaceBuilder;
   final NativeTransportSessionFactory? nativeSessionFactory;
   final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
@@ -90,6 +92,7 @@ class _AppHoldemTableSessionRouteState
     super.didUpdateWidget(oldWidget);
     if (oldWidget.runtime == widget.runtime &&
         oldWidget.peerId == widget.peerId &&
+        oldWidget.localPeerId == widget.localPeerId &&
         oldWidget.nativeSessionFactory == widget.nativeSessionFactory &&
         oldWidget.snapshotCoordinator == widget.snapshotCoordinator &&
         oldWidget.pollInterval == widget.pollInterval &&
@@ -142,7 +145,7 @@ class _AppHoldemTableSessionRouteState
         );
         if (_isCurrentLifecycle(lifecycleGeneration)) setState(() {});
       },
-    ).load(peerId: widget.peerId);
+    ).load(peerId: widget.peerId, recipientPeerId: widget.localPeerId);
   }
 
   Future<void> _checkpointAcceptedEvent({

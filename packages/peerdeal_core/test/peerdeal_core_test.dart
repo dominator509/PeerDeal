@@ -975,6 +975,30 @@ void main() {
     );
   });
 
+  test('core rejects wiping a session before it is closed', () {
+    final opened = protocolEvent(
+      eventId: 'evt_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+    );
+    final wiped = protocolEvent(
+      eventId: 'evt_002',
+      eventType: 'SessionWiped',
+      eventSeq: 2,
+    );
+
+    expect(
+      () => projectOrderedEvents([opened, wiped]),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          CoreInvariantCodes.sessionWipedBeforeClose,
+        ),
+      ),
+    );
+  });
+
   test('core rejects events after a terminal closed state', () {
     final events = <EventEnvelope>[
       protocolEvent(

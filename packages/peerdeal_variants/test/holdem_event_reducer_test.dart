@@ -184,6 +184,53 @@ void main() {
     expect(result.reasonCode, 'ERR_HOLDEM_ACTION_PROJECTION_MISMATCH');
     expect(result.state, same(initial));
   });
+
+  test('rejects settlement awards that do not conserve the current pot', () {
+    final initial = _showdownState();
+    final started = adapter.startHand(
+      coreState: _openCoreState(),
+      handState: initial,
+      cursor: _cursor(),
+    );
+    final revealed = adapter.revealShowdown(
+      coreState: started.coreState,
+      handState: started.handState,
+      cursor: started.cursor,
+      input: _showdownInput,
+    );
+    const coordinator = HoldemShowdownCoordinator();
+    final prepared = coordinator.prepareSettlement(
+      state: revealed.handState,
+      evaluation: revealed.showdownResult!.evaluation,
+    );
+    final invalid = EventEnvelope(
+      eventId: 'evt_invalid_settlement',
+      eventType: 'SettlementProjected',
+      eventVersion: '1.0',
+      protocolVersion: '1.0.0',
+      eventSeq: 5,
+      tableId: 'tbl_001',
+      sessionId: 'sess_001',
+      handId: 'hand_001',
+      emittedAt: '2026-08-10T00:00:05Z',
+      actorRef: 'system',
+      payload: const <String, Object?>{
+        'variant_id': holdemNlheVariantId,
+        'projection_id': 'projection_invalid',
+        'awards': <Object?>[
+          <String, Object?>{'seat_id': 'seat-1', 'amount': 199},
+        ],
+      },
+      prevEventHash: 'hash_invalid',
+      eventHash: 'hash_invalid_settlement',
+    );
+
+    final result = reducer.apply(state: prepared.state, event: invalid);
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_SETTLEMENT_AWARDS_POT_MISMATCH');
+    expect(result.state, same(prepared.state));
+  });
 }
 
 void _expectSameHandState(HoldemHandState actual, HoldemHandState expected) {

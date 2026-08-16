@@ -174,6 +174,7 @@ void main() {
         child: AppHoldemTableSessionRoute(
           runtime: runtime,
           peerId: 'peer_remote',
+          localPeerId: 'peer_local',
           nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
           timerFactory: (interval, callback) =>
               Timer(const Duration(hours: 1), () {}),
@@ -218,6 +219,7 @@ void main() {
         child: AppHoldemTableSessionRoute(
           runtime: runtime,
           peerId: 'peer_remote',
+          localPeerId: 'peer_local',
           nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
           timerFactory: (interval, callback) =>
               Timer(const Duration(hours: 1), () {}),
@@ -358,6 +360,7 @@ void main() {
         child: AppHoldemTableSessionRoute(
           runtime: runtime,
           peerId: ' peer_remote',
+          localPeerId: 'peer_local',
           surfaceBuilder: (context, routeContext) => Text(
             routeContext.transport.available ? 'available' : 'unavailable',
           ),
@@ -380,6 +383,7 @@ Widget _productionSurfaceRoute({
     child: AppHoldemTableSessionRoute(
       runtime: runtime,
       peerId: 'peer_remote',
+      localPeerId: 'peer_local',
       nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
       timerFactory: (interval, callback) =>
           Timer(const Duration(hours: 1), () {}),
@@ -403,6 +407,7 @@ Widget _productionSurfaceRouteWithCoordinator({
     child: AppHoldemTableSessionRoute(
       runtime: runtime,
       peerId: 'peer_remote',
+      localPeerId: 'peer_local',
       nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
       snapshotCoordinator: snapshotCoordinator,
       timerFactory: (interval, callback) =>
@@ -439,6 +444,7 @@ AppHoldemProductionRouteRegistration _registration() {
     navigationLabel: 'Live Holdem',
     runtime: runtime,
     peerId: 'peer_remote',
+    localPeerId: 'peer_local',
     nativeSessionFactory: NativeTransportSessionFactory(
       bridge: _FakeNativeTransportBridge(
         receiveFrame: NativeTransportFrame(

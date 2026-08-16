@@ -2,6 +2,44 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T232 Close Transport and State Invariant Gaps
+
+Summary:
+- Mirrored mobile and desktop production routes now carry remote and local
+  peer identities separately. Native receive filtering uses the local peer,
+  and configured app transport handlers reject sender or recipient mismatches
+  before event decode or runtime mutation.
+- `EventEnvelopeCodec.decode` stops consuming an input iterable at the
+  configured byte limit instead of materializing an unbounded iterable.
+- Core `SessionWiped` requires a prior `SessionClosed` event. Inbound Hold'em
+  `SettlementProjected` requires non-empty positive awards whose total equals
+  the current pot.
+
+Files changed:
+- Mirrored mobile and desktop transport handlers, provisioners, production
+  route registrations, routes, and focused tests.
+- `packages/peerdeal_protocol` event codec/test, `packages/peerdeal_core`
+  lifecycle reducer/invariant code/test, and `packages/peerdeal_variants`
+  settlement reducer/test.
+- `docs/PRODUCTION_READINESS.md`, `docs/ARCHITECTURE.md`, and
+  `docs/ai/API_CONTRACTS.md`.
+
+Verification:
+- Focused mobile and desktop transport/provisioner/route tests passed.
+- Protocol codec, core lifecycle, and Hold'em reducer/settlement tests passed.
+- Full repository gates remain required after this handoff update.
+
+Risks:
+- Existing frame identity checks bind configured route scope but do not provide
+  cryptographic peer authenticity. A keyed session-auth contract is not added
+  because it is not present in the locked protocol/native architecture.
+- Real-device, cross-device, other-platform, release-signing, and product-owned
+  session/database validation remain external or integration-owned.
+
+Next reviewer:
+- Run the complete repository gates, then continue only with the documented
+  external/platform or product-owned production inputs.
+
 ### 2026-08-16 - Codex - T230 Enforce Release Limit Invariants
 
 Summary:
