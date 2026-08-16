@@ -977,6 +977,10 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
   signal through export key provisioning and key-ring writes to cancellable
   secure-key bridges when available; already-dispatched native mutations remain
   host-owned.
+- Mobile and desktop executable entrypoints provide the existing native-backed
+  receipt export and verifier factories by default. Tests and explicit product
+  integrations may override those app-owned factories; the native bridge stays
+  generic and receipt policy stays outside it.
 - The mobile Android host registers
   `peerdeal/native_bridges/secure_key_storage` with `loadKeyRing`, `saveKey`,
   and `deleteKey`. It returns only the generic snapshot/mutation maps defined

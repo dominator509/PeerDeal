@@ -70,10 +70,16 @@ Future<void> main() async {
   final recoveryPersistenceStoreFactory =
       AppRecoveryPersistenceStoreFactory.fromEnvironment() ??
       await AppRecoveryPersistenceStoreFactory.fromNativeAppSupport();
+  final receiptExportFactory =
+      NativeReceiptExportArtifactFactory.methodChannel();
   runApp(
     PeerDealDesktopApp(
       recoveryPersistenceStoreFactory: recoveryPersistenceStoreFactory,
       nativeReadinessLoader: AppNativeReadinessLoader.methodChannel(),
+      receiptArtifactVerifierFactory:
+          DemoReceiptArtifactVerifierFactory.methodChannel(),
+      cancellableReceiptExportArtifactFactory:
+          receiptExportFactory.exportSignedEncrypted,
     ),
   );
 }

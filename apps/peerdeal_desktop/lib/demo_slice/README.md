@@ -47,6 +47,10 @@ provisioner -> receipt signer/cipher adapters -> receipt service export. Do
 not export signed/encrypted artifacts from app code that bypasses native-backed
 key provisioning.
 
+The executable app entrypoint supplies this factory and the verifier factory by
+default. Tests and explicit product integrations may override them through the
+app runtime; the receipt route must retain the same native-backed call order.
+
 Mounted receipt routes may receive an app-owned export factory. The route must
 turn the active snapshot into a deterministic receipt input, export through the
 factory, then verify through `DemoReceiptArtifactVerifierFactory` before

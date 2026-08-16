@@ -27,6 +27,12 @@ PeerDeal is a deterministic, event-sourced, privacy-first poker engine. The app 
 - replay / snapshot recovery
 - capture policy and native bridge hooks
 
+The shipped mobile and desktop entrypoints wire native-backed receipt export and
+verification through the existing app factories by default. The app may still
+inject alternate factories for tests or an explicitly different product route;
+native storage remains generic and receipt policy remains in the app and
+`peerdeal_receipts` layers.
+
 ## Settlement breadcrumb chain
 The canonical Hold'em settlement breadcrumb path is covered across:
 - `peerdeal_protocol`: owns the fixture event identities.

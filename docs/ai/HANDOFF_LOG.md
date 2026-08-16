@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T239 Wire Native Receipt Flow Into App Startup
+
+Summary:
+- Mirrored mobile and desktop executable entrypoints now provide the existing
+  native-backed receipt export and artifact-verifier factories by default.
+  Mounted receipt routes therefore use native key provisioning and verification
+  without requiring a separate caller injection.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/main.dart`
+- `apps/peerdeal_desktop/lib/main.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/README.md`
+- `apps/peerdeal_desktop/lib/demo_slice/README.md`
+- `docs/ARCHITECTURE.md`, `docs/PRODUCTION_READINESS.md`,
+  `docs/ai/API_CONTRACTS.md`, and this handoff log.
+
+Verification:
+- Focused mobile and desktop app-shell suites pass.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass; Android debug APK, Windows debug, and Windows native-host smoke
+  builds pass.
+
+Risks:
+- Receipt routes now fail closed when native key storage is unavailable; no
+  native bridge contract, receipt policy, or package boundary changed.
+
 ### 2026-08-16 - Codex - T238 Block Actions During Pending Projection Work
 
 Summary:
