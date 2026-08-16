@@ -97,8 +97,16 @@ class AppTableSessionTransportSource {
     if (externalCancellation != null) {
       unawaited(
         externalCancellation.then<void>(
-          (_) => _cancelDrain(),
-          onError: (Object _, StackTrace _) => _cancelDrain(),
+          (_) {
+            _externallyCancelled = true;
+            stop();
+            _cancelDrain();
+          },
+          onError: (Object _, StackTrace _) {
+            _externallyCancelled = true;
+            stop();
+            _cancelDrain();
+          },
         ),
       );
     }
@@ -118,6 +126,7 @@ class AppTableSessionTransportSource {
   Future<AppTableSessionTransportPollResult>? _pollInFlight;
   AppTableSessionTransportSourceState _state =
       AppTableSessionTransportSourceState.idle;
+  bool _externallyCancelled = false;
   AppTableSessionTransportPollResult? _lastPoll;
 
   AppTableSessionTransportSourceState get state => _state;
@@ -130,6 +139,11 @@ class AppTableSessionTransportSource {
     if (_state == AppTableSessionTransportSourceState.disposed) {
       return AppTableSessionTransportSourceStartResult.unavailable(
         warnings: <String>['Native transport source is disposed.'],
+      );
+    }
+    if (_externallyCancelled) {
+      return AppTableSessionTransportSourceStartResult.unavailable(
+        warnings: <String>[_pollCancellationWarning],
       );
     }
     if (isRunning) {
@@ -181,6 +195,13 @@ class AppTableSessionTransportSource {
       return _remember(
         AppTableSessionTransportPollResult.unavailable(
           warnings: <String>['Native transport source is disposed.'],
+        ),
+      );
+    }
+    if (_externallyCancelled) {
+      return _remember(
+        AppTableSessionTransportPollResult.unavailable(
+          warnings: <String>[_pollCancellationWarning],
         ),
       );
     }

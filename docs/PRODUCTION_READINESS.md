@@ -2555,6 +2555,13 @@ pass, as do the full repository gates and Android/Windows debug builds;
 the Windows native-host smoke gate also passes; source-owned persistence and
 device behavior remain separate.
 
+The T235 follow-up closes the mirrored transport-source cancellation leak.
+External route cancellation now stops an active source timer, marks the source
+unavailable for restart, and rejects later polls before another native drain is
+started. An already-running cancellable or legacy drain remains host-owned
+until it settles. Focused mobile and desktop source regressions pass; transport
+contracts and native host implementations remain unchanged.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

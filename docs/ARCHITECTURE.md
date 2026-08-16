@@ -56,6 +56,10 @@ sends without rerunning variant rules. Android and Windows hosts now provide
 the generic native byte transport through a host-private bounded multicast
 envelope; device/network reachability and product route integration remain
 outside this seam.
+The app-owned transport source stops its polling timer and rejects future
+drains when route cancellation wins; an already-started native drain remains
+host-owned until it settles. This keeps transport lifecycle policy at the app
+boundary without changing the generic bridge contract.
 The app-owned production route keeps remote-peer identity separate from the
 local recipient identity: native receive scope is filtered to the local peer,
 and the app handler rejects configured sender/recipient mismatches before

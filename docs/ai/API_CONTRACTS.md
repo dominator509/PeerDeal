@@ -384,7 +384,10 @@ poll interval, serialized in-flight polls, explicit lifecycle state, and
   internal disposal signal. Either signal makes the visible poll fail closed
   with a bounded stable warning; an underlying drain that has already started
   remains registered until it settles, so cancellation cannot create an
-  overlapping native drain.
+  overlapping native drain. When route cancellation wins, the source also
+  stops its polling timer and rejects future `start()` and `pollNow()` calls
+  with the same stable cancellation warning; source disposal remains distinct
+  and terminal.
   Mobile and
   desktop `AppTableSessionTransportProvisioner.load(peerId: ...)` composes the
   app runtime handler with `NativeTransportSessionFactory.loadSession`, then

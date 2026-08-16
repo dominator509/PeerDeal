@@ -141,6 +141,44 @@ void main() {
     },
   );
 
+  test('stops active polling when external cancellation wins', () async {
+    _FakeTimer? timer;
+    final cancellation = Completer<void>();
+    var drainCalls = 0;
+    final source = AppTableSessionTransportSource(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      cancellation: cancellation.future,
+      timerFactory: (interval, callback) {
+        timer = _FakeTimer(callback);
+        return timer!;
+      },
+      drain: () async {
+        drainCalls += 1;
+        return NativeTransportFrameDrainResult(
+          available: true,
+          results: const <TransportFrameReceiveResult>[],
+        );
+      },
+    );
+
+    expect(source.start().started, isTrue);
+    await Future<void>.delayed(Duration.zero);
+    expect(drainCalls, 1);
+
+    cancellation.complete();
+    await Future<void>.delayed(Duration.zero);
+
+    expect(source.state, AppTableSessionTransportSourceState.stopped);
+    expect(source.start().isSuccess, isFalse);
+    timer!.fire();
+    await Future<void>.delayed(Duration.zero);
+    final result = await source.pollNow();
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport source poll cancelled.']);
+    expect(drainCalls, 1);
+  });
+
   test('disposal cancels a pending drain owned by the source', () async {
     final drainResult = Completer<NativeTransportFrameDrainResult>();
     final source = AppTableSessionTransportSource(

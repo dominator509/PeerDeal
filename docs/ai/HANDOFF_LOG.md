@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T235 Stop Transport Source After Route Cancellation
+
+Summary:
+- Mirrored mobile and desktop transport sources now stop active polling when
+  external route cancellation wins, reject restart and later polls, and retain
+  only already-started drain work until it settles.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/transport/app_table_session_transport_source.dart`
+- `apps/peerdeal_mobile/test/transport/app_table_session_transport_source_test.dart`
+- `apps/peerdeal_desktop/lib/transport/app_table_session_transport_source.dart`
+- `apps/peerdeal_desktop/test/transport/app_table_session_transport_source_test.dart`
+- `docs/PRODUCTION_READINESS.md`, `docs/ARCHITECTURE.md`, and
+  `docs/ai/API_CONTRACTS.md`.
+
+Verification:
+- Focused mobile and desktop transport-source suites pass.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass; Android debug APK, Windows debug, and Windows native-host smoke
+  builds pass.
+
+Risks:
+- A native drain already dispatched remains host-owned; no protocol, native
+  bridge, or transport frame contract changed.
+
 ### 2026-08-16 - Codex - T234 Propagate Production Source Timeout Cancellation
 
 Summary:
