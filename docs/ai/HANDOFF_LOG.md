@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T234 Propagate Production Source Timeout Cancellation
+
+Summary:
+- Mirrored mobile and desktop production-session bootstraps now pass each
+  source load an idempotent app-owned cancellation signal. Caller cancellation
+  and source timeout complete that signal before the bootstrap fails closed.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_bootstrap.dart`
+- `apps/peerdeal_mobile/test/session/app_holdem_production_session_bootstrap_test.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_bootstrap.dart`
+- `apps/peerdeal_desktop/test/session/app_holdem_production_session_bootstrap_test.dart`
+- `docs/PRODUCTION_READINESS.md`, `docs/ARCHITECTURE.md`, and
+  `docs/ai/API_CONTRACTS.md`.
+
+Verification:
+- Focused mobile and desktop bootstrap suites pass.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass; Android debug APK, Windows debug, and Windows native-host smoke
+  builds pass.
+
+Risks:
+- Source implementations still own cancellation of persistence or native work
+  beneath the app boundary; already-dispatched host calls remain host-owned.
+
 ### 2026-08-16 - Codex - T233 Close Transport Replacement Race
 
 Summary:
@@ -19,7 +44,8 @@ Files changed:
 
 Verification:
 - Focused mobile and desktop stale-completion regressions passed.
-- Full repository gates are pending after this handoff update.
+- Full repository gates and Android/Windows debug builds passed after this
+  handoff update.
 
 Risks:
 - This is app lifecycle hardening only; protocol, native bridge, runtime state,

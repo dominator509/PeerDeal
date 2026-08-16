@@ -78,6 +78,9 @@ the publisher's reported event offset. The mirrored
 injected canonical table/hand state, event cursor, close-retention adapter, and
 peer identity. It validates app-owned route metadata and transport
 configuration without deriving product session truth.
+Bootstrap source loads also receive an app-owned cancellation signal that is
+completed on route cancellation or timeout, so source-owned persistence or
+native work can stop without moving lifecycle policy into shared packages.
 
 ## Forbidden patterns
 - UI mutating core state directly

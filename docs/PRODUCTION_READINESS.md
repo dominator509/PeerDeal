@@ -2545,6 +2545,16 @@ completion cannot publish through the replacement session or duplicate events.
 Focused mobile and desktop route regressions pass; protocol, native bridge,
 runtime state, and transport contracts remain unchanged.
 
+The T234 follow-up closes the production-session bootstrap cancellation gap.
+Mirrored mobile and desktop bootstraps now give each source load an idempotent
+app-owned cancellation signal. Caller cancellation and the configured source
+timeout both complete that signal before the bootstrap fails closed, allowing
+source implementations to stop pending persistence or native work instead of
+continuing after the route handoff has ended. Focused bootstrap regressions
+pass, as do the full repository gates and Android/Windows debug builds;
+the Windows native-host smoke gate also passes; source-owned persistence and
+device behavior remain separate.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

@@ -142,8 +142,11 @@ class AppHoldemProductionSessionBootstrap {
         'Production session source does not support session context.',
       );
     }
-    final input = await _loadFuture(
-      source.loadForSessionContext(sessionContext, cancellation: cancellation),
+    final input = await _loadSourceFuture(
+      (sourceCancellation) => source.loadForSessionContext(
+        sessionContext,
+        cancellation: sourceCancellation,
+      ),
       cancellation: cancellation,
     );
     _validateInput(sessionContext.invite, input);
@@ -180,15 +183,50 @@ class AppHoldemProductionSessionBootstrap {
     ResolvedInvite invite, {
     Future<void>? cancellation,
   }) {
-    return _loadFuture(
-      _source.load(invite, cancellation: cancellation),
+    return _loadSourceFuture(
+      (sourceCancellation) =>
+          _source.load(invite, cancellation: sourceCancellation),
       cancellation: cancellation,
+    );
+  }
+
+  Future<AppHoldemProductionSessionInput> _loadSourceFuture(
+    Future<AppHoldemProductionSessionInput> Function(
+      Future<void> sourceCancellation,
+    )
+    load, {
+    Future<void>? cancellation,
+  }) {
+    final sourceCancellation = Completer<void>();
+
+    void cancelSource() {
+      if (!sourceCancellation.isCompleted) {
+        sourceCancellation.complete();
+      }
+    }
+
+    late final Future<AppHoldemProductionSessionInput> sourceFuture;
+    try {
+      sourceFuture = load(sourceCancellation.future);
+    } on Object catch (error, stackTrace) {
+      cancelSource();
+      sourceFuture = Future<AppHoldemProductionSessionInput>.error(
+        error,
+        stackTrace,
+      );
+    }
+
+    return _loadFuture(
+      sourceFuture,
+      cancellation: cancellation,
+      cancelSource: cancelSource,
     );
   }
 
   Future<AppHoldemProductionSessionInput> _loadFuture(
     Future<AppHoldemProductionSessionInput> sourceFuture, {
     Future<void>? cancellation,
+    void Function()? cancelSource,
   }) {
     final result = Completer<AppHoldemProductionSessionInput>();
     Timer? timeoutTimer;
@@ -205,12 +243,10 @@ class AppHoldemProductionSessionBootstrap {
       result.completeError(error, stackTrace);
     }
 
-    timeoutTimer = Timer(
-      sourceLoadTimeout,
-      () => completeError(
-        TimeoutException('Production session source timed out.'),
-      ),
-    );
+    timeoutTimer = Timer(sourceLoadTimeout, () {
+      cancelSource?.call();
+      completeError(TimeoutException('Production session source timed out.'));
+    });
     sourceFuture.then<void>(
       completeValue,
       onError: (Object error, StackTrace stackTrace) {
@@ -218,10 +254,12 @@ class AppHoldemProductionSessionBootstrap {
       },
     );
     cancellation?.then<void>(
-      (_) => completeError(
-        StateError('Production session source load cancelled.'),
-      ),
+      (_) {
+        cancelSource?.call();
+        completeError(StateError('Production session source load cancelled.'));
+      },
       onError: (Object error, StackTrace stackTrace) {
+        cancelSource?.call();
         completeError(error, stackTrace);
       },
     );

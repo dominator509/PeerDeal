@@ -99,6 +99,8 @@ void main() {
       ).createForInvite(_invite()),
       throwsA(isA<TimeoutException>()),
     );
+    expect(source.loadedCancellation, isNotNull);
+    await expectLater(source.loadedCancellation!, completes);
   });
 
   test(
@@ -117,7 +119,9 @@ void main() {
       cancellation.complete();
 
       await expectLater(loading, throwsStateError);
-      expect(source.loadedCancellation, same(cancellation.future));
+      expect(source.loadedCancellation, isNot(same(cancellation.future)));
+      expect(source.loadedCancellation, isNotNull);
+      await expectLater(source.loadedCancellation!, completes);
     },
   );
 

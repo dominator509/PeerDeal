@@ -515,9 +515,12 @@ surface until the future settles and then fails closed. The source remains
 responsible for canceling work beneath this boundary when its persistence or
 network implementation supports cancellation. Its `load` contract accepts an
 optional `Future<void>? cancellation` signal. The bootstrap races source
-completion, cancellation, and the configured timeout, and cancels its own
-deadline timer on every terminal outcome; the mounted route completes the
-signal on replacement or disposal.
+completion, caller cancellation, and the configured timeout. It passes each
+source load an app-owned cancellation signal and completes that signal when
+caller cancellation or the timeout wins, then cancels its own deadline timer on
+every terminal outcome. The mounted route completes its caller signal on
+replacement or disposal; source implementations remain responsible for
+honoring the signal beneath this boundary.
 
 `AppHoldemProductionSessionBootstrapRoute` is the mirrored app-shell mounting
 adapter for callers that register a production route in `productionRoutes`. Its
