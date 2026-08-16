@@ -168,6 +168,40 @@ void main() {
     expect(errors, isEmpty);
   });
 
+  test('invite payload rejects unsafe or non-text required fields', () {
+    final decoded =
+        fixtureJson('fixtures/invites/open_table_player_invite_v1.json')
+          ..['session_id'] = 42
+          ..['invite_code'] = ' ALPHA7'
+          ..['signature'] = '';
+
+    final errors = InvitePayloadSchema().validate(decoded);
+
+    expect(errors, contains('session_id must be a string'));
+    expect(errors, contains('invite_code must be non-empty and unpadded'));
+    expect(errors, contains('signature must be non-empty and unpadded'));
+  });
+
+  test('invite payload rejects unsupported mode type', () {
+    final decoded = fixtureJson(
+      'fixtures/invites/open_table_player_invite_v1.json',
+    )..['mode_type'] = 'private_table';
+
+    final errors = InvitePayloadSchema().validate(decoded);
+
+    expect(errors, contains('mode_type must be tournament or open_table'));
+  });
+
+  test('invite payload rejects control characters in required text', () {
+    final decoded = fixtureJson(
+      'fixtures/invites/open_table_player_invite_v1.json',
+    )..['invite_id'] = 'inv_001\u0000';
+
+    final errors = InvitePayloadSchema().validate(decoded);
+
+    expect(errors, contains('invite_id contains a control character'));
+  });
+
   test('event hash helper returns non-empty sha256', () {
     final hash = computeCanonicalHash({
       'event_type': 'OpenTableSessionOpened',

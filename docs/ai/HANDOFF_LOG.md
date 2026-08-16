@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T244 Harden Invite Payload Structure
+
+Summary:
+- Hardened `InvitePayloadSchema` so present required invite fields must be
+  non-empty, unpadded, control-free strings and `mode_type` must be
+  `tournament` or `open_table`.
+- Kept signature verification and cryptographic session authentication outside
+  this structural protocol change; no package boundary or wire-auth contract
+  was invented.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/schemas/invite_payload_schema.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `packages/peerdeal_protocol/README.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused protocol suite passed (53 tests).
+- Full analyze, boundary-check, source-text, serialized test, and dependency
+  audit gates passed; actionable upgrades: 0.
+- Final `git diff --check` passed.
+
+Risks:
+- Cryptographic invite/session authentication, provider-specific fairness
+  semantics, product session/state provisioning, durable database replacement,
+  live device/network validation, release signing, and final UX remain separate.
+
 ### 2026-08-16 - Codex - T243 Preserve Matched-But-Unacted Hold'em Options
 
 Summary:

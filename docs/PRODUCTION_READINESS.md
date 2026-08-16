@@ -2632,6 +2632,13 @@ compatible. Product-owned snapshot payload interpretation, durable database
 persistence, device/network validation, other-platform hosts, provider-specific
 proof semantics, release signing, and final UX remain separate.
 
+The T244 follow-up closes the invite payload structural-validation gap.
+`InvitePayloadSchema` now rejects present required fields that are not safe,
+non-empty strings, rejects unsupported `mode_type` values, and retains the
+existing role-hint allowlist. This is protocol shape validation only; signature
+verification and cryptographic session authentication remain explicit product
+or protocol contracts.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

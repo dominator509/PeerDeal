@@ -16,6 +16,7 @@ Owns:
   `EventEnvelope` and `SnapshotEnvelope` hydration before typed field access
 - Game File public schema contract
 - invite payload public schema contract
+- invite payload field-type, safe-text, and mode-value validation
 - accepted and rejected protocol fixtures
 - envelope payload trees, custom catalog entries, and catalog lock errors are
   defensively copied and recursively frozen at construction

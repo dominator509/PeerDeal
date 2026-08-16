@@ -39,6 +39,12 @@ The default catalog owns supported artifact identities for:
 When changing catalog identities, update protocol fixtures and catalog-lock
 tests in the same change.
 
+`InvitePayloadSchema.validate(...)` is the structural invite boundary. Present
+required invite fields must be non-empty, unpadded, control-free strings, and
+`mode_type` must be `tournament` or `open_table`; `role_hint` remains limited
+to `player`, `spectator`, or `cohost`. This schema does not verify the
+signature or provide cryptographic session authentication.
+
 ## Public Package APIs
 
 Agents should import each package through its barrel file:
