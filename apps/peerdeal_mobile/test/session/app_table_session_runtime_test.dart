@@ -30,6 +30,39 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct single and batch warning diagnostics', () {
+    final runtime = _runtime(scope: scope, store: _FakeRecoveryStore());
+    final warnings = <String>[
+      'warning_1',
+      ' padded ',
+      'warning_2',
+      'warning_3',
+      'warning_4',
+    ];
+    final single = AppTableSessionEventResult.rejected(
+      state: runtime.state,
+      reasonCode: 'ERR_TEST',
+      warnings: warnings,
+    );
+    final batch = AppTableSessionEventBatchResult.rejected(
+      state: runtime.state,
+      reasonCode: 'ERR_TEST',
+      warnings: warnings,
+    );
+
+    warnings[0] = 'mutated';
+    const expected = <String>[
+      'warning_1',
+      'Table session warning unavailable.',
+      'warning_2',
+      'Table session warnings truncated.',
+    ];
+    expect(single.warnings, expected);
+    expect(batch.warnings, expected);
+    expect(() => single.warnings.add('warning_5'), throwsUnsupportedError);
+    expect(() => batch.warnings.add('warning_5'), throwsUnsupportedError);
+  });
+
   test('projects ordered events through core and enforces close retention', () {
     final store = _FakeRecoveryStore();
     final runtime = _runtime(scope: scope, store: store);

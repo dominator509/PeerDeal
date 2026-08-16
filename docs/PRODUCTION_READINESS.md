@@ -2486,6 +2486,13 @@ and four-entry sanitizer before exposing immutable diagnostics. This hardens
 the app-owned transport result boundary without changing projection events,
 transport contracts, variant rules, or session truth ownership.
 
+The T228 follow-up closes the remaining app-session result warning bypass.
+Mirrored `AppTableSessionEventResult`, `AppTableSessionEventBatchResult`, and
+`AppHoldemInboundEventResult` constructors now apply bounded control-free
+warning sanitization, preserve stable truncation markers, and expose immutable
+diagnostics. Universal and Hold'em runtime behavior, reducer ownership, event
+identity, and transport contracts remain unchanged.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

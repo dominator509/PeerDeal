@@ -4,6 +4,33 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 import '../recovery/app_recovery_session_close_event_adapter.dart';
 
+const _maximumAppTableSessionWarningCount = 4;
+const _maximumAppTableSessionWarningLength = 160;
+
+List<String> _safeAppTableSessionWarnings(Iterable<String> warnings) {
+  final truncated = warnings.length > _maximumAppTableSessionWarningCount;
+  final valueLimit = truncated
+      ? _maximumAppTableSessionWarningCount - 1
+      : _maximumAppTableSessionWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumAppTableSessionWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Table session warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Table session warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
+}
+
 enum AppTableSessionEventDisposition { applied, rejected }
 
 class AppTableSessionEventResult {
@@ -14,7 +41,7 @@ class AppTableSessionEventResult {
     this.recoveryResult,
     this.reasonCode,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeAppTableSessionWarnings(warnings);
 
   AppTableSessionEventResult.applied({
     required TableState state,
@@ -64,7 +91,7 @@ class AppTableSessionEventBatchResult {
     this.reasonCode,
     List<String> warnings = const <String>[],
   }) : events = List<EventEnvelope>.unmodifiable(events),
-       warnings = List<String>.unmodifiable(warnings);
+       warnings = _safeAppTableSessionWarnings(warnings);
 
   AppTableSessionEventBatchResult.applied({
     required TableState state,

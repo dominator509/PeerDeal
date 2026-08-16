@@ -28,6 +28,32 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct inbound warning diagnostics', () {
+    final runtime = _runtime(_preflopState());
+    final warnings = <String>[
+      'warning_1',
+      ' padded ',
+      'warning_2',
+      'warning_3',
+      'warning_4',
+    ];
+    final result = AppHoldemInboundEventResult.rejected(
+      handState: runtime.handState,
+      cursor: runtime.cursor,
+      reasonCode: 'ERR_TEST',
+      warnings: warnings,
+    );
+
+    warnings[0] = 'mutated';
+    expect(result.warnings, [
+      'warning_1',
+      'Holdem inbound event warning unavailable.',
+      'warning_2',
+      'Holdem inbound event warnings truncated.',
+    ]);
+    expect(() => result.warnings.add('warning_5'), throwsUnsupportedError);
+  });
+
   test('bounds and scrubs direct projection-publish warnings', () {
     final warnings = <String>[
       ' padded ',

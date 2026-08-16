@@ -204,6 +204,43 @@ Next reviewer:
 
 ---
 
+### 2026-08-16 - Codex - T228 Bound App Session Result Warnings
+
+Summary:
+- Mirrored `AppTableSessionEventResult` and
+  `AppTableSessionEventBatchResult` constructors now scrub unsafe warning text,
+  cap direct warning collections at four entries, and preserve a stable
+  truncation marker.
+- Mirrored `AppHoldemInboundEventResult` constructors now apply the same
+  bounded, immutable diagnostic policy at the variant inbound boundary.
+- Core state projection, event identity, variant rules, and transport
+  contracts are unchanged.
+
+Files changed:
+- Mirrored mobile and desktop app table-session and Hold'em runtime models.
+- Mirrored runtime regression suites.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile table-session and Hold'em runtime suites passed (22 tests).
+- Focused desktop table-session and Hold'em runtime suites passed (22 tests).
+- Full `melos run test`, analyze, boundary-check, source-text, and dependency
+  audit gates passed; actionable upgrades: 0.
+- Android debug APK and Windows debug artifacts built successfully.
+- `git diff --check` passed.
+
+Risks:
+- Concrete product state/database source wiring, native runtime/device
+  validation, cross-device reachability, other-platform hosts, and release
+  signing remain external or product-owned boundaries.
+
+Next reviewer:
+- Continue toward concrete product-owned session/state and durable event-log
+  integration without inventing a database or moving game truth across the
+  established package boundaries.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:

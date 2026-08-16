@@ -4,6 +4,33 @@ import 'package:peerdeal_variants/peerdeal_variants.dart';
 
 import 'app_table_session_runtime.dart';
 
+const _maximumHoldemInboundWarningCount = 4;
+const _maximumHoldemInboundWarningLength = 160;
+
+List<String> _safeHoldemInboundWarnings(Iterable<String> warnings) {
+  final truncated = warnings.length > _maximumHoldemInboundWarningCount;
+  final valueLimit = truncated
+      ? _maximumHoldemInboundWarningCount - 1
+      : _maximumHoldemInboundWarningCount;
+  final safe = <String>[];
+  for (final warning in warnings) {
+    if (safe.length == valueLimit) break;
+    final trimmed = warning.trim();
+    safe.add(
+      trimmed.isEmpty ||
+              trimmed != warning ||
+              warning.length > _maximumHoldemInboundWarningLength ||
+              warning.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)
+          ? 'Holdem inbound event warning unavailable.'
+          : warning,
+    );
+  }
+  if (truncated) {
+    safe.add('Holdem inbound event warnings truncated.');
+  }
+  return List<String>.unmodifiable(safe);
+}
+
 enum AppHoldemProjectionDisposition { applied, rejected }
 
 class AppHoldemProjectionResult {
@@ -54,7 +81,7 @@ class AppHoldemInboundEventResult {
     this.sessionResult,
     this.reasonCode,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = _safeHoldemInboundWarnings(warnings);
 
   AppHoldemInboundEventResult.applied({
     required HoldemHandState handState,
