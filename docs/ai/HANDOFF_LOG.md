@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T238 Block Actions During Pending Projection Work
+
+Summary:
+- Mirrored mobile and desktop production Hold'em surfaces now fail closed for
+  new local hand starts and actions while a projection or snapshot checkpoint
+  is pending. Existing retry controls remain available.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_table_surface.dart`
+- `apps/peerdeal_mobile/test/session/app_holdem_table_session_route_test.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_table_surface.dart`
+- `apps/peerdeal_desktop/test/session/app_holdem_table_session_route_test.dart`
+- `docs/ARCHITECTURE.md`, `docs/PRODUCTION_READINESS.md`,
+  `docs/ai/API_CONTRACTS.md`, and this handoff log.
+
+Verification:
+- Focused mobile and desktop production-table route suites pass.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass; Android debug APK, Windows debug, and Windows native-host smoke
+  builds pass.
+
+Risks:
+- Local actions remain unavailable until retry clears older pending work; no
+  protocol, core, sync, or native bridge contract changed.
+
 ### 2026-08-16 - Codex - T237 Make Native Smoke Key Cleanup Failure-Safe
 
 Summary:

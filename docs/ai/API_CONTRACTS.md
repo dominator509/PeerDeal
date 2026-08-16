@@ -331,6 +331,10 @@ contract exists in this scaffold.
 The app-owned production table surface must invalidate pending projection work
 when its transport session or source is replaced; stale completions must not
 publish through the replacement sender. This is an app-owned lifecycle rule.
+While a pending projection or snapshot checkpoint exists, the surface must
+fail closed for new local actions and hand starts. Retry controls remain the
+only mutation path until the pending work clears, preventing a later local
+projection from overtaking or replacing an older retryable projection.
 App-owned native transport drains must cap receive-frame batches before session
 handlers see platform frames, and invalid app batch limits must fail closed
 before native receive calls.

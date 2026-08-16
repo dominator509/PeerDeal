@@ -179,6 +179,12 @@ class _AppHoldemProductionTableSurfaceState
     if (_busy) {
       return const PeerDealInfoRow(label: 'Actions', value: 'Synchronizing');
     }
+    if (_hasPendingWork) {
+      return const PeerDealInfoRow(
+        label: 'Actions',
+        value: 'Unavailable until pending synchronization completes',
+      );
+    }
     if (hand.phase == HoldemHandPhase.handIdle && transportReady) {
       return PeerDealActionButton(label: 'Start hand', onPressed: _startHand);
     }
@@ -281,6 +287,7 @@ class _AppHoldemProductionTableSurfaceState
 
   bool _canMutate(HoldemHandState hand, bool transportReady) {
     return !_busy &&
+        !_hasPendingWork &&
         transportReady &&
         widget.localSeat > 0 &&
         hand.currentActorSeat == widget.localSeat &&
@@ -320,6 +327,7 @@ class _AppHoldemProductionTableSurfaceState
       localPeerId: widget.localPeerId,
     );
     if (_busy ||
+        _hasPendingWork ||
         publisher == null ||
         !widget.routeContext.transport.available ||
         widget.routeContext.runtime.handState.phase !=
@@ -566,6 +574,10 @@ class _AppHoldemProductionTableSurfaceState
   bool _isCurrentOperation(int operationGeneration) {
     return mounted && operationGeneration == _operationGeneration;
   }
+
+  bool get _hasPendingWork =>
+      _pendingProjection != null ||
+      (widget.routeContext.snapshotCoordinator?.hasPending ?? false);
 
   HoldemSeatState? _seatFor(HoldemHandState hand, int seatNumber) {
     for (final seat in hand.seats) {

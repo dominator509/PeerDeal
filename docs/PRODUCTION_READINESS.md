@@ -2575,6 +2575,13 @@ when a later assertion fails, preventing failed validation from leaving test
 credentials in the host key store. The native secure-key contract and host
 implementation remain unchanged.
 
+The T238 follow-up closes the production table surface action-ordering gap.
+Mirrored mobile and desktop surfaces now block local hand starts and actions
+while a projection or snapshot checkpoint is pending, leaving the existing
+retry controls as the only mutation path until the older work clears. This
+preserves app-local event ordering without changing core, protocol, sync, or
+native bridge ownership.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

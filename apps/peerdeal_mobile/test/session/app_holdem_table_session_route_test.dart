@@ -249,6 +249,37 @@ void main() {
     expect(find.text('Action synchronized'), findsOneWidget);
   });
 
+  testWidgets('blocks local actions while persistence is pending', (
+    tester,
+  ) async {
+    final runtime = _runtime();
+    final coordinator = _snapshotCoordinator(
+      _RecordingRecoveryStore(failWrites: true),
+    );
+    final persistenceResult = await coordinator.persist(
+      tableState: runtime.coreState,
+      handState: runtime.handState,
+      eventCursor: runtime.cursor,
+    );
+    expect(persistenceResult.isSuccess, isFalse);
+    expect(coordinator.hasPending, isTrue);
+
+    await tester.pumpWidget(
+      _productionSurfaceRouteWithCoordinator(
+        runtime: runtime,
+        bridge: _BlockingNativeTransportBridge(blockSends: false),
+        snapshotCoordinator: coordinator,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Call'), findsNothing);
+    expect(
+      find.text('Unavailable until pending synchronization completes'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('drops a stale projection completion after runtime replacement', (
     tester,
   ) async {
@@ -888,6 +919,9 @@ class _BlockingReceiveNativeTransportBridge implements NativeTransportBridge {
 }
 
 class _RecordingRecoveryStore implements RecoveryPersistenceStore {
+  _RecordingRecoveryStore({this.failWrites = false});
+
+  final bool failWrites;
   int appendEventsCalls = 0;
   int saveSnapshotCalls = 0;
 
@@ -897,6 +931,12 @@ class _RecordingRecoveryStore implements RecoveryPersistenceStore {
     required SnapshotEnvelope snapshot,
   }) {
     saveSnapshotCalls++;
+    if (failWrites) {
+      return RecoveryPersistenceResult(
+        isSuccess: false,
+        warnings: <String>['test persistence failure'],
+      );
+    }
     return RecoveryPersistenceResult.success();
   }
 
@@ -906,6 +946,12 @@ class _RecordingRecoveryStore implements RecoveryPersistenceStore {
     required List<EventEnvelope> events,
   }) {
     appendEventsCalls++;
+    if (failWrites) {
+      return RecoveryPersistenceResult(
+        isSuccess: false,
+        warnings: <String>['test persistence failure'],
+      );
+    }
     return RecoveryPersistenceResult.success();
   }
 

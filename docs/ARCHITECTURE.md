@@ -70,6 +70,9 @@ The app-owned production table surface also binds pending projection work to
 the current transport session/source; replacement invalidates stale operation
 completion before it can publish through a new session. This remains app
 lifecycle ownership and does not alter protocol or native bridge contracts.
+Pending projection or persistence work also blocks new local action submission
+until the existing retry path clears it, preserving event order at the app
+surface without creating a second state store.
 Typed `AppHoldemProductionRouteRegistration` owners now merge that seam into
 the mobile and desktop production route maps, auto-register navigation, and
 require native readiness before mounting; product callers still own session
