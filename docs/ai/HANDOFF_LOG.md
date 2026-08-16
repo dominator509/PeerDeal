@@ -2,6 +2,42 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T243 Preserve Matched-But-Unacted Hold'em Options
+
+Summary:
+- Fixed `HoldemActionFlow` so matching the current bet does not implicitly
+  count as acting. A matched seat that has not acted remains eligible for its
+  check, raise, or call decision, including the big blind option and a
+  post-short-all-in call.
+- Kept the rule inside `peerdeal_variants`; protocol, core, sync, network,
+  native, and app contracts are unchanged.
+
+Files:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_action_flow.dart`
+- `packages/peerdeal_variants/test/holdem_action_flow_test.dart`
+- `packages/peerdeal_variants/test/holdem_action_applier_test.dart`
+- `packages/peerdeal_variants/test/holdem_action_street_coordinator_test.dart`
+- `packages/peerdeal_variants/test/holdem_core_projection_adapter_test.dart`
+- `packages/peerdeal_variants/test/holdem_event_reducer_test.dart`
+- `packages/peerdeal_variants/test/holdem_lifecycle_settlement_test.dart`
+- `apps/peerdeal_mobile/test/session/app_holdem_table_session_runtime_test.dart`
+- `apps/peerdeal_desktop/test/session/app_holdem_table_session_runtime_test.dart`
+- `packages/peerdeal_variants/README.md`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused Hold'em action-flow/applier/street-coordinator tests passed.
+- Full `peerdeal_variants` suite passed (162 tests).
+- Full mobile and desktop Flutter suites passed (535 and 534 tests).
+- Repository analyze, boundary-check, source-text, and serialized test gates passed.
+- Dependency audit passed with zero actionable upgrades.
+- Final `git diff --check` passed.
+
+Risks:
+- Product session/state provisioning, cryptographic session authentication,
+  provider-specific fairness semantics, durable database replacement, live
+  device/network validation, release signing, and final UX remain separate.
+
 ### 2026-08-16 - Codex - T242 Enforce Short-All-In Raise Reopening
 
 Summary:

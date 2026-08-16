@@ -249,6 +249,7 @@ HoldemHandState _preflopState({
     currentBetToCall: 100,
     minimumRaiseAmount: 100,
     pot: 200,
+    actedSeatsThisRound: <int>[2, 3],
     seats: seats,
   );
 }

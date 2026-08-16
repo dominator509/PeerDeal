@@ -9,6 +9,7 @@ void main() {
     HoldemBettingRound bettingRound = HoldemBettingRound.preflop,
     int currentActorSeat = 1,
     int currentBetToCall = 100,
+    List<int> actedSeatsThisRound = const <int>[2, 3],
     List<String> boardCards = const <String>[],
     List<HoldemSeatState> seats = const <HoldemSeatState>[
       HoldemSeatState(
@@ -53,6 +54,7 @@ void main() {
       pot: 200,
       boardCards: boardCards,
       seats: seats,
+      actedSeatsThisRound: actedSeatsThisRound,
     );
   }
 

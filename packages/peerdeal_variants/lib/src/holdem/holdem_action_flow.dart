@@ -88,6 +88,10 @@ class HoldemActionFlow {
     if (state.currentBetToCall == 0) {
       return !state.actedSeatsThisRound.contains(seat.seat);
     }
-    return seat.committedThisRound < state.currentBetToCall;
+
+    // Matching the bet is not itself an action. This preserves the big blind
+    // option and lets a checked/called seat act once after a short all-in.
+    return seat.committedThisRound < state.currentBetToCall ||
+        !state.actedSeatsThisRound.contains(seat.seat);
   }
 }

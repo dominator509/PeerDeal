@@ -164,3 +164,7 @@ amount future seats must call, but they do not reset the minimum raise size or
 reopen raising for seats that already acted since the last full raise. A short
 all-in call remains legal; an all-in that would constitute a full raise is
 rejected until a full raise reopens action.
+
+Matching the current bet does not mark a seat as acted. The action flow keeps
+the big blind option and any matched seat that has not acted in the current
+round eligible for its check, raise, or call decision.

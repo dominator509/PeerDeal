@@ -6,6 +6,7 @@ void main() {
 
   HoldemHandState buildState({
     int currentBetToCall = 100,
+    List<int> actedSeatsThisRound = const <int>[3],
     List<HoldemSeatState> seats = const <HoldemSeatState>[
       HoldemSeatState(
         seat: 1,
@@ -44,6 +45,7 @@ void main() {
       currentBetToCall: currentBetToCall,
       minimumRaiseAmount: 100,
       seats: seats,
+      actedSeatsThisRound: actedSeatsThisRound,
     );
   }
 
@@ -54,9 +56,47 @@ void main() {
     expect(result.nextActorSeat, 1);
   });
 
+  test('keeps a matched but unacted seat eligible for its option', () {
+    final result = flow.afterAction(
+      state: buildState(
+        seats: const <HoldemSeatState>[
+          HoldemSeatState(
+            seat: 1,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+          ),
+          HoldemSeatState(
+            seat: 2,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+          ),
+          HoldemSeatState(
+            seat: 3,
+            stack: 900,
+            inHand: true,
+            folded: false,
+            allIn: false,
+            committedThisRound: 100,
+          ),
+        ],
+      ).copyWith(actedSeatsThisRound: const <int>[2]),
+      actedSeat: 2,
+    );
+
+    expect(result.isBettingRoundComplete, isFalse);
+    expect(result.nextActorSeat, 3);
+  });
+
   test('marks round complete when all actionable seats match current bet', () {
     final result = flow.afterAction(
       state: buildState(
+        actedSeatsThisRound: const <int>[1, 2, 3],
         seats: const <HoldemSeatState>[
           HoldemSeatState(
             seat: 1,

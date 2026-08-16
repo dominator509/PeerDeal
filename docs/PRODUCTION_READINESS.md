@@ -158,7 +158,9 @@ the gates below are satisfied.
   full opening bets and full raises update the next minimum raise amount, while
   short all-ins can increase the amount to call without reopening raises for
   seats that already acted since the last full raise; full-raise all-ins are
-  rejected until action is reopened.
+  rejected until action is reopened. Betting-round flow also keeps matched but
+  unacted seats eligible, preserving the big blind option and post-short-all-in
+  check/call decisions.
 - Hold'em showdown evaluation now fails closed when fewer than two active
   non-folded seats are present, keeping single-winner hands on the uncontested
   settlement path instead of allowing accidental showdown settlement.

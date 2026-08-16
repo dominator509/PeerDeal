@@ -8,6 +8,7 @@ void main() {
     int currentBetToCall = 100,
     int currentActorSeat = 2,
     int pot = 150,
+    List<int> actedSeatsThisRound = const <int>[3],
     List<HoldemSeatState> seats = const <HoldemSeatState>[
       HoldemSeatState(
         seat: 1,
@@ -50,6 +51,7 @@ void main() {
       minimumRaiseAmount: 100,
       pot: pot,
       seats: seats,
+      actedSeatsThisRound: actedSeatsThisRound,
     );
   }
 
@@ -273,6 +275,7 @@ void main() {
     final result = applier.apply(
       state: buildState(
         currentActorSeat: 1,
+        actedSeatsThisRound: const <int>[2, 3],
         seats: const <HoldemSeatState>[
           HoldemSeatState(
             seat: 1,
