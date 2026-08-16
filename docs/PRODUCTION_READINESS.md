@@ -156,8 +156,9 @@ the gates below are satisfied.
   the first unsent event without replaying variant rules or delivered frames.
 - Hold'em action application now carries production raise sizing semantics:
   full opening bets and full raises update the next minimum raise amount, while
-  short all-ins can increase the amount to call without claiming full-raise
-  reopen or last-aggressor semantics.
+  short all-ins can increase the amount to call without reopening raises for
+  seats that already acted since the last full raise; full-raise all-ins are
+  rejected until action is reopened.
 - Hold'em showdown evaluation now fails closed when fewer than two active
   non-folded seats are present, keeping single-winner hands on the uncontested
   settlement path instead of allowing accidental showdown settlement.

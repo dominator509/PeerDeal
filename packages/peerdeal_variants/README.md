@@ -161,5 +161,6 @@ transitions reset that marker before the next betting round opens.
 Full opening bets and full raises update `minimumRaiseAmount` to the actual
 bet or raise increment for the next legal raise. Short all-ins can increase the
 amount future seats must call, but they do not reset the minimum raise size or
-claim last-aggressor/reopen semantics unless they meet the current full-raise
-threshold.
+reopen raising for seats that already acted since the last full raise. A short
+all-in call remains legal; an all-in that would constitute a full raise is
+rejected until a full raise reopens action.

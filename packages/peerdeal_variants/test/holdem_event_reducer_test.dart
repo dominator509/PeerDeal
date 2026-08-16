@@ -185,6 +185,76 @@ void main() {
     expect(result.state, same(initial));
   });
 
+  test('rejects a remote raise when a short all-in did not reopen action', () {
+    final initial = _preflopState().copyWith(
+      currentActorSeat: 2,
+      currentBetToCall: 125,
+      actedSeatsThisRound: const <int>[2, 3],
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 900,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+          committedThisHand: 100,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+          committedThisRound: 125,
+          committedThisHand: 125,
+        ),
+      ],
+    );
+    final event = EventEnvelope(
+      eventId: 'evt_raise_after_short_all_in',
+      eventType: 'PlayerRaised',
+      eventVersion: '1.0',
+      protocolVersion: '1.0.0',
+      eventSeq: 3,
+      tableId: 'tbl_001',
+      sessionId: 'sess_001',
+      handId: 'hand_001',
+      emittedAt: '2026-08-10T00:00:03Z',
+      actorRef: 'peer_local',
+      payload: const <String, Object?>{
+        'variant_id': holdemNlheVariantId,
+        'action_type': 'raise',
+        'actor_seat': 2,
+        'amount': 225,
+        'contribution': 125,
+        'dealt_board_cards': <Object?>[],
+        'board_cards': <Object?>[],
+        'phase': 'bettingPreflop',
+        'betting_round': 'preflop',
+        'pot': 325,
+        'current_bet_to_call': 225,
+        'minimum_raise_amount': 100,
+      },
+      prevEventHash: 'hash_short_all_in',
+      eventHash: 'hash_raise_after_short_all_in',
+    );
+
+    final result = reducer.apply(state: initial, event: event);
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_RAISE_NOT_REOPENED');
+    expect(result.state, same(initial));
+  });
+
   test('rejects settlement awards that do not conserve the current pot', () {
     final initial = _showdownState();
     final started = adapter.startHand(

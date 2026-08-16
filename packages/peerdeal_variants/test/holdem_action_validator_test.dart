@@ -222,6 +222,141 @@ void main() {
     expect(result.reasonCode, 'ERR_RAISE_BELOW_MINIMUM');
   });
 
+  test('rejects a raise after a short all-in when the actor already acted', () {
+    final state = buildState().copyWith(
+      currentActorSeat: 2,
+      currentBetToCall: 125,
+      actedSeatsThisRound: const <int>[2, 3],
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 900,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+          committedThisRound: 125,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.raise,
+        amount: 225,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_RAISE_NOT_REOPENED');
+  });
+
+  test('allows a short all-in call after a short all-in', () {
+    final state = buildState().copyWith(
+      currentActorSeat: 2,
+      currentBetToCall: 125,
+      actedSeatsThisRound: const <int>[2, 3],
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 25,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+          committedThisRound: 125,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.allIn,
+      ),
+    );
+
+    expect(result.isValid, isTrue);
+  });
+
+  test('rejects an all-in full raise after raising was not reopened', () {
+    final state = buildState().copyWith(
+      currentActorSeat: 2,
+      currentBetToCall: 125,
+      actedSeatsThisRound: const <int>[2, 3],
+      seats: const <HoldemSeatState>[
+        HoldemSeatState(
+          seat: 1,
+          stack: 1000,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 0,
+        ),
+        HoldemSeatState(
+          seat: 2,
+          stack: 125,
+          inHand: true,
+          folded: false,
+          allIn: false,
+          committedThisRound: 100,
+        ),
+        HoldemSeatState(
+          seat: 3,
+          stack: 0,
+          inHand: true,
+          folded: false,
+          allIn: true,
+          committedThisRound: 125,
+        ),
+      ],
+    );
+
+    final result = validator.validate(
+      state: state,
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.allIn,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_RAISE_NOT_REOPENED');
+  });
+
   test('rejects zero opening bet amount', () {
     final state = buildState().copyWith(currentBetToCall: 0);
 

@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T242 Enforce Short-All-In Raise Reopening
+
+Summary:
+- `BasicHoldemActionValidator` now rejects a raise from a seat that already
+  acted since the last full raise when a short all-in increased the amount to
+  call without reopening action.
+- The same gate rejects an all-in that would be a full raise in that state,
+  while preserving legal short all-in calls.
+
+Files changed:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_action_validator.dart`
+- `packages/peerdeal_variants/test/holdem_action_validator_test.dart`
+- `packages/peerdeal_variants/README.md`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused validator and reducer regressions plus the complete
+  `peerdeal_variants` suite pass.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass; Android debug, Windows debug, and all 16 Windows native-host
+  smoke markers pass.
+
+Risks:
+- This closes the existing variant-local no-limit reopen rule without adding
+  protocol fields or moving poker policy outside `peerdeal_variants`.
+
 ### 2026-08-16 - Codex - T241 Cancel Queued Inbound Checkpoints
 
 Summary:

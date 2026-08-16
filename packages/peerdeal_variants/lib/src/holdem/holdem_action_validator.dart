@@ -134,6 +134,13 @@ class BasicHoldemActionValidator implements HoldemActionValidator {
             message: 'Cannot raise when not facing a bet.',
           );
         }
+        if (state.actedSeatsThisRound.contains(action.actorSeat)) {
+          return const HoldemActionValidationResult(
+            isValid: false,
+            reasonCode: 'ERR_RAISE_NOT_REOPENED',
+            message: 'A short all-in did not reopen raising for this seat.',
+          );
+        }
         final minimumTotal = state.currentBetToCall + state.minimumRaiseAmount;
         if (action.amount < minimumTotal) {
           return const HoldemActionValidationResult(
@@ -156,6 +163,16 @@ class BasicHoldemActionValidator implements HoldemActionValidator {
             isValid: false,
             reasonCode: 'ERR_STACK_EMPTY',
             message: 'Cannot move all-in with zero stack.',
+          );
+        }
+        final allInRaiseIncrement =
+            actor.committedThisRound + actor.stack - state.currentBetToCall;
+        if (state.actedSeatsThisRound.contains(action.actorSeat) &&
+            allInRaiseIncrement >= state.minimumRaiseAmount) {
+          return const HoldemActionValidationResult(
+            isValid: false,
+            reasonCode: 'ERR_RAISE_NOT_REOPENED',
+            message: 'A short all-in did not reopen raising for this seat.',
           );
         }
         return HoldemActionValidationResult.ok;
