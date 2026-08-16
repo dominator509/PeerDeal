@@ -11,7 +11,9 @@ class AppHoldemProjectionPublishResult {
     required this.totalEventCount,
     this.reasonCode,
     List<String> warnings = const <String>[],
-  }) : warnings = List<String>.unmodifiable(warnings);
+  }) : warnings = List<String>.unmodifiable(
+         AppHoldemProjectionTransportPublisher._safeWarnings(warnings),
+       );
 
   AppHoldemProjectionPublishResult.complete({required int totalEventCount})
     : this._(

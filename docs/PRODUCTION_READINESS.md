@@ -2479,6 +2479,13 @@ reach app-shell route loading. The existing app-owned source, recovery store,
 identity, and route policy seams remain unchanged. The workspace also aligns
 its existing Melos dev dependency to the newest resolvable 8.3.0 release.
 
+The T227 follow-up closes the projection-publish result warning bypass.
+Mirrored `AppHoldemProjectionPublishResult` constructors now route direct
+warning input through the publisher's existing control-free, padded, length,
+and four-entry sanitizer before exposing immutable diagnostics. This hardens
+the app-owned transport result boundary without changing projection events,
+transport contracts, variant rules, or session truth ownership.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

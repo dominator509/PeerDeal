@@ -169,6 +169,41 @@ Next reviewer:
 
 ---
 
+### 2026-08-16 - Codex - T227 Bound Projection Publish Warnings
+
+Summary:
+- Mirrored `AppHoldemProjectionPublishResult` constructors now pass direct
+  warning input through the existing publisher sanitizer before exposing it.
+- Control-bearing, padded, oversized, and excess warning values are bounded at
+  the app-owned projection transport result boundary; output remains immutable.
+- Projection events, native transport contracts, variant rules, and session
+  truth ownership are unchanged.
+
+Files changed:
+- Mirrored mobile and desktop projection publisher implementations and runtime
+  regression suites.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile projection/runtime suite passed (12 tests).
+- Focused desktop projection/runtime suite passed (12 tests).
+- Full `melos run test`, analyze, boundary-check, source-text, and dependency
+  audit gates passed; actionable upgrades: 0.
+- Android debug APK and Windows debug artifacts built successfully.
+- `git diff --check` passed.
+
+Risks:
+- Concrete product state/database source wiring, native runtime/device
+  validation, cross-device reachability, other-platform hosts, and release
+  signing remain external or product-owned boundaries.
+
+Next reviewer:
+- Continue toward the concrete app-owned product session source and durable
+  event/snapshot integration without adding a new package or moving state truth
+  into UI, native bridges, or generic recovery storage.
+
+---
+
 ### 2026-08-12 - Codex - T218 Unify Demo Bootstrap Endpoint Handling
 
 Summary:

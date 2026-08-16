@@ -28,6 +28,30 @@ void main() {
     expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
   });
 
+  test('bounds and scrubs direct projection-publish warnings', () {
+    final warnings = <String>[
+      ' padded ',
+      'control\u0000warning',
+      'x' * 161,
+      'warning_1',
+      'warning_2',
+    ];
+    final result = AppHoldemProjectionPublishResult.rejected(
+      reasonCode: 'ERR_TEST',
+      totalEventCount: 1,
+      warnings: warnings,
+    );
+
+    warnings[3] = 'mutated';
+    expect(result.warnings, [
+      'Holdem projection transport warning unavailable.',
+      'Holdem projection transport warning unavailable.',
+      'Holdem projection transport warning unavailable.',
+      'warning_1',
+    ]);
+    expect(() => result.warnings.add('warning_3'), throwsUnsupportedError);
+  });
+
   test('commits start and action projections through the app session', () {
     final runtime = _runtime(_preflopState());
 
