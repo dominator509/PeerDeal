@@ -106,8 +106,8 @@ the gates below are satisfied.
   protocol/version, issue timestamp, actor, and Open Table table identity
   fields before accepted command paths can reach reducer orchestration.
 - Core command validation now consults the protocol catalog and rejects
-  unsupported command artifacts or protocol versions, plus padded or
-  control-character command and scope identities.
+  unsupported command artifacts or protocol versions, plus padded or C0/C1
+  control-bearing command and scope identities.
 - The core public API no longer exposes the unused starter local command/event
   models or duplicate reducer and validator seams; protocol-native envelopes
   are now the sole command/event boundary in `peerdeal_core`.
@@ -2638,6 +2638,13 @@ hydration fail closed with stable mismatch codes; no-snapshot replay remains
 compatible. Product-owned snapshot payload interpretation, durable database
 persistence, device/network validation, other-platform hosts, provider-specific
 proof semantics, release signing, and final UX remain separate.
+
+The T248 follow-up aligns the remaining protocol/core text boundary. Invite
+required text and core command/scope identities now reject blank, padded, and
+C0/C1-control-bearing values at their existing package-owned validation seams,
+matching native, network, and variant boundary policy while preserving existing
+diagnostics and wire shape. This remains structural validation only; it does
+not add cryptographic session authentication or product persistence.
 
 The T244 follow-up closes the invite payload structural-validation gap.
 `InvitePayloadSchema` now rejects present required fields that are not safe,

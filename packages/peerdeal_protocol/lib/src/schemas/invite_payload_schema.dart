@@ -48,7 +48,9 @@ class InvitePayloadSchema {
       if (value.trim().isEmpty || value.trim() != value) {
         errors.add('$key must be non-empty and unpadded');
       }
-      if (value.codeUnits.any((unit) => unit < 0x20 || unit == 0x7f)) {
+      if (value.codeUnits.any(
+        (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+      )) {
         errors.add('$key contains a control character');
       }
     }

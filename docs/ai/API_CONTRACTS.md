@@ -40,10 +40,15 @@ When changing catalog identities, update protocol fixtures and catalog-lock
 tests in the same change.
 
 `InvitePayloadSchema.validate(...)` is the structural invite boundary. Present
-required invite fields must be non-empty, unpadded, control-free strings, and
+required invite fields must be non-empty, unpadded, and C0/C1-control-free strings, and
 `mode_type` must be `tournament` or `open_table`; `role_hint` remains limited
 to `player`, `spectator`, or `cohost`. This schema does not verify the
 signature or provide cryptographic session authentication.
+
+`CoreCommandValidator.validate(...)` is the deterministic command boundary.
+Command and scope identity fields must be non-empty, unpadded, and
+C0/C1-control-free before catalog compatibility or reducer orchestration;
+existing unsafe-identity diagnostics are preserved.
 
 ## Public Package APIs
 

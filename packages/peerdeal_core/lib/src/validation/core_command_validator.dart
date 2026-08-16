@@ -1,9 +1,7 @@
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 class CoreCommandValidator {
-  const CoreCommandValidator({
-    this.protocolCatalog = const ProtocolCatalog(),
-  });
+  const CoreCommandValidator({this.protocolCatalog = const ProtocolCatalog()});
 
   final ProtocolCatalog protocolCatalog;
 
@@ -79,9 +77,7 @@ class CoreCommandValidator {
     String fieldName,
     String? value,
   ) {
-    if (value != null &&
-        value.trim().isNotEmpty &&
-        !_isSafeIdentity(value)) {
+    if (value != null && value.trim().isNotEmpty && !_isSafeIdentity(value)) {
       errors.add('$fieldName contains unsafe characters');
     }
   }
@@ -92,7 +88,7 @@ class CoreCommandValidator {
     }
 
     return value.codeUnits.every(
-      (unit) => unit >= 0x20 && unit != 0x7f,
+      (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
     );
   }
 }

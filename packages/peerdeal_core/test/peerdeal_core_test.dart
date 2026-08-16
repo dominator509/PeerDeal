@@ -323,6 +323,27 @@ void main() {
     expect(errors, isNot(contains('command artifact is unsupported')));
   });
 
+  test('validator rejects C1 control-bearing command and scope identities', () {
+    final command = CommandEnvelope(
+      commandId: 'cmd_001\u0085',
+      commandType: 'OpenTableSession',
+      commandVersion: '1.0',
+      protocolVersion: '1.0.0',
+      tableId: 'table_001\u009f',
+      sessionId: null,
+      handId: null,
+      issuedAt: '2026-04-25T12:05:00Z',
+      actorRef: 'host_alpha',
+      payload: <String, Object?>{},
+    );
+
+    final errors = CoreCommandValidator().validate(command);
+
+    expect(errors, contains('command_id contains unsafe characters'));
+    expect(errors, contains('table_id contains unsafe characters'));
+    expect(errors, isNot(contains('command artifact is unsupported')));
+  });
+
   test('core accepts fixture-backed protocol open session spine', () {
     final command = commandEnvelopeFromJson(
       loadProtocolFixture('commands/open_table_session_command_v1.json'),

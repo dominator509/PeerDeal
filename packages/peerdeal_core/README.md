@@ -29,7 +29,8 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
 - deterministic fixture loader for starter tests
 - replay-safe projection coverage for every accepted protocol event fixture
 - protocol-native command validation against the catalog and safe envelope
-  identity boundaries
+  identity boundaries; command and scope identities reject blank, padded, and
+  C0/C1-control-bearing values
 - variant-agnostic pot settlement bounds before side-pot or award traversal:
   64 commitments, 64 winning slice-map entries, and 64 winners per slice
 - public table-state metadata and pot-settlement result collections are

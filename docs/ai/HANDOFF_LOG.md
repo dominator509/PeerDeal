@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T248 Align Protocol/Core Text Boundaries
+
+Summary:
+- Extended invite required-text validation and core command/scope identity
+  validation to reject C0/C1 control-bearing values, matching the existing
+  native, network, and variant boundary policy.
+- Preserved existing diagnostics, catalog behavior, wire shape, authentication
+  scope, and package ownership.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/schemas/invite_payload_schema.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `packages/peerdeal_protocol/README.md`
+- `packages/peerdeal_core/lib/src/validation/core_command_validator.dart`
+- `packages/peerdeal_core/test/peerdeal_core_test.dart`
+- `packages/peerdeal_core/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Focused protocol and core suites pass (53 and 33 tests respectively).
+- Full analyze, boundary-check, source-text, serialized test, dependency-audit,
+  and diff checks pass; actionable dependency upgrades: 0.
+
+Remaining:
+- Real-device native validation, product session/state integration, durable
+  product persistence, release signing, and final UX remain separate readiness
+  work.
+
 ### 2026-08-16 - Codex - T247 Harden Hold’em Event Text Boundaries
 
 Summary:

@@ -202,6 +202,16 @@ void main() {
     expect(errors, contains('invite_id contains a control character'));
   });
 
+  test('invite payload rejects C1 control characters in required text', () {
+    final decoded = fixtureJson(
+      'fixtures/invites/open_table_player_invite_v1.json',
+    )..['invite_id'] = 'inv_001\u0085';
+
+    final errors = InvitePayloadSchema().validate(decoded);
+
+    expect(errors, contains('invite_id contains a control character'));
+  });
+
   test('event hash helper returns non-empty sha256', () {
     final hash = computeCanonicalHash({
       'event_type': 'OpenTableSessionOpened',
