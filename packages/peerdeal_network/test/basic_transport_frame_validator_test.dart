@@ -98,4 +98,24 @@ void main() {
     expect(result.isValid, isFalse);
     expect(result.warnings, contains('ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE'));
   });
+
+  test('rejects payload values outside the byte range', () {
+    const validator = BasicTransportFrameValidator();
+
+    final result = validator.validate(
+      TransportFrame(
+        sessionId: 'session_1',
+        fromPeerId: 'peer_a',
+        toPeerId: 'peer_b',
+        sequence: 1,
+        payload: <int>[-1, 0, 255, 256],
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(
+      result.warnings,
+      contains('ERR_TRANSPORT_FRAME_PAYLOAD_BYTE_INVALID'),
+    );
+  });
 }

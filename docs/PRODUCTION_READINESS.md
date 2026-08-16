@@ -235,6 +235,9 @@ the gates below are satisfied.
 - Network transport frame validation now rejects padded session and peer
   identities before validating sender/receiver boundaries can pass frames to
   platform sinks or session handlers.
+- Network transport frame validation now rejects payload entries outside the
+  0-through-255 byte range before native transport adapters receive them;
+  native bridge byte validation remains a second fail-closed boundary.
 - Network bootstrap candidate resolution now drops blank, padded,
   control-character-bearing, or duplicate peer ids before assigning candidate
   route class and priority, keeping malformed discovery identities out of path

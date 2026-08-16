@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T245 Enforce Network Transport Byte Range
+
+Summary:
+- Hardened `BasicTransportFrameValidator` so transport payload entries must be
+  bytes in the inclusive 0-through-255 range.
+- Invalid entries now fail before validating send/receive boundaries call
+  platform adapters or handlers; the existing native bridge byte checks remain
+  as defense in depth.
+- Preserved the existing `TransportFrame` shape and all package boundaries;
+  this does not add protocol fields or authentication semantics.
+
+Files:
+- `packages/peerdeal_network/lib/src/services/basic_transport_frame_validator.dart`
+- `packages/peerdeal_network/test/basic_transport_frame_validator_test.dart`
+- `packages/peerdeal_network/README.md`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/API_CONTRACTS.md`
+
+Verification:
+- Focused network validator tests passed.
+- Full analyze, boundary-check, source-text, serialized test, dependency-audit,
+  and diff checks remain required before commit.
+
+Risks:
+- Real device/network reachability, endpoint provisioning, cryptographic
+  session authentication, product persistence, release signing, and final UX
+  remain separate readiness work.
+
 ### 2026-08-16 - Codex - T244 Harden Invite Payload Structure
 
 Summary:

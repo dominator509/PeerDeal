@@ -38,6 +38,9 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
     if (frame.payload.length > maxPayloadBytes) {
       warnings.add('ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE');
     }
+    if (frame.payload.any((byte) => byte < 0 || byte > 255)) {
+      warnings.add('ERR_TRANSPORT_FRAME_PAYLOAD_BYTE_INVALID');
+    }
 
     if (warnings.isEmpty) {
       return const TransportFrameValidationResult.valid();

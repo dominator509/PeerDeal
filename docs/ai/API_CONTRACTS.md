@@ -311,6 +311,9 @@ become explicit failed transport results.
 Transport frame session and peer identities must be exact nonblank strings;
 blank or padded identities fail validation before sender/receiver boundaries
 call platform sinks or session handlers.
+Transport frame payload entries must be byte values from 0 through 255;
+out-of-range entries fail with `ERR_TRANSPORT_FRAME_PAYLOAD_BYTE_INVALID`
+before a transport sink or platform adapter is called.
 
 Mobile and desktop `NativeTransportSessionFactory` instances own the app
 payload limit used by the default `BasicTransportFrameValidator`. Session
