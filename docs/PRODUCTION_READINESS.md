@@ -2562,6 +2562,13 @@ started. An already-running cancellable or legacy drain remains host-owned
 until it settles. Focused mobile and desktop source regressions pass; transport
 contracts and native host implementations remain unchanged.
 
+The T236 follow-up closes the persisted-source initial-checkpoint cancellation
+race. Mirrored mobile and desktop sources now check route cancellation before
+calling the existing typed snapshot coordinator and after that checkpoint
+settles, so a cancelled load never returns a production session input. An
+already-started checkpoint remains owned by the persistence boundary until it
+settles; no package, snapshot, or native bridge contract changed.
+
 The T216 follow-up closes the app-owned bootstrap endpoint handoff gap. The
 network boundary now parses the existing `peer-id` and `peer-id@host[:port]`
 discovery values into bounded typed endpoint metadata, and mirrored mobile and

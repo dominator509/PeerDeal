@@ -85,6 +85,10 @@ configuration without deriving product session truth.
 Bootstrap source loads also receive an app-owned cancellation signal that is
 completed on route cancellation or timeout, so source-owned persistence or
 native work can stop without moving lifecycle policy into shared packages.
+The persisted source checks that signal immediately before initial typed
+snapshot checkpointing and again after the checkpoint settles; a cancelled
+load never returns a production input, even if an already-started checkpoint
+has completed.
 
 ## Forbidden patterns
 - UI mutating core state directly

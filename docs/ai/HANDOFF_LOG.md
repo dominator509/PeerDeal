@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-16 - Codex - T236 Guard Initial Snapshot Checkpoint Cancellation
+
+Summary:
+- Mirrored mobile and desktop persisted production-session sources now check
+  route cancellation before and after initial typed snapshot checkpointing.
+  Cancelled loads fail closed without returning a production input.
+
+Files changed:
+- `apps/peerdeal_mobile/lib/session/app_persisted_holdem_production_session_source.dart`
+- `apps/peerdeal_mobile/test/session/app_persisted_holdem_production_session_source_test.dart`
+- `apps/peerdeal_desktop/lib/session/app_persisted_holdem_production_session_source.dart`
+- `apps/peerdeal_desktop/test/session/app_persisted_holdem_production_session_source_test.dart`
+- `docs/PRODUCTION_READINESS.md`, `docs/ARCHITECTURE.md`, and
+  `docs/ai/API_CONTRACTS.md`.
+
+Verification:
+- Focused mobile and desktop persisted-session source suites pass.
+- Full analyze, boundary, source-text, serialized test, and dependency-audit
+  gates pass; Android debug APK, Windows debug, and Windows native-host smoke
+  builds pass.
+
+Risks:
+- A checkpoint already dispatched remains owned by the persistence boundary
+  until it settles; no package, snapshot, or native bridge contract changed.
+
 ### 2026-08-16 - Codex - T235 Stop Transport Source After Route Cancellation
 
 Summary:

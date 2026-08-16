@@ -453,6 +453,67 @@ void main() {
   );
 
   test(
+    'fails closed when cancellation wins before initial checkpointing',
+    () async {
+      final store = _CancellingSnapshotStore();
+      final cancellation = Completer<void>();
+      final source = _source(
+        store,
+        inputFactory: (_, snapshot) {
+          cancellation.complete();
+          return AppHoldemProductionSessionInput(
+            initialTableState: snapshot.tableState,
+            initialHandState: snapshot.handState,
+            initialCursor: snapshot.eventCursor,
+            closeEventAdapter: _closeAdapter(snapshot.tableState),
+            path: '/holdem-live',
+            navigationLabel: 'Live Holdem',
+            peerId: 'peer_remote',
+            localPeerId: 'peer_local',
+            localSeat: 1,
+          );
+        },
+        initialSnapshotLoader: (_, {cancellation}) async => _typedSnapshot(),
+        snapshotCoordinator: AppHoldemProductionSessionSnapshotCoordinator(
+          persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+            store: store,
+          ),
+        ),
+      );
+
+      await expectLater(
+        source.load(_invite(), cancellation: cancellation.future),
+        throwsStateError,
+      );
+      expect(store.saveSnapshotCalls, 0);
+    },
+  );
+
+  test(
+    'fails closed when cancellation wins during initial checkpointing',
+    () async {
+      final store = _CancellingSnapshotStore();
+      final cancellation = Completer<void>();
+      store.onSave = cancellation.complete;
+      final source = _source(
+        store,
+        initialSnapshotLoader: (_, {cancellation}) async => _typedSnapshot(),
+        snapshotCoordinator: AppHoldemProductionSessionSnapshotCoordinator(
+          persistenceWriter: AppHoldemProductionSessionPersistenceWriter(
+            store: store,
+          ),
+        ),
+      );
+
+      await expectLater(
+        source.load(_invite(), cancellation: cancellation.future),
+        throwsStateError,
+      );
+      expect(store.saveSnapshotCalls, 1);
+    },
+  );
+
+  test(
     'rejects orphaned recovery events before initial-state provisioning',
     () async {
       final store = InMemoryRecoveryPersistenceStore();
@@ -973,6 +1034,25 @@ class _FailingSnapshotStore extends _OversizedRecoveryStore {
   @override
   PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) {
     return PersistedRecoveryWindow(events: <EventEnvelope>[]);
+  }
+}
+
+class _CancellingSnapshotStore extends _OversizedRecoveryStore {
+  int saveSnapshotCalls = 0;
+  void Function()? onSave;
+
+  @override
+  PersistedRecoveryWindow loadWindow(RecoveryPersistenceScope scope) =>
+      PersistedRecoveryWindow(events: const <EventEnvelope>[]);
+
+  @override
+  RecoveryPersistenceResult saveSnapshot({
+    required RecoveryPersistenceScope scope,
+    required SnapshotEnvelope snapshot,
+  }) {
+    saveSnapshotCalls += 1;
+    onSave?.call();
+    return RecoveryPersistenceResult.success();
   }
 }
 

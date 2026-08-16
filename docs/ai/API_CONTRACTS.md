@@ -523,7 +523,12 @@ source load an app-owned cancellation signal and completes that signal when
 caller cancellation or the timeout wins, then cancels its own deadline timer on
 every terminal outcome. The mounted route completes its caller signal on
 replacement or disposal; source implementations remain responsible for
-honoring the signal beneath this boundary.
+honoring the signal beneath this boundary. During initial typed snapshot
+hydration, the persisted source checks cancellation immediately before
+invoking its existing snapshot coordinator and again after the checkpoint
+settles. A cancellation that wins during an already-started checkpoint may
+leave that checkpoint durable, but the source still fails closed and never
+returns the production input.
 
 `AppHoldemProductionSessionBootstrapRoute` is the mirrored app-shell mounting
 adapter for callers that register a production route in `productionRoutes`. Its

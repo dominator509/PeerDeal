@@ -448,11 +448,13 @@ class AppPersistedHoldemProductionSessionSource
       await _throwIfCancelled(cancellation);
 
       final input = buildInput(initialSnapshot);
+      await _throwIfCancelled(cancellation);
       final persistenceResult = await snapshotCoordinator.persist(
         tableState: initialSnapshot.tableState,
         handState: initialSnapshot.handState,
         eventCursor: initialSnapshot.eventCursor,
       );
+      await _throwIfCancelled(cancellation);
       if (!persistenceResult.isSuccess) {
         throw StateError('Initial Holdem state could not be persisted.');
       }
