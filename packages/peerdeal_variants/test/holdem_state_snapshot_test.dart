@@ -52,6 +52,21 @@ void main() {
     );
   });
 
+  test('rejects an invalid hand state at direct snapshot construction', () {
+    expect(
+      () => HoldemStateSnapshot(
+        tableState: TableState.initial(
+          tableId: 'table_001',
+          sessionId: 'session_001',
+          protocolVersion: '1.0.0',
+        ),
+        handState: _handState().copyWith(pot: -1),
+        eventCursor: _cursor(),
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
   test('rejects malformed snapshot component shapes', () {
     final malformed = <String, Object?>{
       'table_state': <String, Object?>{},

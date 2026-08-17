@@ -17,6 +17,15 @@ class HoldemStateSnapshot {
     required this.handState,
     required this.eventCursor,
   }) {
+    final handValidation = handState.validate();
+    if (!handValidation.isValid) {
+      throw ArgumentError.value(
+        handState,
+        'handState',
+        'Holdem snapshot hand state is invalid: '
+            '${handValidation.reasonCode}.',
+      );
+    }
     if (tableState.tableId != eventCursor.tableId ||
         tableState.sessionId != eventCursor.sessionId ||
         tableState.protocolVersion != eventCursor.protocolVersion) {
