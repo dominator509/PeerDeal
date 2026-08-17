@@ -70,6 +70,9 @@ class HoldemEventReducer {
     required HoldemHandState state,
     required EventEnvelope event,
   }) {
+    if (!state.validate().isValid) {
+      return _rejected(state, 'ERR_HOLDEM_STATE_INVALID');
+    }
     if (event.eventVersion != '1.0') {
       return _rejected(state, 'ERR_HOLDEM_EVENT_VERSION_UNSUPPORTED');
     }

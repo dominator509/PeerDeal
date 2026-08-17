@@ -57,6 +57,31 @@ void main() {
     expect(result.reasonCode, 'ERR_OUT_OF_TURN');
   });
 
+  test('rejects actions when the in-memory state is invalid', () {
+    final validState = buildState();
+    final result = validator.validate(
+      state: validState.copyWith(
+        seats: <HoldemSeatState>[
+          ...validState.seats,
+          const HoldemSeatState(
+            seat: 4,
+            stack: -1,
+            inHand: true,
+            folded: false,
+            allIn: false,
+          ),
+        ],
+      ),
+      action: const HoldemTableAction(
+        actorSeat: 2,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.reasonCode, 'ERR_HOLDEM_STATE_INVALID');
+  });
+
   test('rejects check while facing bet', () {
     final result = validator.validate(
       state: buildState(),
@@ -377,11 +402,7 @@ void main() {
     for (final type in HoldemTableActionType.values) {
       final result = validator.validate(
         state: buildState(),
-        action: HoldemTableAction(
-          actorSeat: 2,
-          type: type,
-          amount: -1,
-        ),
+        action: HoldemTableAction(actorSeat: 2, type: type, amount: -1),
       );
 
       expect(result.isValid, isFalse, reason: '$type should be rejected');

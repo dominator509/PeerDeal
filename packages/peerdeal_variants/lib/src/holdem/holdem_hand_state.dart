@@ -3,6 +3,22 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'holdem_betting_round.dart';
 import 'holdem_hand_phase.dart';
+import 'holdem_input_limits.dart';
+
+@immutable
+class HoldemStateValidationResult {
+  const HoldemStateValidationResult({
+    required this.isValid,
+    this.reasonCode,
+    this.message,
+  });
+
+  final bool isValid;
+  final String? reasonCode;
+  final String? message;
+
+  static const ok = HoldemStateValidationResult(isValid: true);
+}
 
 @immutable
 class HoldemSeatState {
@@ -141,7 +157,10 @@ class HoldemHandState {
       lastAggressorSeat: _nullableInt(json, 'last_aggressor_seat'),
       lastActionSummary: _nullableString(json, 'last_action_summary'),
     );
-    _validatePersistedState(state);
+    final validation = state.validate();
+    if (!validation.isValid) {
+      throw FormatException('${validation.reasonCode}: ${validation.message}');
+    }
     return state;
   }
 
@@ -188,6 +207,8 @@ class HoldemHandState {
     return null;
   }
 
+  HoldemStateValidationResult validate() => validateHoldemHandState(this);
+
   HoldemHandState copyWith({
     HoldemHandPhase? phase,
     HoldemBettingRound? bettingRound,
@@ -221,28 +242,78 @@ class HoldemHandState {
   }
 }
 
-void _validatePersistedState(HoldemHandState state) {
+HoldemStateValidationResult validateHoldemHandState(HoldemHandState state) {
   if (!_isSafeText(state.handId)) {
-    throw const FormatException('Holdem hand id is invalid.');
+    return const HoldemStateValidationResult(
+      isValid: false,
+      reasonCode: 'ERR_HOLDEM_STATE_HAND_ID_INVALID',
+      message: 'Holdem hand id is invalid.',
+    );
   }
   if (state.currentBetToCall < 0 ||
       state.minimumRaiseAmount <= 0 ||
       state.pot < 0) {
-    throw const FormatException('Holdem monetary state is invalid.');
+    return const HoldemStateValidationResult(
+      isValid: false,
+      reasonCode: 'ERR_HOLDEM_STATE_MONETARY_INVALID',
+      message: 'Holdem monetary state is invalid.',
+    );
+  }
+  if (state.seats.length > HoldemInputLimits.defaultMaxSeats) {
+    return const HoldemStateValidationResult(
+      isValid: false,
+      reasonCode: 'ERR_HOLDEM_STATE_SEAT_COUNT',
+      message: 'Holdem state contains too many seats.',
+    );
+  }
+  if (state.currentActorSeat < 0 ||
+      state.buttonSeat < 0 ||
+      state.smallBlindSeat < 0 ||
+      state.bigBlindSeat < 0 ||
+      (state.lastAggressorSeat != null && state.lastAggressorSeat! < 0)) {
+    return const HoldemStateValidationResult(
+      isValid: false,
+      reasonCode: 'ERR_HOLDEM_STATE_SEAT_REFERENCE',
+      message: 'Holdem state contains a negative seat reference.',
+    );
   }
 
   final seatIds = <int>{};
   for (final seat in state.seats) {
+    if (seat.seat < 0 ||
+        seat.stack < 0 ||
+        seat.committedThisRound < 0 ||
+        seat.committedThisHand < 0 ||
+        (seat.allIn && seat.stack != 0)) {
+      return const HoldemStateValidationResult(
+        isValid: false,
+        reasonCode: 'ERR_HOLDEM_STATE_SEAT_INVALID',
+        message: 'Holdem seat state is invalid.',
+      );
+    }
     if (!seatIds.add(seat.seat)) {
-      throw const FormatException('Holdem seat ids must be unique.');
+      return const HoldemStateValidationResult(
+        isValid: false,
+        reasonCode: 'ERR_HOLDEM_STATE_SEAT_DUPLICATE',
+        message: 'Holdem seat ids must be unique.',
+      );
     }
   }
 
   final actedSeatIds = <int>{};
+  if (state.actedSeatsThisRound.length > HoldemInputLimits.defaultMaxSeats) {
+    return const HoldemStateValidationResult(
+      isValid: false,
+      reasonCode: 'ERR_HOLDEM_STATE_ACTED_SEAT_COUNT',
+      message: 'Holdem state contains too many acted seats.',
+    );
+  }
   for (final seat in state.actedSeatsThisRound) {
     if (seat < 0 || !actedSeatIds.add(seat)) {
-      throw const FormatException(
-        'Holdem acted seat ids must be unique and non-negative.',
+      return const HoldemStateValidationResult(
+        isValid: false,
+        reasonCode: 'ERR_HOLDEM_STATE_ACTED_SEAT_INVALID',
+        message: 'Holdem acted seat ids must be unique and non-negative.',
       );
     }
   }
@@ -250,24 +321,30 @@ void _validatePersistedState(HoldemHandState state) {
   final boardCards = <String>{};
   for (final card in state.boardCards) {
     if (!_isSafeText(card) || !boardCards.add(card)) {
-      throw const FormatException(
-        'Holdem board cards must be unique and safe.',
+      return const HoldemStateValidationResult(
+        isValid: false,
+        reasonCode: 'ERR_HOLDEM_STATE_BOARD_INVALID',
+        message: 'Holdem board cards must be unique and safe.',
       );
     }
   }
   if (state.boardCards.length > 5) {
-    throw const FormatException(
-      'Holdem board cannot contain more than five cards.',
+    return const HoldemStateValidationResult(
+      isValid: false,
+      reasonCode: 'ERR_HOLDEM_STATE_BOARD_COUNT',
+      message: 'Holdem board cannot contain more than five cards.',
     );
   }
 
-  if (state.lastAggressorSeat != null && state.lastAggressorSeat! < 0) {
-    throw const FormatException('Holdem aggressor seat cannot be negative.');
-  }
   if (state.lastActionSummary != null &&
       !_isSafeText(state.lastActionSummary!)) {
-    throw const FormatException('Holdem action summary is invalid.');
+    return const HoldemStateValidationResult(
+      isValid: false,
+      reasonCode: 'ERR_HOLDEM_STATE_ACTION_SUMMARY_INVALID',
+      message: 'Holdem action summary is invalid.',
+    );
   }
+  return HoldemStateValidationResult.ok;
 }
 
 bool _isSafeText(String value) {

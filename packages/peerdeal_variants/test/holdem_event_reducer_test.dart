@@ -41,6 +41,23 @@ void main() {
     expect(rejected.cursor.nextEventSeq, 2);
   });
 
+  test('rejects events when the in-memory state is invalid', () {
+    final initial = _preflopState();
+    final started = adapter.startHand(
+      coreState: _openCoreState(),
+      handState: initial,
+      cursor: _cursor(),
+    );
+
+    final result = reducer.apply(
+      state: initial.copyWith(pot: -1),
+      event: started.events.single,
+    );
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_STATE_INVALID');
+  });
+
   test('reconstructs an adapter-produced action projection', () {
     final initial = _preflopState();
     final started = adapter.startHand(

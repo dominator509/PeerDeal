@@ -42,6 +42,14 @@ class BasicHoldemActionValidator implements HoldemActionValidator {
       );
     }
 
+    if (!state.validate().isValid) {
+      return const HoldemActionValidationResult(
+        isValid: false,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+        message: 'Holdem state is invalid.',
+      );
+    }
+
     const bettingPhases = <HoldemHandPhase>{
       HoldemHandPhase.bettingPreflop,
       HoldemHandPhase.bettingFlop,
