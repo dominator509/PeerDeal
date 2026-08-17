@@ -303,6 +303,19 @@ void main() {
     expect(runtime.sessionRuntime.acceptedEventCount, 1);
   });
 
+  test('rejects an invalid initial hand state at app ingress', () {
+    expect(
+      () => _runtime(_preflopState().copyWith(pot: -1)),
+      throwsA(
+        isA<ArgumentError>().having(
+          (error) => error.message,
+          'message',
+          contains('ERR_HOLDEM_STATE_MONETARY_INVALID'),
+        ),
+      ),
+    );
+  });
+
   test('commits showdown and settlement as one app-owned lifecycle', () {
     final runtime = _runtime(_showdownState());
     expect(runtime.startHand().isApplied, isTrue);

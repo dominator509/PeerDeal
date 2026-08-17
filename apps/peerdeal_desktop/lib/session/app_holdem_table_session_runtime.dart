@@ -320,6 +320,13 @@ class AppHoldemTableSessionRuntime {
         'Hand identity must be non-empty and unpadded.',
       );
     }
+    final handValidation = _handState.validate();
+    if (!handValidation.isValid) {
+      throw ArgumentError(
+        'Initial Holdem hand state is invalid: '
+        '${handValidation.reasonCode ?? 'ERR_HOLDEM_STATE_INVALID'}.',
+      );
+    }
     if (_cursor.nextEventSeq != state.eventSequence + 1) {
       throw ArgumentError(
         'Holdem event cursor must continue the app session sequence.',
