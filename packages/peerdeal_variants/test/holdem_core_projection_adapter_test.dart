@@ -7,6 +7,33 @@ void main() {
   const adapter = HoldemCoreProjectionAdapter();
   const showdownCoordinator = HoldemShowdownCoordinator();
 
+  test('rejects invalid hand state before core projection', () {
+    final initial = _preflopState();
+    final result = adapter.startHand(
+      coreState: _openCoreState(),
+      handState: initial.copyWith(pot: -1),
+      cursor: _cursor(),
+    );
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_STATE_INVALID');
+    expect(result.events, isEmpty);
+  });
+
+  test('rejects invalid hand state before empty recovery replay', () {
+    final initial = _preflopState();
+    final result = adapter.replay(
+      coreState: _openCoreState(),
+      handState: initial.copyWith(pot: -1),
+      cursor: _cursor(),
+      events: const <EventEnvelope>[],
+    );
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_STATE_INVALID');
+    expect(result.appliedEventCount, 0);
+  });
+
   test('projects an accepted Holdem action through the core reducer', () {
     final core = _openCoreState();
     final hand = _preflopState();

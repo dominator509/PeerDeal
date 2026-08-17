@@ -383,6 +383,17 @@ class HoldemCoreProjectionAdapter {
     required Iterable<EventEnvelope> events,
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
   }) {
+    if (!handState.validate().isValid) {
+      return HoldemRecoveryReplayResult(
+        isApplied: false,
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        appliedEventCount: 0,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+      );
+    }
+
     var nextCoreState = coreState;
     var nextHandState = handState;
     var nextCursor = cursor;
@@ -466,6 +477,15 @@ class HoldemCoreProjectionAdapter {
     required HoldemEventCursor cursor,
     String? actorRef,
   }) {
+    if (!handState.validate().isValid) {
+      return _rejected(
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+      );
+    }
+
     if (coreState.hasActiveHand) {
       return _rejected(
         coreState: coreState,
@@ -520,6 +540,15 @@ class HoldemCoreProjectionAdapter {
     bool openNextBettingRound = false,
     String? actorRef,
   }) {
+    if (!handState.validate().isValid) {
+      return _rejected(
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+      );
+    }
+
     final actionResult = actionStreetCoordinator.applyAndAdvanceIfComplete(
       state: handState,
       action: action,
@@ -621,6 +650,15 @@ class HoldemCoreProjectionAdapter {
     required HoldemEventCursor cursor,
     String? actorRef,
   }) {
+    if (!handState.validate().isValid) {
+      return _rejected(
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+      );
+    }
+
     final reveal = showdownCoordinator.reveal(state: handState, input: input);
     if (!reveal.isRevealed) {
       return _rejected(
@@ -701,6 +739,17 @@ class HoldemCoreProjectionAdapter {
     required String settlementId,
     String? actorRef,
   }) {
+    if (!handState.validate().isValid) {
+      return _rejected(
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+        settlementResult: settlement,
+        completionResult: completion,
+      );
+    }
+
     try {
       _requireIdentity(projectionId, 'projectionId');
       _requireIdentity(settlementId, 'settlementId');
