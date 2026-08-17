@@ -141,7 +141,7 @@ class AppTableSessionRuntime {
     CoreReducer reducer = const CoreReducer(),
     DateTime Function()? clock,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
-  }) : _state = _validateInitialState(initialState),
+  }) : _state = _validateInitialState(initialState, reducer),
        _closeEventAdapter = closeEventAdapter,
        _reducer = reducer,
        _clock = clock ?? DateTime.now,
@@ -314,7 +314,10 @@ class AppTableSessionRuntime {
     );
   }
 
-  static TableState _validateInitialState(TableState state) {
+  static TableState _validateInitialState(
+    TableState state,
+    CoreReducer reducer,
+  ) {
     if (state.tableId.trim().isEmpty || state.sessionId.trim().isEmpty) {
       throw ArgumentError(
         'Session state must have table and session identity.',
@@ -322,6 +325,12 @@ class AppTableSessionRuntime {
     }
     if (state.protocolVersion.trim().isEmpty) {
       throw ArgumentError('Session state must have a protocol version.');
+    }
+    final violations = reducer.validateState(state);
+    if (violations.isNotEmpty) {
+      throw ArgumentError(
+        'Session state violates a core invariant: ${violations.first.code}.',
+      );
     }
     return state;
   }

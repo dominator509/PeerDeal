@@ -20,7 +20,20 @@ class CoreReducer {
   final ProtocolCatalog protocolCatalog;
   final List<InvariantGuard> invariantGuards;
 
+  /// Returns every configured invariant violation for [state].
+  ///
+  /// Callers at an app or persistence boundary can preflight typed state
+  /// without duplicating core truth or applying a synthetic event.
+  List<InvariantViolation> validateState(TableState state) {
+    final violations = <InvariantViolation>[];
+    for (final guard in invariantGuards) {
+      violations.addAll(guard.evaluate(state));
+    }
+    return List<InvariantViolation>.unmodifiable(violations);
+  }
+
   TableState apply(TableState current, EventEnvelope event) {
+    _ensureStateIsPossible(current);
     _ensureEventEnvelopeIdentity(event);
 
     final compatibility = protocolCatalog.checkEventEnvelope(event);
@@ -365,10 +378,12 @@ class CoreReducer {
   }
 
   void _ensureProjectedStateIsPossible(TableState state) {
-    for (final guard in invariantGuards) {
-      for (final violation in guard.evaluate(state)) {
-        throw violation;
-      }
+    _ensureStateIsPossible(state);
+  }
+
+  void _ensureStateIsPossible(TableState state) {
+    for (final violation in validateState(state)) {
+      throw violation;
     }
   }
 

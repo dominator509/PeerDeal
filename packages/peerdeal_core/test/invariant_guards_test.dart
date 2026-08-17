@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -15,6 +16,67 @@ void main() {
 
     test('accept clean initial table state', () {
       expect(codesFor(TableState.initial()), isEmpty);
+    });
+
+    test('CoreReducer exposes configured state validation', () {
+      final invalid = TableState.initial(
+        tableId: ' ',
+        sessionId: 'sess_001',
+        protocolVersion: '1.0',
+      ).copyWith(playersConnected: -1);
+
+      final violations = const CoreReducer().validateState(invalid);
+
+      expect(
+        violations.map((violation) => violation.code),
+        containsAll(<String>[
+          CoreInvariantCodes.tableIdEmpty,
+          CoreInvariantCodes.connectedCountNegative,
+        ]),
+      );
+      expect(
+        () => violations.add(
+          const InvariantViolation(
+            code: 'ERR_TEST_MUTATION',
+            message: 'must remain immutable',
+          ),
+        ),
+        throwsUnsupportedError,
+      );
+    });
+
+    test('CoreReducer rejects invalid current state before projection', () {
+      final invalid = TableState.initial(
+        tableId: ' ',
+        sessionId: 'sess_001',
+        protocolVersion: '1.0',
+      );
+      final event = EventEnvelope(
+        eventId: 'evt_001',
+        eventType: 'OpenTableSessionOpened',
+        eventVersion: '1.0',
+        protocolVersion: '1.0',
+        eventSeq: 1,
+        tableId: 'tbl_001',
+        sessionId: 'sess_001',
+        handId: null,
+        emittedAt: '2026-08-17T00:00:00Z',
+        actorRef: 'system',
+        payload: const <String, Object?>{'mode_type': 'cash'},
+        prevEventHash: genesisEventHash,
+        eventHash: 'hash_001',
+      );
+
+      expect(
+        () => const CoreReducer().apply(invalid, event),
+        throwsA(
+          isA<InvariantViolation>().having(
+            (violation) => violation.code,
+            'code',
+            CoreInvariantCodes.tableIdEmpty,
+          ),
+        ),
+      );
     });
 
     test('round-trips TableState JSON without losing typed fields', () {

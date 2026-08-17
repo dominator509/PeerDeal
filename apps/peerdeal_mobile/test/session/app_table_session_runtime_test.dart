@@ -219,19 +219,43 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('rejects a core-invalid initial table state', () {
+    expect(
+      () => _runtime(
+        scope: scope,
+        store: _FakeRecoveryStore(),
+        initialState: TableState.initial(
+          tableId: scope.tableId,
+          sessionId: scope.sessionId,
+          protocolVersion: scope.protocolVersion,
+        ).copyWith(playersConnected: -1),
+      ),
+      throwsA(
+        isA<ArgumentError>().having(
+          (error) => error.toString(),
+          'message',
+          contains('core invariant'),
+        ),
+      ),
+    );
+  });
 }
 
 AppTableSessionRuntime _runtime({
   required RecoveryPersistenceScope scope,
   required _FakeRecoveryStore store,
+  TableState? initialState,
   int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
 }) {
   return AppTableSessionRuntime(
-    initialState: TableState.initial(
-      tableId: scope.tableId,
-      sessionId: scope.sessionId,
-      protocolVersion: scope.protocolVersion,
-    ),
+    initialState:
+        initialState ??
+        TableState.initial(
+          tableId: scope.tableId,
+          sessionId: scope.sessionId,
+          protocolVersion: scope.protocolVersion,
+        ),
     closeEventAdapter: AppRecoverySessionCloseEventAdapter(
       sessionCloseCoordinator: AppRecoverySessionCloseCoordinator(
         retentionCoordinator: AppRecoveryRetentionCoordinator(store: store),
