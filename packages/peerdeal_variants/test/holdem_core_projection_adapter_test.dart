@@ -34,6 +34,130 @@ void main() {
     expect(result.appliedEventCount, 0);
   });
 
+  test('rejects invalid coordinator output before event emission', () {
+    const adapter = HoldemCoreProjectionAdapter(
+      actionStreetCoordinator: _InvalidStateActionStreetCoordinator(),
+    );
+    final core = _openCoreState();
+    final hand = _preflopState();
+    final cursor = _cursor();
+
+    final result = adapter.applyAction(
+      coreState: core,
+      handState: hand,
+      cursor: cursor,
+      action: const HoldemTableAction(
+        actorSeat: 1,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_STATE_INVALID');
+    expect(result.events, isEmpty);
+    expect(result.coreState, same(core));
+    expect(result.handState, same(hand));
+    expect(result.cursor, same(cursor));
+  });
+
+  test('rejects invalid showdown output before event emission', () {
+    const adapter = HoldemCoreProjectionAdapter(
+      showdownCoordinator: _InvalidStateShowdownCoordinator(),
+    );
+    final core = _openCoreState();
+    final hand = _showdownState();
+    final cursor = _cursor();
+
+    final result = adapter.revealShowdown(
+      coreState: core,
+      handState: hand,
+      cursor: cursor,
+      input: _showdownInput,
+    );
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_STATE_INVALID');
+    expect(result.events, isEmpty);
+    expect(result.coreState, same(core));
+    expect(result.handState, same(hand));
+    expect(result.cursor, same(cursor));
+  });
+
+  test('rejects invalid settlement output before event emission', () {
+    const adapter = HoldemCoreProjectionAdapter();
+    final hand = _showdownState();
+    final invalidState = hand.copyWith(pot: -1);
+    final evaluation = ShowdownEvaluationResult(
+      results: const <RankedShowdownResult>[],
+    );
+    final settlement = HoldemSettlementProjectionGateResult(
+      isProjected: false,
+      state: invalidState,
+      evaluation: evaluation,
+      projection: null,
+    );
+    final completion = HoldemHandCompletionGateResult(
+      isCompleted: false,
+      state: invalidState,
+      projection: null,
+    );
+    final core = _openCoreState();
+    final cursor = _cursor();
+
+    final result = adapter.projectSettlement(
+      coreState: core,
+      handState: hand,
+      settlement: settlement,
+      completion: completion,
+      cursor: cursor,
+      projectionId: 'projection_001',
+      settlementId: 'settlement_001',
+    );
+
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_STATE_INVALID');
+    expect(result.events, isEmpty);
+    expect(result.coreState, same(core));
+    expect(result.handState, same(hand));
+    expect(result.cursor, same(cursor));
+  });
+
+  test('rejects invalid reducer output during recovery replay', () {
+    const adapter = HoldemCoreProjectionAdapter();
+    final started = adapter.startHand(
+      coreState: _openCoreState(),
+      handState: _preflopState(),
+      cursor: _cursor(),
+    );
+    final action = adapter.applyAction(
+      coreState: started.coreState,
+      handState: started.handState,
+      cursor: started.cursor,
+      action: const HoldemTableAction(
+        actorSeat: 1,
+        type: HoldemTableActionType.call,
+      ),
+    );
+
+    final result = adapter.replay(
+      coreState: started.coreState,
+      handState: started.handState,
+      cursor: started.cursor,
+      events: action.events,
+      eventReducer: const HoldemEventReducer(
+        actionStreetCoordinator: _InvalidStateActionStreetCoordinator(),
+      ),
+    );
+
+    expect(action.isApplied, isTrue);
+    expect(result.isRejected, isTrue);
+    expect(result.reasonCode, 'ERR_HOLDEM_STATE_INVALID');
+    expect(result.appliedEventCount, 0);
+    expect(result.coreState, same(started.coreState));
+    expect(result.handState, same(started.handState));
+    expect(result.cursor, same(started.cursor));
+  });
+
   test('projects an accepted Holdem action through the core reducer', () {
     final core = _openCoreState();
     final hand = _preflopState();
@@ -374,4 +498,54 @@ final _showdownInput = ShowdownEvaluationInput(
 
 int? _seatFromSeatId(String seatId) {
   return int.tryParse(seatId.split('-').last);
+}
+
+class _InvalidStateActionStreetCoordinator
+    extends HoldemActionStreetCoordinator {
+  const _InvalidStateActionStreetCoordinator();
+
+  @override
+  HoldemActionStreetResult applyAndAdvanceIfComplete({
+    required HoldemHandState state,
+    required HoldemTableAction action,
+    List<String> dealtBoardCards = const <String>[],
+    bool openNextBettingRound = false,
+  }) {
+    final result = super.applyAndAdvanceIfComplete(
+      state: state,
+      action: action,
+      dealtBoardCards: dealtBoardCards,
+      openNextBettingRound: openNextBettingRound,
+    );
+    return HoldemActionStreetResult(
+      action: result.action,
+      street: result.street,
+      bettingRound: result.bettingRound,
+      uncontestedSettlement: result.uncontestedSettlement,
+      state: result.state.copyWith(
+        seats: <HoldemSeatState>[
+          ...result.state.seats,
+          result.state.seats.first,
+        ],
+      ),
+    );
+  }
+}
+
+class _InvalidStateShowdownCoordinator extends HoldemShowdownCoordinator {
+  const _InvalidStateShowdownCoordinator();
+
+  @override
+  HoldemShowdownRevealResult reveal({
+    required HoldemHandState state,
+    required ShowdownEvaluationInput input,
+  }) {
+    final result = super.reveal(state: state, input: input);
+    return HoldemShowdownRevealResult(
+      isRevealed: result.isRevealed,
+      state: result.state.copyWith(pot: -1),
+      evaluation: result.evaluation,
+      warnings: result.warnings,
+    );
+  }
 }

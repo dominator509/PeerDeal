@@ -443,6 +443,16 @@ class HoldemCoreProjectionAdapter {
           );
         }
         projectedHandState = reduced.state;
+        if (!projectedHandState.validate().isValid) {
+          return HoldemRecoveryReplayResult(
+            isApplied: false,
+            coreState: coreState,
+            handState: handState,
+            cursor: cursor,
+            appliedEventCount: 0,
+            reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+          );
+        }
       }
 
       nextCoreState = projectedCoreState;
@@ -568,6 +578,16 @@ class HoldemCoreProjectionAdapter {
         actionResult: actionResult,
       );
     }
+    if (!actionResult.state.validate().isValid) {
+      return _rejected(
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+        warnings: actionResult.warnings,
+        actionResult: actionResult,
+      );
+    }
 
     final events = <EventEnvelope>[];
     var nextCursor = cursor;
@@ -672,6 +692,16 @@ class HoldemCoreProjectionAdapter {
         showdownResult: reveal,
       );
     }
+    if (!reveal.state.validate().isValid) {
+      return _rejected(
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+        warnings: reveal.warnings,
+        showdownResult: reveal,
+      );
+    }
 
     final events = <EventEnvelope>[];
     var nextCursor = cursor;
@@ -772,6 +802,20 @@ class HoldemCoreProjectionAdapter {
         completionResult: completion,
       );
     }
+    final projectedHandState = completion.isCompleted
+        ? completion.state
+        : settlement.state;
+    if (!projectedHandState.validate().isValid) {
+      return _rejected(
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+        warnings: <String>[...settlement.warnings, ...completion.warnings],
+        settlementResult: settlement,
+        completionResult: completion,
+      );
+    }
 
     final events = <EventEnvelope>[];
     var nextCursor = cursor;
@@ -834,9 +878,7 @@ class HoldemCoreProjectionAdapter {
       cursor: cursor,
       nextCursor: nextCursor,
       events: events,
-      nextHandState: completion.isCompleted
-          ? completion.state
-          : settlement.state,
+      nextHandState: projectedHandState,
       warnings: settlement.warnings,
       settlementResult: settlement,
       completionResult: completion,
@@ -856,6 +898,20 @@ class HoldemCoreProjectionAdapter {
     HoldemSettlementProjectionGateResult? settlementResult,
     HoldemHandCompletionGateResult? completionResult,
   }) {
+    if (!nextHandState.validate().isValid) {
+      return _rejected(
+        coreState: coreState,
+        handState: handState,
+        cursor: cursor,
+        reasonCode: 'ERR_HOLDEM_STATE_INVALID',
+        warnings: warnings,
+        actionResult: actionResult,
+        showdownResult: showdownResult,
+        settlementResult: settlementResult,
+        completionResult: completionResult,
+      );
+    }
+
     var projected = coreState;
     try {
       for (final event in events) {

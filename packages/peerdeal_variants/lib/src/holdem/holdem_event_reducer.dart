@@ -81,7 +81,7 @@ class HoldemEventReducer {
     }
 
     try {
-      return switch (event.eventType) {
+      final reduced = switch (event.eventType) {
         'HandStarted' => _reduceHandStarted(state, event),
         'PlayerFolded' ||
         'PlayerChecked' ||
@@ -96,6 +96,10 @@ class HoldemEventReducer {
         'HandSettled' => _reduceHandSettled(state, event),
         _ => _rejected(state, 'ERR_HOLDEM_EVENT_TYPE_UNSUPPORTED'),
       };
+      if (reduced.isApplied && !reduced.state.validate().isValid) {
+        return _rejected(state, 'ERR_HOLDEM_STATE_INVALID');
+      }
+      return reduced;
     } on _HoldemPayloadFailure catch (failure) {
       return _rejected(state, failure.reasonCode);
     } on Object {
