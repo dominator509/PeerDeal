@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import 'holdem_betting_round.dart';
+import 'holdem_card_identity.dart';
 import 'holdem_hand_phase.dart';
 import 'holdem_input_limits.dart';
 
@@ -320,11 +321,11 @@ HoldemStateValidationResult validateHoldemHandState(HoldemHandState state) {
 
   final boardCards = <String>{};
   for (final card in state.boardCards) {
-    if (!_isSafeText(card) || !boardCards.add(card)) {
+    if (!isHoldemCardIdentity(card) || !boardCards.add(card)) {
       return const HoldemStateValidationResult(
         isValid: false,
         reasonCode: 'ERR_HOLDEM_STATE_BOARD_INVALID',
-        message: 'Holdem board cards must be unique and safe.',
+        message: 'Holdem board cards must be unique and valid.',
       );
     }
   }

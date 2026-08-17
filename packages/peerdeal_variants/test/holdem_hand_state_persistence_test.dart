@@ -123,12 +123,14 @@ void main() {
   test('rejects unsafe and duplicate persisted board state', () {
     final unsafeHandId = _stateJson()..['hand_id'] = ' hand_001';
     final unsafeSummary = _stateJson()..['last_action_summary'] = 'bad\ntext';
+    final invalidBoard = _stateJson()..['board_cards'] = <Object?>['1x'];
     final duplicateBoard = _stateJson()
       ..['board_cards'] = <Object?>['Ah', 'Ah'];
 
     for (final state in <Map<String, Object?>>[
       unsafeHandId,
       unsafeSummary,
+      invalidBoard,
       duplicateBoard,
     ]) {
       expect(
