@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Remove Redundant Global Melos Install
+
+Summary:
+- CI now resolves Melos through the root workspace dependency and invokes it
+  with `dart run melos` after `flutter pub get`.
+- The redundant global Melos activation was removed; workflow jobs, commands,
+  permissions, timeouts, and package boundaries otherwise remain unchanged.
+
+Files:
+- `.github/workflows/ci.yml`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Root `pubspec.yaml` and `pubspec.lock` both declare Melos 8.3.0.
+- Local analyzer, boundary, source-text, dependency, and serialized test gates
+  are the required repository verification path.
+
+Remaining:
+- Android real-device and Windows interactive persistence, cross-device
+  transport, operator release signing, other-platform hosts, product-owned
+  session state/database wiring, session authentication, and final UX remain
+  documented production gates.
+
 ### 2026-08-18 - Codex - Pin CI Actions To Immutable Commits
 
 Summary:

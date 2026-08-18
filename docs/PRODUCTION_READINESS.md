@@ -100,6 +100,9 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- CI now runs the repository-declared Melos dependency through `dart run melos`
+  after `flutter pub get`, removing a redundant global tool installation and
+  preventing local/CI orchestration binaries from diverging.
 - The CI workflow now pins checkout, Python setup, and Flutter setup actions to
   verified immutable upstream commits while retaining human-readable version
   comments. This removes mutable action-tag drift without changing jobs,
