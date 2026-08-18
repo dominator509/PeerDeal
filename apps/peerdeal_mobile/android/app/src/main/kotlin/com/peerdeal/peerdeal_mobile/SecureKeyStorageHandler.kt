@@ -332,10 +332,10 @@ internal class SecureKeyStorageHandler(context: Context) :
 
         val root = JSONObject(String(plaintext, StandardCharsets.UTF_8))
         if (root.optInt("version", -1) != STORAGE_VERSION) return ReadResult.Failure
-        val revision = try {
-            if (root.has("revision")) root.getLong("revision") else 0L
-        } catch (_: Exception) {
-            return ReadResult.Failure
+        val revision = if (root.has("revision")) {
+            integerLongValue(root.opt("revision")) ?: return ReadResult.Failure
+        } else {
+            0L
         }
         if (revision < 0) return ReadResult.Failure
         val keyArray = root.getJSONArray("keys")
@@ -539,11 +539,14 @@ internal class SecureKeyStorageHandler(context: Context) :
         )
 
     private fun expectedRevision(call: MethodCall): Long? {
-        return when (val value = call.argument<Any?>("expectedRevision")) {
-            is Int -> value.toLong().takeIf { it >= 0 }
-            is Long -> value.takeIf { it >= 0 }
-            else -> null
-        }
+        return integerLongValue(call.argument<Any?>("expectedRevision"))
+            ?.takeIf { it >= 0 }
+    }
+
+    private fun integerLongValue(value: Any?): Long? = when (value) {
+        is Int -> value.toLong()
+        is Long -> value
+        else -> null
     }
 
     private fun isValidNamespace(namespace: String?): Boolean =

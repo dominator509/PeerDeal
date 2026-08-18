@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T281 Reject Coerced Android Secure-Key Revisions
+
+Summary:
+- Android secure-key recovery now requires persisted revision values to be
+  actual integer `Int`/`Long` values.
+- Fractional, string, and null revisions fail closed instead of being coerced
+  by `JSONObject.getLong`; missing revisions retain legacy revision zero.
+- The encrypted storage format, generic method-channel contract, and package
+  boundaries are unchanged.
+
+Files:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Android `assembleDebug --no-daemon --quiet` passes.
+- Direct Dart analyzer, package-boundary/source-text checks, their 13 and 7
+  focused tests, dependency-audit tests, and `git diff --check` pass.
+- No Dart production code changed; Flutter test execution was not required
+  for this Kotlin-only slice.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T280 Align Android Transport Integer Decoding
 
 Summary:

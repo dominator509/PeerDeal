@@ -107,6 +107,10 @@ the gates below are satisfied.
 - Android native transport method-call decoding now accepts only integer
   sequence and payload-byte values, matching the Windows host instead of
   silently truncating fractional `Number` values before validation.
+- Android secure-key recovery now accepts only integer JSON revisions from its
+  authenticated persisted envelope; fractional or string revisions fail closed
+  instead of being coerced by `JSONObject.getLong`. Missing revisions retain
+  the legacy revision-zero behavior.
 - The generic secure-key channel decoder now rejects unusable records before
   materializing an available snapshot. Mirrored app receipt-key and local
   identity loaders also reject decoder-bypass snapshots with negative
@@ -2853,6 +2857,12 @@ Android method-call decoder now accepts only `Int`/`Long` values for sequence
 and payload bytes, matching the Windows `int32`/`int64` contract and failing
 closed on fractional values instead of truncating them. The generic transport
 channel and host-private envelope remain unchanged.
+
+The T281 follow-up closes an Android persisted secure-key revision coercion
+gap. Authenticated storage envelopes now require integer `Int`/`Long` revision
+values; fractional, string, and null revisions fail closed, while legacy
+envelopes without a revision continue to load as revision zero. The encrypted
+storage format and generic channel contract remain unchanged.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
