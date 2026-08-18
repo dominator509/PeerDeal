@@ -8,6 +8,12 @@ class CoreCommandValidator {
   List<String> validate(CommandEnvelope command) {
     final errors = <String>[];
 
+    try {
+      canonicalJsonEncode(command.payload);
+    } on Object {
+      errors.add('command payload exceeds canonical protocol limits');
+    }
+
     if (command.commandId.trim().isEmpty) {
       errors.add('command_id is required');
     }

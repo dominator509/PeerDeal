@@ -251,6 +251,9 @@ the gates below are satisfied.
 - Direct Game File schema validation now applies the existing canonical payload
   limits to nested values, closing a direct oversized-input bypass without
   changing the Game File schema fields or ownership.
+- Core command ingress now applies the same canonical payload limits to typed
+  `CommandEnvelope` instances, closing a direct constructor bypass without
+  changing command semantics or protocol fields.
 - Core invariant hardening now covers table identity, non-negative counters,
   participant count coherence, hand-scoped event ordering, active-hand identity,
   close-before-closed ordering, and terminal closed/wiped state projection.

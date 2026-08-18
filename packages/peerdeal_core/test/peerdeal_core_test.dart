@@ -390,6 +390,28 @@ void main() {
     },
   );
 
+  test('validator rejects oversized command payloads', () {
+    final command = CommandEnvelope(
+      commandId: 'cmd_oversized_payload',
+      commandType: 'OpenTableSession',
+      commandVersion: '1.0',
+      protocolVersion: '1.0.0',
+      tableId: 'table_001',
+      sessionId: null,
+      handId: null,
+      issuedAt: '2026-04-25T12:05:00Z',
+      actorRef: 'host_alpha',
+      payload: <String, Object?>{
+        'details': List<String>.filled(4097, 'x').join(),
+      },
+    );
+
+    expect(
+      CoreCommandValidator().validate(command),
+      contains('command payload exceeds canonical protocol limits'),
+    );
+  });
+
   test('core accepts fixture-backed protocol open session spine', () {
     final command = commandEnvelopeFromJson(
       loadProtocolFixture('commands/open_table_session_command_v1.json'),

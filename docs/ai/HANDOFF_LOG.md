@@ -2,6 +2,26 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Bound Core Command Payloads
+
+Summary:
+- `CoreCommandValidator` now applies the existing canonical JSON limits to
+  typed command payloads before command compatibility and reducer ingress.
+- Command fields, protocol identities, deterministic core ownership, and package
+  boundaries are unchanged.
+
+Files:
+- `packages/peerdeal_core/lib/src/validation/core_command_validator.dart`
+- `packages/peerdeal_core/test/peerdeal_core_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused core tests pass after formatting.
+
+Remaining:
+- Product-owned command authorization and session-authentication semantics
+  remain separate explicit contracts.
+
 ### 2026-08-18 - Codex - Bound Game File Schema Payloads
 
 Summary:
