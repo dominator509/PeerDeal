@@ -2,6 +2,42 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T255 Bound Native Transport Payload Limits
+
+Summary:
+- Mirrored app `NativeTransportSessionFactory` owners now reject configured
+  payload limits above `NativeBridgePayloadLimits.maxTransportPayloadBytes`.
+- Reported native capability limits are checked against the same ceiling before
+  a session is exposed, and invalid limits fail closed across load, sender, and
+  receiver entry points.
+- This closes an app-to-native resource contract gap without changing the
+  transport channel, protocol frame shape, package ownership, or host code.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/transport/native_transport_session_factory.dart`
+- Mirrored native transport factory tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Mirrored app analyzers pass with the direct Dart SDK.
+- Focused Flutter transport tests did not produce a result: both bounded
+  180-second Flutter runner attempts stalled without test output. Plain
+  `dart test` is not a valid substitute for these Flutter package tests because
+  it cannot load the Flutter engine libraries.
+- All 17 package analyzers pass with the direct Dart SDK.
+- Boundary and source-text checks plus their 20 script tests pass.
+- Serialized non-Flutter package tests pass.
+- `git diff --check` passes.
+- Android debug build and full Flutter app-suite verification remain
+  environment-limited after bounded runner timeouts; no assertion failure was
+  reported.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T254 Harden Safe Receipt Text Projection
 
 Summary:

@@ -28,7 +28,7 @@ class NativeTransportSessionFactory {
   Future<NativeTransportSessionLoadResult> loadSession({
     required TransportFrameHandler handler,
   }) async {
-    if (_maxPayloadBytes < 1) {
+    if (!_isValidAppPayloadLimit(_maxPayloadBytes)) {
       return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>['App transport payload limit is invalid.'],
       );
@@ -56,7 +56,7 @@ class NativeTransportSessionFactory {
         ],
       );
     }
-    if (capability.maxPayloadBytes < 1) {
+    if (!_isValidAppPayloadLimit(capability.maxPayloadBytes)) {
       return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>['Native transport payload limit is invalid.'],
       );
@@ -99,7 +99,7 @@ class NativeTransportSessionFactory {
   }
 
   TransportFrameSender _createSender(NativeTransportBridge bridge) {
-    if (_maxPayloadBytes < 1) {
+    if (!_isValidAppPayloadLimit(_maxPayloadBytes)) {
       return _UnavailableTransportFrameSender(
         warnings: <String>['App transport payload limit is invalid.'],
       );
@@ -114,7 +114,7 @@ class NativeTransportSessionFactory {
     required NativeTransportBridge bridge,
     required TransportFrameHandler handler,
   }) {
-    if (_maxPayloadBytes < 1) {
+    if (!_isValidAppPayloadLimit(_maxPayloadBytes)) {
       return NativeTransportFrameDrain.unavailable(
         warnings: <String>['App transport payload limit is invalid.'],
       );
@@ -163,6 +163,11 @@ class NativeTransportSessionFactory {
       return normalized;
     }
     return normalized.substring(0, maxLength);
+  }
+
+  static bool _isValidAppPayloadLimit(int value) {
+    return value >= 1 &&
+        value <= NativeBridgePayloadLimits.maxTransportPayloadBytes;
   }
 }
 

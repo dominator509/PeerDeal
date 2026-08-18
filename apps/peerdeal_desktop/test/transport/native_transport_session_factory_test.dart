@@ -204,6 +204,65 @@ void main() {
     },
   );
 
+  test(
+    'rejects app payload limits above the native contract before native lookup',
+    () async {
+      final bridge = _FakeNativeTransportBridge();
+      final factory = NativeTransportSessionFactory(
+        bridge: bridge,
+        maxPayloadBytes: NativeBridgePayloadLimits.maxTransportPayloadBytes + 1,
+      );
+
+      final loaded = await factory.loadSession(
+        handler: _RecordingTransportFrameHandler(),
+      );
+      expect(loaded.available, isFalse);
+      expect(loaded.warnings, <String>[
+        'App transport payload limit is invalid.',
+      ]);
+      expect(bridge.capabilityLookups, 0);
+
+      final send = await factory.createSender().send(_frame());
+      expect(send.sent, isFalse);
+      expect(send.reasonCode, 'ERR_TRANSPORT_UNAVAILABLE');
+      expect(bridge.sentFrames, isEmpty);
+
+      final drain = await factory
+          .createDrain(handler: _RecordingTransportFrameHandler())
+          .drain(sessionId: 'session_1', peerId: 'peer_b');
+      expect(drain.available, isFalse);
+      expect(drain.warnings, <String>[
+        'App transport payload limit is invalid.',
+      ]);
+      expect(bridge.receiveLookups, 0);
+    },
+  );
+
+  test(
+    'rejects a native capability above the locked transport ceiling',
+    () async {
+      final bridge = _FakeNativeTransportBridge(
+        capability: const NativeTransportCapability(
+          available: true,
+          sendSupported: true,
+          receiveSupported: true,
+          maxPayloadBytes:
+              NativeBridgePayloadLimits.maxTransportPayloadBytes + 1,
+          notes: 'native-invalid',
+        ),
+      );
+
+      final result = await NativeTransportSessionFactory(
+        bridge: bridge,
+      ).loadSession(handler: _RecordingTransportFrameHandler());
+
+      expect(result.available, isFalse);
+      expect(result.warnings, <String>[
+        'Native transport payload limit is invalid.',
+      ]);
+    },
+  );
+
   test('creates validated sender backed by native transport', () async {
     final bridge = _FakeNativeTransportBridge();
     final sender = NativeTransportSessionFactory(bridge: bridge).createSender();

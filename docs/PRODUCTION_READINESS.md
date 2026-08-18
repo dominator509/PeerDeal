@@ -669,6 +669,9 @@ the gates below are satisfied.
 - Mirrored app `SafeReceiptScanVm` boundaries now bound and scrub receipt status
   and message text before exposing it to UI or other consumers, instead of
   relying only on a later screen-level sanitizer.
+- Mirrored app `NativeTransportSessionFactory` boundaries now reject configured
+  and reported payload limits above the locked native bridge ceiling before
+  native capability lookup, sender creation, or receiver creation.
 - Sync recovery persistence now exposes an idempotent, scope-validated wipe
   operation; the JSON store removes the durable recovery window and matching
   interrupted-write temporary files without removing other scopes. Retention
