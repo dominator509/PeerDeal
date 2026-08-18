@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T277 Align Android Network Capability Eligibility
+
+Summary:
+- Android local-network availability and interface hints now require a usable
+  IPv4 address.
+- Any, loopback, and link-local addresses are excluded before capability or
+  broadcast readiness is reported, matching the existing Android multicast
+  transport filter.
+- No native channel, protocol, or package boundary changed.
+
+Files:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/LocalNetworkHandler.kt`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Android `assembleDebug --no-daemon --quiet` passes after the pinned Gradle
+  distribution was downloaded.
+- Full Dart analyzer, package-boundary/source-text checks, their focused test
+  suites, dependency-audit tests, and `git diff --check` pass.
+- The live dependency-audit resolver produced no output and timed out after
+  five minutes; the full Melos test runner likewise produced no output and
+  timed out after ten minutes. No failure output was available from either
+  runner.
+
+Remaining:
+- Interactive Windows secure-key persistence, Android real-device validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T276 Align Windows IPv4 Interface Eligibility
 
 Summary:

@@ -2827,6 +2827,12 @@ unspecified, broadcast, and IPv4 link-local/APIPA addresses, matching the
 existing Android and Windows transport semantics before reporting a usable
 network interface. The generic native channel remains unchanged.
 
+The T277 follow-up closes the mirrored Android capability false-positive. Android
+local-network availability and interface hints now require a usable IPv4
+address, excluding any, loopback, and link-local addresses before advertising
+host readiness. Existing multicast transport and method-channel contracts are
+unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

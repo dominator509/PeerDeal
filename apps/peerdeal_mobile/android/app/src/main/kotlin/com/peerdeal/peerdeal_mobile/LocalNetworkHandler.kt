@@ -82,8 +82,9 @@ internal class LocalNetworkHandler : MethodChannel.MethodCallHandler {
                 false
             }
         }
-        val hints = activeInterfaces.mapNotNull(::interfaceHint).distinct()
-        val broadcastSupported = activeInterfaces.any { networkInterface ->
+        val usableInterfaces = activeInterfaces.filter(::hasUsableIpv4Address)
+        val hints = usableInterfaces.mapNotNull(::interfaceHint).distinct()
+        val broadcastSupported = usableInterfaces.any { networkInterface ->
             try {
                 networkInterface.supportsMulticast() &&
                     networkInterface.interfaceAddresses
@@ -98,11 +99,27 @@ internal class LocalNetworkHandler : MethodChannel.MethodCallHandler {
             }
         }
         return NetworkSnapshot(
-            available = activeInterfaces.isNotEmpty(),
+            available = usableInterfaces.isNotEmpty(),
             broadcastSupported = broadcastSupported,
             interfaceHints = hints,
         )
     }
+
+    private fun hasUsableIpv4Address(networkInterface: NetworkInterface): Boolean =
+        try {
+            networkInterface.interfaceAddresses
+                .asSequence()
+                .take(MAX_INTERFACE_ADDRESS_COUNT)
+                .any { address ->
+                    val inetAddress = address.address
+                    inetAddress is Inet4Address &&
+                        !inetAddress.isAnyLocalAddress &&
+                        !inetAddress.isLoopbackAddress &&
+                        !inetAddress.isLinkLocalAddress
+                }
+        } catch (_: Exception) {
+            false
+        }
 
     private fun interfaceHint(networkInterface: NetworkInterface): String? {
         val name = try {
