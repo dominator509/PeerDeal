@@ -2881,6 +2881,11 @@ the typed `ValidatedSetupPlan`; numeric, null, blank, padded, and control-bearin
 values fail validation instead of becoming profile identifiers through string
 coercion. The wizard boundary and profile keys remain unchanged.
 
+The T285 follow-up closes a direct Game File metadata gap. The existing
+`DefaultGameFileCompiler` now rejects padded or control-bearing plan IDs and
+policy profile keys/values before emitting a Game File. Canonical JSON bounds
+remain in place, and the wizard compiler/result boundary is otherwise unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

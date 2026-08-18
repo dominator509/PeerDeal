@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T285 Harden Direct Game File Metadata
+
+Summary:
+- Direct `DefaultGameFileCompiler` calls now reject padded or control-bearing
+  plan IDs before emitting `config_id`.
+- Policy profile keys and values now require bounded, safe metadata text;
+  canonical JSON acceptance alone is no longer sufficient.
+- The existing compiler contract, result-code surface, and wizard boundary
+  remain unchanged apart from the additive invalid-plan-id code.
+
+Files:
+- `packages/peerdeal_wizard/lib/src/engine/default_game_file_compiler.dart`
+- `packages/peerdeal_wizard/lib/src/models/wizard_result_codes.dart`
+- `packages/peerdeal_wizard/test/game_file_compiler_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused Game File compiler suite passes: 12 tests.
+- `peerdeal_wizard` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T284 Reject Coerced Wizard Policy Profiles
 
 Summary:

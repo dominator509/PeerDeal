@@ -57,6 +57,8 @@ class DefaultGameFileCompiler implements GameFileCompiler {
     final errors = <String>[];
     if (plan.planId.trim().isEmpty) {
       errors.add('setup_plan_id_missing');
+    } else if (!_isSafeMetadataText(plan.planId)) {
+      errors.add(WizardResultCodes.planIdInvalid);
     }
 
     if (plan.modeId != 'open_table' && plan.modeId != 'tournament') {
@@ -82,7 +84,8 @@ class DefaultGameFileCompiler implements GameFileCompiler {
     } else if (!_isCanonicalJsonBounded(
       plan.policyProfileIds,
       maxMapEntries: WizardInputLimits.defaultMaxPolicyProfileIds,
-    )) {
+    ) ||
+        !_hasSafePolicyProfileMetadata(plan.policyProfileIds)) {
       errors.add(WizardResultCodes.policyProfilesInvalid);
     }
     if (plan.validationResult.errors.length >
@@ -112,6 +115,24 @@ class DefaultGameFileCompiler implements GameFileCompiler {
     } on Object {
       return false;
     }
+  }
+
+  bool _hasSafePolicyProfileMetadata(Map<String, String> profiles) {
+    return profiles.entries.every(
+      (entry) =>
+          _isSafeMetadataText(entry.key) && _isSafeMetadataText(entry.value),
+    );
+  }
+
+  bool _isSafeMetadataText(String value) {
+    if (value.trim().isEmpty || value.trim() != value) return false;
+    if (value.codeUnits.any(
+      (codeUnit) =>
+          codeUnit < 0x20 || (codeUnit >= 0x7f && codeUnit <= 0x9f),
+    )) {
+      return false;
+    }
+    return _isCanonicalJsonBounded(value, maxMapEntries: 1);
   }
 
   bool _validationMessageOverflow(ValidatedSetupPlan plan) {

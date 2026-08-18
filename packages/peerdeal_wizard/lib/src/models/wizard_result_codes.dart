@@ -9,6 +9,7 @@ abstract final class WizardResultCodes {
   static const ambiguityCountTooLarge = 'ERR_WIZARD_AMBIGUITY_COUNT';
   static const resolvedFieldCountTooLarge = 'ERR_WIZARD_RESOLVED_FIELD_COUNT';
   static const policyProfileCountTooLarge = 'ERR_WIZARD_POLICY_PROFILE_COUNT';
+  static const planIdInvalid = 'ERR_WIZARD_PLAN_ID_INVALID';
   static const validationMessageCountTooLarge =
       'ERR_WIZARD_VALIDATION_MESSAGE_COUNT';
   static const presetValuesInvalid = 'ERR_WIZARD_PRESET_VALUES_INVALID';

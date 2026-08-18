@@ -168,6 +168,31 @@ void main() {
       expect(result.errors, ['setup_plan_id_missing']);
     });
 
+    test('tryCompile rejects unsafe plan and policy metadata', () {
+      const compiler = DefaultGameFileCompiler();
+      final plan = ValidatedSetupPlan(
+        planId: 'plan_\u0000demo',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        policyProfileIds: const <String, String>{
+          'privacy_profile': 'privacy.default',
+          'capture_profile': ' capture.protected',
+        },
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        validationResult: ValidationResult(isValid: true),
+        buildReady: true,
+      );
+
+      final result = compiler.tryCompile(plan);
+
+      expect(result.isCompiled, isFalse);
+      expect(result.errors, contains(WizardResultCodes.planIdInvalid));
+      expect(
+        result.errors,
+        contains(WizardResultCodes.policyProfilesInvalid),
+      );
+    });
+
     test('tryCompile rejects build-ready unsupported variant plan', () {
       const compiler = DefaultGameFileCompiler();
       final plan = ValidatedSetupPlan(
