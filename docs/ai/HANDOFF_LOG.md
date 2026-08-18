@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T316 Respect Windows No-Multicast Adapter Flags
+
+Summary:
+- Windows local-network capability reporting and native multicast interface
+  selection now skip adapters marked `IP_ADAPTER_NO_MULTICAST`.
+- This removes a false-ready interface from the existing native seams without
+  changing the generic channel contracts, transport envelope, or package
+  boundaries.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_local_network.cpp`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- `rtk flutter build windows --debug --no-pub -t
+  tool/windows_native_host_smoke.dart` passed.
+- The generated host exited 0 with `PEERDEAL_NATIVE_HOST_SMOKE_PASS` for every
+  existing storage, capture, local-network, transport, and secure-key marker.
+
+Remaining:
+- Android real-device/profile validation and release signing, cross-device
+  multicast/firewall validation, other-platform hosts, product session/state
+  wiring, session authentication, and final UX remain open.
+
 ### 2026-08-18 - Codex - T315 Retry Windows Native Transport Initialization
 
 Summary:

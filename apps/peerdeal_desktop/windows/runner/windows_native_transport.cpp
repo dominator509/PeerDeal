@@ -81,7 +81,8 @@ std::optional<in_addr> SelectMulticastInterface() {
        adapter != nullptr && adapter_count < kMaxAdapterCount;
        adapter = adapter->Next, ++adapter_count) {
     if (adapter->OperStatus != IfOperStatusUp ||
-        adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK) {
+        adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK ||
+        (adapter->Flags & IP_ADAPTER_NO_MULTICAST) != 0) {
       continue;
     }
     std::size_t address_count = 0;

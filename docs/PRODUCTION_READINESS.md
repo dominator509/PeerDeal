@@ -94,6 +94,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Windows local-network capability reporting and multicast interface selection
+  now exclude adapters marked `IP_ADAPTER_NO_MULTICAST`, avoiding a false
+  usable-network result before the existing UDP multicast channel is opened.
+  The generic local-network/transport contracts remain unchanged; firewall,
+  reachability, and device validation are still external gates.
 - The Windows native transport now retries its existing multicast socket
   initialization when capability, send, or receive is requested after startup
   had no usable interface. This matches the Android host's lazy acquisition
