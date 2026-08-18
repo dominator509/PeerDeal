@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Network peer and transport identities now share a 256-byte, strict UTF-8,
+  non-empty, unpadded, C0/C1-free predicate across frame validation, bootstrap
+  parsing, path selection, primary election, relay fallback, and transfer
+  planning; oversized discovery identities are rejected rather than truncated.
 - Replay request scope identities now fail closed for blank, padded, oversized,
   non-round-tripping, and C0/C1-bearing text before projector state creation;
   replay request models and protocol envelope ownership remain unchanged.

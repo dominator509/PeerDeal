@@ -1,4 +1,5 @@
 import '../contracts/transport_frame_validator.dart';
+import '../models/network_input_limits.dart';
 import '../models/transport_frame.dart';
 import '../models/transport_frame_validation_result.dart';
 
@@ -61,10 +62,6 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
   }
 
   bool _isSafeIdentity(String value) {
-    return value.trim() == value &&
-        value.codeUnits.every(
-          (codeUnit) =>
-              codeUnit >= 0x20 && !(codeUnit >= 0x7f && codeUnit <= 0x9f),
-        );
+    return NetworkInputLimits.isSafePeerIdentity(value);
   }
 }

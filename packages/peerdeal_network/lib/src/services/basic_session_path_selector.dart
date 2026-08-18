@@ -117,8 +117,7 @@ class BasicSessionPathSelector implements SessionPathSelector {
   }
 
   static bool _isValidPeerId(String peerId) {
-    if (peerId.isEmpty || peerId.trim() != peerId) return false;
-    return peerId.runes.every((rune) => rune > 0x1f && rune != 0x7f);
+    return NetworkInputLimits.isSafePeerIdentity(peerId);
   }
 
   static BootstrapCandidate? _firstWhere(

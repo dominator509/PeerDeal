@@ -2,6 +2,40 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T297 Harden Network Identity Boundaries
+
+Summary:
+- `peerdeal_network` now applies one 256-byte, strict UTF-8, non-empty,
+  unpadded, C0/C1-free peer identity predicate across transport frames,
+  bootstrap candidates, path selection, primary election, relay fallback, and
+  transfer policy.
+- Discovery parsing now rejects oversized peer identities instead of silently
+  truncating them into a different identity; C1 input is rejected before
+  whitespace normalization can launder it.
+- Existing network contracts, routing semantics, and package boundaries remain
+  unchanged.
+
+Files:
+- `packages/peerdeal_network/lib/src/models/network_input_limits.dart`
+- `packages/peerdeal_network/lib/src/services/basic_bootstrap_candidate_provider.dart`
+- `packages/peerdeal_network/lib/src/services/basic_session_path_selector.dart`
+- `packages/peerdeal_network/lib/src/services/default_primary_peer_election_service.dart`
+- `packages/peerdeal_network/lib/src/services/basic_relay_fallback_service.dart`
+- `packages/peerdeal_network/lib/src/services/default_transfer_policy.dart`
+- `packages/peerdeal_network/lib/src/services/basic_transport_frame_validator.dart`
+- `packages/peerdeal_network/lib/src/services/discovered_peer_endpoint_parser.dart`
+- `packages/peerdeal_network/test/network_identity_boundary_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Full `peerdeal_network` suite passes: 65 tests.
+- `peerdeal_network` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T296 Harden Replay Request Scope Text
 
 Summary:

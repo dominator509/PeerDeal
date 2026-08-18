@@ -1,5 +1,6 @@
 import '../contracts/relay_fallback_service.dart';
 import '../models/direct_relay_transition_plan.dart';
+import '../models/network_input_limits.dart';
 import '../models/session_path_descriptor.dart';
 
 class BasicRelayFallbackService implements RelayFallbackService {
@@ -36,14 +37,9 @@ class BasicRelayFallbackService implements RelayFallbackService {
   }
 
   bool _isOperationalPeerId(String peerId) {
-    if (peerId.isEmpty || peerId.trim() != peerId) return false;
+    if (!NetworkInputLimits.isSafePeerIdentity(peerId)) return false;
     if (peerId == 'none' || peerId == 'unresolved') return false;
     if (peerId.contains('::')) return false;
-
-    for (final codeUnit in peerId.codeUnits) {
-      if (codeUnit < 0x20 || codeUnit == 0x7f) return false;
-    }
-
     return true;
   }
 }

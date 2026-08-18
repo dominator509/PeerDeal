@@ -90,18 +90,22 @@ class DiscoveredPeerEndpointParser {
     return List<BootstrapCandidate>.unmodifiable(result);
   }
 
-  static String _normalize(String value) => value
-      .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
+  static String _normalize(String value) {
+    if (value.codeUnits.any((unit) => unit >= 0x80 && unit <= 0x9f)) {
+      return '';
+    }
+    return value
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
 
   static String _safePeerId(String value) {
     final normalized = _normalize(value);
     if (normalized.isEmpty || _looksSensitive(normalized)) return '';
     const maxLength = 96;
-    return normalized.length <= maxLength
-        ? normalized
-        : normalized.substring(0, maxLength);
+    if (normalized.length > maxLength) return '';
+    return NetworkInputLimits.isSafePeerIdentity(normalized) ? normalized : '';
   }
 
   static _HostPort? _parseHostPort(String value) {
