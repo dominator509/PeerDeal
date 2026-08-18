@@ -18,8 +18,11 @@ class NativeBridgePayloadLimits {
   static const maxSecureKeyRevision = 0x7fffffffffffffff;
   static const maxDiagnosticBytes = 512;
 
-  static bool isWithinUtf8Limit(String value, int maxBytes) =>
-      utf8.encode(value).length <= maxBytes;
+  static bool isWithinUtf8Limit(String value, int maxBytes) {
+    final encoded = utf8.encode(value);
+    return encoded.length <= maxBytes &&
+        utf8.decode(encoded, allowMalformed: false) == value;
+  }
 
   static bool isSafeUtf8Text(String value, int maxBytes) =>
       isWithinUtf8Limit(value, maxBytes) &&

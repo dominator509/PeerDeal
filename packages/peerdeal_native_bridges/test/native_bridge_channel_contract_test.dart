@@ -23,6 +23,25 @@ void main() {
     expect(() => snapshot.interfaceHints.clear(), throwsUnsupportedError);
   });
 
+  test('native bridge UTF-8 limits reject non-round-tripping text', () {
+    final malformed = String.fromCharCode(0xD800);
+
+    expect(
+      NativeBridgePayloadLimits.isWithinUtf8Limit(
+        malformed,
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
+      isFalse,
+    );
+    expect(
+      NativeBridgePayloadLimits.isSafeUtf8Text(
+        malformed,
+        NativeBridgePayloadLimits.maxDiagnosticBytes,
+      ),
+      isFalse,
+    );
+  });
+
   test('transport frame and receive snapshot own and freeze collections', () {
     final payload = <int>[1, 2, 3];
     final frame = NativeTransportFrame(

@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Native bridge UTF-8 byte-limit checks now require an exact encode/decode
+  round-trip, so unpaired UTF-16 text cannot be replaced and accepted as a
+  different native identity or diagnostic value; existing channel contracts,
+  limits, and package ownership remain unchanged.
 - Network peer and transport identities now share a 256-byte, strict UTF-8,
   non-empty, unpadded, C0/C1-free predicate across frame validation, bootstrap
   parsing, path selection, primary election, relay fallback, and transfer

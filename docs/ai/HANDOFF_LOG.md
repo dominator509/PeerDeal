@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T298 Harden Native Bridge UTF-8 Boundaries
+
+Summary:
+- `NativeBridgePayloadLimits.isWithinUtf8Limit` now requires the encoded text
+  to decode back to the exact original value, rejecting unpaired UTF-16 text
+  instead of accepting replacement bytes.
+- All existing native bridge channel, app-shell, and platform consumers inherit
+  the stricter check without changing channel shapes, limits, or package
+  boundaries.
+
+Files:
+- `packages/peerdeal_native_bridges/lib/src/native_bridge_payload_limits.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused native bridge contract suite passes: 32 tests.
+- `peerdeal_native_bridges` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T297 Harden Network Identity Boundaries
 
 Summary:
