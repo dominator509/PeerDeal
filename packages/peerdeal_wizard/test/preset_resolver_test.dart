@@ -106,6 +106,38 @@ void main() {
       expect(resolver.validateDraft(draft).buildReady, isFalse);
     });
 
+    test('does not coerce non-string mode or variant selections', () {
+      const resolver = DefaultPresetResolver();
+      final intent = SetupIntent(
+        intentId: 'intent_selection_types',
+        sourceType: SetupSurface.simple,
+        hostPseudonymousId: 'host_1',
+        partialSettings: <String, Object?>{
+          'mode_type': 7,
+          'variant_id': true,
+          'seat_count': 6,
+        },
+      );
+
+      final draft = resolver.resolveIntent(
+        intent: intent,
+        presetLayers: <PresetLayer>[],
+      );
+
+      expect(draft.modeId, isEmpty);
+      expect(draft.variantId, isEmpty);
+      final result = resolver.validateDraft(draft);
+      expect(result.buildReady, isFalse);
+      expect(
+        result.validationResult.errors,
+        contains('unsupported_mode_id'),
+      );
+      expect(
+        result.validationResult.errors,
+        contains('unsupported_variant_id'),
+      );
+    });
+
     test('fails closed when helper suggestions exceed their limit', () {
       const resolver = DefaultPresetResolver(maxHelperSuggestions: 1);
       final intent = SetupIntent(

@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T287 Reject Coerced Wizard Selections
+
+Summary:
+- Wizard resolution now accepts only bounded, UTF-8-safe, non-padded strings
+  for `mode_type` and `variant_id` values supplied through partial settings or
+  preset resolution.
+- Non-string or control-bearing selections fail closed as unsupported instead
+  of becoming identifiers through `toString()` coercion.
+- Existing mode and variant contracts remain unchanged.
+
+Files:
+- `packages/peerdeal_wizard/lib/src/engine/default_preset_resolver.dart`
+- `packages/peerdeal_wizard/test/preset_resolver_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused preset resolver suite passes: 13 tests.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T286 Harden Diagnostics Redaction
 
 Summary:

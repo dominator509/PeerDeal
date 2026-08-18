@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/preset_resolver.dart';
@@ -135,12 +137,12 @@ class DefaultPresetResolver implements PresetResolver {
       }
     }
 
-    final modeId =
-        (intent.modePreference ?? resolved['mode_type'] ?? 'open_table')
-            .toString();
-    final variantId =
-        (intent.variantPreference ?? resolved['variant_id'] ?? 'holdem_nlhe')
-            .toString();
+    final modeId = _safeSelectionId(
+      intent.modePreference ?? resolved['mode_type'] ?? 'open_table',
+    );
+    final variantId = _safeSelectionId(
+      intent.variantPreference ?? resolved['variant_id'] ?? 'holdem_nlhe',
+    );
 
     if (intent.seatCountPreference != null) {
       resolved['seat_count'] = intent.seatCountPreference;
@@ -333,6 +335,27 @@ class DefaultPresetResolver implements PresetResolver {
       (codeUnit) =>
           codeUnit >= 0x20 && !(codeUnit >= 0x7f && codeUnit <= 0x9f),
     );
+  }
+
+  String _safeSelectionId(Object? value) {
+    if (value is! String || value.isEmpty || value.trim() != value) {
+      return '';
+    }
+    final bytes = utf8.encode(value);
+    if (bytes.length > WizardInputLimits.defaultMaxCanonicalTextBytes) {
+      return '';
+    }
+    try {
+      if (utf8.decode(bytes) != value) return '';
+    } on FormatException {
+      return '';
+    }
+    if (value.codeUnits.any(
+      (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+    )) {
+      return '';
+    }
+    return value;
   }
 }
 

@@ -2892,6 +2892,12 @@ control data, and replaces control-bearing diagnostic code/message text with
 the stable truncation marker. Privacy ownership and diagnostic contracts remain
 unchanged.
 
+The T287 follow-up closes the remaining wizard selection coercion gap. The
+existing preset resolver now requires bounded, UTF-8-safe, non-padded strings
+for `mode_type` and `variant_id` before they become typed setup identifiers;
+non-string and control-bearing values fail closed as unsupported. The wizard
+mode and variant contracts remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
