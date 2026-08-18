@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
@@ -299,6 +300,7 @@ class AppHoldemProductionSessionBootstrap {
   static void _validateIdentity(String value, String name) {
     if (value.trim().isEmpty ||
         value != value.trim() ||
+        !const CanonicalJsonLimits().isWithinUtf8TextLimit(value) ||
         value.codeUnits.any(
           (codeUnit) =>
               codeUnit <= 0x20 || (codeUnit >= 0x7F && codeUnit <= 0x9F),

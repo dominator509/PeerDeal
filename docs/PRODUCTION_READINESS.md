@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored app Hold'em production session bootstrap invite identity validation
+  now applies the existing canonical UTF-8 byte ceiling and exact round-trip
+  check before product source loading; invite/source ownership and route
+  composition remain unchanged.
 - Opaque receipt export now preflights all required envelope text before JSON
   escaping and applies strict UTF-8 round-trip checks to plaintext and
   ciphertext payload limits during encoding and inspection; malformed receipt

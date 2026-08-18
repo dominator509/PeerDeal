@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T303 Harden App Invite UTF-8 Boundaries
+
+Summary:
+- Mirrored mobile and desktop Hold'em production session bootstraps now apply
+  the protocol-owned UTF-8 byte ceiling and exact encode/decode round-trip
+  check to invite and remote-peer identities before product source loading.
+- Added regressions for unpaired UTF-16 and oversized invite identities; the
+  source remains untouched when validation fails.
+- Invite/source ownership, route composition, and package boundaries remain
+  unchanged.
+
+Files:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_bootstrap.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_bootstrap.dart`
+- Mirrored bootstrap tests and `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Focused mobile and desktop bootstrap Flutter tests pass.
+- Full repository analyze, boundary, source-text, dependency, and test gates
+  remain to be run for this slice.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T302 Harden Opaque Receipt UTF-8 Boundaries
 
 Summary:

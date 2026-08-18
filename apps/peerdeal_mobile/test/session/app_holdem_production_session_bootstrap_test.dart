@@ -110,6 +110,35 @@ void main() {
     },
   );
 
+  test(
+    'rejects malformed or oversized invite identity before source load',
+    () async {
+      for (final inviteId in <String>[
+        String.fromCharCode(0xd800),
+        'x' * (const CanonicalJsonLimits().maxTextBytes + 1),
+      ]) {
+        final source = _Source(_input());
+
+        await expectLater(
+          AppHoldemProductionSessionBootstrap(source: source).createForInvite(
+            ResolvedInvite(
+              inviteId: inviteId,
+              tableId: 'table_001',
+              sessionId: 'session_001',
+              modeType: 'open_table',
+              protocolVersion: '1.0.0',
+              requiresReceiptAck: true,
+              requiresRetentionAck: true,
+              requiresCaptureAck: true,
+            ),
+          ),
+          throwsArgumentError,
+        );
+        expect(source.loadedInvite, isNull);
+      }
+    },
+  );
+
   test('bounds product source loading', () async {
     final source = _Source(
       _input(),
