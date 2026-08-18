@@ -2869,6 +2869,12 @@ run exposed a stale mirrored receipt-loader expectation. Mobile and desktop
 tests now assert the existing metadata-specific warning for malformed key
 metadata; no production behavior or architecture changed.
 
+The T283 follow-up closes a provider-proof identity coercion gap. The existing
+crypto normalizer now requires exactly one supported proof-reference alias with
+a string value; numeric, boolean, object, null, and duplicate alias values fail
+closed instead of becoming proof identities through string coercion. The
+provider proof boundary and package ownership remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

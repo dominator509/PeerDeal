@@ -30,11 +30,7 @@ class DefaultProviderProofNormalizer implements ProviderProofNormalizer {
     );
 
     final boundedProof = _BoundedProofCopier(limits).copyMap(rawProof);
-    final proofReference =
-        (boundedProof['proof_ref'] ??
-                boundedProof['proofReference'] ??
-                'unknown')
-            .toString();
+    final proofReference = _proofReferenceFrom(boundedProof);
     _requireSafeTextWithinLimit(
       proofReference,
       limits.maxProofReferenceBytes,
@@ -59,6 +55,25 @@ class DefaultProviderProofNormalizer implements ProviderProofNormalizer {
       normalizedFields: boundedProof,
       rawPayload: boundedProof,
     );
+  }
+
+  static String _proofReferenceFrom(Map<String, Object?> proof) {
+    final hasSnakeCase = proof.containsKey('proof_ref');
+    final hasCamelCase = proof.containsKey('proofReference');
+    if (hasSnakeCase && hasCamelCase) {
+      throw const FormatException(
+        'Provider proof contains ambiguous proof reference fields.',
+      );
+    }
+
+    if (!hasSnakeCase && !hasCamelCase) return 'unknown';
+    final value = proof[hasSnakeCase ? 'proof_ref' : 'proofReference'];
+    if (value is! String) {
+      throw const FormatException(
+        'Provider proof reference must be a string.',
+      );
+    }
+    return value;
   }
 
   static void _requireTextWithinLimit(

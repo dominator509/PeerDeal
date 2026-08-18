@@ -165,6 +165,33 @@ void main() {
     );
   });
 
+  test('normalizer rejects coerced or ambiguous proof references', () {
+    const normalizer = DefaultProviderProofNormalizer();
+
+    for (final value in <Object?>[null, 7, true, <String, Object?>{}]) {
+      expect(
+        () => normalizer.normalize(
+          providerId: 'provider',
+          providerVersion: '1.0.0',
+          rawProof: <String, Object?>{'proof_ref': value},
+        ),
+        throwsA(isA<FormatException>()),
+      );
+    }
+
+    expect(
+      () => normalizer.normalize(
+        providerId: 'provider',
+        providerVersion: '1.0.0',
+        rawProof: const <String, Object?>{
+          'proof_ref': 'proof_1',
+          'proofReference': 'proof_1',
+        },
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('limits reject invalid configuration', () {
     expect(
       () => const DealProofLimits(maxNodes: 0).validate(),

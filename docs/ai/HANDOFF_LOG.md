@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T283 Reject Coerced Provider Proof References
+
+Summary:
+- Provider proof normalization now requires exactly one supported proof
+  reference field (`proof_ref` or `proofReference`) with a string value.
+- Numeric, boolean, object, null, and duplicate alias values fail closed
+  instead of being coerced into proof identities.
+- The existing crypto package boundary and provider proof shape remain intact.
+
+Files:
+- `packages/peerdeal_crypto/lib/src/services/default_provider_proof_normalizer.dart`
+- `packages/peerdeal_crypto/test/default_provider_proof_normalizer_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused provider-proof normalizer suite passes: 8 tests.
+- `peerdeal_crypto` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T282 Restore Aggregate App Test Gate
 
 Summary:
