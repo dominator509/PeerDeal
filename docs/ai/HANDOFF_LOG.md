@@ -2,6 +2,42 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T258 Bound Native Receipt Key Records
+
+Summary:
+- Mirrored app `NativeReceiptKeyRingLoader` owners now reject configured
+  record limits above `NativeBridgePayloadLimits.maxSecureKeyRecords` before
+  invoking native secure-key storage.
+- The existing invalid-limit failure now covers both non-positive and
+  above-contract values, preventing custom bridges from bypassing the locked
+  native secure-storage record ceiling.
+- This remains app-owned receipt orchestration and does not add receipt
+  semantics to `peerdeal_native_bridges` or change the key-storage contract.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/demo_slice/controllers/native_receipt_key_ring_loader.dart`
+- Mirrored native receipt key-ring loader tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Both mirrored loader files and tests were formatted with the direct Dart
+  SDK.
+- Focused mobile Flutter receipt loader tests timed out after 180 seconds
+  without test output; no assertion failure was reported, matching the known
+  local Flutter runner limitation.
+- All 17 package analyzers pass with the direct Dart SDK.
+- Boundary and source-text checks plus their 20 script tests pass.
+- Serialized non-Flutter package tests pass.
+- `git diff --check` is pending after this documentation update.
+- The dependency audit attempt recorded in T257 timed out after 600 seconds
+  without output; no package state was changed.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T257 Bound Native Transport Receive Batches
 
 Summary:

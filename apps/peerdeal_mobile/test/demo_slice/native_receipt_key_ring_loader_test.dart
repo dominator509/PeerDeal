@@ -158,26 +158,31 @@ void main() {
   );
 
   test(
-    'fails closed before native load for invalid key record limit',
+    'fails closed before native load for invalid key record limits',
     () async {
-      final bridge = _FakeSecureKeyStorageBridge(
-        snapshot: SecureKeyStorageSnapshot(
-          available: true,
-          keys: <SecureKeyRecord>[],
-        ),
-      );
+      for (final maxKeyRecords in <int>[
+        0,
+        NativeBridgePayloadLimits.maxSecureKeyRecords + 1,
+      ]) {
+        final bridge = _FakeSecureKeyStorageBridge(
+          snapshot: SecureKeyStorageSnapshot(
+            available: true,
+            keys: <SecureKeyRecord>[],
+          ),
+        );
 
-      final result = await NativeReceiptKeyRingLoader(
-        bridge: bridge,
-        maxKeyRecords: 0,
-      ).load();
+        final result = await NativeReceiptKeyRingLoader(
+          bridge: bridge,
+          maxKeyRecords: maxKeyRecords,
+        ).load();
 
-      expect(result.hasSigningKey, isFalse);
-      expect(result.hasEncryptionKey, isFalse);
-      expect(result.warnings, <String>[
-        'Secure receipt key record limit is invalid.',
-      ]);
-      expect(bridge.namespace, isNull);
+        expect(result.hasSigningKey, isFalse);
+        expect(result.hasEncryptionKey, isFalse);
+        expect(result.warnings, <String>[
+          'Secure receipt key record limit is invalid.',
+        ]);
+        expect(bridge.namespace, isNull);
+      }
     },
   );
 

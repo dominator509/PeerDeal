@@ -91,7 +91,8 @@ class NativeReceiptKeyRingLoader
         warnings: <String>['Secure receipt key namespace is invalid.'],
       );
     }
-    if (maxKeyRecords < 1) {
+    if (maxKeyRecords < 1 ||
+        maxKeyRecords > NativeBridgePayloadLimits.maxSecureKeyRecords) {
       return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key record limit is invalid.'],

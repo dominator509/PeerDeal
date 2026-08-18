@@ -582,6 +582,8 @@ the gates below are satisfied.
 - App receipt key-ring loaders now enforce an app-owned native key-record
   snapshot limit, failing closed before receipt key mapping when platform
   secure storage returns an oversized key set.
+- App receipt key-ring loaders now also reject configured record limits above
+  the locked native secure-storage ceiling before invoking native storage.
 - App receipt key-ring loaders now bound native receipt key-id metadata and
   reject control characters before mapping platform records into signing or
   encryption providers.
