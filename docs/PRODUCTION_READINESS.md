@@ -3065,6 +3065,12 @@ bearing table, session, protocol, and active-hand identities with explicit
 unsafe-state violations. Core state ownership, reducer behavior, and package
 boundaries remain unchanged.
 
+The T293 follow-up closes a generic secure-key mutation contract gap. The
+method-channel decoder now rejects a contradictory successful mutation payload
+that also reports a compare-and-set conflict, preventing app writers from
+advancing after an uncommitted native mutation. The channel shape, native
+storage semantics, and package boundaries remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

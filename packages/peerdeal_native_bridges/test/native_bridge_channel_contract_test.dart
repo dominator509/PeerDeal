@@ -635,6 +635,26 @@ void main() {
     },
   );
 
+  test(
+    'secure key storage mutation result rejects contradictory success conflict',
+    () {
+      final result = SecureKeyStorageChannelContract.decodeMutationResult(
+        const <String, Object?>{
+          'success': true,
+          'conflict': true,
+          'revision': 4,
+        },
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(
+        result.warning,
+        'Secure key storage mutation result is invalid.',
+      );
+      expect(result.isConflict, isFalse);
+    },
+  );
+
   test('secure key snapshot rejects revisions above signed native range', () {
     final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(
       <String, Object?>{

@@ -14032,6 +14032,30 @@ Risks:
 
 ---
 
+### 2026-08-18 - Codex - Secure-Key Mutation Contradiction Guard
+
+Summary:
+- `SecureKeyStorageChannelContract` now rejects native mutation payloads that
+  claim both success and compare-and-set conflict.
+- This keeps app-owned receipt and local-identity writers from treating an
+  uncommitted native mutation as committed.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/secure_key_storage_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Focused native bridge contract suite passed.
+- Full repository gates are running after this handoff update.
+
+Risks:
+- Native device persistence, Android/Windows cross-device validation,
+  operator-owned release signing, other-platform hosts, product state/database
+  wiring, and session authentication remain separate gates.
+
+---
+
 ### 2026-08-12 - Codex - Secure-Key Snapshot Integrity
 
 Summary:
