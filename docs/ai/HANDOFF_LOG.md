@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T313 Verify Windows Native Host Smoke
+
+Summary:
+- Built and executed the existing Windows native host smoke target against the
+  current committed app host.
+- The registered app-storage, capture, local-network, transport, and generic
+  secure-key channels passed their end-to-end smoke checkpoints, including
+  secure-key stale-writer CAS rejection, conditional save/delete, and cleanup.
+- No application architecture or package boundary changed.
+
+Files:
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart` was executed;
+  no source changes were required.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- `rtk flutter build windows --debug --no-pub -t tool/windows_native_host_smoke.dart`
+  passed.
+- The generated host exited 0 with
+  `PEERDEAL_NATIVE_HOST_SMOKE_PASS` for every checkpoint.
+
+Remaining:
+- Android real-device/profile validation and release signing, cross-device
+  multicast/firewall validation, other-platform hosts, product session/state
+  wiring, session authentication, and final UX remain open.
+
 ### 2026-08-18 - Codex - T312 Harden Transport Source Cancellation Ordering
 
 Summary:

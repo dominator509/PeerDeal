@@ -76,9 +76,10 @@ the gates below are satisfied.
   not prove device/network reachability, firewall behavior, or production
   endpoint provisioning. The app
   shells prefer explicit `PEERDEAL_RECOVERY_ROOT` and otherwise use native
-  app-support storage, but runtime persistence/capture validation, Android
-  release signing, real-device/profile validation, production database
-  persistence, and other-platform storage remain open.
+  app-support storage, but runtime persistence/capture validation beyond the
+  passing Windows host smoke, Android release signing, real-device/profile
+  validation, production database persistence, and other-platform storage
+  remain open.
 - App shells now mount demo, receipt, safe-surface, and join-flow routes and
   expose app-owned table-session runtimes over the core event projector. The
   app-owned `AppHoldemTableSessionRoute` now composes a validated Hold'em
@@ -93,6 +94,13 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The Windows native host smoke target now has a passing current-host run
+  covering app-support storage, capture enable/release, local-network
+  capability/discovery, transport capability/send/receive, secure-key
+  persistence, stale-writer CAS rejection, conditional save/delete, and
+  cleanup. This validates the registered Windows channels locally; it does not
+  prove cross-device multicast reachability, firewall behavior, or operator
+  profile/device persistence.
 - Mirrored app transport source observers now register disposal and route
   cancellation before an already-completed native poll, so stale poll results
   cannot publish after source teardown; transport source ownership and native
