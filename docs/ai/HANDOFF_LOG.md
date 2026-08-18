@@ -2,6 +2,37 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T262 Bound Native App-Support Paths
+
+Summary:
+- Mirrored app recovery-store factories now apply the existing
+  `NativeBridgePayloadLimits.maxAppStoragePathBytes` UTF-8 ceiling to
+  app-support paths returned by custom native bridge implementations.
+- This closes the app-owned decoder-bypass path while preserving the generic
+  app-storage bridge contract and recovery persistence ownership.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/recovery/app_recovery_persistence_store_factory.dart`
+- Mirrored recovery-store factory tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- The focused mobile Flutter recovery-store test timed out after 180 seconds
+  without test output; no assertion failure was reported, matching the known
+  local Flutter runner limitation.
+- A direct Dart test attempt could not load the Flutter-dependent app package
+  because the bare Dart VM lacks the Flutter engine libraries; this is an
+  environment limitation, not a test assertion failure.
+- All 17 package analyzers pass, boundary and source-text checks pass, their
+  20 script tests pass, and serialized non-Flutter package tests pass.
+- `git diff --check` passes.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T261 Bound Local Identity Key Records
 
 Summary:

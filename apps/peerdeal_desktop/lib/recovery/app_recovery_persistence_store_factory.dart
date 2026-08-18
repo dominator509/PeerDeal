@@ -95,7 +95,7 @@ class AppRecoveryPersistenceStoreFactory {
     final appSupportPath = snapshot.directoryPath;
     if (!snapshot.available ||
         appSupportPath == null ||
-        !_isValidRootPath(appSupportPath)) {
+        !_isValidNativeAppSupportPath(appSupportPath)) {
       return null;
     }
 
@@ -134,5 +134,13 @@ class AppRecoveryPersistenceStoreFactory {
     return normalized.isNotEmpty &&
         normalized == path &&
         !RegExp(r'[\x00-\x1F\x7F-\x9F]').hasMatch(normalized);
+  }
+
+  static bool _isValidNativeAppSupportPath(String path) {
+    return _isValidRootPath(path) &&
+        NativeBridgePayloadLimits.isWithinUtf8Limit(
+          path,
+          NativeBridgePayloadLimits.maxAppStoragePathBytes,
+        );
   }
 }

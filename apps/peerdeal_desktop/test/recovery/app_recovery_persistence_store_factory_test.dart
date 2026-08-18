@@ -183,6 +183,23 @@ void main() {
   });
 
   test(
+    'returns no factory when native app support path exceeds its byte limit',
+    () async {
+      final oversizedPath = List<String>.filled(
+        NativeBridgePayloadLimits.maxAppStoragePathBytes + 1,
+        'a',
+      ).join();
+
+      final factory =
+          await AppRecoveryPersistenceStoreFactory.fromNativeAppSupport(
+            bridge: _FakeAppStorageDirectoryBridge(oversizedPath),
+          );
+
+      expect(factory, isNull);
+    },
+  );
+
+  test(
     'forwards cancellation to cancellable native app support lookup',
     () async {
       final cancellation = Completer<void>();
