@@ -100,6 +100,9 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The Android Gradle wrapper now verifies the official SHA-256 for its pinned
+  Gradle 8.14 distribution before use, preventing a substituted wrapper
+  archive without changing the Android build version or package ownership.
 - The Android CI job now pins the Temurin Java 17 toolchain required by the
   existing Gradle/Kotlin configuration, using an immutable setup action commit.
   This removes runner-default JDK drift without changing Android source or

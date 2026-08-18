@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Verify Android Gradle Distribution Integrity
+
+Summary:
+- The existing Gradle 8.14 wrapper distribution URL now carries the official
+  Gradle SHA-256 checksum, so a substituted or corrupted archive fails closed.
+- Gradle version, Android build configuration, signing ownership, and package
+  boundaries remain unchanged.
+
+Files:
+- `apps/peerdeal_mobile/android/gradle/wrapper/gradle-wrapper.properties`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- The checksum was retrieved from the official Gradle distribution endpoint.
+- Android debug build plus analyzer, boundary, source-text, dependency, and
+  serialized test gates are the required verification path.
+
+Remaining:
+- Android real-device and Windows interactive persistence, cross-device
+  transport, operator release signing, other-platform hosts, product-owned
+  session state/database wiring, session authentication, and final UX remain
+  documented production gates.
+
 ### 2026-08-18 - Codex - Pin Android CI Java Toolchain
 
 Summary:
