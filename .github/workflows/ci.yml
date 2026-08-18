@@ -6,9 +6,17 @@ on:
     branches: [ main, master, 'retrofit/**', 'hardening/**' ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: peerdeal-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   bootstrap-checks:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
@@ -64,6 +72,7 @@ jobs:
 
   android-debug-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -104,6 +113,7 @@ jobs:
 
   windows-debug-build:
     runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 

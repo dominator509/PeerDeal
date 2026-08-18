@@ -3071,6 +3071,11 @@ that also reports a compare-and-set conflict, preventing app writers from
 advancing after an uncommitted native mutation. The channel shape, native
 storage semantics, and package boundaries remain unchanged.
 
+The CI workflow now grants only repository-content read access, cancels
+superseded pull-request runs, and bounds each job's runtime. This hardens the
+existing validation workflow without changing application behavior or release
+signing ownership.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

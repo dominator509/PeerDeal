@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Harden CI Workflow Boundaries
+
+Summary:
+- The repository CI workflow now uses read-only contents permission, cancels
+  superseded pull-request runs, and applies explicit job timeouts.
+- Build, test, dependency, boundary, source-text, and release-signing checks
+  remain unchanged; application architecture and package ownership are
+  unchanged.
+
+Files:
+- `.github/workflows/ci.yml`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Workflow structure was reviewed locally; repository gates are pending in
+  this handoff.
+
+Remaining:
+- Android real-device and Windows interactive persistence, cross-device
+  transport, operator release signing, other-platform hosts, product-owned
+  session state/database wiring, session authentication, and final UX remain
+  documented production gates.
+
 ### 2026-08-18 - Codex - Reject Duplicate Native Key IDs Across App Boundaries
 
 Summary:
