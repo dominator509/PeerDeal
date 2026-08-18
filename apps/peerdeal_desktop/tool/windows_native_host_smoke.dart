@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 const _secureKeyNamespace = 'peerdeal.runtime_smoke';
 const _secureKeyId = 'windows_host_smoke';
@@ -248,7 +248,9 @@ void _require(bool condition, String message) {
 
 bool _isSafeStoragePath(String value) {
   if (value.isEmpty || value.trim() != value) return false;
-  if (utf8.encode(value).length > 4096) return false;
+  if (!const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
+    return false;
+  }
   return value.codeUnits.every(
     (unit) => unit >= 0x20 && (unit < 0x7f || unit > 0x9f),
   );

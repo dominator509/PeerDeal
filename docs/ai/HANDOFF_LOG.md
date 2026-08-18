@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T304 Harden Windows Native Smoke UTF-8 Boundary
+
+Summary:
+- The Windows native host smoke tool now validates the returned app-support
+  path with the protocol-owned strict UTF-8 round-trip and 4096-byte ceiling,
+  while preserving the existing C0/C1 and padding checks.
+- No native channel, host implementation, or package boundary changed.
+
+Files:
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused Dart analysis passes.
+- Android Gradle `assembleDebug` passes.
+- Windows debug build passes.
+- Windows native host smoke passes all storage, capture, local-network,
+  transport, secure-key, conditional-mutation, and cleanup checkpoints.
+- Full analyze, boundary, source-text, dependency-audit, test, and diff gates
+  pass.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T303 Harden App Invite UTF-8 Boundaries
 
 Summary:
@@ -20,8 +46,8 @@ Files:
 
 Verification:
 - Focused mobile and desktop bootstrap Flutter tests pass.
-- Full repository analyze, boundary, source-text, dependency, and test gates
-  remain to be run for this slice.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates pass.
 
 Remaining:
 - Android real-device and Windows interactive persistence validation,

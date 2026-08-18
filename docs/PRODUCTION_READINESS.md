@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Windows native host smoke storage-path validation now uses the existing
+  protocol-owned strict UTF-8 round-trip and byte ceiling before accepting the
+  native app-support directory; native channel ownership and smoke checkpoints
+  remain unchanged.
 - Mirrored app Hold'em production session bootstrap invite identity validation
   now applies the existing canonical UTF-8 byte ceiling and exact round-trip
   check before product source loading; invite/source ownership and route
