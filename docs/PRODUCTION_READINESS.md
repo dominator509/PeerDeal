@@ -2875,6 +2875,12 @@ a string value; numeric, boolean, object, null, and duplicate alias values fail
 closed instead of becoming proof identities through string coercion. The
 provider proof boundary and package ownership remain unchanged.
 
+The T284 follow-up closes a wizard policy-profile coercion gap. Policy values
+from resolved setup fields now require safe, unpadded strings before entering
+the typed `ValidatedSetupPlan`; numeric, null, blank, padded, and control-bearing
+values fail validation instead of becoming profile identifiers through string
+coercion. The wizard boundary and profile keys remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

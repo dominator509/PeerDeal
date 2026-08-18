@@ -214,18 +214,35 @@ class DefaultPresetResolver implements PresetResolver {
       errors.add('unsupported_variant_id');
     }
 
+    var policyProfilesValid = true;
+    String policyProfileValue(String key, String fallback) {
+      if (!draft.resolvedFields.containsKey(key)) return fallback;
+      final value = draft.resolvedFields[key];
+      if (value is! String || !_isSafePolicyProfile(value)) {
+        policyProfilesValid = false;
+        return fallback;
+      }
+      return value;
+    }
+
     final policyProfiles = <String, String>{
-      'privacy_profile':
-          (draft.resolvedFields['retention_profile'] ?? 'privacy.default')
-              .toString(),
-      'capture_profile':
-          (draft.resolvedFields['table_capture_policy'] ?? 'capture.protected')
-              .toString(),
+      'privacy_profile': policyProfileValue(
+        'retention_profile',
+        'privacy.default',
+      ),
+      'capture_profile': policyProfileValue(
+        'table_capture_policy',
+        'capture.protected',
+      ),
       'network_profile': 'network.hybrid_default',
-      'retention_profile':
-          (draft.resolvedFields['retention_profile'] ?? 'retention.standard')
-              .toString(),
+      'retention_profile': policyProfileValue(
+        'retention_profile',
+        'retention.standard',
+      ),
     };
+    if (!policyProfilesValid) {
+      errors.add(WizardResultCodes.policyProfilesInvalid);
+    }
 
     return ValidatedSetupPlan(
       planId: 'plan_${draft.intentId}',
@@ -308,6 +325,14 @@ class DefaultPresetResolver implements PresetResolver {
     } on Object {
       return false;
     }
+  }
+
+  bool _isSafePolicyProfile(String value) {
+    if (value.trim().isEmpty || value.trim() != value) return false;
+    return value.codeUnits.every(
+      (codeUnit) =>
+          codeUnit >= 0x20 && !(codeUnit >= 0x7f && codeUnit <= 0x9f),
+    );
   }
 }
 

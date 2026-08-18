@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T284 Reject Coerced Wizard Policy Profiles
+
+Summary:
+- Wizard policy profile inputs now require safe, unpadded strings before they
+  enter the typed `ValidatedSetupPlan` profile map.
+- Numeric, null, blank, padded, and control-bearing values fail validation
+  instead of being converted with `.toString()` into profile identifiers.
+- The existing wizard package boundary and profile keys remain unchanged.
+
+Files:
+- `packages/peerdeal_wizard/lib/src/engine/default_preset_resolver.dart`
+- `packages/peerdeal_wizard/test/preset_resolver_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused preset-resolver suite passes: 12 tests.
+- `peerdeal_wizard` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T283 Reject Coerced Provider Proof References
 
 Summary:

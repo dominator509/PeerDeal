@@ -228,5 +228,33 @@ void main() {
       expect(result.validationResult.errors, isEmpty);
       expect(result.validationResult.warnings, isEmpty);
     });
+
+    test('rejects coerced or unsafe policy profile inputs', () {
+      const resolver = DefaultPresetResolver();
+      final draft = ResolvedSetupDraft(
+        intentId: 'intent_invalid_policy',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        resolvedFields: <String, Object?>{
+          'seat_count': 6,
+          'retention_profile': 7,
+          'table_capture_policy': ' capture.protected',
+        },
+        appliedPresetIds: const <String>[],
+      );
+
+      final result = resolver.validateDraft(draft);
+
+      expect(result.buildReady, isFalse);
+      expect(
+        result.validationResult.errors,
+        contains(WizardResultCodes.policyProfilesInvalid),
+      );
+      expect(result.policyProfileIds['privacy_profile'], 'privacy.default');
+      expect(
+        result.policyProfileIds['capture_profile'],
+        'capture.protected',
+      );
+    });
   });
 }
