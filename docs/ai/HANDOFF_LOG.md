@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Disable Persisted CI Checkout Credentials
+
+Summary:
+- All CI checkout steps now set `persist-credentials: false`, preventing the
+  read-only workflow token from being retained in the workspace after source
+  retrieval.
+- Existing immutable action pins, permissions, jobs, and build behavior remain
+  unchanged.
+
+Files:
+- `.github/workflows/ci.yml`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Workflow inspection confirms all three checkout steps carry the setting.
+- Repository analyzer, boundary, source-text, dependency, and serialized test
+  gates are the required verification path.
+
+Remaining:
+- Android real-device and Windows interactive persistence, cross-device
+  transport, operator release signing, other-platform hosts, product-owned
+  session state/database wiring, session authentication, and final UX remain
+  documented production gates.
+
 ### 2026-08-18 - Codex - Remove Redundant Global Melos Install
 
 Summary:

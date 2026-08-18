@@ -100,6 +100,9 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- CI checkout now disables persisted GitHub credentials in every job, so the
+  read-only workflow token is not retained in the workspace after checkout.
+  Action pinning, repository permissions, and job behavior remain unchanged.
 - CI now runs the repository-declared Melos dependency through `dart run melos`
   after `flutter pub get`, removing a redundant global tool installation and
   preventing local/CI orchestration binaries from diverging.
