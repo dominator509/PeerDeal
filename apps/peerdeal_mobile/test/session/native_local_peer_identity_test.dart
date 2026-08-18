@@ -99,6 +99,43 @@ void main() {
     ]);
   });
 
+  test(
+    'fails closed when secure identity records exceed native limits',
+    () async {
+      final result = await NativeLocalPeerIdentityLoader(
+        bridge: _MemorySecureKeyBridge(
+          keys: <SecureKeyRecord>[
+            const SecureKeyRecord(
+              keyId: 'local_peer_id',
+              purpose: 'peer_identity',
+              algorithm: 'opaque-peer-id',
+              secret: 'peer_existing',
+              active: true,
+            ),
+            for (
+              var index = 0;
+              index < NativeBridgePayloadLimits.maxSecureKeyRecords;
+              index++
+            )
+              SecureKeyRecord(
+                keyId: 'other_$index',
+                purpose: 'other',
+                algorithm: 'opaque',
+                secret: 'value_$index',
+                active: false,
+              ),
+          ],
+        ),
+      ).load();
+
+      expect(result.isAvailable, isFalse);
+      expect(result.identity, isNull);
+      expect(result.warnings, <String>[
+        'Local peer identity record limit reached.',
+      ]);
+    },
+  );
+
   test('fails closed on ambiguous active identity records', () async {
     final bridge = _MemorySecureKeyBridge(
       keys: const <SecureKeyRecord>[

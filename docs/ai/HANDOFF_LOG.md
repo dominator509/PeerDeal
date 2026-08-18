@@ -2,6 +2,42 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T261 Bound Local Identity Key Records
+
+Summary:
+- Mirrored app `NativeLocalPeerIdentityLoader` owners now reject secure-key
+  snapshots above `NativeBridgePayloadLimits.maxSecureKeyRecords` before
+  selecting or projecting a local peer identity.
+- This closes the custom-bridge path that could bypass the generic native
+  secure-storage record ceiling while preserving the existing identity,
+  provisioning, and writer contracts.
+- The change remains app-owned session orchestration and does not add identity
+  or receipt semantics to `peerdeal_native_bridges`.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/session/native_local_peer_identity_loader.dart`
+- Mirrored local identity loader tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Both mirrored loader files and tests were formatted with the direct Dart
+  SDK.
+- Focused mobile Flutter local-identity tests timed out after 180 seconds
+  without test output; no assertion failure was reported, matching the known
+  local Flutter runner limitation.
+- All 17 package analyzers pass with the direct Dart SDK.
+- Boundary and source-text checks plus their 20 script tests pass.
+- Serialized non-Flutter package tests pass.
+- `git diff --check` passes.
+- The dependency audit attempt recorded in T257 timed out after 600 seconds
+  without output; no package state was changed.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T260 Bound Native Join Candidate Limits
 
 Summary:

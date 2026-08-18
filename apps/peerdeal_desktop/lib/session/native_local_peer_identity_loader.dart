@@ -106,6 +106,11 @@ class NativeLocalPeerIdentityLoader {
         warnings: <String>['Local peer identity storage is unavailable.'],
       );
     }
+    if (snapshot.keys.length > NativeBridgePayloadLimits.maxSecureKeyRecords) {
+      return AppLocalPeerIdentityLoadResult(
+        warnings: <String>['Local peer identity record limit reached.'],
+      );
+    }
 
     final matches = snapshot.keys
         .where(

@@ -958,6 +958,7 @@ the gates below are satisfied.
   sequence validation, generic native transport byte-payload validation,
   generic native transport exact-key validation,
   app-owned receipt secure-key record bounding,
+  app-owned local peer identity secure-key record bounding,
   app-owned receipt native key-id metadata bounding,
   app-owned receipt key material bounding,
   app-owned receipt provisioning factory failure handling,
