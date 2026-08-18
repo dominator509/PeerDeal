@@ -2,6 +2,42 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T259 Bound Native Bootstrap Candidate Limits
+
+Summary:
+- Mirrored app `NativeBootstrapCandidateLoader` owners now reject configured
+  peer-candidate limits above `NativeBridgePayloadLimits.maxDiscoveryEntries`
+  before invoking native local-network capability discovery.
+- The existing invalid-limit failure now covers both non-positive and
+  above-contract values, keeping custom bridges from bypassing the locked
+  native discovery-entry ceiling.
+- This remains app-owned join/bootstrap orchestration and does not change the
+  native discovery channel, network contracts, or package ownership.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- Mirrored native bootstrap candidate loader tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Both mirrored loader files and tests were formatted with the direct Dart
+  SDK.
+- Focused mobile Flutter bootstrap-loader tests timed out after 180 seconds
+  without test output; no assertion failure was reported, matching the known
+  local Flutter runner limitation.
+- All 17 package analyzers pass with the direct Dart SDK.
+- Boundary and source-text checks plus their 20 script tests pass.
+- Serialized non-Flutter package tests pass.
+- `git diff --check` passes.
+- The dependency audit attempt recorded in T257 timed out after 600 seconds
+  without output; no package state was changed.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T258 Bound Native Receipt Key Records
 
 Summary:
@@ -29,7 +65,7 @@ Verification:
 - All 17 package analyzers pass with the direct Dart SDK.
 - Boundary and source-text checks plus their 20 script tests pass.
 - Serialized non-Flutter package tests pass.
-- `git diff --check` is pending after this documentation update.
+- `git diff --check` passes.
 - The dependency audit attempt recorded in T257 timed out after 600 seconds
   without output; no package state was changed.
 

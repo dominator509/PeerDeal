@@ -112,7 +112,8 @@ class NativeBootstrapCandidateLoader {
       );
     }
 
-    if (_maxPeerCandidates < 1) {
+    if (_maxPeerCandidates < 1 ||
+        _maxPeerCandidates > NativeBridgePayloadLimits.maxDiscoveryEntries) {
       return NativeBootstrapCandidateLoadResult.unavailable(
         nativeNotes: 'unavailable',
         warnings: <String>['Local network peer candidate limit is invalid.'],

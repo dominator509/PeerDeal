@@ -261,22 +261,27 @@ void main() {
   );
 
   test(
-    'fails closed when local network peer candidate limit is invalid',
+    'fails closed when local network peer candidate limits are invalid',
     () async {
-      final bridge = _CountingLocalNetworkBridge();
-      final result = await NativeBootstrapCandidateLoader(
-        bridge: bridge,
-        maxPeerCandidates: 0,
-      ).load(sessionId: 'session-1', tableId: 'table-1');
+      for (final maxPeerCandidates in <int>[
+        0,
+        NativeBridgePayloadLimits.maxDiscoveryEntries + 1,
+      ]) {
+        final bridge = _CountingLocalNetworkBridge();
+        final result = await NativeBootstrapCandidateLoader(
+          bridge: bridge,
+          maxPeerCandidates: maxPeerCandidates,
+        ).load(sessionId: 'session-1', tableId: 'table-1');
 
-      expect(result.discoveryAvailable, isFalse);
-      expect(result.candidates, isEmpty);
-      expect(result.nativeNotes, 'unavailable');
-      expect(result.warnings, <String>[
-        'Local network peer candidate limit is invalid.',
-      ]);
-      expect(bridge.capabilityLookups, 0);
-      expect(bridge.discoveryLookups, 0);
+        expect(result.discoveryAvailable, isFalse);
+        expect(result.candidates, isEmpty);
+        expect(result.nativeNotes, 'unavailable');
+        expect(result.warnings, <String>[
+          'Local network peer candidate limit is invalid.',
+        ]);
+        expect(bridge.capabilityLookups, 0);
+        expect(bridge.discoveryLookups, 0);
+      }
     },
   );
 

@@ -395,6 +395,9 @@ the gates below are satisfied.
 - App-owned local-network bootstrap loaders now fail closed before native
   capability lookup when the app-owned peer candidate limit is invalid, keeping
   bad app configuration from reaching local-network platform discovery.
+- Mirrored app-owned local-network bootstrap loaders now also reject configured
+  peer candidate limits above the locked native discovery-entry ceiling before
+  native capability lookup.
 - App-owned local-network bootstrap loaders and join coordinators now validate
   app-owned session/table bootstrap scope before native capability lookup,
   keeping malformed route or invite scope from reaching platform discovery.
