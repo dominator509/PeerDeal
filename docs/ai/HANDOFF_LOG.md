@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T268 Validate Network Payload Limit At Runtime
+
+Summary:
+- `BasicTransportFrameValidator` now rejects a non-positive payload limit at
+  validation time, so release builds cannot silently classify every frame as
+  oversized when configuration is invalid.
+- The existing const constructor and network/package ownership remain intact.
+
+Files:
+- `packages/peerdeal_network/lib/src/services/basic_transport_frame_validator.dart`
+- `packages/peerdeal_network/test/basic_transport_frame_validator_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Direct Flutter-bundled Dart/Melos analyzer passes all 17 packages.
+- The full `peerdeal_network` test suite passes, including the new runtime
+  payload-limit regression.
+- Boundary and source-text checks pass; their 13 and 7 script tests pass, and
+  the dependency-audit script tests pass.
+- `git diff --check` passes.
+- A Windows native-host smoke build attempt timed out after 300 seconds without
+  output; no compiler failure was emitted.
+
+Remaining:
+- Real-device/cross-device native validation, release signing, other-platform
+  hosts, product session/state and database wiring, session authentication, and
+  final UX validation remain open.
+
 ### 2026-08-17 - Codex - T267 Reject Conditional Revision Regression
 
 Summary:

@@ -2765,6 +2765,14 @@ persistence atomicity, real-device validation, product state/database wiring,
 session authentication, release signing, other-platform hosts, and final UX
 remain separate.
 
+The T268 follow-up closes a release-configuration gap in the network frame
+validator. A non-positive `maxPayloadBytes` now fails at validation time even
+when assertions are disabled, preventing invalid production configuration from
+silently rejecting every frame as oversized. The existing const API, transport
+contracts, and package ownership remain unchanged; native/device reachability,
+session authentication, product state/database wiring, release signing,
+other-platform hosts, and final UX remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

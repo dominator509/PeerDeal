@@ -9,6 +9,14 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
 
   @override
   TransportFrameValidationResult validate(TransportFrame frame) {
+    if (maxPayloadBytes < 1) {
+      throw ArgumentError.value(
+        maxPayloadBytes,
+        'maxPayloadBytes',
+        'Transport payload limit must be positive.',
+      );
+    }
+
     final warnings = <String>[];
 
     if (frame.sessionId.trim().isEmpty) {
