@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored production-session bootstrap loaders now register route
+  cancellation before source completion, so an already-signaled cancellation
+  wins over an immediately completing source and cannot mount stale session
+  state; source contracts and lifecycle ownership remain unchanged.
 - Mirrored local-identity loaders and provisioners now reject
   non-round-tripping UTF-8 warning text before it reaches session diagnostics;
   identity generation, secure-key persistence, and revision behavior remain

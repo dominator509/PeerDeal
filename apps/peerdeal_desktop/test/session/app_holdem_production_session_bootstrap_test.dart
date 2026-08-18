@@ -178,6 +178,22 @@ void main() {
     },
   );
 
+  test('cancellation wins over an immediately completing source', () async {
+    final cancellation = Completer<void>()..complete();
+    final source = _Source(
+      _input(),
+      loadFuture: Future<AppHoldemProductionSessionInput>.value(_input()),
+    );
+
+    await expectLater(
+      AppHoldemProductionSessionBootstrap(
+        source: source,
+      ).createForInvite(_invite(), cancellation: cancellation.future),
+      throwsStateError,
+    );
+    expect(source.loadedCancellation, isNotNull);
+  });
+
   test('rejects a non-positive product source timeout', () async {
     await expectLater(
       AppHoldemProductionSessionBootstrap(

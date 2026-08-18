@@ -248,12 +248,6 @@ class AppHoldemProductionSessionBootstrap {
       cancelSource?.call();
       completeError(TimeoutException('Production session source timed out.'));
     });
-    sourceFuture.then<void>(
-      completeValue,
-      onError: (Object error, StackTrace stackTrace) {
-        completeError(error, stackTrace);
-      },
-    );
     cancellation?.then<void>(
       (_) {
         cancelSource?.call();
@@ -261,6 +255,12 @@ class AppHoldemProductionSessionBootstrap {
       },
       onError: (Object error, StackTrace stackTrace) {
         cancelSource?.call();
+        completeError(error, stackTrace);
+      },
+    );
+    sourceFuture.then<void>(
+      completeValue,
+      onError: (Object error, StackTrace stackTrace) {
         completeError(error, stackTrace);
       },
     );

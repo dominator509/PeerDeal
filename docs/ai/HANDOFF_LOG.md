@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T310 Harden Session Bootstrap Cancellation Ordering
+
+Summary:
+- Mirrored mobile and desktop production-session bootstrap loaders now attach
+  cancellation handling before source completion handling.
+- An already-signaled route cancellation therefore wins over an immediately
+  completing product source and prevents stale composition from being
+  returned; source, transport, and persistence contracts remain unchanged.
+
+Files:
+- Mirrored `app_holdem_production_session_bootstrap.dart` files and tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Mirrored mobile and desktop production-session bootstrap focused Flutter
+  tests pass, including the immediate-source cancellation regression.
+- Full repository gates are pending in this handoff.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T309 Harden Local Identity Warning Boundaries
 
 Summary:
