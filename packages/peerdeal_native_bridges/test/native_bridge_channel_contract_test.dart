@@ -594,6 +594,24 @@ void main() {
     expect(result.warning, 'Secure key storage mutation failed.');
   });
 
+  test(
+    'secure key storage mutation result rejects malformed successful revisions',
+    () {
+      for (final revision in <Object?>[-1, 'bad']) {
+        final result = SecureKeyStorageChannelContract.decodeMutationResult(
+          <String, Object?>{'success': true, 'revision': revision},
+        );
+
+        expect(result.isSuccess, isFalse, reason: '$revision');
+        expect(
+          result.warning,
+          'Secure key storage mutation result is invalid.',
+          reason: '$revision',
+        );
+      }
+    },
+  );
+
   test('native transport channel contract decodes fixture payloads', () {
     final fixture = _loadFixture('native_transport_bridge_contract.json');
     final methods = fixture['methods'] as Map<String, Object?>;

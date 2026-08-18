@@ -94,6 +94,11 @@ class NativeReceiptKeyRingWriter {
         warning: 'Receipt key delete request is invalid.',
       );
     }
+    if (!_isValidRevision(expectedRevision)) {
+      return const ReceiptKeyRingWriteResult.failure(
+        warning: 'Receipt key delete request is invalid.',
+      );
+    }
 
     final SecureKeyStorageMutationResult result;
     try {
@@ -145,7 +150,8 @@ class NativeReceiptKeyRingWriter {
     }
     if (!record.isUsable ||
         !_isValidKeyId(record.keyId, maxKeyIdLength) ||
-        !_isValidSecret(record.secret, maxKeySecretLength)) {
+        !_isValidSecret(record.secret, maxKeySecretLength) ||
+        !_isValidRevision(expectedRevision)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Receipt key save request is invalid.',
       );
@@ -192,6 +198,11 @@ class NativeReceiptKeyRingWriter {
   ReceiptKeyRingWriteResult _fromNativeMutation(
     SecureKeyStorageMutationResult result,
   ) {
+    if (!_isValidRevision(result.revision)) {
+      return const ReceiptKeyRingWriteResult.failure(
+        warning: 'Secure receipt key mutation failed.',
+      );
+    }
     if (result.isSuccess) {
       return ReceiptKeyRingWriteResult.success(revision: result.revision);
     }
@@ -229,6 +240,8 @@ class NativeReceiptKeyRingWriter {
         secret,
         NativeBridgePayloadLimits.maxSecureKeySecretBytes,
       );
+
+  static bool _isValidRevision(int? value) => value == null || value >= 0;
 
   static String _safeNativeWarning(
     String? warning, {

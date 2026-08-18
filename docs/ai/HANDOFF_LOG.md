@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T265 Validate Secure-Key Mutation Revisions
+
+Summary:
+- Mirrored local-identity and receipt-key writers now reject negative expected
+  revisions before invoking native mutation bridges.
+- Negative revisions returned by custom app bridges are no longer reported as
+  successful writes.
+- The generic secure-key channel decoder rejects successful payloads with
+  malformed revision fields while preserving nullable revision compatibility
+  for legacy non-CAS implementations.
+
+Files:
+- Generic secure-key channel contract and focused contract test.
+- Mirrored local-identity and receipt-key writers and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- All 17 package analyzers pass with no issues.
+- Direct boundary and source-text checks pass; their 13 and 7 script tests
+  pass.
+- Non-Flutter regression tests pass across 13 packages.
+- Focused Flutter tests remain subject to the known local no-output runner
+  timeout; no assertion failure was reported.
+- `git diff --check` passes.
+
+Remaining:
+- Product session/state provisioning, durable database replacement,
+  real-device and cross-device validation, session-auth contract, release
+  signing, other-platform native implementations, and final UX remain open.
+
 ### 2026-08-17 - Codex - T264 Validate Secure-Key Consumer Snapshots
 
 Summary:

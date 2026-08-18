@@ -53,7 +53,8 @@ class NativeLocalPeerIdentityWriter {
         !_isValidKeyId(keyId) ||
         !_isValidLabel(purpose) ||
         !_isValidLabel(algorithm) ||
-        !_isValidPeerId(identity.peerId)) {
+        !_isValidPeerId(identity.peerId) ||
+        !_isValidRevision(expectedRevision)) {
       return const AppLocalPeerIdentityWriteResult.failure(
         warning: 'Local peer identity save request is invalid.',
       );
@@ -104,6 +105,11 @@ class NativeLocalPeerIdentityWriter {
       );
     }
 
+    if (!_isValidRevision(result.revision)) {
+      return const AppLocalPeerIdentityWriteResult.failure(
+        warning: 'Local peer identity save failed.',
+      );
+    }
     if (result.isSuccess) {
       return AppLocalPeerIdentityWriteResult.success(revision: result.revision);
     }
@@ -121,6 +127,8 @@ class NativeLocalPeerIdentityWriter {
         value,
         NativeBridgePayloadLimits.maxTransportIdentityBytes,
       );
+
+  bool _isValidRevision(int? value) => value == null || value >= 0;
 
   static bool _isValidNamespace(String value) =>
       _isValidLabel(value) && !value.contains('::');

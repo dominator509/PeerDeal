@@ -121,6 +121,11 @@ class SecureKeyStorageChannelContract {
     final success = _boolValue(payload['success']);
     final revision = _revisionValue(payload['revision']);
     final isConflict = _boolValue(payload['conflict']);
+    if (success && payload.containsKey('revision') && revision == null) {
+      return const SecureKeyStorageMutationResult.failure(
+        warning: 'Secure key storage mutation result is invalid.',
+      );
+    }
     if (!success) {
       return SecureKeyStorageMutationResult.failure(
         warning:

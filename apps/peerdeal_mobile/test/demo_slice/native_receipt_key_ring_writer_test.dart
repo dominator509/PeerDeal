@@ -318,6 +318,48 @@ void main() {
     expect(result.warning, 'Secure receipt key namespace is invalid.');
     expect(bridge.deletedKeys, isEmpty);
   });
+
+  test('rejects negative expected and returned mutation revisions', () async {
+    final expectedBridge = _RecordingSecureKeyStorageBridge();
+    final expected = await NativeReceiptKeyRingWriter(bridge: expectedBridge)
+        .saveSigningKey(
+          const ReceiptSigningKey(
+            keyId: 'receipt_signing_1',
+            secret: 'signing',
+          ),
+          active: true,
+          expectedRevision: -1,
+        );
+    final delete = await NativeReceiptKeyRingWriter(
+      bridge: expectedBridge,
+    ).deleteKey('receipt_signing_1', expectedRevision: -1);
+
+    expect(expected.isSuccess, isFalse);
+    expect(expected.warning, 'Receipt key save request is invalid.');
+    expect(delete.isSuccess, isFalse);
+    expect(delete.warning, 'Receipt key delete request is invalid.');
+    expect(expectedBridge.savedKeys, isEmpty);
+    expect(expectedBridge.deletedKeys, isEmpty);
+
+    final returnedBridge = _RecordingSecureKeyStorageBridge(
+      saveResult: const SecureKeyStorageMutationResult(
+        isSuccess: true,
+        revision: -1,
+      ),
+    );
+    final returned = await NativeReceiptKeyRingWriter(bridge: returnedBridge)
+        .saveSigningKey(
+          const ReceiptSigningKey(
+            keyId: 'receipt_signing_1',
+            secret: 'signing',
+          ),
+          active: true,
+        );
+
+    expect(returned.isSuccess, isFalse);
+    expect(returned.warning, 'Secure receipt key mutation failed.');
+    expect(returnedBridge.savedKeys, hasLength(1));
+  });
 }
 
 class _RecordingSecureKeyStorageBridge

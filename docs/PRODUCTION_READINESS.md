@@ -93,6 +93,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Secure-key mutation boundaries now reject negative expected revisions before
+  native calls, reject negative revisions returned by custom app bridges, and
+  reject successful generic channel payloads with malformed revision fields.
+  Nullable revisions remain compatible for non-CAS mutation implementations;
+  invalid revision material cannot be propagated as success.
 - The generic secure-key channel decoder now rejects unusable records before
   materializing an available snapshot. Mirrored app receipt-key and local
   identity loaders also reject decoder-bypass snapshots with negative
@@ -2714,6 +2719,16 @@ non-empty strings, rejects unsupported `mode_type` values, and retains the
 existing role-hint allowlist. This is protocol shape validation only; signature
 verification and cryptographic session authentication remain explicit product
 or protocol contracts.
+
+The T265 follow-up closes the secure-key mutation-result integrity gap at the
+generic channel and mirrored app writer boundaries. Negative expected
+revisions fail before native mutation, negative returned revisions cannot be
+reported as successful writes, and malformed successful channel payloads fail
+closed. Nullable revisions remain compatible for legacy non-CAS bridges. This
+preserves the existing secure-storage contract and app-owned receipt/identity
+boundaries; native persistence atomicity, real-device validation, product
+database wiring, session authentication, release signing, and final UX remain
+separate.
 
 The T264 follow-up closes the remaining secure-key consumer integrity gap at
 the generic channel and mirrored app read boundaries. Available snapshots now

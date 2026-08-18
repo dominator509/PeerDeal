@@ -241,6 +241,41 @@ void main() {
     }
   });
 
+  test(
+    'rejects negative identity revisions before and after native save',
+    () async {
+      final invalidExpectedBridge = _MemorySecureKeyBridge();
+      final invalidExpected =
+          await NativeLocalPeerIdentityWriter(
+            bridge: invalidExpectedBridge,
+          ).save(
+            const AppLocalPeerIdentity(peerId: 'peer_revision'),
+            expectedRevision: -1,
+          );
+
+      expect(invalidExpected.isSuccess, isFalse);
+      expect(
+        invalidExpected.warning,
+        'Local peer identity save request is invalid.',
+      );
+      expect(invalidExpectedBridge.savedKeys, isEmpty);
+
+      final invalidResultBridge = _MemorySecureKeyBridge(
+        saveResult: const SecureKeyStorageMutationResult(
+          isSuccess: true,
+          revision: -1,
+        ),
+      );
+      final invalidResult = await NativeLocalPeerIdentityWriter(
+        bridge: invalidResultBridge,
+      ).save(const AppLocalPeerIdentity(peerId: 'peer_revision'));
+
+      expect(invalidResult.isSuccess, isFalse);
+      expect(invalidResult.warning, 'Local peer identity save failed.');
+      expect(invalidResultBridge.savedKeys, hasLength(1));
+    },
+  );
+
   test('provisions once and reuses the persisted identity', () async {
     final bridge = _MemorySecureKeyBridge();
     final provisioner = NativeLocalPeerIdentityProvisioner(
@@ -394,6 +429,7 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
     this.loadGate,
     this.loadGates,
     this.savedPeerIdOverride,
+    this.saveResult = const SecureKeyStorageMutationResult(isSuccess: true),
   }) : keys = List<SecureKeyRecord>.from(snapshot?.keys ?? keys),
        revision = snapshot?.revision ?? 0;
 
@@ -402,6 +438,7 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
   final Completer<void>? loadGate;
   final List<Completer<void>?>? loadGates;
   final String? savedPeerIdOverride;
+  final SecureKeyStorageMutationResult saveResult;
   final List<SecureKeyRecord> keys;
   final List<SecureKeyRecord> savedKeys = <SecureKeyRecord>[];
   int loadCalls = 0;
@@ -440,7 +477,7 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
       ),
     );
     savedKeys.add(key);
-    return const SecureKeyStorageMutationResult(isSuccess: true);
+    return saveResult;
   }
 
   @override
