@@ -2821,6 +2821,12 @@ negative duration or counter measurements, preventing malformed input from
 improving a route score. Network ownership and the existing decision contract
 remain unchanged.
 
+The T276 follow-up closes a Windows native address-eligibility gap. Local
+network capability and multicast interface selection now reject all loopback,
+unspecified, broadcast, and IPv4 link-local/APIPA addresses, matching the
+existing Android and Windows transport semantics before reporting a usable
+network interface. The generic native channel remains unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

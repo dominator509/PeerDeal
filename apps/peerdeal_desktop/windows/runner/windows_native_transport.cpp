@@ -94,9 +94,11 @@ std::optional<in_addr> SelectMulticastInterface() {
       }
       const auto* ipv4 = reinterpret_cast<const sockaddr_in*>(socket_address);
       const uint32_t host_address = ntohl(ipv4->sin_addr.s_addr);
-      const bool is_loopback = host_address == INADDR_LOOPBACK;
+      const bool is_unspecified = host_address == 0;
+      const bool is_loopback = (host_address & 0xff000000u) == 0x7f000000u;
       const bool is_apipa = (host_address & 0xffff0000u) == 0xa9fe0000u;
-      if (is_loopback || is_apipa) continue;
+      const bool is_broadcast = host_address == 0xffffffffu;
+      if (is_unspecified || is_loopback || is_apipa || is_broadcast) continue;
       if (!selected.has_value() || adapter->Ipv4Metric < selected_metric) {
         selected = ipv4->sin_addr;
         selected_metric = adapter->Ipv4Metric;

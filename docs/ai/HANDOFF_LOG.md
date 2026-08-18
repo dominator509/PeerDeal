@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T276 Align Windows IPv4 Interface Eligibility
+
+Summary:
+- Windows local-network capability no longer treats non-routable IPv4
+  addresses as usable interface evidence.
+- Windows multicast interface selection now applies the same full loopback,
+  unspecified, broadcast, and APIPA exclusions.
+- The generic local-network/transport channels and package boundaries remain
+  unchanged.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_local_network.cpp`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- `clang-cl` syntax-only compilation passes for both changed Windows native
+  translation units with the generated Flutter include paths, Windows SDK
+  headers, and the runner's `NOMINMAX` definition.
+- Full workspace analyzer, boundary/source-text checks, their 13 and 7 script
+  tests, dependency-audit script tests, and `git diff --check` pass.
+- Runtime smoke remains a separate binary validation because Flutter/CMake
+  orchestration has previously timed out during support-file generation.
+
+Remaining:
+- Interactive Windows secure-key persistence, Android real-device validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T275 Reject Invalid Network Measurements
 
 Summary:

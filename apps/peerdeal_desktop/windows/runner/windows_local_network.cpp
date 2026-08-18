@@ -46,6 +46,14 @@ const char* InterfaceHint(ULONG interface_type) {
   }
 }
 
+bool IsUsableIpv4Address(std::uint32_t host_address) {
+  const bool is_unspecified = host_address == 0;
+  const bool is_loopback = (host_address & 0xff000000u) == 0x7f000000u;
+  const bool is_apipa = (host_address & 0xffff0000u) == 0xa9fe0000u;
+  const bool is_broadcast = host_address == 0xffffffffu;
+  return !is_unspecified && !is_loopback && !is_apipa && !is_broadcast;
+}
+
 }  // namespace
 
 WindowsLocalNetwork::WindowsLocalNetwork(flutter::BinaryMessenger* messenger) {
@@ -120,7 +128,7 @@ WindowsLocalNetwork::ReadNetworkSnapshot() {
         continue;
       }
       const auto* ipv4 = reinterpret_cast<const sockaddr_in*>(socket_address);
-      if (ntohl(ipv4->sin_addr.s_addr) == INADDR_LOOPBACK) {
+      if (!IsUsableIpv4Address(ntohl(ipv4->sin_addr.s_addr))) {
         continue;
       }
       has_ipv4_address = true;
