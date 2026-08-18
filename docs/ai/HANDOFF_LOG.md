@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T300 Harden Hold'em UTF-8 Boundaries
+
+Summary:
+- `HoldemInputLimits` now delegates text validation to the protocol-owned
+  strict UTF-8 round-trip limit.
+- Hold'em hand state, public event reduction, and projection cursor identity
+  checks now reject unpaired UTF-16 text without changing variant rules,
+  protocol event shape, or package ownership.
+
+Files:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_input_limits.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_hand_state.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_event_reducer.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_core_projection_adapter.dart`
+- `packages/peerdeal_variants/test/holdem_hand_state_persistence_test.dart`
+- `packages/peerdeal_variants/test/holdem_core_projection_adapter_test.dart`
+- `packages/peerdeal_variants/test/holdem_event_reducer_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused Hold'em suite passes: 31 tests.
+- `peerdeal_variants` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T299 Harden Protocol/Core UTF-8 Boundaries
 
 Summary:

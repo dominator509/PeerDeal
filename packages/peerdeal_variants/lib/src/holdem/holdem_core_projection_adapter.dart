@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
@@ -1032,7 +1030,7 @@ String _defaultEventHash(Map<String, Object?> canonicalEvent) {
 void _requireIdentity(String value, String field) {
   if (value.trim().isEmpty ||
       value != value.trim() ||
-      utf8.encode(value).length > HoldemInputLimits.defaultMaxTextBytes) {
+      !HoldemInputLimits.isWithinTextLimit(value)) {
     throw ArgumentError.value(
       value,
       field,

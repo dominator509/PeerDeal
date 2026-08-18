@@ -7,4 +7,7 @@ abstract final class HoldemInputLimits {
   static const defaultMaxPotSlices = defaultMaxSeats;
   static const defaultMaxSeatIdsPerSlice = defaultMaxSeats;
   static final defaultMaxTextBytes = CanonicalJsonLimits().maxTextBytes;
+
+  static bool isWithinTextLimit(String value) =>
+      const CanonicalJsonLimits().isWithinUtf8TextLimit(value);
 }

@@ -353,6 +353,42 @@ void main() {
     expect(result.state, same(initial));
   });
 
+  test(
+    'rejects non-round-tripping showdown summaries without mutating state',
+    () {
+      final initial = _showdownState();
+      final event = EventEnvelope(
+        eventId: 'evt_malformed_showdown',
+        eventType: 'ShowdownRevealed',
+        eventVersion: '1.0',
+        protocolVersion: '1.0.0',
+        eventSeq: 3,
+        tableId: 'tbl_001',
+        sessionId: 'sess_001',
+        handId: 'hand_001',
+        emittedAt: '2026-08-10T00:00:03Z',
+        actorRef: 'system',
+        payload: <String, Object?>{
+          'variant_id': holdemNlheVariantId,
+          'results': <Object?>[
+            <String, Object?>{
+              'seat': 1,
+              'rank_index': 0,
+              'summary': String.fromCharCode(0xd800),
+            },
+          ],
+        },
+        prevEventHash: 'hash_showdown',
+        eventHash: 'hash_malformed_showdown',
+      );
+
+      final result = reducer.apply(state: initial, event: event);
+
+      expect(result.isRejected, isTrue);
+      expect(result.state, same(initial));
+    },
+  );
+
   test('rejects oversized showdown summaries without mutating state', () {
     final initial = _showdownState();
     final oversizedSummary = String.fromCharCodes(

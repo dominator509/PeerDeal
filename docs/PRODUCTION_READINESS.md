@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Hold'em variant text validation now uses the existing canonical UTF-8
+  round-trip limit for hand state, public event payloads, and projection cursor
+  identities, preventing malformed Unicode from entering variant state or
+  reconstructed public events.
 - Protocol canonical JSON text limits now require exact UTF-8 encode/decode
   round-trips. Core command ingress, event reduction, table-state hydration,
   and baseline invariant identity guards use that existing protocol limit, so

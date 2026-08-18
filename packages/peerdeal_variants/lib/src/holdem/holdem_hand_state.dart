@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
@@ -353,7 +351,7 @@ HoldemStateValidationResult validateHoldemHandState(HoldemHandState state) {
 bool _isSafeText(String value) {
   return value.trim().isNotEmpty &&
       value.trim() == value &&
-      utf8.encode(value).length <= HoldemInputLimits.defaultMaxTextBytes &&
+      HoldemInputLimits.isWithinTextLimit(value) &&
       value.codeUnits.every(
         (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
       );

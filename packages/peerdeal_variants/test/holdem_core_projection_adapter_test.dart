@@ -12,7 +12,11 @@ void main() {
       List<int>.filled(HoldemInputLimits.defaultMaxTextBytes + 1, 0x78),
     );
 
-    for (final value in <String>[oversizedIdentity, 'actor_1\u0085']) {
+    for (final value in <String>[
+      oversizedIdentity,
+      'actor_1\u0085',
+      String.fromCharCode(0xd800),
+    ]) {
       expect(
         () => HoldemEventCursor(
           protocolVersion: '1.0.0',

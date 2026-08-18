@@ -146,6 +146,19 @@ void main() {
     );
     final states = <HoldemHandState>[
       HoldemHandState(
+        handId: String.fromCharCode(0xd800),
+        phase: HoldemHandPhase.handIdle,
+        bettingRound: HoldemBettingRound.none,
+        seats: const <HoldemSeatState>[],
+        currentActorSeat: 0,
+        buttonSeat: 0,
+        smallBlindSeat: 0,
+        bigBlindSeat: 0,
+        currentBetToCall: 0,
+        boardCards: const <String>[],
+        minimumRaiseAmount: 1,
+      ),
+      HoldemHandState(
         handId: oversizedHandId,
         phase: HoldemHandPhase.handIdle,
         bettingRound: HoldemBettingRound.none,
