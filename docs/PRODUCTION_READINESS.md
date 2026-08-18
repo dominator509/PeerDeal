@@ -2809,6 +2809,12 @@ The generic secure-key channel and app package boundaries remain unchanged;
 normal interactive-profile persistence and real-device validation remain
 external runtime gates.
 
+The T274 follow-up closes the adjacent Windows secure-key serializer arithmetic
+gap. Individual fields larger than the complete platform blob limit are now
+rejected before the bounded-size subtraction, preventing an unsigned-size
+underflow during record serialization. The storage format and channel contract
+remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

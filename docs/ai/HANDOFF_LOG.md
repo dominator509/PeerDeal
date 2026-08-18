@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T274 Guard Windows Credential Serialization Arithmetic
+
+Summary:
+- Windows secure-key `AppendString` now rejects a field larger than the full
+  Credential Manager blob limit before subtracting its encoded size.
+- This removes an unsigned-size underflow path introduced by the platform
+  bound without changing the storage format, channel, or package boundaries.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_secure_key_storage.cpp`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- `clang-cl` syntax-only compilation of the changed Windows translation unit
+  passes with the generated Flutter include paths, Windows SDK headers, and
+  the runner's `NOMINMAX` definition.
+- Boundary/source-text checks, their 13 and 7 script tests, dependency-audit
+  script tests, and `git diff --check` pass.
+- Full Flutter/CMake native orchestration remains separately timed out during
+  Flutter support-file generation, as recorded by T273.
+
+Remaining:
+- Interactive Windows secure-key persistence, Android real-device validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T273 Enforce Windows Credential Blob Limit
 
 Summary:

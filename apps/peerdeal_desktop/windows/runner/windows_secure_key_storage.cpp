@@ -251,6 +251,7 @@ bool AppendString(const std::string& value,
                   std::vector<std::uint8_t>* output) {
   if (!IsValidTextValue(value, max_bytes) ||
       value.size() > std::numeric_limits<std::uint32_t>::max() ||
+      value.size() > kMaxBlobBytes - 4 ||
       output->size() > kMaxBlobBytes - 4 - value.size()) {
     return false;
   }
