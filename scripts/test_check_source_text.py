@@ -99,6 +99,19 @@ class SourceTextCheckTest(unittest.TestCase):
 
             self.assertEqual([], check_source_text(root))
 
+    def test_checks_same_named_file_outside_generated_path(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(
+                root / "src" / "repomix-summary.xml",
+                "<summary>Copied text \u2014 not generated context.</summary>\n",
+            )
+
+            failures = check_source_text(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("src/repomix-summary.xml:1", failures[0])
+
     def test_rejects_invalid_utf8_text_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = pathlib.Path(temp_dir)

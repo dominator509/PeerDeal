@@ -30,9 +30,9 @@ SKIPPED_PARTS = {
     ".git",
     "build",
 }
-SKIPPED_FILES = {
+SKIPPED_PATH_SUFFIXES = {
     # Generated AI context may contain copied source text outside this policy.
-    "repomix-summary.xml",
+    ("docs", "ai", "repomix-summary.xml"),
 }
 FORBIDDEN_TEXT = {
     "\u00c2": "likely mojibake marker",
@@ -45,7 +45,10 @@ FORBIDDEN_TEXT = {
 def should_check(path: pathlib.Path) -> bool:
     return (
         path.suffix in CHECKED_SUFFIXES
-        and path.name not in SKIPPED_FILES
+        and not any(
+            tuple(path.parts[-len(suffix) :]) == suffix
+            for suffix in SKIPPED_PATH_SUFFIXES
+        )
         and not any(part in SKIPPED_PARTS for part in path.parts)
     )
 
