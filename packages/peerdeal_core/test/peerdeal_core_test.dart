@@ -344,6 +344,32 @@ void main() {
     expect(errors, isNot(contains('command artifact is unsupported')));
   });
 
+  test(
+    'validator rejects oversized command identities before compatibility',
+    () {
+      final oversizedId = String.fromCharCodes(
+        List<int>.filled(const CanonicalJsonLimits().maxTextBytes + 1, 0x78),
+      );
+      final command = CommandEnvelope(
+        commandId: oversizedId,
+        commandType: 'OpenTableSession',
+        commandVersion: '1.0',
+        protocolVersion: '1.0.0',
+        tableId: 'table_001',
+        sessionId: null,
+        handId: null,
+        issuedAt: '2026-04-25T12:05:00Z',
+        actorRef: 'host_alpha',
+        payload: <String, Object?>{},
+      );
+
+      final errors = CoreCommandValidator().validate(command);
+
+      expect(errors, contains('command_id contains unsafe characters'));
+      expect(errors, isNot(contains('command artifact is unsupported')));
+    },
+  );
+
   test('core accepts fixture-backed protocol open session spine', () {
     final command = commandEnvelopeFromJson(
       loadProtocolFixture('commands/open_table_session_command_v1.json'),
@@ -847,6 +873,35 @@ void main() {
             (violation) => violation.code,
             'code',
             CoreInvariantCodes.eventEnvelopeIdentityEmpty,
+          ),
+        ),
+      );
+    }
+  });
+
+  test('core rejects unsafe or oversized event envelope identities', () {
+    final valid = protocolEvent(
+      eventId: 'evt_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+    );
+    final oversizedId = String.fromCharCodes(
+      List<int>.filled(const CanonicalJsonLimits().maxTextBytes + 1, 0x78),
+    );
+    final malformedEvents = <EventEnvelope>[
+      copyEvent(valid, eventId: 'evt\n001'),
+      copyEvent(valid, tableId: ' tbl_001'),
+      copyEvent(valid, eventId: oversizedId),
+    ];
+
+    for (final malformed in malformedEvents) {
+      expect(
+        () => const CoreReducer().apply(TableState.initial(), malformed),
+        throwsA(
+          isA<InvariantViolation>().having(
+            (violation) => violation.code,
+            'code',
+            CoreInvariantCodes.eventEnvelopeIdentityUnsafe,
           ),
         ),
       );

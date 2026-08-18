@@ -38,6 +38,8 @@ abstract final class CoreInvariantCodes {
       'ERR_SESSION_CLOSED_WITH_ACTIVE_HAND';
   static const sessionWipedBeforeClose = 'ERR_SESSION_WIPED_BEFORE_CLOSE';
   static const eventEnvelopeIdentityEmpty = 'ERR_EVENT_ENVELOPE_IDENTITY_EMPTY';
+  static const eventEnvelopeIdentityUnsafe =
+      'ERR_EVENT_ENVELOPE_IDENTITY_UNSAFE';
 
   static const all = <String>[
     tableIdEmpty,
@@ -70,5 +72,6 @@ abstract final class CoreInvariantCodes {
     sessionClosedWithActiveHand,
     sessionWipedBeforeClose,
     eventEnvelopeIdentityEmpty,
+    eventEnvelopeIdentityUnsafe,
   ];
 }

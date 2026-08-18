@@ -156,10 +156,7 @@ void main() {
         tableId: 'table\n1',
         sessionId: 'session_1\t',
         protocolVersion: '1.0\u0000',
-      ).copyWith(
-        phase: TablePhase.liveActive,
-        activeHandId: 'hand\n1',
-      );
+      ).copyWith(phase: TablePhase.liveActive, activeHandId: 'hand\n1');
 
       expect(
         codesFor(state),
@@ -167,6 +164,25 @@ void main() {
           CoreInvariantCodes.tableIdUnsafe,
           CoreInvariantCodes.sessionIdUnsafe,
           CoreInvariantCodes.protocolVersionUnsafe,
+          CoreInvariantCodes.activeHandIdUnsafe,
+        ]),
+      );
+    });
+
+    test('flag oversized table state identities', () {
+      final oversizedId = String.fromCharCodes(
+        List<int>.filled(const CanonicalJsonLimits().maxTextBytes + 1, 0x78),
+      );
+      final state = TableState.initial(
+        tableId: oversizedId,
+        sessionId: 'session_1',
+        protocolVersion: '1.0',
+      ).copyWith(phase: TablePhase.liveActive, activeHandId: oversizedId);
+
+      expect(
+        codesFor(state),
+        containsAll(<String>[
+          CoreInvariantCodes.tableIdUnsafe,
           CoreInvariantCodes.activeHandIdUnsafe,
         ]),
       );
@@ -188,6 +204,19 @@ void main() {
           reason: entry.key,
         );
       }
+    });
+
+    test('reject oversized identities during TableState hydration', () {
+      final oversizedId = String.fromCharCodes(
+        List<int>.filled(const CanonicalJsonLimits().maxTextBytes + 1, 0x78),
+      );
+      final malformed = TableState.initial().toJson()
+        ..['table_id'] = oversizedId;
+
+      expect(
+        () => TableState.fromJson(malformed),
+        throwsA(isA<FormatException>()),
+      );
     });
 
     test('flag negative counters and event sequence', () {

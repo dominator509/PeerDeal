@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/invariant_guard.dart';
@@ -239,6 +241,31 @@ class CoreReducer {
     ];
 
     if (emptyFields.isEmpty) {
+      final unsafeFields = <String>[
+        if (!_isSafeIdentity(event.eventId)) 'event_id',
+        if (!_isSafeIdentity(event.eventType)) 'event_type',
+        if (!_isSafeIdentity(event.eventVersion)) 'event_version',
+        if (!_isSafeIdentity(event.protocolVersion)) 'protocol_version',
+        if (!_isSafeIdentity(event.tableId)) 'table_id',
+        if (!_isSafeIdentity(event.sessionId)) 'session_id',
+        if (event.handId != null &&
+            event.handId!.isNotEmpty &&
+            !_isSafeIdentity(event.handId!))
+          'hand_id',
+        if (!_isSafeIdentity(event.emittedAt)) 'emitted_at',
+        if (!_isSafeIdentity(event.actorRef)) 'actor_ref',
+        if (!_isSafeIdentity(event.prevEventHash)) 'prev_event_hash',
+        if (!_isSafeIdentity(event.eventHash)) 'event_hash',
+      ];
+
+      if (unsafeFields.isNotEmpty) {
+        throw InvariantViolation(
+          code: CoreInvariantCodes.eventEnvelopeIdentityUnsafe,
+          message:
+              'Event envelope identity fields contain unsafe or oversized '
+              'text: ${unsafeFields.join(', ')}.',
+        );
+      }
       return;
     }
 
@@ -247,6 +274,18 @@ class CoreReducer {
       message:
           'Event envelope identity fields must be non-empty: '
           '${emptyFields.join(', ')}.',
+    );
+  }
+
+  bool _isSafeIdentity(String value) {
+    if (value.trim() != value) {
+      return false;
+    }
+    if (utf8.encode(value).length > const CanonicalJsonLimits().maxTextBytes) {
+      return false;
+    }
+    return value.codeUnits.every(
+      (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
     );
   }
 

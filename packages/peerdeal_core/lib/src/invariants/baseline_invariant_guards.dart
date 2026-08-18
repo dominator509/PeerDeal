@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import '../contracts/invariant_guard.dart';
 import '../models/core_invariant_codes.dart';
 import '../models/invariant_violation.dart';
@@ -197,6 +201,9 @@ class WipedPhaseMustNotHaveActiveStateGuard implements InvariantGuard {
 
 bool _isSafeIdentity(String value) {
   if (value.trim() != value) return false;
+  if (utf8.encode(value).length > const CanonicalJsonLimits().maxTextBytes) {
+    return false;
+  }
   return value.codeUnits.every(
     (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
   );

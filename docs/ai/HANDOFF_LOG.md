@@ -2,6 +2,38 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T293 Harden Core Typed Ingress Text Bounds
+
+Summary:
+- Core command validation now rejects typed command identities that exceed the
+  existing canonical JSON text-byte ceiling before protocol compatibility is
+  evaluated.
+- Core reducer ingress now rejects unsafe or oversized event envelope
+  identities, including direct in-memory envelopes that bypass wire decoding,
+  with `ERR_EVENT_ENVELOPE_IDENTITY_UNSAFE`.
+- Programmatic and hydrated `TableState` identities now use the same existing
+  canonical text-byte ceiling as their unsafe-text checks.
+- No protocol model, wire format, package boundary, or architecture changed.
+
+Files:
+- `packages/peerdeal_core/lib/src/validation/core_command_validator.dart`
+- `packages/peerdeal_core/lib/src/reducer/core_reducer.dart`
+- `packages/peerdeal_core/lib/src/invariants/baseline_invariant_guards.dart`
+- `packages/peerdeal_core/lib/src/models/table_state.dart`
+- `packages/peerdeal_core/lib/src/models/core_invariant_codes.dart`
+- `packages/peerdeal_core/test/peerdeal_core_test.dart`
+- `packages/peerdeal_core/test/invariant_guards_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused `peerdeal_core` suite passes: 68 tests.
+- `peerdeal_core` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T292 Harden Core State Identities
 
 Summary:

@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Core typed command, event, and table-state ingress now applies the existing
+  canonical JSON text-byte ceiling and rejects unsafe or oversized identities;
+  the reducer reports a stable unsafe event-envelope invariant without
+  changing protocol models or package ownership.
 - Secure-key mutation boundaries now reject negative expected revisions before
   native calls, reject negative revisions returned by custom app bridges, and
   reject successful generic channel payloads with malformed revision fields.

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 class CoreCommandValidator {
@@ -84,6 +86,10 @@ class CoreCommandValidator {
 
   bool _isSafeIdentity(String value) {
     if (value.trim() != value) {
+      return false;
+    }
+
+    if (utf8.encode(value).length > const CanonicalJsonLimits().maxTextBytes) {
       return false;
     }
 
