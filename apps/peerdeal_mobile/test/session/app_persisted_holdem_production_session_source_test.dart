@@ -244,6 +244,31 @@ void main() {
   );
 
   test(
+    'rejects invalid snapshot metadata before provisioning persisted identity',
+    () async {
+      for (final values in <({String type, String version})>[
+        (type: 'HoldemState${String.fromCharCode(0x85)}', version: '1.0'),
+        (
+          type: 'HoldemStateSnapshot',
+          version: '1.${String.fromCharCode(0x85)}',
+        ),
+      ]) {
+        final identityBridge = _IdentityBridge();
+        await expectLater(
+          _lazySource(
+            InMemoryRecoveryPersistenceStore(),
+            identityBridge,
+            snapshotType: values.type,
+            snapshotVersion: values.version,
+          ),
+          throwsArgumentError,
+        );
+        expect(identityBridge.savedKeys, isEmpty);
+      }
+    },
+  );
+
+  test(
     'rejects invalid route policy before provisioning persisted identity',
     () async {
       final store = InMemoryRecoveryPersistenceStore();
@@ -929,8 +954,10 @@ AppPersistedHoldemProductionSessionRoutePolicy _routePolicy({
 
 Future<AppPersistedHoldemProductionSessionSource> _lazySource(
   InMemoryRecoveryPersistenceStore store,
-  _IdentityBridge identityBridge,
-) {
+  _IdentityBridge identityBridge, {
+  String snapshotType = 'HoldemStateSnapshot',
+  String snapshotVersion = '1.0',
+}) {
   return AppPersistedHoldemProductionSessionSource.fromLocalIdentityProvisioner(
     store: store,
     identityProvisioner: NativeLocalPeerIdentityProvisioner(
@@ -942,6 +969,8 @@ Future<AppPersistedHoldemProductionSessionSource> _lazySource(
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-10T00:00:00Z',
     eventHashFactory: computeCanonicalHash,
+    snapshotType: snapshotType,
+    snapshotVersion: snapshotVersion,
   );
 }
 

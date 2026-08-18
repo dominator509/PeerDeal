@@ -21,6 +21,26 @@ Remaining:
 - Real Windows runtime validation, operator signing, and product-owned session
   state wiring remain documented production gates.
 
+### 2026-08-18 - Codex - Validate Production Snapshot Metadata Before Identity
+
+Summary:
+- Mirrored app-owned persisted Hold'em sources now reject unsafe snapshot type
+  and version metadata before secure local-identity provisioning.
+- Direct source construction and the existing configuration path share the
+  same snapshot metadata safety predicate; package boundaries are unchanged.
+
+Files:
+- Mirrored `app_persisted_holdem_production_session_source.dart` files and
+  focused source tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile and desktop persisted-session tests remain to be run.
+
+Remaining:
+- Product-owned session state, real-device/native validation, and operator
+  release signing remain open documented gates.
+
 ### 2026-08-18 - Codex - Bound Core Event Payloads
 
 Summary:

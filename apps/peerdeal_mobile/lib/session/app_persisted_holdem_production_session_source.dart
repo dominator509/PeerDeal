@@ -190,6 +190,7 @@ class AppPersistedHoldemProductionSessionSource
   }) async {
     routePolicy.validate();
     _validateMaxRecoveryEvents(maxRecoveryEvents);
+    _validateSnapshotMetadata(snapshotType, snapshotVersion);
     final provisioned = await identityProvisioner.ensureIdentity(
       cancellation: cancellation,
     );
@@ -253,6 +254,7 @@ class AppPersistedHoldemProductionSessionSource
   }) async {
     routePolicy.validate();
     _validateMaxRecoveryEvents(maxRecoveryEvents);
+    _validateSnapshotMetadata(snapshotType, snapshotVersion);
     await _throwIfCancelled(cancellation);
     AppLocalPeerIdentity? localIdentity;
 
@@ -316,13 +318,21 @@ class AppPersistedHoldemProductionSessionSource
     HoldemCoreProjectionAdapter replayAdapter =
         const HoldemCoreProjectionAdapter(),
     HoldemEventReducer eventReducer = const HoldemEventReducer(),
-    this.snapshotType = 'HoldemStateSnapshot',
-    this.snapshotVersion = '1.0',
+    String snapshotType = 'HoldemStateSnapshot',
+    String snapshotVersion = '1.0',
     this.snapshotCoordinator,
     this.initialSnapshotLoader,
     this.contextInitialSnapshotLoader,
     int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
-  }) : maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
+  }) : snapshotType = _validateSnapshotMetadataValue(
+         snapshotType,
+         'snapshotType',
+       ),
+       snapshotVersion = _validateSnapshotMetadataValue(
+         snapshotVersion,
+         'snapshotVersion',
+       ),
+       maxRecoveryEvents = _validateMaxRecoveryEvents(maxRecoveryEvents),
        _store = store,
        _inputFactory = inputFactory,
        _contextInputFactory = contextInputFactory,
@@ -575,6 +585,24 @@ class AppPersistedHoldemProductionSessionSource
     )) {
       throw StateError('Persisted Holdem snapshot version is invalid.');
     }
+  }
+
+  static void _validateSnapshotMetadata(String type, String version) {
+    _validateSnapshotMetadataValue(type, 'snapshotType');
+    _validateSnapshotMetadataValue(version, 'snapshotVersion');
+  }
+
+  static String _validateSnapshotMetadataValue(String value, String fieldName) {
+    if (!AppHoldemProductionSessionSnapshotWriter.isSafeSnapshotMetadata(
+      value,
+    )) {
+      throw ArgumentError.value(
+        value,
+        fieldName,
+        'Holdem snapshot metadata is invalid.',
+      );
+    }
+    return value;
   }
 
   static Future<void> _throwIfCancelled(Future<void>? cancellation) async {
