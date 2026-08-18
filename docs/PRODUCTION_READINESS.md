@@ -98,6 +98,12 @@ the gates below are satisfied.
   reject successful generic channel payloads with malformed revision fields.
   Nullable revisions remain compatible for non-CAS mutation implementations;
   invalid revision material cannot be propagated as success.
+- Secure-key revision fields now also reject values above the signed 64-bit
+  native storage range (`9223372036854775807`) at the shared channel decoder,
+  method-channel bridge, and mirrored app readiness, local-identity, and
+  receipt adapters. This keeps custom app bridges aligned with Android `Long`
+  and Windows signed revision persistence without changing the generic channel
+  shape or package ownership.
 - The generic secure-key channel decoder now rejects unusable records before
   materializing an available snapshot. Mirrored app receipt-key and local
   identity loaders also reject decoder-bypass snapshots with negative

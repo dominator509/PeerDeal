@@ -161,7 +161,11 @@ class SecureKeyStorageChannelContract {
 
   static int? _revisionValue(Object? value) {
     if (value == null) return 0;
-    if (value is! int || value < 0) return null;
+    if (value is! int ||
+        value < 0 ||
+        value > NativeBridgePayloadLimits.maxSecureKeyRevision) {
+      return null;
+    }
     return value;
   }
 }

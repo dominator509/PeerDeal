@@ -133,7 +133,10 @@ class NativeLocalPeerIdentityWriter {
         NativeBridgePayloadLimits.maxTransportIdentityBytes,
       );
 
-  bool _isValidRevision(int? value) => value == null || value >= 0;
+  bool _isValidRevision(int? value) =>
+      value == null ||
+      (value >= 0 &&
+          value <= NativeBridgePayloadLimits.maxSecureKeyRevision);
 
   bool _isRevisionBeforeExpected(int? revision, int? expectedRevision) {
     return revision != null &&

@@ -282,7 +282,9 @@ class MethodChannelSecureKeyStorageBridge
       ) &&
       !keyId.contains(':');
 
-  bool _isValidRevision(int revision) => revision >= 0;
+  bool _isValidRevision(int revision) =>
+      revision >= 0 &&
+      revision <= NativeBridgePayloadLimits.maxSecureKeyRevision;
 
   static Duration _validateTimeout(Duration timeout) {
     if (timeout.compareTo(Duration.zero) <= 0) {

@@ -106,7 +106,8 @@ class NativeLocalPeerIdentityLoader {
         warnings: <String>['Local peer identity storage is unavailable.'],
       );
     }
-    if (snapshot.revision < 0) {
+    if (snapshot.revision < 0 ||
+        snapshot.revision > NativeBridgePayloadLimits.maxSecureKeyRevision) {
       return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Local peer identity storage revision is invalid.'],
       );

@@ -597,7 +597,11 @@ void main() {
   test(
     'secure key storage mutation result rejects malformed successful revisions',
     () {
-      for (final revision in <Object?>[-1, 'bad']) {
+      for (final revision in <Object?>[
+        -1,
+        NativeBridgePayloadLimits.maxSecureKeyRevision + 1,
+        'bad',
+      ]) {
         final result = SecureKeyStorageChannelContract.decodeMutationResult(
           <String, Object?>{'success': true, 'revision': revision},
         );
@@ -611,6 +615,20 @@ void main() {
       }
     },
   );
+
+  test('secure key snapshot rejects revisions above signed native range', () {
+    final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(
+      <String, Object?>{
+        'available': true,
+        'revision': NativeBridgePayloadLimits.maxSecureKeyRevision + 1,
+        'keys': <Object?>[],
+      },
+    );
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.keys, isEmpty);
+    expect(snapshot.warning, 'Secure key storage snapshot is unavailable.');
+  });
 
   test('native transport channel contract decodes fixture payloads', () {
     final fixture = _loadFixture('native_transport_bridge_contract.json');

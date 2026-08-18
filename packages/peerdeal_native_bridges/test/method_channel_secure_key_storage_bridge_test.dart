@@ -285,6 +285,26 @@ void main() {
     });
   });
 
+  test('rejects an oversized expected revision before invoking the host',
+      () async {
+    final bridge = MethodChannelSecureKeyStorageBridge(channel: channel);
+    final result = await bridge.saveKeyIfRevision(
+      namespace: 'peerdeal.receipts',
+      expectedRevision: NativeBridgePayloadLimits.maxSecureKeyRevision + 1,
+      key: const SecureKeyRecord(
+        keyId: 'receipt_signing_1',
+        purpose: 'receipt_signing',
+        algorithm: 'hmac-sha256',
+        secret: 'signing_secret_1',
+        active: true,
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Secure key storage revision is invalid.');
+    expect(log, isEmpty);
+  });
+
   test('surfaces a conditional mutation conflict', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {

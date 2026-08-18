@@ -137,7 +137,8 @@ class NativeReceiptKeyRingLoader
         ],
       );
     }
-    if (snapshot.revision < 0) {
+    if (snapshot.revision < 0 ||
+        snapshot.revision > NativeBridgePayloadLimits.maxSecureKeyRevision) {
       return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key storage revision is invalid.'],

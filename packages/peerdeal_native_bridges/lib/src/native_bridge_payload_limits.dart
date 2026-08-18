@@ -15,6 +15,7 @@ class NativeBridgePayloadLimits {
   static const maxSecureKeyPurposeBytes = 128;
   static const maxSecureKeyAlgorithmBytes = 128;
   static const maxSecureKeySecretBytes = 4096;
+  static const maxSecureKeyRevision = 0x7fffffffffffffff;
   static const maxDiagnosticBytes = 512;
 
   static bool isWithinUtf8Limit(String value, int maxBytes) =>

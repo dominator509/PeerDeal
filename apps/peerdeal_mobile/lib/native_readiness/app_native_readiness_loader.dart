@@ -228,6 +228,8 @@ class AppNativeReadinessLoader {
         return false;
       }
       if (snapshot.revision < 0 ||
+          snapshot.revision >
+              NativeBridgePayloadLimits.maxSecureKeyRevision ||
           snapshot.keys.length >
               NativeBridgePayloadLimits.maxSecureKeyRecords ||
           snapshot.keys.any((key) => !key.isUsable)) {

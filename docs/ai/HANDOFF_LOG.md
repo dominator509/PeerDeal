@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T279 Bound Native Secure-Key Revisions
+
+Summary:
+- Added a shared maximum secure-key revision equal to the signed 64-bit native
+  storage limit used by Android and Windows.
+- Generic snapshot/mutation decoding and method-channel compare-and-swap writes
+  now reject oversized revisions before treating them as valid state or
+  invoking native storage.
+- Mirrored mobile and desktop readiness, local-identity, and receipt key-ring
+  loaders/writers apply the same bound to custom bridge implementations.
+
+Files:
+- `packages/peerdeal_native_bridges/lib/src/native_bridge_payload_limits.dart`
+- `packages/peerdeal_native_bridges/lib/src/secure_storage/`
+- Mirrored app native-readiness, local-identity, and receipt key-ring adapters.
+- Native bridge regression tests, `docs/PRODUCTION_READINESS.md`, and this log.
+
+Verification:
+- Direct Dart analyzer passes for `apps` and `packages`.
+- Package-boundary/source-text checks, their 13 and 7 focused tests,
+  dependency-audit tests, and `git diff --check` pass.
+- Focused Flutter native-bridge tests were attempted once and timed out after
+  120 seconds with no output; the local Flutter launcher also timed out on a
+  version probe. No assertion failure was produced.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T278 Reject Malformed Android UTF-8 Text
 
 Summary:

@@ -255,7 +255,10 @@ class NativeReceiptKeyRingWriter {
         NativeBridgePayloadLimits.maxSecureKeySecretBytes,
       );
 
-  static bool _isValidRevision(int? value) => value == null || value >= 0;
+  static bool _isValidRevision(int? value) =>
+      value == null ||
+      (value >= 0 &&
+          value <= NativeBridgePayloadLimits.maxSecureKeyRevision);
 
   static bool _isRevisionBeforeExpected(int? revision, int? expectedRevision) {
     return revision != null &&
