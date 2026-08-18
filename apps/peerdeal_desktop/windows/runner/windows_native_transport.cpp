@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cwctype>
 #include <limits>
 #include <optional>
@@ -26,6 +27,7 @@ constexpr std::size_t kMaxPayloadBytes = 60 * 1024;
 constexpr std::size_t kMaxIdBytes = 256;
 constexpr std::size_t kMaxQueueSize = 512;
 constexpr std::size_t kMaxBatchSize = 64;
+constexpr auto kReceiveErrorBackoff = std::chrono::milliseconds(25);
 constexpr ULONG kInitialAdapterBufferBytes = 16 * 1024;
 constexpr ULONG kMaxAdapterBufferBytes = 1024 * 1024;
 constexpr std::size_t kMaxAdapterCount = 64;
@@ -397,6 +399,8 @@ void WindowsNativeTransport::ReceiveLoop() {
         reinterpret_cast<sockaddr*>(&source), &source_length);
     if (received == SOCKET_ERROR) {
       if (stopping_) return;
+      // Keep persistent host/socket errors from becoming a busy retry loop.
+      std::this_thread::sleep_for(kReceiveErrorBackoff);
       continue;
     }
     auto frame = DecodeFrame(buffer.data(), static_cast<std::size_t>(received));

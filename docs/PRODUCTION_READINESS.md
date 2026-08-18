@@ -93,6 +93,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Android and Windows native multicast receive loops now apply a bounded
+  backoff after persistent socket errors, preventing a host failure from
+  becoming an unbounded CPU retry loop without changing the generic transport
+  channel contract. Real-device and cross-device reachability validation remain
+  external.
 - The workspace and CI now use Melos 8.3.0, and dependency audit reports zero actionable upgrades; newer `meta` and `test` versions remain toolchain-blocked.
 - The v1 scaffold protocol catalog is locked across command, event, snapshot,
   Game File, invite payload, and public result-code identities, with accepted

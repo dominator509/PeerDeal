@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T251 Bound Native Receive Error Retries
+
+Summary:
+- Mirrored Android and Windows multicast receive loops now wait 25 ms after a
+  persistent socket error before retrying, preventing a host failure from
+  becoming a busy CPU loop.
+- Preserved the generic byte-frame channel contract, host-private envelope,
+  filtering, and package ownership.
+
+Files:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Android debug APK, Windows debug build, and all Windows native-host smoke
+  markers pass.
+- Direct Dart-SDK analysis, boundary, source-text, and their script-test gates
+  pass; `git diff --check` passes.
+- The Melos analyze/boundary wrappers and the full non-Flutter Dart test
+  invocation timed out silently in this environment; no Dart source changed.
+- Dependency audit also timed out while resolving external package metadata;
+  the last completed audit reported zero actionable upgrades.
+
+Remaining:
+- Real-device and cross-device transport validation, product session/state
+  provisioning, durable database persistence, release signing, and final UX
+  remain separate readiness work.
+
 ### 2026-08-16 - Codex - T250 Align App Diagnostic Text Boundaries
 
 Summary:

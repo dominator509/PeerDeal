@@ -40,6 +40,7 @@ internal class NativeTransportHandler(
         private const val MAX_ID_BYTES = 256
         private const val MAX_QUEUE_SIZE = 512
         private const val MAX_BATCH_SIZE = 64
+        private const val RECEIVE_ERROR_BACKOFF_MILLIS = 25L
         private const val MAX_INTERFACE_COUNT = 64
         private const val MAX_INTERFACE_ADDRESS_COUNT = 256
         private const val HEADER_BYTES = 19
@@ -358,6 +359,9 @@ internal class NativeTransportHandler(
                 }
             } catch (_: Exception) {
                 if (closed || socket.isClosed) return
+                // A persistent host/socket error must not turn teardown or
+                // network failure into an unbounded retry loop.
+                Thread.sleep(RECEIVE_ERROR_BACKOFF_MILLIS)
             }
         }
     }
