@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T311 Harden Native Cancellation Ordering
+
+Summary:
+- Existing native method-channel deadline wrappers now attach cancellation
+  handlers before platform operation handlers across secure storage, capture,
+  app storage, local network, and transport.
+- Mirrored app transport frame drains and session provisioning now apply the
+  same ordering, preventing stale native results from winning an already-
+  signaled route cancellation; contracts and package boundaries remain
+  unchanged.
+
+Files:
+- Existing method-channel bridge wrappers in `peerdeal_native_bridges`.
+- Mirrored mobile and desktop transport adapters, provisioners, and focused
+  regression tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused native bridge, mobile transport, and desktop transport Flutter
+  tests pass, including immediate-completion cancellation regressions.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates pass.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T310 Harden Session Bootstrap Cancellation Ordering
 
 Summary:
@@ -18,7 +46,8 @@ Files:
 Verification:
 - Mirrored mobile and desktop production-session bootstrap focused Flutter
   tests pass, including the immediate-source cancellation regression.
-- Full repository gates are pending in this handoff.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates pass.
 
 Remaining:
 - Android real-device and Windows interactive persistence validation,

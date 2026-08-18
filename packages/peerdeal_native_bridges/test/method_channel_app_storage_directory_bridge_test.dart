@@ -108,4 +108,27 @@ void main() {
     expect(snapshot.warning, 'Native app storage directory lookup cancelled.');
     pending.complete(null);
   });
+
+  test(
+    'cancellation wins over an immediately completing platform lookup',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            return <String, Object?>{
+              'available': true,
+              'directoryPath': r'C:\Users\peerdeal\AppData\Local',
+            };
+          });
+
+      final snapshot = await MethodChannelAppStorageDirectoryBridge(
+        channel: channel,
+      ).getAppSupportDirectory(cancellation: Future<void>.value());
+
+      expect(snapshot.available, isFalse);
+      expect(
+        snapshot.warning,
+        'Native app storage directory lookup cancelled.',
+      );
+    },
+  );
 }

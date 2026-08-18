@@ -125,6 +125,18 @@ void main() {
     },
   );
 
+  test(
+    'cancellation wins over an immediately completing capability call',
+    () async {
+      final capability = await MethodChannelNativeTransportBridge(
+        channel: channel,
+      ).getCapability(cancellation: Future<void>.value());
+
+      expect(capability.available, isFalse);
+      expect(capability.warning, 'Native transport call cancelled.');
+    },
+  );
+
   test('sends native transport frames over the method channel', () async {
     final bridge = MethodChannelNativeTransportBridge(channel: channel);
     final result = await bridge.sendFrame(_frame());

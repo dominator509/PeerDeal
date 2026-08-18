@@ -200,6 +200,24 @@ void main() {
     expect(handler.frames, isEmpty);
   });
 
+  test('cancellation wins over an immediately completing receive', () async {
+    final handler = _RecordingTransportFrameHandler();
+    final drain = NativeTransportFrameDrain(
+      bridge: _FakeNativeTransportBridge(receiveFrames: [_nativeFrame()]),
+      receiver: ValidatingTransportFrameReceiver(handler: handler),
+    );
+
+    final result = await drain.drain(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      cancellation: Future<void>.value(),
+    );
+
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport receive cancelled.']);
+    expect(handler.frames, isEmpty);
+  });
+
   test('rejects invalid native frames through network receiver', () async {
     final handler = _RecordingTransportFrameHandler();
     final drain = NativeTransportFrameDrain(

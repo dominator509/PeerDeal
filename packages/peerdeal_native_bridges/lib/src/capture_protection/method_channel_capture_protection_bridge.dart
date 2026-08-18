@@ -130,15 +130,6 @@ class MethodChannelCaptureProtectionBridge
         StackTrace.current,
       ),
     );
-    unawaited(
-      operation.then<void>(
-        completeValue,
-        onError: (Object error, StackTrace stackTrace) {
-          completeError(error, stackTrace);
-        },
-      ),
-    );
-
     if (cancellation != null) {
       unawaited(
         cancellation.then<void>(
@@ -153,6 +144,14 @@ class MethodChannelCaptureProtectionBridge
         ),
       );
     }
+    unawaited(
+      operation.then<void>(
+        completeValue,
+        onError: (Object error, StackTrace stackTrace) {
+          completeError(error, stackTrace);
+        },
+      ),
+    );
     return completer.future;
   }
 

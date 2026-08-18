@@ -177,6 +177,28 @@ void main() {
   });
 
   test(
+    'cancellation wins over an immediately completing capability lookup',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            return <String, Object?>{
+              'blockingSupported': true,
+              'obscuringSupported': true,
+              'notes': 'screen-protection-supported',
+            };
+          });
+
+      final capability = await MethodChannelCaptureProtectionBridge(
+        channel: channel,
+      ).getCapability(cancellation: Future<void>.value());
+
+      expect(capability.blockingSupported, isFalse);
+      expect(capability.obscuringSupported, isFalse);
+      expect(capability.warning, 'Capture protection call cancelled.');
+    },
+  );
+
+  test(
     'returns unavailable capability for malformed platform payload',
     () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

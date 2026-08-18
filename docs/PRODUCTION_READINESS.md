@@ -93,6 +93,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Native bridge and app transport cancellation wrappers now register route
+  cancellation before native operation completion, so an already-signaled
+  cancellation wins over an immediately completing platform result across
+  secure storage, capture, app storage, local network, transport, and session
+  provisioning; native contracts and package boundaries remain unchanged.
 - Mirrored production-session bootstrap loaders now register route
   cancellation before source completion, so an already-signaled cancellation
   wins over an immediately completing source and cannot mount stale session

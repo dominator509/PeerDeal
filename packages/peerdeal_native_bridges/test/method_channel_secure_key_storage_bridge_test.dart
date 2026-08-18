@@ -116,6 +116,27 @@ void main() {
     expect(snapshot.warning, 'Secure key storage call cancelled.');
   });
 
+  test(
+    'cancellation wins over an immediately completing secure key load',
+    () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            return <String, Object?>{'available': true, 'keys': <Object?>[]};
+          });
+
+      final snapshot =
+          await MethodChannelSecureKeyStorageBridge(
+            channel: channel,
+          ).loadKeyRing(
+            namespace: 'peerdeal.receipts',
+            cancellation: Future<void>.value(),
+          );
+
+      expect(snapshot.available, isFalse);
+      expect(snapshot.warning, 'Secure key storage call cancelled.');
+    },
+  );
+
   test('returns unavailable snapshot for malformed platform payload', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {

@@ -136,15 +136,6 @@ class MethodChannelLocalNetworkBridge
         StackTrace.current,
       ),
     );
-    unawaited(
-      operation.then<void>(
-        completeValue,
-        onError: (Object error, StackTrace stackTrace) {
-          completeError(error, stackTrace);
-        },
-      ),
-    );
-
     final cancellationSignals = <Future<void>>[];
     if (_cancellation case final cancellationSignal?) {
       cancellationSignals.add(cancellationSignal);
@@ -166,6 +157,14 @@ class MethodChannelLocalNetworkBridge
         ),
       );
     }
+    unawaited(
+      operation.then<void>(
+        completeValue,
+        onError: (Object error, StackTrace stackTrace) {
+          completeError(error, stackTrace);
+        },
+      ),
+    );
     return completer.future;
   }
 

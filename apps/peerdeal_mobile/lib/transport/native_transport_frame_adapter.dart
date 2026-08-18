@@ -178,18 +178,18 @@ Future<T?> _awaitOrCancel<T>(Future<T> operation, Future<void>? cancellation) {
   }
 
   unawaited(
-    operation.then<void>(
-      completeValue,
-      onError: (Object error, StackTrace stackTrace) {
-        completeError(error, stackTrace);
-      },
-    ),
-  );
-  unawaited(
     cancellation.then<void>(
       (_) => completeValue(null),
       onError: (Object error, StackTrace stackTrace) {
         completeValue(null);
+      },
+    ),
+  );
+  unawaited(
+    operation.then<void>(
+      completeValue,
+      onError: (Object error, StackTrace stackTrace) {
+        completeError(error, stackTrace);
       },
     ),
   );
