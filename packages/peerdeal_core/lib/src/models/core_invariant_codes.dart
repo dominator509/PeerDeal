@@ -1,11 +1,15 @@
 abstract final class CoreInvariantCodes {
   static const tableIdEmpty = 'ERR_TABLE_ID_EMPTY';
+  static const tableIdUnsafe = 'ERR_TABLE_ID_UNSAFE';
   static const sessionIdEmpty = 'ERR_SESSION_ID_EMPTY';
+  static const sessionIdUnsafe = 'ERR_SESSION_ID_UNSAFE';
   static const protocolVersionEmpty = 'ERR_PROTOCOL_VERSION_EMPTY';
+  static const protocolVersionUnsafe = 'ERR_PROTOCOL_VERSION_UNSAFE';
   static const eventSequenceNegative = 'ERR_EVENT_SEQUENCE_NEGATIVE';
   static const connectedCountNegative = 'ERR_CONNECTED_COUNT_NEGATIVE';
   static const seatedCountNegative = 'ERR_SEATED_COUNT_NEGATIVE';
   static const activeHandIdEmpty = 'ERR_ACTIVE_HAND_ID_EMPTY';
+  static const activeHandIdUnsafe = 'ERR_ACTIVE_HAND_ID_UNSAFE';
   static const activeHandOutsideLivePhase =
       'ERR_ACTIVE_HAND_OUTSIDE_LIVE_PHASE';
   static const seatedExceedsConnected = 'ERR_SEATED_EXCEEDS_CONNECTED';
@@ -37,12 +41,16 @@ abstract final class CoreInvariantCodes {
 
   static const all = <String>[
     tableIdEmpty,
+    tableIdUnsafe,
     sessionIdEmpty,
+    sessionIdUnsafe,
     protocolVersionEmpty,
+    protocolVersionUnsafe,
     eventSequenceNegative,
     connectedCountNegative,
     seatedCountNegative,
     activeHandIdEmpty,
+    activeHandIdUnsafe,
     activeHandOutsideLivePhase,
     seatedExceedsConnected,
     closingWithoutCloseRequest,

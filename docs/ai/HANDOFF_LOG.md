@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T292 Harden Core State Identities
+
+Summary:
+- Core `TableState` hydration now rejects padded or control-bearing table,
+  session, protocol, and active-hand identities.
+- Baseline invariant guards now report explicit unsafe-identity violations for
+  programmatically constructed state as well, preventing malformed state from
+  entering deterministic projection paths.
+- Core state ownership and reducer architecture remain unchanged.
+
+Files:
+- `packages/peerdeal_core/lib/src/models/core_invariant_codes.dart`
+- `packages/peerdeal_core/lib/src/invariants/baseline_invariant_guards.dart`
+- `packages/peerdeal_core/lib/src/models/table_state.dart`
+- `packages/peerdeal_core/test/invariant_guards_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused core invariant/state suite passes: 18 tests.
+- `peerdeal_core` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T291 Normalize Diagnostics Redaction Keys
 
 Summary:

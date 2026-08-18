@@ -151,6 +151,45 @@ void main() {
       );
     });
 
+    test('flag unsafe table state identities', () {
+      final state = TableState.initial(
+        tableId: 'table\n1',
+        sessionId: 'session_1\t',
+        protocolVersion: '1.0\u0000',
+      ).copyWith(
+        phase: TablePhase.liveActive,
+        activeHandId: 'hand\n1',
+      );
+
+      expect(
+        codesFor(state),
+        containsAll(<String>[
+          CoreInvariantCodes.tableIdUnsafe,
+          CoreInvariantCodes.sessionIdUnsafe,
+          CoreInvariantCodes.protocolVersionUnsafe,
+          CoreInvariantCodes.activeHandIdUnsafe,
+        ]),
+      );
+    });
+
+    test('reject unsafe identities during TableState hydration', () {
+      for (final entry in <String, String>{
+        'table_id': 'table\n1',
+        'session_id': ' session_1',
+        'protocol_version': '1.0\u0000',
+        'active_hand_id': 'hand\n1',
+      }.entries) {
+        final malformed = TableState.initial().toJson()
+          ..[entry.key] = entry.value;
+
+        expect(
+          () => TableState.fromJson(malformed),
+          throwsA(isA<FormatException>()),
+          reason: entry.key,
+        );
+      }
+    });
+
     test('flag negative counters and event sequence', () {
       final state = TableState.initial().copyWith(
         eventSequence: -1,

@@ -2921,6 +2921,12 @@ redaction. Sensitive diagnostic field names are normalized for comparison while
 safe original keys remain in the scrubbed shape. Scrubber limits, output shape,
 and privacy package ownership remain unchanged.
 
+The T292 follow-up hardens deterministic core state identity handling. Table
+state hydration and baseline invariant guards now reject padded or control-
+bearing table, session, protocol, and active-hand identities with explicit
+unsafe-state violations. Core state ownership, reducer behavior, and package
+boundaries remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

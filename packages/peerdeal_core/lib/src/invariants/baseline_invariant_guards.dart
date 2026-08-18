@@ -25,11 +25,21 @@ class TableIdentityMustBePresentGuard implements InvariantGuard {
         code: CoreInvariantCodes.tableIdEmpty,
         message: 'A projected table state must keep a non-empty table_id.',
       );
+    } else if (!_isSafeIdentity(state.tableId)) {
+      yield const InvariantViolation(
+        code: CoreInvariantCodes.tableIdUnsafe,
+        message: 'A projected table state must keep a safe table_id.',
+      );
     }
     if (state.sessionId.trim().isEmpty) {
       yield const InvariantViolation(
         code: CoreInvariantCodes.sessionIdEmpty,
         message: 'A projected table state must keep a non-empty session_id.',
+      );
+    } else if (!_isSafeIdentity(state.sessionId)) {
+      yield const InvariantViolation(
+        code: CoreInvariantCodes.sessionIdUnsafe,
+        message: 'A projected table state must keep a safe session_id.',
       );
     }
     if (state.protocolVersion.trim().isEmpty) {
@@ -37,6 +47,11 @@ class TableIdentityMustBePresentGuard implements InvariantGuard {
         code: CoreInvariantCodes.protocolVersionEmpty,
         message:
             'A projected table state must keep a non-empty protocol_version.',
+      );
+    } else if (!_isSafeIdentity(state.protocolVersion)) {
+      yield const InvariantViolation(
+        code: CoreInvariantCodes.protocolVersionUnsafe,
+        message: 'A projected table state must keep a safe protocol_version.',
       );
     }
   }
@@ -77,6 +92,12 @@ class ActiveHandIdentityMustBePresentGuard implements InvariantGuard {
       yield const InvariantViolation(
         code: CoreInvariantCodes.activeHandIdEmpty,
         message: 'active_hand_id cannot be empty when a hand is active.',
+      );
+    } else if (state.activeHandId != null &&
+        !_isSafeIdentity(state.activeHandId!)) {
+      yield const InvariantViolation(
+        code: CoreInvariantCodes.activeHandIdUnsafe,
+        message: 'active_hand_id must contain safe identity text.',
       );
     }
   }
@@ -172,4 +193,11 @@ class WipedPhaseMustNotHaveActiveStateGuard implements InvariantGuard {
       );
     }
   }
+}
+
+bool _isSafeIdentity(String value) {
+  if (value.trim() != value) return false;
+  return value.codeUnits.every(
+    (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
+  );
 }

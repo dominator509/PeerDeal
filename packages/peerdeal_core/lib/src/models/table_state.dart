@@ -129,6 +129,9 @@ class TableState {
     if (value is! String) {
       throw FormatException('TableState $key must be a string.');
     }
+    if (!_isSafeIdentity(value)) {
+      throw FormatException('TableState $key contains unsafe identity text.');
+    }
     return value;
   }
 
@@ -136,6 +139,9 @@ class TableState {
     final value = json[key];
     if (value != null && value is! String) {
       throw FormatException('TableState $key must be a string or null.');
+    }
+    if (value is String && !_isSafeIdentity(value)) {
+      throw FormatException('TableState $key contains unsafe identity text.');
     }
     return value as String?;
   }
@@ -177,4 +183,11 @@ class TableState {
   }
 
   static const Object _sentinel = Object();
+
+  static bool _isSafeIdentity(String value) {
+    if (value.trim() != value) return false;
+    return value.codeUnits.every(
+      (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
+    );
+  }
 }
