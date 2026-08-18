@@ -179,6 +179,48 @@ void main() {
     },
   );
 
+  test('drops malformed UTF-8 provider candidates', () async {
+    final malformedPeerId = String.fromCharCode(0xD800);
+    final coordinator = NativeJoinBootstrapCoordinator(
+      bridge: _StaticLocalNetworkBridge(
+        capability: const LocalNetworkCapability(
+          discoverySupported: true,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: 'local-network-ready',
+        ),
+        discovery: LocalNetworkDiscoverySnapshot(
+          permissionGranted: true,
+          foundEndpoints: <String>['peer-safe'],
+          interfaceHints: const <String>[],
+        ),
+      ),
+      provider: _StaticBootstrapCandidateProvider(
+        candidates: <BootstrapCandidate>[
+          BootstrapCandidate(
+            peerId: malformedPeerId,
+            routeClass: NetworkRouteClass.p2pRemote,
+            reachable: true,
+            priority: 2,
+          ),
+          const BootstrapCandidate(
+            peerId: 'peer-safe',
+            routeClass: NetworkRouteClass.lanDirect,
+            reachable: true,
+            priority: 1,
+          ),
+        ],
+      ),
+    );
+
+    final plan = await coordinator.buildPlan(
+      resolvedInvite: _resolvedInvite,
+      roleGrant: _roleGrant,
+    );
+
+    expect(plan.peerCandidates, <String>['peer-safe']);
+  });
+
   test('scrubs native discovery endpoints before join bootstrap', () async {
     final provider = _RecordingBootstrapCandidateProvider();
     final coordinator = NativeJoinBootstrapCoordinator(

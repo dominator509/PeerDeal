@@ -189,6 +189,12 @@ class NativeJoinBootstrapCoordinator
     if (normalized.isEmpty) {
       return '';
     }
+    if (!NativeBridgePayloadLimits.isWithinUtf8Limit(
+      normalized,
+      NativeBridgePayloadLimits.maxTransportIdentityBytes,
+    )) {
+      return '';
+    }
     if (_looksSensitive(normalized)) {
       return '';
     }

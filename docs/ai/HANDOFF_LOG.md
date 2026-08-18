@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T307 Harden Bootstrap Candidate UTF-8 Boundaries
+
+Summary:
+- Mirrored native join-bootstrap coordinators now drop malformed provider peer
+  identities before producing a join plan.
+- Mirrored bootstrap candidate loaders now fail closed for malformed native
+  notes and interface identities while preserving existing valid normalization,
+  bounds, and relay fallback behavior.
+- Network contracts and package ownership remain unchanged.
+
+Files:
+- `apps/peerdeal_mobile/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- Mirrored desktop implementations and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Mirrored coordinator and bootstrap-loader focused Flutter tests pass.
+- Full repository gates are pending in this handoff.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T306 Harden Join Acceptance Boundaries
 
 Summary:

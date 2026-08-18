@@ -404,6 +404,27 @@ void main() {
     expect(result.nativeNotes, isNot(contains('secret')));
   });
 
+  test('fails closed for malformed native notes', () async {
+    final result = await NativeBootstrapCandidateLoader(
+      bridge: _FakeLocalNetworkBridge(
+        capability: LocalNetworkCapability(
+          discoverySupported: false,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: 'ready${String.fromCharCode(0xD800)}',
+        ),
+        discovery: LocalNetworkDiscoverySnapshot(
+          permissionGranted: true,
+          foundEndpoints: const <String>[],
+          interfaceHints: const <String>[],
+        ),
+      ),
+    ).load(sessionId: 'session-1', tableId: 'table-1');
+
+    expect(result.discoveryAvailable, isFalse);
+    expect(result.nativeNotes, 'unavailable');
+  });
+
   test('fails closed when local network bridge throws', () async {
     final result = await NativeBootstrapCandidateLoader(
       bridge: _ThrowingLocalNetworkBridge(),

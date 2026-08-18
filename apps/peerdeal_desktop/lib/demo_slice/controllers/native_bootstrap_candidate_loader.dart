@@ -251,6 +251,12 @@ class NativeBootstrapCandidateLoader {
     if (normalized.isEmpty) {
       return 'unavailable';
     }
+    if (!NativeBridgePayloadLimits.isWithinUtf8Limit(
+      normalized,
+      NativeBridgePayloadLimits.maxDiagnosticBytes,
+    )) {
+      return 'unavailable';
+    }
     if (_looksSensitive(normalized)) {
       return 'unavailable';
     }
@@ -285,6 +291,12 @@ class NativeBootstrapCandidateLoader {
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
     if (normalized.isEmpty) {
+      return '';
+    }
+    if (!NativeBridgePayloadLimits.isWithinUtf8Limit(
+      normalized,
+      NativeBridgePayloadLimits.maxTransportIdentityBytes,
+    )) {
       return '';
     }
     if (_looksSensitive(normalized)) {
