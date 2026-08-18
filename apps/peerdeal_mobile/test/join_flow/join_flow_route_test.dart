@@ -68,6 +68,26 @@ void main() {
     expect(handedOffInvite?.tableId, 'tbl_001');
   });
 
+  testWidgets('fails closed for a malformed accepted invite', (tester) async {
+    ResolvedInvite? handedOffInvite;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: (_) =>
+              const _MalformedAcceptedInviteOrchestrator(),
+          onJoinReady: (_, invite) => handedOffInvite = invite,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_JOIN_OUTCOME_INVALID'), findsOneWidget);
+    expect(handedOffInvite, isNull);
+  });
+
   testWidgets('forwards verified session context to production handoff', (
     tester,
   ) async {
@@ -88,6 +108,29 @@ void main() {
     expect(handedOffContext?.invite.inviteId, 'inv_001');
     expect(handedOffContext?.remotePeerId, 'peer_a');
     expect(handedOffContext?.localSeat, 1);
+  });
+
+  testWidgets('fails closed for unsafe accepted session context', (
+    tester,
+  ) async {
+    JoinFlowSessionContext? handedOffContext;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: JoinFlowRoute(
+          orchestratorFactory: (_) =>
+              const _UnsafeAcceptedSessionContextOrchestrator(),
+          onSessionReady: (_, sessionContext) =>
+              handedOffContext = sessionContext,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('State: joinRejected'), findsOneWidget);
+    expect(find.text('Result: ERR_JOIN_OUTCOME_INVALID'), findsOneWidget);
+    expect(handedOffContext, isNull);
   });
 
   testWidgets(
@@ -603,6 +646,77 @@ class _VerboseJoinFlowOrchestrator implements JoinFlowOrchestrator {
           code: 'OK_JOIN_$index',
           message: 'Join diagnostic $index.',
         ),
+      ),
+    );
+  }
+
+  @override
+  Future<JoinFlowOutcome> runRejoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) => runFirstJoin(context, cancellation: cancellation);
+}
+
+class _MalformedAcceptedInviteOrchestrator implements JoinFlowOrchestrator {
+  const _MalformedAcceptedInviteOrchestrator();
+
+  @override
+  Future<JoinFlowOutcome> runFirstJoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) async {
+    return JoinFlowOutcome(
+      state: JoinFlowState.joined,
+      status: JoinDecisionStatus.okJoined,
+      resultCode: 'OK_JOINED',
+      resolvedInvite: ResolvedInvite(
+        inviteId: String.fromCharCode(0xD800),
+        tableId: 'tbl_001',
+        sessionId: 'sess_001',
+        modeType: 'open_table',
+        protocolVersion: '1.0.0',
+        requiresReceiptAck: true,
+        requiresRetentionAck: true,
+        requiresCaptureAck: true,
+      ),
+    );
+  }
+
+  @override
+  Future<JoinFlowOutcome> runRejoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) => runFirstJoin(context, cancellation: cancellation);
+}
+
+class _UnsafeAcceptedSessionContextOrchestrator
+    implements JoinFlowOrchestrator {
+  const _UnsafeAcceptedSessionContextOrchestrator();
+
+  @override
+  Future<JoinFlowOutcome> runFirstJoin(
+    InviteContext context, {
+    Future<void>? cancellation,
+  }) async {
+    const invite = ResolvedInvite(
+      inviteId: 'inv_001',
+      tableId: 'tbl_001',
+      sessionId: 'sess_001',
+      modeType: 'open_table',
+      protocolVersion: '1.0.0',
+      requiresReceiptAck: true,
+      requiresRetentionAck: true,
+      requiresCaptureAck: true,
+    );
+    return JoinFlowOutcome(
+      state: JoinFlowState.joined,
+      status: JoinDecisionStatus.okJoined,
+      resultCode: 'OK_JOINED',
+      resolvedInvite: invite,
+      sessionContext: JoinFlowSessionContext(
+        invite: invite,
+        remotePeerId: String.fromCharCode(0xD800),
+        localSeat: 1,
       ),
     );
   }

@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored mobile and desktop join-flow acceptance now fails closed when an
+  accepted invite or supplied session context is unsafe, including malformed
+  UTF-16/UTF-8 identities; valid join and rejoin handoff behavior remains
+  unchanged.
 - Shared app-shell UI primitives now expose scaffold titles as semantic
   headings and operational status pills as live regions, improving screen
   reader navigation and status-change announcements across both app shells;

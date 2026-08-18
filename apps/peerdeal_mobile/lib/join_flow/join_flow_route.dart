@@ -308,18 +308,15 @@ InviteContext _defaultInviteContextFor(JoinFlowDemoMode mode) {
 
 JoinFlowOutcome _safeJoinOutcome(JoinFlowOutcome outcome) {
   if (!_isSafeJoinToken(outcome.resultCode)) {
-    return JoinFlowOutcome(
-      state: JoinFlowState.joinRejected,
-      status: JoinDecisionStatus.rejected,
-      resultCode: 'ERR_JOIN_OUTCOME_INVALID',
-      diagnostics: <ProtocolDiagnostic>[
-        ProtocolDiagnostic(
-          code: 'ERR_JOIN_OUTCOME_INVALID',
-          message: 'Join outcome is invalid.',
-        ),
-      ],
-      message: 'Join outcome is invalid.',
-    );
+    return _invalidJoinOutcome();
+  }
+
+  final safeInvite = _safeResolvedInvite(outcome);
+  final safeSessionContext = _safeSessionContext(outcome);
+  if (_isAcceptedJoinOutcome(outcome) &&
+      (safeInvite == null ||
+          (outcome.sessionContext != null && safeSessionContext == null))) {
+    return _invalidJoinOutcome();
   }
 
   return JoinFlowOutcome(
@@ -328,9 +325,31 @@ JoinFlowOutcome _safeJoinOutcome(JoinFlowOutcome outcome) {
     resultCode: outcome.resultCode,
     diagnostics: _safeJoinDiagnostics(outcome.diagnostics),
     message: _isSafeJoinMessage(outcome.message) ? outcome.message : null,
-    resolvedInvite: _safeResolvedInvite(outcome),
-    sessionContext: _safeSessionContext(outcome),
+    resolvedInvite: safeInvite,
+    sessionContext: safeSessionContext,
   );
+}
+
+JoinFlowOutcome _invalidJoinOutcome() {
+  return JoinFlowOutcome(
+    state: JoinFlowState.joinRejected,
+    status: JoinDecisionStatus.rejected,
+    resultCode: 'ERR_JOIN_OUTCOME_INVALID',
+    diagnostics: <ProtocolDiagnostic>[
+      ProtocolDiagnostic(
+        code: 'ERR_JOIN_OUTCOME_INVALID',
+        message: 'Join outcome is invalid.',
+      ),
+    ],
+    message: 'Join outcome is invalid.',
+  );
+}
+
+bool _isAcceptedJoinOutcome(JoinFlowOutcome outcome) {
+  return (outcome.state == JoinFlowState.joined &&
+          outcome.status == JoinDecisionStatus.okJoined) ||
+      (outcome.state == JoinFlowState.rejoined &&
+          outcome.status == JoinDecisionStatus.okRejoined);
 }
 
 JoinFlowSessionContext? _safeSessionContext(JoinFlowOutcome outcome) {
@@ -377,7 +396,10 @@ ResolvedInvite? _safeResolvedInvite(JoinFlowOutcome outcome) {
 }
 
 bool _isSafeJoinIdentity(String value) {
-  if (value.trim() != value || value.isEmpty || value.length > 160) {
+  if (value.trim() != value ||
+      value.isEmpty ||
+      value.length > 160 ||
+      !const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
     return false;
   }
   return value.codeUnits.every(
@@ -465,7 +487,10 @@ bool _isSafeJoinTokenCodeUnit(int codeUnit) {
 
 bool _isSafeJoinMessage(String? value) {
   if (value == null) return true;
-  if (value.trim() != value || value.isEmpty || value.length > 160) {
+  if (value.trim() != value ||
+      value.isEmpty ||
+      value.length > 160 ||
+      !const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
     return false;
   }
   final lower = value.toLowerCase();

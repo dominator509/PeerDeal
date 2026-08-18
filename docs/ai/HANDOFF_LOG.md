@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T306 Harden Join Acceptance Boundaries
+
+Summary:
+- Mirrored mobile and desktop join-flow routes now reject accepted outcomes
+  when the resolved invite or supplied session context is unsafe instead of
+  rendering a successful result while dropping the product handoff.
+- Existing protocol-owned strict UTF-8 validation is applied to join identities
+  and display messages; join-flow ownership and package boundaries remain
+  unchanged.
+
+Files:
+- `apps/peerdeal_mobile/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_mobile/test/join_flow/join_flow_route_test.dart`
+- `apps/peerdeal_desktop/lib/join_flow/join_flow_route.dart`
+- `apps/peerdeal_desktop/test/join_flow/join_flow_route_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Mirrored mobile and desktop focused join-flow tests pass.
+- Full repository gates are pending in this handoff.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T305 Harden Shared UI Accessibility Semantics
 
 Summary:
