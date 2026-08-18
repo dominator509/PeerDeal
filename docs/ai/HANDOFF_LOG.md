@@ -2,6 +2,38 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T294 Harden Hold'em Typed Text Boundaries
+
+Summary:
+- Hold'em hand-state validation now applies the existing canonical UTF-8 text
+  byte ceiling to hand IDs and action summaries.
+- Hold'em cursor identity checks now reject oversized and C1-bearing text and
+  validate the optional `last_event_type` field at construction.
+- Hold'em event-payload text validation now applies the same bound, preserving
+  fail-closed handling for direct in-memory events that bypass JSON decoding.
+- Variant ownership, protocol event shape, and package boundaries remain
+  unchanged.
+
+Files:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_input_limits.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_hand_state.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_core_projection_adapter.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_event_reducer.dart`
+- `packages/peerdeal_variants/test/holdem_hand_state_persistence_test.dart`
+- `packages/peerdeal_variants/test/holdem_core_projection_adapter_test.dart`
+- `packages/peerdeal_variants/test/holdem_event_reducer_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused variant regression suite passes: 29 tests.
+- Full `peerdeal_variants` Dart suite passes: 180 tests.
+- `peerdeal_variants` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T293 Harden Core Typed Ingress Text Bounds
 
 Summary:

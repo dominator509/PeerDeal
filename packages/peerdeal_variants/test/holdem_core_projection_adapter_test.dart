@@ -7,6 +7,44 @@ void main() {
   const adapter = HoldemCoreProjectionAdapter();
   const showdownCoordinator = HoldemShowdownCoordinator();
 
+  test('cursor rejects oversized and C1 identity text', () {
+    final oversizedIdentity = String.fromCharCodes(
+      List<int>.filled(HoldemInputLimits.defaultMaxTextBytes + 1, 0x78),
+    );
+
+    for (final value in <String>[oversizedIdentity, 'actor_1\u0085']) {
+      expect(
+        () => HoldemEventCursor(
+          protocolVersion: '1.0.0',
+          tableId: 'table_001',
+          sessionId: 'session_001',
+          nextEventSeq: 1,
+          previousEventHash: 'GENESIS',
+          actorRef: value,
+          lastEventType: 'HandStarted',
+          eventIdFactory: (eventType, eventSeq) => 'event_$eventSeq',
+          emittedAtFactory: () => '2026-08-18T00:00:00Z',
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    }
+
+    expect(
+      () => HoldemEventCursor(
+        protocolVersion: '1.0.0',
+        tableId: 'table_001',
+        sessionId: 'session_001',
+        nextEventSeq: 1,
+        previousEventHash: 'GENESIS',
+        actorRef: 'actor_1',
+        lastEventType: 'HandStarted\u0085',
+        eventIdFactory: (eventType, eventSeq) => 'event_$eventSeq',
+        emittedAtFactory: () => '2026-08-18T00:00:00Z',
+      ),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
+
   test('rejects invalid hand state before core projection', () {
     final initial = _preflopState();
     final result = adapter.startHand(

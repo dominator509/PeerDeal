@@ -140,6 +140,42 @@ void main() {
     }
   });
 
+  test('direct state validation rejects oversized and C1 identity text', () {
+    final oversizedHandId = String.fromCharCodes(
+      List<int>.filled(HoldemInputLimits.defaultMaxTextBytes + 1, 0x78),
+    );
+    final states = <HoldemHandState>[
+      HoldemHandState(
+        handId: oversizedHandId,
+        phase: HoldemHandPhase.handIdle,
+        bettingRound: HoldemBettingRound.none,
+        seats: const <HoldemSeatState>[],
+        currentActorSeat: 0,
+        buttonSeat: 0,
+        smallBlindSeat: 0,
+        bigBlindSeat: 1,
+        currentBetToCall: 0,
+        minimumRaiseAmount: 1,
+      ),
+      HoldemHandState(
+        handId: 'hand_001\u0085',
+        phase: HoldemHandPhase.handIdle,
+        bettingRound: HoldemBettingRound.none,
+        seats: const <HoldemSeatState>[],
+        currentActorSeat: 0,
+        buttonSeat: 0,
+        smallBlindSeat: 0,
+        bigBlindSeat: 1,
+        currentBetToCall: 0,
+        minimumRaiseAmount: 1,
+      ),
+    ];
+
+    for (final state in states) {
+      expect(state.validate().reasonCode, 'ERR_HOLDEM_STATE_HAND_ID_INVALID');
+    }
+  });
+
   test(
     'rejects structurally oversized Holdem collections during hydration',
     () {

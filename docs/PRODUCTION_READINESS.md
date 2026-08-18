@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Hold'em variant state, cursor, and event-payload text validation now applies
+  the existing canonical UTF-8 text-byte ceiling and rejects C1 controls;
+  cursor construction also validates optional `last_event_type` without
+  changing variant ownership or protocol event shape.
 - Core typed command, event, and table-state ingress now applies the existing
   canonical JSON text-byte ceiling and rejects unsafe or oversized identities;
   the reducer reports a stable unsafe event-envelope invariant without

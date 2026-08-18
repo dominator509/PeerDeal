@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
@@ -5,6 +7,7 @@ import 'holdem_action_street_coordinator.dart';
 import 'holdem_betting_round.dart';
 import 'holdem_hand_phase.dart';
 import 'holdem_hand_state.dart';
+import 'holdem_input_limits.dart';
 import 'holdem_state_machine.dart';
 import 'holdem_table_action.dart';
 
@@ -438,6 +441,7 @@ class HoldemEventReducer {
   bool _isSafeText(String value) {
     return value.trim().isNotEmpty &&
         value.trim() == value &&
+        utf8.encode(value).length <= HoldemInputLimits.defaultMaxTextBytes &&
         value.codeUnits.every(
           (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
         );

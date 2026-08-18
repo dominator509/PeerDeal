@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:meta/meta.dart';
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
@@ -7,6 +9,7 @@ import '../contracts/showdown_models.dart';
 import 'holdem_hand_phase.dart';
 import 'holdem_hand_state.dart';
 import 'holdem_event_reducer.dart';
+import 'holdem_input_limits.dart';
 import 'holdem_settlement_blocked_event_builder.dart';
 import 'holdem_settlement_projected_event_builder.dart';
 import 'holdem_showdown_coordinator.dart';
@@ -41,6 +44,9 @@ class HoldemEventCursor {
     _requireIdentity(sessionId, 'sessionId');
     _requireIdentity(previousEventHash, 'previousEventHash');
     _requireIdentity(actorRef, 'actorRef');
+    if (lastEventType != null) {
+      _requireIdentity(lastEventType!, 'lastEventType');
+    }
     if (nextEventSeq < 1) {
       throw ArgumentError.value(
         nextEventSeq,
@@ -1024,7 +1030,9 @@ String _defaultEventHash(Map<String, Object?> canonicalEvent) {
 }
 
 void _requireIdentity(String value, String field) {
-  if (value.trim().isEmpty || value != value.trim()) {
+  if (value.trim().isEmpty ||
+      value != value.trim() ||
+      utf8.encode(value).length > HoldemInputLimits.defaultMaxTextBytes) {
     throw ArgumentError.value(
       value,
       field,
@@ -1032,7 +1040,7 @@ void _requireIdentity(String value, String field) {
     );
   }
   for (final codeUnit in value.codeUnits) {
-    if (codeUnit < 0x20 || codeUnit == 0x7f) {
+    if (codeUnit < 0x20 || (codeUnit >= 0x7f && codeUnit <= 0x9f)) {
       throw ArgumentError.value(
         value,
         field,
