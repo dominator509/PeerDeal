@@ -2781,6 +2781,13 @@ remain unchanged; native/device reachability, session authentication, product
 state/database wiring, release signing, other-platform hosts, and final UX
 remain separate.
 
+The T270 follow-up closes an Android native secure-key revision-overflow gap.
+Android secure-key save and delete mutations now reject revision exhaustion
+explicitly before incrementing a signed `Long`, matching the existing Windows
+host behavior and preserving the generic channel contract. The Android debug
+host compiles successfully; device persistence and cross-process runtime
+validation remain external.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T270 Guard Android Secure-Key Revision Exhaustion
+
+Summary:
+- Android secure-key save and delete mutations now fail closed when the
+  persisted revision reaches `Long.MAX_VALUE`, before signed arithmetic can
+  overflow.
+- This aligns Android with the existing Windows secure-key host guard without
+  changing the generic method-channel contract or receipt semantics.
+
+Files:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Android `assembleDebug --no-daemon` passes, including Kotlin compilation.
+- Direct Flutter-bundled Dart analyzer passes all 17 workspace packages.
+- Boundary and source-text checks pass; their 13 and 7 script tests pass, and
+  dependency-audit script tests pass.
+- `git diff --check` passes.
+
+Remaining:
+- Real-device secure-key/capture validation, cross-device multicast, release
+  signing, other-platform hosts, product session/state and database wiring,
+  session authentication, and final UX validation remain open.
+
 ### 2026-08-17 - Codex - T269 Fail Early Transport Provisioning Configuration
 
 Summary:

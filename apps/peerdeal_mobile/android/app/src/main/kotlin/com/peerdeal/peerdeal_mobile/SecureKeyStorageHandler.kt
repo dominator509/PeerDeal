@@ -161,14 +161,18 @@ internal class SecureKeyStorageHandler(context: Context) :
                     val validatedKey = key ?: return@submit mutationFailure(
                         "Secure key storage request is invalid.",
                     )
+                    val nextRevision = nextRevision(read.revision)
+                        ?: return@submit mutationFailure(
+                            "Secure key storage revision exhausted.",
+                        )
                     val nextRecords =
                         read.records.filterNot { it.keyId == validatedKey.keyId } + validatedKey
                     if (nextRecords.size > MAX_RECORDS ||
-                        !writeRecords(namespace, nextRecords, read.revision + 1)
+                        !writeRecords(namespace, nextRecords, nextRevision)
                     ) {
                         mutationFailure("Secure key storage mutation failed.")
                     } else {
-                        mapOf("success" to true, "revision" to read.revision + 1)
+                        mapOf("success" to true, "revision" to nextRevision)
                     }
                 }
                 ReadResult.Failure -> mutationFailure("Secure key storage is unavailable.")
@@ -214,10 +218,16 @@ internal class SecureKeyStorageHandler(context: Context) :
                     val nextRecords = read.records.filterNot { it.keyId == keyId }
                     if (nextRecords.size == read.records.size) {
                         mapOf("success" to true, "revision" to read.revision)
-                    } else if (writeRecords(namespace, nextRecords, read.revision + 1)) {
-                        mapOf("success" to true, "revision" to read.revision + 1)
                     } else {
-                        mutationFailure("Secure key storage mutation failed.")
+                        val nextRevision = nextRevision(read.revision)
+                            ?: return@submit mutationFailure(
+                                "Secure key storage revision exhausted.",
+                            )
+                        if (writeRecords(namespace, nextRecords, nextRevision)) {
+                            mapOf("success" to true, "revision" to nextRevision)
+                        } else {
+                            mutationFailure("Secure key storage mutation failed.")
+                        }
                     }
                 }
                 ReadResult.Failure -> mutationFailure("Secure key storage is unavailable.")
@@ -376,6 +386,10 @@ internal class SecureKeyStorageHandler(context: Context) :
 
         if (!writeStoredEnvelope(namespace, envelope)) return false
         return removeLegacyEnvelope(namespace)
+    }
+
+    private fun nextRevision(revision: Long): Long? {
+        return if (revision == Long.MAX_VALUE) null else revision + 1
     }
 
     private fun readStoredEnvelope(namespace: String): StoredEnvelope {
