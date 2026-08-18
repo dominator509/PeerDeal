@@ -6,16 +6,33 @@ import sys
 
 DEFAULT_ROOT = pathlib.Path(__file__).resolve().parents[1]
 CHECKED_SUFFIXES = {
+    ".c",
+    ".cc",
+    ".cpp",
     ".dart",
+    ".h",
+    ".hpp",
+    ".java",
     ".json",
+    ".kt",
+    ".kts",
     ".md",
+    ".properties",
+    ".ps1",
+    ".py",
+    ".sh",
     ".yaml",
     ".yml",
+    ".xml",
 }
 SKIPPED_PARTS = {
     ".dart_tool",
     ".git",
     "build",
+}
+SKIPPED_FILES = {
+    # Generated AI context may contain copied source text outside this policy.
+    "repomix-summary.xml",
 }
 FORBIDDEN_TEXT = {
     "\u00c2": "likely mojibake marker",
@@ -26,8 +43,10 @@ FORBIDDEN_TEXT = {
 
 
 def should_check(path: pathlib.Path) -> bool:
-    return path.suffix in CHECKED_SUFFIXES and not any(
-        part in SKIPPED_PARTS for part in path.parts
+    return (
+        path.suffix in CHECKED_SUFFIXES
+        and path.name not in SKIPPED_FILES
+        and not any(part in SKIPPED_PARTS for part in path.parts)
     )
 
 

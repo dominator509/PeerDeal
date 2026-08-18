@@ -100,6 +100,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The source-text gate now covers committed native and automation sources,
+  including Kotlin, C/C++, headers, manifests, Gradle configuration, and
+  scripts, while excluding only the generated `repomix-summary.xml` context
+  artifact. This extends existing text-integrity enforcement without changing
+  application behavior, package ownership, or native channel contracts.
 - Mirrored app-owned secure-key consumers now reject duplicate key IDs from
   direct `SecureKeyStorageBridge` implementations before selecting receipt
   keys, local peer identity, or readiness state. This aligns the app boundary

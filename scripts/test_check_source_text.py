@@ -24,8 +24,22 @@ class SourceTextCheckTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             root = pathlib.Path(temp_dir)
             write_file(root / "lib" / "sample.dart", "const label = 'Clean';\n")
+            write_file(root / "android" / "MainActivity.kt", "val label = 'Clean'\n")
+            write_file(root / "windows" / "runner.cpp", "const char* label = \"Clean\";\n")
 
             self.assertEqual([], check_source_text(root))
+
+    def test_checks_native_source_text_extensions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(root / "android" / "MainActivity.kt", "val label = 'A\u2014B'\n")
+            write_file(root / "windows" / "runner.cpp", "const char* label = \"A\u2014B\";\n")
+
+            failures = check_source_text(root)
+
+            self.assertEqual(2, len(failures))
+            self.assertTrue(any("MainActivity.kt:1" in failure for failure in failures))
+            self.assertTrue(any("runner.cpp:1" in failure for failure in failures))
 
     def test_rejects_mojibake_marker(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -72,6 +86,16 @@ class SourceTextCheckTest(unittest.TestCase):
             root = pathlib.Path(temp_dir)
             write_file(root / ".dart_tool" / "cache.dart", "bad\ufffdtext\n")
             write_file(root / "build" / "cache.json", '{"label": "A\u00c2B"}\n')
+
+            self.assertEqual([], check_source_text(root))
+
+    def test_ignores_generated_repomix_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_file(
+                root / "docs" / "ai" / "repomix-summary.xml",
+                "<summary>Copied text \u2014 intentionally generated.</summary>\n",
+            )
 
             self.assertEqual([], check_source_text(root))
 

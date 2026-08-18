@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Extend Source-Text Gate To Native Sources
+
+Summary:
+- The existing source-text checker now scans committed Kotlin, C/C++, header,
+  manifest, Gradle, PowerShell, Python, and shell sources for the same BOM,
+  mojibake, em dash, replacement-character, and UTF-8 violations already
+  enforced for Dart and repository metadata.
+- The generated `docs/ai/repomix-summary.xml` artifact is explicitly excluded
+  because it contains copied context rather than runtime source.
+- No application behavior, package boundary, native channel contract, or
+  architecture changed.
+
+Files:
+- `scripts/check_source_text.py`
+- `scripts/test_check_source_text.py`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Source-text unit tests: 9 passed.
+- Full serialized `melos run test`, analyzer, boundary, source-text, and
+  dependency-audit gates passed.
+- Android debug APK and Windows release executable builds passed.
+
+Remaining:
+- Android real-device and Windows interactive persistence, cross-device
+  transport, operator release signing, other-platform hosts, product-owned
+  session state/database wiring, session authentication, and final UX remain
+  documented production gates.
+
 ### 2026-08-18 - Codex - Harden CI Workflow Boundaries
 
 Summary:
