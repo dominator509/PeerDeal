@@ -45,6 +45,10 @@ void main() {
     expect(find.text('PeerDeal'), findsOneWidget);
     expect(find.text('Table control'), findsOneWidget);
     expect(find.text('Body'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('PeerDeal')),
+      matchesSemantics(label: 'PeerDeal', isHeader: true),
+    );
 
     await tester.tap(find.text('Open'));
 
@@ -106,6 +110,14 @@ void main() {
 
     expect(find.text('stable'), findsNWidgets(2));
     expect(find.text('Network'), findsOneWidget);
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('stable')),
+      matchesSemantics(
+        label: 'stable',
+        hasEnabledState: false,
+        isLiveRegion: true,
+      ),
+    );
   });
 
   testWidgets('info row stacks content within a narrow viewport', (

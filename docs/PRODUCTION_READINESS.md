@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Shared app-shell UI primitives now expose scaffold titles as semantic
+  headings and operational status pills as live regions, improving screen
+  reader navigation and status-change announcements across both app shells;
+  layout, runtime state ownership, and action behavior remain unchanged.
 - Windows native host smoke storage-path validation now uses the existing
   protocol-owned strict UTF-8 round-trip and byte ceiling before accepting the
   native app-support directory; native channel ownership and smoke checkpoints

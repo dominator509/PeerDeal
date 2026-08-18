@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T305 Harden Shared UI Accessibility Semantics
+
+Summary:
+- `PeerDealAppScaffold` now exposes its title as a semantic heading.
+- `PeerDealStatusPill` now exposes its bounded status text as a live semantic
+  region so operational changes can be announced by assistive technology.
+- Runtime state ownership, layout behavior, action handling, and package
+  boundaries remain unchanged.
+
+Files:
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_app_scaffold.dart`
+- `packages/peerdeal_ui_kit/lib/src/app_shell/peer_deal_status_pill.dart`
+- `packages/peerdeal_ui_kit/test/app_shell_widgets_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Shared UI semantics and full UI package tests pass.
+- Mirrored mobile and desktop production Hold'em route tests pass.
+- Full analyze, boundary, source-text, dependency-audit, test, and diff gates
+  pass.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T304 Harden Windows Native Smoke UTF-8 Boundary
 
 Summary:

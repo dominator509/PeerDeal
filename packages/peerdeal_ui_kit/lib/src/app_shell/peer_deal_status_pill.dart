@@ -13,17 +13,23 @@ class PeerDealStatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = _colorsFor(severity);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.background,
-        border: Border.all(color: colors.border),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        child: Text(
-          label,
-          style: TextStyle(color: colors.foreground, fontSize: 13),
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: label,
+      excludeSemantics: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.background,
+          border: Border.all(color: colors.border),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: Text(
+            label,
+            style: TextStyle(color: colors.foreground, fontSize: 13),
+          ),
         ),
       ),
     );
