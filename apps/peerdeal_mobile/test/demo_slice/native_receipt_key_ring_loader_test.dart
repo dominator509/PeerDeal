@@ -289,18 +289,19 @@ void main() {
       ),
     ];
 
-    for (final snapshot in snapshots) {
+    final expectedWarnings = <String>[
+      'Secure receipt key storage revision is invalid.',
+      'Secure receipt key record metadata is invalid.',
+    ];
+    for (var index = 0; index < snapshots.length; index++) {
+      final snapshot = snapshots[index];
       final result = await NativeReceiptKeyRingLoader(
         bridge: _FakeSecureKeyStorageBridge(snapshot: snapshot),
       ).load();
 
       expect(result.hasSigningKey, isFalse);
       expect(result.hasEncryptionKey, isFalse);
-      expect(result.warnings, <String>[
-        snapshot.revision < 0
-            ? 'Secure receipt key storage revision is invalid.'
-            : 'Secure receipt key records are invalid.',
-      ]);
+      expect(result.warnings, <String>[expectedWarnings[index]]);
     }
   });
 

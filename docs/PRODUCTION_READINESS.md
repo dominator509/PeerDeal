@@ -2864,6 +2864,11 @@ values; fractional, string, and null revisions fail closed, while legacy
 envelopes without a revision continue to load as revision zero. The encrypted
 storage format and generic channel contract remain unchanged.
 
+The T282 follow-up restores the aggregate app test gate after the full Flutter
+run exposed a stale mirrored receipt-loader expectation. Mobile and desktop
+tests now assert the existing metadata-specific warning for malformed key
+metadata; no production behavior or architecture changed.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

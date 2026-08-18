@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T282 Restore Aggregate App Test Gate
+
+Summary:
+- Corrected mirrored mobile and desktop receipt key-ring loader expectations
+  so malformed key metadata reports the existing metadata-specific warning.
+- No production behavior or package boundary changed; the fix removes a stale
+  test expectation exposed by the full Flutter gate.
+
+Files:
+- `apps/peerdeal_mobile/test/demo_slice/native_receipt_key_ring_loader_test.dart`
+- `apps/peerdeal_desktop/test/demo_slice/native_receipt_key_ring_loader_test.dart`
+
+Verification:
+- Mobile app suite passes: 559 tests.
+- Desktop app suite passes: 558 tests.
+- Aggregate `melos run test` passes, including package Dart tests, Flutter
+  tests, boundary checks, dependency-audit tests, and source-text checks.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T281 Reject Coerced Android Secure-Key Revisions
 
 Summary:
@@ -75,9 +98,9 @@ Verification:
 - Direct Dart analyzer passes for `apps` and `packages`.
 - Package-boundary/source-text checks, their 13 and 7 focused tests,
   dependency-audit tests, and `git diff --check` pass.
-- Focused Flutter native-bridge tests were attempted once and timed out after
-  120 seconds with no output; the local Flutter launcher also timed out on a
-  version probe. No assertion failure was produced.
+- The focused Flutter native-bridge suite now passes all 49 tests with direct
+  host-access SDK execution; an earlier sandboxed launcher timeout was an
+  environment limitation, not a repository test result.
 
 Remaining:
 - Android real-device and Windows interactive persistence validation,
