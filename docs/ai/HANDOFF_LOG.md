@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T291 Normalize Diagnostics Redaction Keys
+
+Summary:
+- Diagnostics redaction now compares sensitive field names
+  case-insensitively while preserving safe original field names in output.
+- Case variants such as `RECEIPT_TOKEN`, `Session_Secret`, and `IP_ADDRESS`
+  can no longer bypass the existing privacy scrubber.
+- Scrubber limits, output shape, and privacy package ownership remain unchanged.
+
+Files:
+- `packages/peerdeal_privacy/lib/src/services/default_diagnostics_scrubber.dart`
+- `packages/peerdeal_privacy/test/default_diagnostics_scrubber_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused diagnostics scrubber suite passes: 9 tests.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T290 Normalize Metadata Minimization Keys
 
 Summary:

@@ -22,6 +22,23 @@ void main() {
     expect(result.payload['error_code'], 'ERR_CAPTURE_UNSUPPORTED');
   });
 
+  test('DefaultDiagnosticsScrubber redacts case-variant sensitive fields', () {
+    const scrubber = DefaultDiagnosticsScrubber();
+
+    final result = scrubber.scrub({
+      'RECEIPT_TOKEN': 'abc',
+      'Session_Secret': 'def',
+      'Device_Identifier': 'ghi',
+      'IP_ADDRESS': 'jkl',
+    });
+
+    expect(result.rawKeysRemoved, 4);
+    expect(result.payload['RECEIPT_TOKEN'], '<redacted>');
+    expect(result.payload['Session_Secret'], '<redacted>');
+    expect(result.payload['Device_Identifier'], '<redacted>');
+    expect(result.payload['IP_ADDRESS'], '<redacted>');
+  });
+
   test('DefaultDiagnosticsScrubber redacts nested sensitive fields', () {
     const scrubber = DefaultDiagnosticsScrubber();
 

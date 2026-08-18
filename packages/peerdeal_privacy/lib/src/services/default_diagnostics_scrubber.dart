@@ -96,7 +96,7 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
       final field = safeField ? rawField : _truncated;
       final nextPath = <String>[...path, field];
 
-      if (!safeField || _redact.contains(rawField)) {
+      if (!safeField || _redact.contains(rawField.toLowerCase())) {
         payload[field] = '<redacted>';
         if (redacted.length < maxMapEntries) {
           redacted.add(_boundedText(nextPath.join('.')));

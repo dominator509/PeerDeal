@@ -2916,6 +2916,11 @@ now normalize keys before matching, so case variants cannot bypass the active
 privacy profile. Metadata minimizer ownership and policy semantics remain
 unchanged.
 
+The T291 follow-up closes the matching case-variant bypass in diagnostics
+redaction. Sensitive diagnostic field names are normalized for comparison while
+safe original keys remain in the scrubbed shape. Scrubber limits, output shape,
+and privacy package ownership remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
