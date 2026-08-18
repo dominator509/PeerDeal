@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T301 Harden Privacy/Crypto/App UTF-8 Boundaries
+
+Summary:
+- Privacy diagnostic text and field checks now use the protocol-owned strict
+  UTF-8 round-trip limit before preserving scrubbed text.
+- Crypto provider-proof normalization and verification metadata checks now
+  reject unpaired UTF-16 text instead of accepting replacement bytes.
+- Mirrored mobile and desktop Hold'em snapshot metadata checks now use the same
+  strict limit before persistence.
+
+Files:
+- `packages/peerdeal_privacy/lib/src/services/default_diagnostics_scrubber.dart`
+- `packages/peerdeal_privacy/test/default_diagnostics_scrubber_test.dart`
+- `packages/peerdeal_crypto/lib/src/services/default_provider_proof_normalizer.dart`
+- `packages/peerdeal_crypto/lib/src/services/default_verification_engine.dart`
+- `packages/peerdeal_crypto/test/default_provider_proof_normalizer_test.dart`
+- `packages/peerdeal_crypto/test/default_verification_engine_test.dart`
+- Mirrored `app_holdem_production_session_snapshot_writer.dart` files and tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused privacy, crypto, mobile, and desktop suites pass.
+- Privacy and crypto analyzers pass.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T300 Harden Hold'em UTF-8 Boundaries
 
 Summary:

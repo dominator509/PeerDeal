@@ -142,6 +142,7 @@ void main() {
     final longText = String.fromCharCodes(
       List<int>.filled(DefaultDiagnosticsScrubber.maxTextBytes + 1, 120),
     );
+    final malformedText = String.fromCharCode(0xd800);
     Map<String, Object?> nested = <String, Object?>{'leaf': 'value'};
     for (var index = 0; index < DefaultDiagnosticsScrubber.maxDepth; index++) {
       nested = <String, Object?>{'nested': nested};
@@ -152,6 +153,7 @@ void main() {
       'wide_list': wideList,
       'nested': nested,
       'long_text': longText,
+      'malformed_text': malformedText,
     });
 
     expect(result.payload['wide_map'], isA<Map<Object?, Object?>>());
@@ -170,6 +172,7 @@ void main() {
     );
     expect((result.payload['wide_list']! as List<Object?>).last, '<truncated>');
     expect(result.payload['long_text'], '<truncated>');
+    expect(result.payload['malformed_text'], '<truncated>');
     expect(result.payload['nested'], isA<Map<Object?, Object?>>());
     expect(result.payload['nested'].toString(), contains('<truncated>'));
   });

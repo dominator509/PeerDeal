@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/provider_proof_normalizer.dart';
@@ -39,7 +37,9 @@ class DefaultProviderProofNormalizer implements ProviderProofNormalizer {
 
     try {
       final encodedProof = canonicalJsonEncode(boundedProof);
-      if (utf8.encode(encodedProof).length > limits.maxProofBytes) {
+      if (!CanonicalJsonLimits(
+        maxTextBytes: limits.maxProofBytes,
+      ).isWithinUtf8TextLimit(encodedProof)) {
         throw const FormatException('Provider proof payload is too large.');
       }
     } on FormatException {
@@ -69,9 +69,7 @@ class DefaultProviderProofNormalizer implements ProviderProofNormalizer {
     if (!hasSnakeCase && !hasCamelCase) return 'unknown';
     final value = proof[hasSnakeCase ? 'proof_ref' : 'proofReference'];
     if (value is! String) {
-      throw const FormatException(
-        'Provider proof reference must be a string.',
-      );
+      throw const FormatException('Provider proof reference must be a string.');
     }
     return value;
   }
@@ -81,7 +79,9 @@ class DefaultProviderProofNormalizer implements ProviderProofNormalizer {
     int maxBytes,
     String label,
   ) {
-    if (utf8.encode(value).length > maxBytes) {
+    if (!CanonicalJsonLimits(
+      maxTextBytes: maxBytes,
+    ).isWithinUtf8TextLimit(value)) {
       throw FormatException('$label exceeds its configured byte limit.');
     }
   }

@@ -144,6 +144,17 @@ void main() {
     );
   });
 
+  test('normalizer rejects non-round-tripping provider text', () {
+    expect(
+      () => const DefaultProviderProofNormalizer().normalize(
+        providerId: String.fromCharCode(0xd800),
+        providerVersion: '1.0.0',
+        rawProof: const <String, Object?>{},
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
   test('normalizer rejects unsafe provider metadata', () {
     const normalizer = DefaultProviderProofNormalizer();
 

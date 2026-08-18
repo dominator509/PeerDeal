@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/verification_engine.dart';
@@ -215,7 +213,9 @@ class DefaultVerificationEngine implements VerificationEngine {
     if (value.trim().isEmpty || value.trim() != value) {
       return false;
     }
-    if (utf8.encode(value).length > maxBytes) {
+    if (!CanonicalJsonLimits(
+      maxTextBytes: maxBytes,
+    ).isWithinUtf8TextLimit(value)) {
       return false;
     }
     return value.codeUnits.every(

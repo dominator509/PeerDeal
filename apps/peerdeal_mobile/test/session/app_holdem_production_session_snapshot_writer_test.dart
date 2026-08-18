@@ -82,6 +82,7 @@ void main() {
     final state = _typedSnapshot();
     final invalidValues = <String>[
       'snapshot_${String.fromCharCode(0x85)}',
+      String.fromCharCode(0xd800),
       'x' * (const CanonicalJsonLimits().maxTextBytes + 1),
     ];
 

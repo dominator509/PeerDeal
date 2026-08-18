@@ -107,6 +107,32 @@ void main() {
     expect(result.payload.warnings, isEmpty);
   });
 
+  test('fails closed for non-round-tripping proof metadata', () {
+    final result = engine.verify(
+      VerificationRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        handId: 'hand_1',
+        scope: VerificationScope.hand,
+        protocolVersion: '1.0',
+        expectedReplayAnchor: 'replay_anchor',
+        expectedSettlementAnchor: 'settle_anchor',
+        dealProofBundle: DealProofBundle(
+          providerId: String.fromCharCode(0xd800),
+          providerVersion: '1.0.0',
+          proofReference: 'proof_1',
+          normalizedFields: const <String, Object?>{},
+        ),
+      ),
+    );
+
+    expect(result.state, VerificationState.failed);
+    expect(
+      result.reasonCode,
+      VerificationReasonCode.errVerificationDataIncomplete,
+    );
+  });
+
   test('fails closed when hand scope has no hand identity', () {
     final result = engine.verify(
       const VerificationRequest(

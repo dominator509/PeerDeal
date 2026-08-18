@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/diagnostics_scrubber.dart';
@@ -156,7 +154,9 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
   }
 
   String _boundedText(String value) {
-    return utf8.encode(value).length <= maxTextBytes &&
+    return CanonicalJsonLimits(
+              maxTextBytes: maxTextBytes,
+            ).isWithinUtf8TextLimit(value) &&
             !_containsControlCharacter(value)
         ? value
         : _truncated;
@@ -165,7 +165,9 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
   bool _isSafeField(String value) {
     return value.isNotEmpty &&
         value.trim() == value &&
-        utf8.encode(value).length <= maxTextBytes &&
+        CanonicalJsonLimits(
+          maxTextBytes: maxTextBytes,
+        ).isWithinUtf8TextLimit(value) &&
         !_containsControlCharacter(value);
   }
 

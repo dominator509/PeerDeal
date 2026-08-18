@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Privacy diagnostic scrubbing, crypto proof normalization/verification, and
+  mirrored app Hold'em snapshot metadata validation now reject text that fails
+  exact UTF-8 encode/decode round-trip checks, while preserving existing
+  truncation, fail-closed, and persistence behavior.
 - Hold'em variant text validation now uses the existing canonical UTF-8
   round-trip limit for hand state, public event payloads, and projection cursor
   identities, preventing malformed Unicode from entering variant state or
