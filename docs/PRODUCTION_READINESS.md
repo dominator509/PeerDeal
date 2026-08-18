@@ -2910,6 +2910,12 @@ malformed-UTF-8, and C0/C1 control-bearing values before they enter the
 colon-delimited signature or cipher formats. Key-provider contracts and
 cryptographic provider ownership remain unchanged.
 
+The T290 follow-up closes a metadata minimization bypass caused by case-
+variant field names. Existing device, IP, and personal-field stripping rules
+now normalize keys before matching, so case variants cannot bypass the active
+privacy profile. Metadata minimizer ownership and policy semantics remain
+unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

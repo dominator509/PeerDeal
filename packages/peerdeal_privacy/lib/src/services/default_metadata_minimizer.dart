@@ -19,13 +19,14 @@ class DefaultMetadataMinimizer implements MetadataMinimizer {
     final output = <String, Object?>{};
     for (final entry in input.entries) {
       final key = entry.key;
-      if (_alwaysStrip.contains(key)) {
+      final normalizedKey = key.toLowerCase();
+      if (_alwaysStrip.contains(normalizedKey)) {
         continue;
       }
-      if (!profile.allowDeviceIdentifiers && key.contains('device')) {
+      if (!profile.allowDeviceIdentifiers && normalizedKey.contains('device')) {
         continue;
       }
-      if (!profile.allowIpAddressCapture && key.toLowerCase().contains('ip')) {
+      if (!profile.allowIpAddressCapture && normalizedKey.contains('ip')) {
         continue;
       }
       output[key] = entry.value;

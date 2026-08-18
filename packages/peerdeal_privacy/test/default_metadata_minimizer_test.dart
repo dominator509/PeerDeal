@@ -25,4 +25,24 @@ void main() {
     expect(output.containsKey('legal_name'), isFalse);
     expect(output['session_id'], 'sess_1');
   });
+
+  test('strips case-variant sensitive metadata keys', () {
+    const minimizer = DefaultMetadataMinimizer();
+    const profile = MetadataMinimizationProfile(
+      minimizeMetadata: true,
+      exportMinimalIdentity: true,
+      allowPseudonymousAliases: true,
+      allowDeviceIdentifiers: false,
+      allowIpAddressCapture: false,
+    );
+
+    final output = minimizer.minimize({
+      'Device_Identifier': 'device_abc',
+      'IP_ADDRESS': '10.0.0.1',
+      'EMAIL': 'person@example.test',
+      'safe_label': 'table',
+    }, profile);
+
+    expect(output, <String, Object?>{'safe_label': 'table'});
+  });
 }

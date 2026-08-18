@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T290 Normalize Metadata Minimization Keys
+
+Summary:
+- Metadata minimization now applies existing device, IP, and personal-field
+  stripping rules case-insensitively.
+- Case variants such as `Device_Identifier`, `IP_ADDRESS`, and `EMAIL` can no
+  longer bypass the existing privacy profile.
+- The minimizer contract and metadata ownership remain unchanged.
+
+Files:
+- `packages/peerdeal_privacy/lib/src/services/default_metadata_minimizer.dart`
+- `packages/peerdeal_privacy/test/default_metadata_minimizer_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused metadata minimizer suite passes: 3 tests.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T289 Harden Receipt Key IDs
 
 Summary:
