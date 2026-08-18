@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T296 Harden Replay Request Scope Text
+
+Summary:
+- `BasicReplayEngine` now validates table, session, and protocol request scope
+  identities before protocol checks, filtering, or projector state creation.
+- Scope text must be non-empty, unpadded, UTF-8 round-tripping, byte-bounded,
+  and free of C0/C1 controls.
+- Validation remains at the replay engine boundary; permissive protocol
+  envelopes and replay request model construction remain unchanged.
+
+Files:
+- `packages/peerdeal_replay/lib/src/engine/basic_replay_engine.dart`
+- `packages/peerdeal_replay/test/replay_request_identity_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused replay request identity regressions pass.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T295 Harden Recovery Storage Identity Text
 
 Summary:

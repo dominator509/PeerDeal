@@ -93,6 +93,9 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Replay request scope identities now fail closed for blank, padded, oversized,
+  non-round-tripping, and C0/C1-bearing text before projector state creation;
+  replay request models and protocol envelope ownership remain unchanged.
 - Recovery persistence scope identities now reject C0/C1 controls and
   malformed UTF-8 round-trips before deriving the existing delimiter-based
   storage key; key format and recovery package ownership remain unchanged.

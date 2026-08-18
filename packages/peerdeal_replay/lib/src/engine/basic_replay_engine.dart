@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/replay_engine.dart';
@@ -44,6 +46,7 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
     }
 
     final mismatches = <ReplayMismatch>[
+      ..._validateRequestScopeIdentity(request),
       ..._validateProtocolVersions(request),
       ..._validateReplayScope(request),
       ..._validateReplayRange(request),
@@ -191,6 +194,37 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
       warnings: request.snapshot == null
           ? const <String>[]
           : const <String>['Replay used snapshot + suffix planning path.'],
+    );
+  }
+
+  List<ReplayMismatch> _validateRequestScopeIdentity(ReplayRequest request) {
+    final invalidFields = <String>[
+      if (!_isSafeScopeIdentity(request.tableId)) 'table_id',
+      if (!_isSafeScopeIdentity(request.sessionId)) 'session_id',
+      if (!_isSafeScopeIdentity(request.protocolVersion)) 'protocol_version',
+    ];
+    if (invalidFields.isEmpty) return const <ReplayMismatch>[];
+
+    return <ReplayMismatch>[
+      ReplayMismatch(
+        code: 'ERR_REPLAY_REQUEST_SCOPE_INVALID',
+        message: 'Replay request scope identity is invalid.',
+        actual: invalidFields,
+      ),
+    ];
+  }
+
+  bool _isSafeScopeIdentity(String value) {
+    if (value.isEmpty || value.trim() != value) return false;
+    try {
+      final bytes = utf8.encode(value);
+      if (bytes.length > CanonicalJsonLimits().maxTextBytes) return false;
+      if (utf8.decode(bytes, allowMalformed: false) != value) return false;
+    } on FormatException {
+      return false;
+    }
+    return value.runes.every(
+      (rune) => rune >= 0x20 && !(rune >= 0x7f && rune <= 0x9f),
     );
   }
 
