@@ -44,6 +44,11 @@ class AppTableSessionTransportProvisioner {
         warnings: <String>['Native transport peer identity is invalid.'],
       );
     }
+    if (!_isValidPollInterval(_pollInterval)) {
+      return AppTableSessionTransportProvisionResult.unavailable(
+        warnings: <String>['Native transport poll interval is invalid.'],
+      );
+    }
 
     final handler = AppTableSessionTransportHandler(
       runtime: _runtime,
@@ -153,6 +158,11 @@ class AppTableSessionTransportProvisioner {
       value,
       NativeBridgePayloadLimits.maxTransportIdentityBytes,
     );
+  }
+
+  static bool _isValidPollInterval(Duration value) {
+    return value >= const Duration(milliseconds: 100) &&
+        value <= const Duration(minutes: 1);
   }
 
   static List<String> _safeWarnings(

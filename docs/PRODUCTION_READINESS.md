@@ -2773,6 +2773,14 @@ contracts, and package ownership remain unchanged; native/device reachability,
 session authentication, product state/database wiring, release signing,
 other-platform hosts, and final UX remain separate.
 
+The T269 follow-up closes the mirrored app transport provisioning configuration
+gap. Invalid polling intervals now fail before native capability lookup instead
+of producing an apparently available session whose source can only fail when
+started. The existing source bounds, transport contracts, and package ownership
+remain unchanged; native/device reachability, session authentication, product
+state/database wiring, release signing, other-platform hosts, and final UX
+remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

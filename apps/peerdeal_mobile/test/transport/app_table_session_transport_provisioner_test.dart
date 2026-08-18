@@ -72,6 +72,20 @@ void main() {
     },
   );
 
+  test('rejects invalid poll interval before native capability lookup', () async {
+    final bridge = _FakeNativeTransportBridge();
+    final result = await AppTableSessionTransportProvisioner(
+      runtime: _runtime(),
+      nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
+      pollInterval: const Duration(milliseconds: 99),
+    ).load(peerId: 'peer_b', recipientPeerId: 'peer_local');
+
+    expect(result.available, isFalse);
+    expect(result.source, isNull);
+    expect(result.warnings, ['Native transport poll interval is invalid.']);
+    expect(bridge.capabilityLookups, 0);
+  });
+
   test(
     'rejects control-bearing and oversized peer identities before capability',
     () async {

@@ -2,6 +2,37 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T269 Fail Early Transport Provisioning Configuration
+
+Summary:
+- Mirrored mobile and desktop transport provisioners now reject polling
+  intervals outside the existing 100ms-to-one-minute source bounds before
+  native capability lookup.
+- This prevents an invalid configuration from producing an apparently
+  available transport session before source startup fails.
+- No protocol, native channel, package boundary, or source contract changed.
+
+Files:
+- Mirrored app transport provisioners and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Direct Flutter-bundled Dart analyzer passes all 17 workspace packages.
+- Boundary and source-text checks pass; their 13 and 7 script tests pass, and
+  dependency-audit script tests pass.
+- Focused mobile Flutter test invocation timed out after 180 seconds without
+  output; no assertion failure was reported. The equivalent desktop Flutter
+  test was not started because the runner is serialized and exhibits the same
+  local startup limitation.
+- The dependency audit command timed out after 180 seconds without output; no
+  dependency files were changed.
+- Dart formatting and `git diff --check` pass.
+
+Remaining:
+- Real-device/cross-device native validation, release signing, other-platform
+  hosts, product session/state and database wiring, session authentication, and
+  final UX validation remain open.
+
 ### 2026-08-17 - Codex - T268 Validate Network Payload Limit At Runtime
 
 Summary:
