@@ -59,6 +59,19 @@ void main() {
     ]);
   });
 
+  test('scrubs non-round-tripping local identity warnings', () {
+    final malformed = 'warning${String.fromCharCode(0xD800)}';
+    final load = AppLocalPeerIdentityLoadResult(warnings: <String>[malformed]);
+    final provision = AppLocalPeerIdentityProvisionResult(
+      warnings: <String>[malformed],
+    );
+
+    expect(load.warnings, <String>['Local peer identity warning unavailable.']);
+    expect(provision.warnings, <String>[
+      'Local peer identity provisioning warning unavailable.',
+    ]);
+  });
+
   test('loads one active local peer identity record', () async {
     final bridge = _MemorySecureKeyBridge(
       keys: const <SecureKeyRecord>[

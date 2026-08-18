@@ -39,6 +39,7 @@ List<String> _safeLocalIdentityProvisionWarnings(List<String> warnings) {
       trimmed.isEmpty ||
               trimmed != warning ||
               warning.length > _maximumWarningLength ||
+              !NativeBridgePayloadLimits.isWithinUtf8Limit(warning, 512) ||
               warning.codeUnits.any(
                 (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
               )

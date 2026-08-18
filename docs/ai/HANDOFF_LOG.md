@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T309 Harden Local Identity Warning Boundaries
+
+Summary:
+- Mirrored mobile and desktop local-identity loaders and provisioners now
+  fail closed for non-round-tripping UTF-8 warning text.
+- Identity validation, secure-key storage, conditional revisions, and
+  provisioning behavior remain unchanged.
+
+Files:
+- Mirrored `native_local_peer_identity_loader.dart` and
+  `native_local_peer_identity_provisioner.dart` files and tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Mirrored mobile and desktop local-identity focused Flutter tests pass.
+- Full repository gates are pending in this handoff.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T308 Harden Bootstrap Provider Output
 
 Summary:

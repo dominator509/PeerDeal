@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored local-identity loaders and provisioners now reject
+  non-round-tripping UTF-8 warning text before it reaches session diagnostics;
+  identity generation, secure-key persistence, and revision behavior remain
+  unchanged.
 - Mirrored bootstrap candidate result models now filter malformed provider
   output before app surfaces receive it, including unsafe peer identities,
   endpoint hosts/ports, priorities, and diagnostic reasons; valid candidates
