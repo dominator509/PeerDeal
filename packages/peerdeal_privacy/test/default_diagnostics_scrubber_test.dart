@@ -97,6 +97,25 @@ void main() {
     });
   });
 
+  test('DefaultDiagnosticsScrubber redacts unsafe keys and text', () {
+    const scrubber = DefaultDiagnosticsScrubber();
+
+    final result = scrubber.scrub({
+      'receipt_token\u0000suffix': 'secret-token',
+      'message': 'line\nwith-control',
+    });
+
+    expect(result.payload['<truncated>'], '<redacted>');
+    expect(result.payload['message'], '<truncated>');
+    expect(result.rawKeysRemoved, 1);
+
+    final diagnostic = scrubber.scrubProtocolDiagnostic(
+      ProtocolDiagnostic(code: 'ERR\u0001CODE', message: 'unsafe\nmessage'),
+    );
+    expect(diagnostic.code, '<truncated>');
+    expect(diagnostic.message, '<truncated>');
+  });
+
   test('DefaultDiagnosticsScrubber bounds maps, lists, depth, and text', () {
     const scrubber = DefaultDiagnosticsScrubber();
     final wideMap = <String, Object?>{

@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T286 Harden Diagnostics Redaction
+
+Summary:
+- The privacy scrubber now redacts non-string, padded, oversized, or
+  control-bearing diagnostic keys instead of coercing them into output fields.
+- Control-bearing diagnostic code/message text now fails closed to the stable
+  truncation marker.
+- Sensitive keys with appended control data can no longer bypass redaction.
+
+Files:
+- `packages/peerdeal_privacy/lib/src/services/default_diagnostics_scrubber.dart`
+- `packages/peerdeal_privacy/test/default_diagnostics_scrubber_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused diagnostics scrubber suite passes: 8 tests.
+- `peerdeal_privacy` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T285 Harden Direct Game File Metadata
 
 Summary:

@@ -91,11 +91,12 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
       }
       entriesSeen += 1;
 
-      final rawField = entry.key.toString();
-      final field = _boundedText(rawField);
+      final rawField = entry.key is String ? entry.key as String : '';
+      final safeField = _isSafeField(rawField);
+      final field = safeField ? rawField : _truncated;
       final nextPath = <String>[...path, field];
 
-      if (_redact.contains(rawField)) {
+      if (!safeField || _redact.contains(rawField)) {
         payload[field] = '<redacted>';
         if (redacted.length < maxMapEntries) {
           redacted.add(_boundedText(nextPath.join('.')));
@@ -155,6 +156,22 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
   }
 
   String _boundedText(String value) {
-    return utf8.encode(value).length <= maxTextBytes ? value : _truncated;
+    return utf8.encode(value).length <= maxTextBytes &&
+            !_containsControlCharacter(value)
+        ? value
+        : _truncated;
+  }
+
+  bool _isSafeField(String value) {
+    return value.isNotEmpty &&
+        value.trim() == value &&
+        utf8.encode(value).length <= maxTextBytes &&
+        !_containsControlCharacter(value);
+  }
+
+  bool _containsControlCharacter(String value) {
+    return value.codeUnits.any(
+      (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+    );
   }
 }

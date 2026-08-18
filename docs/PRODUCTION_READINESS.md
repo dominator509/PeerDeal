@@ -2886,6 +2886,12 @@ The T285 follow-up closes a direct Game File metadata gap. The existing
 policy profile keys/values before emitting a Game File. Canonical JSON bounds
 remain in place, and the wizard compiler/result boundary is otherwise unchanged.
 
+The T286 follow-up closes a privacy redaction bypass. The existing diagnostics
+scrubber now redacts unsafe map keys, including sensitive keys with appended
+control data, and replaces control-bearing diagnostic code/message text with
+the stable truncation marker. Privacy ownership and diagnostic contracts remain
+unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
