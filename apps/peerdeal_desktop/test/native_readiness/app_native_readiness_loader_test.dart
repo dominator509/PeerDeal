@@ -82,6 +82,19 @@ void main() {
     expect(secureStorage.namespaces, <String>['peerdeal.receipts']);
   });
 
+  test('reports configured production route ready without discovery', () {
+    final snapshot = AppNativeReadinessSnapshot(
+      captureProtectionReady: true,
+      localNetworkDiscoveryReady: false,
+      nativeTransportReady: true,
+      secureKeyStorageReady: true,
+      warnings: const <String>['native local-network discovery unavailable'],
+    );
+
+    expect(snapshot.productionRouteReady, isTrue);
+    expect(snapshot.allCapabilitiesReady, isFalse);
+  });
+
   test('rejects malformed secure-key readiness snapshots', () async {
     final snapshots = <SecureKeyStorageSnapshot>[
       SecureKeyStorageSnapshot(available: true, revision: -1, keys: const []),

@@ -883,12 +883,13 @@ the gates below are satisfied.
   before native capability lookup when the app-owned readiness limit is invalid.
 - App-owned production route maps can now mark specific non-demo routes as
   native-readiness-required; those routes fail closed to the scrubbed
-  route-unavailable surface until the app-owned readiness loader reports all
-  native capabilities ready.
+  route-unavailable surface until the app-owned readiness loader reports the
+  route-critical native capabilities ready. Peer discovery remains a separate
+  requirement for join/bootstrap flows.
 - Default app home surfaces now hide native-readiness-required production
-  navigation actions until the same app-owned readiness snapshot reports all
-  native capabilities ready, preventing unavailable native-backed actions from
-  being advertised before route guards can pass.
+  navigation actions until the same app-owned route-critical readiness
+  projection passes, preventing unavailable native-backed actions from being
+  advertised before route guards can pass.
 - Default app home surfaces now render app-owned production navigation apart
   from enabled demo navigation, preserving the combined validated navigation
   list for custom home builders while giving production routes a distinct
@@ -2792,6 +2793,14 @@ The T271 follow-up closes an Android local-network resource-bound gap. Android
 local-network capability inspection now caps per-interface address traversal at
 the same 256-entry bound already used by the Windows host. Discovery remains
 unsupported by contract; this change only bounds native interface inspection.
+
+The T272 follow-up closes a false-negative app-shell readiness gap. Configured
+production routes now use a route-critical readiness projection requiring
+capture protection, native transport, and secure-key storage, while preserving
+the existing all-capabilities projection for flows that require peer discovery.
+This allows invite/context-based production routes to mount on hosts whose
+discovery advertisement is intentionally unsupported without changing the
+native channel or protocol contract.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate

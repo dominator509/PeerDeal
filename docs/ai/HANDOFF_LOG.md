@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T272 Separate Production Route Readiness From Discovery
+
+Summary:
+- Mirrored mobile and desktop app shells now gate configured production routes
+  with a route-critical readiness projection requiring capture protection,
+  native transport, and secure-key storage.
+- The existing `allCapabilitiesReady` projection still includes local peer
+  discovery for join/bootstrap consumers.
+- Invite/context-based production routes are no longer blocked by the
+  intentionally unsupported discovery advertisement contract.
+
+Files:
+- Mirrored app native-readiness snapshots and app-shell route gates/tests.
+- `docs/ARCHITECTURE.md`, `docs/PRODUCTION_READINESS.md`, and this handoff log.
+
+Verification:
+- Direct Flutter-bundled Dart analyzer passes all 17 workspace packages.
+- Formatting passes with no changed files; boundary and source-text checks pass,
+  their 13 and 7 script tests pass, dependency-audit script tests pass, and
+  `git diff --check` passes.
+- Focused mobile and desktop Flutter suites each timed out after 180 seconds
+  without output; no assertion or compiler failure was reported.
+
+Remaining:
+- Real-device secure-key/capture validation, cross-device multicast, release
+  signing, other-platform hosts, product session/state and database wiring,
+  session authentication, and final UX validation remain open.
+
 ### 2026-08-17 - Codex - T271 Bound Android Local-Network Address Traversal
 
 Summary:

@@ -1032,7 +1032,11 @@ void main() {
                 notes: 'ready',
               ),
             ),
-            localNetworkBridge: const _StaticLocalNetworkBridge(),
+            localNetworkBridge: const _StaticLocalNetworkBridge(
+              capability: LocalNetworkCapability.unavailable(
+                warning: 'discovery is optional for configured routes',
+              ),
+            ),
             nativeTransportBridge: const _StaticNativeTransportBridge(
               capability: NativeTransportCapability(
                 available: true,

@@ -25,6 +25,14 @@ class AppNativeReadinessSnapshot {
       localNetworkDiscoveryReady &&
       nativeTransportReady &&
       secureKeyStorageReady;
+
+  /// Whether a configured production route can mount without peer discovery.
+  ///
+  /// Production routes receive an already-resolved peer/session context. Join
+  /// and bootstrap flows still use [allCapabilitiesReady] when discovery is
+  /// part of their capability requirement.
+  bool get productionRouteReady =>
+      captureProtectionReady && nativeTransportReady && secureKeyStorageReady;
 }
 
 class AppNativeReadinessLoader {

@@ -90,7 +90,10 @@ event checkpoints, so transport callbacks cannot queue recovery writes after
 the route lifecycle has been replaced.
 Typed `AppHoldemProductionRouteRegistration` owners now merge that seam into
 the mobile and desktop production route maps, auto-register navigation, and
-require native readiness before mounting; product callers still own session
+require route-critical native readiness before mounting; configured production
+routes do not require peer discovery when the product supplies an already
+resolved session context. Join/bootstrap flows still require discovery through
+their existing coordinator. Product callers still own session
 state construction and local identity. The app-owned
 `AppHoldemProductionTableSurface` renders bounded projection state and routes
 local actions through the runtime and canonical publisher; it never evaluates

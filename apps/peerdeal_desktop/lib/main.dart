@@ -717,7 +717,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
   }) {
     final protectedPaths = _runtime.nativeReadinessRequiredRoutePaths;
     if (protectedPaths == null || protectedPaths.isEmpty) return navigation;
-    if (nativeReadiness == null || !nativeReadiness.allCapabilitiesReady) {
+    if (nativeReadiness == null || !nativeReadiness.productionRouteReady) {
       return List<PeerDealAppNavigationEntry>.unmodifiable(
         navigation.where((entry) => !protectedPaths.contains(entry.path)),
       );
@@ -968,7 +968,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       future: _nativeReadinessFor(nativeReadinessLoader),
       builder: (context, snapshot) {
         final readiness = snapshot.data;
-        if (readiness == null || !readiness.allCapabilitiesReady) {
+        if (readiness == null || !readiness.productionRouteReady) {
           return AppRouteFallbackScreen(routeName: path);
         }
         return _buildProductionRoute(
