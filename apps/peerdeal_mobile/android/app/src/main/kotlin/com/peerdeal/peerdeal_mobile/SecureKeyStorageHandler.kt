@@ -307,12 +307,15 @@ internal class SecureKeyStorageHandler(context: Context) :
     }
 
     private fun readRecords(namespace: String): ReadResult {
-        val masterKey = loadOrCreateMasterKey(namespace) ?: return ReadResult.Failure
         val stored = when (val result = readStoredEnvelope(namespace)) {
             StoredEnvelope.Missing -> return ReadResult.Success(emptyList(), 0)
             StoredEnvelope.Failure -> return ReadResult.Failure
             is StoredEnvelope.Present -> result
         }
+        // Reads must not create Keystore aliases. A missing key for an existing
+        // envelope must fail closed instead of replacing the key and making the
+        // envelope permanently undecryptable.
+        val masterKey = loadExistingMasterKey(namespace) ?: return ReadResult.Failure
         val encodedEnvelope = stored.value
         if (!isWithinEncodedLimit(encodedEnvelope)) return ReadResult.Failure
 
@@ -471,11 +474,9 @@ internal class SecureKeyStorageHandler(context: Context) :
             value.toByteArray(StandardCharsets.UTF_8).size <= MAX_ENCODED_BYTES
 
     private fun loadOrCreateMasterKey(namespace: String): SecretKey? {
-        val alias = keyAlias(namespace)
-        val keyStore = KeyStore.getInstance(KEYSTORE).apply { load(null) }
-        val existing = keyStore.getKey(alias, null)
-        if (existing != null) return existing as? SecretKey
+        loadExistingMasterKey(namespace)?.let { return it }
 
+        val alias = keyAlias(namespace)
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
         generator.init(
             KeyGenParameterSpec.Builder(
@@ -488,6 +489,13 @@ internal class SecureKeyStorageHandler(context: Context) :
                 .build(),
         )
         return generator.generateKey()
+    }
+
+    private fun loadExistingMasterKey(namespace: String): SecretKey? {
+        val alias = keyAlias(namespace)
+        val keyStore = KeyStore.getInstance(KEYSTORE).apply { load(null) }
+        val existing = keyStore.getKey(alias, null)
+        return existing as? SecretKey
     }
 
     private fun decodeIncomingKey(payload: Map<*, *>): StoredKey? {

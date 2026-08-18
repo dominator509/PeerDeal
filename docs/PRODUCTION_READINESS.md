@@ -94,6 +94,12 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The Android secure-key host now uses a read-only Keystore lookup while
+  loading an existing envelope. Missing namespaces no longer create Keystore
+  aliases, and an existing envelope with a missing key fails closed instead of
+  creating a replacement key that could never decrypt the envelope. The
+  generic channel, AES-GCM envelope, namespace lock, and write-time key
+  creation contract remain unchanged; Android device validation is still open.
 - The Windows native host smoke target now has a passing current-host run
   covering app-support storage, capture enable/release, local-network
   capability/discovery, transport capability/send/receive, secure-key

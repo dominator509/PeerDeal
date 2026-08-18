@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T314 Harden Android Secure-Key Read Semantics
+
+Summary:
+- Android secure-key loads now inspect the existing Android Keystore alias
+  without creating one. A missing namespace therefore remains read-only, and a
+  persisted envelope whose key is missing fails closed instead of creating a
+  replacement key before decryption fails.
+- Write-time key creation, AES-GCM envelope format, namespace locking,
+  revisions, and the generic method-channel contract are unchanged.
+
+Files:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- `rtk flutter build apk --debug --no-pub` passed.
+- Full repository analyze, boundary, source-text, serialized test, dependency
+  audit, and diff gates passed.
+- No Android device or emulator is connected, so runtime Keystore persistence
+  and recovery behavior remain unverified on hardware.
+
+Remaining:
+- Android real-device/profile validation and release signing, cross-device
+  multicast/firewall validation, other-platform hosts, product session/state
+  wiring, session authentication, and final UX remain open.
+
 ### 2026-08-18 - Codex - T313 Verify Windows Native Host Smoke
 
 Summary:
