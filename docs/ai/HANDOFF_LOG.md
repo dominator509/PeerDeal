@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T280 Align Android Transport Integer Decoding
+
+Summary:
+- Android native transport method-call decoding now accepts only `Int` or
+  `Long` values for sequence and payload bytes.
+- Fractional `Number` values are rejected instead of being silently truncated
+  by `toLong()`, matching the existing Windows integer-only decoder.
+- The generic transport channel, host-private envelope, and package boundaries
+  are unchanged.
+
+Files:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Android `assembleDebug --no-daemon --quiet` passes.
+- Direct Dart analyzer, package-boundary/source-text checks, their 13 and 7
+  focused tests, dependency-audit tests, and `git diff --check` pass.
+- No Dart production code changed; the focused Flutter test launcher was not
+  needed for this Kotlin-only slice.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T279 Bound Native Secure-Key Revisions
 
 Summary:

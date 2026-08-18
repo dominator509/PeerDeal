@@ -104,6 +104,9 @@ the gates below are satisfied.
   receipt adapters. This keeps custom app bridges aligned with Android `Long`
   and Windows signed revision persistence without changing the generic channel
   shape or package ownership.
+- Android native transport method-call decoding now accepts only integer
+  sequence and payload-byte values, matching the Windows host instead of
+  silently truncating fractional `Number` values before validation.
 - The generic secure-key channel decoder now rejects unusable records before
   materializing an available snapshot. Mirrored app receipt-key and local
   identity loaders also reject decoder-bypass snapshots with negative
@@ -2844,6 +2847,12 @@ identities, secure-key fields, and app-support paths now require UTF-8
 round-trip fidelity before byte limits or native persistence are applied,
 matching the Windows host's invalid-UTF-8 rejection without changing any
 method-channel fields or package boundary.
+
+The T280 follow-up closes an Android transport argument-type parity gap. The
+Android method-call decoder now accepts only `Int`/`Long` values for sequence
+and payload bytes, matching the Windows `int32`/`int64` contract and failing
+closed on fractional values instead of truncating them. The generic transport
+channel and host-private envelope remain unchanged.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
