@@ -93,6 +93,9 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Recovery persistence scope identities now reject C0/C1 controls and
+  malformed UTF-8 round-trips before deriving the existing delimiter-based
+  storage key; key format and recovery package ownership remain unchanged.
 - Hold'em variant state, cursor, and event-payload text validation now applies
   the existing canonical UTF-8 text-byte ceiling and rejects C1 controls;
   cursor construction also validates optional `last_event_type` without

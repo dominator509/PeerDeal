@@ -30,6 +30,11 @@ class RecoveryPersistenceScope {
   static bool _isValidStoragePart(String value) {
     if (value.isEmpty || value.trim() != value) return false;
     if (value.contains('::')) return false;
-    return value.runes.every((rune) => rune > 0x1f && rune != 0x7f);
+    if (utf8.decode(utf8.encode(value), allowMalformed: false) != value) {
+      return false;
+    }
+    return value.runes.every(
+      (rune) => rune >= 0x20 && !(rune >= 0x7f && rune <= 0x9f),
+    );
   }
 }

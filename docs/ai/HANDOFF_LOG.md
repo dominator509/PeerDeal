@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T295 Harden Recovery Storage Identity Text
+
+Summary:
+- `RecoveryPersistenceScope` now rejects C1 controls in table, session, and
+  protocol identity parts before deriving its existing storage key.
+- Scope validation now requires UTF-8 encode/decode round-trip fidelity, so
+  unpaired UTF-16 text cannot become a different persisted identity.
+- The delimiter-based storage format and sync package boundary remain
+  unchanged.
+
+Files:
+- `packages/peerdeal_sync/lib/src/models/recovery_persistence_scope.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_scope_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused sync scope regression suite passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T294 Harden Hold'em Typed Text Boundaries
 
 Summary:
