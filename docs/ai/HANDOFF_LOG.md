@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Pin Android CI Java Toolchain
+
+Summary:
+- The Android CI job now installs pinned Temurin Java 17, matching the existing
+  Gradle/Kotlin `JavaVersion.VERSION_17` configuration instead of inheriting a
+  GitHub runner default.
+- `actions/setup-java` v4.7.1 was resolved to an immutable commit before use.
+- Android source, release-signing ownership, workflow permissions, and other
+  jobs remain unchanged.
+
+Files:
+- `.github/workflows/ci.yml`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Local Java 17.0.17 and Android Gradle Java 17 requirements were inspected.
+- Repository analyzer, boundary, source-text, dependency, and serialized test
+  gates are the required verification path.
+
+Remaining:
+- Android real-device and Windows interactive persistence, cross-device
+  transport, operator release signing, other-platform hosts, product-owned
+  session state/database wiring, session authentication, and final UX remain
+  documented production gates.
+
 ### 2026-08-18 - Codex - Pin CI Flutter Toolchain
 
 Summary:

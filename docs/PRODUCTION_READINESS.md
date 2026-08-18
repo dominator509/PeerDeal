@@ -100,6 +100,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The Android CI job now pins the Temurin Java 17 toolchain required by the
+  existing Gradle/Kotlin configuration, using an immutable setup action commit.
+  This removes runner-default JDK drift without changing Android source or
+  release-signing ownership.
 - CI now pins Flutter to the verified `3.41.8` toolchain used by the local
   workspace instead of following the mutable stable channel. This keeps the
   Dart/Flutter baseline reproducible without changing package or runtime
