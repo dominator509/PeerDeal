@@ -1,3 +1,5 @@
+import '../serialization/canonical_json.dart';
+
 class GameFileSchema {
   static const requiredTopLevelKeys = <String>{
     'game_file_version',
@@ -22,6 +24,12 @@ class GameFileSchema {
 
   List<String> validate(Map<String, Object?> input) {
     final errors = <String>[];
+
+    try {
+      canonicalJsonEncode(input);
+    } on Object {
+      errors.add('Game File payload exceeds canonical protocol limits');
+    }
 
     for (final key in requiredTopLevelKeys) {
       if (!input.containsKey(key)) {

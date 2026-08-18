@@ -248,6 +248,9 @@ the gates below are satisfied.
 - Direct invite-payload schema validation now applies the existing canonical
   UTF-8 text byte ceiling and rejects malformed UTF-16 input, closing a direct
   caller bypass without changing the invite fields or authentication semantics.
+- Direct Game File schema validation now applies the existing canonical payload
+  limits to nested values, closing a direct oversized-input bypass without
+  changing the Game File schema fields or ownership.
 - Core invariant hardening now covers table identity, non-negative counters,
   participant count coherence, hand-scoped event ordering, active-hand identity,
   close-before-closed ordering, and terminal closed/wiped state projection.

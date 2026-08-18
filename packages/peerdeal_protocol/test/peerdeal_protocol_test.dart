@@ -171,6 +171,20 @@ void main() {
     expect(errors, isEmpty);
   });
 
+  test('game file schema rejects oversized nested text', () {
+    final decoded = fixtureJson('fixtures/gamefiles/open_table_valid_v1.json')
+      ..['validation'] = <String, Object?>{
+        'note': List<String>.filled(4097, 'x').join(),
+      };
+
+    final errors = GameFileSchema().validate(decoded);
+
+    expect(
+      errors,
+      contains('Game File payload exceeds canonical protocol limits'),
+    );
+  });
+
   test('invite payload fixture validates', () {
     final decoded = fixtureJson(
       'fixtures/invites/open_table_player_invite_v1.json',

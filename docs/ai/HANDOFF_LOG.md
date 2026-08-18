@@ -2,6 +2,26 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Bound Game File Schema Payloads
+
+Summary:
+- `GameFileSchema` now applies the existing canonical JSON limits during direct
+  validation, rejecting oversized or otherwise non-canonical nested payloads.
+- Game File fields, schema semantics, catalog identity, and package boundaries
+  are unchanged.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/schemas/game_file_schema.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused protocol tests pass after formatting.
+
+Remaining:
+- Product-owned Game File acceptance and session-authentication semantics remain
+  separate integration contracts.
+
 ### 2026-08-18 - Codex - Bound Invite Schema Text Input
 
 Summary:
