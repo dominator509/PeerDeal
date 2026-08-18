@@ -30,7 +30,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e # v2.21.0
         with:
-          channel: stable
+          flutter-version: '3.41.8'
 
       - name: Show tool versions
         run: |
@@ -78,7 +78,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e # v2.21.0
         with:
-          channel: stable
+          flutter-version: '3.41.8'
 
       - name: Install workspace dependencies
         run: flutter pub get
@@ -121,7 +121,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e # v2.21.0
         with:
-          channel: stable
+          flutter-version: '3.41.8'
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop

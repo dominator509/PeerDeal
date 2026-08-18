@@ -100,6 +100,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- CI now pins Flutter to the verified `3.41.8` toolchain used by the local
+  workspace instead of following the mutable stable channel. This keeps the
+  Dart/Flutter baseline reproducible without changing package or runtime
+  behavior.
 - CI checkout now disables persisted GitHub credentials in every job, so the
   read-only workflow token is not retained in the workspace after checkout.
   Action pinning, repository permissions, and job behavior remain unchanged.

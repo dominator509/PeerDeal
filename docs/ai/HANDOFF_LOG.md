@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Pin CI Flutter Toolchain
+
+Summary:
+- All CI jobs now request Flutter `3.41.8`, matching the verified local Flutter
+  revision and the repository Dart SDK floor of `3.11.5`, instead of the
+  mutable stable channel.
+- The Flutter release tag was verified upstream before the workflow change.
+- Jobs, action pins, permissions, timeouts, commands, and package boundaries
+  remain unchanged.
+
+Files:
+- `.github/workflows/ci.yml`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Local Flutter 3.41.8 and Dart 3.11.5 versions were inspected.
+- Upstream Flutter tag `3.41.8` resolved successfully.
+- Repository analyzer, boundary, source-text, dependency, and serialized test
+  gates are the required verification path.
+
+Remaining:
+- Android real-device and Windows interactive persistence, cross-device
+  transport, operator release signing, other-platform hosts, product-owned
+  session state/database wiring, session authentication, and final UX remain
+  documented production gates.
+
 ### 2026-08-18 - Codex - Disable Persisted CI Checkout Credentials
 
 Summary:
