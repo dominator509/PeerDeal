@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored app-owned Hold'em persistence writers now verify the exact event
+  envelopes in the existing recovery store before honoring an
+  `eventsAlreadyPersisted` retry flag, preventing a snapshot from advancing
+  durable typed state without its event suffix.
 - Android and Windows native multicast receive loops now apply a bounded
   backoff after persistent socket errors, preventing a host failure from
   becoming an unbounded CPU retry loop without changing the generic transport

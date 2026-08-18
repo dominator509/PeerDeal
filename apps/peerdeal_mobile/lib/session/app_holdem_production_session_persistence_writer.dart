@@ -54,6 +54,12 @@ class AppHoldemProductionSessionPersistenceWriter {
       snapshotVersion: snapshotVersion,
     );
     if (snapshotValidation != null) return snapshotValidation;
+    final persistedEventValidation = _validateAlreadyPersistedEvents(
+      tableState: tableState,
+      events: events,
+      eventsAlreadyPersisted: eventsAlreadyPersisted,
+    );
+    if (persistedEventValidation != null) return persistedEventValidation;
 
     RecoveryPersistenceResult eventResult = RecoveryPersistenceResult.success();
     if (events.isNotEmpty && !eventsAlreadyPersisted) {
@@ -158,6 +164,58 @@ class AppHoldemProductionSessionPersistenceWriter {
       return RecoveryPersistenceResult(
         isSuccess: false,
         warnings: <String>['Holdem event-log state hash is inconsistent.'],
+      );
+    }
+    return null;
+  }
+
+  RecoveryPersistenceResult? _validateAlreadyPersistedEvents({
+    required TableState tableState,
+    required List<EventEnvelope> events,
+    required bool eventsAlreadyPersisted,
+  }) {
+    if (!eventsAlreadyPersisted || events.isEmpty) return null;
+
+    final scope = RecoveryPersistenceScope(
+      tableId: tableState.tableId,
+      sessionId: tableState.sessionId,
+      protocolVersion: tableState.protocolVersion,
+    );
+    final PersistedRecoveryWindow window;
+    try {
+      window = _store.loadWindow(scope);
+    } on Object {
+      return RecoveryPersistenceResult(
+        isSuccess: false,
+        warnings: <String>[
+          'Holdem persisted event suffix could not be verified.',
+        ],
+      );
+    }
+
+    try {
+      for (final expected in events) {
+        final stored = window.events.cast<EventEnvelope?>().firstWhere(
+          (candidate) => candidate?.eventSeq == expected.eventSeq,
+          orElse: () => null,
+        );
+        if (stored == null ||
+            canonicalJsonEncode(stored.toJson()) !=
+                canonicalJsonEncode(expected.toJson())) {
+          return RecoveryPersistenceResult(
+            isSuccess: false,
+            warnings: <String>[
+              'Holdem persisted event suffix could not be verified.',
+            ],
+          );
+        }
+      }
+    } on Object {
+      return RecoveryPersistenceResult(
+        isSuccess: false,
+        warnings: <String>[
+          'Holdem persisted event suffix could not be verified.',
+        ],
       );
     }
     return null;

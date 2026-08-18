@@ -2,6 +2,37 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T252 Verify Persisted Hold'em Event Suffixes
+
+Summary:
+- Mirrored app-owned Hold'em persistence writers now read back and compare the
+  exact event envelopes before honoring `eventsAlreadyPersisted` during ordered
+  snapshot retries.
+- A missing, changed, or unavailable event suffix fails closed before snapshot
+  persistence; normal append-first retry behavior and package ownership remain
+  unchanged.
+
+Files:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_persistence_writer.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_persistence_writer.dart`
+- Mirrored persistence-writer tests under `apps/peerdeal_{mobile,desktop}/test/session`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Mirrored focused persistence-writer suites pass (11 tests each).
+- Direct SDK analysis passes for all 17 packages.
+- Serialized non-Flutter package tests pass.
+- Full Flutter suites pass: mobile 541 tests, desktop 540 tests.
+- Boundary, source-text, and their script tests pass; `git diff --check` passes.
+- The current dependency audit timed out after 180 seconds without output; no
+  dependency changes were made.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T251 Bound Native Receive Error Retries
 
 Summary:

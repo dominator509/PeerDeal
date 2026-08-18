@@ -41,6 +41,54 @@ void main() {
     expect(window.snapshot?.snapshotBaseEventSeq, 0);
   });
 
+  test('rejects an unverified already-persisted event suffix', () {
+    final store = InMemoryRecoveryPersistenceStore();
+    final state = _typedSnapshotAfterEvent();
+    final result = AppHoldemProductionSessionPersistenceWriter(store: store)
+        .persist(
+          snapshotId: 'snapshot_001',
+          tableState: state.tableState,
+          handState: state.handState,
+          eventCursor: state.eventCursor,
+          events: <EventEnvelope>[_event()],
+          eventsAlreadyPersisted: true,
+        );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.warnings,
+      contains('Holdem persisted event suffix could not be verified.'),
+    );
+    expect(store.loadWindow(_scope()).snapshot, isNull);
+  });
+
+  test(
+    'accepts an already-persisted event suffix after exact verification',
+    () {
+      final store = InMemoryRecoveryPersistenceStore();
+      final event = _event();
+      expect(
+        store
+            .appendEvents(scope: _scope(), events: <EventEnvelope>[event])
+            .isSuccess,
+        isTrue,
+      );
+      final state = _typedSnapshotAfterEvent();
+      final result = AppHoldemProductionSessionPersistenceWriter(store: store)
+          .persist(
+            snapshotId: 'snapshot_001',
+            tableState: state.tableState,
+            handState: state.handState,
+            eventCursor: state.eventCursor,
+            events: <EventEnvelope>[event],
+            eventsAlreadyPersisted: true,
+          );
+
+      expect(result.isSuccess, isTrue);
+      expect(store.loadWindow(_scope()).snapshot?.snapshotBaseEventSeq, 1);
+    },
+  );
+
   test('rejects an oversized event suffix before traversal or append', () {
     final store = InMemoryRecoveryPersistenceStore();
     final state = _typedSnapshotAfterEvent();
