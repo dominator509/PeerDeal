@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Pin CI Actions To Immutable Commits
+
+Summary:
+- CI checkout, Python setup, and Flutter setup actions now use verified
+  immutable upstream commit SHAs with version comments instead of mutable tags.
+- Existing jobs, permissions, timeouts, build commands, and package boundaries
+  are unchanged.
+
+Files:
+- `.github/workflows/ci.yml`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Upstream tag refs were resolved with `git ls-remote` before pinning.
+- Repository analyzer, boundary, source-text, dependency, and serialized test
+  gates remain the required verification path.
+
+Remaining:
+- Android real-device and Windows interactive persistence, cross-device
+  transport, operator release signing, other-platform hosts, product-owned
+  session state/database wiring, session authentication, and final UX remain
+  documented production gates.
+
 ### 2026-08-18 - Codex - Extend Source-Text Gate To Native Sources
 
 Summary:

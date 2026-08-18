@@ -100,6 +100,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The CI workflow now pins checkout, Python setup, and Flutter setup actions to
+  verified immutable upstream commits while retaining human-readable version
+  comments. This removes mutable action-tag drift without changing jobs,
+  permissions, or application/package behavior.
 - The source-text gate now covers committed native and automation sources,
   including Kotlin, C/C++, headers, manifests, Gradle configuration, and
   scripts, while excluding only the generated `repomix-summary.xml` context
