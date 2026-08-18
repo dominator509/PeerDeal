@@ -1,3 +1,5 @@
+import 'receipt_key_ring_input_limits.dart';
+
 class ReceiptEncryptionKey {
   const ReceiptEncryptionKey({
     required this.keyId,
@@ -10,8 +12,7 @@ class ReceiptEncryptionKey {
   final String algorithm;
 
   bool get isUsable =>
-      keyId.trim().isNotEmpty &&
-      !keyId.contains(':') &&
+      ReceiptKeyRingInputLimits.isSafeKeyId(keyId) &&
       secret.trim().isNotEmpty &&
       algorithm == 'external';
 }

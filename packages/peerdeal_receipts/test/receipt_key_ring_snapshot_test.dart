@@ -67,6 +67,7 @@ void main() {
       ),
       verificationSigningKeys: <ReceiptSigningKey>[
         ReceiptSigningKey(keyId: 'rotated', secret: ''),
+        ReceiptSigningKey(keyId: 'rotated\ncontrol', secret: 'secret'),
       ],
       decryptionKeys: <ReceiptEncryptionKey>[
         ReceiptEncryptionKey(
@@ -78,6 +79,7 @@ void main() {
 
     expect(keyRing.activeSigningKey(), isNull);
     expect(keyRing.findSigningKey('rotated'), isNull);
+    expect(keyRing.findSigningKey('rotated\ncontrol'), isNull);
     expect(keyRing.activeEncryptionKey(), isNull);
     expect(keyRing.findEncryptionKey('bad:encryption'), isNull);
   });

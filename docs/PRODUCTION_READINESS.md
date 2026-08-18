@@ -2904,6 +2904,12 @@ C0/C1 controls before the verified payload is exposed. Artifact format,
 signature handling, opaque payload semantics, and receipt package ownership
 remain unchanged.
 
+The T289 follow-up hardens the existing receipt key-material boundary. Signing
+and encryption key IDs now reject empty, padded, oversized, colon-bearing,
+malformed-UTF-8, and C0/C1 control-bearing values before they enter the
+colon-delimited signature or cipher formats. Key-provider contracts and
+cryptographic provider ownership remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

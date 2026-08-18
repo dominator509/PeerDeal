@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T289 Harden Receipt Key IDs
+
+Summary:
+- Receipt signing and encryption key providers now reject empty, padded,
+  oversized, colon-bearing, malformed-UTF-8, or C0/C1 control-bearing key IDs.
+- The existing colon-delimited signature/cipher formats and key-provider
+  contracts remain unchanged.
+
+Files:
+- `packages/peerdeal_receipts/lib/src/models/receipt_key_ring_input_limits.dart`
+- `packages/peerdeal_receipts/lib/src/models/receipt_signing_key.dart`
+- `packages/peerdeal_receipts/lib/src/models/receipt_encryption_key.dart`
+- `packages/peerdeal_receipts/test/hmac_sha256_receipt_signer_test.dart`
+- `packages/peerdeal_receipts/test/receipt_key_ring_snapshot_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused signer suite passes: 9 tests.
+- Focused key-ring suite passes: 5 tests.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T288 Harden Receipt Export Identifier Inspection
 
 Summary:

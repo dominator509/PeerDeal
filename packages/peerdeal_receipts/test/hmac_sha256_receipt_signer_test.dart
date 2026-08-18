@@ -68,6 +68,19 @@ void main() {
     );
   });
 
+  test('does not use padded or control-bearing signing key ids', () {
+    for (final keyId in <String>[' receipt_key', 'receipt_key\ncontrol']) {
+      final invalidProvider = StaticReceiptSigningKeyProvider(
+        activeKey: ReceiptSigningKey(keyId: keyId, secret: 'test_secret'),
+      );
+      final invalidSigner = HmacSha256ReceiptSigner(
+        keyProvider: invalidProvider,
+      );
+
+      expect(() => invalidSigner.sign('payload'), throwsStateError);
+    }
+  });
+
   test(
     'fails closed when retained signing keys exceed the configured limit',
     () {
