@@ -666,6 +666,9 @@ the gates below are satisfied.
   artifacts before every locked read, write, or wipe operation, and fails
   closed if those artifacts cannot be cleaned up, limiting crash remnants and
   retaining scope isolation.
+- Mirrored app `SafeReceiptScanVm` boundaries now bound and scrub receipt status
+  and message text before exposing it to UI or other consumers, instead of
+  relying only on a later screen-level sanitizer.
 - Sync recovery persistence now exposes an idempotent, scope-validated wipe
   operation; the JSON store removes the durable recovery window and matching
   interrupted-write temporary files without removing other scopes. Retention

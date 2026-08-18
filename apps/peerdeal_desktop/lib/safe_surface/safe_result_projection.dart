@@ -5,10 +5,12 @@ import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 class SafeReceiptScanVm {
   SafeReceiptScanVm({
-    required this.status,
-    required this.message,
+    required String status,
+    required String message,
     required Map<String, Object?> shareableFields,
-  }) : shareableFields = _freezeSafeObjectMap(shareableFields);
+  }) : status = _safeReceiptToken(status, fallback: 'rejected'),
+       message = _safeReceiptMessage(message),
+       shareableFields = _freezeSafeObjectMap(shareableFields);
 
   final String status;
   final String message;
@@ -57,6 +59,42 @@ Map<String, Object?> _freezeSafeObjectMap(Map<String, Object?> source) {
     for (final entry in source.entries)
       entry.key: _freezeSafeValue(entry.value),
   });
+}
+
+String _safeReceiptToken(String value, {required String fallback}) {
+  if (value.trim() != value || value.isEmpty || value.length > 80) {
+    return fallback;
+  }
+  final isSafe = value.codeUnits.every(
+    (codeUnit) =>
+        (codeUnit >= 0x30 && codeUnit <= 0x39) ||
+        (codeUnit >= 0x41 && codeUnit <= 0x5A) ||
+        (codeUnit >= 0x61 && codeUnit <= 0x7A) ||
+        codeUnit == 0x2D ||
+        codeUnit == 0x2E ||
+        codeUnit == 0x5F,
+  );
+  return isSafe ? value : fallback;
+}
+
+String _safeReceiptMessage(String value) {
+  if (value.trim() != value || value.isEmpty || value.length > 160) {
+    return 'Receipt detail unavailable.';
+  }
+  final lower = value.toLowerCase();
+  if (lower.contains('secret') ||
+      lower.contains('token') ||
+      lower.contains('password') ||
+      lower.contains('credential')) {
+    return 'Receipt detail unavailable.';
+  }
+  final isSafe = value.codeUnits.every(
+    (codeUnit) =>
+        codeUnit >= 0x20 &&
+        codeUnit != 0x5C &&
+        !(codeUnit >= 0x7F && codeUnit <= 0x9F),
+  );
+  return isSafe ? value : 'Receipt detail unavailable.';
 }
 
 class SafeResultProjection {

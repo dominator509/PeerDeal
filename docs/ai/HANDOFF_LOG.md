@@ -2,6 +2,39 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T254 Harden Safe Receipt Text Projection
+
+Summary:
+- Mirrored app safe receipt view models now validate status tokens and bound,
+  scrub, and fail closed for unsafe receipt messages at construction time.
+- This closes the app-boundary leak/DoS path without changing receipt protocol,
+  artifact decoding, package ownership, or screen behavior.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/safe_surface/safe_result_projection.dart`
+- Mirrored safe-surface projection tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Focused mirrored safe-surface Flutter tests pass: 5 tests in mobile and 5 in
+  desktop.
+- Direct SDK analysis passes for all 17 packages.
+- Serialized non-Flutter package tests pass.
+- Boundary, source-text, and their script tests pass.
+- Full mobile Flutter verification did not produce a result: two bounded runs
+  stalled in the local Flutter runner, the first timing out at 300 seconds; the
+  desktop full suite was not started after that runner failure. No test
+  assertion failure was reported.
+- `git diff --check` passes.
+- The dependency audit was not rerun for this dependency-free change; its
+  prior invocation timed out after 180 seconds without output.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T253 Clean Stale Recovery Write Artifacts
 
 Summary:

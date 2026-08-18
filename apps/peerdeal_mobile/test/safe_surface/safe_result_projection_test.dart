@@ -32,6 +32,24 @@ void main() {
     );
   });
 
+  test(
+    'receipt scan projection scrubs status and message at the safe boundary',
+    () {
+      const projection = SafeResultProjection();
+
+      final result = projection.projectReceiptScan(
+        ReceiptScanResult(
+          status: 'ok\n',
+          message: 'token=private-value',
+          shareableFields: const <String, Object?>{},
+        ),
+      );
+
+      expect(result.status, 'rejected');
+      expect(result.message, 'Receipt detail unavailable.');
+    },
+  );
+
   test('recovery projection emits scrubbed protocol diagnostics', () {
     const projection = SafeResultProjection();
 
