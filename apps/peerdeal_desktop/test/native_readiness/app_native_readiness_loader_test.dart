@@ -82,6 +82,47 @@ void main() {
     expect(secureStorage.namespaces, <String>['peerdeal.receipts']);
   });
 
+  test('rejects malformed secure-key readiness snapshots', () async {
+    final snapshots = <SecureKeyStorageSnapshot>[
+      SecureKeyStorageSnapshot(available: true, revision: -1, keys: const []),
+      SecureKeyStorageSnapshot(
+        available: true,
+        keys: List<SecureKeyRecord>.filled(
+          NativeBridgePayloadLimits.maxSecureKeyRecords + 1,
+          const SecureKeyRecord(
+            keyId: 'key',
+            purpose: 'purpose',
+            algorithm: 'algorithm',
+            secret: 'secret',
+            active: true,
+          ),
+        ),
+      ),
+      SecureKeyStorageSnapshot(
+        available: true,
+        keys: const <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'key',
+            purpose: 'purpose',
+            algorithm: 'algorithm',
+            secret: 'line\nfeed',
+            active: true,
+          ),
+        ],
+      ),
+    ];
+
+    for (final snapshot in snapshots) {
+      final readiness = await _readyLoader(snapshot).load();
+
+      expect(readiness.secureKeyStorageReady, isFalse);
+      expect(readiness.allCapabilitiesReady, isFalse);
+      expect(readiness.warnings, <String>[
+        'native secure-key storage unavailable',
+      ]);
+    }
+  });
+
   test('cancels cancellable readiness capability lookups', () async {
     final cancellation = Completer<void>();
     final loader = AppNativeReadinessLoader(
@@ -397,6 +438,36 @@ void main() {
         expect(secureStorage.namespaces, isEmpty, reason: namespace);
       }
     },
+  );
+}
+
+AppNativeReadinessLoader _readyLoader(SecureKeyStorageSnapshot snapshot) {
+  return AppNativeReadinessLoader(
+    captureProtectionBridge: _FakeCaptureProtectionBridge(
+      capability: const CaptureProtectionCapability(
+        blockingSupported: true,
+        obscuringSupported: true,
+        notes: 'ready',
+      ),
+    ),
+    localNetworkBridge: _FakeLocalNetworkBridge(
+      capability: const LocalNetworkCapability(
+        discoverySupported: true,
+        permissionPromptSupported: true,
+        broadcastSupported: false,
+        notes: 'ready',
+      ),
+    ),
+    nativeTransportBridge: _FakeNativeTransportBridge(
+      capability: const NativeTransportCapability(
+        available: true,
+        sendSupported: true,
+        receiveSupported: true,
+        maxPayloadBytes: 1024,
+        notes: 'ready',
+      ),
+    ),
+    secureKeyStorageBridge: _FakeSecureKeyStorageBridge(snapshot: snapshot),
   );
 }
 

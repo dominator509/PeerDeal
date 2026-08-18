@@ -93,6 +93,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored app native-readiness loaders now fail closed when an available
+  secure-key bridge snapshot has a negative revision, exceeds the locked
+  `NativeBridgePayloadLimits.maxSecureKeyRecords` ceiling, or contains an
+  unusable `SecureKeyRecord`. Empty but available key storage remains valid;
+  native key provisioning and platform/device validation remain separate.
 - Mirrored app-owned Hold'em persistence writers now verify the exact event
   envelopes in the existing recovery store before honoring an
   `eventsAlreadyPersisted` retry flag, preventing a snapshot from advancing

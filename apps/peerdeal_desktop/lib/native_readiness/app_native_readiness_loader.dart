@@ -219,6 +219,13 @@ class AppNativeReadinessLoader {
         warnings.add('native secure-key storage unavailable');
         return false;
       }
+      if (snapshot.revision < 0 ||
+          snapshot.keys.length >
+              NativeBridgePayloadLimits.maxSecureKeyRecords ||
+          snapshot.keys.any((key) => !key.isUsable)) {
+        warnings.add('native secure-key storage unavailable');
+        return false;
+      }
       return true;
     } on Object {
       warnings.add('native secure-key storage unavailable');

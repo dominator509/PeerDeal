@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T263 Validate Native Readiness Key Snapshots
+
+Summary:
+- Mirrored app native-readiness loaders now reject available secure-key
+  snapshots with negative revisions, more than the locked
+  `NativeBridgePayloadLimits.maxSecureKeyRecords`, or unusable key records.
+- Empty but available key storage remains valid. The generic native bridge,
+  receipt, and identity ownership boundaries are unchanged.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/native_readiness/app_native_readiness_loader.dart`
+- Mirrored native-readiness tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Both focused Flutter readiness suites timed out after 180 seconds without
+  test output, matching the known local Flutter runner limitation.
+- All 17 package analyzers pass after the change.
+- Direct boundary and source-text checks pass, including their 13 and 7
+  script tests; serialized non-Flutter package tests pass.
+- The Melos boundary/source wrappers and dependency audit timed out without
+  output in the local environment; no dependency or package state changed.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T262 Bound Native App-Support Paths
 
 Summary:
