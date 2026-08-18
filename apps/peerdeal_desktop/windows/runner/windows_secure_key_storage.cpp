@@ -33,7 +33,8 @@ constexpr std::size_t kMaxKeyIdBytes = 256;
 constexpr std::size_t kMaxPurposeBytes = 128;
 constexpr std::size_t kMaxAlgorithmBytes = 128;
 constexpr std::size_t kMaxSecretBytes = 4096;
-constexpr std::size_t kMaxBlobBytes = 512 * 1024;
+// Credential Manager rejects generic credential blobs above the Win32 limit.
+constexpr std::size_t kMaxBlobBytes = CRED_MAX_CREDENTIAL_BLOB_SIZE;
 constexpr std::size_t kSha256Bytes = 32;
 constexpr DWORD kStorageMutexWaitMs = 5000;
 constexpr std::array<std::uint8_t, 4> kStorageMagic = {'P', 'D', 'K', '1'};

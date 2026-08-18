@@ -2,6 +2,40 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T273 Enforce Windows Credential Blob Limit
+
+Summary:
+- Windows secure-key serialization now uses the Win32
+  `CRED_MAX_CREDENTIAL_BLOB_SIZE` bound (2,560 bytes), matching the existing
+  `CredWriteW` contract.
+- Oversized serialized key rings fail closed before native persistence instead
+  of reaching an API call that must reject them.
+- No fallback to session-only credentials, channel change, or package-boundary
+  change was introduced.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_secure_key_storage.cpp`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Windows native host smoke reached app storage, capture, local-network,
+  transport, and secure-key baseline checks. Secure-key save remains blocked in
+  the Codex noninteractive logon session because Windows local-machine
+  Credential Manager persistence returns `ERROR_NO_SUCH_LOGON_SESSION`; a
+  session-only fallback would violate durable secure-key requirements.
+- The Windows SDK header defines `CRED_MAX_CREDENTIAL_BLOB_SIZE` as 2,560
+  bytes. Direct Dart analysis, boundary/source-text checks, their 13 and 7
+  script tests, dependency-audit script tests, and `git diff --check` pass.
+- Flutter/CMake native builds timed out during Flutter support-file generation;
+  standalone Visual Studio `msbuild` is not on PATH. The dependency audit
+  command also timed out without changing package state.
+
+Remaining:
+- Validate secure-key persistence under a normal interactive Windows profile,
+  Android secure-key/capture behavior on a real device, cross-device multicast,
+  release signing, other-platform hosts, product session/state and database
+  wiring, session authentication, and final UX validation.
+
 ### 2026-08-18 - Codex - T272 Separate Production Route Readiness From Discovery
 
 Summary:

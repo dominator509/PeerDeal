@@ -2802,6 +2802,13 @@ This allows invite/context-based production routes to mount on hosts whose
 discovery advertisement is intentionally unsupported without changing the
 native channel or protocol contract.
 
+The T273 follow-up closes a Windows Credential Manager size-bound gap. Windows
+secure-key serialization now enforces the platform's 2,560-byte generic
+credential blob limit instead of allowing records that `CredWriteW` must reject.
+The generic secure-key channel and app package boundaries remain unchanged;
+normal interactive-profile persistence and real-device validation remain
+external runtime gates.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
