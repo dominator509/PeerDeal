@@ -2815,6 +2815,12 @@ rejected before the bounded-size subtraction, preventing an unsigned-size
 underflow during record serialization. The storage format and channel contract
 remain unchanged.
 
+The T275 follow-up closes a network metric-integrity gap. Confidence
+classification and primary-peer election now fail closed when a peer supplies
+negative duration or counter measurements, preventing malformed input from
+improving a route score. Network ownership and the existing decision contract
+remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

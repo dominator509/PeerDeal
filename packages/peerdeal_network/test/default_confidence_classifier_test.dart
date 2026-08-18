@@ -23,6 +23,77 @@ void main() {
     expect(result, NetworkConfidence.unsafe);
   });
 
+  test('returns unsafe for negative metric measurements', () {
+    const classifier = DefaultConfidenceClassifier();
+    final invalidSnapshots = <PeerMetricSnapshot>[
+      const PeerMetricSnapshot(
+        peerId: 'peer_latency',
+        routeClass: NetworkRouteClass.remoteDirect,
+        avgLatencyMs: -1,
+        ackLagMs: 10,
+        disconnectsInWindow: 0,
+        reachabilityCount: 1,
+        eventIndexLag: 0,
+        anchorAligned: true,
+      ),
+      const PeerMetricSnapshot(
+        peerId: 'peer_lag',
+        routeClass: NetworkRouteClass.remoteDirect,
+        avgLatencyMs: 10,
+        ackLagMs: -1,
+        disconnectsInWindow: 0,
+        reachabilityCount: 1,
+        eventIndexLag: 0,
+        anchorAligned: true,
+      ),
+      const PeerMetricSnapshot(
+        peerId: 'peer_disconnects',
+        routeClass: NetworkRouteClass.remoteDirect,
+        avgLatencyMs: 10,
+        ackLagMs: 10,
+        disconnectsInWindow: -1,
+        reachabilityCount: 1,
+        eventIndexLag: 0,
+        anchorAligned: true,
+      ),
+      const PeerMetricSnapshot(
+        peerId: 'peer_reachability',
+        routeClass: NetworkRouteClass.remoteDirect,
+        avgLatencyMs: 10,
+        ackLagMs: 10,
+        disconnectsInWindow: 0,
+        reachabilityCount: -1,
+        eventIndexLag: 0,
+        anchorAligned: true,
+      ),
+      const PeerMetricSnapshot(
+        peerId: 'peer_lag_index',
+        routeClass: NetworkRouteClass.remoteDirect,
+        avgLatencyMs: 10,
+        ackLagMs: 10,
+        disconnectsInWindow: 0,
+        reachabilityCount: 1,
+        eventIndexLag: -1,
+        anchorAligned: true,
+      ),
+      const PeerMetricSnapshot(
+        peerId: 'peer_snapshot',
+        routeClass: NetworkRouteClass.remoteDirect,
+        avgLatencyMs: 10,
+        ackLagMs: 10,
+        disconnectsInWindow: 0,
+        reachabilityCount: 1,
+        eventIndexLag: 0,
+        anchorAligned: true,
+        snapshotServeMs: -1,
+      ),
+    ];
+
+    for (final snapshot in invalidSnapshots) {
+      expect(classifier.classify([snapshot]), NetworkConfidence.unsafe);
+    }
+  });
+
   test('returns high for fast aligned peers', () {
     const classifier = DefaultConfidenceClassifier();
 

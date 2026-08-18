@@ -33,6 +33,34 @@ void main() {
     expect(decision.reason, 'Peer metric window exceeds the configured limit');
   });
 
+  test('fails closed when a metric measurement is negative', () {
+    const service = DefaultPrimaryPeerElectionService(
+      confidenceClassifier: DefaultConfidenceClassifier(),
+    );
+    final decision = service.elect(
+      snapshots: const [
+        PeerMetricSnapshot(
+          peerId: 'peer_invalid',
+          routeClass: NetworkRouteClass.remoteDirect,
+          avgLatencyMs: -1,
+          ackLagMs: 10,
+          disconnectsInWindow: 0,
+          reachabilityCount: 1,
+          eventIndexLag: 0,
+          anchorAligned: true,
+        ),
+      ],
+      baselineEventIndex: 5,
+      expectedAnchorHash: 'anchor_5',
+    );
+
+    expect(decision.primaryPeerId, 'none');
+    expect(decision.confidence, NetworkConfidence.unsafe);
+    expect(decision.requiresPause, isTrue);
+    expect(decision.rankings, isEmpty);
+    expect(decision.reason, 'Peer metric measurement is invalid');
+  });
+
   test('elects best aligned peer deterministically', () {
     const service = DefaultPrimaryPeerElectionService(
       confidenceClassifier: DefaultConfidenceClassifier(),

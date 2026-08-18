@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T275 Reject Invalid Network Measurements
+
+Summary:
+- `peerdeal_network` now rejects negative latency, acknowledgement lag,
+  disconnect, reachability, event-index-lag, and snapshot-serve measurements.
+- Confidence classification and primary-peer election return an unsafe,
+  paused result before malformed values reach scoring.
+- Routing contracts, package ownership, and native boundaries are unchanged.
+
+Files:
+- `packages/peerdeal_network/lib/src/models/peer_metric_snapshot.dart`
+- Mirrored network classifiers/election tests and package/readiness docs.
+
+Verification:
+- The complete `peerdeal_network` package suite passes 57 tests, including
+  focused negative-measurement coverage.
+- Formatting, full workspace analyzer, boundary/source-text checks, their 13
+  and 7 script tests, dependency-audit script tests, and `git diff --check`
+  pass.
+
+Remaining:
+- Interactive Windows secure-key persistence, Android real-device validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T274 Guard Windows Credential Serialization Arithmetic
 
 Summary:

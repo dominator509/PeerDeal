@@ -39,6 +39,18 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
           rankings: const <ScoreBreakdown>[],
         );
       }
+      if (!snapshot.hasValidMeasurements) {
+        return PrimaryPeerDecision(
+          primaryPeerId: validCurrentPrimaryPeerId ?? 'none',
+          confidence: NetworkConfidence.unsafe,
+          reason: 'Peer metric measurement is invalid',
+          baselineEventIndex: baselineEventIndex,
+          expectedAnchorHash: expectedAnchorHash,
+          requiresTransfer: false,
+          requiresPause: true,
+          rankings: const <ScoreBreakdown>[],
+        );
+      }
       boundedSnapshots.add(snapshot);
     }
     final items = boundedSnapshots

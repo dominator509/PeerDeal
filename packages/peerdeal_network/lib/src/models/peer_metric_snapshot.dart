@@ -24,4 +24,16 @@ class PeerMetricSnapshot {
   final bool anchorAligned;
   final bool backgroundRisk;
   final int snapshotServeMs;
+
+  /// Whether every measured duration and counter is physically meaningful.
+  ///
+  /// Negative values are not an "unknown" sentinel in this model. Treating
+  /// them as valid would let malformed input improve a peer's score.
+  bool get hasValidMeasurements =>
+      avgLatencyMs >= 0 &&
+      ackLagMs >= 0 &&
+      disconnectsInWindow >= 0 &&
+      reachabilityCount >= 0 &&
+      eventIndexLag >= 0 &&
+      snapshotServeMs >= 0;
 }
