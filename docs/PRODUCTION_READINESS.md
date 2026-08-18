@@ -94,6 +94,12 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The Windows native transport now retries its existing multicast socket
+  initialization when capability, send, or receive is requested after startup
+  had no usable interface. This matches the Android host's lazy acquisition
+  behavior without changing the generic transport channel or host-private
+  envelope. The current-host smoke still passes; dynamic interface changes and
+  cross-device reachability remain runtime validation gates.
 - The Android secure-key host now uses a read-only Keystore lookup while
   loading an existing envelope. Missing namespaces no longer create Keystore
   aliases, and an existing envelope with a missing key fails closed instead of

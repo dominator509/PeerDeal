@@ -39,6 +39,8 @@ class WindowsNativeTransport final {
       const flutter::MethodCall<flutter::EncodableValue>& method_call,
       std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result);
   bool InitializeSocket();
+  bool EnsureSocket();
+  bool InitializeSocketLocked();
   void ReceiveLoop();
 
   static std::optional<TransportFrame> DecodeFrame(const uint8_t* bytes,

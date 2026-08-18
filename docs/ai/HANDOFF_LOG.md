@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T315 Retry Windows Native Transport Initialization
+
+Summary:
+- Windows native multicast transport initialization is now lock-serialized
+  and retried on demand when capability, send, or receive is requested after
+  startup had no usable interface.
+- This closes the existing Android/Windows lifecycle asymmetry without changing
+  the generic transport channel, host-private envelope, or package boundaries.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.h`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- `rtk flutter build windows --debug --no-pub -t
+  tool/windows_native_host_smoke.dart` passed.
+- The generated host exited 0 with `PEERDEAL_NATIVE_HOST_SMOKE_PASS` for every
+  existing storage, capture, local-network, transport, and secure-key marker.
+- The smoke run proves current-host initialization and transport behavior; it
+  cannot simulate a startup with no interface or prove cross-device reachability.
+
+Remaining:
+- Android real-device/profile validation and release signing, cross-device
+  multicast/firewall validation, other-platform hosts, product session/state
+  wiring, session authentication, and final UX remain open.
+
 ### 2026-08-18 - Codex - T314 Harden Android Secure-Key Read Semantics
 
 Summary:

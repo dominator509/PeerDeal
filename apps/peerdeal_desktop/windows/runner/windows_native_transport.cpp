@@ -319,6 +319,17 @@ WindowsNativeTransport::~WindowsNativeTransport() {
 }
 
 bool WindowsNativeTransport::InitializeSocket() {
+  std::lock_guard<std::mutex> lock(lifecycle_mutex_);
+  return InitializeSocketLocked();
+}
+
+bool WindowsNativeTransport::EnsureSocket() {
+  std::lock_guard<std::mutex> lock(lifecycle_mutex_);
+  if (socket_ != INVALID_SOCKET) return true;
+  return InitializeSocketLocked();
+}
+
+bool WindowsNativeTransport::InitializeSocketLocked() {
   WSADATA data{};
   if (::WSAStartup(MAKEWORD(2, 2), &data) != 0) return false;
   wsa_started_ = true;
@@ -418,6 +429,7 @@ void WindowsNativeTransport::HandleMethodCall(
     std::unique_ptr<flutter::MethodResult<EncodableValue>> result) {
   try {
     if (method_call.method_name() == kGetCapabilityMethod) {
+      EnsureSocket();
       bool available = false;
       {
         std::lock_guard<std::mutex> lock(lifecycle_mutex_);
@@ -437,6 +449,10 @@ void WindowsNativeTransport::HandleMethodCall(
                              ? std::nullopt
                              : FrameFromArguments(*frame_arguments);
       if (!frame.has_value()) {
+        result->Success(Failure("Native transport frame is unavailable."));
+        return;
+      }
+      if (!EnsureSocket()) {
         result->Success(Failure("Native transport frame is unavailable."));
         return;
       }
@@ -496,6 +512,7 @@ void WindowsNativeTransport::HandleMethodCall(
       const auto peer_id = arguments == nullptr
                                ? std::nullopt
                                : StringValue(MapValue(*arguments, "peerId"));
+      EnsureSocket();
       bool available = false;
       {
         std::lock_guard<std::mutex> lock(lifecycle_mutex_);
