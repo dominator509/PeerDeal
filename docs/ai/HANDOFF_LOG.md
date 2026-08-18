@@ -2,6 +2,27 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T288 Harden Receipt Export Identifier Inspection
+
+Summary:
+- Signed opaque receipt inspection now rejects padded, control-bearing, or
+  malformed required receipt identifiers before exposing the verified payload.
+- The artifact format, signature boundary, opaque payload semantics, and
+  provider-owned proof behavior remain unchanged.
+
+Files:
+- `packages/peerdeal_receipts/lib/src/services/opaque_export_decoder.dart`
+- `packages/peerdeal_receipts/test/opaque_export_decoder_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused opaque export decoder suite passes: 15 tests.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T287 Reject Coerced Wizard Selections
 
 Summary:

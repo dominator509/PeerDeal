@@ -180,14 +180,30 @@ class OpaqueExportDecoder {
   }
 
   bool _hasRequiredPayloadFields(Map<String, Object?> payload) {
-    return _nonEmpty(payload['receipt_id']) &&
-        _nonEmpty(payload['receipt_version']) &&
-        _nonEmpty(payload['protocol_version']) &&
-        _nonEmpty(payload['mode_type']) &&
-        _nonEmpty(payload['payload_hash']) &&
+    return _safeRequiredText(payload['receipt_id']) &&
+        _safeRequiredText(payload['receipt_version']) &&
+        _safeRequiredText(payload['protocol_version']) &&
+        _safeRequiredText(payload['mode_type']) &&
+        _safeRequiredText(payload['payload_hash']) &&
         _nonEmpty(payload['opaque_payload']) &&
         !payload.containsKey('table_id');
   }
 
   bool _nonEmpty(Object? value) => value is String && value.trim().isNotEmpty;
+
+  bool _safeRequiredText(Object? value) {
+    if (!_nonEmpty(value)) return false;
+    final text = value! as String;
+    if (text.trim() != text) return false;
+    final bytes = utf8.encode(text);
+    if (bytes.length > _limits.maxPayloadBytes) return false;
+    try {
+      if (utf8.decode(bytes) != text) return false;
+    } on FormatException {
+      return false;
+    }
+    return !text.codeUnits.any(
+      (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+    );
+  }
 }

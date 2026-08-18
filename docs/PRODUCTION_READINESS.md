@@ -2898,6 +2898,12 @@ for `mode_type` and `variant_id` before they become typed setup identifiers;
 non-string and control-bearing values fail closed as unsupported. The wizard
 mode and variant contracts remain unchanged.
 
+The T288 follow-up hardens signed opaque receipt inspection. Required receipt
+identifiers are now required to be bounded, UTF-8-safe, non-padded text without
+C0/C1 controls before the verified payload is exposed. Artifact format,
+signature handling, opaque payload semantics, and receipt package ownership
+remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

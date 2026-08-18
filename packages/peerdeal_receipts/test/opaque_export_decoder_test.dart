@@ -218,6 +218,35 @@ void main() {
     expect(result.message, 'Receipt artifact payload shape is unsupported.');
   });
 
+  test('rejects control-bearing or padded receipt identifiers', () {
+    for (final receiptId in <String>['r_1\nleak', ' r_1']) {
+      final payload = jsonEncode(<String, Object?>{
+        'receipt_id': receiptId,
+        'receipt_version': '1.0',
+        'protocol_version': '1.x',
+        'mode_type': 'tournament',
+        'payload_hash': 'hash_77',
+        'opaque_payload': 'opaque_77',
+      });
+      final signature = signer.sign(payload);
+      final artifact = ReceiptExportArtifact(
+        artifactType: 'file',
+        encodedBody: _encodeBody(<String, Object?>{
+          'format_version': '1.0',
+          'cipher': 'none',
+          'payload': payload,
+          'signature': signature,
+        }),
+        minimalMetadata: const <String, Object?>{},
+      );
+
+      final result = decoder.inspect(artifact);
+
+      expect(result.isAccepted, isFalse);
+      expect(result.message, 'Receipt artifact payload shape is unsupported.');
+    }
+  });
+
   test('rejects structurally oversized decoded payloads', () {
     final payload = <String, Object?>{
       'receipt_id': 'r_1',
