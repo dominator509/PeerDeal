@@ -951,6 +951,28 @@ void main() {
     }
   });
 
+  test('core rejects non-canonical event payloads', () {
+    final event = protocolEvent(
+      eventId: 'evt_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+      payload: <String, Object?>{
+        'details': List<String>.filled(4097, 'x').join(),
+      },
+    );
+
+    expect(
+      () => const CoreReducer().apply(TableState.initial(), event),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          CoreInvariantCodes.eventEnvelopePayloadInvalid,
+        ),
+      ),
+    );
+  });
+
   test('core rejects seated protocol state that exceeds connected count', () {
     final opened = protocolEvent(
       eventId: 'evt_001',

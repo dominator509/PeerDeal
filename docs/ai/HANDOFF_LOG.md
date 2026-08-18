@@ -2,6 +2,27 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Bound Core Event Payloads
+
+Summary:
+- `CoreReducer` now rejects typed event envelopes whose payloads exceed the
+  existing canonical JSON limits or contain non-canonical values.
+- The rejection uses `ERR_EVENT_ENVELOPE_PAYLOAD_INVALID`; event fields,
+  reducer ownership, protocol identities, and package boundaries are unchanged.
+
+Files:
+- `packages/peerdeal_core/lib/src/models/core_invariant_codes.dart`
+- `packages/peerdeal_core/lib/src/reducer/core_reducer.dart`
+- `packages/peerdeal_core/test/peerdeal_core_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused core tests pass after formatting.
+
+Remaining:
+- Product-owned event authorization and session-authentication semantics remain
+  separate explicit contracts.
+
 ### 2026-08-18 - Codex - Bound Core Command Payloads
 
 Summary:

@@ -254,6 +254,9 @@ the gates below are satisfied.
 - Core command ingress now applies the same canonical payload limits to typed
   `CommandEnvelope` instances, closing a direct constructor bypass without
   changing command semantics or protocol fields.
+- Core event ingress now applies the same canonical payload limits to typed
+  `EventEnvelope` instances and reports a dedicated invariant violation,
+  closing the corresponding direct constructor bypass.
 - Core invariant hardening now covers table identity, non-negative counters,
   participant count coherence, hand-scoped event ordering, active-hand identity,
   close-before-closed ordering, and terminal closed/wiped state projection.

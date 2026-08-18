@@ -40,6 +40,8 @@ abstract final class CoreInvariantCodes {
   static const eventEnvelopeIdentityEmpty = 'ERR_EVENT_ENVELOPE_IDENTITY_EMPTY';
   static const eventEnvelopeIdentityUnsafe =
       'ERR_EVENT_ENVELOPE_IDENTITY_UNSAFE';
+  static const eventEnvelopePayloadInvalid =
+      'ERR_EVENT_ENVELOPE_PAYLOAD_INVALID';
 
   static const all = <String>[
     tableIdEmpty,
@@ -73,5 +75,6 @@ abstract final class CoreInvariantCodes {
     sessionWipedBeforeClose,
     eventEnvelopeIdentityEmpty,
     eventEnvelopeIdentityUnsafe,
+    eventEnvelopePayloadInvalid,
   ];
 }

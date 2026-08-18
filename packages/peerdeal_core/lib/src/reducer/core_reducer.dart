@@ -35,6 +35,7 @@ class CoreReducer {
   TableState apply(TableState current, EventEnvelope event) {
     _ensureStateIsPossible(current);
     _ensureEventEnvelopeIdentity(event);
+    _ensureEventEnvelopePayload(event);
 
     final compatibility = protocolCatalog.checkEventEnvelope(event);
     if (!compatibility.isSupported) {
@@ -273,6 +274,17 @@ class CoreReducer {
           'Event envelope identity fields must be non-empty: '
           '${emptyFields.join(', ')}.',
     );
+  }
+
+  void _ensureEventEnvelopePayload(EventEnvelope event) {
+    try {
+      canonicalJsonEncode(event.payload);
+    } on Object {
+      throw InvariantViolation(
+        code: CoreInvariantCodes.eventEnvelopePayloadInvalid,
+        message: 'Event envelope payload exceeds canonical protocol limits.',
+      );
+    }
   }
 
   bool _isSafeIdentity(String value) {
