@@ -274,22 +274,31 @@ void main() {
     },
   );
 
-  test('rejects invalid receive batch limit before native receive', () async {
+  test('rejects invalid receive batch limits before native receive', () async {
     final bridge = _FakeNativeTransportBridge(receiveFrames: [_nativeFrame()]);
     final handler = _RecordingTransportFrameHandler();
-    final drain = NativeTransportFrameDrain(
-      bridge: bridge,
-      receiver: ValidatingTransportFrameReceiver(handler: handler),
-      maxFramesPerDrain: 0,
-    );
+    for (final maxFramesPerDrain in <int>[
+      0,
+      NativeBridgePayloadLimits.maxTransportFrames + 1,
+    ]) {
+      final drain = NativeTransportFrameDrain(
+        bridge: bridge,
+        receiver: ValidatingTransportFrameReceiver(handler: handler),
+        maxFramesPerDrain: maxFramesPerDrain,
+      );
 
-    final result = await drain.drain(sessionId: 'session_1', peerId: 'peer_b');
+      final result = await drain.drain(
+        sessionId: 'session_1',
+        peerId: 'peer_b',
+      );
 
-    expect(result.available, isFalse);
-    expect(result.results, isEmpty);
-    expect(result.warnings, [
-      'Native transport receive batch limit is invalid.',
-    ]);
+      expect(result.available, isFalse);
+      expect(result.results, isEmpty);
+      expect(result.warnings, [
+        'Native transport receive batch limit is invalid.',
+      ]);
+    }
+
     expect(bridge.receiveLookups, 0);
     expect(handler.frames, isEmpty);
   });

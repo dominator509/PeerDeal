@@ -2,6 +2,43 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T257 Bound Native Transport Receive Batches
+
+Summary:
+- Mirrored app `NativeTransportFrameDrain` owners now reject configured
+  receive-batch limits above `NativeBridgePayloadLimits.maxTransportFrames`
+  before invoking the native receive bridge.
+- The existing invalid-limit failure remains fail closed and now covers both
+  non-positive and above-contract values, preventing custom app bridges from
+  bypassing the locked native frame ceiling.
+- This stays in app transport orchestration and does not change the native
+  channel, protocol frame shape, package ownership, or host implementation.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/transport/native_transport_frame_adapter.dart`
+- Mirrored native transport frame adapter tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Both mirrored adapter files and tests were formatted with the direct Dart
+  SDK.
+- Focused mobile Flutter transport tests timed out after 180 seconds without
+  test output; no assertion failure was reported, matching the known local
+  Flutter runner limitation.
+- All 17 package analyzers pass with the direct Dart SDK.
+- Boundary and source-text checks plus their 20 script tests pass.
+- Serialized non-Flutter package tests pass.
+- `git diff --check` passes.
+- `melos run dependency-audit` timed out after 600 seconds without output;
+  no package state was changed, so dependency status is not re-proven by this
+  turn.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T256 Align Native Readiness Payload Limits
 
 Summary:
@@ -24,8 +61,9 @@ Verification:
 - All 17 package analyzers pass with the direct Dart SDK.
 - Focused mobile Flutter readiness tests did not produce a result: the bounded
   180-second Flutter runner stalled without test output.
-- Boundary, source-text, serialized non-Flutter tests, and `git diff --check`
-  remain to be run after this documentation update.
+- Boundary and source-text checks plus their 20 script tests pass.
+- Serialized non-Flutter package tests pass.
+- `git diff --check` passes.
 
 Remaining:
 - Product session/state provisioning, durable database replacement, real-device

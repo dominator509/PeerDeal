@@ -74,7 +74,8 @@ class NativeTransportFrameDrain {
         warnings: <String>['Native transport receive scope is invalid.'],
       );
     }
-    if (_maxFramesPerDrain < 1) {
+    if (_maxFramesPerDrain < 1 ||
+        _maxFramesPerDrain > NativeBridgePayloadLimits.maxTransportFrames) {
       return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive batch limit is invalid.'],
       );
