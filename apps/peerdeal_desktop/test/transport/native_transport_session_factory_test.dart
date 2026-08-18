@@ -70,6 +70,45 @@ void main() {
   );
 
   test(
+    'loaded session enforces the native payload ceiling for send and receive',
+    () async {
+      final bridge = _FakeNativeTransportBridge(
+        capability: const NativeTransportCapability(
+          available: true,
+          sendSupported: true,
+          receiveSupported: true,
+          maxPayloadBytes: 2,
+          notes: 'native-ready',
+        ),
+        receiveFrames: [_nativeFrame()],
+      );
+      final handler = _RecordingTransportFrameHandler();
+      final loaded = await NativeTransportSessionFactory(
+        bridge: bridge,
+      ).loadSession(handler: handler);
+
+      final send = await loaded.session!.sender.send(_frame());
+      final receive = await loaded.session!.drain.drain(
+        sessionId: 'session_1',
+        peerId: 'peer_b',
+      );
+
+      expect(send.sent, isFalse);
+      expect(send.reasonCode, 'ERR_TRANSPORT_FRAME_REJECTED');
+      expect(send.warnings, contains('ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE'));
+      expect(receive.available, isTrue);
+      expect(receive.results.single.accepted, isFalse);
+      expect(receive.results.single.reasonCode, 'ERR_TRANSPORT_FRAME_REJECTED');
+      expect(
+        receive.results.single.warnings,
+        contains('ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE'),
+      );
+      expect(bridge.sentFrames, isEmpty);
+      expect(handler.frames, isEmpty);
+    },
+  );
+
+  test(
     'loadSession fails closed when native transport is unsupported',
     () async {
       final result = await NativeTransportSessionFactory(

@@ -2,6 +2,40 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T266 Enforce Negotiated Transport Payload Ceilings
+
+Summary:
+- Mirrored mobile and desktop native transport session factories now carry the
+  validated native capability payload ceiling into both loaded-session sender
+  and receiver validation.
+- Existing injected app validators remain authoritative for their own rules;
+  the negotiated native limit is an additional fail-closed bound.
+- Custom bridge implementations can no longer accept oversized outbound or
+  inbound frames after reporting a smaller native payload capability.
+
+Files:
+- Mirrored app native transport session factories and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile Flutter test invocation timed out after 180 seconds without
+  test output, matching the known local Flutter runner limitation; no assertion
+  failure was reported.
+- The direct Flutter-bundled Dart/Melos analyzer passes all 17 packages with no
+  issues.
+- Boundary and source-text checks pass; their 13 and 7 script tests pass, and
+  the dependency-audit script tests pass.
+- Serialized non-Flutter regression tests pass across 13 packages.
+- The command-level dependency audit timed out after 180 seconds without
+  output in this environment; no dependency files were changed.
+- `git diff --check` passes.
+
+Remaining:
+- Real-device secure-key/capture validation, cross-device multicast and
+  release signing, other-platform native implementations, product session/state
+  and durable database wiring, explicit session authentication, and final UX
+  validation remain open.
+
 ### 2026-08-17 - Codex - T265 Validate Secure-Key Mutation Revisions
 
 Summary:

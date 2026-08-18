@@ -69,10 +69,18 @@ class NativeTransportSessionFactory {
       );
     }
 
+    final negotiatedValidator = _validatorForPayloadLimit(
+      capability.maxPayloadBytes,
+    );
+
     return NativeTransportSessionLoadResult.available(
       session: NativeTransportSession(
-        sender: _createSender(bridge),
-        drain: _createDrain(bridge: bridge, handler: handler),
+        sender: _createSender(bridge, validator: negotiatedValidator),
+        drain: _createDrain(
+          bridge: bridge,
+          handler: handler,
+          validator: negotiatedValidator,
+        ),
         maxPayloadBytes: capability.maxPayloadBytes,
         nativeNotes: _safeNativeNotes(capability.notes),
         cancellation: _cancellation,
@@ -98,21 +106,28 @@ class NativeTransportSessionFactory {
     return _createDrain(bridge: _resolvedBridge, handler: handler);
   }
 
-  TransportFrameSender _createSender(NativeTransportBridge bridge) {
+  TransportFrameSender _createSender(
+    NativeTransportBridge bridge, {
+    TransportFrameValidator? validator,
+  }) {
     if (!_isValidAppPayloadLimit(_maxPayloadBytes)) {
       return _UnavailableTransportFrameSender(
         warnings: <String>['App transport payload limit is invalid.'],
       );
     }
     return ValidatingTransportFrameSender(
-      sink: NativeTransportFrameSink(bridge: bridge, validator: _validator),
-      validator: _validator,
+      sink: NativeTransportFrameSink(
+        bridge: bridge,
+        validator: validator ?? _validator,
+      ),
+      validator: validator ?? _validator,
     );
   }
 
   NativeTransportFrameDrain _createDrain({
     required NativeTransportBridge bridge,
     required TransportFrameHandler handler,
+    TransportFrameValidator? validator,
   }) {
     if (!_isValidAppPayloadLimit(_maxPayloadBytes)) {
       return NativeTransportFrameDrain.unavailable(
@@ -123,8 +138,15 @@ class NativeTransportSessionFactory {
       bridge: bridge,
       receiver: ValidatingTransportFrameReceiver(
         handler: handler,
-        validator: _validator,
+        validator: validator ?? _validator,
       ),
+    );
+  }
+
+  TransportFrameValidator _validatorForPayloadLimit(int maxPayloadBytes) {
+    return _PayloadBoundTransportFrameValidator(
+      delegate: _validator,
+      maxPayloadBytes: maxPayloadBytes,
     );
   }
 
@@ -168,6 +190,30 @@ class NativeTransportSessionFactory {
   static bool _isValidAppPayloadLimit(int value) {
     return value >= 1 &&
         value <= NativeBridgePayloadLimits.maxTransportPayloadBytes;
+  }
+}
+
+class _PayloadBoundTransportFrameValidator implements TransportFrameValidator {
+  const _PayloadBoundTransportFrameValidator({
+    required this.delegate,
+    required this.maxPayloadBytes,
+  });
+
+  final TransportFrameValidator delegate;
+  final int maxPayloadBytes;
+
+  @override
+  TransportFrameValidationResult validate(TransportFrame frame) {
+    final validation = delegate.validate(frame);
+    final warnings = <String>[...validation.warnings];
+    if (frame.payload.length > maxPayloadBytes &&
+        !warnings.contains('ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE')) {
+      warnings.add('ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE');
+    }
+    if (warnings.isEmpty) {
+      return const TransportFrameValidationResult.valid();
+    }
+    return TransportFrameValidationResult(isValid: false, warnings: warnings);
   }
 }
 

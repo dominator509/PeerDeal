@@ -696,6 +696,11 @@ the gates below are satisfied.
 - Mirrored app `NativeTransportSessionFactory` boundaries now reject configured
   and reported payload limits above the locked native bridge ceiling before
   native capability lookup, sender creation, or receiver creation.
+- Mirrored app native transport sessions now carry the reported native payload
+  ceiling into both their outbound and inbound frame validators. A custom app
+  bridge can no longer accept a frame larger than the capability negotiated by
+  the loaded session; the generic transport and native channel contracts are
+  unchanged.
 - Mirrored app native-readiness loaders now apply that same ceiling to both
   configured and reported transport payload limits before advertising native
   transport readiness.
@@ -2739,6 +2744,16 @@ secure-storage separator policy. This preserves the generic native bridge and
 app-owned receipt/identity boundaries; native persistence atomicity,
 real-device validation, product database wiring, session authentication,
 release signing, and final UX remain separate.
+
+The T266 follow-up closes the negotiated transport payload-boundary gap in the
+mirrored app session factories. A loaded session now applies the native
+capability's validated payload ceiling to both its sender and receiver while
+preserving any injected app validator rules. This prevents custom bridge
+implementations from accepting outbound or inbound frames larger than their
+reported native capability without changing protocol, network, or native
+channel ownership. Flutter-focused execution remains locally runner-blocked;
+real-device reachability, release signing, product state/database wiring,
+session authentication, other-platform hosts, and final UX remain separate.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
