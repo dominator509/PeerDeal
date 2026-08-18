@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Reject Duplicate Native Key IDs Across App Boundaries
+
+Summary:
+- Mirrored mobile and desktop local-identity and native-readiness adapters now
+  fail closed when a generic secure-key snapshot contains duplicate key IDs.
+- This matches the locked native channel decoder and the existing receipt
+  key-ring loader, preventing ambiguous app state from direct bridge adapters.
+
+Files:
+- Mirrored `native_local_peer_identity_loader.dart` and
+  `app_native_readiness_loader.dart` files and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile identity and readiness tests passed: 21 and 14 tests.
+- Focused desktop identity and readiness tests passed: 21 and 14 tests.
+- Full `melos run analyze`, `boundary-check`, `source-text`, serialized
+  `test`, `dependency-audit`, and `git diff --check` gates passed.
+
+Remaining:
+- Real-device secure-key persistence, cross-device transport, release signing,
+  other-platform native hosts, and product-owned session state remain open
+  documented gates.
+
 ### 2026-08-18 - Codex - Reject Duplicate Receipt Key IDs At App Boundary
 
 Summary:

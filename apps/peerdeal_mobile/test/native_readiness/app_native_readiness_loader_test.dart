@@ -123,6 +123,25 @@ void main() {
           ),
         ],
       ),
+      SecureKeyStorageSnapshot(
+        available: true,
+        keys: const <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'duplicate',
+            purpose: 'purpose_a',
+            algorithm: 'algorithm_a',
+            secret: 'secret_a',
+            active: false,
+          ),
+          SecureKeyRecord(
+            keyId: 'duplicate',
+            purpose: 'purpose_b',
+            algorithm: 'algorithm_b',
+            secret: 'secret_b',
+            active: false,
+          ),
+        ],
+      ),
     ];
 
     for (final snapshot in snapshots) {

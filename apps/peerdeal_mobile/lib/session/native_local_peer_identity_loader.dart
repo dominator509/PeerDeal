@@ -118,6 +118,14 @@ class NativeLocalPeerIdentityLoader {
         warnings: <String>['Local peer identity record limit reached.'],
       );
     }
+    final keyIds = <String>{};
+    if (snapshot.keys.any((record) => !keyIds.add(record.keyId))) {
+      return AppLocalPeerIdentityLoadResult(
+        warnings: <String>[
+          'Local peer identity storage contains duplicate key IDs.',
+        ],
+      );
+    }
 
     final matches = snapshot.keys
         .where(

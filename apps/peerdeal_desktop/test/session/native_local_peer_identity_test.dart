@@ -184,7 +184,38 @@ void main() {
     },
   );
 
-  test('fails closed on ambiguous active identity records', () async {
+  test(
+    'fails closed on duplicate secure-key ids before identity selection',
+    () async {
+      final bridge = _MemorySecureKeyBridge(
+        keys: const <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'local_peer_id',
+            purpose: 'peer_identity',
+            algorithm: 'opaque-peer-id',
+            secret: 'peer_one',
+            active: true,
+          ),
+          SecureKeyRecord(
+            keyId: 'local_peer_id',
+            purpose: 'peer_identity',
+            algorithm: 'opaque-peer-id',
+            secret: 'peer_two',
+            active: true,
+          ),
+        ],
+      );
+
+      final result = await NativeLocalPeerIdentityLoader(bridge: bridge).load();
+
+      expect(result.isAvailable, isFalse);
+      expect(result.warnings, <String>[
+        'Local peer identity storage contains duplicate key IDs.',
+      ]);
+    },
+  );
+
+  test('fails closed on duplicate secure-key ids across purposes', () async {
     final bridge = _MemorySecureKeyBridge(
       keys: const <SecureKeyRecord>[
         SecureKeyRecord(
@@ -196,10 +227,10 @@ void main() {
         ),
         SecureKeyRecord(
           keyId: 'local_peer_id',
-          purpose: 'peer_identity',
-          algorithm: 'opaque-peer-id',
-          secret: 'peer_two',
-          active: true,
+          purpose: 'other-purpose',
+          algorithm: 'opaque',
+          secret: 'other-value',
+          active: false,
         ),
       ],
     );
@@ -208,7 +239,7 @@ void main() {
 
     expect(result.isAvailable, isFalse);
     expect(result.warnings, <String>[
-      'Local peer identity records are ambiguous.',
+      'Local peer identity storage contains duplicate key IDs.',
     ]);
   });
 

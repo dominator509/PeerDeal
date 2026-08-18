@@ -100,6 +100,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored app-owned secure-key consumers now reject duplicate key IDs from
+  direct `SecureKeyStorageBridge` implementations before selecting receipt
+  keys, local peer identity, or readiness state. This aligns the app boundary
+  with the locked native channel decoder without changing generic storage
+  semantics, receipt formats, or package boundaries.
 - Mirrored app-owned receipt key-ring loaders now reject duplicate secure-key IDs
   from any `SecureKeyStorageBridge` implementation before constructing a receipt
   signer or cipher. This matches the locked native channel decoder's integrity
