@@ -94,6 +94,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The JSON recovery persistence store now converts root-directory, temporary
+  file, and other write-path filesystem failures into its existing fatal
+  `ERR_RECOVERY_PERSISTENCE_WRITE_FAILED` result instead of leaking exceptions
+  through the synchronous persistence contract. The recovery format, locking,
+  and package ownership remain unchanged.
 - Windows local-network capability reporting and multicast interface selection
   now exclude adapters marked `IP_ADAPTER_NO_MULTICAST`, avoiding a false
   usable-network result before the existing UDP multicast channel is opened.

@@ -489,6 +489,45 @@ void main() {
     );
   });
 
+  test('file store converts root filesystem failures into write results', () {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_recovery_store_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) {
+        directory.deleteSync(recursive: true);
+      }
+    });
+
+    final rootFile = File('${directory.path}${Platform.pathSeparator}root');
+    rootFile.writeAsStringSync('not a directory');
+    final writer = JsonFileRecoveryPersistenceStore(
+      rootDirectory: Directory(rootFile.path),
+    );
+
+    final append = writer.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+      ],
+    );
+    final snapshot = writer.saveSnapshot(
+      scope: scope,
+      snapshot: _snapshot(seq: 0),
+    );
+
+    expect(append.isSuccess, isFalse);
+    expect(snapshot.isSuccess, isFalse);
+    expect(
+      append.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_WRITE_FAILED',
+    );
+    expect(
+      snapshot.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_WRITE_FAILED',
+    );
+  });
+
   test('file store rejects non-positive file limits', () {
     final directory = Directory.systemTemp.createTempSync(
       'peerdeal_recovery_store_',

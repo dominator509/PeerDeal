@@ -80,6 +80,8 @@ class JsonFileRecoveryPersistenceStore
       return _lockFailure();
     } on _RecoveryPersistenceTemporaryFileCleanupException {
       return _temporaryFileCleanupFailure();
+    } on Object {
+      return _writeFailureResult();
     }
   }
 
@@ -105,6 +107,8 @@ class JsonFileRecoveryPersistenceStore
       return _lockFailure();
     } on _RecoveryPersistenceTemporaryFileCleanupException {
       return _temporaryFileCleanupFailure();
+    } on Object {
+      return _writeFailureResult();
     }
   }
 
@@ -314,24 +318,28 @@ class JsonFileRecoveryPersistenceStore
       tempFile.renameSync(file.path);
       return RecoveryPersistenceResult.success();
     } on Object {
-      if (tempFile != null && tempFile.existsSync()) {
-        try {
+      try {
+        if (tempFile != null && tempFile.existsSync()) {
           tempFile.deleteSync();
-        } on Object {
-          // Best-effort cleanup; the failed persistence result is authoritative.
         }
+      } on Object {
+        // Best-effort cleanup; the failed persistence result is authoritative.
       }
-      return RecoveryPersistenceResult(
-        isSuccess: false,
-        conflicts: <SyncConflict>[
-          SyncConflict(
-            code: 'ERR_RECOVERY_PERSISTENCE_WRITE_FAILED',
-            message: 'Recovery persistence file could not be written.',
-            severity: SyncConflictSeverity.fatal,
-          ),
-        ],
-      );
+      return _writeFailureResult();
     }
+  }
+
+  RecoveryPersistenceResult _writeFailureResult() {
+    return RecoveryPersistenceResult(
+      isSuccess: false,
+      conflicts: <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_WRITE_FAILED',
+          message: 'Recovery persistence file could not be written.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ],
+    );
   }
 
   RecoveryPersistenceResult _validateScopeIdentity(

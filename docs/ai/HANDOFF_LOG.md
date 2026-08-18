@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T317 Fail Closed On Recovery Write Filesystem Errors
+
+Summary:
+- `JsonFileRecoveryPersistenceStore.saveSnapshot` and `appendEvents` now
+  convert root-directory, temporary-file, and other write-path filesystem
+  failures into the existing fatal `ERR_RECOVERY_PERSISTENCE_WRITE_FAILED`
+  result instead of leaking synchronous exceptions.
+- Temporary-file cleanup remains best effort and the recovery format, locking,
+  and package boundaries are unchanged.
+
+Files:
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused `recovery_persistence_store_test.dart` passed all 33 tests.
+- Full serialized repository tests, analyze, boundary-check, source-text, and
+  dependency-audit gates passed.
+
+Remaining:
+- Android real-device/profile validation and release signing, cross-device
+  multicast/firewall validation, other-platform hosts, product session/state
+  wiring, session authentication, and final UX remain open.
+
 ### 2026-08-18 - Codex - T316 Respect Windows No-Multicast Adapter Flags
 
 Summary:
