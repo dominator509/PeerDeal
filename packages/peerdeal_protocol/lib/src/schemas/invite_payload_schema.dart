@@ -1,4 +1,8 @@
+import '../serialization/canonical_json_limits.dart';
+
 class InvitePayloadSchema {
+  static const _textLimits = CanonicalJsonLimits();
+
   static const requiredKeys = <String>{
     'invite_version',
     'invite_id',
@@ -47,6 +51,9 @@ class InvitePayloadSchema {
       }
       if (value.trim().isEmpty || value.trim() != value) {
         errors.add('$key must be non-empty and unpadded');
+      }
+      if (!_textLimits.isWithinUtf8TextLimit(value)) {
+        errors.add('$key exceeds the protocol UTF-8 text byte limit');
       }
       if (value.codeUnits.any(
         (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),

@@ -245,6 +245,9 @@ the gates below are satisfied.
 - The v1 scaffold protocol catalog is locked across command, event, snapshot,
   Game File, invite payload, and public result-code identities, with accepted
   fixture parity and fail-closed unsupported-version checks.
+- Direct invite-payload schema validation now applies the existing canonical
+  UTF-8 text byte ceiling and rejects malformed UTF-16 input, closing a direct
+  caller bypass without changing the invite fields or authentication semantics.
 - Core invariant hardening now covers table identity, non-negative counters,
   participant count coherence, hand-scoped event ordering, active-hand identity,
   close-before-closed ordering, and terminal closed/wiped state projection.

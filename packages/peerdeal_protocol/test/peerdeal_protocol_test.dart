@@ -223,6 +223,32 @@ void main() {
     expect(errors, contains('invite_id contains a control character'));
   });
 
+  test('invite payload rejects text beyond the protocol UTF-8 byte limit', () {
+    final decoded = fixtureJson(
+      'fixtures/invites/open_table_player_invite_v1.json',
+    )..['signature'] = List<String>.filled(4097, 'x').join();
+
+    final errors = InvitePayloadSchema().validate(decoded);
+
+    expect(
+      errors,
+      contains('signature exceeds the protocol UTF-8 text byte limit'),
+    );
+  });
+
+  test('invite payload rejects malformed UTF-16 text', () {
+    final decoded = fixtureJson(
+      'fixtures/invites/open_table_player_invite_v1.json',
+    )..['signature'] = String.fromCharCode(0xd800);
+
+    final errors = InvitePayloadSchema().validate(decoded);
+
+    expect(
+      errors,
+      contains('signature exceeds the protocol UTF-8 text byte limit'),
+    );
+  });
+
   test('event hash helper returns non-empty sha256', () {
     final hash = computeCanonicalHash({
       'event_type': 'OpenTableSessionOpened',

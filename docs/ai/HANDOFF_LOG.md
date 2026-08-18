@@ -2,6 +2,26 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Bound Invite Schema Text Input
+
+Summary:
+- `InvitePayloadSchema` now applies the existing canonical UTF-8 text byte
+  ceiling and rejects malformed UTF-16 text during direct validation.
+- Invite fields, signature semantics, catalog identity, and package boundaries
+  are unchanged.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/schemas/invite_payload_schema.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused protocol tests pass after formatting.
+
+Remaining:
+- Session authentication still requires an explicit product/protocol contract;
+  this slice only bounds and validates the existing signature field.
+
 ### 2026-08-18 - Codex - T317 Fail Closed On Recovery Write Filesystem Errors
 
 Summary:
