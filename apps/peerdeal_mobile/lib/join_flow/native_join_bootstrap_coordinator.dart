@@ -40,7 +40,8 @@ class NativeJoinBootstrapCoordinator
       );
     }
 
-    if (_maxPeerCandidates < 1) {
+    if (_maxPeerCandidates < 1 ||
+        _maxPeerCandidates > NativeBridgePayloadLimits.maxDiscoveryEntries) {
       return BootstrapPlan(
         requiresBootstrap: true,
         peerCandidates: <String>[],

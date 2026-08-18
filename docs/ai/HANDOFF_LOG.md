@@ -2,6 +2,42 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T260 Bound Native Join Candidate Limits
+
+Summary:
+- Mirrored app `NativeJoinBootstrapCoordinator` owners now reject configured
+  peer-candidate limits above `NativeBridgePayloadLimits.maxDiscoveryEntries`
+  before native capability lookup or discovery parsing.
+- The existing relay-fallback path now covers both non-positive and
+  above-contract values, preventing custom bridges from expanding discovery
+  parsing beyond the locked native entry ceiling.
+- This remains app-owned join orchestration and does not change the native
+  discovery channel, network contracts, or package ownership.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/join_flow/native_join_bootstrap_coordinator.dart`
+- Mirrored native join bootstrap coordinator tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Both mirrored coordinator files and tests were formatted with the direct
+  Dart SDK.
+- Focused mobile Flutter join-flow tests timed out after 180 seconds without
+  test output; no assertion failure was reported, matching the known local
+  Flutter runner limitation.
+- All 17 package analyzers pass with the direct Dart SDK.
+- Boundary and source-text checks plus their 20 script tests pass.
+- Serialized non-Flutter package tests pass.
+- `git diff --check` passes.
+- The dependency audit attempt recorded in T257 timed out after 600 seconds
+  without output; no package state was changed.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T259 Bound Native Bootstrap Candidate Limits
 
 Summary:

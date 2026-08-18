@@ -381,6 +381,9 @@ the gates below are satisfied.
 - App-owned join bootstrap coordinators now fall back before native capability
   lookup when the app-owned peer candidate limit is invalid, keeping bad join
   bootstrap configuration from reaching local-network platform discovery.
+- Mirrored app-owned join bootstrap coordinators now also reject configured
+  peer candidate limits above the locked native discovery-entry ceiling before
+  native capability lookup or discovery parsing.
 - App-owned join bootstrap coordinators now preserve relay fallback when
   app/network candidate resolution fails after native discovery, aligning join
   bootstrap with mounted table bootstrap fail-closed behavior.

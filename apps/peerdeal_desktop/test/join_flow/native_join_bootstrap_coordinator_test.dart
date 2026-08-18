@@ -212,26 +212,31 @@ void main() {
     expect(plan.peerCandidates.single, 'peer-safe');
   });
 
-  test('keeps relay fallback when peer candidate limit is invalid', () async {
-    final provider = _RecordingBootstrapCandidateProvider();
-    final bridge = _CountingLocalNetworkBridge();
-    final coordinator = NativeJoinBootstrapCoordinator(
-      bridge: bridge,
-      provider: provider,
-      maxPeerCandidates: 0,
-    );
+  test('keeps relay fallback when peer candidate limits are invalid', () async {
+    for (final maxPeerCandidates in <int>[
+      0,
+      NativeBridgePayloadLimits.maxDiscoveryEntries + 1,
+    ]) {
+      final provider = _RecordingBootstrapCandidateProvider();
+      final bridge = _CountingLocalNetworkBridge();
+      final coordinator = NativeJoinBootstrapCoordinator(
+        bridge: bridge,
+        provider: provider,
+        maxPeerCandidates: maxPeerCandidates,
+      );
 
-    final plan = await coordinator.buildPlan(
-      resolvedInvite: _resolvedInvite,
-      roleGrant: _roleGrant,
-    );
+      final plan = await coordinator.buildPlan(
+        resolvedInvite: _resolvedInvite,
+        roleGrant: _roleGrant,
+      );
 
-    expect(plan.requiresBootstrap, isTrue);
-    expect(plan.peerCandidates, isEmpty);
-    expect(plan.relayFallbackAllowed, isTrue);
-    expect(provider.request, isNull);
-    expect(bridge.capabilityLookups, 0);
-    expect(bridge.discoveryLookups, 0);
+      expect(plan.requiresBootstrap, isTrue);
+      expect(plan.peerCandidates, isEmpty);
+      expect(plan.relayFallbackAllowed, isTrue);
+      expect(provider.request, isNull);
+      expect(bridge.capabilityLookups, 0);
+      expect(bridge.discoveryLookups, 0);
+    }
   });
 
   test(
