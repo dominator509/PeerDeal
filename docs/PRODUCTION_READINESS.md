@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored bootstrap candidate result models now filter malformed provider
+  output before app surfaces receive it, including unsafe peer identities,
+  endpoint hosts/ports, priorities, and diagnostic reasons; valid candidates
+  and existing candidate bounds remain unchanged.
 - Mirrored app-owned local-network bootstrap projections now reject malformed
   UTF-8 provider peer identities and native diagnostic text before candidates
   or notes reach join/session surfaces; existing valid normalization and relay

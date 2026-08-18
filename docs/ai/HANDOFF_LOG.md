@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T308 Harden Bootstrap Provider Output
+
+Summary:
+- Mirrored mobile and desktop `NativeBootstrapCandidateLoadResult` boundaries
+  now filter provider candidates before app state exposure.
+- Unsafe peer identities, endpoint hosts/ports, negative priorities, and
+  diagnostic reasons are dropped; valid candidate ordering and bounds remain
+  unchanged.
+- No network model, transport contract, or package boundary changed.
+
+Files:
+- `apps/peerdeal_mobile/lib/demo_slice/controllers/native_bootstrap_candidate_loader.dart`
+- `apps/peerdeal_mobile/test/demo_slice/native_bootstrap_candidate_loader_test.dart`
+- Mirrored desktop implementation and test.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Mirrored mobile and desktop bootstrap-loader focused Flutter tests pass.
+- Full repository gates are pending in this handoff.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T307 Harden Bootstrap Candidate UTF-8 Boundaries
 
 Summary:

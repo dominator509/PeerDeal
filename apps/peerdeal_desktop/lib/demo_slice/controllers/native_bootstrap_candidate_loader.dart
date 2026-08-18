@@ -37,8 +37,52 @@ class NativeBootstrapCandidateLoadResult {
 
   static List<BootstrapCandidate> _boundedCandidates(
     List<BootstrapCandidate> candidates,
-  ) =>
-      List<BootstrapCandidate>.unmodifiable(candidates.take(maxCandidateCount));
+  ) {
+    final result = <BootstrapCandidate>[];
+    for (final candidate in candidates) {
+      if (result.length == maxCandidateCount) break;
+      if (!_isSafeCandidate(candidate)) continue;
+      result.add(candidate);
+    }
+    return List<BootstrapCandidate>.unmodifiable(result);
+  }
+
+  static bool _isSafeCandidate(BootstrapCandidate candidate) {
+    if (!NetworkInputLimits.isSafePeerIdentity(candidate.peerId) ||
+        candidate.priority < 0) {
+      return false;
+    }
+    final host = candidate.host;
+    if (host != null && !_isSafeEndpointHost(host)) return false;
+    final port = candidate.port;
+    if (port != null && (port < 1 || port > 65535)) return false;
+    final reason = candidate.reason;
+    return reason == null ||
+        NativeBridgePayloadLimits.isSafeUtf8Text(
+          reason,
+          NativeBridgePayloadLimits.maxDiagnosticBytes,
+        );
+  }
+
+  static bool _isSafeEndpointHost(String value) {
+    if (value.isEmpty || value.length > 253 || value.trim() != value) {
+      return false;
+    }
+    if (!NativeBridgePayloadLimits.isWithinUtf8Limit(
+      value,
+      NativeBridgePayloadLimits.maxDiscoveryValueBytes,
+    )) {
+      return false;
+    }
+    if (value.contains(':')) {
+      return RegExp(r'^[0-9A-Fa-f:]+$').hasMatch(value);
+    }
+    return RegExp(r'^[A-Za-z0-9.-]+$').hasMatch(value) &&
+        !value.startsWith('.') &&
+        !value.endsWith('.') &&
+        !value.startsWith('-') &&
+        !value.endsWith('-');
+  }
 
   static List<String> _boundedWarnings(
     List<String> warnings, {

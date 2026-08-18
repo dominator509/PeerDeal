@@ -260,6 +260,44 @@ void main() {
     },
   );
 
+  test('filters malformed provider candidate output', () async {
+    final result = await NativeBootstrapCandidateLoader(
+      bridge: _FakeLocalNetworkBridge(
+        capability: const LocalNetworkCapability(
+          discoverySupported: true,
+          permissionPromptSupported: true,
+          broadcastSupported: true,
+          notes: 'local-network-ready',
+        ),
+        discovery: LocalNetworkDiscoverySnapshot(
+          permissionGranted: true,
+          foundEndpoints: <String>['peer-safe'],
+          interfaceHints: const <String>[],
+        ),
+      ),
+      provider: _StaticBootstrapCandidateProvider(
+        candidates: <BootstrapCandidate>[
+          BootstrapCandidate(
+            peerId: String.fromCharCode(0xD800),
+            routeClass: NetworkRouteClass.p2pRemote,
+            reachable: true,
+            priority: 2,
+          ),
+          const BootstrapCandidate(
+            peerId: 'peer-safe',
+            routeClass: NetworkRouteClass.lanDirect,
+            reachable: true,
+            priority: 1,
+          ),
+        ],
+      ),
+    ).load(sessionId: 'session-1', tableId: 'table-1');
+
+    expect(result.candidates.map((candidate) => candidate.peerId), <String>[
+      'peer-safe',
+    ]);
+  });
+
   test(
     'fails closed when local network peer candidate limits are invalid',
     () async {
@@ -524,6 +562,17 @@ class _ThrowingBootstrapCandidateProvider
   ) async {
     throw StateError('bootstrap failed');
   }
+}
+
+class _StaticBootstrapCandidateProvider implements BootstrapCandidateProvider {
+  const _StaticBootstrapCandidateProvider({required this.candidates});
+
+  final List<BootstrapCandidate> candidates;
+
+  @override
+  Future<List<BootstrapCandidate>> resolveCandidates(
+    BootstrapResolutionRequest request,
+  ) async => candidates;
 }
 
 class _RecordingBootstrapCandidateProvider
