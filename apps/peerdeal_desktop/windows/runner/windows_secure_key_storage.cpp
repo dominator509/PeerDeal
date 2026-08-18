@@ -542,6 +542,11 @@ WindowsSecureKeyStorage::ReadStatus WindowsSecureKeyStorage::ReadRecords(
   }
   std::vector<std::uint8_t> blob;
   const auto status = ReadCredentialBlob(target, &blob);
+  if (status == ReadStatus::kNotFound) {
+    records->clear();
+    *revision = 0;
+    return ReadStatus::kSuccess;
+  }
   if (status != ReadStatus::kSuccess) {
     return status;
   }

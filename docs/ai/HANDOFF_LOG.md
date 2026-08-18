@@ -2,6 +2,25 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Fix Windows First-Run Secure-Key Availability
+
+Summary:
+- Windows secure-key storage now maps a missing Credential Manager record to
+  an available empty key ring at revision zero, matching Android and the
+  locked generic bridge contract.
+- Existing corrupt or unreadable credentials still fail closed as unavailable.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_secure_key_storage.cpp`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Windows native build and repository gates remain to be run for this change.
+
+Remaining:
+- Real Windows runtime validation, operator signing, and product-owned session
+  state wiring remain documented production gates.
+
 ### 2026-08-18 - Codex - Bound Core Event Payloads
 
 Summary:

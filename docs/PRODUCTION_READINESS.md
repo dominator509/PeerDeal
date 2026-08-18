@@ -3,6 +3,10 @@
 This document defines the release bar for moving PeerDeal from scaffold
 baseline toward production-ready engine and app builds.
 
+The Windows secure-key host now treats a missing first-run credential as an
+available empty key ring, matching the generic bridge contract and allowing
+the existing app-owned receipt key provisioning flow to create its first key.
+
 ## Current state
 The repository is a green migration baseline. It has package boundaries, local
 checks, CI wiring, and starter implementations. It is not production-ready until
