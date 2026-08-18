@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored app transport source observers now register disposal and route
+  cancellation before an already-completed native poll, so stale poll results
+  cannot publish after source teardown; transport source ownership and native
+  bridge contracts remain unchanged.
 - Native bridge and app transport cancellation wrappers now register route
   cancellation before native operation completion, so an already-signaled
   cancellation wins over an immediately completing platform result across

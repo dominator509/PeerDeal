@@ -141,6 +141,24 @@ void main() {
     },
   );
 
+  test('cancellation wins over an immediately completing poll', () async {
+    final source = AppTableSessionTransportSource(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      cancellation: Future<void>.value(),
+      drain: () async => NativeTransportFrameDrainResult(
+        available: true,
+        results: const <TransportFrameReceiveResult>[],
+      ),
+    );
+
+    final result = await source.pollNow();
+
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport source poll cancelled.']);
+    source.dispose();
+  });
+
   test('stops active polling when external cancellation wins', () async {
     _FakeTimer? timer;
     final cancellation = Completer<void>();

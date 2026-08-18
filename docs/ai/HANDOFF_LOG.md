@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T312 Harden Transport Source Cancellation Ordering
+
+Summary:
+- Mirrored mobile and desktop app transport source observers now attach
+  disposal and route cancellation before poll completion handling.
+- An already-signaled cancellation therefore wins over an immediately
+  completing native poll and cannot publish stale receive counts after source
+  teardown; transport ownership and native contracts remain unchanged.
+
+Files:
+- Mirrored `app_table_session_transport_source.dart` files and tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Mirrored mobile and desktop transport source focused Flutter tests pass,
+  including the immediate-poll cancellation regression.
+- Full repository analyze, boundary, source-text, dependency-audit, test, and
+  diff gates pass.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T311 Harden Native Cancellation Ordering
 
 Summary:

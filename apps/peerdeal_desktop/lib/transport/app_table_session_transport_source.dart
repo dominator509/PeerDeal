@@ -243,14 +243,6 @@ class AppTableSessionTransportSource {
     }
 
     unawaited(
-      future.then<void>(
-        completeValue,
-        onError: (Object error, StackTrace stackTrace) {
-          completeError(error, stackTrace);
-        },
-      ),
-    );
-    unawaited(
       _disposeCancellation.future.then<void>((_) {
         completeValue(
           AppTableSessionTransportPollResult.unavailable(
@@ -277,6 +269,15 @@ class AppTableSessionTransportSource {
         ),
       );
     }
+
+    unawaited(
+      future.then<void>(
+        completeValue,
+        onError: (Object error, StackTrace stackTrace) {
+          completeError(error, stackTrace);
+        },
+      ),
+    );
 
     return _remember(await observed.future);
   }
