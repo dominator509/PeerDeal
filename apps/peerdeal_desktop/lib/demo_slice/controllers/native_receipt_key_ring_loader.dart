@@ -150,6 +150,15 @@ class NativeReceiptKeyRingLoader
         warnings: <String>['Secure receipt key record limit reached.'],
       );
     }
+    final keyIds = <String>{};
+    if (snapshot.keys.any((record) => !keyIds.add(record.keyId))) {
+      return ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>[
+          'Secure receipt key storage contains duplicate key IDs.',
+        ],
+      );
+    }
     if (snapshot.keys.any((record) => !_isValidKeyId(record.keyId))) {
       return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),

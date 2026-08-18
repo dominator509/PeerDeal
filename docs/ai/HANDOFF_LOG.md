@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - Reject Duplicate Receipt Key IDs At App Boundary
+
+Summary:
+- Mirrored mobile and desktop `NativeReceiptKeyRingLoader` adapters now fail
+  closed when any generic secure-key snapshot contains duplicate key IDs.
+- This aligns direct app bridge implementations with the locked native channel
+  decoder and prevents ambiguous receipt signer/cipher key lookup.
+
+Files:
+- Mirrored `native_receipt_key_ring_loader.dart` files and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused mobile loader test passed: 19 tests.
+- Focused desktop loader test passed: 19 tests.
+- Full `melos run analyze`, `boundary-check`, `source-text`, serialized
+  `test`, `dependency-audit`, and `git diff --check` gates passed.
+
+Remaining:
+- Real-device secure-key persistence, cross-device transport, release signing,
+  other-platform native hosts, and product-owned session state remain open
+  documented gates.
+
 ### 2026-08-18 - Codex - Fix Windows First-Run Secure-Key Availability
 
 Summary:

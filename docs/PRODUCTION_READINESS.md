@@ -100,6 +100,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Mirrored app-owned receipt key-ring loaders now reject duplicate secure-key IDs
+  from any `SecureKeyStorageBridge` implementation before constructing a receipt
+  signer or cipher. This matches the locked native channel decoder's integrity
+  rule and prevents ambiguous key lookup without changing receipt formats,
+  generic native storage semantics, or package boundaries.
 - The JSON recovery persistence store now converts root-directory, temporary
   file, and other write-path filesystem failures into its existing fatal
   `ERR_RECOVERY_PERSISTENCE_WRITE_FAILED` result instead of leaking exceptions

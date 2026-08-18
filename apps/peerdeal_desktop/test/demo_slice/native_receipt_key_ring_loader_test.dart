@@ -465,6 +465,38 @@ void main() {
     },
   );
 
+  test('fails closed when native storage has duplicate key ids', () async {
+    final bridge = _FakeSecureKeyStorageBridge(
+      snapshot: SecureKeyStorageSnapshot(
+        available: true,
+        keys: <SecureKeyRecord>[
+          const SecureKeyRecord(
+            keyId: 'receipt_signing_1',
+            purpose: 'receipt_signing',
+            algorithm: 'hmac-sha256',
+            secret: 'signing_secret_1',
+            active: true,
+          ),
+          const SecureKeyRecord(
+            keyId: 'receipt_signing_1',
+            purpose: 'receipt_signing',
+            algorithm: 'hmac-sha256',
+            secret: 'replacement_secret',
+            active: false,
+          ),
+        ],
+      ),
+    );
+
+    final result = await NativeReceiptKeyRingLoader(bridge: bridge).load();
+
+    expect(result.hasSigningKey, isFalse);
+    expect(result.hasEncryptionKey, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key storage contains duplicate key IDs.',
+    ]);
+  });
+
   test('fails closed when native secure key storage throws', () async {
     final result = await NativeReceiptKeyRingLoader(
       bridge: _ThrowingSecureKeyStorageBridge(),
