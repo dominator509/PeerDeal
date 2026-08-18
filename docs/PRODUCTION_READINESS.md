@@ -2788,6 +2788,11 @@ host behavior and preserving the generic channel contract. The Android debug
 host compiles successfully; device persistence and cross-process runtime
 validation remain external.
 
+The T271 follow-up closes an Android local-network resource-bound gap. Android
+local-network capability inspection now caps per-interface address traversal at
+the same 256-entry bound already used by the Windows host. Discovery remains
+unsupported by contract; this change only bounds native interface inspection.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -13,6 +13,7 @@ internal class LocalNetworkHandler : MethodChannel.MethodCallHandler {
         private const val GET_CAPABILITY = "getCapability"
         private const val DISCOVER_PEERS = "discoverPeers"
         private const val MAX_INTERFACE_COUNT = 64
+        private const val MAX_INTERFACE_ADDRESS_COUNT = 256
         private const val DISCOVERY_WARNING =
             "Native local-network peer discovery is not configured."
     }
@@ -85,7 +86,10 @@ internal class LocalNetworkHandler : MethodChannel.MethodCallHandler {
         val broadcastSupported = activeInterfaces.any { networkInterface ->
             try {
                 networkInterface.supportsMulticast() &&
-                    networkInterface.interfaceAddresses.any { address ->
+                    networkInterface.interfaceAddresses
+                        .asSequence()
+                        .take(MAX_INTERFACE_ADDRESS_COUNT)
+                        .any { address ->
                         address.broadcast != null &&
                             address.address is Inet4Address
                     }

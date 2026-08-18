@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T271 Bound Android Local-Network Address Traversal
+
+Summary:
+- Android local-network capability inspection now caps per-interface address
+  traversal at 256 entries, matching the existing Windows host bound.
+- The unsupported peer-discovery contract and native channel shape remain
+  unchanged; only native resource traversal is bounded.
+
+Files:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/LocalNetworkHandler.kt`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Android `assembleDebug --no-daemon` passes, including Kotlin compilation.
+- Direct Flutter-bundled Dart analyzer passes all 17 workspace packages.
+- Boundary and source-text checks pass; their 13 and 7 script tests pass, and
+  dependency-audit script tests pass.
+- `git diff --check` passes.
+
+Remaining:
+- Real-device secure-key/capture validation, cross-device multicast, release
+  signing, other-platform hosts, product session/state and database wiring,
+  session authentication, and final UX validation remain open.
+
 ### 2026-08-17 - Codex - T270 Guard Android Secure-Key Revision Exhaustion
 
 Summary:
