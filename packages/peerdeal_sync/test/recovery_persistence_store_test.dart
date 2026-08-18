@@ -856,6 +856,44 @@ void main() {
     );
   });
 
+  test(
+    'file store removes stale temporary files before the next operation',
+    () {
+      final directory = Directory.systemTemp.createTempSync(
+        'peerdeal_recovery_store_',
+      );
+      addTearDown(() {
+        if (directory.existsSync()) {
+          directory.deleteSync(recursive: true);
+        }
+      });
+
+      final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+      expect(
+        writer
+            .appendEvents(
+              scope: scope,
+              events: <EventEnvelope>[
+                _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+              ],
+            )
+            .isSuccess,
+        isTrue,
+      );
+      final targetFile = directory.listSync().whereType<File>().singleWhere(
+        (candidate) => candidate.path.endsWith('.json'),
+      );
+      final staleTemporaryFile = File('${targetFile.path}.tmp.orphan');
+      staleTemporaryFile.writeAsStringSync('sensitive interrupted payload');
+
+      final load = writer.loadWindowResult(scope);
+
+      expect(load.isSuccess, isTrue);
+      expect(staleTemporaryFile.existsSync(), isFalse);
+      expect(load.window.events.map((event) => event.eventSeq), <int>[1]);
+    },
+  );
+
   test('file store rejects structurally oversized persisted snapshots', () {
     final directory = Directory.systemTemp.createTempSync(
       'peerdeal_recovery_store_',

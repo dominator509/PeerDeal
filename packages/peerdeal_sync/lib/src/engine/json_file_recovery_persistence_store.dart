@@ -78,6 +78,8 @@ class JsonFileRecoveryPersistenceStore
       });
     } on _RecoveryPersistenceLockException {
       return _lockFailure();
+    } on _RecoveryPersistenceTemporaryFileCleanupException {
+      return _temporaryFileCleanupFailure();
     }
   }
 
@@ -101,6 +103,8 @@ class JsonFileRecoveryPersistenceStore
       });
     } on _RecoveryPersistenceLockException {
       return _lockFailure();
+    } on _RecoveryPersistenceTemporaryFileCleanupException {
+      return _temporaryFileCleanupFailure();
     }
   }
 
@@ -123,6 +127,8 @@ class JsonFileRecoveryPersistenceStore
         }
         return RecoveryPersistenceResult.success();
       });
+    } on _RecoveryPersistenceTemporaryFileCleanupException {
+      return _temporaryFileCleanupFailure();
     } on Object {
       return RecoveryPersistenceResult(
         isSuccess: false,
@@ -174,6 +180,12 @@ class JsonFileRecoveryPersistenceStore
         conflicts: result.conflicts,
         warnings: result.warnings,
       );
+    } on _RecoveryPersistenceTemporaryFileCleanupException {
+      final result = _temporaryFileCleanupFailure();
+      return RecoveryPersistenceLoadResult.failure(
+        conflicts: result.conflicts,
+        warnings: result.warnings,
+      );
     } on Object {
       return RecoveryPersistenceLoadResult.failure(
         conflicts: <SyncConflict>[
@@ -219,6 +231,7 @@ class JsonFileRecoveryPersistenceStore
     var locked = false;
     try {
       locked = true;
+      _cleanupTemporaryFiles(scope);
       return operation();
     } finally {
       if (locked) {
@@ -350,6 +363,31 @@ class JsonFileRecoveryPersistenceStore
         ),
       ],
     );
+  }
+
+  RecoveryPersistenceResult _temporaryFileCleanupFailure() {
+    return RecoveryPersistenceResult(
+      isSuccess: false,
+      conflicts: <SyncConflict>[
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_TEMPORARY_FILE_CLEANUP_FAILED',
+          message:
+              'Recovery persistence temporary files could not be cleaned up.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      ],
+    );
+  }
+
+  void _cleanupTemporaryFiles(RecoveryPersistenceScope scope) {
+    try {
+      final file = _fileFor(scope);
+      for (final candidate in _temporaryFilesFor(file)) {
+        candidate.deleteSync();
+      }
+    } on Object {
+      throw const _RecoveryPersistenceTemporaryFileCleanupException();
+    }
   }
 
   _HydratedRecoveryStore _corruptStore(InMemoryRecoveryPersistenceStore store) {
@@ -484,4 +522,8 @@ class _RecoveryPersistenceLockException implements Exception {
 
 class _RecoveryPersistenceEventCountException implements Exception {
   const _RecoveryPersistenceEventCountException();
+}
+
+class _RecoveryPersistenceTemporaryFileCleanupException implements Exception {
+  const _RecoveryPersistenceTemporaryFileCleanupException();
 }

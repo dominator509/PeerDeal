@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T253 Clean Stale Recovery Write Artifacts
+
+Summary:
+- The JSON recovery store now removes stale per-scope `.tmp.*` write artifacts
+  under the existing scope lock before every read, write, or wipe operation.
+- Cleanup is fail-closed with a stable fatal persistence conflict; no recovery
+  store contract, package boundary, or database choice changed.
+
+Files:
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/test/recovery_persistence_store_test.dart`
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- Focused JSON recovery persistence suite passes (33 tests).
+- Direct SDK analysis passes for all 17 packages.
+- Serialized non-Flutter package tests pass.
+- Full Flutter suites pass: mobile 541 tests, desktop 540 tests.
+- Boundary, source-text, and their script tests pass; `git diff --check` passes.
+- The latest dependency audit invocation timed out after 180 seconds without
+  output; this change does not modify dependency manifests.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T252 Verify Persisted Hold'em Event Suffixes
 
 Summary:

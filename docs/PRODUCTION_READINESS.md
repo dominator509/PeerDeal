@@ -662,6 +662,10 @@ the gates below are satisfied.
   transaction, read, and wipe through an operating-system file lock. The lock
   handle is closed on every path so process termination releases it, and lock
   failures fail closed without changing the public recovery-store contract.
+- Sync recovery file persistence now removes stale per-scope temporary write
+  artifacts before every locked read, write, or wipe operation, and fails
+  closed if those artifacts cannot be cleaned up, limiting crash remnants and
+  retaining scope isolation.
 - Sync recovery persistence now exposes an idempotent, scope-validated wipe
   operation; the JSON store removes the durable recovery window and matching
   interrupted-write temporary files without removing other scopes. Retention
