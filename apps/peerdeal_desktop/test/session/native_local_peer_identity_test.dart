@@ -276,6 +276,29 @@ void main() {
     },
   );
 
+  test('rejects a regressing conditional identity revision', () async {
+    final bridge = _ConditionalMemorySecureKeyBridge(
+      snapshot: SecureKeyStorageSnapshot(
+        available: true,
+        revision: 3,
+        keys: [],
+      ),
+      returnedSaveRevision: 2,
+    );
+    final provisioner = NativeLocalPeerIdentityProvisioner(
+      loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+      writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+      identityFactory: () => 'peer_regressing_revision',
+    );
+
+    final result = await provisioner.ensureIdentity();
+
+    expect(result.isSuccess, isFalse);
+    expect(result.identity, isNull);
+    expect(result.warnings, <String>['Local peer identity save failed.']);
+    expect(bridge.expectedSaveRevision, 3);
+  });
+
   test('provisions once and reuses the persisted identity', () async {
     final bridge = _MemorySecureKeyBridge();
     final provisioner = NativeLocalPeerIdentityProvisioner(
@@ -528,6 +551,12 @@ class _CancellableMemorySecureKeyBridge extends _MemorySecureKeyBridge
 
 class _ConditionalMemorySecureKeyBridge extends _MemorySecureKeyBridge
     implements ConditionalSecureKeyStorageMutationBridge {
+  _ConditionalMemorySecureKeyBridge({
+    super.snapshot,
+    this.returnedSaveRevision,
+  });
+
+  final int? returnedSaveRevision;
   int? expectedSaveRevision;
 
   @override
@@ -558,7 +587,10 @@ class _ConditionalMemorySecureKeyBridge extends _MemorySecureKeyBridge
     }
     await super.saveKey(namespace: namespace, key: key);
     revision += 1;
-    return SecureKeyStorageMutationResult(isSuccess: true, revision: revision);
+    return SecureKeyStorageMutationResult(
+      isSuccess: true,
+      revision: returnedSaveRevision ?? revision,
+    );
   }
 
   @override

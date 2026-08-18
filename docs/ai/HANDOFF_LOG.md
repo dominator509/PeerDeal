@@ -2,6 +2,37 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T267 Reject Conditional Revision Regression
+
+Summary:
+- Mirrored mobile and desktop local-identity and receipt-key writers now
+  reject successful conditional native mutations whose returned revision is
+  lower than the revision supplied by the caller.
+- Nullable revisions remain compatible for legacy non-CAS bridges, and equal
+  revisions remain valid for conditional no-op deletes.
+- The generic native bridge contract and package ownership remain unchanged.
+
+Files:
+- Mirrored app local-identity and receipt-key writers and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Direct Flutter-bundled Dart/Melos analyzer passes all 17 packages with no
+  issues.
+- Boundary and source-text checks pass; their 13 and 7 script tests pass, and
+  the dependency-audit script tests pass.
+- Serialized non-Flutter regression tests pass across 13 packages.
+- Focused mobile Flutter tests timed out after 120 seconds without test output,
+  matching the known local runner limitation; no assertion failure was
+  reported.
+- `git diff --check` passes.
+
+Remaining:
+- Real-device secure-key/capture validation, cross-device multicast and
+  release signing, other-platform native implementations, product
+  session/state and durable database wiring, explicit session authentication,
+  and final UX validation remain open.
+
 ### 2026-08-17 - Codex - T266 Enforce Negotiated Transport Payload Ceilings
 
 Summary:

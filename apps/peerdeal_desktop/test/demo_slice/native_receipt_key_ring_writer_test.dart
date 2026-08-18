@@ -360,6 +360,34 @@ void main() {
     expect(returned.warning, 'Secure receipt key mutation failed.');
     expect(returnedBridge.savedKeys, hasLength(1));
   });
+
+  test('rejects a regressing conditional mutation revision', () async {
+    final bridge = _RegressingConditionalSecureKeyStorageBridge();
+    final result = await NativeReceiptKeyRingWriter(bridge: bridge)
+        .saveSigningKey(
+          const ReceiptSigningKey(
+            keyId: 'receipt_signing_1',
+            secret: 'signing',
+          ),
+          active: true,
+          expectedRevision: 3,
+        );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Secure receipt key mutation failed.');
+    expect(bridge.expectedRevision, 3);
+  });
+
+  test('rejects a regressing conditional delete revision', () async {
+    final bridge = _RegressingConditionalSecureKeyStorageBridge();
+    final result = await NativeReceiptKeyRingWriter(
+      bridge: bridge,
+    ).deleteKey('receipt_signing_1', expectedRevision: 3);
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warning, 'Secure receipt key mutation failed.');
+    expect(bridge.expectedRevision, 3);
+  });
 }
 
 class _RecordingSecureKeyStorageBridge
@@ -395,6 +423,60 @@ class _RecordingSecureKeyStorageBridge
   }) async {
     deletedKeys.add(_DeletedKey(namespace: namespace, keyId: keyId));
     return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+}
+
+class _RegressingConditionalSecureKeyStorageBridge
+    implements
+        SecureKeyStorageMutationBridge,
+        ConditionalSecureKeyStorageMutationBridge {
+  int? expectedRevision;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    return SecureKeyStorageSnapshot(
+      available: true,
+      revision: 3,
+      keys: const <SecureKeyRecord>[],
+    );
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKey({
+    required String namespace,
+    required SecureKeyRecord key,
+  }) async {
+    return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKey({
+    required String namespace,
+    required String keyId,
+  }) async {
+    return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKeyIfRevision({
+    required String namespace,
+    required SecureKeyRecord key,
+    required int expectedRevision,
+  }) async {
+    this.expectedRevision = expectedRevision;
+    return const SecureKeyStorageMutationResult(isSuccess: true, revision: 2);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKeyIfRevision({
+    required String namespace,
+    required String keyId,
+    required int expectedRevision,
+  }) async {
+    this.expectedRevision = expectedRevision;
+    return const SecureKeyStorageMutationResult(isSuccess: true, revision: 2);
   }
 }
 

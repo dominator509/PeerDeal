@@ -60,6 +60,9 @@ class NativeLocalPeerIdentityWriter {
       );
     }
 
+    final usesConditionalMutation =
+        expectedRevision != null &&
+        _bridge is ConditionalSecureKeyStorageMutationBridge;
     final SecureKeyStorageMutationResult result;
     try {
       final bridge = _bridge;
@@ -105,7 +108,9 @@ class NativeLocalPeerIdentityWriter {
       );
     }
 
-    if (!_isValidRevision(result.revision)) {
+    if (!_isValidRevision(result.revision) ||
+        (usesConditionalMutation &&
+            _isRevisionBeforeExpected(result.revision, expectedRevision))) {
       return const AppLocalPeerIdentityWriteResult.failure(
         warning: 'Local peer identity save failed.',
       );
@@ -129,6 +134,12 @@ class NativeLocalPeerIdentityWriter {
       );
 
   bool _isValidRevision(int? value) => value == null || value >= 0;
+
+  bool _isRevisionBeforeExpected(int? revision, int? expectedRevision) {
+    return revision != null &&
+        expectedRevision != null &&
+        revision < expectedRevision;
+  }
 
   static bool _isValidNamespace(String value) =>
       _isValidLabel(value) && !value.contains('::');

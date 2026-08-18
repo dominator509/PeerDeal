@@ -100,6 +100,9 @@ class NativeReceiptKeyRingWriter {
       );
     }
 
+    final usesConditionalMutation =
+        expectedRevision != null &&
+        _bridge is ConditionalSecureKeyStorageMutationBridge;
     final SecureKeyStorageMutationResult result;
     try {
       result =
@@ -135,7 +138,10 @@ class NativeReceiptKeyRingWriter {
       );
     }
 
-    return _fromNativeMutation(result);
+    return _fromNativeMutation(
+      result,
+      expectedRevision: usesConditionalMutation ? expectedRevision : null,
+    );
   }
 
   Future<ReceiptKeyRingWriteResult> _save(
@@ -157,6 +163,9 @@ class NativeReceiptKeyRingWriter {
       );
     }
 
+    final usesConditionalMutation =
+        expectedRevision != null &&
+        _bridge is ConditionalSecureKeyStorageMutationBridge;
     final SecureKeyStorageMutationResult result;
     try {
       result =
@@ -192,13 +201,18 @@ class NativeReceiptKeyRingWriter {
       );
     }
 
-    return _fromNativeMutation(result);
+    return _fromNativeMutation(
+      result,
+      expectedRevision: usesConditionalMutation ? expectedRevision : null,
+    );
   }
 
   ReceiptKeyRingWriteResult _fromNativeMutation(
-    SecureKeyStorageMutationResult result,
-  ) {
-    if (!_isValidRevision(result.revision)) {
+    SecureKeyStorageMutationResult result, {
+    int? expectedRevision,
+  }) {
+    if (!_isValidRevision(result.revision) ||
+        _isRevisionBeforeExpected(result.revision, expectedRevision)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Secure receipt key mutation failed.',
       );
@@ -242,6 +256,12 @@ class NativeReceiptKeyRingWriter {
       );
 
   static bool _isValidRevision(int? value) => value == null || value >= 0;
+
+  static bool _isRevisionBeforeExpected(int? revision, int? expectedRevision) {
+    return revision != null &&
+        expectedRevision != null &&
+        revision < expectedRevision;
+  }
 
   static String _safeNativeWarning(
     String? warning, {

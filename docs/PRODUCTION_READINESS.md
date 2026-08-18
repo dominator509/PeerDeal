@@ -2755,6 +2755,16 @@ channel ownership. Flutter-focused execution remains locally runner-blocked;
 real-device reachability, release signing, product state/database wiring,
 session authentication, other-platform hosts, and final UX remain separate.
 
+The T267 follow-up closes the remaining app-side conditional secure-key revision
+regression gap. Mirrored local-identity and receipt-key writers now reject a
+successful conditional mutation that reports a revision below the caller's
+expected revision. Nullable revisions remain compatible for legacy non-CAS
+bridges, and equal revisions remain valid for conditional no-op deletes. The
+generic native bridge contract and package ownership remain unchanged; native
+persistence atomicity, real-device validation, product state/database wiring,
+session authentication, release signing, other-platform hosts, and final UX
+remain separate.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
