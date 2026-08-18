@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T278 Reject Malformed Android UTF-8 Text
+
+Summary:
+- Android transport identity validation now rejects strings whose UTF-8
+  encoding does not round-trip, instead of accepting replacement-byte output.
+- Android secure-key namespace, key-record, and app-support path validation
+  apply the same fail-closed UTF-8 rule before bounded native use.
+- Windows already rejected malformed UTF-8; this aligns the Android host with
+  that existing behavior without changing channel fields or package ownership.
+
+Files:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/SecureKeyStorageHandler.kt`
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/AppStorageDirectoryHandler.kt`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Android `assembleDebug --no-daemon --quiet` passes.
+- Full workspace analyzer, boundary/source-text checks, their 13 and 7
+  focused tests, dependency-audit tests, and `git diff --check` pass.
+- The full Melos test runner and live dependency resolver remain separately
+  documented as prior no-output timeouts; this Kotlin-only change introduced no
+  Dart test path.
+
+Remaining:
+- Interactive Windows secure-key persistence, Android real-device validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T277 Align Android Network Capability Eligibility
 
 Summary:

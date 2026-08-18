@@ -40,8 +40,12 @@ internal class AppStorageDirectoryHandler(
     }
 
     private fun isSafePath(value: String): Boolean {
-        if (value.isEmpty() || value.trim() != value) return false
-        if (value.toByteArray(Charsets.UTF_8).size > MAX_PATH_BYTES) return false
+        val bytes = value.toByteArray(Charsets.UTF_8)
+        if (value.isEmpty() ||
+            value.trim() != value ||
+            bytes.size > MAX_PATH_BYTES ||
+            String(bytes, Charsets.UTF_8) != value
+        ) return false
         return value.all { character ->
             character.code >= 0x20 && character.code !in 0x7f..0x9f
         }

@@ -26,6 +26,11 @@ import javax.crypto.spec.GCMParameterSpec
 import org.json.JSONArray
 import org.json.JSONObject
 
+private fun isWellFormedUtf8(value: String): Boolean {
+    val bytes = value.toByteArray(StandardCharsets.UTF_8)
+    return String(bytes, StandardCharsets.UTF_8) == value
+}
+
 /** Generic encrypted key-record storage for the locked Flutter method channel. */
 internal class SecureKeyStorageHandler(context: Context) :
     MethodChannel.MethodCallHandler {
@@ -551,6 +556,7 @@ internal class SecureKeyStorageHandler(context: Context) :
 
     private fun isValidText(value: String, maxLength: Int): Boolean {
         if (value.isEmpty() ||
+            !isWellFormedUtf8(value) ||
             value.toByteArray(StandardCharsets.UTF_8).size > maxLength ||
             value.trim() != value
         ) {
@@ -601,6 +607,7 @@ internal class SecureKeyStorageHandler(context: Context) :
 
         private fun isValidTextValue(value: String, maxLength: Int): Boolean =
             value.isNotEmpty() &&
+                isWellFormedUtf8(value) &&
                 value.toByteArray(StandardCharsets.UTF_8).size <= maxLength &&
                 value.trim() == value &&
                 value.none { character ->

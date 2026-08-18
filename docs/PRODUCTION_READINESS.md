@@ -2833,6 +2833,12 @@ address, excluding any, loopback, and link-local addresses before advertising
 host readiness. Existing multicast transport and method-channel contracts are
 unchanged.
 
+The T278 follow-up closes an Android native text-boundary mismatch. Transport
+identities, secure-key fields, and app-support paths now require UTF-8
+round-trip fidelity before byte limits or native persistence are applied,
+matching the Windows host's invalid-UTF-8 rejection without changing any
+method-channel fields or package boundary.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

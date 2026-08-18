@@ -449,7 +449,12 @@ internal class NativeTransportHandler(
 
     private fun safeString(value: Any?): String? {
         val text = value as? String ?: return null
-        if (text.isEmpty() || text.trim() != text || text.toByteArray(Charsets.UTF_8).size > MAX_ID_BYTES) return null
+        val bytes = text.toByteArray(Charsets.UTF_8)
+        if (text.isEmpty() ||
+            text.trim() != text ||
+            bytes.size > MAX_ID_BYTES ||
+            String(bytes, Charsets.UTF_8) != text
+        ) return null
         if (text.any { it.code < 0x20 || it.code in 0x7f..0x9f }) return null
         return text
     }
