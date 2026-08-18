@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 class CoreCommandValidator {
@@ -89,7 +87,7 @@ class CoreCommandValidator {
       return false;
     }
 
-    if (utf8.encode(value).length > const CanonicalJsonLimits().maxTextBytes) {
+    if (!const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
       return false;
     }
 

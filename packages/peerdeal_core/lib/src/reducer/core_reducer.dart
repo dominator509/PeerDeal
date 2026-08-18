@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/invariant_guard.dart';
@@ -281,7 +279,7 @@ class CoreReducer {
     if (value.trim() != value) {
       return false;
     }
-    if (utf8.encode(value).length > const CanonicalJsonLimits().maxTextBytes) {
+    if (!const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
       return false;
     }
     return value.codeUnits.every(

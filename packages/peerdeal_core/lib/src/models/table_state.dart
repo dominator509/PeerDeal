@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
@@ -188,7 +186,7 @@ class TableState {
 
   static bool _isSafeIdentity(String value) {
     if (value.trim() != value) return false;
-    if (utf8.encode(value).length > const CanonicalJsonLimits().maxTextBytes) {
+    if (!const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
       return false;
     }
     return value.codeUnits.every(

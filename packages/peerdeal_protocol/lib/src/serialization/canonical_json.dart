@@ -105,7 +105,7 @@ class _CanonicalJsonWriter {
   }
 
   void _checkText(String value, String label) {
-    if (utf8.encode(value).length > limits.maxTextBytes) {
+    if (!limits.isWithinUtf8TextLimit(value)) {
       throw FormatException('$label exceeds its configured byte limit.');
     }
   }

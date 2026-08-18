@@ -344,6 +344,26 @@ void main() {
     expect(errors, isNot(contains('command artifact is unsupported')));
   });
 
+  test('validator rejects non-round-tripping UTF-8 identities', () {
+    final command = CommandEnvelope(
+      commandId: String.fromCharCode(0xd800),
+      commandType: 'OpenTableSession',
+      commandVersion: '1.0',
+      protocolVersion: '1.0.0',
+      tableId: 'table_001',
+      sessionId: null,
+      handId: null,
+      issuedAt: '2026-04-25T12:05:00Z',
+      actorRef: 'system',
+      payload: <String, Object?>{},
+    );
+
+    expect(
+      CoreCommandValidator().validate(command),
+      contains('command_id contains unsafe characters'),
+    );
+  });
+
   test(
     'validator rejects oversized command identities before compatibility',
     () {
@@ -891,6 +911,7 @@ void main() {
     final malformedEvents = <EventEnvelope>[
       copyEvent(valid, eventId: 'evt\n001'),
       copyEvent(valid, tableId: ' tbl_001'),
+      copyEvent(valid, eventId: String.fromCharCode(0xd800)),
       copyEvent(valid, eventId: oversizedId),
     ];
 

@@ -110,6 +110,17 @@ void main() {
     );
   });
 
+  test('canonical json rejects non-round-tripping UTF-8 text', () {
+    final malformed = String.fromCharCode(0xd800);
+    const limits = CanonicalJsonLimits();
+
+    expect(limits.isWithinUtf8TextLimit(malformed), isFalse);
+    expect(
+      () => canonicalJsonEncode(<String, Object?>{'value': malformed}),
+      throwsFormatException,
+    );
+  });
+
   test('all protocol fixtures are JSON objects', () {
     final fixtures = protocolFixtureFiles();
 

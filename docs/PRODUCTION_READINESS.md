@@ -93,6 +93,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Protocol canonical JSON text limits now require exact UTF-8 encode/decode
+  round-trips. Core command ingress, event reduction, table-state hydration,
+  and baseline invariant identity guards use that existing protocol limit, so
+  unpaired UTF-16 text cannot become replacement text at deterministic state
+  boundaries.
 - Native bridge UTF-8 byte-limit checks now require an exact encode/decode
   round-trip, so unpaired UTF-16 text cannot be replaced and accepted as a
   different native identity or diagnostic value; existing channel contracts,

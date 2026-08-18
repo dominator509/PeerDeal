@@ -2,6 +2,39 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T299 Harden Protocol/Core UTF-8 Boundaries
+
+Summary:
+- `CanonicalJsonLimits` now exposes strict UTF-8 encode/decode round-trip
+  validation for its existing text-byte ceiling.
+- Canonical JSON serialization and core command validation, event reduction,
+  table-state hydration, and baseline invariant identity checks now reject
+  unpaired UTF-16 text instead of accepting replacement bytes.
+- Protocol constructors, event shapes, deterministic state ownership, and
+  package boundaries remain unchanged.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/serialization/canonical_json_limits.dart`
+- `packages/peerdeal_protocol/lib/src/serialization/canonical_json.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `packages/peerdeal_core/lib/src/validation/core_command_validator.dart`
+- `packages/peerdeal_core/lib/src/reducer/core_reducer.dart`
+- `packages/peerdeal_core/lib/src/models/table_state.dart`
+- `packages/peerdeal_core/lib/src/invariants/baseline_invariant_guards.dart`
+- `packages/peerdeal_core/test/peerdeal_core_test.dart`
+- `packages/peerdeal_core/test/invariant_guards_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused protocol suite passes: 55 tests.
+- Focused core suite passes: 56 tests.
+- Protocol and core analyzers pass.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T298 Harden Native Bridge UTF-8 Boundaries
 
 Summary:

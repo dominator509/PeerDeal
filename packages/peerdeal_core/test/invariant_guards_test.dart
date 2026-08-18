@@ -188,6 +188,16 @@ void main() {
       );
     });
 
+    test('flag non-round-tripping table state identities', () {
+      final malformed = TableState.initial(
+        tableId: String.fromCharCode(0xd800),
+        sessionId: 'session_1',
+        protocolVersion: '1.0',
+      ).copyWith(phase: TablePhase.liveActive);
+
+      expect(codesFor(malformed), contains(CoreInvariantCodes.tableIdUnsafe));
+    });
+
     test('reject unsafe identities during TableState hydration', () {
       for (final entry in <String, String>{
         'table_id': 'table\n1',

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class CanonicalJsonLimits {
   const CanonicalJsonLimits({
     this.maxMapEntries = 256,
@@ -14,6 +16,12 @@ class CanonicalJsonLimits {
   final int maxTextBytes;
   final int maxNodes;
   final int maxEncodedBytes;
+
+  bool isWithinUtf8TextLimit(String value) {
+    final bytes = utf8.encode(value);
+    return bytes.length <= maxTextBytes &&
+        utf8.decode(bytes, allowMalformed: false) == value;
+  }
 
   void validate() {
     _requirePositive(maxMapEntries, 'maxMapEntries');
