@@ -51,11 +51,12 @@ class OpaqueExportDecoder {
         message: 'Receipt artifact payload is malformed.',
       );
     }
-    final payloadBytes = utf8.encode(payload).length;
     final payloadLimit = body['cipher'] == 'external'
         ? _limits.maxCiphertextLength
         : _limits.maxPayloadBytes;
-    if (payloadBytes > payloadLimit) {
+    if (!CanonicalJsonLimits(
+      maxTextBytes: payloadLimit,
+    ).isWithinUtf8TextLimit(payload)) {
       return ReceiptExportInspectionResult.rejected(
         message: 'Receipt artifact payload is malformed.',
       );
@@ -163,7 +164,11 @@ class OpaqueExportDecoder {
 
   Map<String, Object?>? _decodePayloadShape(String payload) {
     try {
-      if (utf8.encode(payload).length > _limits.maxPayloadBytes) return null;
+      if (!CanonicalJsonLimits(
+        maxTextBytes: _limits.maxPayloadBytes,
+      ).isWithinUtf8TextLimit(payload)) {
+        return null;
+      }
       final decoded = jsonDecode(payload);
       if (decoded is! Map<String, Object?>) return null;
       canonicalJsonEncode(
@@ -195,11 +200,9 @@ class OpaqueExportDecoder {
     if (!_nonEmpty(value)) return false;
     final text = value! as String;
     if (text.trim() != text) return false;
-    final bytes = utf8.encode(text);
-    if (bytes.length > _limits.maxPayloadBytes) return false;
-    try {
-      if (utf8.decode(bytes) != text) return false;
-    } on FormatException {
+    if (!CanonicalJsonLimits(
+      maxTextBytes: _limits.maxPayloadBytes,
+    ).isWithinUtf8TextLimit(text)) {
       return false;
     }
     return !text.codeUnits.any(

@@ -59,6 +59,27 @@ void main() {
     expect(artifact.artifactType, 'unavailable');
     expect(artifact.reason, 'Receipt export failed.');
   });
+
+  test('fails closed when required receipt text is non-round-tripping', () {
+    final malformed = PeerDealReceipt(
+      receiptId: String.fromCharCode(0xd800),
+      receiptVersion: receipt.receiptVersion,
+      protocolVersion: receipt.protocolVersion,
+      modeType: receipt.modeType,
+      sessionId: receipt.sessionId,
+      tableId: receipt.tableId,
+      pseudonymousUserId: receipt.pseudonymousUserId,
+      bindingMode: receipt.bindingMode,
+      wipeState: receipt.wipeState,
+      payloadHash: receipt.payloadHash,
+      opaquePayload: receipt.opaquePayload,
+    );
+
+    final artifact = const OpaqueExportEncoder().encode(malformed);
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt export failed.');
+  });
 }
 
 class _ThrowingReceiptSigner implements ReceiptSigner {

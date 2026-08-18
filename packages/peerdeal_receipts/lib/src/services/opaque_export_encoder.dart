@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import '../contracts/receipt_cipher.dart';
 import '../contracts/receipt_signer.dart';
 import '../models/peer_deal_receipt.dart';
@@ -31,6 +33,9 @@ class OpaqueExportEncoder {
 
   ReceiptExportArtifact _encode(PeerDealReceipt receipt) {
     _limits.validate();
+    if (!_hasSafeEnvelopeText(receipt)) {
+      throw StateError('Receipt envelope text is malformed.');
+    }
     final innerBody = jsonEncode(<String, Object?>{
       'receipt_id': receipt.receiptId,
       'receipt_version': receipt.receiptVersion,
@@ -39,7 +44,9 @@ class OpaqueExportEncoder {
       'payload_hash': receipt.payloadHash,
       'opaque_payload': receipt.opaquePayload,
     });
-    if (utf8.encode(innerBody).length > _limits.maxPayloadBytes) {
+    if (!CanonicalJsonLimits(
+      maxTextBytes: _limits.maxPayloadBytes,
+    ).isWithinUtf8TextLimit(innerBody)) {
       throw StateError('Receipt payload exceeds the configured limit.');
     }
 
@@ -48,7 +55,9 @@ class OpaqueExportEncoder {
     final payloadLimit = encrypted
         ? _limits.maxCiphertextLength
         : _limits.maxPayloadBytes;
-    if (utf8.encode(payload).length > payloadLimit) {
+    if (!CanonicalJsonLimits(
+      maxTextBytes: payloadLimit,
+    ).isWithinUtf8TextLimit(payload)) {
       throw StateError('Receipt export payload exceeds the configured limit.');
     }
     final signature = _signer?.sign(payload);
@@ -76,5 +85,29 @@ class OpaqueExportEncoder {
         'signed': signature != null,
       },
     );
+  }
+
+  bool _hasSafeEnvelopeText(PeerDealReceipt receipt) {
+    final limits = CanonicalJsonLimits(maxTextBytes: _limits.maxPayloadBytes);
+    final values = <String>[
+      receipt.receiptId,
+      receipt.receiptVersion,
+      receipt.protocolVersion,
+      receipt.modeType,
+      receipt.sessionId,
+      receipt.tableId,
+      receipt.pseudonymousUserId,
+      receipt.payloadHash,
+      receipt.opaquePayload,
+    ];
+    return receipt.hasRequiredEnvelopeFields &&
+        values.every(
+          (value) =>
+              value.trim() == value &&
+              limits.isWithinUtf8TextLimit(value) &&
+              !value.codeUnits.any(
+                (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+              ),
+        );
   }
 }

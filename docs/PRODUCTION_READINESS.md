@@ -93,6 +93,10 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Opaque receipt export now preflights all required envelope text before JSON
+  escaping and applies strict UTF-8 round-trip checks to plaintext and
+  ciphertext payload limits during encoding and inspection; malformed receipt
+  text fails closed without exposing a verified artifact.
 - Privacy diagnostic scrubbing, crypto proof normalization/verification, and
   mirrored app Hold'em snapshot metadata validation now reject text that fails
   exact UTF-8 encode/decode round-trip checks, while preserving existing

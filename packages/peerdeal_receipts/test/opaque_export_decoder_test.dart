@@ -218,8 +218,12 @@ void main() {
     expect(result.message, 'Receipt artifact payload shape is unsupported.');
   });
 
-  test('rejects control-bearing or padded receipt identifiers', () {
-    for (final receiptId in <String>['r_1\nleak', ' r_1']) {
+  test('rejects unsafe or non-round-tripping receipt identifiers', () {
+    for (final receiptId in <String>[
+      'r_1\nleak',
+      ' r_1',
+      String.fromCharCode(0xd800),
+    ]) {
       final payload = jsonEncode(<String, Object?>{
         'receipt_id': receiptId,
         'receipt_version': '1.0',

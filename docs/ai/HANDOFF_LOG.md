@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-18 - Codex - T302 Harden Opaque Receipt UTF-8 Boundaries
+
+Summary:
+- `OpaqueExportEncoder` now validates all required receipt envelope text before
+  JSON encoding, preventing unpaired UTF-16 values from becoming escaped
+  replacement identities in an export artifact.
+- Encoder and decoder plaintext/ciphertext payload limits now require exact
+  UTF-8 encode/decode round-trips; malformed payloads fail closed before
+  signature verification or payload exposure.
+- Receipt artifact format, signer/cipher ownership, and package boundaries
+  remain unchanged.
+
+Files:
+- `packages/peerdeal_receipts/lib/src/services/opaque_export_encoder.dart`
+- `packages/peerdeal_receipts/lib/src/services/opaque_export_decoder.dart`
+- `packages/peerdeal_receipts/test/opaque_export_encoder_test.dart`
+- `packages/peerdeal_receipts/test/opaque_export_decoder_test.dart`
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- Focused receipt encoder/decoder suites pass.
+- `peerdeal_receipts` analyzer passes.
+
+Remaining:
+- Android real-device and Windows interactive persistence validation,
+  cross-device multicast, release signing, other-platform hosts, product
+  session/state and database wiring, session authentication, and final UX.
+
 ### 2026-08-18 - Codex - T301 Harden Privacy/Crypto/App UTF-8 Boundaries
 
 Summary:
