@@ -2,6 +2,40 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T264 Validate Secure-Key Consumer Snapshots
+
+Summary:
+- The generic secure-key channel decoder now rejects unusable records before
+  returning an available snapshot.
+- Mirrored receipt-key and local-identity loaders now reject negative snapshot
+  revisions and unusable records even when a custom app bridge bypasses the
+  generic decoder.
+- Mirrored receipt-key loader and writer namespace validation now rejects the
+  existing reserved `::` separator.
+- Empty but available secure-key storage remains valid; native persistence and
+  device behavior are unchanged.
+
+Files:
+- Generic secure-key channel contract and focused contract test.
+- Mirrored receipt-key loaders/writers and focused tests.
+- Mirrored local-identity loaders and focused tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- All 17 package analyzers pass with no issues.
+- Direct boundary and source-text checks pass; their 13 and 7 script tests
+  pass.
+- Focused Flutter package test timed out after 180 seconds without test output,
+  matching the known local Flutter runner limitation; direct Dart fallback is
+  invalid for this Flutter-dependent package because the engine libraries are
+  unavailable to the bare VM.
+- `git diff --check` passes.
+
+Remaining:
+- Product session/state provisioning, durable database replacement,
+  real-device and cross-device validation, session-auth contract, release
+  signing, other-platform native implementations, and final UX remain open.
+
 ### 2026-08-17 - Codex - T263 Validate Native Readiness Key Snapshots
 
 Summary:

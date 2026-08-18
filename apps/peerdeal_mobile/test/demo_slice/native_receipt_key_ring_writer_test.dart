@@ -79,6 +79,7 @@ void main() {
     () async {
       for (final namespace in <String>[
         'peerdeal${String.fromCharCode(0x85)}receipts',
+        'peerdeal::receipts',
         'x' * (NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes + 1),
       ]) {
         final bridge = _RecordingSecureKeyStorageBridge();

@@ -42,7 +42,7 @@ class SecureKeyStorageChannelContract {
     final keyIds = <String>{};
     for (final keyPayload in keyPayloads) {
       final key = _decodeKey(keyPayload);
-      if (key == null || !keyIds.add(key.keyId)) {
+      if (key == null || !key.isUsable || !keyIds.add(key.keyId)) {
         return const SecureKeyStorageSnapshot.unavailable(
           warning: 'Secure key storage snapshot is invalid.',
         );

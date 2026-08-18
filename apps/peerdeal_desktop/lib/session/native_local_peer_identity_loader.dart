@@ -106,6 +106,11 @@ class NativeLocalPeerIdentityLoader {
         warnings: <String>['Local peer identity storage is unavailable.'],
       );
     }
+    if (snapshot.revision < 0) {
+      return AppLocalPeerIdentityLoadResult(
+        warnings: <String>['Local peer identity storage revision is invalid.'],
+      );
+    }
     if (snapshot.keys.length > NativeBridgePayloadLimits.maxSecureKeyRecords) {
       return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Local peer identity record limit reached.'],
@@ -121,6 +126,11 @@ class NativeLocalPeerIdentityLoader {
         )
         .toList(growable: false);
     if (matches.isEmpty) {
+      if (snapshot.keys.any((record) => !record.isUsable)) {
+        return AppLocalPeerIdentityLoadResult(
+          warnings: <String>['Local peer identity records are invalid.'],
+        );
+      }
       return AppLocalPeerIdentityLoadResult(revision: snapshot.revision);
     }
     if (matches.length != 1 || !matches.single.active) {
@@ -133,6 +143,11 @@ class NativeLocalPeerIdentityLoader {
     if (!_isValidPeerId(peerId)) {
       return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Persisted local peer identity is invalid.'],
+      );
+    }
+    if (snapshot.keys.any((record) => !record.isUsable)) {
+      return AppLocalPeerIdentityLoadResult(
+        warnings: <String>['Local peer identity records are invalid.'],
       );
     }
 

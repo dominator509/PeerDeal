@@ -93,6 +93,12 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- The generic secure-key channel decoder now rejects unusable records before
+  materializing an available snapshot. Mirrored app receipt-key and local
+  identity loaders also reject decoder-bypass snapshots with negative
+  revisions or unusable records, and receipt namespace validation rejects the
+  existing reserved `::` separator. Empty but available storage remains
+  valid; native persistence and device validation remain separate.
 - Mirrored app native-readiness loaders now fail closed when an available
   secure-key bridge snapshot has a negative revision, exceeds the locked
   `NativeBridgePayloadLimits.maxSecureKeyRecords` ceiling, or contains an
@@ -2708,6 +2714,16 @@ non-empty strings, rejects unsupported `mode_type` values, and retains the
 existing role-hint allowlist. This is protocol shape validation only; signature
 verification and cryptographic session authentication remain explicit product
 or protocol contracts.
+
+The T264 follow-up closes the remaining secure-key consumer integrity gap at
+the generic channel and mirrored app read boundaries. Available snapshots now
+cannot carry negative revisions or unusable records into receipt-key or local
+identity projection, even when a custom app bridge bypasses the generic
+decoder. Receipt namespace validation is aligned with the existing native
+secure-storage separator policy. This preserves the generic native bridge and
+app-owned receipt/identity boundaries; native persistence atomicity,
+real-device validation, product database wiring, session authentication,
+release signing, and final UX remain separate.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate

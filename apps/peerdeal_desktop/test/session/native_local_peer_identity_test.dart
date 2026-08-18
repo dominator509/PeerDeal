@@ -136,6 +136,41 @@ void main() {
     },
   );
 
+  test(
+    'fails closed on invalid identity snapshot revisions and records',
+    () async {
+      final invalidSnapshots = <SecureKeyStorageSnapshot>[
+        SecureKeyStorageSnapshot(available: true, revision: -1, keys: const []),
+        SecureKeyStorageSnapshot(
+          available: true,
+          keys: const <SecureKeyRecord>[
+            SecureKeyRecord(
+              keyId: 'unusable:key',
+              purpose: 'other',
+              algorithm: 'opaque',
+              secret: 'value',
+              active: false,
+            ),
+          ],
+        ),
+      ];
+
+      for (final snapshot in invalidSnapshots) {
+        final result = await NativeLocalPeerIdentityLoader(
+          bridge: _MemorySecureKeyBridge(snapshot: snapshot),
+        ).load();
+
+        expect(result.isAvailable, isFalse);
+        expect(result.identity, isNull);
+        expect(result.warnings, <String>[
+          snapshot.revision < 0
+              ? 'Local peer identity storage revision is invalid.'
+              : 'Local peer identity records are invalid.',
+        ]);
+      }
+    },
+  );
+
   test('fails closed on ambiguous active identity records', () async {
     final bridge = _MemorySecureKeyBridge(
       keys: const <SecureKeyRecord>[
@@ -354,13 +389,16 @@ void main() {
 class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
   _MemorySecureKeyBridge({
     List<SecureKeyRecord> keys = const <SecureKeyRecord>[],
+    SecureKeyStorageSnapshot? snapshot,
     this.available = true,
     this.loadGate,
     this.loadGates,
     this.savedPeerIdOverride,
-  }) : keys = List<SecureKeyRecord>.from(keys);
+  }) : keys = List<SecureKeyRecord>.from(snapshot?.keys ?? keys),
+       revision = snapshot?.revision ?? 0;
 
   final bool available;
+  int revision;
   final Completer<void>? loadGate;
   final List<Completer<void>?>? loadGates;
   final String? savedPeerIdOverride;
@@ -381,6 +419,7 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
       SecureKeyStorageSnapshot(
         available: available,
         keys: List<SecureKeyRecord>.unmodifiable(keys),
+        revision: revision,
       ),
     );
   }
@@ -452,7 +491,6 @@ class _CancellableMemorySecureKeyBridge extends _MemorySecureKeyBridge
 
 class _ConditionalMemorySecureKeyBridge extends _MemorySecureKeyBridge
     implements ConditionalSecureKeyStorageMutationBridge {
-  int revision = 0;
   int? expectedSaveRevision;
 
   @override

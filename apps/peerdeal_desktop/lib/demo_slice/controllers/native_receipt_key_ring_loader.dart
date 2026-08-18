@@ -137,6 +137,12 @@ class NativeReceiptKeyRingLoader
         ],
       );
     }
+    if (snapshot.revision < 0) {
+      return ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key storage revision is invalid.'],
+      );
+    }
     if (snapshot.keys.length > maxKeyRecords) {
       return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
@@ -153,6 +159,12 @@ class NativeReceiptKeyRingLoader
       return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key material is invalid.'],
+      );
+    }
+    if (snapshot.keys.any((record) => !record.isUsable)) {
+      return ReceiptKeyRingLoadResult(
+        keyRing: ReceiptKeyRingSnapshot(),
+        warnings: <String>['Secure receipt key records are invalid.'],
       );
     }
 
@@ -228,7 +240,8 @@ class NativeReceiptKeyRingLoader
       NativeBridgePayloadLimits.isSafeUtf8Text(
         namespace,
         NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes,
-      );
+      ) &&
+      !namespace.contains('::');
 
   bool _isValidKeyId(String keyId) =>
       keyId.length <= maxKeyIdLength &&

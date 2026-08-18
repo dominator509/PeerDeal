@@ -533,6 +533,28 @@ void main() {
     expect(snapshot.keys, isEmpty);
   });
 
+  test('secure key storage channel contract rejects unusable records', () {
+    final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(
+      const <String, Object?>{
+        'available': true,
+        'revision': 1,
+        'keys': <Object?>[
+          <String, Object?>{
+            'keyId': 'bad:key',
+            'purpose': 'receipt_signing',
+            'algorithm': 'hmac-sha256',
+            'secret': 'signing_secret_1',
+            'active': true,
+          },
+        ],
+      },
+    );
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.warning, 'Secure key storage snapshot is invalid.');
+    expect(snapshot.keys, isEmpty);
+  });
+
   test('secure key storage channel contract encodes key records', () {
     final payload = SecureKeyStorageChannelContract.encodeKey(
       const SecureKeyRecord(

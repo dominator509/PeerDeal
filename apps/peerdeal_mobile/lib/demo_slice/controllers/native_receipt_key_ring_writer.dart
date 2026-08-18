@@ -209,7 +209,8 @@ class NativeReceiptKeyRingWriter {
       NativeBridgePayloadLimits.isSafeUtf8Text(
         namespace,
         NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes,
-      );
+      ) &&
+      !namespace.contains('::');
 
   static bool _isValidKeyId(String keyId, int maxLength) =>
       maxLength > 0 &&

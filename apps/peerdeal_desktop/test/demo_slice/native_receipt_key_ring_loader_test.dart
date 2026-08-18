@@ -133,6 +133,7 @@ void main() {
     () async {
       for (final namespace in <String>[
         'peerdeal${String.fromCharCode(0x85)}receipts',
+        'peerdeal::receipts',
         'x' * (NativeBridgePayloadLimits.maxSecureKeyNamespaceBytes + 1),
       ]) {
         final bridge = _FakeSecureKeyStorageBridge(
@@ -262,6 +263,45 @@ void main() {
       'Secure receipt key record limit reached.',
     ]);
     expect(bridge.namespace, 'peerdeal.receipts');
+  });
+
+  test('fails closed on invalid key snapshot revisions and records', () async {
+    final snapshots = <SecureKeyStorageSnapshot>[
+      SecureKeyStorageSnapshot(available: true, revision: -1, keys: const []),
+      SecureKeyStorageSnapshot(
+        available: true,
+        keys: const <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'receipt_signing_1',
+            purpose: 'receipt_signing',
+            algorithm: 'hmac-sha256',
+            secret: 'signing_secret_1',
+            active: true,
+          ),
+          SecureKeyRecord(
+            keyId: 'bad:key',
+            purpose: 'ignored',
+            algorithm: 'external',
+            secret: 'ignored_secret',
+            active: false,
+          ),
+        ],
+      ),
+    ];
+
+    for (final snapshot in snapshots) {
+      final result = await NativeReceiptKeyRingLoader(
+        bridge: _FakeSecureKeyStorageBridge(snapshot: snapshot),
+      ).load();
+
+      expect(result.hasSigningKey, isFalse);
+      expect(result.hasEncryptionKey, isFalse);
+      expect(result.warnings, <String>[
+        snapshot.revision < 0
+            ? 'Secure receipt key storage revision is invalid.'
+            : 'Secure receipt key records are invalid.',
+      ]);
+    }
   });
 
   test('fails closed when native key snapshot has unsafe metadata', () async {
