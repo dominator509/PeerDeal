@@ -172,7 +172,7 @@ class AppNativeReadinessLoader {
     List<String> warnings, {
     Future<void>? cancellation,
   }) async {
-    if (_nativeTransportMaxPayloadBytes < 1) {
+    if (!_isValidNativeTransportPayloadLimit(_nativeTransportMaxPayloadBytes)) {
       warnings.add('native transport unavailable');
       return false;
     }
@@ -186,7 +186,7 @@ class AppNativeReadinessLoader {
           capability.available &&
           capability.sendSupported &&
           capability.receiveSupported &&
-          capability.maxPayloadBytes > 0 &&
+          _isValidNativeTransportPayloadLimit(capability.maxPayloadBytes) &&
           capability.maxPayloadBytes <= _nativeTransportMaxPayloadBytes;
       if (!ready) warnings.add('native transport unavailable');
       return ready;
@@ -235,6 +235,11 @@ class AppNativeReadinessLoader {
     }
     if (namespace.contains('::')) return false;
     return true;
+  }
+
+  bool _isValidNativeTransportPayloadLimit(int value) {
+    return value >= 1 &&
+        value <= NativeBridgePayloadLimits.maxTransportPayloadBytes;
   }
 
   Future<bool> _isCancellationRequested(Future<void>? cancellation) async {

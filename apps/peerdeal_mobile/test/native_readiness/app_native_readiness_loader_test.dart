@@ -270,6 +270,83 @@ void main() {
   );
 
   test(
+    'rejects app transport payload limits above the native contract',
+    () async {
+      final nativeTransport = _FakeNativeTransportBridge();
+      final loader = AppNativeReadinessLoader(
+        captureProtectionBridge: _FakeCaptureProtectionBridge(
+          capability: const CaptureProtectionCapability(
+            blockingSupported: true,
+            obscuringSupported: true,
+            notes: 'ready',
+          ),
+        ),
+        localNetworkBridge: _FakeLocalNetworkBridge(
+          capability: const LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: false,
+            notes: 'ready',
+          ),
+        ),
+        nativeTransportBridge: nativeTransport,
+        secureKeyStorageBridge: _FakeSecureKeyStorageBridge(
+          snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
+        ),
+        nativeTransportMaxPayloadBytes:
+            NativeBridgePayloadLimits.maxTransportPayloadBytes + 1,
+      );
+
+      final snapshot = await loader.load();
+
+      expect(snapshot.nativeTransportReady, isFalse);
+      expect(snapshot.warnings, <String>['native transport unavailable']);
+      expect(nativeTransport.capabilityLookups, 0);
+    },
+  );
+
+  test(
+    'rejects a reported transport payload limit above the native contract',
+    () async {
+      final loader = AppNativeReadinessLoader(
+        captureProtectionBridge: _FakeCaptureProtectionBridge(
+          capability: const CaptureProtectionCapability(
+            blockingSupported: true,
+            obscuringSupported: true,
+            notes: 'ready',
+          ),
+        ),
+        localNetworkBridge: _FakeLocalNetworkBridge(
+          capability: const LocalNetworkCapability(
+            discoverySupported: true,
+            permissionPromptSupported: true,
+            broadcastSupported: false,
+            notes: 'ready',
+          ),
+        ),
+        nativeTransportBridge: _FakeNativeTransportBridge(
+          capability: const NativeTransportCapability(
+            available: true,
+            sendSupported: true,
+            receiveSupported: true,
+            maxPayloadBytes:
+                NativeBridgePayloadLimits.maxTransportPayloadBytes + 1,
+            notes: 'invalid',
+          ),
+        ),
+        secureKeyStorageBridge: _FakeSecureKeyStorageBridge(
+          snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
+        ),
+      );
+
+      final snapshot = await loader.load();
+
+      expect(snapshot.nativeTransportReady, isFalse);
+      expect(snapshot.warnings, <String>['native transport unavailable']);
+    },
+  );
+
+  test(
     'rejects malformed secure-key namespaces before native storage',
     () async {
       for (final namespace in <String>[

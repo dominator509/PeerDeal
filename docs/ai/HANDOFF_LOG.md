@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-17 - Codex - T256 Align Native Readiness Payload Limits
+
+Summary:
+- Mirrored app native-readiness loaders now reject configured transport limits
+  above `NativeBridgePayloadLimits.maxTransportPayloadBytes` before invoking the
+  native transport bridge.
+- Reported native capability limits are checked against the same locked ceiling
+  before readiness can become true.
+- This aligns readiness with the T255 transport factory hardening without
+  changing the native channel, protocol frame shape, package ownership, or host
+  implementation.
+
+Files:
+- Mirrored `apps/peerdeal_{mobile,desktop}/lib/native_readiness/app_native_readiness_loader.dart`
+- Mirrored native-readiness loader tests
+- `docs/PRODUCTION_READINESS.md`
+- `docs/ai/HANDOFF_LOG.md`
+
+Verification:
+- All 17 package analyzers pass with the direct Dart SDK.
+- Focused mobile Flutter readiness tests did not produce a result: the bounded
+  180-second Flutter runner stalled without test output.
+- Boundary, source-text, serialized non-Flutter tests, and `git diff --check`
+  remain to be run after this documentation update.
+
+Remaining:
+- Product session/state provisioning, durable database replacement, real-device
+  and cross-device validation, session-auth contract, release signing, and
+  final UX remain separate readiness work.
+
 ### 2026-08-17 - Codex - T255 Bound Native Transport Payload Limits
 
 Summary:

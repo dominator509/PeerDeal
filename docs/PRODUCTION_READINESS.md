@@ -672,6 +672,9 @@ the gates below are satisfied.
 - Mirrored app `NativeTransportSessionFactory` boundaries now reject configured
   and reported payload limits above the locked native bridge ceiling before
   native capability lookup, sender creation, or receiver creation.
+- Mirrored app native-readiness loaders now apply that same ceiling to both
+  configured and reported transport payload limits before advertising native
+  transport readiness.
 - Sync recovery persistence now exposes an idempotent, scope-validated wipe
   operation; the JSON store removes the durable recovery window and matching
   interrupted-write temporary files without removing other scopes. Retention
