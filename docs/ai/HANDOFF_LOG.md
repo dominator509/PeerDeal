@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Honor Explicit Wizard Preset References
+
+Summary:
+- `DefaultPresetResolver.resolveIntent(...)` now honors nonempty
+  `SetupIntent.presetRefs` instead of merging unrelated supplied layers.
+- Explicit references must be bounded, safe, unique, and resolve to exactly one
+  supplied layer; missing or invalid references fail closed. Empty references
+  preserve existing caller-supplied layer behavior.
+
+Files:
+- `packages/peerdeal_wizard/lib/src/engine/default_preset_resolver.dart`
+- `packages/peerdeal_wizard/test/preset_resolver_test.dart`
+- `packages/peerdeal_wizard/README.md`
+
+Verification:
+- `peerdeal_wizard` analysis passed.
+- Full `peerdeal_wizard` suite passed: 34 tests.
+
+Remaining:
+- Product-owned Game File source policy, session/database wiring, native/device
+  validation, authentication/replay contracts, signing, and final UX remain
+  separate readiness gates.
+
 ### 2026-08-20 - Codex - Validate Complete Invite Payloads
 
 Summary:

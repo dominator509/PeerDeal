@@ -43,5 +43,9 @@ are present.
   the compiled Game File; the compiler emits the complete protocol-shaped
   object with the current protocol version and validates it against the locked
   Game File schema and catalog before returning success.
+- Empty `SetupIntent.presetRefs` preserves the existing behavior of merging all
+  supplied layers. Nonempty references select exactly one matching layer per
+  reference; missing, duplicate, padded, control-bearing, or oversized
+  references fail closed.
 - Preset resolution and direct Game File compilation apply bounded collection
   and canonical JSON checks, failing closed with stable `ERR_WIZARD_*` codes.

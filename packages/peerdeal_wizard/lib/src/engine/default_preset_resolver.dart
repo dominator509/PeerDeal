@@ -93,7 +93,21 @@ class DefaultPresetResolver implements PresetResolver {
       return _blockedDraft(intentId, intentInputError);
     }
 
-    final presetResolution = mergeLayers(presetLayers);
+    if (presetLayers.length > maxPresetLayers) {
+      return _blockedDraft(
+        intentId,
+        WizardResultCodes.presetLayerCountTooLarge,
+      );
+    }
+    final selectedPresetLayers = _selectPresetLayers(
+      intent.presetRefs,
+      presetLayers,
+    );
+    if (selectedPresetLayers == null) {
+      return _blockedDraft(intentId, WizardResultCodes.presetIdsInvalid);
+    }
+
+    final presetResolution = mergeLayers(selectedPresetLayers);
     if (presetResolution.errors.isNotEmpty) {
       return _blockedDraft(intentId, presetResolution.errors.first);
     }
@@ -295,6 +309,9 @@ class DefaultPresetResolver implements PresetResolver {
   }
 
   String? _intentInputError(SetupIntent intent) {
+    if (intent.presetRefs.length > maxPresetLayers) {
+      return WizardResultCodes.presetLayerCountTooLarge;
+    }
     if (intent.partialSettings.length > maxPartialSettings) {
       return WizardResultCodes.partialSettingCountTooLarge;
     }
@@ -311,6 +328,35 @@ class DefaultPresetResolver implements PresetResolver {
       return WizardResultCodes.ambiguityCountTooLarge;
     }
     return null;
+  }
+
+  List<PresetLayer>? _selectPresetLayers(
+    List<String> presetRefs,
+    List<PresetLayer> presetLayers,
+  ) {
+    // An empty reference list preserves the existing caller-supplied layer
+    // behavior. Explicit references opt into exact, least-privilege selection.
+    if (presetRefs.isEmpty) return presetLayers;
+
+    final seenRefs = <String>{};
+    final selected = <PresetLayer>[];
+    for (final presetRef in presetRefs) {
+      if (!_isSafePresetId(presetRef) || !seenRefs.add(presetRef)) {
+        return null;
+      }
+
+      PresetLayer? match;
+      var matchCount = 0;
+      for (final layer in presetLayers) {
+        if (layer.presetId == presetRef) {
+          match = layer;
+          matchCount += 1;
+        }
+      }
+      if (matchCount != 1 || match == null) return null;
+      selected.add(match);
+    }
+    return selected;
   }
 
   bool _isCanonicalJsonBounded(Object? value, {required int maxMapEntries}) {
@@ -358,6 +404,10 @@ class DefaultPresetResolver implements PresetResolver {
       return '';
     }
     return value;
+  }
+
+  bool _isSafePresetId(String value) {
+    return value.isNotEmpty && _safeSelectionId(value) == value;
   }
 }
 

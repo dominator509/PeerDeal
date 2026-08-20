@@ -25,6 +25,69 @@ void main() {
       expect(result.conflicts, isNotEmpty);
     });
 
+    test('explicit preset references select only the requested layers', () {
+      const resolver = DefaultPresetResolver();
+      final intent = SetupIntent(
+        intentId: 'intent_selected_presets',
+        sourceType: SetupSurface.simple,
+        hostPseudonymousId: 'host_1',
+        presetRefs: <String>['builtin_open_table'],
+        seatCountPreference: 6,
+      );
+
+      final draft = resolver.resolveIntent(
+        intent: intent,
+        presetLayers: <PresetLayer>[
+          PresetLayer(
+            presetId: 'builtin_open_table',
+            priority: 1,
+            values: <String, Object?>{
+              'mode_type': 'open_table',
+              'variant_id': 'holdem_nlhe',
+              'seat_count': 6,
+            },
+          ),
+          PresetLayer(
+            presetId: 'unrequested_override',
+            priority: 2,
+            values: <String, Object?>{'seat_count': 9},
+          ),
+        ],
+      );
+
+      expect(draft.resolvedFields['seat_count'], 6);
+      expect(draft.appliedPresetIds, ['builtin_open_table']);
+      expect(resolver.validateDraft(draft).buildReady, isTrue);
+    });
+
+    test('rejects unknown, duplicate, or unsafe preset references', () {
+      const resolver = DefaultPresetResolver();
+      final layer = PresetLayer(
+        presetId: 'builtin_open_table',
+        priority: 1,
+        values: const <String, Object?>{},
+      );
+
+      for (final refs in <List<String>>[
+        <String>['missing_preset'],
+        <String>['builtin_open_table', 'builtin_open_table'],
+        <String>[' builtin_open_table'],
+      ]) {
+        final draft = resolver.resolveIntent(
+          intent: SetupIntent(
+            intentId: 'intent_invalid_preset_ref',
+            sourceType: SetupSurface.simple,
+            hostPseudonymousId: 'host_1',
+            presetRefs: refs,
+          ),
+          presetLayers: <PresetLayer>[layer],
+        );
+
+        expect(draft.unresolvedIssues, [WizardResultCodes.presetIdsInvalid]);
+        expect(resolver.validateDraft(draft).buildReady, isFalse);
+      }
+    });
+
     test('fails closed when the preset layer collection exceeds its limit', () {
       const resolver = DefaultPresetResolver(maxPresetLayers: 1);
       final result = resolver.mergeLayers(
@@ -128,10 +191,7 @@ void main() {
       expect(draft.variantId, isEmpty);
       final result = resolver.validateDraft(draft);
       expect(result.buildReady, isFalse);
-      expect(
-        result.validationResult.errors,
-        contains('unsupported_mode_id'),
-      );
+      expect(result.validationResult.errors, contains('unsupported_mode_id'));
       expect(
         result.validationResult.errors,
         contains('unsupported_variant_id'),
@@ -283,10 +343,7 @@ void main() {
         contains(WizardResultCodes.policyProfilesInvalid),
       );
       expect(result.policyProfileIds['privacy_profile'], 'privacy.default');
-      expect(
-        result.policyProfileIds['capture_profile'],
-        'capture.protected',
-      );
+      expect(result.policyProfileIds['capture_profile'], 'capture.protected');
     });
   });
 }

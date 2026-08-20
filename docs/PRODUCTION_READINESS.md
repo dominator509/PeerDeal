@@ -3229,6 +3229,13 @@ existing `ProtocolCatalog` responsibility.
 the whole payload before accepting required-field validation, so unsupported
 nested values fail at the protocol boundary instead of during later encoding.
 
+The wizard resolver now honors explicit `SetupIntent.presetRefs`. Empty
+references preserve the existing all-supplied-layer behavior for compatibility;
+nonempty references select exactly one bounded, safe, unique matching layer and
+fail closed when a requested layer is missing or ambiguous. This closes a
+wizard input-selection gap without changing preset merge policy or package
+ownership.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

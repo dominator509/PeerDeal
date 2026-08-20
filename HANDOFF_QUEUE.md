@@ -193,6 +193,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-20-183` | Wizard Game File compiler emitted an incomplete object and unsupported protocol version | 4 | T302 | RESOLVED | `DefaultGameFileCompiler` now carries pseudonymous creator and preset metadata, emits all locked Game File sections with protocol `1.0.0`, and validates the result against `GameFileSchema` and `ProtocolCatalog`; setup/runtime ownership remains unchanged. |
 | `LEGACY-GAP-2026-08-20-184` | Game File schema accepted malformed identity and section shapes | 4 | T303 | RESOLVED | `GameFileSchema` now validates required text fields, required object sections, and the variant identifier type while leaving unsupported-version handling to `ProtocolCatalog`; existing accepted/rejected fixtures remain green. |
 | `LEGACY-GAP-2026-08-20-185` | Invite schema accepted unsupported nested values until later encoding | 4 | T304 | RESOLVED | `InvitePayloadSchema` now applies bounded canonical JSON validation before field acceptance, with a focused rejected-payload regression; invite field and catalog ownership remain unchanged. |
+| `LEGACY-GAP-2026-08-20-186` | Wizard resolver ignored explicit `SetupIntent.presetRefs` and merged unrequested layers | 4 | T305 | RESOLVED | `DefaultPresetResolver` preserves empty-reference compatibility but requires nonempty references to select exactly one bounded, safe, unique matching layer; missing or invalid references fail closed. Wizard merge policy and package ownership remain unchanged. |
 
 ## Status Definitions
 

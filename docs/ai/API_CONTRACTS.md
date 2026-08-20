@@ -124,7 +124,10 @@ pseudonymous creator and applied preset IDs into the plan. Successful compiler
 output contains the complete protocol Game File shape, uses the current
 protocol version, and must pass both `GameFileSchema` and `ProtocolCatalog`;
 `createdAtFactory` is injectable for deterministic tests. Overflow or
-unsupported values fail closed with stable `ERR_WIZARD_*` result codes.
+unsupported values fail closed with stable `ERR_WIZARD_*` result codes. Empty
+`SetupIntent.presetRefs` preserves the existing all-supplied-layer behavior;
+nonempty references select exactly one matching layer per safe, unique
+reference, and missing or invalid references fail closed.
 
 ## App Route Surface
 
