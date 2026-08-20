@@ -3189,6 +3189,11 @@ The same Windows receive handler now rejects malformed raw scopes before socket
 initialization, matching Android request ordering and keeping invalid method
 channel input side-effect free.
 
+The generic native transport capability decoder now discards any reported
+payload ceiling when the native transport is unavailable, keeping the decoded
+model aligned with its existing unavailable state without changing channel
+fields or transport negotiation.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

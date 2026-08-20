@@ -18,11 +18,14 @@ class NativeTransportChannelContract {
       );
     }
 
+    final available = _boolValue(payload['available']);
     return NativeTransportCapability(
-      available: _boolValue(payload['available']),
+      available: available,
       sendSupported: _boolValue(payload['sendSupported']),
       receiveSupported: _boolValue(payload['receiveSupported']),
-      maxPayloadBytes: _payloadLimitValue(payload['maxPayloadBytes']),
+      maxPayloadBytes: available
+          ? _payloadLimitValue(payload['maxPayloadBytes'])
+          : 0,
       notes:
           _boundedStringValue(
             payload['notes'],

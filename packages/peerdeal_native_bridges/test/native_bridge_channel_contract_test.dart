@@ -722,6 +722,21 @@ void main() {
     expect(snapshot.warning, contains('unavailable'));
   });
 
+  test('unavailable native transport discards a reported payload ceiling', () {
+    final capability = NativeTransportChannelContract.decodeCapability(
+      const <String, Object?>{
+        'available': false,
+        'sendSupported': false,
+        'receiveSupported': false,
+        'maxPayloadBytes': 4096,
+        'notes': 'unavailable',
+      },
+    );
+
+    expect(capability.available, isFalse);
+    expect(capability.maxPayloadBytes, 0);
+  });
+
   test('native transport channel contract tolerates malformed fields', () {
     final capability = NativeTransportChannelContract.decodeCapability(
       const <String, Object?>{

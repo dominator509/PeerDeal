@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Normalize Unavailable Transport Capability Limits
+
+Summary:
+- The generic native transport channel decoder now forces
+  `maxPayloadBytes` to zero when `available` is false, preventing malformed
+  capability payloads from exposing a usable ceiling on an unavailable
+  transport.
+- The existing channel fields, native hosts, negotiation rules, and package
+  ownership remain unchanged.
+
+Files:
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- Production-readiness note.
+
+Verification:
+- `dart analyze packages/peerdeal_native_bridges` passed.
+- `melos run boundary-check` passed.
+- `melos run source-text` passed.
+- `git diff --check` passed.
+- The focused Flutter tests were attempted, but the runner produced no output
+  for 30 seconds and was stopped; no Flutter test pass is claimed.
+
+Remaining:
+- Native/device reachability, transport authentication/replay, product state
+  and database wiring, provider proof semantics, release signing, and final UX
+  remain separate gates.
+
 ### 2026-08-20 - Codex - Harden Windows Native Readiness Failure Boundaries
 
 Summary:
