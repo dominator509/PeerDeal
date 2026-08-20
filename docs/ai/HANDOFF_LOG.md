@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Validate Complete Wizard Game Files
+
+Summary:
+- `DefaultGameFileCompiler` now emits the complete protocol-shaped Game File
+  instead of the prior partial object and uses the catalog's `1.0.0` protocol
+  version.
+- The wizard plan now carries the existing pseudonymous creator and applied
+  preset IDs, and successful output is checked by `GameFileSchema` and
+  `ProtocolCatalog` before it reaches app setup flows.
+
+Files:
+- `packages/peerdeal_wizard/lib/src/engine/default_game_file_compiler.dart`
+- `packages/peerdeal_wizard/lib/src/engine/default_preset_resolver.dart`
+- `packages/peerdeal_wizard/lib/src/models/resolved_setup_draft.dart`
+- `packages/peerdeal_wizard/lib/src/models/validated_setup_plan.dart`
+- `packages/peerdeal_wizard/test/game_file_compiler_test.dart`
+
+Verification:
+- `peerdeal_wizard` analysis passed.
+- Focused wizard compiler, resolver, and equivalence tests passed: 27 tests.
+
+Remaining:
+- Product-owned Game File source policy, session/database wiring, native/device
+  validation, authentication/replay contracts, signing, and final UX remain
+  separate readiness gates.
+
 ### 2026-08-20 - Codex - Compose Production Session Factory From Native Support
 
 Summary:

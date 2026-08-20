@@ -3213,6 +3213,13 @@ event factories, and persistence limits unchanged. This closes app storage
 composition only; it does not invent product state, a database, or route
 policy.
 
+The wizard Game File compiler now carries the existing pseudonymous creator and
+applied preset metadata into a complete protocol-shaped Game File, emits the
+current `1.0.0` protocol version, and validates the result against both
+`GameFileSchema` and `ProtocolCatalog` before reporting success. This closes the
+invalid compiler-output gap without moving setup policy into runtime state or
+changing the protocol schema.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

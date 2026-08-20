@@ -169,6 +169,7 @@ class DefaultPresetResolver implements PresetResolver {
       intentId: intentId,
       modeId: modeId,
       variantId: variantId,
+      hostPseudonymousId: hostPseudonymousId,
       resolvedFields: resolved,
       appliedPresetIds: presetResolution.appliedPresetIds,
       unresolvedIssues: unresolvedIssues,
@@ -250,8 +251,10 @@ class DefaultPresetResolver implements PresetResolver {
       planId: 'plan_${draft.intentId}',
       modeId: draft.modeId,
       variantId: draft.variantId,
+      createdBy: draft.hostPseudonymousId,
       policyProfileIds: policyProfiles,
       resolvedFields: draft.resolvedFields,
+      appliedPresetIds: draft.appliedPresetIds,
       validationResult: ValidationResult(
         isValid: errors.isEmpty,
         warnings: warnings,
@@ -332,8 +335,7 @@ class DefaultPresetResolver implements PresetResolver {
   bool _isSafePolicyProfile(String value) {
     if (value.trim().isEmpty || value.trim() != value) return false;
     return value.codeUnits.every(
-      (codeUnit) =>
-          codeUnit >= 0x20 && !(codeUnit >= 0x7f && codeUnit <= 0x9f),
+      (codeUnit) => codeUnit >= 0x20 && !(codeUnit >= 0x7f && codeUnit <= 0x9f),
     );
   }
 

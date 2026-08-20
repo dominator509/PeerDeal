@@ -17,4 +17,5 @@ abstract final class WizardResultCodes {
   static const helperSuggestionInvalid = 'ERR_WIZARD_HELPER_SUGGESTION_INVALID';
   static const resolvedFieldsInvalid = 'ERR_WIZARD_RESOLVED_FIELDS_INVALID';
   static const policyProfilesInvalid = 'ERR_WIZARD_POLICY_PROFILES_INVALID';
+  static const presetIdsInvalid = 'ERR_WIZARD_PRESET_IDS_INVALID';
 }

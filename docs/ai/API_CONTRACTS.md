@@ -118,9 +118,13 @@ merged fields, conflicts, helper suggestions, partial settings, ambiguities,
 and resolved fields before returning a draft. Nested preset and setup values
 must pass bounded protocol canonical JSON. Direct `ResolvedSetupDraft` values
 are checked again during validation. `DefaultGameFileCompiler` repeats the
-resolved-field, policy-profile, and validation-message checks for manually
-constructed plans. Overflow or unsupported values fail closed with stable
-`ERR_WIZARD_*` result codes.
+resolved-field, policy-profile, creator, preset-ID, and validation-message
+checks for manually constructed plans. Resolver output carries the
+pseudonymous creator and applied preset IDs into the plan. Successful compiler
+output contains the complete protocol Game File shape, uses the current
+protocol version, and must pass both `GameFileSchema` and `ProtocolCatalog`;
+`createdAtFactory` is injectable for deterministic tests. Overflow or
+unsupported values fail closed with stable `ERR_WIZARD_*` result codes.
 
 ## App Route Surface
 

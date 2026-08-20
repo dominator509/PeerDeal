@@ -39,5 +39,9 @@ are present.
 - `DefaultGameFileCompiler.tryCompile(...)` rechecks build-ready mode and
   variant support plus non-empty plan identity, so manually constructed plans
   cannot bypass resolver validation.
+- Resolver output carries the pseudonymous creator and applied preset IDs into
+  the compiled Game File; the compiler emits the complete protocol-shaped
+  object with the current protocol version and validates it against the locked
+  Game File schema and catalog before returning success.
 - Preset resolution and direct Game File compilation apply bounded collection
   and canonical JSON checks, failing closed with stable `ERR_WIZARD_*` codes.

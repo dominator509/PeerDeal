@@ -1,4 +1,5 @@
 import 'package:peerdeal_wizard/peerdeal_wizard.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -9,6 +10,7 @@ void main() {
         planId: 'plan_demo',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: <String, String>{
           'privacy_profile': 'privacy.default',
           'capture_profile': 'capture.protected',
@@ -26,6 +28,13 @@ void main() {
 
       final gameFile = compiler.compile(plan);
       expect(gameFile['schema_id'], 'peerdeal.gamefile');
+      expect(gameFile['protocol_version'], currentProtocolVersion.toWire());
+      expect(GameFileSchema().validate(gameFile), isEmpty);
+      expect(
+        const ProtocolCatalog().checkGameFileJson(gameFile).isSupported,
+        isTrue,
+      );
+      expect(gameFile.keys, containsAll(GameFileSchema.requiredTopLevelKeys));
       expect(
         (gameFile['mode'] as Map<String, Object?>)['display_name'],
         'Open Table Mode',
@@ -56,6 +65,7 @@ void main() {
         planId: '   ',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: <String, String>{
           'privacy_profile': 'privacy.default',
           'capture_profile': 'capture.protected',
@@ -76,6 +86,7 @@ void main() {
         planId: 'plan_demo',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: <String, String>{
           'privacy_profile': 'privacy.default',
           'capture_profile': 'capture.protected',
@@ -102,12 +113,47 @@ void main() {
       expect(result.errors, isEmpty);
     });
 
+    test('resolver metadata is preserved in the compiled Game File', () {
+      const resolver = DefaultPresetResolver();
+      final plan = resolver.validateDraft(
+        resolver.resolveIntent(
+          intent: SetupIntent(
+            intentId: 'intent_game_file',
+            sourceType: SetupSurface.simple,
+            hostPseudonymousId: 'host_game_file',
+            modePreference: 'open_table',
+            variantPreference: 'holdem_nlhe',
+            seatCountPreference: 6,
+          ),
+          presetLayers: <PresetLayer>[
+            PresetLayer(
+              presetId: 'builtin_open_table',
+              priority: 1,
+              values: const <String, Object?>{},
+            ),
+          ],
+        ),
+      );
+
+      final result = DefaultGameFileCompiler(
+        createdAtFactory: () => DateTime.utc(2026, 8, 20, 12),
+      ).tryCompile(plan);
+
+      expect(result.isCompiled, isTrue);
+      expect(result.gameFile?['created_by'], 'host_game_file');
+      expect(result.gameFile?['created_at'], '2026-08-20T12:00:00.000Z');
+      expect((result.gameFile?['presets'] as Map)['applied_preset_ids'], [
+        'builtin_open_table',
+      ]);
+    });
+
     test('tryCompile rejects invalid plan without throwing', () {
       const compiler = DefaultGameFileCompiler();
       final plan = ValidatedSetupPlan(
         planId: 'plan_bad',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: <String, String>{},
         resolvedFields: <String, Object?>{},
         validationResult: ValidationResult(
@@ -150,6 +196,7 @@ void main() {
         planId: '   ',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: <String, String>{
           'privacy_profile': 'privacy.default',
           'capture_profile': 'capture.protected',
@@ -174,6 +221,7 @@ void main() {
         planId: 'plan_\u0000demo',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: const <String, String>{
           'privacy_profile': 'privacy.default',
           'capture_profile': ' capture.protected',
@@ -187,10 +235,7 @@ void main() {
 
       expect(result.isCompiled, isFalse);
       expect(result.errors, contains(WizardResultCodes.planIdInvalid));
-      expect(
-        result.errors,
-        contains(WizardResultCodes.policyProfilesInvalid),
-      );
+      expect(result.errors, contains(WizardResultCodes.policyProfilesInvalid));
     });
 
     test('tryCompile rejects build-ready unsupported variant plan', () {
@@ -199,6 +244,7 @@ void main() {
         planId: 'plan_unsupported_variant',
         modeId: 'open_table',
         variantId: 'omaha_plo',
+        createdBy: 'host_demo',
         policyProfileIds: <String, String>{
           'privacy_profile': 'privacy.default',
           'capture_profile': 'capture.protected',
@@ -223,6 +269,7 @@ void main() {
         planId: 'plan_unsupported_mode',
         modeId: 'cash_private',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: <String, String>{
           'privacy_profile': 'privacy.default',
           'capture_profile': 'capture.protected',
@@ -247,6 +294,7 @@ void main() {
         planId: 'plan_fields_overflow',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: const <String, String>{},
         resolvedFields: <String, Object?>{
           for (
@@ -273,6 +321,7 @@ void main() {
         planId: 'plan_invalid_fields',
         modeId: 'open_table',
         variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
         policyProfileIds: <String, String>{},
         resolvedFields: <String, Object?>{'unsupported': Object()},
         validationResult: ValidationResult(isValid: true),

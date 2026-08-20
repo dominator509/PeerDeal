@@ -22,18 +22,23 @@ class ValidatedSetupPlan {
     required this.planId,
     required this.modeId,
     required this.variantId,
+    this.createdBy = '',
     required Map<String, String> policyProfileIds,
     required Map<String, Object?> resolvedFields,
+    List<String> appliedPresetIds = const <String>[],
     required this.validationResult,
     required this.buildReady,
   }) : policyProfileIds = Map<String, String>.unmodifiable(policyProfileIds),
+       appliedPresetIds = List<String>.unmodifiable(appliedPresetIds),
        resolvedFields = freezeWizardObjectMap(resolvedFields);
 
   final String planId;
   final String modeId;
   final String variantId;
+  final String createdBy;
   final Map<String, String> policyProfileIds;
   final Map<String, Object?> resolvedFields;
+  final List<String> appliedPresetIds;
   final ValidationResult validationResult;
   final bool buildReady;
 }

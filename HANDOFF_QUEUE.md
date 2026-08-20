@@ -190,6 +190,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-20-180` | Generic capture-action decoding exposed blocking as enabled after a failed native action | 4 | T299 | RESOLVED | The capture-action decoder now forces `blockingEnabled` to false when `success` is false, with focused contract coverage. Channel fields and native behavior remain unchanged. |
 | `LEGACY-GAP-2026-08-20-181` | Generic local-network discovery decoding exposed peer endpoints without permission | 4 | T300 | RESOLVED | The local-network decoder now discards peer endpoints when `permissionGranted` is false while retaining interface hints, with focused contract coverage. Channel fields and native behavior remain unchanged. |
 | `LEGACY-GAP-2026-08-20-182` | App production-session composition lacked a direct native app-support factory seam | 4 | T301 | RESOLVED | Mirrored app configuration factories now expose `fromNativeAppSupport(...)`, reusing the existing generic app-support and recovery-store seams while keeping product state, identity, route policy, and database ownership with the app caller. |
+| `LEGACY-GAP-2026-08-20-183` | Wizard Game File compiler emitted an incomplete object and unsupported protocol version | 4 | T302 | RESOLVED | `DefaultGameFileCompiler` now carries pseudonymous creator and preset metadata, emits all locked Game File sections with protocol `1.0.0`, and validates the result against `GameFileSchema` and `ProtocolCatalog`; setup/runtime ownership remains unchanged. |
 
 ## Status Definitions
 
