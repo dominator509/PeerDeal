@@ -185,6 +185,52 @@ void main() {
     expect(store.loadWindow(scope).snapshot, isNull);
   });
 
+  test('rejects an unsafe snapshot identity before persistence mutation', () {
+    final store = _testStore();
+    final result = store.saveSnapshot(
+      scope: scope,
+      snapshot: SnapshotEnvelope(
+        snapshotId: 'snapshot_0\nforged',
+        protocolVersion: scope.protocolVersion,
+        tableId: scope.tableId,
+        sessionId: scope.sessionId,
+        snapshotBaseEventSeq: 0,
+        snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+        payload: const <String, Object?>{},
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_IDENTITY_INVALID',
+    );
+    expect(store.loadWindow(scope).snapshot, isNull);
+  });
+
+  test('rejects a negative snapshot base sequence before persistence', () {
+    final store = _testStore();
+    final result = store.saveSnapshot(
+      scope: scope,
+      snapshot: SnapshotEnvelope(
+        snapshotId: 'snapshot_0',
+        protocolVersion: scope.protocolVersion,
+        tableId: scope.tableId,
+        sessionId: scope.sessionId,
+        snapshotBaseEventSeq: -1,
+        snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+        payload: const <String, Object?>{},
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_SEQUENCE_INVALID',
+    );
+    expect(store.loadWindow(scope).snapshot, isNull);
+  });
+
   test('rejects a tampered snapshot payload hash without mutation', () {
     final store = _testStore();
     final result = store.saveSnapshot(

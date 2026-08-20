@@ -18,6 +18,8 @@ Owns:
   `event_hash` is excluded from the hashed fields
 - shared event-envelope identity validation for non-empty, bounded, strict
   UTF-8, control-free ingress fields used by core, replay, and sync
+- shared snapshot-envelope identity validation for non-empty, bounded, strict
+  UTF-8, control-free ingress fields used by persistence, replay, and sync
 - Game File public schema contract
 - invite payload public schema contract
 - invite payload field-type, safe-text, and mode-value validation; required

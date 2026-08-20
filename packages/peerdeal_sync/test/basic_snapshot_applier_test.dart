@@ -124,6 +124,70 @@ void main() {
     expect(result.conflicts.single.code, 'ERR_RECOVERY_SNAPSHOT_INVALID');
   });
 
+  test('rejects an unsafe direct snapshot identity before projection', () {
+    final applier = _testApplier<FakeSnapshotProjection>(
+      projector: FakeSnapshotProjector(),
+    );
+
+    final result = applier.apply(
+      SnapshotApplyRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1\nforged',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 0,
+          snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+          payload: const <String, Object?>{},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.appliedEventCount, 0);
+    expect(result.state.snapshotApplied, isFalse);
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_APPLY_IDENTITY_INVALID');
+  });
+
+  test(
+    'rejects a negative direct snapshot base sequence before projection',
+    () {
+      final applier = _testApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      );
+
+      final result = applier.apply(
+        SnapshotApplyRequest(
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          protocolVersion: '1.0.0',
+          snapshot: SnapshotEnvelope(
+            snapshotId: 'snap_1',
+            protocolVersion: '1.0.0',
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            snapshotBaseEventSeq: -1,
+            snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+            payload: const <String, Object?>{},
+          ),
+          events: const <EventEnvelope>[],
+        ),
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.appliedEventCount, 0);
+      expect(result.state.snapshotApplied, isFalse);
+      expect(
+        result.conflicts.single.code,
+        'ERR_SNAPSHOT_APPLY_SEQUENCE_INVALID',
+      );
+    },
+  );
+
   test('rejects a tampered snapshot payload hash before projection', () {
     final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),

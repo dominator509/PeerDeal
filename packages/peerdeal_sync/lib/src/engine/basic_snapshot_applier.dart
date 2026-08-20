@@ -157,6 +157,14 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     }
 
     if (snapshot != null) {
+      final snapshotIdentityConflict = _snapshotIdentityConflict(snapshot);
+      if (snapshotIdentityConflict != null) {
+        return <SyncConflict>[snapshotIdentityConflict];
+      }
+      final snapshotSequenceConflict = _snapshotSequenceConflict(snapshot);
+      if (snapshotSequenceConflict != null) {
+        return <SyncConflict>[snapshotSequenceConflict];
+      }
       final snapshotEncodingConflict = _snapshotEncodingConflict(snapshot);
       if (snapshotEncodingConflict != null) {
         return <SyncConflict>[snapshotEncodingConflict];
@@ -402,6 +410,26 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
         expected: isTooLarge ? '${snapshotLimits.maxEncodedBytes}' : null,
       );
     }
+  }
+
+  SyncConflict? _snapshotIdentityConflict(SnapshotEnvelope snapshot) {
+    if (validateSnapshotEnvelopeIdentity(snapshot).isValid) return null;
+    return const SyncConflict(
+      code: 'ERR_SNAPSHOT_APPLY_IDENTITY_INVALID',
+      message: 'Recovery snapshot envelope identity is empty or unsafe.',
+      severity: SyncConflictSeverity.fatal,
+    );
+  }
+
+  SyncConflict? _snapshotSequenceConflict(SnapshotEnvelope snapshot) {
+    if (snapshot.snapshotBaseEventSeq >= 0) return null;
+    return SyncConflict(
+      code: 'ERR_SNAPSHOT_APPLY_SEQUENCE_INVALID',
+      message: 'Recovery snapshot base sequence must be non-negative.',
+      severity: SyncConflictSeverity.fatal,
+      expected: '>=0',
+      actual: '${snapshot.snapshotBaseEventSeq}',
+    );
   }
 
   SyncConflict? _snapshotHashConflict(SnapshotEnvelope snapshot) {

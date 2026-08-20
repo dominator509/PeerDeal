@@ -58,6 +58,7 @@ class InMemoryRecoveryPersistenceStore
 
     final conflicts = <SyncConflict>[
       ..._validateSnapshotScope(scope, snapshot),
+      ..._validateSnapshotIdentity(snapshot),
       ..._validateSnapshotIntegrity(snapshot),
     ];
     if (conflicts.isNotEmpty) {
@@ -287,6 +288,32 @@ class InMemoryRecoveryPersistenceStore
         severity: SyncConflictSeverity.fatal,
       ),
     ];
+  }
+
+  List<SyncConflict> _validateSnapshotIdentity(SnapshotEnvelope snapshot) {
+    final validation = validateSnapshotEnvelopeIdentity(snapshot);
+    final conflicts = <SyncConflict>[];
+    if (!validation.isValid) {
+      conflicts.add(
+        const SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_IDENTITY_INVALID',
+          message: 'Persisted snapshot envelope identity is empty or unsafe.',
+          severity: SyncConflictSeverity.fatal,
+        ),
+      );
+    }
+    if (snapshot.snapshotBaseEventSeq < 0) {
+      conflicts.add(
+        SyncConflict(
+          code: 'ERR_RECOVERY_PERSISTENCE_SNAPSHOT_SEQUENCE_INVALID',
+          message: 'Persisted snapshot base sequence must be non-negative.',
+          severity: SyncConflictSeverity.fatal,
+          expected: '>=0',
+          actual: '${snapshot.snapshotBaseEventSeq}',
+        ),
+      );
+    }
+    return conflicts;
   }
 
   List<SyncConflict> _validateEventAppend(

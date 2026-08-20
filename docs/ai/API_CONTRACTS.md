@@ -830,6 +830,12 @@ Each supplied snapshot is encoded through the injected bounded canonical JSON
 limits before protocol, scope, or projection work. The default encoded-byte
 limit is 4 MiB with the protocol structure limits; failures map to fatal
 `ERR_RECOVERY_SNAPSHOT_TOO_LARGE` or `ERR_RECOVERY_SNAPSHOT_INVALID`.
+The shared protocol `validateSnapshotEnvelopeIdentity(...)` predicate rejects
+empty, padded, oversized, malformed UTF-8, or control-bearing snapshot
+identity fields. Persistence, conflict detection, and snapshot application
+also reject negative `snapshot_base_event_seq` values before mutation,
+planning, or projection with their boundary-specific fatal `ERR_*SNAPSHOT*`
+identity or sequence conflicts.
 Recovery persistence scopes must use exact, non-empty protocol, table, and
 session identities without padding, control characters, or the internal `::`
 storage-key delimiter. The complete UTF-8 storage key is capped at 180 bytes

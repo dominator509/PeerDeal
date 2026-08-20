@@ -109,6 +109,26 @@ class BasicConflictDetector implements ConflictDetector {
 
     if (request.snapshot != null) {
       final snapshot = request.snapshot!;
+      if (!validateSnapshotEnvelopeIdentity(snapshot).isValid) {
+        conflicts.add(
+          const SyncConflict(
+            code: 'ERR_SNAPSHOT_IDENTITY_INVALID',
+            message: 'Recovery snapshot envelope identity is empty or unsafe.',
+            severity: SyncConflictSeverity.fatal,
+          ),
+        );
+      }
+      if (snapshot.snapshotBaseEventSeq < 0) {
+        conflicts.add(
+          SyncConflict(
+            code: 'ERR_SNAPSHOT_BASE_SEQUENCE_INVALID',
+            message: 'Recovery snapshot base sequence must be non-negative.',
+            severity: SyncConflictSeverity.fatal,
+            expected: '>=0',
+            actual: '${snapshot.snapshotBaseEventSeq}',
+          ),
+        );
+      }
       final snapshotCompatibility = protocolCatalog.checkSnapshotEnvelope(
         snapshot,
       );

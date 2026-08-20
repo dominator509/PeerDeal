@@ -180,6 +180,57 @@ void main() {
     expect(result.conflicts.single.isFatal, isTrue);
   });
 
+  test('rejects an unsafe snapshot identity before recovery planning', () {
+    final result = detector.detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1\nforged',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 0,
+          snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+          payload: const <String, Object?>{},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.conflicts.first.code, 'ERR_SNAPSHOT_IDENTITY_INVALID');
+    expect(result.conflicts.first.isFatal, isTrue);
+  });
+
+  test(
+    'rejects a negative snapshot base sequence before recovery planning',
+    () {
+      final result = detector.detect(
+        RecoveryRequest(
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          protocolVersion: '1.0.0',
+          mode: RecoveryMode.reconnect,
+          snapshot: SnapshotEnvelope(
+            snapshotId: 'snap_1',
+            protocolVersion: '1.0.0',
+            tableId: 'table_1',
+            sessionId: 'session_1',
+            snapshotBaseEventSeq: -1,
+            snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+            payload: const <String, Object?>{},
+          ),
+          events: const <EventEnvelope>[],
+        ),
+      );
+
+      expect(result.conflicts.first.code, 'ERR_SNAPSHOT_BASE_SEQUENCE_INVALID');
+      expect(result.conflicts.first.isFatal, isTrue);
+    },
+  );
+
   test(
     'flags fatal mismatch when final event hash differs from expected baseline',
     () {

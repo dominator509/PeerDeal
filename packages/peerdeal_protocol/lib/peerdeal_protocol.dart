@@ -16,3 +16,4 @@ export 'src/serialization/canonical_json.dart';
 export 'src/serialization/canonical_json_limits.dart';
 export 'src/serialization/event_envelope_codec.dart';
 export 'src/validation/event_envelope_validation.dart';
+export 'src/validation/snapshot_envelope_validation.dart';

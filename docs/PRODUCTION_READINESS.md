@@ -1835,6 +1835,12 @@ closed on duplicate or unsafe participant, seat, occupant, waitlist, or mode
 identities before first-match authorization. Existing mode role, seat, and
 waitlist policy ownership remains unchanged.
 
+The T315 follow-up closes the direct recovery snapshot ingress gap.
+The shared protocol snapshot identity validator and all three sync ingress
+paths now reject empty, unsafe, or negative-base snapshot envelopes before
+persistence mutation, recovery planning, or snapshot projection. Existing
+payload-hash, catalog, scope, and recovery policy ownership remains unchanged.
+
 The T126 follow-up closes the direct wizard materialization gap.
 `DefaultPresetResolver` now bounds preset layers, per-layer and merged values,
 conflicts, helper suggestions, partial settings, ambiguities, and resolved

@@ -68,6 +68,11 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
   `snapshot_hash` matches the canonical snapshot payload before recovery
   planning or projection, failing closed as
   `ERR_SNAPSHOT_PAYLOAD_HASH_MISMATCH`.
+- Direct persistence, conflict detection, and snapshot application reject
+  unsafe or empty snapshot-envelope identity and negative snapshot base
+  sequences before mutation, planning, or projection. Failures use the
+  boundary-specific `ERR_*SNAPSHOT*IDENTITY_INVALID` and
+  `ERR_*SNAPSHOT*SEQUENCE_INVALID` conflicts.
 - Recovery persistence scopes cap the complete UTF-8 storage key at 180 bytes
   before in-memory indexing or base64url filename generation; oversized scopes
   fail closed as `ERR_RECOVERY_PERSISTENCE_SCOPE_INVALID`.

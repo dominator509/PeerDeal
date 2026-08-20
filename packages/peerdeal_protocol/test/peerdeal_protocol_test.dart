@@ -838,6 +838,24 @@ void main() {
     expect(snapshot.toJson()['snapshot_version'], '1.0');
   });
 
+  test('shared snapshot identity validation rejects unsafe fields', () {
+    final validation = validateSnapshotEnvelopeIdentity(
+      SnapshotEnvelope(
+        snapshotId: 'snap_1\nforged',
+        protocolVersion: '1.0.0',
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        snapshotBaseEventSeq: 0,
+        snapshotHash: 'hash_1',
+        payload: const <String, Object?>{},
+      ),
+    );
+
+    expect(validation.isValid, isFalse);
+    expect(validation.emptyFields, isEmpty);
+    expect(validation.unsafeFields, contains('snapshot_id'));
+  });
+
   test('event envelope round-trips through JSON', () {
     final event = EventEnvelope.fromJson(
       EventEnvelope(

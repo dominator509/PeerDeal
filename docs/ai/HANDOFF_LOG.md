@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Recovery Snapshot Ingress
+
+Summary:
+- Added shared protocol snapshot-envelope identity validation using the
+  existing strict UTF-8, bounded, control-free identity rule.
+- Sync persistence, conflict detection, and snapshot application now reject
+  unsafe identities and negative snapshot base sequences before mutation,
+  planning, or projection.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/validation/snapshot_envelope_validation.dart`
+- `packages/peerdeal_protocol/lib/peerdeal_protocol.dart`
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/engine/basic_conflict_detector.dart`
+- `packages/peerdeal_sync/lib/src/engine/basic_snapshot_applier.dart`
+- Focused protocol and sync regression tests.
+
+Verification:
+- `peerdeal_protocol` analysis passed.
+- Full protocol suite passed: 73 tests.
+- `peerdeal_sync` analysis passed.
+- Full sync suite passed: 92 tests.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Harden Governance Identity Boundary
 
 Summary:
