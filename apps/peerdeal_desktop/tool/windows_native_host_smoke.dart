@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
@@ -94,6 +95,28 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
     'native transport capability unavailable',
   );
   _pass('transport.capability');
+  final rawTransportChannel = const MethodChannel(
+    NativeTransportChannelContract.channelName,
+  );
+  final invalidFrameResult = await rawTransportChannel
+      .invokeMapMethod<String, Object?>(
+        NativeTransportChannelContract.sendFrameMethod,
+        <String, Object?>{
+          'frame': <String, Object?>{
+            'sessionId': 'windows_runtime_smoke\n',
+            'senderPeerId': 'peer_runtime_smoke_sender',
+            'recipientPeerId': 'peer_runtime_smoke_recipient',
+            'sequence': 1,
+            'payloadBytes': <int>[1, 2, 3],
+          },
+        },
+      );
+  _require(
+    invalidFrameResult?['success'] == false &&
+        invalidFrameResult?['warning'] == 'Native transport frame is invalid.',
+    'native transport accepted an invalid raw frame',
+  );
+  _pass('transport.invalid_frame_rejected');
   final sendResult = await transport.sendFrame(
     NativeTransportFrame(
       sessionId: 'windows_runtime_smoke',

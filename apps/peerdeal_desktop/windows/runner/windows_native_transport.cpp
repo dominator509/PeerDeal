@@ -512,7 +512,7 @@ void WindowsNativeTransport::HandleMethodCall(
                              ? std::nullopt
                              : FrameFromArguments(*frame_arguments);
       if (!frame.has_value()) {
-        result->Success(Failure("Native transport frame is unavailable."));
+        result->Success(Failure("Native transport frame is invalid."));
         return;
       }
       if (!EnsureSocket()) {

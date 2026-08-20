@@ -3174,6 +3174,12 @@ receipt with a malformed identity field that export encoding would later
 reject. This remains receipt-owned input validation and does not alter binding
 semantics.
 
+The Windows native transport now applies the locked safe-identity predicate to
+raw method-channel frame arguments before socket send, matching Android
+outbound validation. The Windows native smoke path exercises this direct raw
+frame rejection; transport authentication and cross-device reachability
+remain separate product/device gates.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

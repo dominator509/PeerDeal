@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Close Windows Native Transport Egress Validation
+
+Summary:
+- Windows `FrameFromArguments` now rejects non-safe session and peer identity
+  strings before encoding or socket send, matching Android and the generic
+  native payload contract.
+- The Windows native host smoke path now sends a raw malformed frame through
+  the method channel and requires the stable invalid-frame result.
+- No transport authentication, replay, or package-contract behavior was
+  invented; this only closes the existing egress validation parity gap.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart`
+- Production-readiness note and gap queue.
+
+Verification:
+- Dart receipt package gates remain green after the prior commit.
+- The native source change passed `git diff --check` and repository source-text
+  validation; Windows host runtime/build smoke remains environment-dependent.
+
+Remaining:
+- Real Windows/Android device reachability, transport authentication/replay,
+  release signing, and other native platform hosts remain external or
+  product-owned gates.
+
 ### 2026-08-20 - Codex - Align Receipt Model and Authorization Validation
 
 Summary:
