@@ -42,6 +42,11 @@ class DefaultGovernanceEngine implements GovernanceEngine {
 
     switch (action.type) {
       case GovernanceActionType.admitParticipant:
+        if (!_canManageParticipants(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
         return GovernanceDecision(
           allowed: true,
           resultCode: GovernanceResultCodes.okAdmit,
@@ -94,6 +99,11 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.offerSeat:
+        if (!_canManageSeats(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
         final seat = context.seats
             .where((s) => s.seatIndex == action.seatIndex)
             .firstOrNull;
@@ -138,6 +148,11 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.acceptSeatOffer:
+        if (!_isSelfAction(actor, subject)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
         if (subject.state != ParticipantGovernanceState.seatOffered) {
           return GovernanceDecision.deny(
             GovernanceResultCodes.errSeatOfferMissing,
@@ -179,6 +194,12 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.addToWaitlist:
+        if (!_isSelfAction(actor, subject) &&
+            !_canManageWaitlist(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
         final ordering = List<String>.from(context.waitlistOrdering);
         if (!ordering.contains(subject.participantId)) {
           if (ordering.length >= maxWaitlistEntries) {
@@ -226,6 +247,12 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.markParticipantAway:
+        if (!_isSelfAction(actor, subject) &&
+            !_canManageParticipants(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
         return GovernanceDecision(
           allowed: true,
           resultCode: 'OK_PARTICIPANT_AWAY',
@@ -233,6 +260,12 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.returnParticipant:
+        if (!_isSelfAction(actor, subject) &&
+            !_canManageParticipants(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
         return GovernanceDecision(
           allowed: true,
           resultCode: 'OK_PARTICIPANT_RETURNED',
@@ -243,6 +276,11 @@ class DefaultGovernanceEngine implements GovernanceEngine {
       case GovernanceActionType.rejectParticipant:
       case GovernanceActionType.removeParticipant:
       case GovernanceActionType.banParticipantForSession:
+        if (!_canManageParticipants(actor)) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errPermissionDenied,
+          );
+        }
         return GovernanceDecision(
           allowed: true,
           resultCode: 'OK_GOVERNANCE_ACTION_ACCEPTED',
@@ -267,6 +305,17 @@ class DefaultGovernanceEngine implements GovernanceEngine {
   bool _canManageSeats(ParticipantSnapshot? actor) {
     return actor != null &&
         (actor.role == RoleKind.host || actor.role == RoleKind.cohost);
+  }
+
+  bool _canManageParticipants(ParticipantSnapshot? actor) {
+    return _canManageSeats(actor);
+  }
+
+  bool _isSelfAction(
+    ParticipantSnapshot? actor,
+    ParticipantSnapshot subject,
+  ) {
+    return actor != null && actor.participantId == subject.participantId;
   }
 
   String? _inputLimitError(GovernanceContext context) {

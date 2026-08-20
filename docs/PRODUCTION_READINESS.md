@@ -3102,6 +3102,24 @@ superseded pull-request runs, and bounds each job's runtime. This hardens the
 existing validation workflow without changing application behavior or release
 signing ownership.
 
+The T294 follow-up closes five source-backed hardening gaps without changing
+the PeerDeal architecture or package boundaries. Android native transport now
+allocates the complete variable-length frame before encoding session, sender,
+and recipient identifiers. Receipt view authorization now enforces the
+existing session/user binding rules, including both bindings for mixed
+receipts. Mode governance now requires existing host/cohost authority for
+administrative participant and seat actions and binds seat acceptance to the
+subject participant. Core settlement now fails closed when the public
+button-relative odd-chip policy lacks the button input required to implement
+it, instead of silently applying another policy. Privacy diagnostics now
+redact common password, token, authorization, API-key, and client-secret
+fields. Focused package suites and the full repository gates pass. The
+workspace lockfile also refreshes the two currently resolvable transitive
+upgrades; direct `meta` and `test` upgrades remain toolchain-blocked. The
+rebuilt Windows native smoke host also passes app-storage, capture,
+local-network, transport, secure-key read-back, conditional mutation, and
+cleanup checks.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

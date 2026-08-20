@@ -24,6 +24,13 @@ class DefaultDiagnosticsScrubber implements DiagnosticsScrubber {
     'receipt_token',
     'private_key',
     'session_secret',
+    'password',
+    'auth_token',
+    'access_token',
+    'refresh_token',
+    'authorization',
+    'api_key',
+    'client_secret',
     'ip_address',
     'device_identifier',
   };

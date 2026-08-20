@@ -14228,6 +14228,57 @@ Risks:
 
 ---
 
+### 2026-08-20 - Codex - T294 Source-Backed Production Hardening
+
+Summary:
+- Fixed the Android native transport encoder's under-sized variable-length
+  buffer allocation.
+- Receipt view authorization now enforces session and user bindings; mixed
+  receipts enforce both bindings.
+- Governance administrative actions now require existing host/cohost
+  authority, while seat acceptance is bound to the subject participant and
+  self-service waitlist/away/return actions cannot be forged by another ID.
+- Button-relative odd-chip settlement now fails closed because the existing
+  core API has no button position input; the deterministic default remains
+  unchanged.
+- Diagnostics redaction now covers common credential field names.
+- Refreshed the workspace lockfile's two currently resolvable transitive
+  upgrades: `source_maps` and `vm_service`.
+
+Files changed:
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `packages/peerdeal_receipts/lib/src/services/default_receipt_authorizer.dart`
+- `packages/peerdeal_receipts/test/default_receipt_authorizer_test.dart`
+- `packages/peerdeal_modes/lib/src/governance/default_governance_engine.dart`
+- `packages/peerdeal_modes/test/governance_engine_test.dart`
+- `packages/peerdeal_core/lib/src/pot/pot_engine.dart`
+- `packages/peerdeal_core/test/pot/pot_engine_test.dart`
+- `packages/peerdeal_privacy/lib/src/services/default_diagnostics_scrubber.dart`
+- `packages/peerdeal_privacy/test/default_diagnostics_scrubber_test.dart`
+- `pubspec.lock`, `docs/PRODUCTION_READINESS.md`, and this handoff log.
+
+Verification:
+- Focused receipt, governance, core settlement, and privacy suites passed.
+- Full analyze, boundary-check, source-text, serialized Dart/Flutter test,
+  dependency-audit, and diff-check gates pass.
+- Android debug APK build passed.
+- Windows debug native smoke host build passed, and the smoke script passed
+  app-storage, capture, local-network, transport, secure-key, and cleanup
+  checks including secure-key read-back and conditional mutation.
+
+Architecture status:
+- No new package, schema, route, native channel, or persistence boundary was
+  added. Existing locked ownership and fail-closed behavior were preserved.
+
+Remaining:
+- Real Android secure-key/capture and Android/Windows cross-device multicast
+  validation; operator release signing; other-platform native
+  implementations; concrete product database/auth/local identity/state
+  wiring; and final product UX remain integration, operator, or device-owned
+  work.
+
+---
+
 ### 2026-08-18 - Codex - Secure-Key Mutation Contradiction Guard
 
 Summary:

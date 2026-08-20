@@ -397,7 +397,9 @@ internal class NativeTransportHandler(
         if (session.size > MAX_ID_BYTES || sender.size > MAX_ID_BYTES || recipient.size > MAX_ID_BYTES) {
             return null
         }
-        val output = ByteBuffer.allocate(HEADER_BYTES + frame.payload.size).order(ByteOrder.BIG_ENDIAN)
+        val output = ByteBuffer.allocate(
+            HEADER_BYTES + session.size + sender.size + recipient.size + frame.payload.size,
+        ).order(ByteOrder.BIG_ENDIAN)
         output.put(MAGIC)
         output.put(VERSION)
         output.putShort(session.size.toShort())

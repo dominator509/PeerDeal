@@ -39,6 +39,27 @@ void main() {
     expect(result.payload['IP_ADDRESS'], '<redacted>');
   });
 
+  test('DefaultDiagnosticsScrubber redacts common credential field names', () {
+    const scrubber = DefaultDiagnosticsScrubber();
+
+    final result = scrubber.scrub({
+      'password': 'pw',
+      'Authorization': 'Bearer token',
+      'access_token': 'access',
+      'api_key': 'key',
+      'client_secret': 'secret',
+      'safe_label': 'diagnostic',
+    });
+
+    expect(result.rawKeysRemoved, 5);
+    expect(result.payload['password'], '<redacted>');
+    expect(result.payload['Authorization'], '<redacted>');
+    expect(result.payload['access_token'], '<redacted>');
+    expect(result.payload['api_key'], '<redacted>');
+    expect(result.payload['client_secret'], '<redacted>');
+    expect(result.payload['safe_label'], 'diagnostic');
+  });
+
   test('DefaultDiagnosticsScrubber redacts nested sensitive fields', () {
     const scrubber = DefaultDiagnosticsScrubber();
 

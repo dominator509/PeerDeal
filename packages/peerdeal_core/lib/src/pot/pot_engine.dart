@@ -1,5 +1,6 @@
 import '../models/core_input_limits.dart';
 import 'ledger_delta_hook.dart';
+import 'odd_chip_policy.dart';
 import 'pot_commitment.dart';
 import 'pot_slice.dart';
 import 'settlement_policy.dart';
@@ -41,6 +42,16 @@ class PotEngine {
     }
 
     final slices = sidePotBuilder.build(commitments);
+    if (policy.oddChipPolicy == OddChipPolicy.firstWinnerLeftOfButton) {
+      return SettlementResult(
+        slices: slices,
+        awards: const <PotAward>[],
+        ledgerDeltas: const <LedgerDelta>[],
+        warnings: const <String>[
+          'ERR_CORE_SETTLEMENT_ODD_CHIP_POLICY_UNSUPPORTED',
+        ],
+      );
+    }
     final warnings = _validateWinnersBySlice(
       slices: slices,
       winningSeatIdsBySliceIndex: winningSeatIdsBySliceIndex,

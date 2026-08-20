@@ -30,15 +30,8 @@ class DefaultReceiptAuthorizer implements ReceiptAuthorizer {
       );
     }
 
-    if (request.accessMode == ReceiptAccessMode.view) {
-      return const ReceiptAuthorizationResult(
-        allowed: true,
-        normalizedResultCode: 'OK_RECEIPT_VIEW_ALLOWED',
-        message: 'View permitted under shared-view rules.',
-      );
-    }
-
-    if (receipt.bindingMode == ReceiptBindingMode.sessionBound &&
+    if ((receipt.bindingMode == ReceiptBindingMode.sessionBound ||
+            receipt.bindingMode == ReceiptBindingMode.mixed) &&
         request.requestedSessionId != receipt.sessionId) {
       return const ReceiptAuthorizationResult(
         allowed: false,
@@ -58,10 +51,14 @@ class DefaultReceiptAuthorizer implements ReceiptAuthorizer {
       );
     }
 
-    return const ReceiptAuthorizationResult(
+    return ReceiptAuthorizationResult(
       allowed: true,
-      normalizedResultCode: 'OK_RECEIPT_RESTORE_ALLOWED',
-      message: 'Restore permitted.',
+      normalizedResultCode: request.accessMode == ReceiptAccessMode.view
+          ? 'OK_RECEIPT_VIEW_ALLOWED'
+          : 'OK_RECEIPT_RESTORE_ALLOWED',
+      message: request.accessMode == ReceiptAccessMode.view
+          ? 'View permitted for the bound session and user.'
+          : 'Restore permitted.',
     );
   }
 }

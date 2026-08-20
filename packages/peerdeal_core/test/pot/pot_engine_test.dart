@@ -68,6 +68,29 @@ void main() {
     expect(_ledgerDeltas(second), _ledgerDeltas(first));
   });
 
+  test('fails closed when button-relative odd-chip policy lacks button input', () {
+    const engine = PotEngine();
+    final result = engine.settle(
+      commitments: const [
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+        PotCommitment(seatId: 'B', committed: 100, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: const <int, List<String>>{
+        0: <String>['A', 'B'],
+      },
+      policy: SettlementPolicy(
+        oddChipPolicy: OddChipPolicy.firstWinnerLeftOfButton,
+      ),
+    );
+
+    expect(result.awards, isEmpty);
+    expect(
+      result.warnings,
+      contains('ERR_CORE_SETTLEMENT_ODD_CHIP_POLICY_UNSUPPORTED'),
+    );
+    expect(result.ledgerDeltas, isEmpty);
+  });
+
   test('blocks settlement when a slice has no winners', () {
     const engine = PotEngine();
     final result = engine.settle(

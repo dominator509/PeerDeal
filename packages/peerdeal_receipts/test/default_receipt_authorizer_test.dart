@@ -42,6 +42,42 @@ void main() {
     expect(result.normalizedResultCode, 'ERR_RECEIPT_USER_MISMATCH');
   });
 
+  test('allows view only for the bound user and session', () {
+    const request = ReceiptAuthorizationRequest(
+      requestedByUserId: 'user_1',
+      requestedSessionId: 'sess_1',
+      accessMode: ReceiptAccessMode.view,
+    );
+
+    final result = authorizer.authorize(liveReceipt, request);
+    expect(result.allowed, isTrue);
+    expect(result.normalizedResultCode, 'OK_RECEIPT_VIEW_ALLOWED');
+  });
+
+  test('rejects wrong-user view', () {
+    const request = ReceiptAuthorizationRequest(
+      requestedByUserId: 'user_2',
+      requestedSessionId: 'sess_1',
+      accessMode: ReceiptAccessMode.view,
+    );
+
+    final result = authorizer.authorize(liveReceipt, request);
+    expect(result.allowed, isFalse);
+    expect(result.normalizedResultCode, 'ERR_RECEIPT_USER_MISMATCH');
+  });
+
+  test('rejects wrong-session view', () {
+    const request = ReceiptAuthorizationRequest(
+      requestedByUserId: 'user_1',
+      requestedSessionId: 'sess_2',
+      accessMode: ReceiptAccessMode.view,
+    );
+
+    final result = authorizer.authorize(liveReceipt, request);
+    expect(result.allowed, isFalse);
+    expect(result.normalizedResultCode, 'ERR_RECEIPT_SESSION_MISMATCH');
+  });
+
   test('rejects wiped receipt restore', () {
     const wipedReceipt = PeerDealReceipt(
       receiptId: 'r_2',

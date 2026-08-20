@@ -103,6 +103,40 @@ void main() {
       expect(decision.nextSeatState, SeatState.reservedPending.name);
     });
 
+    test('denies seat offers from an unauthorised actor', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'player_1',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [SeatSnapshot(seatIndex: 1, state: SeatState.empty)],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.offerSeat,
+          actorId: 'player_1',
+          subjectId: 'player_2',
+          seatIndex: 1,
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errPermissionDenied);
+    });
+
     test('denies missing seat offer acceptance', () {
       final context = GovernanceContext(
         modeId: 'open_table',
@@ -128,6 +162,39 @@ void main() {
 
       expect(decision.allowed, isFalse);
       expect(decision.resultCode, GovernanceResultCodes.errSeatOfferMissing);
+    });
+
+    test('denies accepting a seat offer on behalf of another participant', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'player_1',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.seatOffered,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.acceptSeatOffer,
+          actorId: 'player_2',
+          subjectId: 'player_1',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errPermissionDenied);
     });
 
     test('fails closed before participant traversal on oversized contexts', () {
