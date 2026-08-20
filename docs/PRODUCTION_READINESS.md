@@ -3180,6 +3180,10 @@ outbound validation. The Windows native smoke path exercises this direct raw
 frame rejection; transport authentication and cross-device reachability
 remain separate product/device gates.
 
+The same Windows receive handler now rejects malformed raw scopes before socket
+initialization, matching Android request ordering and keeping invalid method
+channel input side-effect free.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -575,13 +575,18 @@ void WindowsNativeTransport::HandleMethodCall(
       const auto peer_id = arguments == nullptr
                                ? std::nullopt
                                : StringValue(MapValue(*arguments, "peerId"));
+      if (!session_id.has_value() || !peer_id.has_value()) {
+        result->Success(
+            Failure("Native transport receive request is invalid."));
+        return;
+      }
       EnsureSocket();
       bool available = false;
       {
         std::lock_guard<std::mutex> lock(lifecycle_mutex_);
         available = socket_ != INVALID_SOCKET;
       }
-      if (!session_id.has_value() || !peer_id.has_value() || !available) {
+      if (!available) {
         result->Success(Failure("Native transport receive is unavailable."));
         return;
       }

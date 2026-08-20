@@ -117,6 +117,21 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
     'native transport accepted an invalid raw frame',
   );
   _pass('transport.invalid_frame_rejected');
+  final invalidReceiveResult = await rawTransportChannel
+      .invokeMapMethod<String, Object?>(
+        NativeTransportChannelContract.receiveFramesMethod,
+        <String, Object?>{
+          'sessionId': 'windows_runtime_smoke\n',
+          'peerId': 'peer_runtime_smoke_recipient',
+        },
+      );
+  _require(
+    invalidReceiveResult?['available'] == false &&
+        invalidReceiveResult?['warning'] ==
+            'Native transport receive request is invalid.',
+    'native transport initialized for an invalid receive scope',
+  );
+  _pass('transport.invalid_receive_rejected');
   final sendResult = await transport.sendFrame(
     NativeTransportFrame(
       sessionId: 'windows_runtime_smoke',

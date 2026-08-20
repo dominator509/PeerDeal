@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Windows Transport Receive Request Ordering
+
+Summary:
+- Windows native transport now rejects malformed raw receive scopes before
+  socket initialization, matching Android and preventing invalid method-channel
+  input from triggering native setup.
+- The Windows host smoke path now exercises malformed raw receive rejection in
+  addition to malformed raw send-frame rejection.
+- Transport contracts, authentication semantics, and package ownership remain
+  unchanged.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart`
+- Production-readiness note and gap queue.
+
+Verification:
+- Source-text and boundary validation remain the required local gates; the
+  no-pub Windows build was attempted but stalled before output in this
+  environment.
+- The smoke assertions are ready for the existing Windows native host lane.
+
+Remaining:
+- Real device/network reachability, transport authentication/replay, release
+  signing, and other native platform hosts remain external or product-owned.
+
 ### 2026-08-20 - Codex - Close Windows Native Transport Egress Validation
 
 Summary:
