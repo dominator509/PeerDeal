@@ -188,6 +188,40 @@ void main() {
     },
   );
 
+  test('rejects non-positive events hidden by a snapshot', () {
+    final applier = _testApplier<FakeSnapshotProjection>(
+      projector: FakeSnapshotProjector(),
+    );
+
+    final result = applier.apply(
+      SnapshotApplyRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 0,
+          snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+          payload: const <String, Object?>{},
+        ),
+        events: <EventEnvelope>[
+          _event(0, prevEventHash: genesisEventHash, eventHash: 'hash_0'),
+        ],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.appliedEventCount, 0);
+    expect(result.state.snapshotApplied, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_SNAPSHOT_APPLY_EVENT_SEQUENCE_INVALID',
+    );
+  });
+
   test('rejects a tampered snapshot payload hash before projection', () {
     final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),

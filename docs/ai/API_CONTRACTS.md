@@ -836,6 +836,8 @@ identity fields. Persistence, conflict detection, and snapshot application
 also reject negative `snapshot_base_event_seq` values before mutation,
 planning, or projection with their boundary-specific fatal `ERR_*SNAPSHOT*`
 identity or sequence conflicts.
+When a snapshot is present, non-positive recovery event sequences are rejected
+before suffix filtering can treat them as covered by the snapshot base.
 Recovery persistence scopes must use exact, non-empty protocol, table, and
 session identities without padding, control characters, or the internal `::`
 storage-key delimiter. The complete UTF-8 storage key is capped at 180 bytes

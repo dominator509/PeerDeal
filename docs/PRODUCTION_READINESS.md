@@ -1841,6 +1841,11 @@ paths now reject empty, unsafe, or negative-base snapshot envelopes before
 persistence mutation, recovery planning, or snapshot projection. Existing
 payload-hash, catalog, scope, and recovery policy ownership remains unchanged.
 
+The T316 follow-up closes the snapshot-suffix sequence filtering gap.
+Snapshot-backed conflict detection and application now reject non-positive
+event sequences before suffix filtering can treat malformed events as covered
+by the snapshot base.
+
 The T126 follow-up closes the direct wizard materialization gap.
 `DefaultPresetResolver` now bounds preset layers, per-layer and merged values,
 conflicts, helper suggestions, partial settings, ambiguities, and resolved

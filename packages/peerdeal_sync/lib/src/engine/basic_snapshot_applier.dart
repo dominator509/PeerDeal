@@ -165,6 +165,12 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
       if (snapshotSequenceConflict != null) {
         return <SyncConflict>[snapshotSequenceConflict];
       }
+      final snapshotEventSequenceConflict = _snapshotEventSequenceConflict(
+        request,
+      );
+      if (snapshotEventSequenceConflict != null) {
+        return <SyncConflict>[snapshotEventSequenceConflict];
+      }
       final snapshotEncodingConflict = _snapshotEncodingConflict(snapshot);
       if (snapshotEncodingConflict != null) {
         return <SyncConflict>[snapshotEncodingConflict];
@@ -430,6 +436,22 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
       expected: '>=0',
       actual: '${snapshot.snapshotBaseEventSeq}',
     );
+  }
+
+  SyncConflict? _snapshotEventSequenceConflict(SnapshotApplyRequest request) {
+    if (request.snapshot == null) return null;
+    for (final event in request.events) {
+      if (event.eventSeq < 1) {
+        return SyncConflict(
+          code: 'ERR_SNAPSHOT_APPLY_EVENT_SEQUENCE_INVALID',
+          message: 'Snapshot-backed recovery event sequences must be positive.',
+          severity: SyncConflictSeverity.fatal,
+          expected: '>=1',
+          actual: '${event.eventSeq}',
+        );
+      }
+    }
+    return null;
   }
 
   SyncConflict? _snapshotHashConflict(SnapshotEnvelope snapshot) {

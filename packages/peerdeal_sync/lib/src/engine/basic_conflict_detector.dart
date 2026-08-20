@@ -129,6 +129,20 @@ class BasicConflictDetector implements ConflictDetector {
           ),
         );
       }
+      for (final event in request.events) {
+        if (event.eventSeq < 1) {
+          conflicts.add(
+            SyncConflict(
+              code: 'ERR_SNAPSHOT_EVENT_SEQUENCE_INVALID',
+              message:
+                  'Snapshot-backed recovery event sequences must be positive.',
+              severity: SyncConflictSeverity.fatal,
+              expected: '>=1',
+              actual: '${event.eventSeq}',
+            ),
+          );
+        }
+      }
       final snapshotCompatibility = protocolCatalog.checkSnapshotEnvelope(
         snapshot,
       );

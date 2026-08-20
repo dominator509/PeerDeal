@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Snapshot Suffix Event Sequences
+
+Summary:
+- Snapshot-backed sync conflict detection and application now reject
+  non-positive event sequences before filtering events covered by the snapshot
+  base.
+- Existing full-window, replay, hash, and suffix policy contracts remain
+  unchanged.
+
+Files:
+- `packages/peerdeal_sync/lib/src/engine/basic_conflict_detector.dart`
+- `packages/peerdeal_sync/lib/src/engine/basic_snapshot_applier.dart`
+- Focused snapshot-backed sync regression tests.
+
+Verification:
+- `peerdeal_sync` analysis passed.
+- Full package-local sync suite passed: 94 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Harden Recovery Snapshot Ingress
 
 Summary:

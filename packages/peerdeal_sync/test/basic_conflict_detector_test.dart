@@ -231,6 +231,32 @@ void main() {
     },
   );
 
+  test('rejects non-positive events hidden by a snapshot', () {
+    final result = detector.detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 0,
+          snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+          payload: const <String, Object?>{},
+        ),
+        events: <EventEnvelope>[
+          _event(0, prevEventHash: genesisEventHash, eventHash: 'hash_0'),
+        ],
+      ),
+    );
+
+    expect(result.conflicts.first.code, 'ERR_SNAPSHOT_EVENT_SEQUENCE_INVALID');
+    expect(result.conflicts.first.isFatal, isTrue);
+  });
+
   test(
     'flags fatal mismatch when final event hash differs from expected baseline',
     () {

@@ -204,6 +204,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-20-194` | Bootstrap candidate resolution ignored malformed session/table scope identities | 4 | T313 | RESOLVED | `BasicBootstrapCandidateProvider` now fails closed before candidate materialization when session or table scope identities are malformed; peer discovery and path-selection ownership remain unchanged. |
 | `LEGACY-GAP-2026-08-20-195` | Governance authorization accepted malformed or ambiguous context identities | 4 | T314 | RESOLVED | `DefaultGovernanceEngine` now fails closed on unsafe action identities and duplicate or unsafe participant, seat, occupant, waitlist, or mode identities before first-match authorization; mode policy ownership remains unchanged. |
 | `LEGACY-GAP-2026-08-20-196` | Recovery snapshot ingress accepted unsafe envelope identity or negative base sequence | 4 | T315 | RESOLVED | Shared protocol snapshot identity validation and sync persistence, conflict-detection, and application checks now fail closed before mutation, planning, or projection; payload-hash, catalog, scope, and recovery ownership remain unchanged. |
+| `LEGACY-GAP-2026-08-20-197` | Snapshot-backed sync filtered non-positive events as covered by the snapshot base | 4 | T316 | RESOLVED | `BasicConflictDetector` and `BasicSnapshotApplier` now reject non-positive event sequences before snapshot-suffix filtering; full-window and replay sequence contracts remain unchanged. |
 
 ## Status Definitions
 
