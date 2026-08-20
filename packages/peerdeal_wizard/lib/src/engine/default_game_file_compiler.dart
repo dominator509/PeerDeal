@@ -26,8 +26,9 @@ class DefaultGameFileCompiler implements GameFileCompiler {
   @override
   GameFileCompileResult tryCompile(ValidatedSetupPlan plan) {
     if (!plan.buildReady || !plan.validationResult.isValid) {
-      final errors = _validationMessageOverflow(plan)
-          ? const <String>[WizardResultCodes.validationMessageCountTooLarge]
+      final validationMessageError = _validationMessageError(plan);
+      final errors = validationMessageError != null
+          ? <String>[validationMessageError]
           : plan.validationResult.errors.isEmpty
           ? const <String>['setup_plan_not_build_ready']
           : plan.validationResult.errors;
@@ -107,11 +108,9 @@ class DefaultGameFileCompiler implements GameFileCompiler {
     )) {
       errors.add(WizardResultCodes.presetIdsInvalid);
     }
-    if (plan.validationResult.errors.length >
-            WizardInputLimits.defaultMaxValidationMessages ||
-        plan.validationResult.warnings.length >
-            WizardInputLimits.defaultMaxValidationMessages) {
-      errors.add(WizardResultCodes.validationMessageCountTooLarge);
+    final validationMessageError = _validationMessageError(plan);
+    if (validationMessageError != null) {
+      errors.add(validationMessageError);
     }
 
     return List<String>.unmodifiable(errors);
@@ -160,8 +159,23 @@ class DefaultGameFileCompiler implements GameFileCompiler {
             WizardInputLimits.defaultMaxValidationMessages;
   }
 
-  List<String> _safeWarnings(ValidatedSetupPlan plan) {
+  String? _validationMessageError(ValidatedSetupPlan plan) {
     if (_validationMessageOverflow(plan)) {
+      return WizardResultCodes.validationMessageCountTooLarge;
+    }
+    if (plan.validationResult.errors.any(
+          (message) => !_isSafeMetadataText(message),
+        ) ||
+        plan.validationResult.warnings.any(
+          (message) => !_isSafeMetadataText(message),
+        )) {
+      return WizardResultCodes.validationMessagesInvalid;
+    }
+    return null;
+  }
+
+  List<String> _safeWarnings(ValidatedSetupPlan plan) {
+    if (_validationMessageError(plan) != null) {
       return const <String>[];
     }
     return List<String>.unmodifiable(plan.validationResult.warnings);

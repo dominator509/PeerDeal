@@ -132,6 +132,9 @@ Direct drafts with unsafe applied preset IDs are rejected before becoming
 build-ready; the compiler repeats the same check.
 Preset merging also rejects unsafe layer IDs and preserves supplied order when
 priorities are equal.
+Compiler validation diagnostics must be bounded, nonblank, unpadded, and
+control-free; invalid or oversized diagnostics fail closed with a stable
+`ERR_WIZARD_*` code and are not returned verbatim.
 
 ## App Route Surface
 

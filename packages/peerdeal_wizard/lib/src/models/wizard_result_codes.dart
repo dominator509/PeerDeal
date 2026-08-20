@@ -12,6 +12,8 @@ abstract final class WizardResultCodes {
   static const planIdInvalid = 'ERR_WIZARD_PLAN_ID_INVALID';
   static const validationMessageCountTooLarge =
       'ERR_WIZARD_VALIDATION_MESSAGE_COUNT';
+  static const validationMessagesInvalid =
+      'ERR_WIZARD_VALIDATION_MESSAGES_INVALID';
   static const presetValuesInvalid = 'ERR_WIZARD_PRESET_VALUES_INVALID';
   static const partialSettingsInvalid = 'ERR_WIZARD_PARTIAL_SETTINGS_INVALID';
   static const helperSuggestionInvalid = 'ERR_WIZARD_HELPER_SUGGESTION_INVALID';

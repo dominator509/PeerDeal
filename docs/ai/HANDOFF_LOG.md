@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Bound Wizard Validation Diagnostics
+
+Summary:
+- `DefaultGameFileCompiler` now rejects unsafe or oversized validation
+  diagnostics with stable wizard result codes.
+- Rejected compile results and successful Game Files no longer expose invalid
+  diagnostic text; the existing compiler and protocol boundaries remain.
+
+Files:
+- `packages/peerdeal_wizard/lib/src/engine/default_game_file_compiler.dart`
+- `packages/peerdeal_wizard/lib/src/models/wizard_result_codes.dart`
+- `packages/peerdeal_wizard/test/game_file_compiler_test.dart`
+- `packages/peerdeal_wizard/README.md`
+
+Verification:
+- `peerdeal_wizard` analysis passed.
+- Full `peerdeal_wizard` suite passed: 39 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned Game File source policy, session/database wiring, native/device
+  validation, authentication/replay contracts, signing, and final UX remain
+  separate readiness gates.
+
 ### 2026-08-20 - Codex - Harden Deterministic Preset Merging
 
 Summary:

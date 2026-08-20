@@ -54,3 +54,6 @@ are present.
   references fail closed.
 - Preset resolution and direct Game File compilation apply bounded collection
   and canonical JSON checks, failing closed with stable `ERR_WIZARD_*` codes.
+- Direct Game File compilation also rejects unsafe or oversized validation
+  diagnostics and never returns their original text through the compile result
+  or compiled Game File.

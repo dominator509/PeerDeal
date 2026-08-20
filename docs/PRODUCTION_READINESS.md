@@ -3244,6 +3244,10 @@ Direct preset merging also rejects unsafe layer IDs and preserves supplied
 layer order for equal priorities, making conflict resolution deterministic
 without changing the existing priority-based merge policy.
 
+The Game File compiler now rejects oversized, blank, padded, or control-bearing
+validation diagnostics with stable wizard result codes and suppresses their
+original values from rejected results and compiled Game Files.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

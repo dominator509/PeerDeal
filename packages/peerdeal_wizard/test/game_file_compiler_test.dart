@@ -238,6 +238,59 @@ void main() {
       expect(result.errors, contains(WizardResultCodes.policyProfilesInvalid));
     });
 
+    test('tryCompile rejects unsafe validation diagnostics', () {
+      const compiler = DefaultGameFileCompiler();
+      final plan = ValidatedSetupPlan(
+        planId: 'plan_unsafe_diagnostics',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
+        policyProfileIds: const <String, String>{
+          'privacy_profile': 'privacy.default',
+          'capture_profile': 'capture.protected',
+          'network_profile': 'network.hybrid_default',
+          'retention_profile': 'retention.standard',
+        },
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        validationResult: ValidationResult(
+          isValid: true,
+          warnings: <String>['\u0000sensitive diagnostic'],
+        ),
+        buildReady: true,
+      );
+
+      final result = compiler.tryCompile(plan);
+
+      expect(result.isCompiled, isFalse);
+      expect(result.errors, [WizardResultCodes.validationMessagesInvalid]);
+      expect(result.warnings, isEmpty);
+      expect(result.errors, isNot(contains(contains('sensitive'))));
+    });
+
+    test('tryCompile scrubs unsafe diagnostics on rejected plans', () {
+      const compiler = DefaultGameFileCompiler();
+      final plan = ValidatedSetupPlan(
+        planId: 'plan_rejected_diagnostics',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        createdBy: 'host_demo',
+        policyProfileIds: const <String, String>{},
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        validationResult: ValidationResult(
+          isValid: false,
+          errors: <String>['\u0000sensitive error'],
+          warnings: <String>[' padded warning '],
+        ),
+        buildReady: false,
+      );
+
+      final result = compiler.tryCompile(plan);
+
+      expect(result.isCompiled, isFalse);
+      expect(result.errors, [WizardResultCodes.validationMessagesInvalid]);
+      expect(result.warnings, isEmpty);
+    });
+
     test('tryCompile rejects build-ready unsupported variant plan', () {
       const compiler = DefaultGameFileCompiler();
       final plan = ValidatedSetupPlan(
