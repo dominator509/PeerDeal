@@ -1829,6 +1829,12 @@ and 256 waitlist entries. Oversized collections and waitlist growth at
 capacity fail closed with `ERR_GOVERNANCE_PARTICIPANT_COUNT`,
 `ERR_GOVERNANCE_SEAT_COUNT`, or `ERR_GOVERNANCE_WAITLIST_COUNT`.
 
+The T314 follow-up closes the direct mode-governance identity gap.
+`DefaultGovernanceEngine` now rejects malformed action identities and fails
+closed on duplicate or unsafe participant, seat, occupant, waitlist, or mode
+identities before first-match authorization. Existing mode role, seat, and
+waitlist policy ownership remains unchanged.
+
 The T126 follow-up closes the direct wizard materialization gap.
 `DefaultPresetResolver` now bounds preset layers, per-layer and merged values,
 conflicts, helper suggestions, partial settings, ambiguities, and resolved

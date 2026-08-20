@@ -36,6 +36,9 @@ app orchestration.
   than accepting any pending seat in the context.
 - Reject, remove, and session-ban actions now return their actual terminal
   participant states, and terminal participants cannot be re-admitted.
+- Governance rejects malformed action identities and fails closed on duplicate
+  or unsafe participant, seat, occupant, waitlist, or mode identities before
+  first-match authorization.
 - Co-host grant and revoke decisions now return explicit next role values and
   reject unauthorized or invalid role transitions.
 - Waitlist promotion is deterministic: only a waitlisted participant at the head

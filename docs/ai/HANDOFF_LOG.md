@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Governance Identity Boundary
+
+Summary:
+- `DefaultGovernanceEngine` now rejects malformed action identities and fails
+  closed on duplicate or unsafe context identities before first-match lookup.
+- Existing mode role, seat, and waitlist policy decisions remain unchanged.
+
+Files:
+- `packages/peerdeal_modes/lib/src/models/mode_input_limits.dart`
+- `packages/peerdeal_modes/lib/src/governance/default_governance_engine.dart`
+- `packages/peerdeal_modes/lib/src/governance/governance_result.dart`
+- `packages/peerdeal_modes/test/governance_engine_test.dart`
+
+Verification:
+- `peerdeal_modes` analysis passed.
+- Full package-local mode suite passed: 37 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Validate Bootstrap Resolution Scope
 
 Summary:

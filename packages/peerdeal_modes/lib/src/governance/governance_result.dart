@@ -24,4 +24,7 @@ class GovernanceResultCodes {
   static const errParticipantCountTooLarge = 'ERR_GOVERNANCE_PARTICIPANT_COUNT';
   static const errSeatCountTooLarge = 'ERR_GOVERNANCE_SEAT_COUNT';
   static const errWaitlistCountTooLarge = 'ERR_GOVERNANCE_WAITLIST_COUNT';
+  static const errContextInvalid = 'ERR_GOVERNANCE_CONTEXT_INVALID';
+  static const errActionIdentityInvalid =
+      'ERR_GOVERNANCE_ACTION_IDENTITY_INVALID';
 }

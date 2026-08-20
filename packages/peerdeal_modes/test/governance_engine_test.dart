@@ -867,5 +867,68 @@ void main() {
         GovernanceResultCodes.errWaitlistPromotionUnavailable,
       );
     });
+
+    test('fails closed on malformed action identities', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.admitParticipant,
+          actorId: 'host_1\nsecret',
+          subjectId: 'host_1',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(
+        decision.resultCode,
+        GovernanceResultCodes.errActionIdentityInvalid,
+      );
+    });
+
+    test('fails closed on ambiguous governance context identities', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.admittedUnseated,
+            waitlistState: WaitlistState.notWaitlisted,
+          ),
+        ],
+        seats: const [],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.admitParticipant,
+          actorId: 'host_1',
+          subjectId: 'host_1',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errContextInvalid);
+    });
   });
 }

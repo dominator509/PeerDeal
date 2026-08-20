@@ -26,7 +26,7 @@ class DefaultGovernanceEngine implements GovernanceEngine {
     required GovernanceAction action,
   }) {
     _validateConfiguration();
-    final inputError = _inputLimitError(context);
+    final inputError = _inputError(context, action);
     if (inputError != null) {
       return GovernanceDecision.deny(inputError);
     }
@@ -370,7 +370,7 @@ class DefaultGovernanceEngine implements GovernanceEngine {
     return actor != null && actor.participantId == subject.participantId;
   }
 
-  String? _inputLimitError(GovernanceContext context) {
+  String? _inputError(GovernanceContext context, GovernanceAction action) {
     if (context.participants.length > maxParticipants) {
       return GovernanceResultCodes.errParticipantCountTooLarge;
     }
@@ -380,7 +380,46 @@ class DefaultGovernanceEngine implements GovernanceEngine {
     if (context.waitlistOrdering.length > maxWaitlistEntries) {
       return GovernanceResultCodes.errWaitlistCountTooLarge;
     }
+    if (!_isValidContext(context)) {
+      return GovernanceResultCodes.errContextInvalid;
+    }
+    if (!ModeInputLimits.isSafeIdentity(action.actorId) ||
+        !ModeInputLimits.isSafeIdentity(action.subjectId)) {
+      return GovernanceResultCodes.errActionIdentityInvalid;
+    }
     return null;
+  }
+
+  bool _isValidContext(GovernanceContext context) {
+    if (!ModeInputLimits.isSafeIdentity(context.modeId)) return false;
+
+    final participantIds = <String>{};
+    for (final participant in context.participants) {
+      if (!ModeInputLimits.isSafeIdentity(participant.participantId) ||
+          !participantIds.add(participant.participantId) ||
+          (participant.seatIndex != null && participant.seatIndex! < 0)) {
+        return false;
+      }
+    }
+
+    final seatIndexes = <int>{};
+    for (final seat in context.seats) {
+      if (seat.seatIndex < 0 ||
+          !seatIndexes.add(seat.seatIndex) ||
+          (seat.occupantId != null &&
+              !ModeInputLimits.isSafeIdentity(seat.occupantId!))) {
+        return false;
+      }
+    }
+
+    final waitlistIds = <String>{};
+    for (final participantId in context.waitlistOrdering) {
+      if (!ModeInputLimits.isSafeIdentity(participantId) ||
+          !waitlistIds.add(participantId)) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

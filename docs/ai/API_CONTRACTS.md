@@ -111,6 +111,12 @@ construction. `GovernanceDecision` snapshots its next waitlist ordering and
 notes, and `ValidationResult` snapshots warnings and errors. These public
 collections are read-only views and must not be mutated by callers.
 
+Before authorization lookup, `DefaultGovernanceEngine` rejects malformed actor
+or subject identities with `ERR_GOVERNANCE_ACTION_IDENTITY_INVALID`. Duplicate
+or unsafe mode, participant, seat, occupant, or waitlist identities fail closed
+with `ERR_GOVERNANCE_CONTEXT_INVALID`; existing role, seat, and waitlist policy
+decisions are unchanged.
+
 ## Wizard Setup
 
 `DefaultPresetResolver` rejects oversized preset layers, per-layer values,
