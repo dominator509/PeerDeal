@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Normalize Unavailable Transport Receive Frames
+
+Summary:
+- The generic native transport receive decoder now discards decoded frames
+  whenever the native payload reports `available: false`.
+- The existing channel fields, native hosts, transport negotiation, and package
+  ownership remain unchanged.
+
+Files:
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- Production-readiness note.
+
+Verification:
+- `dart analyze packages/peerdeal_native_bridges` passed.
+- `dart format` passed for the changed Dart files.
+- The plain Dart test runner cannot execute this Flutter package because its
+  public barrel imports `dart:ui`; no test pass is claimed. The focused Flutter
+  runner remains subject to the existing startup stall.
+
+Remaining:
+- Native/device reachability, transport authentication/replay, product state
+  and database wiring, provider proof semantics, release signing, and final UX
+  remain separate gates.
+
 ### 2026-08-20 - Codex - Normalize Unavailable Transport Capability Limits
 
 Summary:

@@ -89,13 +89,16 @@ class NativeTransportChannelContract {
       );
     }
 
-    final frames = framePayloads
-        .map(_decodeFrame)
-        .whereType<NativeTransportFrame>()
-        .toList(growable: false);
+    final available = _boolValue(payload['available']);
+    final frames = available
+        ? framePayloads
+              .map(_decodeFrame)
+              .whereType<NativeTransportFrame>()
+              .toList(growable: false)
+        : const <NativeTransportFrame>[];
 
     return NativeTransportReceiveSnapshot(
-      available: _boolValue(payload['available']),
+      available: available,
       frames: frames,
       warning: _boundedStringValue(
         payload['warning'],

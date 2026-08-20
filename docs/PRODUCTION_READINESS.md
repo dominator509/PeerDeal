@@ -3194,6 +3194,11 @@ payload ceiling when the native transport is unavailable, keeping the decoded
 model aligned with its existing unavailable state without changing channel
 fields or transport negotiation.
 
+The same generic receive decoder now discards any decoded frames when the
+native transport reports `available: false`, preventing malformed unavailable
+payloads from exposing stale transport data through the app boundary. Channel
+fields, native hosts, and transport negotiation remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

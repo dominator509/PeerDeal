@@ -737,6 +737,26 @@ void main() {
     expect(capability.maxPayloadBytes, 0);
   });
 
+  test('unavailable native transport discards reported receive frames', () {
+    final snapshot = NativeTransportChannelContract.decodeReceiveSnapshot(
+      const <String, Object?>{
+        'available': false,
+        'frames': <Object?>[
+          <String, Object?>{
+            'sessionId': 'session_1',
+            'senderPeerId': 'peer_a',
+            'recipientPeerId': 'peer_b',
+            'sequence': 1,
+            'payloadBytes': <int>[1, 2, 3],
+          },
+        ],
+      },
+    );
+
+    expect(snapshot.available, isFalse);
+    expect(snapshot.frames, isEmpty);
+  });
+
   test('native transport channel contract tolerates malformed fields', () {
     final capability = NativeTransportChannelContract.decodeCapability(
       const <String, Object?>{
