@@ -3236,6 +3236,10 @@ fail closed when a requested layer is missing or ambiguous. This closes a
 wizard input-selection gap without changing preset merge policy or package
 ownership.
 
+The same resolver now rejects unsafe applied preset IDs while validating direct
+drafts, before they can become build-ready. The existing Game File compiler
+continues to repeat this check at its output boundary.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

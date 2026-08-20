@@ -39,6 +39,9 @@ are present.
 - `DefaultGameFileCompiler.tryCompile(...)` rechecks build-ready mode and
   variant support plus non-empty plan identity, so manually constructed plans
   cannot bypass resolver validation.
+- `DefaultPresetResolver.validateDraft(...)` rejects unsafe applied preset IDs
+  before a draft is considered build-ready; the compiler repeats this check at
+  its own output boundary.
 - Resolver output carries the pseudonymous creator and applied preset IDs into
   the compiled Game File; the compiler emits the complete protocol-shaped
   object with the current protocol version and validates it against the locked

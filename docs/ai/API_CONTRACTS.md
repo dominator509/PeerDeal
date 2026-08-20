@@ -128,6 +128,8 @@ unsupported values fail closed with stable `ERR_WIZARD_*` result codes. Empty
 `SetupIntent.presetRefs` preserves the existing all-supplied-layer behavior;
 nonempty references select exactly one matching layer per safe, unique
 reference, and missing or invalid references fail closed.
+Direct drafts with unsafe applied preset IDs are rejected before becoming
+build-ready; the compiler repeats the same check.
 
 ## App Route Surface
 

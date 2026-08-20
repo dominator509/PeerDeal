@@ -204,6 +204,10 @@ class DefaultPresetResolver implements PresetResolver {
     }
     if (draft.appliedPresetIds.length > maxPresetLayers) {
       errors.add(WizardResultCodes.presetLayerCountTooLarge);
+    } else if (draft.appliedPresetIds.any(
+      (presetId) => !_isSafePresetId(presetId),
+    )) {
+      errors.add(WizardResultCodes.presetIdsInvalid);
     }
     if (draft.helperApplied.length > maxHelperSuggestions) {
       errors.add(WizardResultCodes.helperSuggestionCountTooLarge);

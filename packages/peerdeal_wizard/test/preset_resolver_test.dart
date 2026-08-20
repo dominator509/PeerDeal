@@ -303,6 +303,25 @@ void main() {
       ]);
     });
 
+    test('rejects unsafe applied preset IDs before Game File compilation', () {
+      const resolver = DefaultPresetResolver();
+      final draft = ResolvedSetupDraft(
+        intentId: 'intent_unsafe_preset_id',
+        modeId: 'open_table',
+        variantId: 'holdem_nlhe',
+        resolvedFields: <String, Object?>{'seat_count': 6},
+        appliedPresetIds: <String>[' builtin_open_table'],
+      );
+
+      final result = resolver.validateDraft(draft);
+
+      expect(result.buildReady, isFalse);
+      expect(
+        result.validationResult.errors,
+        contains(WizardResultCodes.presetIdsInvalid),
+      );
+    });
+
     test('accepts supported Holdem variant draft', () {
       const resolver = DefaultPresetResolver();
       final draft = ResolvedSetupDraft(

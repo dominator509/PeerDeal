@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Validate Wizard Draft Preset IDs
+
+Summary:
+- `DefaultPresetResolver.validateDraft(...)` now rejects padded,
+  control-bearing, or otherwise unsafe applied preset IDs before marking a
+  draft build-ready.
+- The existing compiler check remains as a second output boundary; no wizard
+  model or package contract changed.
+
+Files:
+- `packages/peerdeal_wizard/lib/src/engine/default_preset_resolver.dart`
+- `packages/peerdeal_wizard/test/preset_resolver_test.dart`
+- `packages/peerdeal_wizard/README.md`
+
+Verification:
+- `peerdeal_wizard` analysis passed.
+- Full `peerdeal_wizard` suite passed: 35 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned Game File source policy, session/database wiring, native/device
+  validation, authentication/replay contracts, signing, and final UX remain
+  separate readiness gates.
+
 ### 2026-08-20 - Codex - Honor Explicit Wizard Preset References
 
 Summary:
