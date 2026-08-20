@@ -2,6 +2,30 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Direct Showdown Result Projection
+
+Summary:
+- `ShowdownEvaluationResult` now rejects negative or duplicate result seats,
+  negative rank indexes, and unsafe summaries before winner grouping or pot
+  projection.
+- Invalid direct results return stable projection warnings and cannot become
+  settlement winners; the existing variant/core boundary is unchanged.
+
+Files:
+- `packages/peerdeal_variants/lib/src/contracts/showdown_models.dart`
+- `packages/peerdeal_variants/test/holdem_adapter_test.dart`
+
+Verification:
+- `peerdeal_variants` analysis passed.
+- Focused showdown adapter suite passed: 25 tests.
+- Full package-local variant suite passed: 184 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Validate Hold'em Showdown Seat Identities
 
 Summary:

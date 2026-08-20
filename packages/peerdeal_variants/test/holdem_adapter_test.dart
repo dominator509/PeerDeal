@@ -662,6 +662,89 @@ void main() {
       },
     );
 
+    test('showdown projection fails closed on malformed direct results', () {
+      final result = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[],
+      );
+      final malformed = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[
+          const RankedShowdownResult(
+            seat: -1,
+            rankIndex: 0,
+            summary: 'invalid seat',
+          ),
+        ],
+      );
+      final invalidRank = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[
+          const RankedShowdownResult(
+            seat: 1,
+            rankIndex: -1,
+            summary: 'invalid rank',
+          ),
+        ],
+      );
+
+      expect(result.winnerGroups, isEmpty);
+      expect(malformed.winnerGroups, isEmpty);
+      final projection = malformed.projectContestedSeatIdsBySliceIndex(
+        contestedSeatIdsBySliceIndex: const <int, List<String>>{
+          0: <String>['seat-1'],
+        },
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(projection.winningSeatIdsBySliceIndex, isEmpty);
+      expect(projection.warnings, <String>[
+        'ERR_HOLDEM_SHOWDOWN_SEAT_ID_INVALID',
+      ]);
+      expect(projection.hasUnawardableSlices, isTrue);
+      expect(
+        invalidRank
+            .projectContestedSeatIdsBySliceIndex(
+              contestedSeatIdsBySliceIndex: const <int, List<String>>{
+                0: <String>['seat-1'],
+              },
+              seatForId: _seatFromSeatId,
+            )
+            .warnings,
+        <String>['ERR_HOLDEM_SHOWDOWN_RANK_INDEX_INVALID'],
+      );
+    });
+
+    test('showdown projection rejects duplicate seats and unsafe summaries', () {
+      final duplicateSeats = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[
+          const RankedShowdownResult(seat: 1, rankIndex: 0, summary: 'winner'),
+          const RankedShowdownResult(seat: 1, rankIndex: 1, summary: 'runner'),
+        ],
+      );
+      final unsafeSummary = ShowdownEvaluationResult(
+        results: <RankedShowdownResult>[
+          const RankedShowdownResult(seat: 1, rankIndex: 0, summary: ' winner'),
+        ],
+      );
+
+      expect(
+        duplicateSeats.projectContestedSeatIdsBySliceIndex(
+          contestedSeatIdsBySliceIndex: const <int, List<String>>{
+            0: <String>['seat-1'],
+          },
+          seatForId: _seatFromSeatId,
+        ).warnings,
+        <String>['ERR_HOLDEM_SHOWDOWN_SEAT_ID_DUPLICATE'],
+      );
+      expect(
+        unsafeSummary.projectContestedSeatIdsBySliceIndex(
+          contestedSeatIdsBySliceIndex: const <int, List<String>>{
+            0: <String>['seat-1'],
+          },
+          seatForId: _seatFromSeatId,
+        ).warnings,
+        <String>['ERR_HOLDEM_SHOWDOWN_SUMMARY_INVALID'],
+      );
+    });
+
     test('showdown projection fails closed on oversized slice collections', () {
       final result = adapter.evaluate(
         ShowdownEvaluationInput(

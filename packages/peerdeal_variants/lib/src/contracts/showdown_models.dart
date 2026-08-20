@@ -85,7 +85,7 @@ class ShowdownEvaluationResult {
   List<ShowdownWinnerGroup> get winnerGroups {
     if (warnings.isNotEmpty ||
         results.isEmpty ||
-        results.length > HoldemInputLimits.defaultMaxShowdownResults) {
+        _resultInputWarning() != null) {
       return const <ShowdownWinnerGroup>[];
     }
 
@@ -110,7 +110,7 @@ class ShowdownEvaluationResult {
   }) {
     if (warnings.isNotEmpty ||
         results.isEmpty ||
-        results.length > HoldemInputLimits.defaultMaxShowdownResults ||
+        _resultInputWarning() != null ||
         eligibleSeatsBySliceIndex.length >
             HoldemInputLimits.defaultMaxPotSlices ||
         eligibleSeatsBySliceIndex.values.any(
@@ -221,8 +221,9 @@ class ShowdownEvaluationResult {
   String? _projectionInputWarning(
     Map<int, List<String>> contestedSeatIdsBySliceIndex,
   ) {
-    if (results.length > HoldemInputLimits.defaultMaxShowdownResults) {
-      return 'ERR_HOLDEM_SHOWDOWN_RESULT_COUNT';
+    final resultWarning = _resultInputWarning();
+    if (resultWarning != null) {
+      return resultWarning;
     }
     if (contestedSeatIdsBySliceIndex.length >
         HoldemInputLimits.defaultMaxPotSlices) {
@@ -235,6 +236,38 @@ class ShowdownEvaluationResult {
     }
     return null;
   }
+
+  String? _resultInputWarning() {
+    if (results.length > HoldemInputLimits.defaultMaxShowdownResults) {
+      return 'ERR_HOLDEM_SHOWDOWN_RESULT_COUNT';
+    }
+
+    final seats = <int>{};
+    for (final result in results) {
+      if (result.seat < 0) {
+        return 'ERR_HOLDEM_SHOWDOWN_SEAT_ID_INVALID';
+      }
+      if (!seats.add(result.seat)) {
+        return 'ERR_HOLDEM_SHOWDOWN_SEAT_ID_DUPLICATE';
+      }
+      if (result.rankIndex < 0) {
+        return 'ERR_HOLDEM_SHOWDOWN_RANK_INDEX_INVALID';
+      }
+      if (!_isSafeText(result.summary)) {
+        return 'ERR_HOLDEM_SHOWDOWN_SUMMARY_INVALID';
+      }
+    }
+    return null;
+  }
+}
+
+bool _isSafeText(String value) {
+  return value.trim().isNotEmpty &&
+      value.trim() == value &&
+      HoldemInputLimits.isWithinTextLimit(value) &&
+      value.codeUnits.every(
+        (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
+      );
 }
 
 String _defaultSeatIdFor(int seat) => seat.toString();

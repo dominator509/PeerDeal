@@ -63,8 +63,10 @@ side-pot construction on both contested and uncontested paths, returning
 `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`.
 
 Direct winner projection also bounds result windows, slice maps, and contested
-seat-ID lists to nine entries. Overflow returns explicit projection warnings
-and blocks settlement rather than materializing unbounded caller collections.
+seat-ID lists to nine entries. It rejects negative or duplicate ranked seats,
+negative rank indexes, and unsafe summaries. Overflow or malformed results
+return explicit projection warnings and block settlement rather than
+materializing unsafe caller collections.
 
 ## Hold'em action application
 `HoldemBlindPostingCoordinator.postBlinds(...)` is the deterministic

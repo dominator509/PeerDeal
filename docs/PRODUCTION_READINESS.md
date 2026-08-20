@@ -3257,6 +3257,11 @@ Direct Hold'em showdown evaluation now also rejects negative or duplicate seat
 numbers before ranking or winner projection, matching the existing variant hand
 state invariant without changing the adapter boundary.
 
+Direct `ShowdownEvaluationResult` projection now applies the same fail-closed
+boundary to caller-supplied ranked results: negative or duplicate seats,
+negative rank indexes, and unsafe summaries cannot be grouped or projected
+into settlement winners.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

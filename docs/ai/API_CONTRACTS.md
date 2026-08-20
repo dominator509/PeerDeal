@@ -481,7 +481,12 @@ pot-slice maps, and contested seat-ID lists use the shared nine-seat Hold'em
 limits. Overflow returns projection warnings
 `ERR_HOLDEM_SHOWDOWN_RESULT_COUNT`, `ERR_HOLDEM_SHOWDOWN_SLICE_COUNT`, or
 `ERR_HOLDEM_SHOWDOWN_SLICE_SEAT_COUNT`; settlement propagates those warnings as
-a blocked result.
+a blocked result. Direct ranked-result projections also fail closed for
+negative or duplicate seat numbers, negative rank indexes, or unsafe summaries
+with `ERR_HOLDEM_SHOWDOWN_SEAT_ID_INVALID`,
+`ERR_HOLDEM_SHOWDOWN_SEAT_ID_DUPLICATE`,
+`ERR_HOLDEM_SHOWDOWN_RANK_INDEX_INVALID`, or
+`ERR_HOLDEM_SHOWDOWN_SUMMARY_INVALID`.
 
 `peerdeal_core` applies variant-agnostic settlement bounds before side-pot or
 award traversal: 64 commitments, 64 winning slice-map entries, and 64 winners
