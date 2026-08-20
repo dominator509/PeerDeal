@@ -1,3 +1,4 @@
+import '../serialization/canonical_json.dart';
 import '../serialization/canonical_json_limits.dart';
 
 class InvitePayloadSchema {
@@ -33,6 +34,12 @@ class InvitePayloadSchema {
 
   List<String> validate(Map<String, Object?> input) {
     final errors = <String>[];
+
+    try {
+      canonicalJsonEncode(input);
+    } on Object {
+      errors.add('Invite payload exceeds canonical protocol limits');
+    }
 
     for (final key in requiredKeys) {
       if (!input.containsKey(key)) {

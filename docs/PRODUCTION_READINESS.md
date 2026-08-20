@@ -3225,6 +3225,10 @@ object shapes, and the required variant identifier type before callers rely on
 fixture or compiler acceptance. Unsupported protocol versions remain the
 existing `ProtocolCatalog` responsibility.
 
+`InvitePayloadSchema` now applies the existing bounded canonical JSON encoder to
+the whole payload before accepting required-field validation, so unsupported
+nested values fail at the protocol boundary instead of during later encoding.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

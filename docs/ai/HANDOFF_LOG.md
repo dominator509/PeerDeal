@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Validate Complete Invite Payloads
+
+Summary:
+- `InvitePayloadSchema` now runs the full payload through the existing bounded
+  canonical JSON encoder before accepting required fields, preventing unsupported
+  nested values from reaching later serialization.
+- Invite field validation, catalog compatibility, and package ownership remain
+  unchanged.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/schemas/invite_payload_schema.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- Protocol README and readiness records.
+
+Verification:
+- `peerdeal_protocol` analysis passed.
+- Full protocol suite passed: 71 tests.
+
+Remaining:
+- Product-owned invite/session authorization, persistence, native/device
+  validation, authentication/replay contracts, signing, and final UX remain
+  separate readiness gates.
+
 ### 2026-08-20 - Codex - Harden Game File Schema Shape Validation
 
 Summary:

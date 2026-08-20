@@ -208,6 +208,19 @@ void main() {
     expect(errors, isEmpty);
   });
 
+  test('invite payload rejects unsupported canonical values', () {
+    final decoded = fixtureJson(
+      'fixtures/invites/open_table_player_invite_v1.json',
+    )..['extension'] = Object();
+
+    final errors = InvitePayloadSchema().validate(decoded);
+
+    expect(
+      errors,
+      contains('Invite payload exceeds canonical protocol limits'),
+    );
+  });
+
   test('invite payload rejects unsafe or non-text required fields', () {
     final decoded =
         fixtureJson('fixtures/invites/open_table_player_invite_v1.json')

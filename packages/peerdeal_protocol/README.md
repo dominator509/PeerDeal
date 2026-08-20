@@ -22,6 +22,8 @@ Owns:
 - invite payload public schema contract
 - invite payload field-type, safe-text, and mode-value validation; required
   text rejects blank, padded, and C0/C1-control-bearing values
+- invite payloads also pass bounded canonical JSON validation before schema
+  acceptance
 - accepted and rejected protocol fixtures
 - envelope payload trees, custom catalog entries, and catalog lock errors are
   defensively copied and recursively frozen at construction
