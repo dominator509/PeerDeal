@@ -2,6 +2,46 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Receipt Export Authorization and Provider Proof Verification
+
+Summary:
+- The generic crypto verification engine no longer treats a non-null provider
+  proof bundle as verified. It now requires the provider-owned
+  `DealProofVerifier` seam and fails closed on missing, rejected, or throwing
+  verification.
+- Receipt export now requires an explicit `ReceiptAuthorizationRequest` and
+  invokes the existing receipt authorizer before encoding. Missing, denied, or
+  failed authorization returns an unavailable artifact.
+- Mirrored mobile and desktop receipt factories, routes, runtimes, and focused
+  tests carry the optional product-owned authorization request. No caller
+  identity is copied from receipt fields, and generic native bridges remain
+  receipt-agnostic.
+
+Files:
+- `packages/peerdeal_crypto/lib/src/contracts/deal_proof_verifier.dart`
+- `packages/peerdeal_crypto/lib/src/services/default_verification_engine.dart`
+- `packages/peerdeal_receipts/lib/src/contracts/receipt_service.dart`
+- `packages/peerdeal_receipts/lib/src/services/default_receipt_service.dart`
+- Mirrored mobile/desktop receipt export factories, routes, runtimes, and tests.
+- `docs/PRODUCTION_READINESS.md` and this handoff log.
+
+Verification:
+- `peerdeal_receipts` analyzer clean; all 62 package tests passed.
+- Mirrored mobile and desktop package analyzers clean.
+- Direct Flutter test attempts were stopped after bounded no-output startup
+  windows; no Flutter test pass is claimed for this slice.
+- Direct Dart execution of Flutter-dependent tests is invalid because
+  `dart:ui` is unavailable outside the Flutter test runner.
+- `git diff --check` passed.
+
+Remaining:
+- Provider integrations must supply real proof verification semantics.
+- Product session/auth state must supply the caller authorization request for
+  receipt export; absent state remains fail closed.
+- Real-device/native transport and secure-key validation, release signing,
+  durable product persistence, other-platform hosts, and final UX remain
+  external or integration-owned gates.
+
 ### 2026-08-20 - Codex - Align Event Identity Ingress and Native Queue Admission
 
 Summary:

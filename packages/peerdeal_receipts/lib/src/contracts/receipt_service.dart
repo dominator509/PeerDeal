@@ -10,7 +10,10 @@ abstract class ReceiptService {
     ReceiptAuthorizationRequest request,
   );
 
-  ReceiptExportArtifact exportReceipt(PeerDealReceipt receipt);
+  ReceiptExportArtifact exportReceipt(
+    PeerDealReceipt receipt, {
+    ReceiptAuthorizationRequest? authorization,
+  });
 
   ReceiptScanResult scanReceipt(PeerDealReceipt receipt);
 }

@@ -89,6 +89,7 @@ class PeerDealDesktopRuntime {
     this.receiptPresenter,
     this.receiptArtifactVerifierFactory,
     this.receiptExportArtifact,
+    this.receiptAuthorization,
     this.receiptExportArtifactFactory,
     this.cancellableReceiptExportArtifactFactory,
     this.receiptFactory,
@@ -141,6 +142,7 @@ class PeerDealDesktopRuntime {
   final DemoReceiptSurfacePresenter? receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? receiptExportArtifact;
+  final ReceiptAuthorizationRequest? receiptAuthorization;
   final ReceiptExportArtifactBuilder? receiptExportArtifactFactory;
   final CancellableReceiptExportArtifactBuilder?
   cancellableReceiptExportArtifactFactory;
@@ -177,6 +179,7 @@ class PeerDealDesktopRuntime {
     DemoReceiptSurfacePresenter? receiptPresenter,
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
+    ReceiptAuthorizationRequest? receiptAuthorization,
     ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
     CancellableReceiptExportArtifactBuilder?
     cancellableReceiptExportArtifactFactory,
@@ -215,6 +218,7 @@ class PeerDealDesktopRuntime {
           receiptArtifactVerifierFactory ?? this.receiptArtifactVerifierFactory,
       receiptExportArtifact:
           receiptExportArtifact ?? this.receiptExportArtifact,
+      receiptAuthorization: receiptAuthorization ?? this.receiptAuthorization,
       receiptExportArtifactFactory:
           receiptExportArtifactFactory ?? this.receiptExportArtifactFactory,
       cancellableReceiptExportArtifactFactory:
@@ -279,6 +283,7 @@ class PeerDealDesktopApp extends StatefulWidget {
     DemoReceiptSurfacePresenter? presenter,
     DemoReceiptArtifactVerifierFactory? receiptArtifactVerifierFactory,
     ReceiptExportArtifact? receiptExportArtifact,
+    ReceiptAuthorizationRequest? receiptAuthorization,
     ReceiptExportArtifactBuilder? receiptExportArtifactFactory,
     CancellableReceiptExportArtifactBuilder?
     cancellableReceiptExportArtifactFactory,
@@ -314,6 +319,7 @@ class PeerDealDesktopApp extends StatefulWidget {
        _receiptPresenter = presenter,
        _receiptArtifactVerifierFactory = receiptArtifactVerifierFactory,
        _receiptExportArtifact = receiptExportArtifact,
+       _receiptAuthorization = receiptAuthorization,
        _receiptExportArtifactFactory = receiptExportArtifactFactory,
        _cancellableReceiptExportArtifactFactory =
            cancellableReceiptExportArtifactFactory,
@@ -350,6 +356,7 @@ class PeerDealDesktopApp extends StatefulWidget {
   final DemoReceiptSurfacePresenter? _receiptPresenter;
   final DemoReceiptArtifactVerifierFactory? _receiptArtifactVerifierFactory;
   final ReceiptExportArtifact? _receiptExportArtifact;
+  final ReceiptAuthorizationRequest? _receiptAuthorization;
   final ReceiptExportArtifactBuilder? _receiptExportArtifactFactory;
   final CancellableReceiptExportArtifactBuilder?
   _cancellableReceiptExportArtifactFactory;
@@ -413,6 +420,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
       receiptPresenter: widget._receiptPresenter,
       receiptArtifactVerifierFactory: widget._receiptArtifactVerifierFactory,
       receiptExportArtifact: widget._receiptExportArtifact,
+      receiptAuthorization: widget._receiptAuthorization,
       receiptExportArtifactFactory: widget._receiptExportArtifactFactory,
       cancellableReceiptExportArtifactFactory:
           widget._cancellableReceiptExportArtifactFactory,
@@ -543,6 +551,7 @@ class _PeerDealDesktopAppState extends State<PeerDealDesktopApp> {
               presenter: _receiptPresenter ?? DemoReceiptSurfacePresenter(),
               exportArtifact: _runtime.receiptExportArtifact,
               receipt: _receiptInputFor(_activeSnapshot),
+              receiptAuthorization: _runtime.receiptAuthorization,
               exportArtifactFactory: _runtime.receiptExportArtifactFactory,
               cancellableExportArtifactFactory:
                   _runtime.cancellableReceiptExportArtifactFactory,

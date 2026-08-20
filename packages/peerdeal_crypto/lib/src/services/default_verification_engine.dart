@@ -1,7 +1,9 @@
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../contracts/verification_engine.dart';
+import '../contracts/deal_proof_verifier.dart';
 import '../models/deal_proof_limits.dart';
+import '../models/deal_proof_bundle.dart';
 import '../models/verification_layer_result.dart';
 import '../models/verification_payload.dart';
 import '../models/verification_reason_code.dart';
@@ -12,9 +14,13 @@ import '../models/verification_state.dart';
 import '../models/verification_summary.dart';
 
 class DefaultVerificationEngine implements VerificationEngine {
-  const DefaultVerificationEngine({this.proofLimits = const DealProofLimits()});
+  const DefaultVerificationEngine({
+    this.proofLimits = const DealProofLimits(),
+    this.proofVerifier,
+  });
 
   final DealProofLimits proofLimits;
+  final DealProofVerifier? proofVerifier;
 
   @override
   VerificationResult verify(VerificationRequest request) {
@@ -42,7 +48,9 @@ class DefaultVerificationEngine implements VerificationEngine {
     final replayOk =
         request.expectedReplayAnchor != null &&
         request.expectedReplayAnchor!.isNotEmpty;
-    final proofOk = request.dealProofBundle != null;
+    final proofBundle = request.dealProofBundle;
+    final proofPresent = proofBundle != null;
+    final proofOk = proofPresent && _verifyProof(proofBundle);
     final settlementOk =
         request.expectedSettlementAnchor != null &&
         request.expectedSettlementAnchor!.isNotEmpty;
@@ -56,7 +64,11 @@ class DefaultVerificationEngine implements VerificationEngine {
       VerificationLayerResult(
         layerId: 'deal_provider_integrity',
         passed: proofOk,
-        reason: proofOk ? null : 'Missing deal proof bundle.',
+        reason: proofOk
+            ? null
+            : proofPresent
+            ? 'Provider proof verification failed.'
+            : 'Missing deal proof bundle.',
       ),
       VerificationLayerResult(
         layerId: 'settlement_integrity',
@@ -95,7 +107,7 @@ class DefaultVerificationEngine implements VerificationEngine {
       );
     }
 
-    if (replayOk && settlementOk && !proofOk) {
+    if (replayOk && settlementOk && !proofPresent) {
       return VerificationResult(
         state: VerificationState.partial,
         reasonCode: VerificationReasonCode.okVerificationPartial,
@@ -112,6 +124,25 @@ class DefaultVerificationEngine implements VerificationEngine {
           fairDealAnchor: request.expectedFairDealAnchor,
           settlementAnchor: request.expectedSettlementAnchor,
           warnings: <String>['Deal proof bundle missing.'],
+        ),
+      );
+    }
+
+    if (replayOk && settlementOk && proofPresent && !proofOk) {
+      return VerificationResult(
+        state: VerificationState.failed,
+        reasonCode: VerificationReasonCode.errVerificationDealProofFailed,
+        layers: layers,
+        summary: const VerificationSummary(
+          headline: 'Failed',
+          detail: 'Provider proof could not be cryptographically verified.',
+        ),
+        payload: VerificationPayload(
+          verificationLayersPassed: passed,
+          verificationLayersFailed: failed,
+          replayAnchor: request.expectedReplayAnchor,
+          fairDealAnchor: request.expectedFairDealAnchor,
+          settlementAnchor: request.expectedSettlementAnchor,
         ),
       );
     }
@@ -205,6 +236,16 @@ class DefaultVerificationEngine implements VerificationEngine {
       return false;
     }
     return true;
+  }
+
+  bool _verifyProof(DealProofBundle? proofBundle) {
+    final verifier = proofVerifier;
+    if (proofBundle == null || verifier == null) return false;
+    try {
+      return verifier.verify(proofBundle);
+    } on Object {
+      return false;
+    }
   }
 
   bool _isSafeRequiredText(String value) => _isSafeBoundedText(value, 256);

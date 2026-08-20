@@ -11,6 +11,7 @@ export 'src/models/verification_summary.dart';
 export 'src/models/verification_payload.dart';
 
 export 'src/contracts/deal_provider.dart';
+export 'src/contracts/deal_proof_verifier.dart';
 export 'src/contracts/provider_proof_normalizer.dart';
 export 'src/contracts/verification_engine.dart';
 

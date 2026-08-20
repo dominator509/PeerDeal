@@ -244,11 +244,14 @@ void main() {
             snapshot: _fixtureSnapshot('verification_receipt_review.json'),
             presenter: presenter,
             receipt: _receipt,
-            cancellableExportArtifactFactory: (receipt, {cancellation}) =>
-                factory.exportSignedEncrypted(
-                  receipt,
-                  cancellation: cancellation,
-                ),
+            receiptAuthorization: _authorization,
+            cancellableExportArtifactFactory:
+                (receipt, {cancellation, authorization}) =>
+                    factory.exportSignedEncrypted(
+                      receipt,
+                      cancellation: cancellation,
+                      authorization: authorization,
+                    ),
           ),
         ),
       );
@@ -308,7 +311,7 @@ void main() {
           presenter: presenter,
           exportArtifact: _signedArtifact,
           receipt: _receipt,
-          exportArtifactFactory: (_) async {
+          exportArtifactFactory: (_, {authorization}) async {
             exportFactoryCalled = true;
             throw StateError('conflicting export source used');
           },
@@ -488,6 +491,12 @@ const _receipt = PeerDealReceipt(
   wipeState: ReceiptWipeState.live,
   payloadHash: 'hash_77',
   opaquePayload: 'opaque_77',
+);
+
+const _authorization = ReceiptAuthorizationRequest(
+  requestedByUserId: 'user_7',
+  requestedSessionId: 'sess_77',
+  accessMode: ReceiptAccessMode.view,
 );
 
 final _signedArtifact = OpaqueExportEncoder(

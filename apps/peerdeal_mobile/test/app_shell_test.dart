@@ -199,7 +199,7 @@ void main() {
       PeerDealMobileApp(
         presenter: presenter,
         receiptExportArtifact: signedDemoReceiptArtifact(),
-        receiptExportArtifactFactory: (_) async {
+        receiptExportArtifactFactory: (_, {authorization}) async {
           exportFactoryCalled = true;
           return ReceiptExportArtifact.unavailable(
             reason: 'conflicting export source used',
@@ -270,7 +270,7 @@ void main() {
         ),
         receiptFactory: (snapshot) =>
             _receiptForSnapshot(snapshot, pseudonymousUserId: 'user_injected'),
-        receiptExportArtifactFactory: (receipt) async {
+        receiptExportArtifactFactory: (receipt, {authorization}) async {
           exportedUserId = receipt.pseudonymousUserId;
           return ReceiptExportArtifact.unavailable(
             reason: 'test artifact unavailable',
@@ -323,7 +323,7 @@ void main() {
         receiptFactory: (_) {
           throw StateError('receipt source unavailable');
         },
-        receiptExportArtifactFactory: (receipt) async {
+        receiptExportArtifactFactory: (receipt, {authorization}) async {
           exportCalled = true;
           return ReceiptExportArtifact.unavailable(
             reason: 'test artifact unavailable',

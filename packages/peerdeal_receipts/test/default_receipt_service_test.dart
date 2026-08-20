@@ -20,8 +20,36 @@ void main() {
     opaquePayload: 'opaque_77',
   );
 
-  test('exports opaque artifact with minimal metadata', () {
+  const authorization = ReceiptAuthorizationRequest(
+    requestedByUserId: 'user_7',
+    requestedSessionId: 'sess_77',
+    accessMode: ReceiptAccessMode.view,
+  );
+
+  test('requires explicit export authorization', () {
     final artifact = service.exportReceipt(receipt);
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt export authorization unavailable.');
+  });
+
+  test('rejects export authorization for another user', () {
+    final artifact = service.exportReceipt(
+      receipt,
+      authorization: const ReceiptAuthorizationRequest(
+        requestedByUserId: 'user_other',
+        requestedSessionId: 'sess_77',
+        accessMode: ReceiptAccessMode.view,
+      ),
+    );
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt export authorization denied.');
+  });
+
+  test('exports opaque artifact with minimal metadata', () {
+    final artifact = service.exportReceipt(
+      receipt,
+      authorization: authorization,
+    );
     expect(artifact.artifactType, 'file');
     expect(artifact.reason, isNull);
     expect(artifact.minimalMetadata['receipt_id'], 'r_1');
@@ -59,7 +87,10 @@ void main() {
       ),
     );
 
-    final artifact = encryptedService.exportReceipt(receipt);
+    final artifact = encryptedService.exportReceipt(
+      receipt,
+      authorization: authorization,
+    );
 
     expect(artifact.artifactType, 'encrypted_file');
     expect(artifact.minimalMetadata['encrypted'], isTrue);
@@ -98,7 +129,10 @@ void main() {
       exportEncoder: OpaqueExportEncoder(signer: signer),
     );
 
-    final artifact = signedService.exportReceipt(receipt);
+    final artifact = signedService.exportReceipt(
+      receipt,
+      authorization: authorization,
+    );
     final body = _decodeBody(artifact.encodedBody);
     final signature = body['signature'] as String;
     final payload = body['payload'] as String;
@@ -129,7 +163,10 @@ void main() {
       opaquePayload: 'opaque_99',
     );
 
-    final artifact = service.exportReceipt(malformedReceipt);
+    final artifact = service.exportReceipt(
+      malformedReceipt,
+      authorization: authorization,
+    );
     expect(artifact.artifactType, 'unavailable');
     expect(artifact.encodedBody, isEmpty);
     expect(artifact.minimalMetadata, isEmpty);
@@ -151,7 +188,10 @@ void main() {
       opaquePayload: 'opaque_88',
     );
 
-    final artifact = service.exportReceipt(wipedReceipt);
+    final artifact = service.exportReceipt(
+      wipedReceipt,
+      authorization: authorization,
+    );
     expect(artifact.artifactType, 'unavailable');
     expect(artifact.encodedBody, isEmpty);
     expect(artifact.minimalMetadata, isEmpty);
@@ -164,7 +204,10 @@ void main() {
       exportEncoder: OpaqueExportEncoder(signer: _ThrowingReceiptSigner()),
     );
 
-    final artifact = signedService.exportReceipt(receipt);
+    final artifact = signedService.exportReceipt(
+      receipt,
+      authorization: authorization,
+    );
 
     expect(artifact.artifactType, 'unavailable');
     expect(artifact.encodedBody, isEmpty);
@@ -178,7 +221,10 @@ void main() {
       exportEncoder: OpaqueExportEncoder(cipher: _ThrowingReceiptCipher()),
     );
 
-    final artifact = encryptedService.exportReceipt(receipt);
+    final artifact = encryptedService.exportReceipt(
+      receipt,
+      authorization: authorization,
+    );
 
     expect(artifact.artifactType, 'unavailable');
     expect(artifact.encodedBody, isEmpty);

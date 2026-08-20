@@ -3149,6 +3149,19 @@ and session-ban actions return their actual terminal participant states, and
 terminal participants cannot be re-admitted. Mode ownership and the existing
 governance action/decision contracts remain unchanged.
 
+The crypto verification follow-up closes a trust-by-presence gap. The generic
+verification engine now requires an injected provider-owned `DealProofVerifier`
+to mark a proof bundle verified; missing verifiers, failed verification, and
+verifier exceptions fail closed without moving provider cryptographic semantics
+into `peerdeal_crypto`. The receipt follow-up closes an export authorization
+gap: `DefaultReceiptService.exportReceipt` now requires an explicit caller
+authorization request, invokes the existing receipt authorizer, and returns an
+unavailable artifact when authorization is absent, denied, or unavailable.
+Both mirrored app shells pass the optional product-owned authorization request
+through the receipt route and native export factory without deriving caller
+identity from the receipt itself. Provider proof implementations and concrete
+product session/user authorization remain integration-owned.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

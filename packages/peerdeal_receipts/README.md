@@ -20,6 +20,8 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
 
 ## Hardened scaffold coverage
 - Receipt exports reject malformed or wiped receipts.
+- Receipt exports require an explicit caller authorization request and fail
+  closed when authorization is absent, denied, or unavailable.
 - Export artifacts minimize metadata and do not expose table identity.
 - `ReceiptCipher` and `ReceiptSigner` contracts can wrap opaque export payloads
   without moving cryptography into app shells.

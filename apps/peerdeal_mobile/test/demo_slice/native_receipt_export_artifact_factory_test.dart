@@ -9,13 +9,45 @@ import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('fails closed before key provisioning without authorization', () async {
+    final bridge = _ExportBridge();
+    final factory = _factory(bridge);
+
+    final artifact = await factory.exportSignedEncrypted(_receipt);
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt export authorization unavailable.');
+    expect(bridge.savedKeys, isEmpty);
+  });
+
+  test('fails closed before key provisioning for another user', () async {
+    final bridge = _ExportBridge();
+    final factory = _factory(bridge);
+
+    final artifact = await factory.exportSignedEncrypted(
+      _receipt,
+      authorization: const ReceiptAuthorizationRequest(
+        requestedByUserId: 'user_other',
+        requestedSessionId: 'sess_export_1',
+        accessMode: ReceiptAccessMode.view,
+      ),
+    );
+
+    expect(artifact.artifactType, 'unavailable');
+    expect(artifact.reason, 'Receipt export authorization denied.');
+    expect(bridge.savedKeys, isEmpty);
+  });
+
   test(
     'provisions native-backed keys before signed encrypted export',
     () async {
       final bridge = _ExportBridge();
       final factory = _factory(bridge);
 
-      final artifact = await factory.exportSignedEncrypted(_receipt);
+      final artifact = await factory.exportSignedEncrypted(
+        _receipt,
+        authorization: _authorization,
+      );
 
       expect(artifact.artifactType, 'encrypted_file');
       expect(artifact.reason, isNull);
@@ -72,7 +104,10 @@ void main() {
       );
       final factory = _factory(bridge);
 
-      final artifact = await factory.exportSignedEncrypted(_receipt);
+      final artifact = await factory.exportSignedEncrypted(
+        _receipt,
+        authorization: _authorization,
+      );
 
       expect(artifact.artifactType, 'encrypted_file');
       expect(bridge.savedKeys, isEmpty);
@@ -87,7 +122,10 @@ void main() {
     );
     final factory = _factory(bridge);
 
-    final artifact = await factory.exportSignedEncrypted(_receipt);
+    final artifact = await factory.exportSignedEncrypted(
+      _receipt,
+      authorization: _authorization,
+    );
 
     expect(artifact.artifactType, 'unavailable');
     expect(artifact.reason, 'Receipt key provisioning failed.');
@@ -103,7 +141,10 @@ void main() {
     );
     final factory = _factory(bridge);
 
-    final artifact = await factory.exportSignedEncrypted(_receipt);
+    final artifact = await factory.exportSignedEncrypted(
+      _receipt,
+      authorization: _authorization,
+    );
 
     expect(artifact.artifactType, 'unavailable');
     expect(artifact.reason, 'Receipt key provisioning failed.');
@@ -117,7 +158,10 @@ void main() {
       nonceFactory: () => List<int>.filled(32, 7),
     );
 
-    final artifact = await factory.exportSignedEncrypted(_receipt);
+    final artifact = await factory.exportSignedEncrypted(
+      _receipt,
+      authorization: _authorization,
+    );
 
     expect(artifact.artifactType, 'unavailable');
     expect(artifact.reason, 'Receipt key provisioning failed.');
@@ -134,6 +178,7 @@ void main() {
     final artifactFuture = factory.exportSignedEncrypted(
       _receipt,
       cancellation: cancellation.future,
+      authorization: _authorization,
     );
 
     expect(provisioner.receivedCancellation, same(cancellation.future));
@@ -157,6 +202,12 @@ const _receipt = PeerDealReceipt(
   wipeState: ReceiptWipeState.live,
   payloadHash: 'hash_export_1',
   opaquePayload: 'opaque_export_1',
+);
+
+const _authorization = ReceiptAuthorizationRequest(
+  requestedByUserId: 'user_export_1',
+  requestedSessionId: 'sess_export_1',
+  accessMode: ReceiptAccessMode.view,
 );
 
 NativeReceiptExportArtifactFactory _factory(_ExportBridge bridge) {

@@ -5,25 +5,20 @@ void main() {
   const engine = DefaultVerificationEngine();
 
   test('returns verified when all required evidence exists', () {
-    final request = VerificationRequest(
-      tableId: 'table_1',
-      sessionId: 'session_1',
-      handId: 'hand_1',
-      scope: VerificationScope.hand,
-      protocolVersion: '1.0',
-      expectedReplayAnchor: 'replay_anchor',
-      expectedFairDealAnchor: 'fair_anchor',
-      expectedSettlementAnchor: 'settle_anchor',
-      dealProofBundle: DealProofBundle(
-        providerId: 'mental_poker_toolkit',
-        providerVersion: '1.0.0',
-        proofReference: 'proof_1',
-        normalizedFields: <String, Object?>{},
-      ),
-    );
-
-    final result = engine.verify(request);
+    final result = DefaultVerificationEngine(
+      proofVerifier: const _AcceptingProofVerifier(),
+    ).verify(_requestWithProof());
     expect(result.state, VerificationState.verified);
+  });
+
+  test('does not treat a proof bundle as verified without a verifier', () {
+    final result = engine.verify(_requestWithProof());
+
+    expect(result.state, VerificationState.failed);
+    expect(
+      result.reasonCode,
+      VerificationReasonCode.errVerificationDealProofFailed,
+    );
   });
 
   test(
@@ -180,4 +175,30 @@ void main() {
       VerificationReasonCode.errVerificationDataIncomplete,
     );
   });
+}
+
+VerificationRequest _requestWithProof() {
+  return VerificationRequest(
+    tableId: 'table_1',
+    sessionId: 'session_1',
+    handId: 'hand_1',
+    scope: VerificationScope.hand,
+    protocolVersion: '1.0',
+    expectedReplayAnchor: 'replay_anchor',
+    expectedFairDealAnchor: 'fair_anchor',
+    expectedSettlementAnchor: 'settle_anchor',
+    dealProofBundle: DealProofBundle(
+      providerId: 'mental_poker_toolkit',
+      providerVersion: '1.0.0',
+      proofReference: 'proof_1',
+      normalizedFields: <String, Object?>{},
+    ),
+  );
+}
+
+class _AcceptingProofVerifier implements DealProofVerifier {
+  const _AcceptingProofVerifier();
+
+  @override
+  bool verify(DealProofBundle proofBundle) => true;
 }

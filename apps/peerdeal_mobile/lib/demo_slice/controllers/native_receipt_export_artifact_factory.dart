@@ -6,11 +6,15 @@ import 'native_receipt_key_ring_provisioner.dart';
 import 'native_receipt_key_ring_writer.dart';
 
 typedef ReceiptExportArtifactBuilder =
-    Future<ReceiptExportArtifact> Function(PeerDealReceipt receipt);
+    Future<ReceiptExportArtifact> Function(
+      PeerDealReceipt receipt, {
+      ReceiptAuthorizationRequest? authorization,
+    });
 typedef CancellableReceiptExportArtifactBuilder =
     Future<ReceiptExportArtifact> Function(
       PeerDealReceipt receipt, {
       Future<void>? cancellation,
+      ReceiptAuthorizationRequest? authorization,
     });
 
 class NativeReceiptExportArtifactFactory {
@@ -44,7 +48,24 @@ class NativeReceiptExportArtifactFactory {
   Future<ReceiptExportArtifact> exportSignedEncrypted(
     PeerDealReceipt receipt, {
     Future<void>? cancellation,
+    ReceiptAuthorizationRequest? authorization,
   }) async {
+    final request = authorization;
+    if (request == null) {
+      return ReceiptExportArtifact.unavailable(
+        reason: 'Receipt export authorization unavailable.',
+      );
+    }
+
+    final authorizationResult = const DefaultReceiptService(
+      authorizer: DefaultReceiptAuthorizer(),
+    ).authorize(receipt, request);
+    if (!authorizationResult.allowed) {
+      return ReceiptExportArtifact.unavailable(
+        reason: 'Receipt export authorization denied.',
+      );
+    }
+
     final ReceiptKeyRingProvisionResult provisionResult;
     try {
       provisionResult = await _keyRingProvisioner.ensureActiveKeys(
@@ -73,6 +94,6 @@ class NativeReceiptExportArtifactFactory {
         signer: HmacSha256ReceiptSigner(keyProvider: keyRing),
       ),
     );
-    return service.exportReceipt(receipt);
+    return service.exportReceipt(receipt, authorization: request);
   }
 }

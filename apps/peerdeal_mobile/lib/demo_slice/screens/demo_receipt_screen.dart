@@ -22,6 +22,7 @@ class DemoReceiptRoute extends StatefulWidget {
     required this.presenter,
     this.exportArtifact,
     this.receipt,
+    this.receiptAuthorization,
     this.exportArtifactFactory,
     this.cancellableExportArtifactFactory,
     this.artifactVerifier,
@@ -32,6 +33,7 @@ class DemoReceiptRoute extends StatefulWidget {
   final DemoReceiptSurfacePresenter presenter;
   final ReceiptExportArtifact? exportArtifact;
   final PeerDealReceipt? receipt;
+  final ReceiptAuthorizationRequest? receiptAuthorization;
   final ReceiptExportArtifactBuilder? exportArtifactFactory;
   final CancellableReceiptExportArtifactBuilder?
   cancellableExportArtifactFactory;
@@ -60,6 +62,7 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
         oldWidget.presenter != widget.presenter ||
         oldWidget.exportArtifact != widget.exportArtifact ||
         oldWidget.receipt != widget.receipt ||
+        oldWidget.receiptAuthorization != widget.receiptAuthorization ||
         oldWidget.exportArtifactFactory != widget.exportArtifactFactory ||
         oldWidget.cancellableExportArtifactFactory !=
             widget.cancellableExportArtifactFactory ||
@@ -172,8 +175,12 @@ class _DemoReceiptRouteState extends State<DemoReceiptRoute> {
             ? await cancellableExportFactory(
                 receipt,
                 cancellation: cancellation,
+                authorization: widget.receiptAuthorization,
               )
-            : await exportFactory!(receipt),
+            : await exportFactory!(
+                receipt,
+                authorization: widget.receiptAuthorization,
+              ),
         cancellation: cancellation,
       );
     }

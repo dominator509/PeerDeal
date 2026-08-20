@@ -25,7 +25,16 @@ class DefaultReceiptService implements ReceiptService {
   ) => _authorizer.authorize(receipt, request);
 
   @override
-  ReceiptExportArtifact exportReceipt(PeerDealReceipt receipt) {
+  ReceiptExportArtifact exportReceipt(
+    PeerDealReceipt receipt, {
+    ReceiptAuthorizationRequest? authorization,
+  }) {
+    if (authorization == null) {
+      return ReceiptExportArtifact.unavailable(
+        reason: 'Receipt export authorization unavailable.',
+      );
+    }
+
     if (!receipt.hasRequiredEnvelopeFields) {
       return ReceiptExportArtifact.unavailable(
         reason: 'Receipt envelope is malformed.',
@@ -33,8 +42,13 @@ class DefaultReceiptService implements ReceiptService {
     }
 
     if (receipt.wipeState == ReceiptWipeState.wiped) {
+      return ReceiptExportArtifact.unavailable(reason: 'Receipt unavailable.');
+    }
+
+    final authorizationResult = _authorizeForExport(receipt, authorization);
+    if (authorizationResult == null || !authorizationResult.allowed) {
       return ReceiptExportArtifact.unavailable(
-        reason: 'Receipt unavailable.',
+        reason: 'Receipt export authorization denied.',
       );
     }
 
@@ -44,6 +58,17 @@ class DefaultReceiptService implements ReceiptService {
       return ReceiptExportArtifact.unavailable(
         reason: 'Receipt export failed.',
       );
+    }
+  }
+
+  ReceiptAuthorizationResult? _authorizeForExport(
+    PeerDealReceipt receipt,
+    ReceiptAuthorizationRequest request,
+  ) {
+    try {
+      return _authorizer.authorize(receipt, request);
+    } on Object {
+      return null;
     }
   }
 
