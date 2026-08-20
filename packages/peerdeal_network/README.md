@@ -36,6 +36,8 @@ score, and recover network paths without owning game truth.
   `relayFallback`/`relay` compatibility names.
 - Bootstrap candidate resolution drops blank, padded, control-character-bearing,
   or duplicate peer ids before assigning route class and priority.
+- Bootstrap candidate resolution fails closed when its session or table scope
+  identities are blank, padded, oversized, malformed UTF-8, or control-bearing.
 - Direct network services bound peer IDs to 32, candidates to 32, and peer
   metrics to 64 before materialization; overflow fails closed without traversing
   an unbounded caller collection.

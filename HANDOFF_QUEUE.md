@@ -201,6 +201,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-20-191` | Direct Hold'em showdown evaluation accepted negative or duplicate seat identities | 4 | T310 | RESOLVED | `HoldemShowdownEvaluator` now rejects negative and duplicate seat numbers before ranking, aligning direct evaluation with the existing Hold'em state invariant. |
 | `LEGACY-GAP-2026-08-20-192` | Direct showdown result projection accepted malformed ranked results | 4 | T311 | RESOLVED | `ShowdownEvaluationResult` now rejects negative or duplicate seats, negative rank indexes, and unsafe summaries before winner grouping or settlement projection; variant/core ownership remains unchanged. |
 | `LEGACY-GAP-2026-08-20-193` | Direct uncontested settlement accepted a negative winner seat | 4 | T312 | RESOLVED | `ShowdownSettlementProjector.projectUncontestedAndSettle` now rejects negative winner seats before side-pot construction with a stable variant warning; core settlement ownership remains unchanged. |
+| `LEGACY-GAP-2026-08-20-194` | Bootstrap candidate resolution ignored malformed session/table scope identities | 4 | T313 | RESOLVED | `BasicBootstrapCandidateProvider` now fails closed before candidate materialization when session or table scope identities are malformed; peer discovery and path-selection ownership remain unchanged. |
 
 ## Status Definitions
 

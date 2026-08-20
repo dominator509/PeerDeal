@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Validate Bootstrap Resolution Scope
+
+Summary:
+- `BasicBootstrapCandidateProvider` now rejects malformed session and table
+  scope identities before candidate materialization.
+- Peer candidate filtering, route selection, and package boundaries remain
+  unchanged.
+
+Files:
+- `packages/peerdeal_network/lib/src/services/basic_bootstrap_candidate_provider.dart`
+- `packages/peerdeal_network/test/basic_bootstrap_candidate_provider_test.dart`
+
+Verification:
+- `peerdeal_network` analysis passed.
+- Full package-local network suite passed: 65 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Validate Uncontested Settlement Winner Identity
 
 Summary:

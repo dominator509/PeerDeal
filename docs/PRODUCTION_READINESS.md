@@ -453,6 +453,9 @@ the gates below are satisfied.
   control-character-bearing, or duplicate peer ids before assigning candidate
   route class and priority, keeping malformed discovery identities out of path
   selection.
+- Network bootstrap candidate resolution also rejects malformed session or table
+  scope identities before candidate materialization, preserving the network
+  request boundary independently of the app-owned bootstrap loader.
 - Network session path selection now ignores malformed reachable candidate
   peer ids and malformed elected-primary overrides before returning path
   descriptors, falling back to valid candidates or unresolved state.

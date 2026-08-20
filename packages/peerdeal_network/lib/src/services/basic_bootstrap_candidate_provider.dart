@@ -16,7 +16,8 @@ class BasicBootstrapCandidateProvider implements BootstrapCandidateProvider {
     BootstrapResolutionRequest request,
   ) async {
     _validatePositiveLimit(maxPeerIds, 'maxPeerIds');
-    if (request.peerIds.length > maxPeerIds) {
+    if (!_isValidScope(request.sessionId, request.tableId) ||
+        request.peerIds.length > maxPeerIds) {
       return const <BootstrapCandidate>[];
     }
     final peerIds = _validatedPeerIds(request.peerIds);
@@ -53,6 +54,10 @@ class BasicBootstrapCandidateProvider implements BootstrapCandidateProvider {
 
   bool _isValidPeerId(String peerId) {
     return NetworkInputLimits.isSafePeerIdentity(peerId);
+  }
+
+  bool _isValidScope(String sessionId, String tableId) {
+    return _isValidPeerId(sessionId) && _isValidPeerId(tableId);
   }
 }
 

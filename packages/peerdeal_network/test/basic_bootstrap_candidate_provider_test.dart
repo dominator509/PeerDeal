@@ -54,6 +54,31 @@ void main() {
     expect(result.single.priority, 1);
   });
 
+  test('fails closed on malformed session or table scope identities', () async {
+    const provider = BasicBootstrapCandidateProvider();
+    final invalidSession = await provider.resolveCandidates(
+      BootstrapResolutionRequest(
+        sessionId: 'session\nsecret',
+        tableId: 'table_1',
+        preferLan: true,
+        relayAllowed: true,
+        peerIds: <String>['peer_a'],
+      ),
+    );
+    final invalidTable = await provider.resolveCandidates(
+      BootstrapResolutionRequest(
+        sessionId: 'session_1',
+        tableId: ' table_1',
+        preferLan: true,
+        relayAllowed: true,
+        peerIds: <String>['peer_a'],
+      ),
+    );
+
+    expect(invalidSession, isEmpty);
+    expect(invalidTable, isEmpty);
+  });
+
   test('deduplicates exact peer ids before assigning priorities', () async {
     const provider = BasicBootstrapCandidateProvider();
     final result = await provider.resolveCandidates(
