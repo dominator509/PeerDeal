@@ -3248,6 +3248,11 @@ The Game File compiler now rejects oversized, blank, padded, or control-bearing
 validation diagnostics with stable wizard result codes and suppresses their
 original values from rejected results and compiled Game Files.
 
+Core pot settlement now fails closed before side-pot or award traversal when
+commitments are negative or carry unsafe/duplicate seat IDs, or when a winner
+list carries unsafe/duplicate seat IDs. Direct `SidePotBuilder` calls apply the
+same commitment-identity guard without moving Hold'em rules into core.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

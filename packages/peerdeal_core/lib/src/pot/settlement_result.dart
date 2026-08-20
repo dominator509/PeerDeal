@@ -1,6 +1,16 @@
 import 'ledger_delta_hook.dart';
 import 'pot_slice.dart';
 
+abstract final class SettlementResultCodes {
+  static const commitmentInvalid = 'ERR_CORE_SETTLEMENT_COMMITMENT_INVALID';
+  static const duplicateCommitmentSeatId =
+      'ERR_CORE_SETTLEMENT_DUPLICATE_COMMITMENT_SEAT_ID';
+  static const winnerSeatIdInvalid =
+      'ERR_CORE_SETTLEMENT_WINNER_SEAT_ID_INVALID';
+  static const duplicateWinnerSeatId =
+      'ERR_CORE_SETTLEMENT_DUPLICATE_WINNER_SEAT_ID';
+}
+
 class PotAward {
   const PotAward({
     required this.sliceIndex,

@@ -37,6 +37,8 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
   keeping reducer and recovery ingress rules aligned
 - variant-agnostic pot settlement bounds before side-pot or award traversal:
   64 commitments, 64 winning slice-map entries, and 64 winners per slice
+- pot settlement rejects negative commitments, unsafe or duplicate commitment
+  seat IDs, and unsafe or duplicate winner IDs before side-pot construction
 - public table-state metadata and pot-settlement result collections are
   defensively copied and recursively frozen at construction
 - baseline reducer guards remain immutable through `CoreReducer()`; custom

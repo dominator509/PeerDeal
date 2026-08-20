@@ -1,5 +1,6 @@
 import '../models/core_input_limits.dart';
 import 'pot_commitment.dart';
+import 'pot_input_validation.dart';
 import 'pot_slice.dart';
 
 class SidePotBuilder {
@@ -11,7 +12,9 @@ class SidePotBuilder {
 
   List<PotSlice> build(List<PotCommitment> commitments) {
     _validatePositiveLimit(maxCommitments, 'maxCommitments');
-    if (commitments.length > maxCommitments) {
+    if (commitments.length > maxCommitments ||
+        PotInputValidation.hasInvalidCommitment(commitments) ||
+        PotInputValidation.hasDuplicateCommitmentSeatIds(commitments)) {
       return const <PotSlice>[];
     }
 

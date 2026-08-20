@@ -27,4 +27,21 @@ void main() {
 
     expect(slices, isEmpty);
   });
+
+  test('fails closed on invalid or duplicate commitment identities', () {
+    const builder = SidePotBuilder();
+    expect(
+      builder.build(const [
+        PotCommitment(seatId: 'A', committed: -1, isEligibleForShowdown: true),
+      ]),
+      isEmpty,
+    );
+    expect(
+      builder.build(const [
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+        PotCommitment(seatId: 'A', committed: 200, isEligibleForShowdown: true),
+      ]),
+      isEmpty,
+    );
+  });
 }

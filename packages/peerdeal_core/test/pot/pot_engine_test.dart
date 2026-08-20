@@ -68,28 +68,39 @@ void main() {
     expect(_ledgerDeltas(second), _ledgerDeltas(first));
   });
 
-  test('fails closed when button-relative odd-chip policy lacks button input', () {
-    const engine = PotEngine();
-    final result = engine.settle(
-      commitments: const [
-        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
-        PotCommitment(seatId: 'B', committed: 100, isEligibleForShowdown: true),
-      ],
-      winningSeatIdsBySliceIndex: const <int, List<String>>{
-        0: <String>['A', 'B'],
-      },
-      policy: SettlementPolicy(
-        oddChipPolicy: OddChipPolicy.firstWinnerLeftOfButton,
-      ),
-    );
+  test(
+    'fails closed when button-relative odd-chip policy lacks button input',
+    () {
+      const engine = PotEngine();
+      final result = engine.settle(
+        commitments: const [
+          PotCommitment(
+            seatId: 'A',
+            committed: 100,
+            isEligibleForShowdown: true,
+          ),
+          PotCommitment(
+            seatId: 'B',
+            committed: 100,
+            isEligibleForShowdown: true,
+          ),
+        ],
+        winningSeatIdsBySliceIndex: const <int, List<String>>{
+          0: <String>['A', 'B'],
+        },
+        policy: SettlementPolicy(
+          oddChipPolicy: OddChipPolicy.firstWinnerLeftOfButton,
+        ),
+      );
 
-    expect(result.awards, isEmpty);
-    expect(
-      result.warnings,
-      contains('ERR_CORE_SETTLEMENT_ODD_CHIP_POLICY_UNSUPPORTED'),
-    );
-    expect(result.ledgerDeltas, isEmpty);
-  });
+      expect(result.awards, isEmpty);
+      expect(
+        result.warnings,
+        contains('ERR_CORE_SETTLEMENT_ODD_CHIP_POLICY_UNSUPPORTED'),
+      );
+      expect(result.ledgerDeltas, isEmpty);
+    },
+  );
 
   test('blocks settlement when a slice has no winners', () {
     const engine = PotEngine();
@@ -128,6 +139,59 @@ void main() {
     expect(result.warnings, <String>[
       'ERR_CORE_SETTLEMENT_WINNER_NOT_CONTESTANT',
     ]);
+  });
+
+  test('fails closed on negative commitments', () {
+    const engine = PotEngine();
+    final result = engine.settle(
+      commitments: const [
+        PotCommitment(seatId: 'A', committed: -1, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: const <int, List<String>>{},
+    );
+
+    expect(result.slices, isEmpty);
+    expect(result.awards, isEmpty);
+    expect(result.warnings, [SettlementResultCodes.commitmentInvalid]);
+  });
+
+  test('fails closed on duplicate commitment seat IDs', () {
+    const engine = PotEngine();
+    final result = engine.settle(
+      commitments: const [
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+        PotCommitment(seatId: 'A', committed: 200, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: const <int, List<String>>{},
+    );
+
+    expect(result.slices, isEmpty);
+    expect(result.warnings, [SettlementResultCodes.duplicateCommitmentSeatId]);
+  });
+
+  test('fails closed on unsafe and duplicate winner seat IDs', () {
+    const engine = PotEngine();
+    final unsafe = engine.settle(
+      commitments: const [
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: const <int, List<String>>{
+        0: <String>[' A'],
+      },
+    );
+    final duplicate = engine.settle(
+      commitments: const [
+        PotCommitment(seatId: 'A', committed: 100, isEligibleForShowdown: true),
+      ],
+      winningSeatIdsBySliceIndex: const <int, List<String>>{
+        0: <String>['A', 'A'],
+      },
+    );
+
+    expect(unsafe.slices, isEmpty);
+    expect(unsafe.warnings, [SettlementResultCodes.winnerSeatIdInvalid]);
+    expect(duplicate.slices, isEmpty);
+    expect(duplicate.warnings, [SettlementResultCodes.duplicateWinnerSeatId]);
   });
 
   test('blocks settlement when winners reference an unknown slice', () {

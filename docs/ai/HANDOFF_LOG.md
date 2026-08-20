@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Core Pot Input Validation
+
+Summary:
+- `PotEngine` now rejects negative commitments, unsafe or duplicate commitment
+  seat IDs, and unsafe or duplicate winner IDs before side-pot or award
+  traversal.
+- Direct `SidePotBuilder` calls also fail closed on invalid or duplicate
+  commitment identities; Hold'em-specific rules remain in `peerdeal_variants`.
+
+Files:
+- `packages/peerdeal_core/lib/src/pot/pot_input_validation.dart`
+- `packages/peerdeal_core/lib/src/pot/pot_engine.dart`
+- `packages/peerdeal_core/lib/src/pot/side_pot_builder.dart`
+- `packages/peerdeal_core/lib/src/pot/settlement_result.dart`
+- Core pot tests and README/API records.
+
+Verification:
+- `peerdeal_core` analysis passed.
+- Full package-local core suite passed: 78 tests.
+- Focused pot suites, boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Bound Wizard Validation Diagnostics
 
 Summary:

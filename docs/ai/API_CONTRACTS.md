@@ -488,6 +488,11 @@ per slice by default. Overflow returns blocked `SettlementResult` warnings
 `ERR_CORE_SETTLEMENT_COMMITMENT_COUNT`,
 `ERR_CORE_SETTLEMENT_WINNER_SLICE_COUNT`, or
 `ERR_CORE_SETTLEMENT_WINNER_COUNT`.
+Settlement also fails closed on negative commitments, unsafe or duplicate
+commitment seat IDs, and unsafe or duplicate winner IDs with
+`SettlementResultCodes` warnings before constructing slices or awards. Direct
+`SidePotBuilder` calls reject invalid or duplicate commitment identities as
+well.
 
 Core truth models own caller-provided collections at construction:
 `TableState` recursively freezes metadata, `PotSlice` freezes contested seat

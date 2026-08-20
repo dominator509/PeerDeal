@@ -2,6 +2,7 @@ import '../models/core_input_limits.dart';
 import 'ledger_delta_hook.dart';
 import 'odd_chip_policy.dart';
 import 'pot_commitment.dart';
+import 'pot_input_validation.dart';
 import 'pot_slice.dart';
 import 'settlement_policy.dart';
 import 'settlement_result.dart';
@@ -170,6 +171,20 @@ class PotEngine {
       (winners) => winners.length > maxWinnersPerSlice,
     )) {
       return 'ERR_CORE_SETTLEMENT_WINNER_COUNT';
+    }
+    if (PotInputValidation.hasInvalidCommitment(commitments)) {
+      return SettlementResultCodes.commitmentInvalid;
+    }
+    if (PotInputValidation.hasDuplicateCommitmentSeatIds(commitments)) {
+      return SettlementResultCodes.duplicateCommitmentSeatId;
+    }
+    if (PotInputValidation.hasInvalidWinnerSeatId(winningSeatIdsBySliceIndex)) {
+      return SettlementResultCodes.winnerSeatIdInvalid;
+    }
+    if (PotInputValidation.hasDuplicateWinnerSeatId(
+      winningSeatIdsBySliceIndex,
+    )) {
+      return SettlementResultCodes.duplicateWinnerSeatId;
     }
     return null;
   }
