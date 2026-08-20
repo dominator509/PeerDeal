@@ -42,6 +42,8 @@ are present.
 - `DefaultPresetResolver.validateDraft(...)` rejects unsafe applied preset IDs
   before a draft is considered build-ready; the compiler repeats this check at
   its own output boundary.
+- `DefaultPresetResolver.mergeLayers(...)` rejects unsafe layer IDs and uses
+  supplied order as the deterministic tie-breaker for equal priorities.
 - Resolver output carries the pseudonymous creator and applied preset IDs into
   the compiled Game File; the compiler emits the complete protocol-shaped
   object with the current protocol version and validates it against the locked

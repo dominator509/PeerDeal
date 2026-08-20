@@ -25,6 +25,40 @@ void main() {
       expect(result.conflicts, isNotEmpty);
     });
 
+    test('equal-priority layers preserve supplied order deterministically', () {
+      const resolver = DefaultPresetResolver();
+      final result = resolver.mergeLayers(<PresetLayer>[
+        PresetLayer(
+          presetId: 'first',
+          priority: 1,
+          values: <String, Object?>{'seat_count': 6},
+        ),
+        PresetLayer(
+          presetId: 'second',
+          priority: 1,
+          values: <String, Object?>{'seat_count': 8},
+        ),
+      ]);
+
+      expect(result.mergedValues['seat_count'], 8);
+      expect(result.appliedPresetIds, ['first', 'second']);
+    });
+
+    test('rejects unsafe preset IDs before merging', () {
+      const resolver = DefaultPresetResolver();
+      final result = resolver.mergeLayers(<PresetLayer>[
+        PresetLayer(
+          presetId: ' unsafe',
+          priority: 1,
+          values: const <String, Object?>{},
+        ),
+      ]);
+
+      expect(result.errors, [WizardResultCodes.presetIdsInvalid]);
+      expect(result.mergedValues, isEmpty);
+      expect(result.appliedPresetIds, isEmpty);
+    });
+
     test('explicit preset references select only the requested layers', () {
       const resolver = DefaultPresetResolver();
       final intent = SetupIntent(

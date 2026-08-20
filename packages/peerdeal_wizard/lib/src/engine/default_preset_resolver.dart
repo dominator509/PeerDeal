@@ -38,12 +38,20 @@ class DefaultPresetResolver implements PresetResolver {
       return _blockedResolution(WizardResultCodes.presetLayerCountTooLarge);
     }
 
-    final ordered = [...layers]
-      ..sort((a, b) => a.priority.compareTo(b.priority));
+    if (layers.any((layer) => !_isSafePresetId(layer.presetId))) {
+      return _blockedResolution(WizardResultCodes.presetIdsInvalid);
+    }
+
+    final ordered = layers.asMap().entries.toList()
+      ..sort((a, b) {
+        final byPriority = a.value.priority.compareTo(b.value.priority);
+        return byPriority == 0 ? a.key.compareTo(b.key) : byPriority;
+      });
     final merged = <String, Object?>{};
     final conflicts = <String>[];
 
-    for (final layer in ordered) {
+    for (final entry in ordered) {
+      final layer = entry.value;
       if (layer.values.length > maxPresetValues) {
         return _blockedResolution(WizardResultCodes.presetValueCountTooLarge);
       }
@@ -74,7 +82,7 @@ class DefaultPresetResolver implements PresetResolver {
     return PresetResolutionResult(
       mergedValues: merged,
       appliedPresetIds: ordered
-          .map((layer) => layer.presetId)
+          .map((entry) => entry.value.presetId)
           .toList(growable: false),
       conflicts: conflicts,
     );

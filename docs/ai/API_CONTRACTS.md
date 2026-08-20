@@ -130,6 +130,8 @@ nonempty references select exactly one matching layer per safe, unique
 reference, and missing or invalid references fail closed.
 Direct drafts with unsafe applied preset IDs are rejected before becoming
 build-ready; the compiler repeats the same check.
+Preset merging also rejects unsafe layer IDs and preserves supplied order when
+priorities are equal.
 
 ## App Route Surface
 

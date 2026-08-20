@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Deterministic Preset Merging
+
+Summary:
+- Direct preset merging now rejects unsafe layer IDs before producing merged
+  values or diagnostics.
+- Equal-priority layers now preserve supplied order as the deterministic
+  tie-breaker; merge policy and package ownership remain unchanged.
+
+Files:
+- `packages/peerdeal_wizard/lib/src/engine/default_preset_resolver.dart`
+- `packages/peerdeal_wizard/test/preset_resolver_test.dart`
+- `packages/peerdeal_wizard/README.md`
+
+Verification:
+- `peerdeal_wizard` analysis passed.
+- Full `peerdeal_wizard` suite passed: 37 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned Game File source policy, session/database wiring, native/device
+  validation, authentication/replay contracts, signing, and final UX remain
+  separate readiness gates.
+
 ### 2026-08-20 - Codex - Validate Wizard Draft Preset IDs
 
 Summary:

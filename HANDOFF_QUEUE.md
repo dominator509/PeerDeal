@@ -195,6 +195,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-20-185` | Invite schema accepted unsupported nested values until later encoding | 4 | T304 | RESOLVED | `InvitePayloadSchema` now applies bounded canonical JSON validation before field acceptance, with a focused rejected-payload regression; invite field and catalog ownership remain unchanged. |
 | `LEGACY-GAP-2026-08-20-186` | Wizard resolver ignored explicit `SetupIntent.presetRefs` and merged unrequested layers | 4 | T305 | RESOLVED | `DefaultPresetResolver` preserves empty-reference compatibility but requires nonempty references to select exactly one bounded, safe, unique matching layer; missing or invalid references fail closed. Wizard merge policy and package ownership remain unchanged. |
 | `LEGACY-GAP-2026-08-20-187` | Wizard draft validation marked unsafe applied preset IDs build-ready until compiler validation | 4 | T306 | RESOLVED | `DefaultPresetResolver.validateDraft` now applies the existing safe metadata predicate to applied preset IDs before build readiness; compiler validation remains as a second boundary. |
+| `LEGACY-GAP-2026-08-20-188` | Direct wizard preset merging accepted unsafe layer IDs and left equal-priority ordering unspecified | 4 | T307 | RESOLVED | `DefaultPresetResolver.mergeLayers` now rejects unsafe IDs and uses supplied order as the deterministic equal-priority tie-breaker; preset merge policy and package ownership remain unchanged. |
 
 ## Status Definitions
 
