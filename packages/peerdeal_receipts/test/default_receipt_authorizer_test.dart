@@ -142,6 +142,31 @@ void main() {
     expect(result.normalizedResultCode, 'ERR_RECEIPT_AUTHORIZATION_INVALID');
   });
 
+  test('rejects malformed receipt identity fields before binding checks', () {
+    const malformedReceipt = PeerDealReceipt(
+      receiptId: 'r_1',
+      receiptVersion: '1.0',
+      protocolVersion: '1.x',
+      modeType: 'open_table',
+      sessionId: 'sess_1\n',
+      tableId: 'table_1',
+      pseudonymousUserId: 'user_1',
+      bindingMode: ReceiptBindingMode.mixed,
+      wipeState: ReceiptWipeState.live,
+      payloadHash: 'hash_live',
+      opaquePayload: 'opaque_live',
+    );
+    const request = ReceiptAuthorizationRequest(
+      requestedByUserId: 'user_1',
+      requestedSessionId: 'sess_1',
+      accessMode: ReceiptAccessMode.view,
+    );
+
+    final result = authorizer.authorize(malformedReceipt, request);
+    expect(result.allowed, isFalse);
+    expect(result.normalizedResultCode, 'ERR_RECEIPT_MALFORMED');
+  });
+
   test('rejects control-bearing authorization identity fields', () {
     const request = ReceiptAuthorizationRequest(
       requestedByUserId: 'user_1\n',

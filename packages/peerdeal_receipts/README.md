@@ -24,6 +24,8 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
   closed when authorization is absent, denied, or unavailable.
 - Receipt authorization rejects blank, padded, oversized, or control-bearing
   caller identity/session fields before binding checks.
+- Receipt envelope validation applies the same bounded, strict UTF-8 and
+  control-free text rules before scan or authorization policy runs.
 - Direct authorization calls fail closed when a caller-owned authorizer throws.
 - Export artifacts minimize metadata and do not expose table identity.
 - `ReceiptCipher` and `ReceiptSigner` contracts can wrap opaque export payloads

@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Align Receipt Model and Authorization Validation
+
+Summary:
+- `PeerDealReceipt.hasRequiredEnvelopeFields` now applies bounded, strict
+  UTF-8, non-padded, control-free text validation to every required envelope
+  field before scan or authorization policy runs.
+- Direct receipt authorization can no longer approve a receipt identity that
+  strict export encoding would reject; binding semantics and package ownership
+  are unchanged.
+
+Files:
+- `packages/peerdeal_receipts/lib/src/models/peer_deal_receipt.dart`
+- `packages/peerdeal_receipts/test/default_receipt_authorizer_test.dart`
+- Receipt README, production-readiness note, and gap queue.
+
+Verification:
+- Receipt package analyzer passed with the Flutter SDK Dart executable and a
+  redirected writable telemetry directory.
+- All 66 receipt package tests passed.
+- `git diff --check` passed.
+
+Remaining:
+- Product session/auth state must still supply real caller identity.
+- Native/device, provider-proof, durable persistence, release-signing,
+  other-platform, and final UX gates remain external or integration-owned.
+
 ### 2026-08-20 - Codex - Harden Receipt Authorization Request Boundary
 
 Summary:

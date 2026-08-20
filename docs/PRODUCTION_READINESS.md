@@ -3168,6 +3168,12 @@ the existing binding policy, and converts direct authorizer failures into a
 denied result. Receipt policy remains in `peerdeal_receipts`; product callers
 still own the source of authorization identity.
 
+Receipt model validation now applies the same strict envelope-text predicate
+before scan or authorization, so direct policy callers cannot authorize a
+receipt with a malformed identity field that export encoding would later
+reject. This remains receipt-owned input validation and does not alter binding
+semantics.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

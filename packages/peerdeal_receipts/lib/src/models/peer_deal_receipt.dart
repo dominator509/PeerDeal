@@ -1,3 +1,5 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import 'receipt_binding_mode.dart';
 import 'receipt_wipe_state.dart';
 
@@ -34,14 +36,25 @@ class PeerDealReceipt {
 
   bool get isWiped => wipeState == ReceiptWipeState.wiped;
 
-  bool get hasRequiredEnvelopeFields =>
-      receiptId.trim().isNotEmpty &&
-      receiptVersion.trim().isNotEmpty &&
-      protocolVersion.trim().isNotEmpty &&
-      modeType.trim().isNotEmpty &&
-      sessionId.trim().isNotEmpty &&
-      tableId.trim().isNotEmpty &&
-      pseudonymousUserId.trim().isNotEmpty &&
-      payloadHash.trim().isNotEmpty &&
-      opaquePayload.trim().isNotEmpty;
+  bool get hasRequiredEnvelopeFields => <String>[
+    receiptId,
+    receiptVersion,
+    protocolVersion,
+    modeType,
+    sessionId,
+    tableId,
+    pseudonymousUserId,
+    payloadHash,
+    opaquePayload,
+  ].every(_isSafeRequiredText);
+
+  static bool _isSafeRequiredText(String value) {
+    if (value.trim().isEmpty || value.trim() != value) return false;
+    if (!const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
+      return false;
+    }
+    return !value.codeUnits.any(
+      (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
+    );
+  }
 }
