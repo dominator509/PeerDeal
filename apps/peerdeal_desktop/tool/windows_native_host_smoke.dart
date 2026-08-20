@@ -91,7 +91,8 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
   _require(
     transportCapability.available &&
         transportCapability.sendSupported &&
-        transportCapability.receiveSupported,
+        transportCapability.receiveSupported &&
+        transportCapability.maxPayloadBytes == 60 * 1024,
     'native transport capability unavailable',
   );
   _pass('transport.capability');

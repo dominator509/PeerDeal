@@ -2,6 +2,40 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Windows Native Readiness Failure Boundaries
+
+Summary:
+- Windows local-network and app-support handlers now reject unknown methods
+  before performing native work and convert handler exceptions into the
+  existing stable unavailable payloads.
+- Windows transport capability now reports zero payload bytes when its socket
+  is unavailable, matching the generic native transport model.
+- Channel names, payload schemas, package ownership, and transport semantics
+  remain unchanged.
+
+Files:
+- `apps/peerdeal_desktop/windows/runner/windows_local_network.cpp`
+- `apps/peerdeal_desktop/windows/runner/windows_app_storage.cpp`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `apps/peerdeal_desktop/tool/windows_native_host_smoke.dart`
+- Production-readiness note and gap queue.
+
+Verification:
+- Direct Dart analysis for `peerdeal_native_bridges` and
+  `peerdeal_desktop`, boundary-check, source-text, formatting, and
+  `git diff --check` passed.
+- Elevated CMake compilation passed and compiled all four changed native host
+  translation units.
+- The existing Windows host smoke reached app storage, capture,
+  local-network, and transport checkpoints, but the current Windows profile
+  rejected Credential Manager save at `secure_key.save`; no full smoke pass is
+  claimed for this run.
+
+Remaining:
+- Android/Windows device and network reachability, transport authentication
+  and replay, release signing, other native hosts, durable product state, and
+  final UX remain separate gates.
+
 ### 2026-08-20 - Codex - Harden Windows Transport Receive Request Ordering
 
 Summary:

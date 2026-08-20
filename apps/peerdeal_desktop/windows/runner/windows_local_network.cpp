@@ -74,16 +74,25 @@ WindowsLocalNetwork::~WindowsLocalNetwork() {
 void WindowsLocalNetwork::HandleMethodCall(
     const flutter::MethodCall<EncodableValue>& method_call,
     std::unique_ptr<flutter::MethodResult<EncodableValue>> result) {
-  const auto snapshot = ReadNetworkSnapshot();
-  if (method_call.method_name() == kGetCapabilityMethod) {
-    result->Success(CapabilityPayload(snapshot));
+  const auto& method = method_call.method_name();
+  if (method != kGetCapabilityMethod && method != kDiscoverPeersMethod) {
+    result->NotImplemented();
     return;
   }
-  if (method_call.method_name() == kDiscoverPeersMethod) {
+
+  try {
+    const auto snapshot = ReadNetworkSnapshot();
+    if (method == kGetCapabilityMethod) {
+      result->Success(CapabilityPayload(snapshot));
+      return;
+    }
     result->Success(DiscoveryPayload(snapshot));
-    return;
+  } catch (...) {
+    const NetworkSnapshot unavailable;
+    result->Success(method == kGetCapabilityMethod
+                        ? CapabilityPayload(unavailable)
+                        : DiscoveryPayload(unavailable));
   }
-  result->NotImplemented();
 }
 
 WindowsLocalNetwork::NetworkSnapshot

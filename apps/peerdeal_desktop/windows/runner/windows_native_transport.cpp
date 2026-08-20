@@ -671,7 +671,8 @@ EncodableValue WindowsNativeTransport::CapabilityPayload(bool available) {
   payload.emplace(EncodableValue("receiveSupported"),
                   EncodableValue(available));
   payload.emplace(EncodableValue("maxPayloadBytes"),
-                  EncodableValue(static_cast<int32_t>(kMaxPayloadBytes)));
+                  EncodableValue(static_cast<int32_t>(
+                      available ? kMaxPayloadBytes : 0)));
   payload.emplace(EncodableValue("notes"),
                   EncodableValue(available ? "windows-udp-multicast"
                                             : "unavailable"));

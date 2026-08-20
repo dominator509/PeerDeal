@@ -100,6 +100,11 @@ the gates below are satisfied.
 - App UI is not production-polished.
 
 ## Covered hardening slices
+- Windows local-network and app-support method-channel handlers now reject
+  unknown methods before native enumeration and convert native handler failures
+  into stable unavailable payloads. Windows transport capability now reports a
+  zero payload limit when its socket is unavailable, matching the existing
+  native bridge model.
 - The Android Gradle wrapper now verifies the official SHA-256 for its pinned
   Gradle 8.14 distribution before use, preventing a substituted wrapper
   archive without changing the Android build version or package ownership.

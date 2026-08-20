@@ -113,12 +113,16 @@ void WindowsAppStorage::HandleMethodCall(
     return;
   }
 
-  const auto path = LocalAppDataPath();
-  if (!path.has_value()) {
+  try {
+    const auto path = LocalAppDataPath();
+    if (!path.has_value()) {
+      result->Success(Failure());
+      return;
+    }
+    result->Success(Success(path.value()));
+  } catch (...) {
     result->Success(Failure());
-    return;
   }
-  result->Success(Success(path.value()));
 }
 
 EncodableValue WindowsAppStorage::Failure() {
