@@ -729,6 +729,34 @@ void main() {
     expect(result.mismatches.single.actual, 'table_1/other_session');
   });
 
+  test('rejects unsafe snapshot identity before projection', () {
+    final result = engine.replay(
+      ReplayRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        scope: ReplayScope.session,
+        snapshot: SnapshotEnvelope(
+          snapshotId: 'snap_1\nforged',
+          protocolVersion: '1.0.0',
+          tableId: 'table_1',
+          sessionId: 'session_1',
+          snapshotBaseEventSeq: 0,
+          snapshotHash: computeCanonicalHash(const <String, Object?>{}),
+          payload: const <String, Object?>{},
+        ),
+        events: const <EventEnvelope>[],
+      ),
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(
+      result.mismatches.single.code,
+      'ERR_REPLAY_SNAPSHOT_IDENTITY_INVALID',
+    );
+  });
+
   test('rejects unsupported event artifact before projection', () {
     final result = engine.replay(
       ReplayRequest(

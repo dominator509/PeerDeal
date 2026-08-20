@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Align Replay Snapshot Ingress
+
+Summary:
+- `BasicReplayEngine` now applies the shared snapshot-envelope identity
+  validator before projection.
+- Direct `SnapshotSuffixReplayer` calls reject unsafe snapshot identities and
+  negative bases before filtering events.
+
+Files:
+- `packages/peerdeal_replay/lib/src/engine/basic_replay_engine.dart`
+- `packages/peerdeal_replay/lib/src/engine/snapshot_suffix_replayer.dart`
+- Focused replay regression tests.
+
+Verification:
+- `peerdeal_replay` analysis passed.
+- Full package-local replay suite passed: 47 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Harden Snapshot Suffix Event Sequences
 
 Summary:

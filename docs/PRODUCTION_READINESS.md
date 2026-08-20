@@ -1846,6 +1846,10 @@ Snapshot-backed conflict detection and application now reject non-positive
 event sequences before suffix filtering can treat malformed events as covered
 by the snapshot base.
 
+The T317 follow-up aligns replay with the shared snapshot ingress boundary.
+`BasicReplayEngine` and direct `SnapshotSuffixReplayer` calls now reject unsafe
+snapshot identities and negative bases before projection or suffix filtering.
+
 The T126 follow-up closes the direct wizard materialization gap.
 `DefaultPresetResolver` now bounds preset layers, per-layer and merged values,
 conflicts, helper suggestions, partial settings, ambiguities, and resolved

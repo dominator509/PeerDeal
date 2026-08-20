@@ -94,6 +94,10 @@ projection. The supplied projector must also implement
 `ReplaySnapshotStateProjector` so the verified typed snapshot state is created
 before its contiguous suffix is applied; a projector that only supports fresh
 base state fails with `ERR_REPLAY_SNAPSHOT_PROJECTOR_UNAVAILABLE`.
+Replay also applies the shared snapshot-envelope identity validator before
+projection with `ERR_REPLAY_SNAPSHOT_IDENTITY_INVALID`; direct
+`SnapshotSuffixReplayer` callers reject the same unsafe identities and
+negative bases before suffix filtering.
 
 ## Mode Governance
 

@@ -49,3 +49,6 @@ payload interpretation and must preserve the invite-scoped state contract.
   snapshot base sequences or tampered payloads before projection. Snapshot
   requests require `ReplaySnapshotStateProjector` so the suffix is applied to
   verified typed snapshot state rather than a fresh base state.
+- Replay validates snapshot-envelope identity through the shared protocol
+  predicate before projection, and direct snapshot-suffix planning rejects
+  unsafe identities or negative bases before filtering events.

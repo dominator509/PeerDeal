@@ -423,6 +423,14 @@ class BasicReplayEngine<TState> implements ReplayEngine<TState> {
   List<ReplayMismatch> _validateSnapshotIntegrity(ReplayRequest request) {
     final snapshot = request.snapshot;
     if (snapshot == null) return const <ReplayMismatch>[];
+    if (!validateSnapshotEnvelopeIdentity(snapshot).isValid) {
+      return <ReplayMismatch>[
+        ReplayMismatch(
+          code: 'ERR_REPLAY_SNAPSHOT_IDENTITY_INVALID',
+          message: 'Replay snapshot envelope identity is empty or unsafe.',
+        ),
+      ];
+    }
     if (snapshot.snapshotBaseEventSeq < 0) {
       return <ReplayMismatch>[
         ReplayMismatch(

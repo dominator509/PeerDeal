@@ -30,6 +30,20 @@ class SnapshotSuffixReplayer {
         'Snapshot suffix event window exceeds the configured limit.',
       );
     }
+    if (!validateSnapshotEnvelopeIdentity(snapshot).isValid) {
+      throw ArgumentError.value(
+        snapshot,
+        'snapshot',
+        'Snapshot envelope identity is empty or unsafe.',
+      );
+    }
+    if (snapshot.snapshotBaseEventSeq < 0) {
+      throw ArgumentError.value(
+        snapshot.snapshotBaseEventSeq,
+        'snapshot.snapshotBaseEventSeq',
+        'Snapshot base event sequence must be non-negative.',
+      );
+    }
 
     final suffix = events
         .where((event) => event.eventSeq > snapshot.snapshotBaseEventSeq)

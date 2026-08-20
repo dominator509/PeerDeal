@@ -103,4 +103,38 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('rejects unsafe snapshot identity before filtering', () {
+    final snapshot = SnapshotEnvelope(
+      snapshotId: 'snap_1\nforged',
+      protocolVersion: '1.0.0',
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      snapshotBaseEventSeq: 1,
+      snapshotHash: 'snap_hash',
+      payload: const <String, Object?>{},
+    );
+
+    expect(
+      () => replayer.plan(snapshot: snapshot, events: const <EventEnvelope>[]),
+      throwsArgumentError,
+    );
+  });
+
+  test('rejects a negative snapshot base before filtering', () {
+    final snapshot = SnapshotEnvelope(
+      snapshotId: 'snap_1',
+      protocolVersion: '1.0.0',
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      snapshotBaseEventSeq: -1,
+      snapshotHash: 'snap_hash',
+      payload: const <String, Object?>{},
+    );
+
+    expect(
+      () => replayer.plan(snapshot: snapshot, events: const <EventEnvelope>[]),
+      throwsArgumentError,
+    );
+  });
 }
