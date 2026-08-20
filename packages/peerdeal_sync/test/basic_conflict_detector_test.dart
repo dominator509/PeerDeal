@@ -2,8 +2,27 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
+BasicConflictDetector _testDetector({
+  ProtocolCatalog protocolCatalog = const ProtocolCatalog(),
+  int maxEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+  EventEnvelopeCodec eventCodec = const EventEnvelopeCodec(
+    maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
+  ),
+  CanonicalJsonLimits snapshotLimits = const CanonicalJsonLimits(
+    maxEncodedBytes: RecoveryEventWindowLimits.defaultMaxSnapshotBytes,
+  ),
+}) => BasicConflictDetector(
+  protocolCatalog: protocolCatalog,
+  maxEvents: maxEvents,
+  eventCodec: eventCodec,
+  snapshotLimits: snapshotLimits,
+  eventHashCalculator: _acceptFixtureEventHash,
+);
+
 void main() {
-  const detector = BasicConflictDetector();
+  final detector = _testDetector();
 
   test('rejects an invalid direct request scope before traversing events', () {
     final result = detector.detect(
@@ -59,7 +78,7 @@ void main() {
       ],
     );
 
-    final result = const BasicConflictDetector(maxEvents: 1).detect(request);
+    final result = _testDetector(maxEvents: 1).detect(request);
 
     expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_COUNT_TOO_LARGE');
     expect(result.conflicts.single.expected, '1');
@@ -67,10 +86,8 @@ void main() {
   });
 
   test('rejects an oversized direct event before protocol inspection', () {
-    final result =
-        const BasicConflictDetector(
-          eventCodec: EventEnvelopeCodec(maxBytes: 256),
-        ).detect(
+    final result = _testDetector(eventCodec: EventEnvelopeCodec(maxBytes: 256))
+        .detect(
           RecoveryRequest(
             tableId: 'table_1',
             sessionId: 'session_1',
@@ -114,7 +131,7 @@ void main() {
 
   test('rejects an oversized direct snapshot before protocol inspection', () {
     final result =
-        const BasicConflictDetector(
+        _testDetector(
           snapshotLimits: CanonicalJsonLimits(maxEncodedBytes: 256),
         ).detect(
           RecoveryRequest(
@@ -539,6 +556,41 @@ void main() {
     );
     expect(result.conflicts.single.expected, genesisEventHash);
     expect(result.conflicts.single.actual, 'root');
+  });
+
+  test('rejects a tampered event content hash by default', () {
+    final unsigned = _event(1, prevEventHash: genesisEventHash, eventHash: '');
+    final valid = _event(
+      1,
+      prevEventHash: genesisEventHash,
+      eventHash: computeCanonicalEventHash(unsigned),
+    );
+    final tampered = EventEnvelope(
+      eventId: valid.eventId,
+      eventType: valid.eventType,
+      eventVersion: valid.eventVersion,
+      protocolVersion: valid.protocolVersion,
+      eventSeq: valid.eventSeq,
+      tableId: valid.tableId,
+      sessionId: valid.sessionId,
+      handId: valid.handId,
+      emittedAt: valid.emittedAt,
+      actorRef: valid.actorRef,
+      payload: const <String, Object?>{'tampered': true},
+      prevEventHash: valid.prevEventHash,
+      eventHash: valid.eventHash,
+    );
+    final result = BasicConflictDetector().detect(
+      RecoveryRequest(
+        tableId: tampered.tableId,
+        sessionId: tampered.sessionId,
+        protocolVersion: tampered.protocolVersion,
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[tampered],
+      ),
+    );
+
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_HASH_INVALID');
   });
 }
 

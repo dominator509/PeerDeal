@@ -5,6 +5,8 @@ import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:test/test.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
 void main() {
   group('baseline invariant guards', () {
     List<String> codesFor(TableState state) {
@@ -68,7 +70,9 @@ void main() {
       );
 
       expect(
-        () => const CoreReducer().apply(invalid, event),
+        () => CoreReducer(
+          eventHashCalculator: _acceptFixtureEventHash,
+        ).apply(invalid, event),
         throwsA(
           isA<InvariantViolation>().having(
             (violation) => violation.code,

@@ -20,6 +20,7 @@ class JsonFileRecoveryPersistenceStore
     int maxFileBytes = defaultMaxFileBytes,
     int maxEvents = InMemoryRecoveryPersistenceStore.defaultMaxEvents,
     int maxEventBytes = InMemoryRecoveryPersistenceStore.defaultMaxEventBytes,
+    this.eventHashCalculator = computeCanonicalEventHash,
   }) : _rootDirectory = rootDirectory,
        _maxFileBytes = maxFileBytes,
        _maxEvents = maxEvents,
@@ -54,6 +55,7 @@ class JsonFileRecoveryPersistenceStore
   final int _maxFileBytes;
   final int _maxEvents;
   final int _maxEventBytes;
+  final EventHashCalculator eventHashCalculator;
 
   @override
   RecoveryPersistenceResult saveSnapshot({
@@ -253,6 +255,7 @@ class JsonFileRecoveryPersistenceStore
     final store = InMemoryRecoveryPersistenceStore(
       maxEvents: _maxEvents,
       maxEventBytes: _maxEventBytes,
+      eventHashCalculator: eventHashCalculator,
     );
     final file = _fileFor(scope);
     if (!file.existsSync()) {

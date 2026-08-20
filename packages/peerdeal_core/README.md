@@ -31,6 +31,8 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
 - protocol-native command validation against the catalog and safe envelope
   identity boundaries; command and scope identities reject blank, padded, and
   C0/C1-control-bearing values
+- `CoreReducer()` verifies canonical event content hashes before projection;
+  documented variant hash policies can be supplied through its calculator seam
 - variant-agnostic pot settlement bounds before side-pot or award traversal:
   64 commitments, 64 winning slice-map entries, and 64 winners per slice
 - public table-state metadata and pot-settlement result collections are

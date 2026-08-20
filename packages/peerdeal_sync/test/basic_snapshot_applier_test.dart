@@ -4,9 +4,28 @@ import 'package:test/test.dart';
 
 import 'fakes/fake_snapshot_projector.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
+BasicSnapshotApplier<T> _testApplier<T>({
+  required SnapshotStateProjector<T> projector,
+  int maxEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+  EventEnvelopeCodec eventCodec = const EventEnvelopeCodec(
+    maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
+  ),
+  CanonicalJsonLimits snapshotLimits = const CanonicalJsonLimits(
+    maxEncodedBytes: RecoveryEventWindowLimits.defaultMaxSnapshotBytes,
+  ),
+}) => BasicSnapshotApplier<T>(
+  projector: projector,
+  maxEvents: maxEvents,
+  eventCodec: eventCodec,
+  snapshotLimits: snapshotLimits,
+  eventHashCalculator: _acceptFixtureEventHash,
+);
+
 void main() {
   test('rejects an invalid direct apply scope before projector access', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
     );
     final result = applier.apply(
@@ -24,7 +43,7 @@ void main() {
   });
 
   test('rejects an oversized event window before applying events', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: _ThrowingEventProjector(),
       maxEvents: 1,
     );
@@ -50,7 +69,7 @@ void main() {
   });
 
   test('rejects an unencodable direct event before projector access', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: _ThrowingEventProjector(),
     );
 
@@ -77,7 +96,7 @@ void main() {
   });
 
   test('rejects an unencodable direct snapshot before snapshot projection', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
     );
 
@@ -106,7 +125,7 @@ void main() {
   });
 
   test('rejects a tampered snapshot payload hash before projection', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
     );
 
@@ -135,7 +154,7 @@ void main() {
   });
 
   test('applies snapshot first and only replays suffix events', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
     );
 
@@ -201,7 +220,7 @@ void main() {
   });
 
   test('fails safely when snapshot suffix has a sequence gap', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
     );
 
@@ -250,7 +269,7 @@ void main() {
   });
 
   test('fails safely when apply request has no snapshot and no events', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
     );
 
@@ -270,7 +289,7 @@ void main() {
   });
 
   test('fails safely when no-snapshot event window misses the prefix', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: FakeSnapshotProjector(),
     );
 
@@ -308,7 +327,7 @@ void main() {
   });
 
   test('fails safely when projector throws while applying an event', () {
-    final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+    final applier = _testApplier<FakeSnapshotProjection>(
       projector: _ThrowingEventProjector(),
     );
 
@@ -351,7 +370,7 @@ void main() {
   test(
     'fails safely when no-snapshot event window has non-genesis first hash',
     () {
-      final applier = BasicSnapshotApplier<FakeSnapshotProjection>(
+      final applier = _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       );
 

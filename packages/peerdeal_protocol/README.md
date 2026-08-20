@@ -14,6 +14,8 @@ Owns:
 - envelope-level compatibility checks
 - bounded deterministic canonical JSON serialization, including direct
   `EventEnvelope` and `SnapshotEnvelope` hydration before typed field access
+- canonical event content-hash payload construction and SHA-256 calculation;
+  `event_hash` is excluded from the hashed fields
 - Game File public schema contract
 - invite payload public schema contract
 - invite payload field-type, safe-text, and mode-value validation; required

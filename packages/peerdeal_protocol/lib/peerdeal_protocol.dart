@@ -1,3 +1,4 @@
+export 'src/hashing/event_hash.dart';
 export 'src/hashing/hash_chain.dart';
 export 'src/models/command_envelope.dart';
 export 'src/models/event_envelope.dart';

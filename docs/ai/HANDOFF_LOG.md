@@ -14279,6 +14279,49 @@ Remaining:
 
 ---
 
+### 2026-08-20 - Codex - T295 Generic Event Content Integrity
+
+Summary:
+- Added the protocol-owned canonical event hash payload map and SHA-256
+  calculator. The map covers every event envelope field except `event_hash`.
+- `CoreReducer`, replay event-window validation, direct sync conflict and
+  snapshot validation, and recovery persistence now reject content-hash
+  mismatches before projection or mutation.
+- Hold'em cursor hashing now reuses the protocol canonical field map. Existing
+  calculator seams remain available for documented variant hash policies.
+- Legacy placeholder-hash tests now pass an explicit test-only calculator;
+  production defaults remain strict.
+
+Files changed:
+- `packages/peerdeal_protocol/lib/src/hashing/event_hash.dart`
+- `packages/peerdeal_protocol/lib/peerdeal_protocol.dart`
+- `packages/peerdeal_core/lib/src/reducer/core_reducer.dart`
+- `packages/peerdeal_replay/lib/src/engine/event_window_validator.dart`
+- `packages/peerdeal_sync/lib/src/engine/basic_conflict_detector.dart`
+- `packages/peerdeal_sync/lib/src/engine/basic_snapshot_applier.dart`
+- `packages/peerdeal_sync/lib/src/engine/in_memory_recovery_persistence_store.dart`
+- `packages/peerdeal_sync/lib/src/engine/json_file_recovery_persistence_store.dart`
+- `packages/peerdeal_variants/lib/src/holdem/holdem_core_projection_adapter.dart`
+- Focused package regression tests, package READMEs, and readiness docs.
+
+Verification:
+- Protocol, core, replay, sync, and variants package suites pass.
+- New protocol, core, replay, and sync tamper regressions pass.
+- Full repository analyze, boundary, source-text, test, dependency, and
+  diff-check gates remain required before commit.
+
+Architecture status:
+- No package, schema, route, native channel, or persistence boundary was
+  added. Hash policy remains protocol-owned by default and variant-injectable
+  at existing package seams.
+
+Remaining:
+- Real device/native validation, cross-device multicast reachability, release
+  signing, product-owned auth/database/local-identity/state wiring, and final
+  product UX remain external or integration-owned gates.
+
+---
+
 ### 2026-08-18 - Codex - Secure-Key Mutation Contradiction Guard
 
 Summary:

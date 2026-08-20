@@ -14,6 +14,7 @@ class InMemoryRecoveryPersistenceStore
   InMemoryRecoveryPersistenceStore({
     int maxEvents = defaultMaxEvents,
     int maxEventBytes = defaultMaxEventBytes,
+    this.eventHashCalculator = computeCanonicalEventHash,
   }) : _maxEvents = maxEvents,
        _eventCodec = EventEnvelopeCodec(maxBytes: maxEventBytes) {
     if (maxEvents <= 0) {
@@ -37,6 +38,7 @@ class InMemoryRecoveryPersistenceStore
       RecoveryEventWindowLimits.defaultMaxEventBytes;
 
   final int _maxEvents;
+  final EventHashCalculator eventHashCalculator;
   final EventEnvelopeCodec _eventCodec;
   final Map<String, _RecoveryPersistenceRecord> _records =
       <String, _RecoveryPersistenceRecord>{};
@@ -350,6 +352,30 @@ class InMemoryRecoveryPersistenceStore
             severity: SyncConflictSeverity.fatal,
             expected: scope.protocolVersion,
             actual: event.protocolVersion,
+          ),
+        );
+      }
+
+      try {
+        final expectedHash = eventHashCalculator(event);
+        if (expectedHash != event.eventHash) {
+          conflicts.add(
+            SyncConflict(
+              code: 'ERR_RECOVERY_PERSISTENCE_EVENT_HASH_INVALID',
+              message:
+                  'Persisted event content hash does not match the envelope.',
+              severity: SyncConflictSeverity.fatal,
+              expected: expectedHash,
+              actual: event.eventHash,
+            ),
+          );
+        }
+      } on Object {
+        conflicts.add(
+          const SyncConflict(
+            code: 'ERR_RECOVERY_PERSISTENCE_EVENT_HASH_INVALID',
+            message: 'Persisted event content hash could not be calculated.',
+            severity: SyncConflictSeverity.fatal,
           ),
         );
       }

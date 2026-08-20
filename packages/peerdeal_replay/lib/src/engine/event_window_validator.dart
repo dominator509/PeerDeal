@@ -3,8 +3,10 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import '../models/replay_mismatch.dart';
 
 class EventWindowValidator {
-  EventWindowValidator({int maxEvents = defaultMaxEvents})
-    : _maxEvents = maxEvents {
+  EventWindowValidator({
+    int maxEvents = defaultMaxEvents,
+    this.eventHashCalculator = computeCanonicalEventHash,
+  }) : _maxEvents = maxEvents {
     if (maxEvents <= 0) {
       throw ArgumentError.value(
         maxEvents,
@@ -17,6 +19,7 @@ class EventWindowValidator {
   static const defaultMaxEvents = 4096;
 
   final int _maxEvents;
+  final EventHashCalculator eventHashCalculator;
 
   List<ReplayMismatch> validateEventCount(List<EventEnvelope> events) {
     if (events.length <= _maxEvents) {
@@ -83,6 +86,7 @@ class EventWindowValidator {
 
     for (var i = 0; i < events.length; i++) {
       final event = events[i];
+      _appendEventHashMismatch(event, mismatches);
       if (i > 0) {
         final previous = events[i - 1];
         if (event.eventSeq <= previous.eventSeq) {
@@ -118,5 +122,31 @@ class EventWindowValidator {
     }
 
     return mismatches;
+  }
+
+  void _appendEventHashMismatch(
+    EventEnvelope event,
+    List<ReplayMismatch> mismatches,
+  ) {
+    try {
+      final expectedHash = eventHashCalculator(event);
+      if (expectedHash == event.eventHash) return;
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_EVENT_HASH_INVALID',
+          message: 'Event content hash does not match the event envelope.',
+          expected: expectedHash,
+          actual: event.eventHash,
+        ),
+      );
+    } on Object {
+      mismatches.add(
+        ReplayMismatch(
+          code: 'ERR_REPLAY_EVENT_HASH_INVALID',
+          message: 'Event content hash could not be calculated.',
+          actual: event.eventHash,
+        ),
+      );
+    }
   }
 }

@@ -19,6 +19,7 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     this.snapshotLimits = const CanonicalJsonLimits(
       maxEncodedBytes: RecoveryEventWindowLimits.defaultMaxSnapshotBytes,
     ),
+    this.eventHashCalculator = computeCanonicalEventHash,
   }) {
     if (maxEvents <= 0) {
       throw ArgumentError.value(
@@ -33,6 +34,7 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
   final int maxEvents;
   final EventEnvelopeCodec eventCodec;
   final CanonicalJsonLimits snapshotLimits;
+  final EventHashCalculator eventHashCalculator;
 
   @override
   SnapshotApplyResult<TState> apply(SnapshotApplyRequest request) {
@@ -207,6 +209,10 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
       if (eventEncodingConflict != null) {
         return <SyncConflict>[eventEncodingConflict];
       }
+      final eventHashConflict = _eventHashConflict(event);
+      if (eventHashConflict != null) {
+        return <SyncConflict>[eventHashConflict];
+      }
 
       if (event.tableId != request.tableId ||
           event.sessionId != request.sessionId) {
@@ -341,6 +347,26 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
             : 'Recovery event could not be encoded as a protocol envelope.',
         severity: SyncConflictSeverity.fatal,
         expected: isTooLarge ? '${eventCodec.maxBytes}' : null,
+      );
+    }
+  }
+
+  SyncConflict? _eventHashConflict(EventEnvelope event) {
+    try {
+      final expectedHash = eventHashCalculator(event);
+      if (expectedHash == event.eventHash) return null;
+      return SyncConflict(
+        code: 'ERR_SNAPSHOT_APPLY_EVENT_HASH_INVALID',
+        message: 'Recovery event content hash does not match the envelope.',
+        severity: SyncConflictSeverity.fatal,
+        expected: expectedHash,
+        actual: event.eventHash,
+      );
+    } on Object {
+      return const SyncConflict(
+        code: 'ERR_SNAPSHOT_APPLY_EVENT_HASH_INVALID',
+        message: 'Recovery event content hash could not be calculated.',
+        severity: SyncConflictSeverity.fatal,
       );
     }
   }

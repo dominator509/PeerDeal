@@ -3,6 +3,8 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'package:test/test.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
 void main() {
   const adapter = HoldemCoreProjectionAdapter();
   const showdownCoordinator = HoldemShowdownCoordinator();
@@ -400,7 +402,9 @@ void main() {
 }
 
 TableState _openCoreState() {
-  return const CoreReducer().apply(
+  return CoreReducer(
+    eventHashCalculator: _acceptFixtureEventHash,
+  ).apply(
     TableState.initial(
       tableId: 'tbl_001',
       sessionId: 'sess_001',

@@ -5,6 +5,8 @@ import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:test/test.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
 Map<String, Object?> loadProtocolFixture(String path) {
   return jsonDecode(
         File('../peerdeal_protocol/fixtures/$path').readAsStringSync(),
@@ -46,7 +48,7 @@ EventEnvelope eventEnvelopeFromJson(Map<String, Object?> json) {
 }
 
 TableState projectOrderedEvents(Iterable<EventEnvelope> events) {
-  final reducer = CoreReducer();
+  final reducer = CoreReducer(eventHashCalculator: _acceptFixtureEventHash);
   var state = TableState.initial();
   for (final event in events) {
     state = reducer.apply(state, event);
@@ -58,7 +60,7 @@ TableState projectOrderedEventsFrom({
   required TableState initial,
   required Iterable<EventEnvelope> events,
 }) {
-  final reducer = CoreReducer();
+  final reducer = CoreReducer(eventHashCalculator: _acceptFixtureEventHash);
   var state = initial;
   for (final event in events) {
     state = reducer.apply(state, event);
@@ -421,7 +423,9 @@ void main() {
     );
 
     final errors = CoreCommandValidator().validate(command);
-    final state = const CoreReducer().apply(TableState.initial(), event);
+    final state = CoreReducer(
+      eventHashCalculator: _acceptFixtureEventHash,
+    ).apply(TableState.initial(), event);
 
     expect(errors, isEmpty);
     expect(state.tableId, event.tableId);
@@ -433,13 +437,62 @@ void main() {
     expect(state.metadata['last_event_hash'], event.eventHash);
   });
 
+  test('core rejects a tampered canonical event hash by default', () {
+    final unsigned = protocolEvent(
+      eventId: 'evt_hash_001',
+      eventType: 'OpenTableSessionOpened',
+      eventSeq: 1,
+    );
+    final valid = EventEnvelope(
+      eventId: unsigned.eventId,
+      eventType: unsigned.eventType,
+      eventVersion: unsigned.eventVersion,
+      protocolVersion: unsigned.protocolVersion,
+      eventSeq: unsigned.eventSeq,
+      tableId: unsigned.tableId,
+      sessionId: unsigned.sessionId,
+      handId: unsigned.handId,
+      emittedAt: unsigned.emittedAt,
+      actorRef: unsigned.actorRef,
+      payload: unsigned.payload,
+      prevEventHash: unsigned.prevEventHash,
+      eventHash: computeCanonicalEventHash(unsigned),
+    );
+    final tampered = EventEnvelope(
+      eventId: valid.eventId,
+      eventType: valid.eventType,
+      eventVersion: valid.eventVersion,
+      protocolVersion: valid.protocolVersion,
+      eventSeq: valid.eventSeq,
+      tableId: valid.tableId,
+      sessionId: valid.sessionId,
+      handId: valid.handId,
+      emittedAt: valid.emittedAt,
+      actorRef: valid.actorRef,
+      payload: const <String, Object?>{'tampered': true},
+      prevEventHash: valid.prevEventHash,
+      eventHash: valid.eventHash,
+    );
+
+    expect(
+      () => const CoreReducer().apply(TableState.initial(), tampered),
+      throwsA(
+        isA<InvariantViolation>().having(
+          (violation) => violation.code,
+          'code',
+          'ERR_EVENT_HASH_INVALID',
+        ),
+      ),
+    );
+  });
+
   test(
     'core projection is deterministic for fixture-backed protocol event',
     () {
       final event = eventEnvelopeFromJson(
         loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
       );
-      final reducer = const CoreReducer();
+      final reducer = CoreReducer(eventHashCalculator: _acceptFixtureEventHash);
 
       final firstProjection = reducer.apply(TableState.initial(), event);
       final secondProjection = reducer.apply(TableState.initial(), event);
@@ -469,10 +522,13 @@ void main() {
     );
 
     final reconstructed = projectOrderedEvents([opened, admitted]);
-    final stepped = const CoreReducer().apply(
-      const CoreReducer().apply(TableState.initial(), opened),
-      admitted,
-    );
+    final stepped = CoreReducer(eventHashCalculator: _acceptFixtureEventHash)
+        .apply(
+          CoreReducer(
+            eventHashCalculator: _acceptFixtureEventHash,
+          ).apply(TableState.initial(), opened),
+          admitted,
+        );
 
     expect(reconstructed.toJson(), stepped.toJson());
     expect(reconstructed.tableId, opened.tableId);
@@ -876,7 +932,9 @@ void main() {
       );
 
       expect(
-        () => const CoreReducer().apply(TableState.initial(), event),
+        () => CoreReducer(
+          eventHashCalculator: _acceptFixtureEventHash,
+        ).apply(TableState.initial(), event),
         throwsA(
           isA<InvariantViolation>().having(
             (violation) => violation.code,
@@ -909,7 +967,9 @@ void main() {
 
     for (final malformed in malformedEvents) {
       expect(
-        () => const CoreReducer().apply(TableState.initial(), malformed),
+        () => CoreReducer(
+          eventHashCalculator: _acceptFixtureEventHash,
+        ).apply(TableState.initial(), malformed),
         throwsA(
           isA<InvariantViolation>().having(
             (violation) => violation.code,
@@ -939,7 +999,9 @@ void main() {
 
     for (final malformed in malformedEvents) {
       expect(
-        () => const CoreReducer().apply(TableState.initial(), malformed),
+        () => CoreReducer(
+          eventHashCalculator: _acceptFixtureEventHash,
+        ).apply(TableState.initial(), malformed),
         throwsA(
           isA<InvariantViolation>().having(
             (violation) => violation.code,
@@ -962,7 +1024,9 @@ void main() {
     );
 
     expect(
-      () => const CoreReducer().apply(TableState.initial(), event),
+      () => CoreReducer(
+        eventHashCalculator: _acceptFixtureEventHash,
+      ).apply(TableState.initial(), event),
       throwsA(
         isA<InvariantViolation>().having(
           (violation) => violation.code,
@@ -1180,7 +1244,7 @@ void main() {
     final event = eventEnvelopeFromJson(
       loadProtocolFixture('events/open_table_session_opened_event_v1.json'),
     );
-    final reducer = const CoreReducer();
+    final reducer = CoreReducer(eventHashCalculator: _acceptFixtureEventHash);
     final projected = reducer.apply(TableState.initial(), event);
 
     expect(
@@ -1388,7 +1452,7 @@ void main() {
       eventHash: 'hash_002',
     );
 
-    final reducer = CoreReducer();
+    final reducer = CoreReducer(eventHashCalculator: _acceptFixtureEventHash);
 
     var a = TableState.initial();
     a = reducer.apply(a, event1);

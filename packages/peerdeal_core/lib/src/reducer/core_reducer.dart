@@ -8,16 +8,20 @@ import '../models/table_phase.dart';
 import '../models/table_state.dart';
 
 class CoreReducer {
-  const CoreReducer({this.protocolCatalog = const ProtocolCatalog()})
-    : invariantGuards = baselineInvariantGuards;
+  const CoreReducer({
+    this.protocolCatalog = const ProtocolCatalog(),
+    this.eventHashCalculator = computeCanonicalEventHash,
+  }) : invariantGuards = baselineInvariantGuards;
 
   /// Creates a reducer with caller-supplied guards owned by the reducer.
   CoreReducer.withInvariantGuards({
     this.protocolCatalog = const ProtocolCatalog(),
+    this.eventHashCalculator = computeCanonicalEventHash,
     List<InvariantGuard> invariantGuards = baselineInvariantGuards,
   }) : invariantGuards = List<InvariantGuard>.unmodifiable(invariantGuards);
 
   final ProtocolCatalog protocolCatalog;
+  final EventHashCalculator eventHashCalculator;
   final List<InvariantGuard> invariantGuards;
 
   /// Returns every configured invariant violation for [state].
@@ -36,6 +40,7 @@ class CoreReducer {
     _ensureStateIsPossible(current);
     _ensureEventEnvelopeIdentity(event);
     _ensureEventEnvelopePayload(event);
+    _ensureEventHash(event);
 
     final compatibility = protocolCatalog.checkEventEnvelope(event);
     if (!compatibility.isSupported) {
@@ -274,6 +279,25 @@ class CoreReducer {
           'Event envelope identity fields must be non-empty: '
           '${emptyFields.join(', ')}.',
     );
+  }
+
+  void _ensureEventHash(EventEnvelope event) {
+    try {
+      final expectedHash = eventHashCalculator(event);
+      if (expectedHash == event.eventHash) return;
+      throw InvariantViolation(
+        code: 'ERR_EVENT_HASH_INVALID',
+        message:
+            'event_hash must match the canonical content hash for the event.',
+      );
+    } on InvariantViolation {
+      rethrow;
+    } on Object {
+      throw InvariantViolation(
+        code: 'ERR_EVENT_HASH_INVALID',
+        message: 'Event content hash calculation failed.',
+      );
+    }
   }
 
   void _ensureEventEnvelopePayload(EventEnvelope event) {

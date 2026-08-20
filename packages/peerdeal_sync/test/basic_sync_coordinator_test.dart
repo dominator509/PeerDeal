@@ -6,11 +6,33 @@ import 'package:test/test.dart';
 import 'fakes/fake_snapshot_projector.dart';
 import 'fixture_loader.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
+BasicConflictDetector _testDetector() =>
+    BasicConflictDetector(eventHashCalculator: _acceptFixtureEventHash);
+
+BasicSnapshotApplier<T> _testApplier<T>({
+  required SnapshotStateProjector<T> projector,
+  int maxEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+  EventEnvelopeCodec eventCodec = const EventEnvelopeCodec(
+    maxBytes: RecoveryEventWindowLimits.defaultMaxEventBytes,
+  ),
+  CanonicalJsonLimits snapshotLimits = const CanonicalJsonLimits(
+    maxEncodedBytes: RecoveryEventWindowLimits.defaultMaxSnapshotBytes,
+  ),
+}) => BasicSnapshotApplier<T>(
+  projector: projector,
+  maxEvents: maxEvents,
+  eventCodec: eventCodec,
+  snapshotLimits: snapshotLimits,
+  eventHashCalculator: _acceptFixtureEventHash,
+);
+
 void main() {
   test('returns safe-close recommendation on fatal conflict', () {
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-      conflictDetector: const BasicConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       ),
     );
@@ -47,8 +69,8 @@ void main() {
 
   test('safe-closes empty recovery requests', () {
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-      conflictDetector: const BasicConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       ),
     );
@@ -73,8 +95,8 @@ void main() {
     'recovers by applying snapshot and suffix window when no fatal conflict exists',
     () {
       final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-        conflictDetector: const BasicConflictDetector(),
-        snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+        conflictDetector: _testDetector(),
+        snapshotApplier: _testApplier<FakeSnapshotProjection>(
           projector: FakeSnapshotProjector(),
         ),
       );
@@ -129,8 +151,8 @@ void main() {
     final events = _loadHoldemShowdownSettlementEvents();
     final first = events.first;
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-      conflictDetector: const BasicConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       ),
     );
@@ -185,8 +207,8 @@ void main() {
     final events = _loadHoldemShowdownSettlementEvents();
     final first = events.first;
     final coordinator = BasicSyncCoordinator<TableState>(
-      conflictDetector: const BasicConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<TableState>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<TableState>(
         projector: const _CoreSnapshotProjector(),
       ),
     );
@@ -244,8 +266,8 @@ void main() {
     final events = _loadHoldemBlockedSettlementEvents();
     final first = events.first;
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-      conflictDetector: const BasicConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       ),
     );
@@ -302,8 +324,8 @@ void main() {
             <String>['ERR_HOLDEM_SETTLEMENT_PROJECT_INVALID_SHOWDOWN'],
       };
       final coordinator = BasicSyncCoordinator<TableState>(
-        conflictDetector: const BasicConflictDetector(),
-        snapshotApplier: BasicSnapshotApplier<TableState>(
+        conflictDetector: _testDetector(),
+        snapshotApplier: _testApplier<TableState>(
           projector: const _CoreSnapshotProjector(),
         ),
       );
@@ -382,8 +404,8 @@ void main() {
       ];
       final first = gappedEvents.first;
       final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-        conflictDetector: const BasicConflictDetector(),
-        snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+        conflictDetector: _testDetector(),
+        snapshotApplier: _testApplier<FakeSnapshotProjection>(
           projector: FakeSnapshotProjector(),
         ),
       );
@@ -419,8 +441,8 @@ void main() {
     ];
     final first = divergentEvents.first;
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-      conflictDetector: const BasicConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       ),
     );
@@ -448,8 +470,8 @@ void main() {
     final events = _loadHoldemShowdownSettlementEvents();
     final first = events.first;
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
-      conflictDetector: const BasicConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       ),
     );
@@ -492,7 +514,7 @@ void main() {
   test('safe-closes when snapshot applier rejects the recovery window', () {
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
       conflictDetector: const _NoConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       ),
     );
@@ -542,7 +564,7 @@ void main() {
   test('safe-closes when conflict detector throws', () {
     final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
       conflictDetector: const _ThrowingConflictDetector(),
-      snapshotApplier: BasicSnapshotApplier<FakeSnapshotProjection>(
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
         projector: FakeSnapshotProjector(),
       ),
     );
@@ -738,6 +760,8 @@ class _CoreSnapshotProjector implements SnapshotStateProjector<TableState> {
     required TableState state,
     required EventEnvelope event,
   }) {
-    return const CoreReducer().apply(state, event);
+    return CoreReducer(
+      eventHashCalculator: _acceptFixtureEventHash,
+    ).apply(state, event);
   }
 }

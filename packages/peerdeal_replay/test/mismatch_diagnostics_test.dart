@@ -4,9 +4,14 @@ import 'package:test/test.dart';
 
 import 'fakes/fake_table_projector.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
 void main() {
   final engine = BasicReplayEngine<FakeTableProjection>(
     projector: FakeTableProjector(),
+    eventWindowValidator: EventWindowValidator(
+      eventHashCalculator: _acceptFixtureEventHash,
+    ),
   );
 
   test('fails safely on event sequence gap', () {

@@ -3120,6 +3120,17 @@ rebuilt Windows native smoke host also passes app-storage, capture,
 local-network, transport, secure-key read-back, conditional mutation, and
 cleanup checks.
 
+The T295 follow-up closes the generic event content-integrity gap without
+changing package ownership. `peerdeal_protocol` now owns the canonical event
+hash field map and calculator. `peerdeal_core`, `peerdeal_replay`, and all
+`peerdeal_sync` event-validation entry points verify that `event_hash` matches
+the envelope content before projection, replay, recovery planning, snapshot
+application, or persistence mutation. The existing calculator seams preserve
+documented variant-specific hash policies, and Hold'em cursor hashing now
+reuses the protocol field map instead of duplicating it. Placeholder hashes in
+legacy test fixtures remain test-only through explicit test calculators and
+are not accepted by production defaults.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

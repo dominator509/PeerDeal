@@ -5,6 +5,30 @@ import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:test/test.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
+InMemoryRecoveryPersistenceStore _testStore({
+  int maxEvents = InMemoryRecoveryPersistenceStore.defaultMaxEvents,
+  int maxEventBytes = InMemoryRecoveryPersistenceStore.defaultMaxEventBytes,
+}) => InMemoryRecoveryPersistenceStore(
+  maxEvents: maxEvents,
+  maxEventBytes: maxEventBytes,
+  eventHashCalculator: _acceptFixtureEventHash,
+);
+
+JsonFileRecoveryPersistenceStore _testFileStore({
+  required Directory rootDirectory,
+  int maxFileBytes = JsonFileRecoveryPersistenceStore.defaultMaxFileBytes,
+  int maxEvents = InMemoryRecoveryPersistenceStore.defaultMaxEvents,
+  int maxEventBytes = InMemoryRecoveryPersistenceStore.defaultMaxEventBytes,
+}) => JsonFileRecoveryPersistenceStore(
+  rootDirectory: rootDirectory,
+  maxFileBytes: maxFileBytes,
+  maxEvents: maxEvents,
+  maxEventBytes: maxEventBytes,
+  eventHashCalculator: _acceptFixtureEventHash,
+);
+
 void main() {
   const scope = RecoveryPersistenceScope(
     tableId: 'table_1',
@@ -13,7 +37,7 @@ void main() {
   );
 
   test('appends contiguous events and returns immutable recovery window', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
 
     final result = store.appendEvents(
       scope: scope,
@@ -36,7 +60,7 @@ void main() {
   test(
     'rejects an event window above the configured count without mutation',
     () {
-      final store = InMemoryRecoveryPersistenceStore(maxEvents: 1);
+      final store = _testStore(maxEvents: 1);
       expect(
         store
             .appendEvents(
@@ -70,7 +94,7 @@ void main() {
   );
 
   test('rejects an event above the configured byte limit without mutation', () {
-    final store = InMemoryRecoveryPersistenceStore(maxEventBytes: 1024);
+    final store = _testStore(maxEventBytes: 1024);
     final result = store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -95,7 +119,7 @@ void main() {
   });
 
   test('rejects an event with a non-JSON payload without mutation', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     final result = store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -117,7 +141,7 @@ void main() {
   });
 
   test('rejects an unencodable snapshot without mutation', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     final result = store.saveSnapshot(
       scope: scope,
       snapshot: SnapshotEnvelope(
@@ -140,7 +164,7 @@ void main() {
   });
 
   test('rejects a tampered snapshot payload hash without mutation', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     final result = store.saveSnapshot(
       scope: scope,
       snapshot: _snapshot(seq: 0, hash: 'tampered_hash'),
@@ -155,7 +179,7 @@ void main() {
   });
 
   test('wipes an in-memory recovery window idempotently', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -174,7 +198,7 @@ void main() {
   });
 
   test('rejects event append that would create a sequence gap', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -198,7 +222,7 @@ void main() {
   });
 
   test('rejects event append that would break hash continuity', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -223,7 +247,7 @@ void main() {
   });
 
   test('rejects first event append that does not chain from genesis', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
 
     final result = store.appendEvents(
       scope: scope,
@@ -241,7 +265,7 @@ void main() {
   });
 
   test('rejects mismatched event scope without mutating stored stream', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
 
     final result = store.appendEvents(
       scope: scope,
@@ -264,7 +288,7 @@ void main() {
   });
 
   test('rejects invalid recovery persistence scope before mutating store', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     const invalidScope = RecoveryPersistenceScope(
       tableId: ' table_1',
       sessionId: 'session_1',
@@ -313,7 +337,7 @@ void main() {
   });
 
   test('rejects an oversized recovery scope before mutating store', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     final oversizedScope = RecoveryPersistenceScope(
       tableId: 'table_1',
       sessionId: 'x' * RecoveryPersistenceLimits.defaultMaxStorageKeyBytes,
@@ -337,7 +361,7 @@ void main() {
   });
 
   test('stores snapshot only when scope matches persisted recovery stream', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -364,7 +388,7 @@ void main() {
   });
 
   test('rejects snapshot ahead of persisted events', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -394,7 +418,7 @@ void main() {
   });
 
   test('rejects snapshot regression without replacing checkpoint', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -418,7 +442,7 @@ void main() {
   });
 
   test('rejects snapshot hash replacement for existing checkpoint', () {
-    final store = InMemoryRecoveryPersistenceStore();
+    final store = _testStore();
     store.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -464,7 +488,7 @@ void main() {
       }
     });
 
-    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final writer = _testFileStore(rootDirectory: directory);
     final append = writer.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -477,7 +501,7 @@ void main() {
       snapshot: _snapshot(seq: 2),
     );
 
-    final reader = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final reader = _testFileStore(rootDirectory: directory);
     final window = reader.loadWindow(scope);
 
     expect(append.isSuccess, isTrue);
@@ -501,9 +525,7 @@ void main() {
 
     final rootFile = File('${directory.path}${Platform.pathSeparator}root');
     rootFile.writeAsStringSync('not a directory');
-    final writer = JsonFileRecoveryPersistenceStore(
-      rootDirectory: Directory(rootFile.path),
-    );
+    final writer = _testFileStore(rootDirectory: Directory(rootFile.path));
 
     final append = writer.appendEvents(
       scope: scope,
@@ -539,24 +561,15 @@ void main() {
     });
 
     expect(
-      () => JsonFileRecoveryPersistenceStore(
-        rootDirectory: directory,
-        maxFileBytes: 0,
-      ),
+      () => _testFileStore(rootDirectory: directory, maxFileBytes: 0),
       throwsArgumentError,
     );
     expect(
-      () => JsonFileRecoveryPersistenceStore(
-        rootDirectory: directory,
-        maxEvents: 0,
-      ),
+      () => _testFileStore(rootDirectory: directory, maxEvents: 0),
       throwsArgumentError,
     );
     expect(
-      () => JsonFileRecoveryPersistenceStore(
-        rootDirectory: directory,
-        maxEventBytes: 0,
-      ),
+      () => _testFileStore(rootDirectory: directory, maxEventBytes: 0),
       throwsArgumentError,
     );
   });
@@ -573,7 +586,7 @@ void main() {
         }
       });
 
-      final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+      final writer = _testFileStore(rootDirectory: directory);
       expect(
         writer
             .appendEvents(
@@ -587,10 +600,7 @@ void main() {
         isTrue,
       );
 
-      final limited = JsonFileRecoveryPersistenceStore(
-        rootDirectory: directory,
-        maxEvents: 1,
-      );
+      final limited = _testFileStore(rootDirectory: directory, maxEvents: 1);
       final result = limited.appendEvents(
         scope: scope,
         events: <EventEnvelope>[
@@ -618,7 +628,7 @@ void main() {
       }
     });
 
-    final limited = JsonFileRecoveryPersistenceStore(
+    final limited = _testFileStore(
       rootDirectory: directory,
       maxEventBytes: 1024,
     );
@@ -659,7 +669,7 @@ void main() {
       }
     });
 
-    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final writer = _testFileStore(rootDirectory: directory);
     expect(
       writer
           .appendEvents(
@@ -676,10 +686,7 @@ void main() {
     );
     file.writeAsBytesSync(List<int>.filled(32, 0x20));
 
-    final limited = JsonFileRecoveryPersistenceStore(
-      rootDirectory: directory,
-      maxFileBytes: 8,
-    );
+    final limited = _testFileStore(rootDirectory: directory, maxFileBytes: 8);
     final result = limited.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -705,10 +712,7 @@ void main() {
       }
     });
 
-    final limited = JsonFileRecoveryPersistenceStore(
-      rootDirectory: directory,
-      maxFileBytes: 8,
-    );
+    final limited = _testFileStore(rootDirectory: directory, maxFileBytes: 8);
     final result = limited.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -739,7 +743,7 @@ void main() {
       }
     });
 
-    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final writer = _testFileStore(rootDirectory: directory);
     expect(
       writer
           .appendEvents(
@@ -792,7 +796,7 @@ void main() {
         }
       });
 
-      final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+      final writer = _testFileStore(rootDirectory: directory);
       expect(
         writer
             .appendEvents(
@@ -815,9 +819,7 @@ void main() {
         sessionId: 'session_2',
         protocolVersion: '1.0.0',
       );
-      final otherWriter = JsonFileRecoveryPersistenceStore(
-        rootDirectory: directory,
-      );
+      final otherWriter = _testFileStore(rootDirectory: directory);
       expect(
         otherWriter
             .appendEvents(
@@ -869,7 +871,7 @@ void main() {
       }
     });
 
-    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final writer = _testFileStore(rootDirectory: directory);
     final result = writer.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
@@ -907,7 +909,7 @@ void main() {
         }
       });
 
-      final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+      final writer = _testFileStore(rootDirectory: directory);
       expect(
         writer
             .appendEvents(
@@ -943,7 +945,7 @@ void main() {
       }
     });
 
-    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final writer = _testFileStore(rootDirectory: directory);
     expect(
       writer
           .appendEvents(
@@ -997,7 +999,7 @@ void main() {
       }
     });
 
-    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final writer = _testFileStore(rootDirectory: directory);
     expect(
       writer.saveSnapshot(scope: scope, snapshot: _snapshot(seq: 0)).isSuccess,
       isTrue,
@@ -1034,7 +1036,7 @@ void main() {
       }
     });
 
-    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final writer = _testFileStore(rootDirectory: directory);
     expect(
       writer
           .appendEvents(
@@ -1078,7 +1080,7 @@ void main() {
       }
     });
 
-    final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+    final writer = _testFileStore(rootDirectory: directory);
     final result = writer.appendEvents(
       scope: const RecoveryPersistenceScope(
         tableId: 'table_1',
@@ -1110,7 +1112,7 @@ void main() {
         }
       });
 
-      final writer = JsonFileRecoveryPersistenceStore(rootDirectory: directory);
+      final writer = _testFileStore(rootDirectory: directory);
       final result = writer.appendEvents(
         scope: RecoveryPersistenceScope(
           tableId: 'table_1',

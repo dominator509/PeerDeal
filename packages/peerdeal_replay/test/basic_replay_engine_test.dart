@@ -6,9 +6,16 @@ import 'package:test/test.dart';
 import 'fixture_loader.dart';
 import 'fakes/fake_table_projector.dart';
 
+String _acceptFixtureEventHash(EventEnvelope event) => event.eventHash;
+
+final _fixtureEventWindowValidator = EventWindowValidator(
+  eventHashCalculator: _acceptFixtureEventHash,
+);
+
 void main() {
   final engine = BasicReplayEngine<FakeTableProjection>(
     projector: FakeTableProjector(),
+    eventWindowValidator: _fixtureEventWindowValidator,
   );
 
   test('replays ordered event window into projected state', () {
@@ -169,7 +176,10 @@ void main() {
   test('rejects oversized replay event windows before request traversal', () {
     final failingEngine = BasicReplayEngine<FakeTableProjection>(
       projector: const _ThrowingReplayProjector(throwOnCreate: true),
-      eventWindowValidator: EventWindowValidator(maxEvents: 2),
+      eventWindowValidator: EventWindowValidator(
+        maxEvents: 2,
+        eventHashCalculator: _acceptFixtureEventHash,
+      ),
     );
 
     final event = EventEnvelope(
@@ -225,6 +235,7 @@ void main() {
     final result =
         BasicReplayEngine<FakeTableProjection>(
           projector: FakeTableProjector(),
+          eventWindowValidator: _fixtureEventWindowValidator,
         ).replay(
           ReplayRequest(
             tableId: 'table_1',
@@ -247,6 +258,7 @@ void main() {
   test('rejects inverted replay event range before projection', () {
     final failingEngine = BasicReplayEngine<FakeTableProjection>(
       projector: const _ThrowingReplayProjector(throwOnCreate: true),
+      eventWindowValidator: _fixtureEventWindowValidator,
     );
 
     final result = failingEngine.replay(
@@ -306,6 +318,7 @@ void main() {
     final first = events.first;
     final coreReplayEngine = BasicReplayEngine<TableState>(
       projector: const _CoreReplayProjector(),
+      eventWindowValidator: _fixtureEventWindowValidator,
     );
 
     final result = coreReplayEngine.replay(
@@ -386,6 +399,7 @@ void main() {
     final first = events.first;
     final limitedEngine = BasicReplayEngine<FakeTableProjection>(
       projector: FakeTableProjector(),
+      eventWindowValidator: _fixtureEventWindowValidator,
       snapshotSuffixReplayer: SnapshotSuffixReplayer(maxEvents: 1),
     );
 
@@ -459,6 +473,7 @@ void main() {
       };
       final coreReplayEngine = BasicReplayEngine<TableState>(
         projector: const _CoreReplayProjector(),
+        eventWindowValidator: _fixtureEventWindowValidator,
       );
 
       for (final entry in fixtureCases.entries) {
@@ -828,6 +843,7 @@ void main() {
   test('rejects tampered snapshot payload before projector hydration', () {
     final failingEngine = BasicReplayEngine<FakeTableProjection>(
       projector: const _ThrowingReplayProjector(throwOnCreate: true),
+      eventWindowValidator: _fixtureEventWindowValidator,
     );
     final result = failingEngine.replay(
       ReplayRequest(
@@ -860,6 +876,7 @@ void main() {
     final result =
         BasicReplayEngine<FakeTableProjection>(
           projector: const _ThrowingReplayProjector(),
+          eventWindowValidator: _fixtureEventWindowValidator,
         ).replay(
           ReplayRequest(
             tableId: 'table_1',
@@ -890,6 +907,7 @@ void main() {
   test('fails closed when replay projector cannot create base state', () {
     final failingEngine = BasicReplayEngine<FakeTableProjection>(
       projector: const _ThrowingReplayProjector(throwOnCreate: true),
+      eventWindowValidator: _fixtureEventWindowValidator,
     );
 
     final result = failingEngine.replay(
@@ -917,6 +935,7 @@ void main() {
   test('fails closed when replay projector cannot apply an event', () {
     final failingEngine = BasicReplayEngine<FakeTableProjection>(
       projector: const _ThrowingReplayProjector(throwOnApply: true),
+      eventWindowValidator: _fixtureEventWindowValidator,
     );
 
     final result = failingEngine.replay(
@@ -952,7 +971,60 @@ void main() {
     expect(result.mismatches.single.code, 'ERR_REPLAY_PROJECTOR_FAILURE');
     expect(result.mismatches.single.actual, '_ReplayProjectorFailure');
   });
+
+  test('rejects a tampered event content hash before projection', () {
+    final unsigned = _canonicalEvent(eventHash: '');
+    final valid = _canonicalEvent(
+      eventHash: computeCanonicalEventHash(unsigned),
+    );
+    final tampered = EventEnvelope(
+      eventId: valid.eventId,
+      eventType: valid.eventType,
+      eventVersion: valid.eventVersion,
+      protocolVersion: valid.protocolVersion,
+      eventSeq: valid.eventSeq,
+      tableId: valid.tableId,
+      sessionId: valid.sessionId,
+      handId: valid.handId,
+      emittedAt: valid.emittedAt,
+      actorRef: valid.actorRef,
+      payload: const <String, Object?>{'tampered': true},
+      prevEventHash: valid.prevEventHash,
+      eventHash: valid.eventHash,
+    );
+    final result =
+        BasicReplayEngine<FakeTableProjection>(
+          projector: FakeTableProjector(),
+        ).replay(
+          ReplayRequest(
+            tableId: tampered.tableId,
+            sessionId: tampered.sessionId,
+            protocolVersion: tampered.protocolVersion,
+            scope: ReplayScope.session,
+            events: <EventEnvelope>[tampered],
+          ),
+        );
+
+    expect(result.isSuccess, isFalse);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_EVENT_HASH_INVALID');
+  });
 }
+
+EventEnvelope _canonicalEvent({required String eventHash}) => EventEnvelope(
+  eventId: 'evt_1',
+  eventType: 'OpenTableSessionOpened',
+  eventVersion: '1.0',
+  protocolVersion: '1.0.0',
+  eventSeq: 1,
+  tableId: 'table_1',
+  sessionId: 'session_1',
+  handId: null,
+  emittedAt: '2026-04-25T00:00:00Z',
+  actorRef: 'system',
+  payload: const <String, Object?>{},
+  prevEventHash: genesisEventHash,
+  eventHash: eventHash,
+);
 
 List<EventEnvelope> _loadHoldemShowdownSettlementEvents() {
   return <EventEnvelope>[
@@ -1016,7 +1088,9 @@ class _CoreReplayProjector implements ReplayStateProjector<TableState> {
     required TableState state,
     required EventEnvelope event,
   }) {
-    return const CoreReducer().apply(state, event);
+    return CoreReducer(
+      eventHashCalculator: _acceptFixtureEventHash,
+    ).apply(state, event);
   }
 }
 

@@ -116,20 +116,21 @@ class HoldemEventCursor {
     }
 
     final eventPayload = Map<String, Object?>.unmodifiable(payload);
-    final canonicalEvent = <String, Object?>{
-      'event_id': resolvedEventId,
-      'event_type': eventType,
-      'event_version': '1.0',
-      'protocol_version': protocolVersion,
-      'event_seq': nextEventSeq,
-      'table_id': tableId,
-      'session_id': sessionId,
-      'hand_id': handId,
-      'emitted_at': resolvedEmittedAt,
-      'actor_ref': resolvedActorRef,
-      'payload': eventPayload,
-      'prev_event_hash': previousEventHash,
-    };
+    final unsignedEvent = EventEnvelope(
+      eventId: resolvedEventId,
+      eventType: eventType,
+      eventVersion: '1.0',
+      protocolVersion: protocolVersion,
+      eventSeq: nextEventSeq,
+      tableId: tableId,
+      sessionId: sessionId,
+      handId: handId,
+      emittedAt: resolvedEmittedAt,
+      actorRef: resolvedActorRef,
+      payload: eventPayload,
+      prevEventHash: previousEventHash,
+      eventHash: '',
+    );
     final event = EventEnvelope(
       eventId: resolvedEventId,
       eventType: eventType,
@@ -144,7 +145,9 @@ class HoldemEventCursor {
       payload: eventPayload,
       prevEventHash: previousEventHash,
       eventHash: eventHashFactory(
-        Map<String, Object?>.unmodifiable(canonicalEvent),
+        Map<String, Object?>.unmodifiable(
+          canonicalEventHashPayload(unsignedEvent),
+        ),
       ),
     );
     _requireIdentity(event.eventHash, 'eventHash');
@@ -217,7 +220,7 @@ class HoldemEventCursor {
       _requireIdentity(event.actorRef, 'actorRef');
       _requireIdentity(event.eventHash, 'eventHash');
       final expectedHash = eventHashFactory(
-        Map<String, Object?>.unmodifiable(_canonicalEvent(event)),
+        Map<String, Object?>.unmodifiable(canonicalEventHashPayload(event)),
       );
       if (expectedHash != event.eventHash) {
         return HoldemEventCursorAcceptanceResult.rejected(
@@ -246,23 +249,6 @@ class HoldemEventCursor {
         lastEventType: event.eventType,
       ),
     );
-  }
-
-  Map<String, Object?> _canonicalEvent(EventEnvelope event) {
-    return <String, Object?>{
-      'event_id': event.eventId,
-      'event_type': event.eventType,
-      'event_version': event.eventVersion,
-      'protocol_version': event.protocolVersion,
-      'event_seq': event.eventSeq,
-      'table_id': event.tableId,
-      'session_id': event.sessionId,
-      'hand_id': event.handId,
-      'emitted_at': event.emittedAt,
-      'actor_ref': event.actorRef,
-      'payload': Map<String, Object?>.unmodifiable(event.payload),
-      'prev_event_hash': event.prevEventHash,
-    };
   }
 }
 
