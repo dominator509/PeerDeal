@@ -198,6 +198,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-20-188` | Direct wizard preset merging accepted unsafe layer IDs and left equal-priority ordering unspecified | 4 | T307 | RESOLVED | `DefaultPresetResolver.mergeLayers` now rejects unsafe IDs and uses supplied order as the deterministic equal-priority tie-breaker; preset merge policy and package ownership remain unchanged. |
 | `LEGACY-GAP-2026-08-20-189` | Game File compiler exposed unsafe validation diagnostics through results and compiled output | 4 | T308 | RESOLVED | `DefaultGameFileCompiler` now rejects oversized or unsafe diagnostic text with stable wizard codes and suppresses the original values from rejected results and Game Files; compiler and protocol boundaries remain unchanged. |
 | `LEGACY-GAP-2026-08-20-190` | Core pot settlement ignored negative commitments and duplicate or unsafe seat identities | 4 | T309 | RESOLVED | `PotEngine` and `SidePotBuilder` now fail closed before traversal on negative commitments, unsafe or duplicate commitment IDs, and unsafe or duplicate winner IDs; variant-agnostic pot ownership remains in core. |
+| `LEGACY-GAP-2026-08-20-191` | Direct Hold'em showdown evaluation accepted negative or duplicate seat identities | 4 | T310 | RESOLVED | `HoldemShowdownEvaluator` now rejects negative and duplicate seat numbers before ranking, aligning direct evaluation with the existing Hold'em state invariant. |
 
 ## Status Definitions
 

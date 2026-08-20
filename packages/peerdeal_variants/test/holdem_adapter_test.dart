@@ -107,6 +107,41 @@ void main() {
       expect(result.warnings, contains('ERR_HOLDEM_SHOWDOWN_HOLE_CARD_COUNT'));
     });
 
+    test('showdown rejects negative and duplicate seat identities', () {
+      final result = adapter.evaluate(
+        ShowdownEvaluationInput(
+          boardCards: <String>['Ah', 'Kh', 'Qh', 'Jh', '2c'],
+          seats: <ShowdownSeatInput>[
+            ShowdownSeatInput(
+              seat: -1,
+              holeCards: <String>['As', 'Ad'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['7c', '8d'],
+              isFolded: false,
+            ),
+            ShowdownSeatInput(
+              seat: 1,
+              holeCards: <String>['9c', '9d'],
+              isFolded: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(result.results, isEmpty);
+      expect(
+        result.warnings,
+        contains('ERR_HOLDEM_SHOWDOWN_SEAT_ID_INVALID'),
+      );
+      expect(
+        result.warnings,
+        contains('ERR_HOLDEM_SHOWDOWN_SEAT_ID_DUPLICATE'),
+      );
+    });
+
     test('showdown fails safely on malformed card identities', () {
       final result = adapter.evaluate(
         ShowdownEvaluationInput(

@@ -3253,6 +3253,10 @@ commitments are negative or carry unsafe/duplicate seat IDs, or when a winner
 list carries unsafe/duplicate seat IDs. Direct `SidePotBuilder` calls apply the
 same commitment-identity guard without moving Hold'em rules into core.
 
+Direct Hold'em showdown evaluation now also rejects negative or duplicate seat
+numbers before ranking or winner projection, matching the existing variant hand
+state invariant without changing the adapter boundary.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

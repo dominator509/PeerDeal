@@ -32,7 +32,8 @@ It does **not** yet implement a full production poker engine.
 Direct Hold'em showdown inputs are bounded by the locked nine-seat launch
 invariant before seat sorting, card expansion, or hand evaluation. Oversized
 inputs fail closed with `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`; the adapter identity
-and configuration validation use the same variant-owned limit.
+and configuration validation use the same variant-owned limit. Showdown also
+rejects negative or duplicate seat identities before ranking.
 
 ## Hold'em showdown to settlement
 The intended app/session call order is:

@@ -22,6 +22,13 @@ class HoldemShowdownEvaluator {
     }
 
     final warnings = <String>[];
+    final seatIds = <int>{};
+    if (input.seats.any((seat) => seat.seat < 0)) {
+      warnings.add('ERR_HOLDEM_SHOWDOWN_SEAT_ID_INVALID');
+    }
+    if (input.seats.any((seat) => !seatIds.add(seat.seat))) {
+      warnings.add('ERR_HOLDEM_SHOWDOWN_SEAT_ID_DUPLICATE');
+    }
     if (input.boardCards.length != 5) {
       warnings.add('ERR_HOLDEM_SHOWDOWN_BOARD_CARD_COUNT');
     }

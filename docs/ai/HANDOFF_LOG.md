@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Validate Hold'em Showdown Seat Identities
+
+Summary:
+- `HoldemShowdownEvaluator` now rejects negative and duplicate seat numbers
+  before sorting or evaluating showdown inputs.
+- The evaluator now matches the existing Hold'em hand-state invariant without
+  changing the variant or core package boundary.
+
+Files:
+- `packages/peerdeal_variants/lib/src/holdem/holdem_showdown_evaluator.dart`
+- `packages/peerdeal_variants/test/holdem_adapter_test.dart`
+- `packages/peerdeal_variants/README.md`
+
+Verification:
+- `peerdeal_variants` analysis passed.
+- Full package-local variant suite passed: 181 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Harden Core Pot Input Validation
 
 Summary:

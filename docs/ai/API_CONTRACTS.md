@@ -468,7 +468,8 @@ use the existing variant-specific rejection codes.
 more than the shared nine-seat Hold'em launch limit before sorting seats,
 expanding hole cards, or evaluating hands. It returns an empty result with
 `ERR_HOLDEM_SHOWDOWN_SEAT_COUNT`; `HoldemAdapter` identity and configuration
-validation reuse that same variant-owned limit.
+validation reuse that same variant-owned limit. Negative or duplicate direct
+showdown seat numbers also fail closed before ranking.
 
 `ShowdownSettlementProjector` applies the same nine-seat commitment limit before
 calling core side-pot construction. Contested and uncontested overflow return a
