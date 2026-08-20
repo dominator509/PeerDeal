@@ -45,6 +45,19 @@ void main() {
     expect(artifact.reason, 'Receipt export authorization denied.');
   });
 
+  test('contains authorizer failures in direct authorization', () {
+    const service = DefaultReceiptService(
+      authorizer: _ThrowingReceiptAuthorizer(),
+    );
+
+    final result = service.authorize(receipt, authorization);
+    expect(result.allowed, isFalse);
+    expect(
+      result.normalizedResultCode,
+      'ERR_RECEIPT_AUTHORIZATION_UNAVAILABLE',
+    );
+  });
+
   test('exports opaque artifact with minimal metadata', () {
     final artifact = service.exportReceipt(
       receipt,
@@ -319,5 +332,17 @@ class _ThrowingReceiptCipher implements ReceiptCipher {
   @override
   String decrypt(String ciphertext) {
     throw StateError('decryption unavailable');
+  }
+}
+
+class _ThrowingReceiptAuthorizer implements ReceiptAuthorizer {
+  const _ThrowingReceiptAuthorizer();
+
+  @override
+  ReceiptAuthorizationResult authorize(
+    PeerDealReceipt receipt,
+    ReceiptAuthorizationRequest request,
+  ) {
+    throw StateError('authorization unavailable');
   }
 }

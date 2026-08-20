@@ -3162,6 +3162,12 @@ through the receipt route and native export factory without deriving caller
 identity from the receipt itself. Provider proof implementations and concrete
 product session/user authorization remain integration-owned.
 
+The receipt authorization follow-up also validates caller identity and session
+fields as bounded, strict UTF-8, non-padded, control-free text before applying
+the existing binding policy, and converts direct authorizer failures into a
+denied result. Receipt policy remains in `peerdeal_receipts`; product callers
+still own the source of authorization identity.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -22,7 +22,17 @@ class DefaultReceiptService implements ReceiptService {
   ReceiptAuthorizationResult authorize(
     PeerDealReceipt receipt,
     ReceiptAuthorizationRequest request,
-  ) => _authorizer.authorize(receipt, request);
+  ) {
+    try {
+      return _authorizer.authorize(receipt, request);
+    } on Object {
+      return const ReceiptAuthorizationResult(
+        allowed: false,
+        normalizedResultCode: 'ERR_RECEIPT_AUTHORIZATION_UNAVAILABLE',
+        message: 'Receipt authorization is unavailable.',
+      );
+    }
+  }
 
   @override
   ReceiptExportArtifact exportReceipt(

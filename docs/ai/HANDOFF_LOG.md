@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Receipt Authorization Request Boundary
+
+Summary:
+- `DefaultReceiptAuthorizer` now rejects blank, padded, oversized, malformed
+  UTF-8, or control-bearing caller user/session identity fields before applying
+  the existing receipt binding policy.
+- `DefaultReceiptService.authorize` now converts authorizer exceptions into a
+  denied, normalized unavailable result instead of leaking the exception.
+- Receipt package ownership and the app/native authorization flow are
+  unchanged; product callers still supply the authorization request.
+
+Files:
+- `packages/peerdeal_receipts/lib/src/services/default_receipt_authorizer.dart`
+- `packages/peerdeal_receipts/lib/src/services/default_receipt_service.dart`
+- Focused receipt authorization/service tests and package README.
+
+Verification:
+- Receipt package analyzer passed with the Flutter SDK Dart executable and a
+  redirected writable telemetry directory.
+- All 65 receipt package tests passed.
+- `git diff --check` passed.
+
+Remaining:
+- Product session/auth state must still supply real caller identity.
+- Native/device, provider-proof, durable persistence, release-signing,
+  other-platform, and final UX gates remain external or integration-owned.
+
 ### 2026-08-20 - Codex - Receipt Export Authorization and Provider Proof Verification
 
 Summary:

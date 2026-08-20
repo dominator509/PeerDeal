@@ -129,4 +129,28 @@ void main() {
     expect(result.allowed, isFalse);
     expect(result.normalizedResultCode, 'ERR_RECEIPT_MALFORMED');
   });
+
+  test('rejects malformed authorization identity fields', () {
+    const request = ReceiptAuthorizationRequest(
+      requestedByUserId: ' user_1',
+      requestedSessionId: 'sess_1',
+      accessMode: ReceiptAccessMode.view,
+    );
+
+    final result = authorizer.authorize(liveReceipt, request);
+    expect(result.allowed, isFalse);
+    expect(result.normalizedResultCode, 'ERR_RECEIPT_AUTHORIZATION_INVALID');
+  });
+
+  test('rejects control-bearing authorization identity fields', () {
+    const request = ReceiptAuthorizationRequest(
+      requestedByUserId: 'user_1\n',
+      requestedSessionId: 'sess_1',
+      accessMode: ReceiptAccessMode.view,
+    );
+
+    final result = authorizer.authorize(liveReceipt, request);
+    expect(result.allowed, isFalse);
+    expect(result.normalizedResultCode, 'ERR_RECEIPT_AUTHORIZATION_INVALID');
+  });
 }

@@ -1,3 +1,5 @@
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+
 import '../contracts/receipt_authorizer.dart';
 import '../models/peer_deal_receipt.dart';
 import '../models/receipt_access_mode.dart';
@@ -30,6 +32,15 @@ class DefaultReceiptAuthorizer implements ReceiptAuthorizer {
       );
     }
 
+    if (!_isSafeIdentity(request.requestedByUserId) ||
+        !_isSafeIdentity(request.requestedSessionId)) {
+      return const ReceiptAuthorizationResult(
+        allowed: false,
+        normalizedResultCode: 'ERR_RECEIPT_AUTHORIZATION_INVALID',
+        message: 'Receipt authorization request is malformed.',
+      );
+    }
+
     if ((receipt.bindingMode == ReceiptBindingMode.sessionBound ||
             receipt.bindingMode == ReceiptBindingMode.mixed) &&
         request.requestedSessionId != receipt.sessionId) {
@@ -59,6 +70,16 @@ class DefaultReceiptAuthorizer implements ReceiptAuthorizer {
       message: request.accessMode == ReceiptAccessMode.view
           ? 'View permitted for the bound session and user.'
           : 'Restore permitted.',
+    );
+  }
+
+  bool _isSafeIdentity(String value) {
+    if (value.trim().isEmpty || value.trim() != value) return false;
+    if (!const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
+      return false;
+    }
+    return !value.codeUnits.any(
+      (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
     );
   }
 }
