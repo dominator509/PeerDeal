@@ -312,6 +312,15 @@ class InMemoryRecoveryPersistenceStore
     EventEnvelope? previous = storedEvents.isEmpty ? null : storedEvents.last;
 
     for (final event in events) {
+      if (!validateEventEnvelopeIdentity(event).isValid) {
+        conflicts.add(
+          const SyncConflict(
+            code: 'ERR_RECOVERY_PERSISTENCE_EVENT_IDENTITY_INVALID',
+            message: 'Persisted event envelope identity is empty or unsafe.',
+            severity: SyncConflictSeverity.fatal,
+          ),
+        );
+      }
       try {
         _eventCodec.encode(event);
       } on FormatException catch (error) {

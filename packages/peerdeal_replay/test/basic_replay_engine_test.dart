@@ -215,7 +215,7 @@ void main() {
     expect(result.mismatches.single.actual, 3);
   });
 
-  test('fails closed when replay anchor calculation throws', () {
+  test('fails closed before replay anchor calculation on unsafe identity', () {
     final event = EventEnvelope(
       eventId: 'evt_1',
       eventType: 'OpenTableSessionOpened',
@@ -249,10 +249,7 @@ void main() {
     expect(result.isSuccess, isFalse);
     expect(result.state, isNull);
     expect(result.reconstructedAnchor, isNull);
-    expect(
-      result.mismatches.single.code,
-      'ERR_REPLAY_ANCHOR_CALCULATION_FAILURE',
-    );
+    expect(result.mismatches.single.code, 'ERR_REPLAY_EVENT_IDENTITY_INVALID');
   });
 
   test('rejects inverted replay event range before projection', () {

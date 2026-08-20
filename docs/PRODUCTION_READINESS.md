@@ -3131,6 +3131,24 @@ reuses the protocol field map instead of duplicating it. Placeholder hashes in
 legacy test fixtures remain test-only through explicit test calculators and
 are not accepted by production defaults.
 
+The T296 follow-up closes the duplicated event-envelope identity boundary.
+`peerdeal_protocol` now exposes the shared non-empty, bounded, strict UTF-8,
+control-free identity predicate. Core, replay, recovery conflict detection,
+snapshot application, and recovery persistence apply that predicate before
+their existing hash, projection, or mutation checks. Native Android and
+Windows receive queues also admit frames only for actively polled session and
+peer scopes, preventing unrelated multicast traffic from evicting a live
+bounded queue. Transport authentication, replay protection, real-device
+reachability, product session authorization, and durable persistence remain
+separate product or operator contracts.
+
+The governance follow-up closes state-transition and seat-binding gaps in the
+mode policy layer. Seat acceptance, assignment, and expiry now require the
+participant seat index and seat occupant identity to agree. Reject, remove,
+and session-ban actions return their actual terminal participant states, and
+terminal participants cannot be re-admitted. Mode ownership and the existing
+governance action/decision contracts remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

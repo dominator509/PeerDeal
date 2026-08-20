@@ -33,6 +33,8 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
   C0/C1-control-bearing values
 - `CoreReducer()` verifies canonical event content hashes before projection;
   documented variant hash policies can be supplied through its calculator seam
+- event-envelope identity checks use the protocol-owned validation predicate,
+  keeping reducer and recovery ingress rules aligned
 - variant-agnostic pot settlement bounds before side-pot or award traversal:
   64 commitments, 64 winning slice-map entries, and 64 winners per slice
 - public table-state metadata and pot-settlement result collections are

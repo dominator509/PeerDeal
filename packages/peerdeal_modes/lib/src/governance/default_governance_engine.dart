@@ -47,6 +47,13 @@ class DefaultGovernanceEngine implements GovernanceEngine {
             GovernanceResultCodes.errPermissionDenied,
           );
         }
+        if (subject.state == ParticipantGovernanceState.closedOutUnseated ||
+            subject.state == ParticipantGovernanceState.removed ||
+            subject.state == ParticipantGovernanceState.bannedForSession) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errParticipantStateInvalid,
+          );
+        }
         return GovernanceDecision(
           allowed: true,
           resultCode: GovernanceResultCodes.okAdmit,
@@ -139,6 +146,16 @@ class DefaultGovernanceEngine implements GovernanceEngine {
             GovernanceResultCodes.errSeatOfferMissing,
           );
         }
+        if (seat.occupantId != subject.participantId) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatUnavailable,
+          );
+        }
+        if (subject.seatIndex != action.seatIndex) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatOfferMissing,
+          );
+        }
         return GovernanceDecision(
           allowed: true,
           resultCode: GovernanceResultCodes.okSeatAssigned,
@@ -154,6 +171,27 @@ class DefaultGovernanceEngine implements GovernanceEngine {
           );
         }
         if (subject.state != ParticipantGovernanceState.seatOffered) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatOfferMissing,
+          );
+        }
+        final seatIndex = action.seatIndex;
+        final seat = seatIndex == null
+            ? null
+            : context.seats
+                  .where((candidate) => candidate.seatIndex == seatIndex)
+                  .firstOrNull;
+        if (seat == null || seat.state != SeatState.reservedPending) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatOfferMissing,
+          );
+        }
+        if (subject.seatIndex != seatIndex) {
+          return GovernanceDecision.deny(
+            GovernanceResultCodes.errSeatOfferMissing,
+          );
+        }
+        if (seat.occupantId != subject.participantId) {
           return GovernanceDecision.deny(
             GovernanceResultCodes.errSeatOfferMissing,
           );
@@ -179,7 +217,9 @@ class DefaultGovernanceEngine implements GovernanceEngine {
             .firstOrNull;
         if (subject.state != ParticipantGovernanceState.seatOffered ||
             seat == null ||
-            seat.state != SeatState.reservedPending) {
+            seat.state != SeatState.reservedPending ||
+            subject.seatIndex != action.seatIndex ||
+            seat.occupantId != subject.participantId) {
           return GovernanceDecision.deny(
             GovernanceResultCodes.errSeatOfferMissing,
           );
@@ -194,8 +234,7 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.addToWaitlist:
-        if (!_isSelfAction(actor, subject) &&
-            !_canManageWaitlist(actor)) {
+        if (!_isSelfAction(actor, subject) && !_canManageWaitlist(actor)) {
           return GovernanceDecision.deny(
             GovernanceResultCodes.errPermissionDenied,
           );
@@ -247,8 +286,7 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.markParticipantAway:
-        if (!_isSelfAction(actor, subject) &&
-            !_canManageParticipants(actor)) {
+        if (!_isSelfAction(actor, subject) && !_canManageParticipants(actor)) {
           return GovernanceDecision.deny(
             GovernanceResultCodes.errPermissionDenied,
           );
@@ -260,8 +298,7 @@ class DefaultGovernanceEngine implements GovernanceEngine {
         );
 
       case GovernanceActionType.returnParticipant:
-        if (!_isSelfAction(actor, subject) &&
-            !_canManageParticipants(actor)) {
+        if (!_isSelfAction(actor, subject) && !_canManageParticipants(actor)) {
           return GovernanceDecision.deny(
             GovernanceResultCodes.errPermissionDenied,
           );
@@ -281,10 +318,28 @@ class DefaultGovernanceEngine implements GovernanceEngine {
             GovernanceResultCodes.errPermissionDenied,
           );
         }
+        final nextState = switch (action.type) {
+          GovernanceActionType.rejectParticipant =>
+            ParticipantGovernanceState.closedOutUnseated,
+          GovernanceActionType.removeParticipant =>
+            ParticipantGovernanceState.removed,
+          GovernanceActionType.banParticipantForSession =>
+            ParticipantGovernanceState.bannedForSession,
+          _ => subject.state,
+        };
+        final resultCode = switch (action.type) {
+          GovernanceActionType.rejectParticipant =>
+            GovernanceResultCodes.okParticipantRejected,
+          GovernanceActionType.removeParticipant =>
+            GovernanceResultCodes.okParticipantRemoved,
+          GovernanceActionType.banParticipantForSession =>
+            GovernanceResultCodes.okParticipantBanned,
+          _ => 'OK_GOVERNANCE_ACTION_ACCEPTED',
+        };
         return GovernanceDecision(
           allowed: true,
-          resultCode: 'OK_GOVERNANCE_ACTION_ACCEPTED',
-          nextParticipantState: subject.state.name,
+          resultCode: resultCode,
+          nextParticipantState: nextState.name,
         );
     }
   }
@@ -311,10 +366,7 @@ class DefaultGovernanceEngine implements GovernanceEngine {
     return _canManageSeats(actor);
   }
 
-  bool _isSelfAction(
-    ParticipantSnapshot? actor,
-    ParticipantSnapshot subject,
-  ) {
+  bool _isSelfAction(ParticipantSnapshot? actor, ParticipantSnapshot subject) {
     return actor != null && actor.participantId == subject.participantId;
   }
 

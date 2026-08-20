@@ -27,6 +27,8 @@ constexpr std::size_t kMaxPayloadBytes = 60 * 1024;
 constexpr std::size_t kMaxIdBytes = 256;
 constexpr std::size_t kMaxQueueSize = 512;
 constexpr std::size_t kMaxBatchSize = 64;
+constexpr std::size_t kMaxActiveReceiveScopes = 32;
+constexpr auto kActiveReceiveScopeTtl = std::chrono::seconds(15);
 constexpr auto kReceiveErrorBackoff = std::chrono::milliseconds(25);
 constexpr ULONG kInitialAdapterBufferBytes = 16 * 1024;
 constexpr ULONG kMaxAdapterBufferBytes = 1024 * 1024;
@@ -315,6 +317,7 @@ WindowsNativeTransport::~WindowsNativeTransport() {
   {
     std::lock_guard<std::mutex> lock(queue_mutex_);
     frames_.clear();
+    active_receive_scopes_.clear();
   }
   if (wsa_started_) ::WSACleanup();
 }
@@ -420,9 +423,68 @@ void WindowsNativeTransport::ReceiveLoop() {
     auto frame = DecodeFrame(buffer.data(), static_cast<std::size_t>(received));
     if (!frame.has_value()) continue;
     std::lock_guard<std::mutex> lock(queue_mutex_);
-    while (frames_.size() >= kMaxQueueSize) frames_.pop_front();
-    frames_.push_back(std::move(frame.value()));
+    const auto now = std::chrono::steady_clock::now();
+    PruneInactiveReceiveScopesLocked(now);
+    if (IsFrameAdmittedLocked(frame.value())) {
+      while (frames_.size() >= kMaxQueueSize) frames_.pop_front();
+      frames_.push_back(std::move(frame.value()));
+    }
   }
+}
+
+void WindowsNativeTransport::RegisterReceiveScope(
+    const std::string& session_id, const std::string& peer_id) {
+  std::lock_guard<std::mutex> lock(queue_mutex_);
+  const auto now = std::chrono::steady_clock::now();
+  PruneInactiveReceiveScopesLocked(now);
+  const auto existing = std::find_if(
+      active_receive_scopes_.begin(), active_receive_scopes_.end(),
+      [&session_id, &peer_id](const ReceiveScope& scope) {
+        return scope.session_id == session_id && scope.peer_id == peer_id;
+      });
+  if (existing != active_receive_scopes_.end()) {
+    active_receive_scopes_.erase(existing);
+    active_receive_scopes_.push_back(ReceiveScope{session_id, peer_id, now});
+    return;
+  }
+  active_receive_scopes_.push_back(ReceiveScope{session_id, peer_id, now});
+  if (active_receive_scopes_.size() > kMaxActiveReceiveScopes) {
+    active_receive_scopes_.erase(active_receive_scopes_.begin());
+  }
+}
+
+void WindowsNativeTransport::PruneInactiveFrames() {
+  std::lock_guard<std::mutex> lock(queue_mutex_);
+  const auto now = std::chrono::steady_clock::now();
+  PruneInactiveReceiveScopesLocked(now);
+  std::deque<TransportFrame> retained;
+  while (!frames_.empty()) {
+    auto frame = std::move(frames_.front());
+    frames_.pop_front();
+    if (IsFrameAdmittedLocked(frame)) retained.push_back(std::move(frame));
+  }
+  frames_.swap(retained);
+}
+
+void WindowsNativeTransport::PruneInactiveReceiveScopesLocked(
+    std::chrono::steady_clock::time_point now) {
+  active_receive_scopes_.erase(
+      std::remove_if(
+          active_receive_scopes_.begin(), active_receive_scopes_.end(),
+          [now](const ReceiveScope& scope) {
+            return now - scope.last_seen > kActiveReceiveScopeTtl;
+          }),
+      active_receive_scopes_.end());
+}
+
+bool WindowsNativeTransport::IsFrameAdmittedLocked(
+    const TransportFrame& frame) const {
+  return std::any_of(
+      active_receive_scopes_.begin(), active_receive_scopes_.end(),
+      [&frame](const ReceiveScope& scope) {
+        return scope.session_id == frame.session_id &&
+               scope.peer_id == frame.recipient_peer_id;
+      });
 }
 
 void WindowsNativeTransport::HandleMethodCall(
@@ -523,6 +585,8 @@ void WindowsNativeTransport::HandleMethodCall(
         result->Success(Failure("Native transport receive is unavailable."));
         return;
       }
+      RegisterReceiveScope(session_id.value(), peer_id.value());
+      PruneInactiveFrames();
       result->Success(ReceivePayload(&frames_, &queue_mutex_, session_id.value(),
                                      peer_id.value()));
       return;

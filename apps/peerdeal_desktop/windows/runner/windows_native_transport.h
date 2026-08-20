@@ -8,6 +8,7 @@
 #include <flutter/method_channel.h>
 
 #include <atomic>
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <deque>
@@ -28,6 +29,12 @@ class WindowsNativeTransport final {
     std::vector<uint8_t> payload;
   };
 
+  struct ReceiveScope {
+    std::string session_id;
+    std::string peer_id;
+    std::chrono::steady_clock::time_point last_seen;
+  };
+
   explicit WindowsNativeTransport(flutter::BinaryMessenger* messenger);
   ~WindowsNativeTransport();
 
@@ -42,6 +49,12 @@ class WindowsNativeTransport final {
   bool EnsureSocket();
   bool InitializeSocketLocked();
   void ReceiveLoop();
+  void RegisterReceiveScope(const std::string& session_id,
+                            const std::string& peer_id);
+  void PruneInactiveFrames();
+  void PruneInactiveReceiveScopesLocked(
+      std::chrono::steady_clock::time_point now);
+  bool IsFrameAdmittedLocked(const TransportFrame& frame) const;
 
   static std::optional<TransportFrame> DecodeFrame(const uint8_t* bytes,
                                                    std::size_t length);
@@ -61,6 +74,7 @@ class WindowsNativeTransport final {
   std::atomic_bool stopping_{false};
   std::mutex queue_mutex_;
   std::deque<TransportFrame> frames_;
+  std::vector<ReceiveScope> active_receive_scopes_;
 };
 
 #endif  // RUNNER_WINDOWS_NATIVE_TRANSPORT_H_

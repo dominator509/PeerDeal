@@ -231,54 +231,23 @@ class CoreReducer {
   }
 
   void _ensureEventEnvelopeIdentity(EventEnvelope event) {
-    final emptyFields = <String>[
-      if (event.eventId.trim().isEmpty) 'event_id',
-      if (event.eventType.trim().isEmpty) 'event_type',
-      if (event.eventVersion.trim().isEmpty) 'event_version',
-      if (event.protocolVersion.trim().isEmpty) 'protocol_version',
-      if (event.tableId.trim().isEmpty) 'table_id',
-      if (event.sessionId.trim().isEmpty) 'session_id',
-      if (event.emittedAt.trim().isEmpty) 'emitted_at',
-      if (event.actorRef.trim().isEmpty) 'actor_ref',
-      if (event.prevEventHash.trim().isEmpty) 'prev_event_hash',
-      if (event.eventHash.trim().isEmpty) 'event_hash',
-    ];
-
-    if (emptyFields.isEmpty) {
-      final unsafeFields = <String>[
-        if (!_isSafeIdentity(event.eventId)) 'event_id',
-        if (!_isSafeIdentity(event.eventType)) 'event_type',
-        if (!_isSafeIdentity(event.eventVersion)) 'event_version',
-        if (!_isSafeIdentity(event.protocolVersion)) 'protocol_version',
-        if (!_isSafeIdentity(event.tableId)) 'table_id',
-        if (!_isSafeIdentity(event.sessionId)) 'session_id',
-        if (event.handId != null &&
-            event.handId!.isNotEmpty &&
-            !_isSafeIdentity(event.handId!))
-          'hand_id',
-        if (!_isSafeIdentity(event.emittedAt)) 'emitted_at',
-        if (!_isSafeIdentity(event.actorRef)) 'actor_ref',
-        if (!_isSafeIdentity(event.prevEventHash)) 'prev_event_hash',
-        if (!_isSafeIdentity(event.eventHash)) 'event_hash',
-      ];
-
-      if (unsafeFields.isNotEmpty) {
-        throw InvariantViolation(
-          code: CoreInvariantCodes.eventEnvelopeIdentityUnsafe,
-          message:
-              'Event envelope identity fields contain unsafe or oversized '
-              'text: ${unsafeFields.join(', ')}.',
-        );
-      }
-      return;
+    final validation = validateEventEnvelopeIdentity(event);
+    if (validation.unsafeFields.isNotEmpty) {
+      throw InvariantViolation(
+        code: CoreInvariantCodes.eventEnvelopeIdentityUnsafe,
+        message:
+            'Event envelope identity fields contain unsafe or oversized '
+            'text: ${validation.unsafeFields.join(', ')}.',
+      );
     }
-
-    throw InvariantViolation(
-      code: CoreInvariantCodes.eventEnvelopeIdentityEmpty,
-      message:
-          'Event envelope identity fields must be non-empty: '
-          '${emptyFields.join(', ')}.',
-    );
+    if (validation.emptyFields.isNotEmpty) {
+      throw InvariantViolation(
+        code: CoreInvariantCodes.eventEnvelopeIdentityEmpty,
+        message:
+            'Event envelope identity fields must be non-empty: '
+            '${validation.emptyFields.join(', ')}.',
+      );
+    }
   }
 
   void _ensureEventHash(EventEnvelope event) {
@@ -309,18 +278,6 @@ class CoreReducer {
         message: 'Event envelope payload exceeds canonical protocol limits.',
       );
     }
-  }
-
-  bool _isSafeIdentity(String value) {
-    if (value.trim() != value) {
-      return false;
-    }
-    if (!const CanonicalJsonLimits().isWithinUtf8TextLimit(value)) {
-      return false;
-    }
-    return value.codeUnits.every(
-      (unit) => unit >= 0x20 && !(unit >= 0x7f && unit <= 0x9f),
-    );
   }
 
   void _ensureEventCanAdvanceState(TableState current, EventEnvelope event) {

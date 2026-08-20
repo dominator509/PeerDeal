@@ -114,4 +114,33 @@ void main() {
       'ERR_REPLAY_EVENT_SEQUENCE_NOT_INCREASING',
     );
   });
+
+  test('rejects unsafe event envelope identity before replay', () {
+    final event = EventEnvelope(
+      eventId: 'evt_1',
+      eventType: 'OpenTableSessionOpened',
+      eventVersion: '1.0',
+      protocolVersion: '1.0.0',
+      eventSeq: 1,
+      tableId: 'table_1',
+      sessionId: 'session_1',
+      handId: null,
+      emittedAt: '2026-04-25T00:00:00Z',
+      actorRef: 'host\n1',
+      payload: const <String, Object?>{},
+      prevEventHash: genesisEventHash,
+      eventHash: 'hash_1',
+    );
+
+    final mismatches = EventWindowValidator(
+      eventHashCalculator: _acceptFixtureEventHash,
+    ).validate(<EventEnvelope>[event]);
+
+    expect(
+      mismatches.any(
+        (mismatch) => mismatch.code == 'ERR_REPLAY_EVENT_IDENTITY_INVALID',
+      ),
+      isTrue,
+    );
+  });
 }

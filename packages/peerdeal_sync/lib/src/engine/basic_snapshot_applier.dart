@@ -205,6 +205,10 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
     }
 
     for (final event in request.events) {
+      final eventIdentityConflict = _eventIdentityConflict(event);
+      if (eventIdentityConflict != null) {
+        return <SyncConflict>[eventIdentityConflict];
+      }
       final eventEncodingConflict = _eventEncodingConflict(event);
       if (eventEncodingConflict != null) {
         return <SyncConflict>[eventEncodingConflict];
@@ -349,6 +353,15 @@ class BasicSnapshotApplier<TState> implements SnapshotApplier<TState> {
         expected: isTooLarge ? '${eventCodec.maxBytes}' : null,
       );
     }
+  }
+
+  SyncConflict? _eventIdentityConflict(EventEnvelope event) {
+    if (validateEventEnvelopeIdentity(event).isValid) return null;
+    return const SyncConflict(
+      code: 'ERR_SNAPSHOT_APPLY_EVENT_IDENTITY_INVALID',
+      message: 'Recovery event envelope identity is empty or unsafe.',
+      severity: SyncConflictSeverity.fatal,
+    );
   }
 
   SyncConflict? _eventHashConflict(EventEnvelope event) {

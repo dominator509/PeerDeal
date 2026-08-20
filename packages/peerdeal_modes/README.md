@@ -29,7 +29,13 @@ app orchestration.
 
 ## Hardened coverage
 - Seat assignment and offer expiry now require manager authority and explicit
-  lifecycle states before returning deterministic next participant/seat states.
+  lifecycle states before returning deterministic next participant/seat states;
+  seat claims and assignments also require participant and seat occupant
+  identity to agree.
+- Seat acceptance requires an explicit, participant-bound reserved seat rather
+  than accepting any pending seat in the context.
+- Reject, remove, and session-ban actions now return their actual terminal
+  participant states, and terminal participants cannot be re-admitted.
 - Co-host grant and revoke decisions now return explicit next role values and
   reject unauthorized or invalid role transitions.
 - Waitlist promotion is deterministic: only a waitlisted participant at the head

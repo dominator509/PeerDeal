@@ -32,10 +32,11 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
   into fatal safe-close conflicts instead of escaping recovery callers.
 - The recovery persistence contract has an in-memory gate that rejects
   table/session or protocol mismatches, sequence gaps, hash-chain breaks, and
-  event content-hash mismatches, and snapshots ahead of the stored event stream
-  before mutating stored recovery windows. Direct conflict detection, snapshot
-  application, and persistence use the same protocol-owned default calculator
-  with an explicit seam for documented variant policies.
+  unsafe or empty event-envelope identity, event content-hash mismatches, and
+  snapshots ahead of the stored event stream before mutating stored recovery
+  windows. Direct conflict detection, snapshot application, and persistence
+  use the same protocol-owned default calculator with an explicit seam for
+  documented variant policies.
 - Recovery persistence scopes reject blank, padded, control-character, or
   delimiter-bearing identities before mutating memory or resolving file paths.
 - Persisted snapshots cannot regress to an older checkpoint or replace an

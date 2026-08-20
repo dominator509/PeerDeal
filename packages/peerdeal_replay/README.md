@@ -27,9 +27,10 @@ payload interpretation and must preserve the invite-scoped state contract.
 - Replay rejects unsupported request, snapshot, and event protocol/catalog
   identities before projection.
 - Replay event windows reject sequence gaps, non-increasing event sequences,
-  event content-hash mismatches, hash-chain breaks, and snapshot suffix gaps
-  before projection. The default calculator is protocol canonical SHA-256 and
-  can be replaced only for a documented variant hash policy.
+  unsafe or empty event-envelope identity, event content-hash mismatches,
+  hash-chain breaks, and snapshot suffix gaps before projection. The default
+  calculator is protocol canonical SHA-256 and can be replaced only for a
+  documented variant hash policy.
 - Replay requests reject event windows above the configurable `EventWindowValidator`
   limit before protocol, scope, range, or projector traversal; the default is
   4,096 events and the failure code is `ERR_REPLAY_EVENT_WINDOW_TOO_LARGE`.

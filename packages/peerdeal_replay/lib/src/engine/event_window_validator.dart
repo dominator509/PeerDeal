@@ -86,6 +86,15 @@ class EventWindowValidator {
 
     for (var i = 0; i < events.length; i++) {
       final event = events[i];
+      final identityValidation = validateEventEnvelopeIdentity(event);
+      if (!identityValidation.isValid) {
+        mismatches.add(
+          ReplayMismatch(
+            code: 'ERR_REPLAY_EVENT_IDENTITY_INVALID',
+            message: 'Event envelope identity is empty or unsafe.',
+          ),
+        );
+      }
       _appendEventHashMismatch(event, mismatches);
       if (i > 0) {
         final previous = events[i - 1];

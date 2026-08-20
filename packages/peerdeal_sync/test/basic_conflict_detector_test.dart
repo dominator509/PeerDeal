@@ -592,6 +592,27 @@ void main() {
 
     expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_HASH_INVALID');
   });
+
+  test('rejects unsafe event envelope identity before recovery', () {
+    final result = BasicConflictDetector().detect(
+      RecoveryRequest(
+        tableId: 'table_1',
+        sessionId: 'session_1',
+        protocolVersion: '1.0.0',
+        mode: RecoveryMode.reconnect,
+        events: <EventEnvelope>[
+          _event(
+            1,
+            prevEventHash: genesisEventHash,
+            eventHash: 'hash_1',
+            actorRef: 'system\nforged',
+          ),
+        ],
+      ),
+    );
+
+    expect(result.conflicts.single.code, 'ERR_RECOVERY_EVENT_IDENTITY_INVALID');
+  });
 }
 
 EventEnvelope _event(
@@ -599,6 +620,7 @@ EventEnvelope _event(
   required String prevEventHash,
   required String eventHash,
   Map<String, Object?> payload = const <String, Object?>{},
+  String actorRef = 'system',
 }) {
   return EventEnvelope(
     eventId: 'evt_$eventSeq',
@@ -610,7 +632,7 @@ EventEnvelope _event(
     sessionId: 'session_1',
     handId: null,
     emittedAt: '2026-04-25T00:00:00Z',
-    actorRef: 'system',
+    actorRef: actorRef,
     payload: payload,
     prevEventHash: prevEventHash,
     eventHash: eventHash,

@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
+import java.util.LinkedHashMap
 
 /**
  * Provides the generic byte-frame transport over a bounded local multicast
@@ -40,6 +41,8 @@ internal class NativeTransportHandler(
         private const val MAX_ID_BYTES = 256
         private const val MAX_QUEUE_SIZE = 512
         private const val MAX_BATCH_SIZE = 64
+        private const val MAX_ACTIVE_RECEIVE_SCOPES = 32
+        private const val ACTIVE_RECEIVE_SCOPE_TTL_MILLIS = 15_000L
         private const val RECEIVE_ERROR_BACKOFF_MILLIS = 25L
         private const val MAX_INTERFACE_COUNT = 64
         private const val MAX_INTERFACE_ADDRESS_COUNT = 256
@@ -52,6 +55,10 @@ internal class NativeTransportHandler(
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
     private val frames = ConcurrentLinkedQueue<TransportFrame>()
+    // Only scopes that are actively polling may admit frames to the bounded
+    // queue. This prevents unrelated multicast traffic from evicting a live
+    // session before the Dart boundary can filter it.
+    private val activeReceiveScopes = LinkedHashMap<ReceiveScope, Long>()
     private val lifecycleLock = Any()
     private var receiveSocket: MulticastSocket? = null
     private var multicastLock: WifiManager.MulticastLock? = null
@@ -84,6 +91,7 @@ internal class NativeTransportHandler(
             lock = multicastLock
             multicastLock = null
             frames.clear()
+            activeReceiveScopes.clear()
         }
         socket?.close()
         releaseMulticastLock(lock)
@@ -191,11 +199,13 @@ internal class NativeTransportHandler(
             if (closed || !receiverAvailable) {
                 return@synchronized receiveUnavailablePayload()
             }
+            registerReceiveScopeLocked(sessionId, peerId)
             val selected = ArrayList<Map<String, Any?>>(MAX_BATCH_SIZE)
             val retained = ArrayList<TransportFrame>()
             val scanCount = frames.size
             repeat(scanCount) {
                 val frame = frames.poll() ?: return@repeat
+                if (!isActiveReceiveScopeLocked(frame)) return@repeat
                 if (selected.size < MAX_BATCH_SIZE &&
                     frame.sessionId == sessionId &&
                     frame.recipientPeerId == peerId
@@ -351,7 +361,8 @@ internal class NativeTransportHandler(
                 val frame = decode(packet.data, packet.length)
                 if (frame != null) {
                     synchronized(lifecycleLock) {
-                        if (!closed && !socket.isClosed) {
+                        if (!closed && !socket.isClosed &&
+                            isActiveReceiveScopeLocked(frame)) {
                             while (frames.size >= MAX_QUEUE_SIZE) frames.poll()
                             frames.offer(frame)
                         }
@@ -388,6 +399,36 @@ internal class NativeTransportHandler(
         is Int -> value.toLong()
         is Long -> value
         else -> null
+    }
+
+    private fun registerReceiveScopeLocked(sessionId: String, peerId: String) {
+        val now = System.currentTimeMillis()
+        pruneInactiveReceiveScopesLocked(now)
+        val scope = ReceiveScope(sessionId, peerId)
+        activeReceiveScopes.remove(scope)
+        activeReceiveScopes[scope] = now
+        while (activeReceiveScopes.size > MAX_ACTIVE_RECEIVE_SCOPES) {
+            val oldest = activeReceiveScopes.entries.firstOrNull()?.key ?: break
+            activeReceiveScopes.remove(oldest)
+        }
+    }
+
+    private fun isActiveReceiveScopeLocked(frame: TransportFrame): Boolean {
+        val now = System.currentTimeMillis()
+        pruneInactiveReceiveScopesLocked(now)
+        return activeReceiveScopes.keys.any { scope ->
+            scope.sessionId == frame.sessionId &&
+                scope.peerId == frame.recipientPeerId
+        }
+    }
+
+    private fun pruneInactiveReceiveScopesLocked(now: Long) {
+        val iterator = activeReceiveScopes.entries.iterator()
+        while (iterator.hasNext()) {
+            if (now - iterator.next().value > ACTIVE_RECEIVE_SCOPE_TTL_MILLIS) {
+                iterator.remove()
+            }
+        }
     }
 
     private fun encode(frame: TransportFrame): ByteArray? {
@@ -485,4 +526,9 @@ internal class NativeTransportHandler(
             "payloadBytes" to payload.map { it.toInt() and 0xff },
         )
     }
+
+    private data class ReceiveScope(
+        val sessionId: String,
+        val peerId: String,
+    )
 }

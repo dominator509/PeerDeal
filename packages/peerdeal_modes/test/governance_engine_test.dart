@@ -388,10 +388,15 @@ void main() {
             role: RoleKind.player,
             state: ParticipantGovernanceState.seatOffered,
             waitlistState: WaitlistState.notWaitlisted,
+            seatIndex: 1,
           ),
         ],
         seats: const [
-          SeatSnapshot(seatIndex: 1, state: SeatState.reservedPending),
+          SeatSnapshot(
+            seatIndex: 1,
+            state: SeatState.reservedPending,
+            occupantId: 'player_2',
+          ),
         ],
       );
 
@@ -424,10 +429,15 @@ void main() {
             role: RoleKind.player,
             state: ParticipantGovernanceState.seatOffered,
             waitlistState: WaitlistState.notWaitlisted,
+            seatIndex: 1,
           ),
         ],
         seats: const [
-          SeatSnapshot(seatIndex: 1, state: SeatState.reservedPending),
+          SeatSnapshot(
+            seatIndex: 1,
+            state: SeatState.reservedPending,
+            occupantId: 'player_2',
+          ),
         ],
       );
 
@@ -448,6 +458,170 @@ void main() {
         ParticipantGovernanceState.admittedUnseated.name,
       );
       expect(decision.nextSeatState, SeatState.empty.name);
+    });
+
+    test('accepts only the participant-bound seat offer', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.seatOffered,
+            waitlistState: WaitlistState.notWaitlisted,
+            seatIndex: 1,
+          ),
+        ],
+        seats: const [
+          SeatSnapshot(
+            seatIndex: 1,
+            state: SeatState.reservedPending,
+            occupantId: 'player_2',
+          ),
+        ],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.acceptSeatOffer,
+          actorId: 'player_2',
+          subjectId: 'player_2',
+          seatIndex: 1,
+        ),
+      );
+
+      expect(decision.allowed, isTrue);
+      expect(decision.resultCode, GovernanceResultCodes.okSeatClaimed);
+      expect(decision.nextSeatState, SeatState.claimed.name);
+    });
+
+    test('denies seat assignment when the seat occupant does not match', () {
+      final context = GovernanceContext(
+        modeId: 'open_table',
+        participants: const [
+          ParticipantSnapshot(
+            participantId: 'host_1',
+            role: RoleKind.host,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+            seatIndex: 0,
+          ),
+          ParticipantSnapshot(
+            participantId: 'player_2',
+            role: RoleKind.player,
+            state: ParticipantGovernanceState.seated,
+            waitlistState: WaitlistState.notWaitlisted,
+            seatIndex: 1,
+          ),
+        ],
+        seats: const [
+          SeatSnapshot(
+            seatIndex: 1,
+            state: SeatState.claimed,
+            occupantId: 'player_3',
+          ),
+        ],
+      );
+
+      final decision = engine.evaluate(
+        context: context,
+        action: const GovernanceAction(
+          type: GovernanceActionType.assignSeat,
+          actorId: 'host_1',
+          subjectId: 'player_2',
+          seatIndex: 1,
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(decision.resultCode, GovernanceResultCodes.errSeatUnavailable);
+    });
+
+    test('applies terminal participant governance transitions', () {
+      const actions = <(GovernanceActionType, String, String)>[
+        (
+          GovernanceActionType.rejectParticipant,
+          GovernanceResultCodes.okParticipantRejected,
+          'closedOutUnseated',
+        ),
+        (
+          GovernanceActionType.removeParticipant,
+          GovernanceResultCodes.okParticipantRemoved,
+          'removed',
+        ),
+        (
+          GovernanceActionType.banParticipantForSession,
+          GovernanceResultCodes.okParticipantBanned,
+          'bannedForSession',
+        ),
+      ];
+
+      for (final (actionType, resultCode, nextState) in actions) {
+        final decision = engine.evaluate(
+          context: GovernanceContext(
+            modeId: 'open_table',
+            participants: const [
+              ParticipantSnapshot(
+                participantId: 'host_1',
+                role: RoleKind.host,
+                state: ParticipantGovernanceState.seated,
+                waitlistState: WaitlistState.notWaitlisted,
+              ),
+              ParticipantSnapshot(
+                participantId: 'player_2',
+                role: RoleKind.player,
+                state: ParticipantGovernanceState.admittedUnseated,
+                waitlistState: WaitlistState.notWaitlisted,
+              ),
+            ],
+            seats: const [],
+          ),
+          action: GovernanceAction(
+            type: actionType,
+            actorId: 'host_1',
+            subjectId: 'player_2',
+          ),
+        );
+
+        expect(decision.allowed, isTrue);
+        expect(decision.resultCode, resultCode);
+        expect(decision.nextParticipantState, nextState);
+      }
+    });
+
+    test('cannot re-admit a terminal participant', () {
+      final decision = engine.evaluate(
+        context: GovernanceContext(
+          modeId: 'open_table',
+          participants: const [
+            ParticipantSnapshot(
+              participantId: 'host_1',
+              role: RoleKind.host,
+              state: ParticipantGovernanceState.seated,
+              waitlistState: WaitlistState.notWaitlisted,
+            ),
+            ParticipantSnapshot(
+              participantId: 'player_2',
+              role: RoleKind.player,
+              state: ParticipantGovernanceState.bannedForSession,
+              waitlistState: WaitlistState.notWaitlisted,
+            ),
+          ],
+          seats: const [],
+        ),
+        action: const GovernanceAction(
+          type: GovernanceActionType.admitParticipant,
+          actorId: 'host_1',
+          subjectId: 'player_2',
+        ),
+      );
+
+      expect(decision.allowed, isFalse);
+      expect(
+        decision.resultCode,
+        GovernanceResultCodes.errParticipantStateInvalid,
+      );
     });
 
     test('denies seat offer expiry when subject has no active offer', () {

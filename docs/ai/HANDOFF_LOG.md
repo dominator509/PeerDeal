@@ -2,6 +2,42 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Align Event Identity Ingress and Native Queue Admission
+
+Summary:
+- Added the protocol-owned event-envelope identity validator and applied it
+  before core, replay, recovery conflict, snapshot, and persistence paths.
+- Added Android and Windows native receive-scope admission so unrelated
+  multicast traffic cannot evict frames for an actively polled session/peer.
+- Hardened mode governance so seat acceptance, assignment, and expiry require
+  participant/seat binding, while reject/remove/ban actions emit terminal
+  states and terminal participants cannot be re-admitted.
+- Package boundaries, transport channel shapes, hash policy seams, and the
+  original app architecture remain unchanged.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/validation/event_envelope_validation.dart`
+- Core, replay, and sync ingress validators plus focused tests.
+- `apps/peerdeal_mobile/android/app/src/main/kotlin/com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+  and `.h`
+- `packages/peerdeal_modes/lib/src/governance/default_governance_engine.dart`
+  and focused governance tests.
+- `docs/PRODUCTION_READINESS.md` and package READMEs.
+
+Verification:
+- Focused protocol, core, replay, sync, and modes suites pass: 69, 75, 43,
+  86, and 36 tests respectively; all five package analyzers report no issues.
+- Direct boundary-check and source-text gates pass.
+- Android and Windows debug build attempts were stopped after bounded
+  no-output windows and are not claimed as verified in this handoff.
+
+Remaining:
+- Native frame authentication/replay protection needs the product identity
+  and key contract; snapshot authenticity needs a trusted persistence anchor.
+- Real-device transport/key validation, product session/state/database wiring,
+  release signing, other-platform hosts, and final UX remain external gates.
+
 ### 2026-08-18 - Codex - Verify Android Gradle Distribution Integrity
 
 Summary:

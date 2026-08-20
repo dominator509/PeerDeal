@@ -74,6 +74,12 @@ class BasicConflictDetector implements ConflictDetector {
     }
 
     for (final event in request.events) {
+      final eventIdentityConflict = _eventIdentityConflict(event);
+      if (eventIdentityConflict != null) {
+        return ConflictDetectionResult(
+          conflicts: <SyncConflict>[eventIdentityConflict],
+        );
+      }
       final eventEncodingConflict = _eventEncodingConflict(event);
       if (eventEncodingConflict != null) {
         return ConflictDetectionResult(
@@ -161,6 +167,10 @@ class BasicConflictDetector implements ConflictDetector {
     }
 
     for (final event in request.events) {
+      final eventIdentityConflict = _eventIdentityConflict(event);
+      if (eventIdentityConflict != null) {
+        conflicts.add(eventIdentityConflict);
+      }
       if (event.tableId != request.tableId ||
           event.sessionId != request.sessionId) {
         conflicts.add(
@@ -368,6 +378,15 @@ class BasicConflictDetector implements ConflictDetector {
         expected: isTooLarge ? '${eventCodec.maxBytes}' : null,
       );
     }
+  }
+
+  SyncConflict? _eventIdentityConflict(EventEnvelope event) {
+    if (validateEventEnvelopeIdentity(event).isValid) return null;
+    return const SyncConflict(
+      code: 'ERR_RECOVERY_EVENT_IDENTITY_INVALID',
+      message: 'Recovery event envelope identity is empty or unsafe.',
+      severity: SyncConflictSeverity.fatal,
+    );
   }
 
   SyncConflict? _eventHashConflict(EventEnvelope event) {

@@ -57,6 +57,28 @@ void main() {
     );
   });
 
+  test('rejects unsafe event identity before persistence mutation', () {
+    final store = _testStore();
+    final result = store.appendEvents(
+      scope: scope,
+      events: <EventEnvelope>[
+        _event(
+          seq: 1,
+          prevHash: genesisEventHash,
+          hash: 'hash_1',
+          actorRef: 'system\nforged',
+        ),
+      ],
+    );
+
+    expect(result.isSuccess, isFalse);
+    expect(
+      result.conflicts.single.code,
+      'ERR_RECOVERY_PERSISTENCE_EVENT_IDENTITY_INVALID',
+    );
+    expect(store.loadWindow(scope).events, isEmpty);
+  });
+
   test(
     'rejects an event window above the configured count without mutation',
     () {
@@ -1141,6 +1163,7 @@ EventEnvelope _event({
   String tableId = 'table_1',
   String sessionId = 'session_1',
   String protocolVersion = '1.0.0',
+  String actorRef = 'system',
   Map<String, Object?> payload = const <String, Object?>{},
 }) {
   return EventEnvelope(
@@ -1153,7 +1176,7 @@ EventEnvelope _event({
     sessionId: sessionId,
     handId: null,
     emittedAt: '2026-06-08T00:00:00Z',
-    actorRef: 'system',
+    actorRef: actorRef,
     payload: payload,
     prevEventHash: prevHash,
     eventHash: hash,
