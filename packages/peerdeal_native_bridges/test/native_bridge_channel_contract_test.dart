@@ -222,6 +222,19 @@ void main() {
     expect(action.warning, isNull);
   });
 
+  test('failed capture action discards a reported blocking state', () {
+    final action = CaptureProtectionChannelContract.decodeActionResult(
+      const <String, Object?>{
+        'success': false,
+        'blockingEnabled': true,
+        'warning': 'Capture protection action failed.',
+      },
+    );
+
+    expect(action.isSuccess, isFalse);
+    expect(action.blockingEnabled, isFalse);
+  });
+
   test('capture protection channel contract bounds diagnostics', () {
     final oversized = String.fromCharCodes(
       List<int>.filled(NativeBridgePayloadLimits.maxDiagnosticBytes + 1, 97),
@@ -345,6 +358,20 @@ void main() {
     expect(snapshot.foundEndpoints, ['peer_a']);
     expect(snapshot.interfaceHints, ['wifi']);
     expect(snapshot.warning, isNull);
+  });
+
+  test('ungranted discovery discards reported peer endpoints', () {
+    final snapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(
+      const <String, Object?>{
+        'permissionGranted': false,
+        'foundEndpoints': <Object?>['peer_a@192.168.1.10'],
+        'interfaceHints': <Object?>['wifi'],
+      },
+    );
+
+    expect(snapshot.permissionGranted, isFalse);
+    expect(snapshot.foundEndpoints, isEmpty);
+    expect(snapshot.interfaceHints, ['wifi']);
   });
 
   test('local network channel contract bounds discovery collections', () {

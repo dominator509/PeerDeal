@@ -45,10 +45,13 @@ class LocalNetworkChannelContract {
       );
     }
 
-    final foundEndpoints = _stringListValue(payload['foundEndpoints']);
+    final permissionGranted = _boolValue(payload['permissionGranted']);
+    final foundEndpoints = permissionGranted
+        ? _stringListValue(payload['foundEndpoints'])
+        : const <String>[];
     final interfaceHints = _stringListValue(payload['interfaceHints']);
     return LocalNetworkDiscoverySnapshot(
-      permissionGranted: _boolValue(payload['permissionGranted']),
+      permissionGranted: permissionGranted,
       foundEndpoints: foundEndpoints,
       interfaceHints: interfaceHints,
       warning: _boundedStringValue(

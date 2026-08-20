@@ -2,6 +2,32 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Normalize Failed Capture and Ungranted Discovery Results
+
+Summary:
+- The generic capture-action decoder now forces `blockingEnabled` to false
+  whenever `success` is false.
+- The generic local-network discovery decoder now discards peer endpoints when
+  `permissionGranted` is false while retaining non-sensitive interface hints.
+- Existing channel fields, native behavior, and package ownership remain
+  unchanged.
+
+Files:
+- `packages/peerdeal_native_bridges/lib/src/capture_protection/capture_protection_channel_contract.dart`
+- `packages/peerdeal_native_bridges/lib/src/local_network/local_network_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- Production-readiness note.
+
+Verification:
+- `dart analyze packages/peerdeal_native_bridges` passed.
+- `dart format` passed for the changed Dart files.
+- Deterministic repository gates are required after this boundary change.
+
+Remaining:
+- Native/device reachability, transport authentication/replay, product state
+  and database wiring, provider proof semantics, release signing, and final UX
+  remain separate gates.
+
 ### 2026-08-20 - Codex - Normalize Unavailable Transport Receive Frames
 
 Summary:

@@ -3199,6 +3199,12 @@ native transport reports `available: false`, preventing malformed unavailable
 payloads from exposing stale transport data through the app boundary. Channel
 fields, native hosts, and transport negotiation remain unchanged.
 
+The generic capture-action decoder now forces `blockingEnabled` to false when
+the native action reports failure, and the local-network discovery decoder now
+discards peer endpoints when `permissionGranted` is false while preserving
+non-sensitive interface hints. Existing channel fields and native behavior
+remain unchanged.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

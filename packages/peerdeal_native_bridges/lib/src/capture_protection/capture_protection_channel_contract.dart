@@ -46,10 +46,9 @@ class CaptureProtectionChannelContract {
     }
 
     final success = _boolValue(payload['success']);
-    final blockingEnabled = _boolValue(payload['blockingEnabled']);
     return CaptureProtectionActionResult(
       isSuccess: success,
-      blockingEnabled: blockingEnabled,
+      blockingEnabled: success && _boolValue(payload['blockingEnabled']),
       warning: _boundedStringValue(
         payload['warning'],
         NativeBridgePayloadLimits.maxDiagnosticBytes,
