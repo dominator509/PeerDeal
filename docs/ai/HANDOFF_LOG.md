@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Validate Uncontested Settlement Winner Identity
+
+Summary:
+- `ShowdownSettlementProjector.projectUncontestedAndSettle` now rejects a
+  negative winner seat before side-pot construction.
+- The existing Hold'em seat invariant and variant/core ownership remain
+  unchanged.
+
+Files:
+- `packages/peerdeal_variants/lib/src/contracts/showdown_settlement_projector.dart`
+- `packages/peerdeal_variants/test/holdem_settlement_projection_test.dart`
+
+Verification:
+- `peerdeal_variants` analysis passed.
+- Full package-local variant suite passed: 184 tests.
+- Boundary-check, source-text, and `git diff --check` passed.
+
+Remaining:
+- Product-owned session/database wiring, native/device validation,
+  authentication/replay contracts, signing, and final UX remain separate
+  readiness gates.
+
 ### 2026-08-20 - Codex - Harden Direct Showdown Result Projection
 
 Summary:

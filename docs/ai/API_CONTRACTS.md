@@ -475,6 +475,9 @@ showdown seat numbers also fail closed before ranking.
 calling core side-pot construction. Contested and uncontested overflow return a
 blocked projection with
 `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`; core remains variant-agnostic.
+`projectUncontestedAndSettle` also rejects negative winner seat numbers before
+side-pot construction with
+`ERR_HOLDEM_UNCONTESTED_SETTLEMENT_WINNER_INVALID`.
 
 `ShowdownEvaluationResult` also bounds direct projection inputs: result windows,
 pot-slice maps, and contested seat-ID lists use the shared nine-seat Hold'em

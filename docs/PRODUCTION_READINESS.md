@@ -3262,6 +3262,10 @@ boundary to caller-supplied ranked results: negative or duplicate seats,
 negative rank indexes, and unsafe summaries cannot be grouped or projected
 into settlement winners.
 
+Direct uncontested settlement projection now rejects negative winner seat
+numbers before side-pot construction, matching the existing Hold'em seat
+identity invariant.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

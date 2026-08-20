@@ -121,6 +121,27 @@ void main() {
       ]);
     });
 
+    test('fails closed on a negative uncontested winner seat', () {
+      final outcome = projector.projectUncontestedAndSettle(
+        winningSeat: -1,
+        commitments: const <PotCommitment>[
+          PotCommitment(
+            seatId: 'seat-1',
+            committed: 100,
+            isEligibleForShowdown: true,
+          ),
+        ],
+        seatForId: _seatFromSeatId,
+      );
+
+      expect(outcome.isBlocked, isTrue);
+      expect(outcome.slices, isEmpty);
+      expect(outcome.projection.winningSeatIdsBySliceIndex, isEmpty);
+      expect(outcome.warnings, <String>[
+        'ERR_HOLDEM_UNCONTESTED_SETTLEMENT_WINNER_INVALID',
+      ]);
+    });
+
     test(
       'propagates oversized showdown result warnings through settlement',
       () {

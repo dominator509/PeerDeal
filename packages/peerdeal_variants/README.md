@@ -61,6 +61,8 @@ a safe failure path instead of silently awarding partial pots.
 The projector also rejects more than nine direct commitments before core
 side-pot construction on both contested and uncontested paths, returning
 `ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT`.
+Uncontested settlement also rejects negative winner seat numbers before
+building pot slices with `ERR_HOLDEM_UNCONTESTED_SETTLEMENT_WINNER_INVALID`.
 
 Direct winner projection also bounds result windows, slice maps, and contested
 seat-ID lists to nine entries. It rejects negative or duplicate ranked seats,

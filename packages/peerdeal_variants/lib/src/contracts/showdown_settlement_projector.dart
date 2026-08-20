@@ -99,6 +99,9 @@ class ShowdownSettlementProjector {
     SettlementPolicy policy = const SettlementPolicy(),
   }) {
     _validatePositiveLimit(maxCommitments, 'maxCommitments');
+    if (winningSeat < 0) {
+      return _blockedForInvalidUncontestedWinner();
+    }
     if (commitments.length > maxCommitments) {
       return _blockedForCommitmentOverflow();
     }
@@ -176,6 +179,19 @@ class ShowdownSettlementProjector {
       ),
       warnings: const <String>[
         'ERR_HOLDEM_SETTLEMENT_PROJECT_COMMITMENT_COUNT',
+      ],
+    );
+  }
+
+  ShowdownSettlementProjectionResult _blockedForInvalidUncontestedWinner() {
+    return ShowdownSettlementProjectionResult.blocked(
+      slices: const <PotSlice>[],
+      projection: ShowdownSliceWinnerProjection(
+        winningSeatIdsBySliceIndex: <int, List<String>>{},
+        unawardableSliceIndexes: <int>[],
+      ),
+      warnings: const <String>[
+        'ERR_HOLDEM_UNCONTESTED_SETTLEMENT_WINNER_INVALID',
       ],
     );
   }
