@@ -7,6 +7,7 @@ import 'package:peerdeal_mobile/session/app_holdem_production_session_configurat
 import 'package:peerdeal_mobile/session/app_holdem_production_session_configuration_loader_factory.dart';
 import 'package:peerdeal_mobile/session/app_holdem_production_session_snapshot_coordinator.dart';
 import 'package:peerdeal_mobile/session/app_persisted_holdem_production_session_source.dart';
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
@@ -51,6 +52,41 @@ void main() {
     expect(result.isAvailable, isFalse);
     expect(result.configuration, isNull);
     expect(result.warnings, contains('Recovery persistence root is invalid.'));
+  });
+
+  test('composes a configuration factory from native app support', () async {
+    final directory = Directory.systemTemp.createTempSync(
+      'peerdeal_mobile_native_config_',
+    );
+    addTearDown(() {
+      if (directory.existsSync()) directory.deleteSync(recursive: true);
+    });
+
+    final factory =
+        await AppHoldemProductionSessionConfigurationFactory
+            .fromNativeAppSupport(
+              bridge: _NativeSupportBridge(directory.path),
+              routePolicyFactory: (_) => _routePolicy(),
+              eventIdFactory: _eventId,
+              emittedAtFactory: _eventTimestamp,
+              eventHashFactory: (_) => 'hash',
+            );
+
+    expect(factory, isNotNull);
+  });
+
+  test('returns no configuration factory when native app support is absent', () async {
+    final factory =
+        await AppHoldemProductionSessionConfigurationFactory
+            .fromNativeAppSupport(
+              bridge: const _UnavailableNativeSupportBridge(),
+              routePolicyFactory: (_) => _routePolicy(),
+              eventIdFactory: _eventId,
+              emittedAtFactory: _eventTimestamp,
+              eventHashFactory: (_) => 'hash',
+            );
+
+    expect(factory, isNull);
   });
 
   test('composes the configured route from the recovery store', () async {
@@ -313,3 +349,23 @@ EventEnvelope _event({
 String _eventId(String eventType, int eventSeq) => 'evt_${eventType}_$eventSeq';
 
 String _eventTimestamp() => '2026-08-11T00:00:00Z';
+
+class _NativeSupportBridge implements AppStorageDirectoryBridge {
+  const _NativeSupportBridge(this.path);
+
+  final String path;
+
+  @override
+  Future<AppStorageDirectorySnapshot> getAppSupportDirectory() async {
+    return AppStorageDirectorySnapshot(available: true, directoryPath: path);
+  }
+}
+
+class _UnavailableNativeSupportBridge implements AppStorageDirectoryBridge {
+  const _UnavailableNativeSupportBridge();
+
+  @override
+  Future<AppStorageDirectorySnapshot> getAppSupportDirectory() async {
+    return const AppStorageDirectorySnapshot.unavailable();
+  }
+}

@@ -1,3 +1,4 @@
+import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
@@ -121,6 +122,66 @@ class AppHoldemProductionSessionConfigurationFactory {
        _maxPendingCheckpointBytes = maxPendingCheckpointBytes,
        _initialSnapshotLoader = initialSnapshotLoader,
        _contextInitialSnapshotLoader = contextInitialSnapshotLoader;
+
+  /// Composes production-session configuration from the native app-support
+  /// directory without selecting product state or route policy.
+  static Future<AppHoldemProductionSessionConfigurationFactory?>
+  fromNativeAppSupport({
+    required AppHoldemProductionSessionRoutePolicyFactory routePolicyFactory,
+    AppHoldemProductionSessionContextRoutePolicyFactory?
+    contextRoutePolicyFactory,
+    required HoldemEventIdFactory eventIdFactory,
+    required HoldemEventTimestampFactory emittedAtFactory,
+    required HoldemEventHashFactory eventHashFactory,
+    AppStorageDirectoryBridge? bridge,
+    Future<void>? cancellation,
+    NativeLocalPeerIdentityProvisioner? identityProvisioner,
+    HoldemCoreProjectionAdapter replayAdapter =
+        const HoldemCoreProjectionAdapter(),
+    HoldemEventReducer eventReducer = const HoldemEventReducer(),
+    String snapshotType = 'HoldemStateSnapshot',
+    String snapshotVersion = '1.0',
+    AppHoldemProductionSessionFactory sessionFactory =
+        const AppHoldemProductionSessionFactory(),
+    Duration sourceLoadTimeout = const Duration(seconds: 5),
+    int maxRecoveryEvents = RecoveryEventWindowLimits.defaultMaxEvents,
+    int maxPendingCheckpoints = AppHoldemProductionSessionSnapshotCoordinator
+        .defaultMaxPendingCheckpoints,
+    int maxPendingCheckpointBytes =
+        AppHoldemProductionSessionSnapshotCoordinator
+            .defaultMaxPendingCheckpointBytes,
+    AppHoldemProductionSessionInitialSnapshotLoader? initialSnapshotLoader,
+    AppHoldemProductionSessionContextInitialSnapshotLoader?
+    contextInitialSnapshotLoader,
+  }) async {
+    final recoveryStoreFactory =
+        await AppRecoveryPersistenceStoreFactory.fromNativeAppSupport(
+          bridge: bridge,
+          cancellation: cancellation,
+        );
+    if (recoveryStoreFactory == null) return null;
+
+    return AppHoldemProductionSessionConfigurationFactory(
+      recoveryStoreFactory: recoveryStoreFactory,
+      routePolicyFactory: routePolicyFactory,
+      contextRoutePolicyFactory: contextRoutePolicyFactory,
+      eventIdFactory: eventIdFactory,
+      emittedAtFactory: emittedAtFactory,
+      eventHashFactory: eventHashFactory,
+      identityProvisioner: identityProvisioner,
+      replayAdapter: replayAdapter,
+      eventReducer: eventReducer,
+      snapshotType: snapshotType,
+      snapshotVersion: snapshotVersion,
+      sessionFactory: sessionFactory,
+      sourceLoadTimeout: sourceLoadTimeout,
+      maxRecoveryEvents: maxRecoveryEvents,
+      maxPendingCheckpoints: maxPendingCheckpoints,
+      maxPendingCheckpointBytes: maxPendingCheckpointBytes,
+      initialSnapshotLoader: initialSnapshotLoader,
+      contextInitialSnapshotLoader: contextInitialSnapshotLoader,
+    );
+  }
 
   final AppRecoveryPersistenceStoreFactory _recoveryStoreFactory;
   final AppHoldemProductionSessionRoutePolicyFactory _routePolicyFactory;

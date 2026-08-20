@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Compose Production Session Factory From Native Support
+
+Summary:
+- Mirrored app shells now expose
+  `AppHoldemProductionSessionConfigurationFactory.fromNativeAppSupport(...)`.
+- The helper composes the existing generic native app-support directory into
+  the existing recovery store factory and forwards all existing product-owned
+  route, state, identity, event, and persistence inputs without changing their
+  ownership.
+
+Files:
+- `apps/peerdeal_mobile/lib/session/app_holdem_production_session_configuration_factory.dart`
+- `apps/peerdeal_desktop/lib/session/app_holdem_production_session_configuration_factory.dart`
+- Mirrored configuration-factory tests and demo-slice README API notes.
+- Production-readiness note.
+
+Verification:
+- Mobile and desktop package analysis passed.
+- `dart format` passed for the changed Dart files.
+- The focused mobile Flutter test was attempted, but the runner produced no
+  output for 30 seconds and was stopped; no Flutter test pass is claimed.
+- Deterministic boundary/source-text checks are required before commit.
+
+Remaining:
+- Product route/state/database inputs, native/device reachability, transport
+  authentication/replay, provider proof semantics, release signing, and final
+  UX remain separate gates.
+
 ### 2026-08-20 - Codex - Normalize Failed Capture and Ungranted Discovery Results
 
 Summary:

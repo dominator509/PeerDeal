@@ -102,6 +102,11 @@ retention policy remain app-owned. The factory result also includes a validated
 non-retention event suffix before checkpointing supplied typed state; retention
 events still go through the close-retention adapter. These writers do not
 choose state, event or snapshot IDs, route policy, or a database.
+Callers with the required product-owned route and state inputs may use
+`AppHoldemProductionSessionConfigurationFactory.fromNativeAppSupport(...)` to
+compose the same configuration factory directly from the generic native
+app-support directory. Native storage selection remains separate from product
+state and route policy.
 Route cancellation also propagates through
 the app local-identity secure-key seam when the host exposes its additive
 cancellation capability; an already-dispatched host mutation remains

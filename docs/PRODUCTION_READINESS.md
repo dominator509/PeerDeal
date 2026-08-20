@@ -3205,6 +3205,14 @@ discards peer endpoints when `permissionGranted` is false while preserving
 non-sensitive interface hints. Existing channel fields and native behavior
 remain unchanged.
 
+The mirrored app-owned `AppHoldemProductionSessionConfigurationFactory` now
+exposes `fromNativeAppSupport(...)`, composing the existing generic native
+app-support directory seam directly into the typed production-session factory
+while forwarding caller-owned route policy, product state loaders, identity,
+event factories, and persistence limits unchanged. This closes app storage
+composition only; it does not invent product state, a database, or route
+policy.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
