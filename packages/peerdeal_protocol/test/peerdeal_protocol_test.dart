@@ -171,6 +171,21 @@ void main() {
     expect(errors, isEmpty);
   });
 
+  test('game file schema rejects malformed identities and section shapes', () {
+    final decoded = fixtureJson('fixtures/gamefiles/open_table_valid_v1.json')
+      ..['created_by'] = ' host_alpha'
+      ..['mode'] = 'open_table'
+      ..['variant'] = <String, Object?>{'variant_id': 7}
+      ..['table'] = <String, Object?>{'table_name': 'Friday Open Table'};
+
+    final errors = GameFileSchema().validate(decoded);
+
+    expect(errors, contains('created_by must be non-empty and unpadded'));
+    expect(errors, contains('mode must be an object'));
+    expect(errors, contains('variant.variant_id must be a string'));
+    expect(errors, isNot(contains('table must be an object')));
+  });
+
   test('game file schema rejects oversized nested text', () {
     final decoded = fixtureJson('fixtures/gamefiles/open_table_valid_v1.json')
       ..['validation'] = <String, Object?>{

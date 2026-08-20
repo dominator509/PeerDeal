@@ -3220,6 +3220,11 @@ current `1.0.0` protocol version, and validates the result against both
 invalid compiler-output gap without moving setup policy into runtime state or
 changing the protocol schema.
 
+`GameFileSchema` now also validates required identity text, required section
+object shapes, and the required variant identifier type before callers rely on
+fixture or compiler acceptance. Unsupported protocol versions remain the
+existing `ProtocolCatalog` responsibility.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -2,6 +2,29 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-20 - Codex - Harden Game File Schema Shape Validation
+
+Summary:
+- `GameFileSchema` now validates required Game File identity text, required
+  object sections, and the variant identifier type instead of checking only
+  top-level key presence.
+- Unsupported protocol versions remain the existing `ProtocolCatalog`
+  responsibility; no schema fields or package boundaries changed.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/schemas/game_file_schema.dart`
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- Production-readiness and queue records.
+
+Verification:
+- `peerdeal_protocol` analysis passed.
+- Full protocol suite passed: 70 tests.
+
+Remaining:
+- Product-owned Game File policy, session/database wiring, native/device
+  validation, authentication/replay contracts, signing, and final UX remain
+  separate readiness gates.
+
 ### 2026-08-20 - Codex - Validate Complete Wizard Game Files
 
 Summary:
