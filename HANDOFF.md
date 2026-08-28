@@ -46,7 +46,7 @@ native-bridge collections, T175 immutable network collections, T176
 immutable sync/recovery collections, and T177 immutable replay collections,
 and T318 shared production table failure-surface hardening, T319 production
 table operational UI hierarchy hardening, and T320 transport replay-scope
-admission serialization
+admission serialization, and T321 cross-platform transport sequence bounds
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -82,6 +82,13 @@ record that scope, preventing post-handler scope-limit failure and preserving
 retry behavior when handler work fails. Protocol, handler, and replay-guard
 contracts remain unchanged; device reachability and product transport wiring
 remain separate gates.
+
+The T321 native transport hardening now enforces a shared signed 32-bit maximum
+sequence in the generic bridge model and channel decoder. Windows host argument
+and wire decoding now apply the same ceiling already required by Android and
+the host-private wire envelope, so a frame cannot be accepted by one native
+host and rejected by another. Package analysis and source checks pass; Flutter
+and Windows native runtime/build validation remain separate gates.
 
 ## What Changed
 

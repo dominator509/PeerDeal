@@ -55,6 +55,7 @@ class NativeTransportFrame {
       ) &&
       senderPeerId != recipientPeerId &&
       sequence >= 1 &&
+      sequence <= NativeBridgePayloadLimits.maxTransportSequence &&
       payloadBytes.isNotEmpty &&
       payloadBytes.length <=
           NativeBridgePayloadLimits.maxTransportPayloadBytes &&

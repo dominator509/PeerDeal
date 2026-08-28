@@ -674,22 +674,18 @@ void main() {
       );
 
       expect(result.isSuccess, isFalse);
-      expect(
-        result.warning,
-        'Secure key storage mutation result is invalid.',
-      );
+      expect(result.warning, 'Secure key storage mutation result is invalid.');
       expect(result.isConflict, isFalse);
     },
   );
 
   test('secure key snapshot rejects revisions above signed native range', () {
-    final snapshot = SecureKeyStorageChannelContract.decodeSnapshot(
-      <String, Object?>{
-        'available': true,
-        'revision': NativeBridgePayloadLimits.maxSecureKeyRevision + 1,
-        'keys': <Object?>[],
-      },
-    );
+    final snapshot =
+        SecureKeyStorageChannelContract.decodeSnapshot(<String, Object?>{
+          'available': true,
+          'revision': NativeBridgePayloadLimits.maxSecureKeyRevision + 1,
+          'keys': <Object?>[],
+        });
 
     expect(snapshot.available, isFalse);
     expect(snapshot.keys, isEmpty);
@@ -750,15 +746,14 @@ void main() {
   });
 
   test('unavailable native transport discards a reported payload ceiling', () {
-    final capability = NativeTransportChannelContract.decodeCapability(
-      const <String, Object?>{
-        'available': false,
-        'sendSupported': false,
-        'receiveSupported': false,
-        'maxPayloadBytes': 4096,
-        'notes': 'unavailable',
-      },
-    );
+    final capability =
+        NativeTransportChannelContract.decodeCapability(const <String, Object?>{
+          'available': false,
+          'sendSupported': false,
+          'receiveSupported': false,
+          'maxPayloadBytes': 4096,
+          'notes': 'unavailable',
+        });
 
     expect(capability.available, isFalse);
     expect(capability.maxPayloadBytes, 0);
@@ -893,6 +888,35 @@ void main() {
     expect(oversizedPayload.frames, isEmpty);
     expect(oversizedFrame.isUsable, isFalse);
     expect(NativeTransportChannelContract.encodeFrame(oversizedFrame), isEmpty);
+
+    final oversizedSequenceFrame = NativeTransportFrame(
+      sessionId: 'session_1',
+      senderPeerId: 'peer_a',
+      recipientPeerId: 'peer_b',
+      sequence: NativeBridgePayloadLimits.maxTransportSequence + 1,
+      payloadBytes: const <int>[1],
+    );
+    final oversizedSequenceSnapshot =
+        NativeTransportChannelContract.decodeReceiveSnapshot(<String, Object?>{
+          'available': true,
+          'frames': <Object?>[
+            <String, Object?>{
+              'sessionId': 'session_1',
+              'senderPeerId': 'peer_a',
+              'recipientPeerId': 'peer_b',
+              'sequence': NativeBridgePayloadLimits.maxTransportSequence + 1,
+              'payloadBytes': <int>[1],
+            },
+          ],
+        });
+
+    expect(oversizedSequenceFrame.isUsable, isFalse);
+    expect(
+      NativeTransportChannelContract.encodeFrame(oversizedSequenceFrame),
+      isEmpty,
+    );
+    expect(oversizedSequenceSnapshot.available, isTrue);
+    expect(oversizedSequenceSnapshot.frames, isEmpty);
 
     final controlFrame = NativeTransportChannelContract.decodeReceiveSnapshot(
       <String, Object?>{

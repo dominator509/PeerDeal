@@ -146,7 +146,11 @@ class NativeTransportChannelContract {
       : 0;
 
   static int _positiveIntValue(Object? value) =>
-      value is int && value >= 1 ? value : 0;
+      value is int &&
+          value >= 1 &&
+          value <= NativeBridgePayloadLimits.maxTransportSequence
+      ? value
+      : 0;
 
   static String? _boundedStringValue(Object? value, int maxBytes) {
     if (value is! String ||

@@ -326,6 +326,15 @@ void main() {
         payloadBytes: <int>[1, 256],
       ),
     );
+    final oversizedSequenceSend = await bridge.sendFrame(
+      NativeTransportFrame(
+        sessionId: 'session_1',
+        senderPeerId: 'peer_a',
+        recipientPeerId: 'peer_b',
+        sequence: NativeBridgePayloadLimits.maxTransportSequence + 1,
+        payloadBytes: <int>[1],
+      ),
+    );
 
     expect(send.isSuccess, isFalse);
     expect(receive.available, isFalse);
@@ -335,6 +344,7 @@ void main() {
     expect(controlReceive.available, isFalse);
     expect(zeroSequenceSend.isSuccess, isFalse);
     expect(invalidPayloadSend.isSuccess, isFalse);
+    expect(oversizedSequenceSend.isSuccess, isFalse);
     expect(log, isEmpty);
   });
 }

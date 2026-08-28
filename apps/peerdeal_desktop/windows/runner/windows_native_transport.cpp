@@ -174,7 +174,8 @@ std::optional<uint32_t> SequenceValue(const EncodableValue* value) {
   } else {
     return std::nullopt;
   }
-  if (sequence < 1 || sequence > std::numeric_limits<uint32_t>::max()) {
+  if (sequence < 1 ||
+      sequence > std::numeric_limits<int32_t>::max()) {
     return std::nullopt;
   }
   return static_cast<uint32_t>(sequence);
@@ -638,6 +639,7 @@ WindowsNativeTransport::DecodeFrame(const uint8_t* bytes, std::size_t length) {
       !ReadUint16(bytes, length, &offset, &recipient_length) ||
       !ReadUint32(bytes, length, &offset, &sequence) ||
       !ReadUint32(bytes, length, &offset, &payload_length) || sequence < 1 ||
+      sequence > std::numeric_limits<int32_t>::max() ||
       session_length > kMaxIdBytes || sender_length > kMaxIdBytes ||
       recipient_length > kMaxIdBytes || payload_length < 1 ||
       payload_length > kMaxPayloadBytes ||

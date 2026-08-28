@@ -1909,6 +1909,16 @@ Remaining:
 - Focused and full network tests plus package analysis pass. Device/network
   reachability and product transport wiring remain external.
 
+## T321 Cross-Platform Transport Sequence Bounds
+
+- Generic native transport models and channel decoding now reject sequence IDs
+  above the shared signed 32-bit maximum required by Android and the native wire
+  envelope.
+- Windows host argument and wire decoding now apply the same maximum instead
+  of accepting its broader unsigned 32-bit range.
+- Package analysis and source checks pass. Flutter widget and Windows native
+  build/runtime validation remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

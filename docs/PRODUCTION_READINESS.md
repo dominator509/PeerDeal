@@ -119,6 +119,10 @@ the gates below are satisfied.
   before a bounded scope-limit failure and preserves handler-failure retry
   behavior. Device/network reachability and product transport wiring remain
   open.
+- Generic native transport models and channel decoding now enforce the shared
+  signed 32-bit sequence ceiling required by Android and the host-private wire
+  envelope; Windows host argument decoding applies the same ceiling. Flutter
+  widget and native runtime/build validation remain open.
 
 ## Covered hardening slices
 - Windows local-network and app-support method-channel handlers now reject

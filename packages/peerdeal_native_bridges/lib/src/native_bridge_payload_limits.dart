@@ -6,6 +6,7 @@ class NativeBridgePayloadLimits {
   static const maxTransportFrames = 64;
   static const maxTransportPayloadBytes = 64 * 1024;
   static const maxTransportIdentityBytes = 256;
+  static const maxTransportSequence = 0x7fffffff;
   static const maxDiscoveryEntries = 64;
   static const maxDiscoveryValueBytes = 512;
   static const maxAppStoragePathBytes = 4096;
@@ -30,7 +31,6 @@ class NativeBridgePayloadLimits {
       value.trim() == value &&
       value.codeUnits.every(
         (codeUnit) =>
-            codeUnit >= 0x20 &&
-            !(codeUnit >= 0x7F && codeUnit <= 0x9F),
+            codeUnit >= 0x20 && !(codeUnit >= 0x7F && codeUnit <= 0x9F),
       );
 }

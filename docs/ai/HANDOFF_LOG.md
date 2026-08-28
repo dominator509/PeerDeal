@@ -15059,6 +15059,37 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - T321 Cross-Platform Transport Sequence Bounds
+
+Summary:
+- Generic native transport models and channel decoding now reject sequence IDs
+  above the shared signed 32-bit maximum required by Android and the native wire
+  envelope.
+- Windows host argument and wire decoding now apply the same ceiling instead of
+  accepting its broader unsigned 32-bit range.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/native_bridge_payload_limits.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_bridge_models.dart`
+- `packages/peerdeal_native_bridges/lib/src/transport/native_transport_channel_contract.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `packages/peerdeal_native_bridges/test/method_channel_native_transport_bridge_test.dart`
+- `apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Native bridge package analysis: passed.
+- Boundary, source-text, formatting, and diff checks: passed.
+- Flutter widget tests and Windows native build were not runnable because the
+  local Flutter command wrapper stalled before launching its test/build child.
+
+Risks:
+- Device/network reachability, cross-device runtime validation, release
+  signing, and product transport wiring remain separate gates.
+
+---
+
 ### 2026-08-20 - Codex - T294 Source-Backed Production Hardening
 
 Summary:
