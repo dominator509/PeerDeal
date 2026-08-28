@@ -103,6 +103,44 @@ void main() {
       expect(decision.nextSeatState, SeatState.reservedPending.name);
     });
 
+    test('gates every governance fixture through the policy engine', () {
+      final fixtures = Directory('test/fixtures')
+          .listSync()
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.json'))
+          .toList()
+        ..sort((left, right) => left.path.compareTo(right.path));
+
+      expect(fixtures, isNotEmpty);
+      for (final fixture in fixtures) {
+        final name = fixture.uri.pathSegments.last;
+        final context = governanceContextFixture(name);
+        final participant = context.participants.first;
+        final decision = engine.evaluate(
+          context: context,
+          action: GovernanceAction(
+            type: GovernanceActionType.admitParticipant,
+            actorId: participant.participantId,
+            subjectId: participant.participantId,
+          ),
+        );
+
+        if (name.startsWith('invalid_')) {
+          expect(
+            decision.resultCode,
+            GovernanceResultCodes.errContextInvalid,
+            reason: name,
+          );
+        } else {
+          expect(
+            decision.resultCode,
+            isNot(GovernanceResultCodes.errContextInvalid),
+            reason: name,
+          );
+        }
+      }
+    });
+
     test('denies seat offers from an unauthorised actor', () {
       final context = GovernanceContext(
         modeId: 'open_table',

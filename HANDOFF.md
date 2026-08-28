@@ -122,6 +122,11 @@ duplicate-seat and negative-stack fixtures. The persistence suite loads the
 edge state and requires every `invalid_` Hold'em fixture to fail through the
 existing typed parser.
 
+The T327 mode hardening adds a duplicate-participant governance fixture and a
+directory-driven gate over every mode JSON fixture. Valid fixtures must remain
+usable by the policy engine, while `invalid_` fixtures must return the existing
+`ERR_GOVERNANCE_CONTEXT_INVALID` result without changing mode semantics.
+
 ## What Changed
 
 - Added normalized retrofit bundle source under `spec/baseline_v1_retrofit/`.

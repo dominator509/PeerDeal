@@ -15094,6 +15094,32 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - Mode Fixture Breadth Gate
+
+Summary:
+- Added an invalid duplicate-participant governance fixture.
+- Added a directory-driven test that sends every mode JSON fixture through the
+  existing governance policy engine and requires invalid contexts to fail with
+  `ERR_GOVERNANCE_CONTEXT_INVALID`.
+
+Files changed:
+- `packages/peerdeal_modes/test/fixtures/invalid_duplicate_participant.json`
+- `packages/peerdeal_modes/test/governance_engine_test.dart`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and this stable AI handoff log.
+
+Verification:
+- Direct `peerdeal_modes` analysis passed.
+- Dart focused test startup stalled without output and was stopped; no test
+  failure was emitted. Deterministic repository checks remain required.
+
+Risks:
+- This closes local mode-fixture coverage only. Native/device validation,
+  production persistence, product session wiring, release signing, and final
+  UX validation remain separate gates.
+
+---
+
 ### 2026-08-28 - Codex - T318 Production Route Failure Surface
 
 Summary:

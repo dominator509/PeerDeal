@@ -1954,6 +1954,14 @@ Remaining:
   bypassing typed validation.
 - No Hold'em rule, core truth, protocol, app, or package boundary changed.
 
+## Recent T327 Changes
+
+- Mode governance fixtures now include an invalid duplicate-participant case.
+- The governance test suite discovers every JSON fixture and requires invalid
+  fixtures to return `ERR_GOVERNANCE_CONTEXT_INVALID` through the existing
+  policy engine.
+- No mode policy, state model, protocol, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

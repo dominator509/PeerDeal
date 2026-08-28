@@ -144,6 +144,9 @@ the gates below are satisfied.
 - Variant persistence fixtures now include a valid all-in/five-card edge state
   and invalid duplicate-seat and negative-stack states; the suite routes every
   `invalid_` fixture through the typed parser and requires rejection.
+- Mode governance fixtures now include an invalid duplicate-participant state;
+  the suite discovers every mode JSON fixture and requires invalid contexts to
+  fail through the existing `DefaultGovernanceEngine` validation result.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

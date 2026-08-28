@@ -216,6 +216,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-28-205` | `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart` | 4 | T324 | RESOLVED | Added a generic fixture gate that routes every `invalid_` and `unsupported_` protocol fixture through its catalog/schema family and requires rejection, preventing newly added rejected fixtures from silently becoming accepted. |
 | `LEGACY-GAP-2026-08-28-206` | `packages/peerdeal_variants/test/fixtures/holdem_opening_hand.json`, `packages/peerdeal_variants/test/holdem_hand_state_persistence_test.dart` | 4 | T325 | RESOLVED | Updated the existing opening-hand fixture to the current strict `HoldemHandState` persistence shape and load-tested it through `HoldemHandState.fromJson`; no variant rules or package boundaries changed. |
 | `LEGACY-GAP-2026-08-28-207` | `packages/peerdeal_variants/test/fixtures/`, `packages/peerdeal_variants/test/holdem_hand_state_persistence_test.dart` | 4 | T326 | RESOLVED | Added a valid all-in edge fixture and invalid duplicate-seat/negative-stack fixtures; the variant persistence suite now requires invalid Hold'em fixtures to be rejected by the typed parser. |
+| `LEGACY-GAP-2026-08-28-208` | `packages/peerdeal_modes/test/fixtures/`, `packages/peerdeal_modes/test/governance_engine_test.dart` | 4 | T327 | RESOLVED | Added an invalid duplicate-participant governance fixture and a generic JSON fixture gate; invalid mode contexts must return `ERR_GOVERNANCE_CONTEXT_INVALID` through the existing policy engine. |
 
 ## Status Definitions
 
