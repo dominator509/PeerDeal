@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
@@ -90,14 +92,47 @@ void main() {
     expect(second.accepted, isTrue);
     expect(handler.successfulFrames, [frame]);
   });
+
+  test('serializes new replay scopes before invoking their handlers', () async {
+    final handler = _BlockingFirstTransportFrameHandler();
+    final receiver = ValidatingTransportFrameReceiver(
+      handler: handler,
+      replayGuard: SlidingWindowTransportFrameReplayGuard(maxScopes: 1),
+    );
+    final firstFrame = _frame(sequence: 1);
+    final secondFrame = _frame(
+      sequence: 1,
+      sessionId: 'session_other',
+      senderPeerId: 'peer_other',
+    );
+
+    final first = receiver.receive(firstFrame);
+    await handler.firstFrameStarted.future;
+    final second = receiver.receive(secondFrame);
+
+    await Future<void>.delayed(Duration.zero);
+    expect(handler.frames, [firstFrame]);
+
+    handler.releaseFirstFrame();
+    expect((await first).accepted, isTrue);
+    final secondResult = await second;
+    expect(secondResult.accepted, isFalse);
+    expect(secondResult.reasonCode, 'ERR_TRANSPORT_FRAME_REPLAY_SCOPE_LIMIT');
+    expect(handler.frames, [firstFrame]);
+  });
 }
 
-TransportFrame _frame() {
+TransportFrame _frame({
+  int sequence = 1,
+  String sessionId = 'session_1',
+  String senderPeerId = 'peer_a',
+  String recipientPeerId = 'peer_b',
+}) {
   return TransportFrame(
-    sessionId: 'session_1',
-    fromPeerId: 'peer_a',
-    toPeerId: 'peer_b',
-    sequence: 1,
+    sessionId: sessionId,
+    fromPeerId: senderPeerId,
+    toPeerId: recipientPeerId,
+    sequence: sequence,
     payload: <int>[1, 2, 3],
   );
 }
@@ -129,5 +164,24 @@ class _FailOnceTransportFrameHandler implements TransportFrameHandler {
       throw StateError('session handler unavailable');
     }
     successfulFrames.add(frame);
+  }
+}
+
+class _BlockingFirstTransportFrameHandler implements TransportFrameHandler {
+  final Completer<void> firstFrameStarted = Completer<void>();
+  final Completer<void> _firstFrameRelease = Completer<void>();
+  final List<TransportFrame> frames = <TransportFrame>[];
+
+  @override
+  Future<void> handleFrame(TransportFrame frame) async {
+    frames.add(frame);
+    if (frame.sequence == 1 && !firstFrameStarted.isCompleted) {
+      firstFrameStarted.complete();
+      await _firstFrameRelease.future;
+    }
+  }
+
+  void releaseFirstFrame() {
+    _firstFrameRelease.complete();
   }
 }

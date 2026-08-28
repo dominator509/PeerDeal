@@ -44,8 +44,9 @@ immutable local-identity diagnostics, T172 immutable readiness/transport
 diagnostics, T173 immutable app-boundary collections, T174 immutable
 native-bridge collections, T175 immutable network collections, T176
 immutable sync/recovery collections, and T177 immutable replay collections,
-and T318 shared production table failure-surface hardening and T319 production
-table operational UI hierarchy hardening
+and T318 shared production table failure-surface hardening, T319 production
+table operational UI hierarchy hardening, and T320 transport replay-scope
+admission serialization
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -73,6 +74,14 @@ retain existing safe values and semantics while distinguishing the configured
 local and current acting seats. State truth, transport, persistence, and
 package ownership remain unchanged; final visual, device, and non-demo
 product-flow validation remain separate gates.
+
+The T320 network hardening now serializes admission of unrecorded replay scopes
+and serializes receive lifecycles within established scopes. A concurrent new
+scope cannot reach the session handler before the replay guard can admit and
+record that scope, preventing post-handler scope-limit failure and preserving
+retry behavior when handler work fails. Protocol, handler, and replay-guard
+contracts remain unchanged; device reachability and product transport wiring
+remain separate gates.
 
 ## What Changed
 

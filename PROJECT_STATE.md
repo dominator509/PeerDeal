@@ -1898,6 +1898,17 @@ Remaining:
   persistence, and package boundaries are unchanged; final visual/device and
   non-demo product-flow validation remain external.
 
+## T320 Transport Replay-Scope Admission Serialization
+
+- `ValidatingTransportFrameReceiver` now serializes unrecorded replay-scope
+  admission and per-scope receive lifecycles before handler dispatch and replay
+  recording.
+- This prevents concurrent first frames from reaching a handler when a bounded
+  replay scope limit can reject the later record, while preserving retry after
+  handler failure and leaving protocol/network contracts unchanged.
+- Focused and full network tests plus package analysis pass. Device/network
+  reachability and product transport wiring remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

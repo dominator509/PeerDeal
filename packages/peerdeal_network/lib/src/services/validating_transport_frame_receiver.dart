@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../contracts/transport_frame_handler.dart';
 import '../contracts/transport_frame_replay_guard.dart';
 import '../contracts/transport_frame_receiver.dart';
@@ -21,6 +23,11 @@ class ValidatingTransportFrameReceiver implements TransportFrameReceiver {
   final TransportFrameValidator _validator;
   final TransportFrameReplayGuard _replayGuard;
   final Set<_TransportFrameReplayKey> _inFlight = <_TransportFrameReplayKey>{};
+  final Set<_TransportFrameReplayScope> _knownScopes =
+      <_TransportFrameReplayScope>{};
+  final Map<_TransportFrameReplayScope, Future<void>> _scopeQueueTails =
+      <_TransportFrameReplayScope, Future<void>>{};
+  Future<void>? _newScopeQueueTail;
 
   @override
   Future<TransportFrameReceiveResult> receive(TransportFrame frame) async {
@@ -40,6 +47,49 @@ class ValidatingTransportFrameReceiver implements TransportFrameReceiver {
       );
     }
 
+    final scope = _TransportFrameReplayScope.from(frame);
+    final wasKnown = _knownScopes.contains(scope);
+    final queued = _enqueue(
+      wasKnown ? _scopeQueueTails[scope] : _newScopeQueueTail,
+      () => _receiveValidatedFrame(frame, replayKey),
+    );
+    if (wasKnown) {
+      _scopeQueueTails[scope] = queued.tail;
+    } else {
+      _newScopeQueueTail = queued.tail;
+    }
+    unawaited(
+      queued.result.then<void>(
+        (result) {
+          if (wasKnown) {
+            if (identical(_scopeQueueTails[scope], queued.tail)) {
+              _scopeQueueTails.remove(scope);
+            }
+          } else if (identical(_newScopeQueueTail, queued.tail)) {
+            _newScopeQueueTail = null;
+            if (result.accepted &&
+                _knownScopes.length <
+                    SlidingWindowTransportFrameReplayGuard.maximumScopes) {
+              _knownScopes.add(scope);
+            }
+          }
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          if (wasKnown && identical(_scopeQueueTails[scope], queued.tail)) {
+            _scopeQueueTails.remove(scope);
+          } else if (!wasKnown && identical(_newScopeQueueTail, queued.tail)) {
+            _newScopeQueueTail = null;
+          }
+        },
+      ),
+    );
+    return queued.result;
+  }
+
+  Future<TransportFrameReceiveResult> _receiveValidatedFrame(
+    TransportFrame frame,
+    _TransportFrameReplayKey replayKey,
+  ) async {
     late final TransportFrameReplayResult replay;
     try {
       replay = _replayGuard.check(frame);
@@ -81,6 +131,19 @@ class ValidatingTransportFrameReceiver implements TransportFrameReceiver {
 
     return const TransportFrameReceiveResult.accepted();
   }
+
+  _TransportFrameReceiveQueueEntry _enqueue(
+    Future<void>? previous,
+    Future<TransportFrameReceiveResult> Function() operation,
+  ) {
+    final current = (previous ?? Future<void>.value())
+        .then<TransportFrameReceiveResult>((_) => operation());
+    final tail = current.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stackTrace) {},
+    );
+    return _TransportFrameReceiveQueueEntry(result: current, tail: tail);
+  }
 }
 
 class _TransportFrameReplayKey {
@@ -117,4 +180,45 @@ class _TransportFrameReplayKey {
   @override
   int get hashCode =>
       Object.hash(sessionId, senderPeerId, recipientPeerId, sequence);
+}
+
+class _TransportFrameReplayScope {
+  const _TransportFrameReplayScope({
+    required this.sessionId,
+    required this.senderPeerId,
+    required this.recipientPeerId,
+  });
+
+  factory _TransportFrameReplayScope.from(TransportFrame frame) {
+    return _TransportFrameReplayScope(
+      sessionId: frame.sessionId,
+      senderPeerId: frame.fromPeerId,
+      recipientPeerId: frame.toPeerId,
+    );
+  }
+
+  final String sessionId;
+  final String senderPeerId;
+  final String recipientPeerId;
+
+  @override
+  bool operator ==(Object other) {
+    return other is _TransportFrameReplayScope &&
+        other.sessionId == sessionId &&
+        other.senderPeerId == senderPeerId &&
+        other.recipientPeerId == recipientPeerId;
+  }
+
+  @override
+  int get hashCode => Object.hash(sessionId, senderPeerId, recipientPeerId);
+}
+
+class _TransportFrameReceiveQueueEntry {
+  const _TransportFrameReceiveQueueEntry({
+    required this.result,
+    required this.tail,
+  });
+
+  final Future<TransportFrameReceiveResult> result;
+  final Future<void> tail;
 }

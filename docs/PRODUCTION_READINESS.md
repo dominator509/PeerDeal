@@ -113,6 +113,12 @@ the gates below are satisfied.
   seat, connection, and control sections, with bounded visual distinction for
   the local and acting seats. Final visual/device and non-demo product-flow
   validation remain open.
+- The validating network receiver now serializes unrecorded replay-scope
+  admission and per-scope receive lifecycles before handler dispatch and replay
+  recording. This prevents a concurrent new scope from invoking the handler
+  before a bounded scope-limit failure and preserves handler-failure retry
+  behavior. Device/network reachability and product transport wiring remain
+  open.
 
 ## Covered hardening slices
 - Windows local-network and app-support method-channel handlers now reject

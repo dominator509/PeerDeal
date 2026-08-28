@@ -209,6 +209,8 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-28-199` | Production table route builder failure bypassed the shared app-shell failure surface | 4 | T318 | RESOLVED | Mirrored `AppHoldemTableSessionRoute` owners now render the shared scaffold/status unavailable state without exposing the caught exception; focused mobile and desktop route tests pass. Final visual/device and non-demo product-flow validation remain deferred. |
 | `LEGACY-GAP-2026-08-28-200` | Production Hold'em surface presented runtime state as an undifferentiated row stream, weakening operational scanning of seat and connection state | 4 | T319 | RESOLVED | Mirrored production surfaces now use explicit operational sections and bounded seat rows that distinguish local and acting seats without changing state ownership; mirrored route tests cover the hierarchy and direct app analysis passes, while final visual/device validation remains deferred. |
 
+| `LEGACY-GAP-2026-08-28-201` | `packages/peerdeal_network/` | 4 | T320 | RESOLVED | `ValidatingTransportFrameReceiver` now serializes unrecorded replay-scope admission and per-scope receive lifecycles, preventing concurrent first frames from invoking a handler before a bounded scope-limit record can fail; focused and full network tests plus package analysis pass. Device/network reachability and product transport wiring remain deferred. |
+
 ## Status Definitions
 
 - RESOLVED: Closed by this additive retrofit baseline.

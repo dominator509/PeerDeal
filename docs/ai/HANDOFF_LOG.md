@@ -15033,6 +15033,32 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - T320 Transport Replay-Scope Admission Serialization
+
+Summary:
+- `ValidatingTransportFrameReceiver` now serializes unrecorded replay-scope
+  admission and per-scope receive lifecycles before handler dispatch and replay
+  recording.
+- Concurrent first frames cannot invoke a handler before a bounded replay
+  scope-limit record can fail. Handler failures still leave frames retryable.
+
+Files changed:
+- `packages/peerdeal_network/lib/src/services/validating_transport_frame_receiver.dart`
+- `packages/peerdeal_network/test/validating_transport_frame_receiver_test.dart`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Focused receiver suite: passed, 6 tests.
+- Full `peerdeal_network` package suite: passed, 74 tests.
+- Package analysis: passed.
+
+Risks:
+- Device/network reachability, product transport wiring, runtime validation,
+  release signing, and durable product persistence remain separate gates.
+
+---
+
 ### 2026-08-20 - Codex - T294 Source-Backed Production Hardening
 
 Summary:
