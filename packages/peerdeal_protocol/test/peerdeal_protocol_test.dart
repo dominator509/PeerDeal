@@ -403,6 +403,23 @@ void main() {
     }
   });
 
+  test('rejected protocol fixtures are rejected by the catalog', () {
+    const catalog = ProtocolCatalog();
+    final fixtures = protocolFixtureFiles().where(isRejectedFixture).toList();
+
+    expect(fixtures, isNotEmpty);
+    for (final fixture in fixtures) {
+      final result = catalogResultForFixture(catalog, fixture);
+
+      expect(result.isSupported, isFalse, reason: fixture.path);
+      expect(
+        result.resultCode,
+        isNot(ResultCode.okAccepted),
+        reason: fixture.path,
+      );
+    }
+  });
+
   test('protocol catalog accepts fixture-backed event', () {
     final catalog = ProtocolCatalog();
     final decoded = fixtureJson(

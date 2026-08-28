@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-28 - Codex - Enforce Rejected Protocol Fixtures
+
+Summary:
+- Added a generic protocol fixture assertion that sends every `invalid_` and
+  `unsupported_` JSON fixture through its existing catalog/schema family and
+  requires fail-closed rejection.
+
+Files:
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Static review, boundary, source-text, and `git diff --check` gates passed.
+- The focused Dart test runner stalled without output in the current local
+  runner state; no test failure was reported.
+
+Remaining:
+- Android/Windows device and cross-network reachability, operator release
+  signing, other-platform native implementations, durable product persistence,
+  and final UX validation remain external or integration-owned.
+
 ### 2026-08-28 - Codex - Add Native Contract Bound Parity Gate
 
 Summary:

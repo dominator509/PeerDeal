@@ -131,6 +131,10 @@ the gates below are satisfied.
   both Android and Windows host declarations and runs negative-path checker
   tests. This prevents future cross-platform bound drift without claiming
   device or cross-network validation.
+- Protocol fixture coverage now generically routes every `invalid_` and
+  `unsupported_` JSON fixture through its catalog/schema family and requires
+  rejection, preventing newly added rejected fixtures from silently passing as
+  accepted artifacts.
 
 ## Covered hardening slices
 - Windows local-network and app-support method-channel handlers now reject

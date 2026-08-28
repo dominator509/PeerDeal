@@ -40,6 +40,9 @@ Generated: 2026-08-10
   the canonical Dart payload, identity, batch, and signed sequence limits with
   both Android and Windows host declarations; Melos and CI run the checker and
   its negative-path tests.
+- Protocol tests now route every `invalid_` and `unsupported_` fixture through
+  its catalog/schema family and require rejection, preventing rejected fixture
+  additions from silently becoming accepted.
 - Mirrored app capture coordinators serialize native blocking/release, downgrade
   to visual obscuring when blocking fails, and receipt routes release blocking
   on disposal.
