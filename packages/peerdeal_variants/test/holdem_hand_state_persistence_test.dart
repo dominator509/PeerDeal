@@ -8,11 +8,7 @@ void main() {
   test(
     'loads the opening-hand fixture through strict persisted state parsing',
     () {
-      final fixture = Map<String, Object?>.from(
-        jsonDecode(
-          File('test/fixtures/holdem_opening_hand.json').readAsStringSync(),
-        ) as Map,
-      );
+      final fixture = _fixtureJson('holdem_opening_hand.json');
 
       expect(fixture['variant_id'], 'holdem_nlhe');
       expect(fixture['mode_type'], 'open_table');
@@ -40,6 +36,54 @@ void main() {
       expect(state.lastActionSummary, isNull);
     },
   );
+
+  test('loads the all-in edge fixture through strict persisted parsing', () {
+    final state = HoldemHandState.fromJson(
+      _fixtureJson('holdem_all_in_edge.json'),
+    );
+
+    expect(state.phase, HoldemHandPhase.handComplete);
+    expect(state.bettingRound, HoldemBettingRound.river);
+    expect(state.boardCards, hasLength(5));
+    expect(
+      state.seats.every((seat) => seat.allIn && seat.stack == 0),
+      isTrue,
+    );
+  });
+
+  test('every non-invalid Holdem fixture is accepted by the typed parser', () {
+    final fixtures = _fixtureFiles()
+        .where((file) => !file.uri.pathSegments.last.startsWith('invalid_'))
+        .toList();
+
+    expect(fixtures, isNotEmpty);
+    for (final fixture in fixtures) {
+      expect(
+        () => HoldemHandState.fromJson(
+          _fixtureJson(fixture.uri.pathSegments.last),
+        ),
+        returnsNormally,
+        reason: fixture.path,
+      );
+    }
+  });
+
+  test('every invalid Holdem fixture is rejected by the typed parser', () {
+    final fixtures = _fixtureFiles()
+        .where((file) => file.uri.pathSegments.last.startsWith('invalid_'))
+        .toList();
+
+    expect(fixtures, isNotEmpty);
+    for (final fixture in fixtures) {
+      expect(
+        () => HoldemHandState.fromJson(
+          _fixtureJson(fixture.uri.pathSegments.last),
+        ),
+        throwsA(isA<FormatException>()),
+        reason: fixture.path,
+      );
+    }
+  });
 
   test('round-trips HoldemHandState through JSON without losing fields', () {
     final state = HoldemHandState(
@@ -268,6 +312,17 @@ Map<String, Object?> _stateJson() => <String, Object?>{
   'last_aggressor_seat': null,
   'last_action_summary': null,
 };
+
+Map<String, Object?> _fixtureJson(String fileName) =>
+    Map<String, Object?>.from(
+      jsonDecode(File('test/fixtures/$fileName').readAsStringSync()) as Map,
+    );
+
+List<File> _fixtureFiles() => Directory('test/fixtures')
+    .listSync()
+    .whereType<File>()
+    .where((file) => file.path.endsWith('.json'))
+    .toList(growable: false);
 
 Map<String, Object?> _seatJson() => <String, Object?>{
   'seat': 0,

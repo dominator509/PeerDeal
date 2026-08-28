@@ -48,8 +48,9 @@ and T318 shared production table failure-surface hardening, T319 production
 table operational UI hierarchy hardening, and T320 transport replay-scope
 admission serialization, T321 cross-platform transport sequence bounds,
 T322 cross-platform transport payload bounds, T323 native transport contract
-bound parity, T324 rejected protocol fixture enforcement, and T325 wired
-Hold'em opening-hand fixture persistence coverage
+bound parity, T324 rejected protocol fixture enforcement, T325 wired
+Hold'em opening-hand fixture persistence coverage, and T326 Hold'em fixture
+breadth enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -115,6 +116,11 @@ The T325 variant hardening updates the existing Hold'em opening-hand fixture to
 the current strict persisted-state shape and loads it through
 `HoldemHandState.fromJson` in package tests. This closes the unwired fixture
 path without moving rules or persistence policy across package boundaries.
+
+The T326 variant hardening adds an all-in/five-card edge fixture plus invalid
+duplicate-seat and negative-stack fixtures. The persistence suite loads the
+edge state and requires every `invalid_` Hold'em fixture to fail through the
+existing typed parser.
 
 ## What Changed
 

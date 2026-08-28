@@ -141,6 +141,9 @@ the gates below are satisfied.
   `HoldemHandState` shape and is loaded through the typed parser in variant
   persistence tests. This closes local fixture/parser drift without claiming
   full production engine, device, or product-session validation.
+- Variant persistence fixtures now include a valid all-in/five-card edge state
+  and invalid duplicate-seat and negative-stack states; the suite routes every
+  `invalid_` fixture through the typed parser and requires rejection.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

@@ -1945,6 +1945,15 @@ Remaining:
   fixture cannot silently drift from the typed parser.
 - No Hold'em rule, core truth, protocol, app, or package boundary changed.
 
+## Recent T326 Changes
+
+- Variant persistence fixtures now cover a valid all-in/five-card edge state
+  and invalid duplicate-seat and negative-stack states.
+- The persistence suite generically rejects every `invalid_` Hold'em fixture
+  through `HoldemHandState.fromJson`, preventing fixture additions from
+  bypassing typed validation.
+- No Hold'em rule, core truth, protocol, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

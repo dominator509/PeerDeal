@@ -15066,6 +15066,34 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - Hold'em Fixture Breadth Gate
+
+Summary:
+- Added a valid all-in/five-card Hold'em persistence edge fixture.
+- Added invalid duplicate-seat and negative-stack fixtures.
+- Added a generic test requiring every `invalid_` Hold'em fixture to be
+  rejected by `HoldemHandState.fromJson`.
+
+Files changed:
+- `packages/peerdeal_variants/test/fixtures/holdem_all_in_edge.json`
+- `packages/peerdeal_variants/test/fixtures/invalid_holdem_duplicate_seat.json`
+- `packages/peerdeal_variants/test/fixtures/invalid_holdem_negative_stack.json`
+- `packages/peerdeal_variants/test/holdem_hand_state_persistence_test.dart`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and this stable AI handoff log.
+
+Verification:
+- Direct `peerdeal_variants` analysis passed.
+- Fixture JSON inventory and source-text checks passed.
+- Focused Dart test execution stalled without output in the local runner;
+  no test failure was emitted.
+
+Risks:
+- Full gameplay fixture breadth, native/device runtime validation, production
+  persistence, and product session wiring remain separate gates.
+
+---
+
 ### 2026-08-28 - Codex - T318 Production Route Failure Surface
 
 Summary:
