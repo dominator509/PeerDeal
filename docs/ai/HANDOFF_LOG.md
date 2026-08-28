@@ -15090,6 +15090,32 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - T322 Cross-Platform Transport Payload Bounds
+
+Summary:
+- The shared native transport payload ceiling is now 60 KiB, matching the
+  Android and Windows host implementations and their private wire envelope.
+- A contract test locks the common ceiling so oversized payloads fail closed
+  before native dispatch.
+
+Files changed:
+- `packages/peerdeal_native_bridges/lib/src/native_bridge_payload_limits.dart`
+- `packages/peerdeal_native_bridges/test/native_bridge_channel_contract_test.dart`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Native bridge package analysis: passed.
+- Boundary, source-text, formatting, and diff checks: passed.
+- Flutter widget and native runtime/build validation remain unavailable in the
+  local command environment.
+
+Risks:
+- Device/network reachability, cross-device runtime validation, release
+  signing, and product transport wiring remain separate gates.
+
+---
+
 ### 2026-08-20 - Codex - T294 Source-Backed Production Hardening
 
 Summary:

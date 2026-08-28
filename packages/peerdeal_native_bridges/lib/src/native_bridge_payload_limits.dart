@@ -4,7 +4,7 @@ class NativeBridgePayloadLimits {
   const NativeBridgePayloadLimits._();
 
   static const maxTransportFrames = 64;
-  static const maxTransportPayloadBytes = 64 * 1024;
+  static const maxTransportPayloadBytes = 60 * 1024;
   static const maxTransportIdentityBytes = 256;
   static const maxTransportSequence = 0x7fffffff;
   static const maxDiscoveryEntries = 64;

@@ -5,6 +5,10 @@ import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('native transport payload ceiling matches the host wire contract', () {
+    expect(NativeBridgePayloadLimits.maxTransportPayloadBytes, 60 * 1024);
+  });
+
   test('local network discovery snapshot owns and freezes collections', () {
     final endpoints = <String>['peer_a'];
     final interfaces = <String>['wifi'];

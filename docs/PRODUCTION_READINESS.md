@@ -123,6 +123,9 @@ the gates below are satisfied.
   signed 32-bit sequence ceiling required by Android and the host-private wire
   envelope; Windows host argument decoding applies the same ceiling. Flutter
   widget and native runtime/build validation remain open.
+- The shared native transport payload ceiling now matches the 60 KiB Android
+  and Windows host/wire limit, so Dart cannot encode a frame either host must
+  reject. Flutter widget and native runtime/build validation remain open.
 
 ## Covered hardening slices
 - Windows local-network and app-support method-channel handlers now reject

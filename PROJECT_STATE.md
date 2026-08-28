@@ -1919,6 +1919,15 @@ Remaining:
 - Package analysis and source checks pass. Flutter widget and Windows native
   build/runtime validation remain external.
 
+## T322 Cross-Platform Transport Payload Bounds
+
+- The shared native transport payload ceiling is now 60 KiB, matching the
+  Android and Windows host implementations and their private wire envelope.
+- Oversized payloads therefore fail closed at the Dart model/channel boundary
+  before reaching a host that would reject them.
+- Direct package analysis and source checks pass. Flutter widget and native
+  runtime/build validation remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

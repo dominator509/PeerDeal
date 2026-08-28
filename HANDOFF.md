@@ -46,7 +46,8 @@ native-bridge collections, T175 immutable network collections, T176
 immutable sync/recovery collections, and T177 immutable replay collections,
 and T318 shared production table failure-surface hardening, T319 production
 table operational UI hierarchy hardening, and T320 transport replay-scope
-admission serialization, and T321 cross-platform transport sequence bounds
+admission serialization, T321 cross-platform transport sequence bounds, and
+T322 cross-platform transport payload bounds
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -89,6 +90,12 @@ and wire decoding now apply the same ceiling already required by Android and
 the host-private wire envelope, so a frame cannot be accepted by one native
 host and rejected by another. Package analysis and source checks pass; Flutter
 and Windows native runtime/build validation remain separate gates.
+
+The T322 native transport hardening aligns the shared Dart payload ceiling with
+the 60 KiB limit implemented by both Android and Windows hosts. Channel model
+validation and encoding now fail closed before a payload can be accepted by
+Dart and rejected by either native host. Device and native runtime validation
+remain separate gates.
 
 ## What Changed
 
