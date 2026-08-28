@@ -1888,6 +1888,16 @@ Remaining:
   the fail-closed surface; final visual, device, and product-flow validation
   remain external.
 
+## T319 Production Table Operational UI Hierarchy
+
+- Mirrored production Hold'em surfaces now use explicit Session, Table state,
+  Seats, Connection, and Controls sections for operational scanning.
+- Seat rows retain bounded values and semantics while distinguishing the local
+  and current acting seats through the existing app-owned surface.
+- This is a presentation-only hardening slice. State truth, transport,
+  persistence, and package boundaries are unchanged; final visual/device and
+  non-demo product-flow validation remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

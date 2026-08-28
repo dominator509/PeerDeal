@@ -107,67 +107,138 @@ class _AppHoldemProductionTableSurfaceState
             label: _statusLabel(hand, transportReady, canAct),
             severity: _statusSeverity(hand, transportReady, canAct),
           ),
-          const SizedBox(height: 12),
-          PeerDealInfoRow(
-            label: 'Session',
-            value: _safeValue(
-              runtime.coreState.sessionId,
-              fallback: 'Session unavailable',
+          const SizedBox(height: 16),
+          _buildSection(
+            title: 'Session',
+            children: <Widget>[
+              PeerDealInfoRow(
+                label: 'Session ID',
+                value: _safeValue(
+                  runtime.coreState.sessionId,
+                  fallback: 'Session unavailable',
+                ),
+              ),
+              PeerDealInfoRow(
+                label: 'Hand ID',
+                value: _safeValue(hand.handId, fallback: 'Hand unavailable'),
+              ),
+            ],
+          ),
+          _buildSection(
+            title: 'Table state',
+            children: <Widget>[
+              PeerDealInfoRow(label: 'Phase', value: _phaseLabel(hand.phase)),
+              PeerDealInfoRow(
+                label: 'Betting round',
+                value: _bettingRoundLabel(hand.bettingRound),
+              ),
+              PeerDealInfoRow(label: 'Pot', value: hand.pot.toString()),
+              PeerDealInfoRow(
+                label: 'Current actor',
+                value: _actorLabel(hand.currentActorSeat),
+              ),
+              PeerDealInfoRow(
+                label: 'Board',
+                value: _safeCardList(hand.boardCards),
+              ),
+            ],
+          ),
+          _buildSection(
+            title: 'Seats',
+            children: <Widget>[
+              for (final seat in hand.seats) _buildSeatRow(seat),
+            ],
+          ),
+          _buildSection(
+            title: 'Connection',
+            children: <Widget>[
+              PeerDealInfoRow(
+                label: 'Transport',
+                value: transportReady ? 'Connected' : 'Unavailable',
+              ),
+              if (routeContext.snapshotCoordinator?.hasPending ?? false)
+                const PeerDealInfoRow(
+                  label: 'Persistence',
+                  value: 'Checkpoint pending',
+                ),
+              if (_statusMessage != null)
+                PeerDealInfoRow(label: 'Status', value: _statusMessage!),
+            ],
+          ),
+          _buildSection(
+            title: 'Controls',
+            children: <Widget>[_buildActionArea(hand, transportReady, canAct)],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection({
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Semantics(
+            header: true,
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Color(0xFFE8F3EF),
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-          PeerDealInfoRow(
-            label: 'Hand',
-            value: _safeValue(hand.handId, fallback: 'Hand unavailable'),
-          ),
-          PeerDealInfoRow(label: 'Phase', value: _phaseLabel(hand.phase)),
-          PeerDealInfoRow(
-            label: 'Betting round',
-            value: _bettingRoundLabel(hand.bettingRound),
-          ),
-          PeerDealInfoRow(label: 'Pot', value: hand.pot.toString()),
-          PeerDealInfoRow(
-            label: 'Current actor',
-            value: _actorLabel(hand.currentActorSeat),
-          ),
-          PeerDealInfoRow(
-            label: 'Board',
-            value: _safeCardList(hand.boardCards),
-          ),
-          const SizedBox(height: 12),
-          Semantics(header: true, child: const Text('Seats')),
           const SizedBox(height: 4),
-          for (final seat in hand.seats) _buildSeatRow(seat),
-          const SizedBox(height: 12),
-          PeerDealInfoRow(
-            label: 'Transport',
-            value: transportReady ? 'Connected' : 'Unavailable',
-          ),
-          if (routeContext.snapshotCoordinator?.hasPending ?? false)
-            const PeerDealInfoRow(
-              label: 'Persistence',
-              value: 'Checkpoint pending',
-            ),
-          if (_statusMessage != null)
-            PeerDealInfoRow(label: 'Status', value: _statusMessage!),
-          const SizedBox(height: 12),
-          _buildActionArea(hand, transportReady, canAct),
+          ...children,
         ],
       ),
     );
   }
 
   Widget _buildSeatRow(HoldemSeatState seat) {
+    final isActing =
+        seat.seat == widget.routeContext.runtime.handState.currentActorSeat;
+    final isLocal = seat.seat == widget.localSeat;
     final flags = <String>[
       if (seat.folded) 'folded',
       if (seat.allIn) 'all-in',
-      if (seat.seat == widget.localSeat) 'you',
-      if (seat.seat == widget.routeContext.runtime.handState.currentActorSeat)
-        'acting',
+      if (isLocal) 'you',
+      if (isActing) 'acting',
     ];
     final suffix = flags.isEmpty ? '' : ' (${flags.join(', ')})';
-    return PeerDealInfoRow(
-      label: 'Seat ${seat.seat}',
-      value: 'Stack ${seat.stack}, committed ${seat.committedThisHand}$suffix',
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isActing
+              ? const Color(0xFF332B14)
+              : isLocal
+              ? const Color(0xFF102C26)
+              : const Color(0xFF10201D),
+          border: Border.all(
+            color: isActing
+                ? const Color(0xFFA78932)
+                : isLocal
+                ? const Color(0xFF2C6B5D)
+                : const Color(0xFF1F3A33),
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: PeerDealInfoRow(
+            label: 'Seat ${seat.seat}',
+            value:
+                'Stack ${seat.stack}, committed ${seat.committedThisHand}$suffix',
+          ),
+        ),
+      ),
     );
   }
 

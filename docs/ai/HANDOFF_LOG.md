@@ -15011,6 +15011,28 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - T319 Production Table Operational UI Hierarchy
+
+Summary:
+- Mirrored production Hold'em surfaces now group bounded runtime data into
+  Session, Table state, Seats, Connection, and Controls sections.
+- Repeated seat rows retain existing safe values and semantics while visually
+  distinguishing the configured local and current acting seats.
+
+Files changed:
+- Mirrored production table surface files and route tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Focused mobile and desktop route suites remain the required local evidence;
+  final visual/device and non-demo product-flow validation remain external.
+
+Risks:
+- No game truth, transport, persistence, or package ownership moved into UI.
+
+---
+
 ### 2026-08-20 - Codex - T294 Source-Backed Production Hardening
 
 Summary:

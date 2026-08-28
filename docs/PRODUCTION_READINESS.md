@@ -109,7 +109,10 @@ the gates below are satisfied.
   inside the shared scaffold/status unavailable state without exposing raw
   exception text. Focused mobile and desktop route coverage passes; final
   visual/device and non-demo product-flow validation remain open.
-- App UI is not production-polished.
+- The default production Hold'em surface now has explicit session, table-state,
+  seat, connection, and control sections, with bounded visual distinction for
+  the local and acting seats. Final visual/device and non-demo product-flow
+  validation remain open.
 
 ## Covered hardening slices
 - Windows local-network and app-support method-channel handlers now reject
@@ -117,6 +120,11 @@ the gates below are satisfied.
   into stable unavailable payloads. Windows transport capability now reports a
   zero payload limit when its socket is unavailable, matching the existing
   native bridge model.
+- Mirrored production Hold'em surfaces now present runtime state in explicit
+  operational sections and bounded seat rows, distinguishing local and acting
+  seats without moving state ownership into UI. Focused route coverage remains
+  the local evidence; final visual/device and non-demo product-flow validation
+  remain open.
 - The Android Gradle wrapper now verifies the official SHA-256 for its pinned
   Gradle 8.14 distribution before use, preventing a substituted wrapper
   archive without changing the Android build version or package ownership.

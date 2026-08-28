@@ -117,6 +117,11 @@ void main() {
     expect(find.text('Betting preflop'), findsOneWidget);
     expect(find.text('bettingPreflop'), findsNothing);
     expect(find.text('Fold'), findsNothing);
+    expect(find.text('Session'), findsOneWidget);
+    expect(find.text('Table state'), findsOneWidget);
+    expect(find.text('Seats'), findsOneWidget);
+    expect(find.text('Connection'), findsOneWidget);
+    expect(find.text('Controls'), findsOneWidget);
   });
 
   testWidgets('production table surface labels an idle actor safely', (

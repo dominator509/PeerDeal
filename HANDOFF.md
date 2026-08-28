@@ -44,7 +44,8 @@ immutable local-identity diagnostics, T172 immutable readiness/transport
 diagnostics, T173 immutable app-boundary collections, T174 immutable
 native-bridge collections, T175 immutable network collections, T176
 immutable sync/recovery collections, and T177 immutable replay collections,
-and T318 shared production table failure-surface hardening
+and T318 shared production table failure-surface hardening and T319 production
+table operational UI hierarchy hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -65,6 +66,13 @@ inside the shared app-shell scaffold. Builder exceptions are not rendered or
 returned to the user, and mirrored mobile and desktop route tests cover the
 bounded unavailable state. Final visual, device, and non-demo product-flow
 validation remain separate gates.
+
+The T319 table-surface hardening now groups bounded runtime data into Session,
+Table state, Seats, Connection, and Controls sections. Repeated seat rows
+retain existing safe values and semantics while distinguishing the configured
+local and current acting seats. State truth, transport, persistence, and
+package ownership remain unchanged; final visual, device, and non-demo
+product-flow validation remain separate gates.
 
 ## What Changed
 
