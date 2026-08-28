@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../session/app_holdem_table_session_runtime.dart';
 import '../session/app_table_session_runtime.dart';
@@ -17,6 +18,7 @@ class AppTableSessionTransportProvisioner {
     Duration pollInterval = const Duration(seconds: 1),
     NativeTransportSourceTimerFactory? timerFactory,
     Future<void>? cancellation,
+    SessionMessageAuthenticator? sessionAuthenticator,
   }) : _runtime = runtime,
        _holdemRuntime = holdemRuntime,
        _onEventAccepted = onEventAccepted,
@@ -25,7 +27,8 @@ class AppTableSessionTransportProvisioner {
            NativeTransportSessionFactory(cancellation: cancellation),
        _pollInterval = pollInterval,
        _timerFactory = timerFactory,
-       _cancellation = cancellation;
+       _cancellation = cancellation,
+       _sessionAuthenticator = sessionAuthenticator;
 
   final AppTableSessionRuntime _runtime;
   final AppHoldemTableSessionRuntime? _holdemRuntime;
@@ -34,6 +37,7 @@ class AppTableSessionTransportProvisioner {
   final Duration _pollInterval;
   final NativeTransportSourceTimerFactory? _timerFactory;
   final Future<void>? _cancellation;
+  final SessionMessageAuthenticator? _sessionAuthenticator;
 
   Future<AppTableSessionTransportProvisionResult> load({
     required String peerId,
@@ -56,6 +60,7 @@ class AppTableSessionTransportProvisioner {
       onEventAccepted: _onEventAccepted,
       expectedRemotePeerId: peerId,
       expectedLocalPeerId: recipientPeerId,
+      sessionAuthenticator: _sessionAuthenticator,
     );
     NativeTransportSessionLoadResult loaded;
     try {

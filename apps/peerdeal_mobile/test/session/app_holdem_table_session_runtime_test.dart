@@ -406,7 +406,12 @@ TableState _openCoreState() {
       sessionId: 'sess_001',
       protocolVersion: '1.0.0',
     ),
-    EventEnvelope(
+    _canonicalOpenEvent(),
+  );
+}
+
+EventEnvelope _canonicalOpenEvent() {
+  final event = EventEnvelope(
       eventId: 'evt_open',
       eventType: 'OpenTableSessionOpened',
       eventVersion: '1.0',
@@ -419,9 +424,12 @@ TableState _openCoreState() {
       actorRef: 'system',
       payload: <String, Object?>{'mode_type': 'cash'},
       prevEventHash: genesisEventHash,
-      eventHash: 'hash_open',
-    ),
-  );
+      eventHash: '',
+    );
+  return EventEnvelope.fromJson(<String, Object?>{
+    ...event.toJson(),
+    'event_hash': computeCanonicalEventHash(event),
+  });
 }
 
 HoldemEventCursor _cursor() {
@@ -430,7 +438,7 @@ HoldemEventCursor _cursor() {
     tableId: 'tbl_001',
     sessionId: 'sess_001',
     nextEventSeq: 2,
-    previousEventHash: 'hash_open',
+    previousEventHash: _canonicalOpenEvent().eventHash,
     actorRef: 'system',
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-10T00:00:01Z',

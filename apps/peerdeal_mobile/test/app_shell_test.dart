@@ -232,6 +232,11 @@ void main() {
     await tester.pumpWidget(
       PeerDealMobileApp(
         presenter: presenter,
+        receiptAuthorization: const ReceiptAuthorizationRequest(
+          requestedByUserId: 'user_demo',
+          requestedSessionId: 'session_open_table_live_turn',
+          accessMode: ReceiptAccessMode.view,
+        ),
         receiptExportArtifactFactory: NativeReceiptExportArtifactFactory(
           keyRingProvisioner: NativeReceiptKeyRingProvisioner(
             loader: NativeReceiptKeyRingLoader(bridge: keyBridge),
@@ -602,7 +607,11 @@ void main() {
         protocolVersion: '1.x',
       ),
       events: <EventEnvelope>[
-        _recoveryEvent(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+        _recoveryEvent(
+          seq: 1,
+          prevHash: genesisEventHash,
+          hash: _recoveryEventHash(),
+        ),
       ],
     );
     expect(append.isSuccess, isTrue);
@@ -643,7 +652,10 @@ void main() {
         _recoveryEvent(
           seq: 1,
           prevHash: genesisEventHash,
-          hash: 'hash_1',
+          hash: _recoveryEventHash(
+            tableId: scope.tableId,
+            sessionId: scope.sessionId,
+          ),
           tableId: scope.tableId,
           sessionId: scope.sessionId,
         ),
@@ -2303,11 +2315,18 @@ AppHoldemProductionSessionConfigurationFactory _productionConfigurationFactory(
       navigationLabel: 'Live Holdem',
       remotePeerId: 'peer_remote',
       localSeat: 1,
+      sessionAuthenticator: _authenticator(),
       closeEventAdapterFactory: (_) => throw StateError('unused'),
     ),
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-11T00:00:00Z',
     eventHashFactory: (_) => 'hash',
+  );
+}
+
+HmacSha256SessionMessageAuthenticator _authenticator() {
+  return HmacSha256SessionMessageAuthenticator(
+    key: List<int>.generate(32, (index) => index),
   );
 }
 
@@ -2589,5 +2608,20 @@ EventEnvelope _recoveryEvent({
     payload: const <String, Object?>{},
     prevEventHash: prevHash,
     eventHash: hash,
+  );
+}
+
+String _recoveryEventHash({
+  String tableId = 'open_table_live_turn',
+  String sessionId = 'demo:open_table_live_turn',
+}) {
+  return computeCanonicalEventHash(
+    _recoveryEvent(
+      seq: 1,
+      prevHash: genesisEventHash,
+      hash: '',
+      tableId: tableId,
+      sessionId: sessionId,
+    ),
   );
 }

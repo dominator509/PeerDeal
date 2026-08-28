@@ -117,7 +117,10 @@ void main() {
 
       expect((await receiver.receive(_frame(_event()))).accepted, isTrue);
       final result = await receiver.receive(
-        _frame(_event(seq: 3, prevEventHash: 'hash_1'), sequence: 2),
+        _frame(
+          _event(seq: 3, prevEventHash: _event().eventHash),
+          sequence: 2,
+        ),
       );
 
       expect(result.accepted, isFalse);
@@ -172,7 +175,7 @@ EventEnvelope _event({
   String sessionId = 'session_1',
   String prevEventHash = genesisEventHash,
 }) {
-  return EventEnvelope(
+  final event = EventEnvelope(
     eventId: 'evt_$seq',
     eventType: 'OpenTableSessionOpened',
     eventVersion: '1.0',
@@ -185,8 +188,12 @@ EventEnvelope _event({
     actorRef: 'actor_1',
     payload: const <String, Object?>{'mode_type': 'cash'},
     prevEventHash: prevEventHash,
-    eventHash: 'hash_$seq',
+    eventHash: '',
   );
+  return EventEnvelope.fromJson(<String, Object?>{
+    ...event.toJson(),
+    'event_hash': computeCanonicalEventHash(event),
+  });
 }
 
 HoldemEventCursor _holdemCursor() {

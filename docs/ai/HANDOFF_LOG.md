@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-28 - Codex - Add Production Session Message Authentication
+
+Summary:
+- Added the protocol-owned versioned `SessionAuthenticatedPayloadCodec` and
+  HMAC-SHA256 `SessionMessageAuthenticator` contract.
+- Production mobile and desktop Hold'em route composition now requires an
+  injected authenticator, authenticates canonical event bytes with transport
+  session/peer/sequence scope, and fails closed when authentication is absent
+  or invalid.
+- Updated mirrored route fixtures and added fail-closed bootstrap coverage.
+
+Files:
+- `packages/peerdeal_protocol/lib/src/authentication/session_message_authenticator.dart`
+- Mirrored mobile and desktop production session/transport composition files.
+- Mirrored route and bootstrap regression tests.
+- `docs/ARCHITECTURE.md`, `docs/PRODUCTION_READINESS.md`,
+  `docs/ai/API_CONTRACTS.md`, and `docs/ai/ARCHITECTURE_MAP.md`.
+
+Verification:
+- Full mobile (577) and desktop (576) Flutter suites passed.
+- Protocol authentication, mirrored route/bootstrap, analyzer, boundary,
+  source-text, and `git diff --check` gates passed.
+- Dependency audit remains toolchain-sensitive locally; the latest completed
+  audit for this dependency state reported zero actionable upgrades.
+
+Remaining:
+- App-owned key provisioning, session authorization and rotation policy,
+  real-device/cross-device transport validation, other-platform hosts,
+  product session/database wiring, and final UX remain separate readiness gates.
+
 ### 2026-08-20 - Codex - Align Replay Snapshot Ingress
 
 Summary:

@@ -97,6 +97,7 @@ void main() {
           runtime: _runtime(),
           peerId: 'peer_remote',
           localPeerId: 'peer_local',
+          sessionAuthenticator: _authenticator(),
           localSeat: 1,
         );
 
@@ -128,6 +129,7 @@ void main() {
           runtime: _runtime(initialHandState: _idleState()),
           peerId: 'peer_remote',
           localPeerId: 'peer_local',
+          sessionAuthenticator: _authenticator(),
           localSeat: 1,
         );
 
@@ -162,8 +164,9 @@ void main() {
         senderPeerId: 'peer_remote',
         recipientPeerId: 'peer_local',
         sequence: projection.events.single.eventSeq,
-        payloadBytes: const EventEnvelopeCodec().encode(
+        payloadBytes: _authenticatedPayload(
           projection.events.single,
+          authenticator: _authenticator(),
         ),
       ),
     );
@@ -175,6 +178,7 @@ void main() {
           runtime: runtime,
           peerId: 'peer_remote',
           localPeerId: 'peer_local',
+          sessionAuthenticator: _authenticator(),
           nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
           timerFactory: (interval, callback) =>
               Timer(const Duration(hours: 1), () {}),
@@ -207,8 +211,9 @@ void main() {
         senderPeerId: 'peer_remote',
         recipientPeerId: 'peer_local',
         sequence: projection.events.single.eventSeq,
-        payloadBytes: const EventEnvelopeCodec().encode(
+        payloadBytes: _authenticatedPayload(
           projection.events.single,
+          authenticator: _authenticator(),
         ),
       ),
     );
@@ -220,6 +225,7 @@ void main() {
           runtime: runtime,
           peerId: 'peer_remote',
           localPeerId: 'peer_local',
+          sessionAuthenticator: _authenticator(),
           nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
           timerFactory: (interval, callback) =>
               Timer(const Duration(hours: 1), () {}),
@@ -242,7 +248,7 @@ void main() {
     expect(bridge.lastSentFrame, isNotNull);
     expect(
       const EventEnvelopeCodec()
-          .decode(bridge.lastSentFrame!.payloadBytes)
+          .decode(_decodeAuthenticatedPayload(bridge.lastSentFrame!))
           .payload['actor_seat'],
       1,
     );
@@ -295,8 +301,9 @@ void main() {
         senderPeerId: 'peer_remote',
         recipientPeerId: 'peer_local',
         sequence: projection.events.single.eventSeq,
-        payloadBytes: const EventEnvelopeCodec().encode(
+        payloadBytes: _authenticatedPayload(
           projection.events.single,
+          authenticator: _authenticator(),
         ),
       ),
     );
@@ -341,8 +348,9 @@ void main() {
           senderPeerId: 'peer_remote',
           recipientPeerId: 'peer_local',
           sequence: projection.events.single.eventSeq,
-          payloadBytes: const EventEnvelopeCodec().encode(
+          payloadBytes: _authenticatedPayload(
             projection.events.single,
+            authenticator: _authenticator(),
           ),
         ),
       );
@@ -420,8 +428,9 @@ void main() {
         senderPeerId: 'peer_remote',
         recipientPeerId: 'peer_local',
         sequence: projection.events.single.eventSeq,
-        payloadBytes: const EventEnvelopeCodec().encode(
+        payloadBytes: _authenticatedPayload(
           projection.events.single,
+          authenticator: _authenticator(),
         ),
       ),
     );
@@ -471,6 +480,7 @@ void main() {
           runtime: runtime,
           peerId: ' peer_remote',
           localPeerId: 'peer_local',
+          sessionAuthenticator: _authenticator(),
           surfaceBuilder: (context, routeContext) => Text(
             routeContext.transport.available ? 'available' : 'unavailable',
           ),
@@ -494,6 +504,7 @@ Widget _productionSurfaceRoute({
       runtime: runtime,
       peerId: 'peer_remote',
       localPeerId: 'peer_local',
+      sessionAuthenticator: _authenticator(),
       nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
       timerFactory: (interval, callback) =>
           Timer(const Duration(hours: 1), () {}),
@@ -518,6 +529,7 @@ Widget _productionSurfaceRouteWithCoordinator({
       runtime: runtime,
       peerId: 'peer_remote',
       localPeerId: 'peer_local',
+      sessionAuthenticator: _authenticator(),
       nativeSessionFactory: NativeTransportSessionFactory(bridge: bridge),
       snapshotCoordinator: snapshotCoordinator,
       timerFactory: (interval, callback) =>
@@ -555,6 +567,7 @@ AppHoldemProductionRouteRegistration _registration() {
     runtime: runtime,
     peerId: 'peer_remote',
     localPeerId: 'peer_local',
+    sessionAuthenticator: _authenticator(),
     nativeSessionFactory: NativeTransportSessionFactory(
       bridge: _FakeNativeTransportBridge(
         receiveFrame: NativeTransportFrame(
@@ -562,8 +575,9 @@ AppHoldemProductionRouteRegistration _registration() {
           senderPeerId: 'peer_remote',
           recipientPeerId: 'peer_local',
           sequence: projection.events.single.eventSeq,
-          payloadBytes: const EventEnvelopeCodec().encode(
+          payloadBytes: _authenticatedPayload(
             projection.events.single,
+            authenticator: _authenticator(),
           ),
         ),
       ),
@@ -589,6 +603,39 @@ AppNativeReadinessLoader _readyReadinessLoader() {
       ),
     ),
     secureKeyStorageBridge: const _ReadySecureKeyStorageBridge(),
+  );
+}
+
+List<int> _authenticatedPayload(
+  EventEnvelope event, {
+  required SessionMessageAuthenticator authenticator,
+}) {
+  return SessionAuthenticatedPayloadCodec.encode(
+    input: SessionAuthenticationInput(
+      sessionId: event.sessionId,
+      senderPeerId: 'peer_remote',
+      recipientPeerId: 'peer_local',
+      sequence: event.eventSeq,
+      payload: const EventEnvelopeCodec().encode(event),
+    ),
+    authenticator: authenticator,
+  );
+}
+
+List<int> _decodeAuthenticatedPayload(NativeTransportFrame frame) {
+  return SessionAuthenticatedPayloadCodec.decode(
+    encoded: frame.payloadBytes,
+    sessionId: frame.sessionId,
+    senderPeerId: frame.senderPeerId,
+    recipientPeerId: frame.recipientPeerId,
+    sequence: frame.sequence,
+    authenticator: _authenticator(),
+  );
+}
+
+HmacSha256SessionMessageAuthenticator _authenticator() {
+  return HmacSha256SessionMessageAuthenticator(
+    key: List<int>.generate(32, (index) => index),
   );
 }
 
@@ -674,7 +721,8 @@ TableState _openCoreState() {
       actorRef: 'system',
       payload: <String, Object?>{'mode_type': 'cash'},
       prevEventHash: genesisEventHash,
-      eventHash: 'hash_open',
+      eventHash:
+          '3182affc679d55993257597f317df8b19c7582156e5a90f1d33d728dde51e2e5',
     ),
   );
 }
@@ -685,7 +733,8 @@ HoldemEventCursor _cursor() {
     tableId: 'tbl_001',
     sessionId: 'sess_001',
     nextEventSeq: 2,
-    previousEventHash: 'hash_open',
+    previousEventHash:
+        '3182affc679d55993257597f317df8b19c7582156e5a90f1d33d728dde51e2e5',
     actorRef: 'system',
     eventIdFactory: (eventType, eventSeq) => 'evt_${eventType}_$eventSeq',
     emittedAtFactory: () => '2026-08-10T00:00:01Z',

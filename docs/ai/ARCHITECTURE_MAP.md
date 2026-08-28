@@ -160,6 +160,16 @@ with the host implementation without changing the generic bridge contract.
 Device/network
 reachability, real platform discovery, and other-platform transport remain open.
 
+Session message authentication remains protocol and app-session ownership, not
+native packet ownership. `peerdeal_protocol` provides the bounded,
+versioned `SessionAuthenticatedPayloadCodec` and HMAC-SHA256 authenticator,
+which bind canonical event bytes to transport session, sender, recipient, and
+sequence scope. Mirrored production Hold'em routes require an injected
+authenticator and fail closed when it is absent or invalid. Key provisioning,
+session authorization, rotation, and real-device/network validation remain
+app/product or operational work; generic low-level transport adapters remain
+neutral and are not authenticated production routes.
+
 Recovery:
 
 1. Recovery request carries optional `SnapshotEnvelope` plus ordered events.

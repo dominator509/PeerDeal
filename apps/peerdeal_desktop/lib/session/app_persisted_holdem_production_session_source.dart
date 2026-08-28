@@ -46,6 +46,7 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
     required this.navigationLabel,
     required this.remotePeerId,
     required this.localSeat,
+    required this.sessionAuthenticator,
     required this.closeEventAdapterFactory,
   });
 
@@ -53,6 +54,7 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
   final String navigationLabel;
   final String remotePeerId;
   final int localSeat;
+  final SessionMessageAuthenticator sessionAuthenticator;
   final AppHoldemProductionCloseEventAdapterFactory closeEventAdapterFactory;
 
   /// Rejects route policy that cannot produce a valid production composition.
@@ -117,6 +119,7 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
       peerId: selectedRemotePeerId,
       localPeerId: localPeerId,
       localSeat: selectedLocalSeat,
+      sessionAuthenticator: sessionAuthenticator,
       snapshotCoordinator: snapshotCoordinator,
     );
   }

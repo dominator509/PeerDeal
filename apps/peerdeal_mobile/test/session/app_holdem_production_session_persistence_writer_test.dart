@@ -261,10 +261,15 @@ HoldemStateSnapshot _typedSnapshotAfterEvent() {
           protocolVersion: '1.0.0',
         ).copyWith(
           eventSequence: 1,
-          metadata: const <String, Object?>{'last_event_hash': 'hash_1'},
+          metadata: <String, Object?>{
+            'last_event_hash': _event().eventHash,
+          },
         ),
     handState: _handState(),
-    eventCursor: _cursor(nextEventSeq: 2, previousEventHash: 'hash_1'),
+    eventCursor: _cursor(
+      nextEventSeq: 2,
+      previousEventHash: _event().eventHash,
+    ),
   );
 }
 
@@ -295,8 +300,8 @@ HoldemEventCursor _cursor({
   emittedAtFactory: _eventTimestamp,
 );
 
-EventEnvelope _event({String eventType = 'HoldemActionApplied'}) =>
-    EventEnvelope(
+EventEnvelope _event({String eventType = 'HoldemActionApplied'}) {
+  final event = EventEnvelope(
       eventId: 'evt_1',
       eventType: eventType,
       eventVersion: '1.0',
@@ -309,8 +314,13 @@ EventEnvelope _event({String eventType = 'HoldemActionApplied'}) =>
       actorRef: 'peer_local',
       payload: const <String, Object?>{},
       prevEventHash: genesisEventHash,
-      eventHash: 'hash_1',
+      eventHash: '',
     );
+  return EventEnvelope.fromJson(<String, Object?>{
+    ...event.toJson(),
+    'event_hash': computeCanonicalEventHash(event),
+  });
+}
 
 String _eventId(String eventType, int eventSeq) => 'evt_${eventType}_$eventSeq';
 

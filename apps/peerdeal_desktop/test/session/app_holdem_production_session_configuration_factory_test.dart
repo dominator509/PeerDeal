@@ -63,31 +63,32 @@ void main() {
     });
 
     final factory =
-        await AppHoldemProductionSessionConfigurationFactory
-            .fromNativeAppSupport(
-              bridge: _NativeSupportBridge(directory.path),
-              routePolicyFactory: (_) => _routePolicy(),
-              eventIdFactory: _eventId,
-              emittedAtFactory: _eventTimestamp,
-              eventHashFactory: (_) => 'hash',
-            );
+        await AppHoldemProductionSessionConfigurationFactory.fromNativeAppSupport(
+          bridge: _NativeSupportBridge(directory.path),
+          routePolicyFactory: (_) => _routePolicy(),
+          eventIdFactory: _eventId,
+          emittedAtFactory: _eventTimestamp,
+          eventHashFactory: (_) => 'hash',
+        );
 
     expect(factory, isNotNull);
   });
 
-  test('returns no configuration factory when native app support is absent', () async {
-    final factory =
-        await AppHoldemProductionSessionConfigurationFactory
-            .fromNativeAppSupport(
-              bridge: const _UnavailableNativeSupportBridge(),
-              routePolicyFactory: (_) => _routePolicy(),
-              eventIdFactory: _eventId,
-              emittedAtFactory: _eventTimestamp,
-              eventHashFactory: (_) => 'hash',
-            );
+  test(
+    'returns no configuration factory when native app support is absent',
+    () async {
+      final factory =
+          await AppHoldemProductionSessionConfigurationFactory.fromNativeAppSupport(
+            bridge: const _UnavailableNativeSupportBridge(),
+            routePolicyFactory: (_) => _routePolicy(),
+            eventIdFactory: _eventId,
+            emittedAtFactory: _eventTimestamp,
+            eventHashFactory: (_) => 'hash',
+          );
 
-    expect(factory, isNull);
-  });
+      expect(factory, isNull);
+    },
+  );
 
   test('composes the configured route from the recovery store', () async {
     RecoveryPersistenceStore? capturedStore;
@@ -214,6 +215,7 @@ void main() {
               navigationLabel: 'Live Holdem',
               remotePeerId: 'peer_remote',
               localSeat: 1,
+              sessionAuthenticator: _authenticator(),
               closeEventAdapterFactory: (_) => throw StateError('unused'),
             ),
       );
@@ -281,7 +283,14 @@ AppPersistedHoldemProductionSessionRoutePolicy _routePolicy({
     navigationLabel: 'Live Holdem',
     remotePeerId: remotePeerId,
     localSeat: localSeat,
+    sessionAuthenticator: _authenticator(),
     closeEventAdapterFactory: (_) => throw StateError('unused'),
+  );
+}
+
+HmacSha256SessionMessageAuthenticator _authenticator() {
+  return HmacSha256SessionMessageAuthenticator(
+    key: List<int>.generate(32, (index) => index),
   );
 }
 

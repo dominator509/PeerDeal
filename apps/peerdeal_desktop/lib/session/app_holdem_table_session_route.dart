@@ -22,6 +22,7 @@ class AppHoldemTableSessionRouteContext {
     required this.runtime,
     required this.transport,
     required this.peerId,
+    required this.sessionAuthenticator,
     required this.refresh,
     this.snapshotCoordinator,
   });
@@ -29,6 +30,7 @@ class AppHoldemTableSessionRouteContext {
   final AppHoldemTableSessionRuntime runtime;
   final AppTableSessionTransportProvisionResult transport;
   final String peerId;
+  final SessionMessageAuthenticator sessionAuthenticator;
   final VoidCallback refresh;
   final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
 
@@ -41,6 +43,7 @@ class AppHoldemTableSessionRouteContext {
       sender: session.sender,
       localPeerId: localPeerId,
       remotePeerId: peerId,
+      sessionAuthenticator: sessionAuthenticator,
     );
   }
 }
@@ -53,6 +56,7 @@ class AppHoldemTableSessionRoute extends StatefulWidget {
     required this.runtime,
     required this.peerId,
     required this.localPeerId,
+    required this.sessionAuthenticator,
     required this.surfaceBuilder,
     this.nativeSessionFactory,
     this.snapshotCoordinator,
@@ -63,6 +67,7 @@ class AppHoldemTableSessionRoute extends StatefulWidget {
   final AppHoldemTableSessionRuntime runtime;
   final String peerId;
   final String localPeerId;
+  final SessionMessageAuthenticator sessionAuthenticator;
   final AppHoldemTableSessionSurfaceBuilder surfaceBuilder;
   final NativeTransportSessionFactory? nativeSessionFactory;
   final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
@@ -93,6 +98,7 @@ class _AppHoldemTableSessionRouteState
     if (oldWidget.runtime == widget.runtime &&
         oldWidget.peerId == widget.peerId &&
         oldWidget.localPeerId == widget.localPeerId &&
+        oldWidget.sessionAuthenticator == widget.sessionAuthenticator &&
         oldWidget.nativeSessionFactory == widget.nativeSessionFactory &&
         oldWidget.snapshotCoordinator == widget.snapshotCoordinator &&
         oldWidget.pollInterval == widget.pollInterval &&
@@ -133,6 +139,7 @@ class _AppHoldemTableSessionRouteState
       nativeSessionFactory: widget.nativeSessionFactory,
       pollInterval: widget.pollInterval,
       timerFactory: widget.timerFactory,
+      sessionAuthenticator: widget.sessionAuthenticator,
       cancellation: _transportCancellation.future,
       onEventAccepted: (result) {
         unawaited(
@@ -191,6 +198,7 @@ class _AppHoldemTableSessionRouteState
       runtime: widget.runtime,
       transport: transport,
       peerId: widget.peerId,
+      sessionAuthenticator: widget.sessionAuthenticator,
       snapshotCoordinator: widget.snapshotCoordinator,
       refresh: () {
         if (mounted) setState(() {});

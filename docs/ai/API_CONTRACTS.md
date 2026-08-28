@@ -42,8 +42,9 @@ tests in the same change.
 `InvitePayloadSchema.validate(...)` is the structural invite boundary. Present
 required invite fields must be non-empty, unpadded, and C0/C1-control-free strings, and
 `mode_type` must be `tournament` or `open_table`; `role_hint` remains limited
-to `player`, `spectator`, or `cohost`. This schema does not verify the
-signature or provide cryptographic session authentication.
+to `player`, `spectator`, or `cohost`. This schema does not verify the invite
+signature or decide session authorization. Session-message authentication is a
+separate protocol contract below.
 
 `CoreCommandValidator.validate(...)` is the deterministic command boundary.
 Command and scope identity fields must be non-empty, unpadded, and
@@ -371,9 +372,18 @@ whose keys merely stringify to expected field names are dropped.
 The app-owned production Hold'em route treats `peerId` as the expected remote
 sender and passes its separate `localPeerId` as the native receive recipient
 scope. Its configured transport handler rejects mismatched `fromPeerId` or
-`toPeerId` before decoding or applying the event. These existing frame fields
-bind route scope but are not cryptographic sender authentication; no keyed wire
-contract exists in this scaffold.
+`toPeerId` before decoding or applying the event. These fields remain routing
+validation; cryptographic message authentication is provided by the protocol
+`SessionAuthenticatedPayloadCodec` and `SessionMessageAuthenticator` contract.
+The versioned envelope carries a four-byte magic, version, tag length, HMAC
+tag, and canonical event payload. The tag authenticates `sessionId`, sender,
+recipient, positive transport sequence, and payload as associated data. The
+production Hold'em route requires an injected authenticator and fails closed
+when it is absent or verification fails. Low-level generic transport adapters
+may remain unauthenticated for neutral transport tests, but are not production
+session paths. Key provisioning, session authorization, and key rotation stay
+with app/product integration; runtime cursors retain ordering and duplicate
+rejection.
 The app-owned production table surface must invalidate pending projection work
 when its transport session or source is replaced; stale completions must not
 publish through the replacement sender. This is an app-owned lifecycle rule.
@@ -1119,7 +1129,12 @@ metadata, while bare peer IDs remain valid and malformed locations are dropped.
 
 ## Auth Requirements
 
-- No central auth token/session contract exists in the scaffold.
+- No central user-auth token/session service exists in the scaffold. The
+  protocol now defines session-message authentication separately through
+  `SessionAuthenticationInput`, `SessionMessageAuthenticator`, and the bounded
+  versioned `SessionAuthenticatedPayloadCodec`; the mirrored production
+  Hold'em route requires an injected authenticator and bootstrap fails closed
+  when it is unavailable.
 - Receipt authorization is based on session/user binding.
 - Provider-proof verification belongs to `peerdeal_crypto`. Its default
   normalizer accepts bounded JSON-safe proof maps through `DealProofLimits`,

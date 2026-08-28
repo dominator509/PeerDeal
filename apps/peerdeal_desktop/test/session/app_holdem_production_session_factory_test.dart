@@ -103,6 +103,12 @@ void main() {
   });
 }
 
+HmacSha256SessionMessageAuthenticator _authenticator() {
+  return HmacSha256SessionMessageAuthenticator(
+    key: List<int>.generate(32, (index) => index),
+  );
+}
+
 AppHoldemProductionSessionComposition _create({
   TableState? initialTableState,
   HoldemHandState? initialHandState,
@@ -125,6 +131,7 @@ AppHoldemProductionSessionComposition _create({
     navigationLabel: navigationLabel,
     peerId: peerId,
     localPeerId: localPeerId,
+    sessionAuthenticator: _authenticator(),
     localSeat: localSeat,
     pollInterval: pollInterval,
     maxRecoveryEvents: maxRecoveryEvents,

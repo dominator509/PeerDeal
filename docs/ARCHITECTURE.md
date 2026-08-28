@@ -70,8 +70,14 @@ The app-owned production route keeps remote-peer identity separate from the
 local recipient identity: native receive scope is filtered to the local peer,
 and the app handler rejects configured sender/recipient mismatches before
 event decode or state mutation. This is an existing-frame routing and
-authorization binding, not a cryptographic authentication protocol; session
-authentication remains an explicit product/protocol contract.
+authorization binding. The protocol now also exposes a versioned
+`SessionAuthenticatedPayloadCodec` and `HmacSha256SessionMessageAuthenticator`;
+the production Hold'em route requires the app to inject one, authenticates the
+session/peer scope, sequence, and canonical event bytes, and fails closed when
+it is unavailable or invalid. Key provisioning, session authorization, key
+rotation, and device/network validation remain app/product and operational
+responsibilities; low-level generic transport adapters without an authenticator
+are not production-authenticated session paths.
 The app-owned production table surface also binds pending projection work to
 the current transport session/source; replacement invalidates stale operation
 completion before it can publish through a new session. This remains app

@@ -74,7 +74,11 @@ void main() {
     expect(
       runtime
           .applyEvent(
-            _event(type: 'SessionCloseRequested', seq: 2, prevHash: 'hash_1'),
+            _event(
+              type: 'SessionCloseRequested',
+              seq: 2,
+              prevHash: _openEventHash(),
+            ),
           )
           .isApplied,
       isTrue,
@@ -82,7 +86,7 @@ void main() {
     final closingEvent = _event(
       type: 'SessionClosed',
       seq: 3,
-      prevHash: 'hash_2',
+      prevHash: _closeRequestedEventHash(),
     );
     final result = runtime.applyEvent(closingEvent, now: closedAt);
 
@@ -121,13 +125,17 @@ void main() {
     expect(
       runtime
           .applyEvent(
-            _event(type: 'SessionCloseRequested', seq: 2, prevHash: 'hash_1'),
+            _event(
+              type: 'SessionCloseRequested',
+              seq: 2,
+              prevHash: _openEventHash(),
+            ),
           )
           .isApplied,
       isTrue,
     );
     final result = runtime.applyEvent(
-      _event(type: 'SessionClosed', seq: 3, prevHash: 'hash_2'),
+      _event(type: 'SessionClosed', seq: 3, prevHash: _closeRequestedEventHash()),
       now: closedAt,
     );
 
@@ -150,7 +158,11 @@ void main() {
     expect(
       runtime
           .applyEvent(
-            _event(type: 'SessionCloseRequested', seq: 2, prevHash: 'hash_1'),
+            _event(
+              type: 'SessionCloseRequested',
+              seq: 2,
+              prevHash: _openEventHash(),
+            ),
           )
           .isApplied,
       isTrue,
@@ -159,7 +171,7 @@ void main() {
       _event(
         type: 'SessionClosed',
         seq: 3,
-        prevHash: 'hash_2',
+        prevHash: _closeRequestedEventHash(),
         emittedAt: 'not-a-timestamp',
       ),
       now: closedAt,
@@ -175,7 +187,7 @@ void main() {
     final runtime = _runtime(scope: scope, store: _FakeRecoveryStore());
     final rejected = runtime.applyEventBatch(<EventEnvelope>[
       _event(type: 'OpenTableSessionOpened', seq: 1),
-      _event(type: 'PlayerCalled', seq: 2, prevHash: 'hash_1'),
+      _event(type: 'PlayerCalled', seq: 2, prevHash: _openEventHash()),
     ]);
 
     expect(rejected.isRejected, isTrue);
@@ -185,7 +197,11 @@ void main() {
 
     final applied = runtime.applyEventBatch(<EventEnvelope>[
       _event(type: 'OpenTableSessionOpened', seq: 1),
-      _event(type: 'SessionCloseRequested', seq: 2, prevHash: 'hash_1'),
+      _event(
+        type: 'SessionCloseRequested',
+        seq: 2,
+        prevHash: _openEventHash(),
+      ),
     ]);
     expect(applied.isApplied, isTrue);
     expect(runtime.state.eventSequence, 2);
@@ -200,7 +216,11 @@ void main() {
     );
     final result = runtime.applyEventBatch(<EventEnvelope>[
       _event(type: 'OpenTableSessionOpened', seq: 1),
-      _event(type: 'SessionCloseRequested', seq: 2, prevHash: 'hash_1'),
+      _event(
+        type: 'SessionCloseRequested',
+        seq: 2,
+        prevHash: _openEventHash(),
+      ),
     ]);
 
     expect(result.isRejected, isTrue);
@@ -275,7 +295,7 @@ EventEnvelope _event({
   String prevHash = 'GENESIS',
   String emittedAt = '2026-08-09T12:00:00.000Z',
 }) {
-  return EventEnvelope(
+  final event = EventEnvelope(
     eventId: 'evt_$seq',
     eventType: type,
     eventVersion: '1.0',
@@ -290,9 +310,22 @@ EventEnvelope _event({
         ? const <String, Object?>{'mode_type': 'cash'}
         : const <String, Object?>{},
     prevEventHash: prevHash,
-    eventHash: 'hash_$seq',
+    eventHash: '',
   );
+  return EventEnvelope.fromJson(<String, Object?>{
+    ...event.toJson(),
+    'event_hash': computeCanonicalEventHash(event),
+  });
 }
+
+String _openEventHash() => _event(type: 'OpenTableSessionOpened').eventHash;
+
+String _closeRequestedEventHash() =>
+    _event(
+      type: 'SessionCloseRequested',
+      seq: 2,
+      prevHash: _openEventHash(),
+    ).eventHash;
 
 RetentionPolicy _policy({required int seconds}) {
   return RetentionPolicy(

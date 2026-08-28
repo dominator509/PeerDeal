@@ -43,6 +43,7 @@ class AppHoldemProductionSessionInput {
     required this.peerId,
     required this.localPeerId,
     required this.localSeat,
+    this.sessionAuthenticator,
     this.reducer = const CoreReducer(),
     this.clock,
     this.projectionAdapter = const HoldemCoreProjectionAdapter(),
@@ -62,6 +63,7 @@ class AppHoldemProductionSessionInput {
   final String peerId;
   final String localPeerId;
   final int localSeat;
+  final SessionMessageAuthenticator? sessionAuthenticator;
   final CoreReducer reducer;
   final DateTime Function()? clock;
   final HoldemCoreProjectionAdapter projectionAdapter;
@@ -158,6 +160,10 @@ class AppHoldemProductionSessionBootstrap {
   AppHoldemProductionSessionComposition _createComposition(
     AppHoldemProductionSessionInput input,
   ) {
+    final sessionAuthenticator = input.sessionAuthenticator;
+    if (sessionAuthenticator == null) {
+      throw StateError('Production session authentication is unavailable.');
+    }
     return _factory.create(
       initialTableState: input.initialTableState,
       initialHandState: input.initialHandState,
@@ -167,6 +173,7 @@ class AppHoldemProductionSessionBootstrap {
       navigationLabel: input.navigationLabel,
       peerId: input.peerId,
       localPeerId: input.localPeerId,
+      sessionAuthenticator: sessionAuthenticator,
       localSeat: input.localSeat,
       reducer: input.reducer,
       clock: input.clock,

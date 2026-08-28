@@ -48,6 +48,16 @@ are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
+## Current Production Hardening
+
+The protocol now exposes a bounded, versioned HMAC-SHA256 session-message
+contract. Mirrored production Hold'em routes authenticate canonical event bytes
+with transport session, sender, recipient, and sequence scope and fail closed
+when the app does not provide an authenticator or verification fails. Native
+transport remains generic; key provisioning, session authorization, rotation,
+real-device/network validation, product session/database wiring, and final UX
+remain outside this software slice.
+
 ## What Changed
 
 - Added normalized retrofit bundle source under `spec/baseline_v1_retrofit/`.

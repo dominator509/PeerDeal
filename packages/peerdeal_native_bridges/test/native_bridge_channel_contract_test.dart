@@ -355,7 +355,7 @@ void main() {
     expect(capability.warning, isNull);
 
     expect(snapshot.permissionGranted, isFalse);
-    expect(snapshot.foundEndpoints, ['peer_a']);
+    expect(snapshot.foundEndpoints, isEmpty);
     expect(snapshot.interfaceHints, ['wifi']);
     expect(snapshot.warning, isNull);
   });

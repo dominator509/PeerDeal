@@ -35,8 +35,9 @@ A dependency PR must include:
 - rollback notes when the upgrade affects shared tooling
 
 ## Current baseline note
-As of the dependency cleanup baseline, the workspace uses the newest resolvable
-lint and Melos tooling, with compatible transitive lockfile refreshes.
+As of the 2026-08-28 dependency cleanup, the workspace uses Melos 8.5.0 and
+the newest resolvable lint/tooling baseline, with compatible transitive lockfile
+refreshes.
 `flutter pub outdated` may still report newer `meta`, `test`, and transitive
 versions when they are not mutually compatible with the current Flutter/Dart
 toolchain.

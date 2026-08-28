@@ -1,5 +1,6 @@
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 
@@ -44,6 +45,7 @@ class AppHoldemProductionSessionFactory {
     required String navigationLabel,
     required String peerId,
     required String localPeerId,
+    required SessionMessageAuthenticator sessionAuthenticator,
     required int localSeat,
     CoreReducer reducer = const CoreReducer(),
     DateTime Function()? clock,
@@ -110,6 +112,7 @@ class AppHoldemProductionSessionFactory {
       runtime: holdemRuntime,
       peerId: peerId,
       localPeerId: localPeerId,
+      sessionAuthenticator: sessionAuthenticator,
       localSeat: localSeat,
       nativeSessionFactory: nativeSessionFactory,
       pollInterval: pollInterval,

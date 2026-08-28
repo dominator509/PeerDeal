@@ -53,15 +53,18 @@ class AppHoldemProjectionTransportPublisher {
     required String localPeerId,
     required String remotePeerId,
     EventEnvelopeCodec codec = const EventEnvelopeCodec(),
+    SessionMessageAuthenticator? sessionAuthenticator,
   }) : _sender = sender,
        _localPeerId = localPeerId,
        _remotePeerId = remotePeerId,
-       _codec = codec;
+       _codec = codec,
+       _sessionAuthenticator = sessionAuthenticator;
 
   final TransportFrameSender _sender;
   final String _localPeerId;
   final String _remotePeerId;
   final EventEnvelopeCodec _codec;
+  final SessionMessageAuthenticator? _sessionAuthenticator;
 
   Future<AppHoldemProjectionPublishResult> publish(
     AppHoldemProjectionResult projection, {
@@ -106,15 +109,40 @@ class AppHoldemProjectionTransportPublisher {
         );
       }
 
-      final List<int> payload;
+      final List<int> eventPayload;
       try {
-        payload = _codec.encode(event);
+        eventPayload = _codec.encode(event);
       } on Object {
         return AppHoldemProjectionPublishResult.rejected(
           reasonCode: 'ERR_HOLDEM_PROJECTION_ENCODING_FAILED',
           totalEventCount: events.length,
           sentEventCount: sentEventCount,
         );
+      }
+
+      final List<int> payload;
+      final authenticator = _sessionAuthenticator;
+      if (authenticator == null) {
+        payload = eventPayload;
+      } else {
+        try {
+          payload = SessionAuthenticatedPayloadCodec.encode(
+            input: SessionAuthenticationInput(
+              sessionId: event.sessionId,
+              senderPeerId: _localPeerId,
+              recipientPeerId: _remotePeerId,
+              sequence: event.eventSeq,
+              payload: eventPayload,
+            ),
+            authenticator: authenticator,
+          );
+        } on Object {
+          return AppHoldemProjectionPublishResult.rejected(
+            reasonCode: 'ERR_HOLDEM_PROJECTION_AUTHENTICATION_FAILED',
+            totalEventCount: events.length,
+            sentEventCount: sentEventCount,
+          );
+        }
       }
 
       final TransportFrameSendResult result;

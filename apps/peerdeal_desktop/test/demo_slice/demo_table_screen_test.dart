@@ -208,7 +208,13 @@ void main() {
               ),
               _recoveryEvent(
                 seq: 2,
-                prevHash: 'hash_b_1',
+                prevHash: _recoveryEvent(
+                  seq: 1,
+                  prevHash: genesisEventHash,
+                  hash: 'hash_b_1',
+                  tableId: secondScope.tableId,
+                  sessionId: secondScope.sessionId,
+                ).eventHash,
                 hash: 'hash_b_2',
                 tableId: secondScope.tableId,
                 sessionId: secondScope.sessionId,
@@ -364,7 +370,7 @@ EventEnvelope _recoveryEvent({
   required String tableId,
   required String sessionId,
 }) {
-  return EventEnvelope(
+  final event = EventEnvelope(
     eventId: 'evt_$hash',
     eventType: 'RecoveryEventPersisted',
     eventVersion: '1.0',
@@ -377,8 +383,12 @@ EventEnvelope _recoveryEvent({
     actorRef: 'system',
     payload: const <String, Object?>{},
     prevEventHash: prevHash,
-    eventHash: hash,
+    eventHash: '',
   );
+  return EventEnvelope.fromJson(<String, Object?>{
+    ...event.toJson(),
+    'event_hash': computeCanonicalEventHash(event),
+  });
 }
 
 class _NoDiscoveryBridge implements LocalNetworkBridge {

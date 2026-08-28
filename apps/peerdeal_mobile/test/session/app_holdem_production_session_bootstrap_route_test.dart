@@ -288,6 +288,13 @@ AppHoldemProductionSessionInput _input({String path = '/holdem-live'}) {
     peerId: 'peer_remote',
     localPeerId: 'peer_local',
     localSeat: 1,
+    sessionAuthenticator: _authenticator(),
+  );
+}
+
+HmacSha256SessionMessageAuthenticator _authenticator() {
+  return HmacSha256SessionMessageAuthenticator(
+    key: List<int>.generate(32, (index) => index),
   );
 }
 

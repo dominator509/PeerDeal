@@ -22,8 +22,8 @@ Generated: 2026-08-10
 
 ## Recent T4 Changes
 
-- `.github/workflows/ci.yml` activates Melos 8.2.2.
-- `pubspec.yaml` and `pubspec.lock` align the workspace on Melos 8.2.2.
+- `.github/workflows/ci.yml` invokes the repository-pinned Melos 8.5.0.
+- `pubspec.yaml` and `pubspec.lock` align the workspace on Melos 8.5.0.
 - Compatible transitive lock refresh raises `mustache_template` to 2.0.5.
 - `apps/peerdeal_mobile/android/` now provides the generated Android host and
   registers the generic secure-key method channel.
@@ -1848,6 +1848,21 @@ Remaining:
   and `BasicReplayEngine` converts selection and anchor failures into stable
   `ERR_REPLAY_SELECTION_FAILURE` and `ERR_REPLAY_ANCHOR_CALCULATION_FAILURE`
   mismatches. Focused replay/protocol tests and package analysis pass.
+
+## T178 Protocol Session Message Authentication
+
+- `peerdeal_protocol` now exposes a bounded, versioned
+  `SessionAuthenticatedPayloadCodec` and HMAC-SHA256
+  `SessionMessageAuthenticator` contract.
+- Mirrored mobile and desktop production Hold'em routes authenticate canonical
+  event bytes with transport session, sender, recipient, and sequence scope;
+  bootstrap fails closed when the app does not provide an authenticator.
+- Full mobile (577) and desktop (576) Flutter suites, protocol tests, mirrored
+  route/bootstrap tests, analyzer, boundary, source-text, and diff checks pass.
+  Native transport remains generic; app-owned key provisioning, session
+  authorization, key rotation, real-device/network validation, product
+  session/database wiring, other-platform hosts, release signing, and final
+  UX remain open.
 
 ## Required Gates
 

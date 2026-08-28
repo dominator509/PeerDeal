@@ -8,6 +8,12 @@ available empty key ring, matching the generic bridge contract and allowing
 the existing app-owned receipt key provisioning flow to create its first key.
 The app-owned persisted Hold'em source also rejects unsafe snapshot metadata
 before native local-identity provisioning or route exposure.
+The protocol-owned session message contract now provides versioned HMAC-SHA256
+authentication over canonical event bytes plus transport session, peer, and
+sequence scope. The mirrored production Hold'em route requires that contract
+and bootstrap fails closed when its authenticator is unavailable; key
+provisioning, session authorization, rotation, and real-device validation
+remain product/operator gates.
 
 ## Current state
 The repository is a green migration baseline. It has package boundaries, local
@@ -93,8 +99,8 @@ the gates below are satisfied.
   surface refresh; its route context also exposes canonical projection
   publishing. Typed `AppHoldemProductionRouteRegistration` now merges that
   route into the validated app route map and native-readiness gate. Platform
-  source provisioning, actual product session/state wiring, and device/network
-  transport validation remain open. The default app-owned production Hold'em surface now
+  source provisioning, actual product session/state wiring, key provisioning,
+  and device/network transport validation remain open. The default app-owned production Hold'em surface now
   renders bounded runtime state, gates local actions on transport readiness, and
   publishes canonical projections; final product UX validation remains open.
 - App UI is not production-polished.
@@ -211,6 +217,11 @@ the gates below are satisfied.
   now applies the existing canonical UTF-8 byte ceiling and exact round-trip
   check before product source loading; invite/source ownership and route
   composition remain unchanged.
+- Protocol session messages now use a bounded versioned HMAC-SHA256 payload
+  envelope that authenticates canonical event bytes together with transport
+  session, sender, recipient, and sequence scope. Production Hold'em bootstrap
+  and route composition require an injected authenticator and fail closed when
+  it is absent; key provisioning and session authorization remain app-owned.
 - Opaque receipt export now preflights all required envelope text before JSON
   escaping and applies strict UTF-8 round-trip checks to plaintext and
   ciphertext payload limits during encoding and inspection; malformed receipt
@@ -288,7 +299,7 @@ the gates below are satisfied.
   becoming an unbounded CPU retry loop without changing the generic transport
   channel contract. Real-device and cross-device reachability validation remain
   external.
-- The workspace and CI now use Melos 8.3.0, and dependency audit reports zero actionable upgrades; newer `meta` and `test` versions remain toolchain-blocked.
+- The workspace and CI now use Melos 8.5.0, and dependency audit reports zero actionable upgrades; newer `meta` and `test` versions remain toolchain-blocked.
 - The v1 scaffold protocol catalog is locked across command, event, snapshot,
   Game File, invite payload, and public result-code identities, with accepted
   fixture parity and fail-closed unsupported-version checks.

@@ -73,6 +73,7 @@ void main() {
             navigationLabel: 'Live Holdem',
             remotePeerId: 'peer_remote',
             localSeat: 1,
+            sessionAuthenticator: _authenticator(),
             closeEventAdapterFactory: (scope) => _closeAdapter(
               TableState.initial(
                 tableId: scope.tableId,
@@ -131,6 +132,7 @@ void main() {
               navigationLabel: 'Live Holdem',
               remotePeerId: 'peer_default',
               localSeat: 1,
+              sessionAuthenticator: _authenticator(),
               closeEventAdapterFactory: (scope) => _closeAdapter(
                 TableState.initial(
                   tableId: scope.tableId,
@@ -223,6 +225,7 @@ void main() {
             navigationLabel: 'Live Holdem',
             remotePeerId: 'peer_default',
             localSeat: 1,
+            sessionAuthenticator: _authenticator(),
             closeEventAdapterFactory: (scope) => _closeAdapter(
               TableState.initial(
                 tableId: scope.tableId,
@@ -287,6 +290,7 @@ void main() {
             navigationLabel: 'Live Holdem',
             remotePeerId: 'peer_default',
             localSeat: 1,
+            sessionAuthenticator: _authenticator(),
             closeEventAdapterFactory: (scope) => _closeAdapter(
               TableState.initial(
                 tableId: scope.tableId,
@@ -876,13 +880,13 @@ void main() {
             ),
           ];
       for (final testCase in cases) {
-        final store = InMemoryRecoveryPersistenceStore();
-        _persist(
-          store,
-          _typedSnapshot(),
-          snapshotId: testCase.id,
-          snapshotType: testCase.type,
-          snapshotVersion: testCase.version,
+        final store = _SnapshotRecoveryStore(
+          _snapshotEnvelope(
+            _typedSnapshot(),
+            snapshotId: testCase.id,
+            snapshotType: testCase.type,
+            snapshotVersion: testCase.version,
+          ),
         );
         var identityCalls = 0;
         final source = _source(
@@ -907,30 +911,40 @@ void main() {
   test('fails closed on an unsupported recovery suffix event', () {
     final store = InMemoryRecoveryPersistenceStore();
     _persist(store, _typedSnapshot());
+    final unsupportedEvent = EventEnvelope(
+      eventId: 'evt_suffix_1',
+      eventType: 'RecoveryEventPersisted',
+      eventVersion: '1.0',
+      protocolVersion: '1.0.0',
+      eventSeq: 1,
+      tableId: 'table_001',
+      sessionId: 'session_001',
+      handId: null,
+      emittedAt: '2026-08-10T00:00:00Z',
+      actorRef: 'system',
+      payload: const <String, Object?>{},
+      prevEventHash: genesisEventHash,
+      eventHash: '',
+    );
     final append = store.appendEvents(
       scope: _scope(),
       events: <EventEnvelope>[
-        EventEnvelope(
-          eventId: 'evt_suffix_1',
-          eventType: 'RecoveryEventPersisted',
-          eventVersion: '1.0',
-          protocolVersion: '1.0.0',
-          eventSeq: 1,
-          tableId: 'table_001',
-          sessionId: 'session_001',
-          handId: null,
-          emittedAt: '2026-08-10T00:00:00Z',
-          actorRef: 'system',
-          payload: const <String, Object?>{},
-          prevEventHash: genesisEventHash,
-          eventHash: 'hash_suffix_1',
-        ),
+        EventEnvelope.fromJson(<String, Object?>{
+          ...unsupportedEvent.toJson(),
+          'event_hash': computeCanonicalEventHash(unsupportedEvent),
+        }),
       ],
     );
     expect(append.isSuccess, isTrue);
 
     expect(() => _source(store).load(_invite()), throwsA(isA<StateError>()));
   });
+}
+
+HmacSha256SessionMessageAuthenticator _authenticator() {
+  return HmacSha256SessionMessageAuthenticator(
+    key: List<int>.generate(32, (index) => index),
+  );
 }
 
 AppPersistedHoldemProductionSessionRoutePolicy _routePolicy({
@@ -942,6 +956,7 @@ AppPersistedHoldemProductionSessionRoutePolicy _routePolicy({
     navigationLabel: navigationLabel,
     remotePeerId: 'peer_remote',
     localSeat: 1,
+    sessionAuthenticator: _authenticator(),
     closeEventAdapterFactory: (scope) => _closeAdapter(
       TableState.initial(
         tableId: scope.tableId,
@@ -1104,7 +1119,7 @@ class _CancellingSnapshotStore extends _OversizedRecoveryStore {
 }
 
 EventEnvelope _event(int eventSeq) {
-  return EventEnvelope(
+  final event = EventEnvelope(
     eventId: 'evt_$eventSeq',
     eventType: 'RecoveryEventPersisted',
     eventVersion: '1.0',
@@ -1117,8 +1132,12 @@ EventEnvelope _event(int eventSeq) {
     actorRef: 'system',
     payload: const <String, Object?>{},
     prevEventHash: eventSeq == 1 ? genesisEventHash : 'hash_${eventSeq - 1}',
-    eventHash: 'hash_$eventSeq',
+    eventHash: '',
   );
+  return EventEnvelope.fromJson(<String, Object?>{
+    ...event.toJson(),
+    'event_hash': computeCanonicalEventHash(event),
+  });
 }
 
 void _persist(

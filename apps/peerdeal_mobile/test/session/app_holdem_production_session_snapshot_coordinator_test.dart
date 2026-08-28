@@ -507,7 +507,9 @@ HoldemStateSnapshot _typedSnapshotAfterEvent() {
   return HoldemStateSnapshot(
     tableState: initial.tableState.copyWith(
       eventSequence: 1,
-      metadata: const <String, Object?>{'last_event_hash': 'hash_1'},
+      metadata: <String, Object?>{
+        'last_event_hash': _event().eventHash,
+      },
     ),
     handState: initial.handState,
     eventCursor: HoldemEventCursor(
@@ -515,7 +517,7 @@ HoldemStateSnapshot _typedSnapshotAfterEvent() {
       tableId: 'table_001',
       sessionId: 'session_001',
       nextEventSeq: 2,
-      previousEventHash: 'hash_1',
+      previousEventHash: _event().eventHash,
       actorRef: 'peer_local',
       eventIdFactory: _eventId,
       emittedAtFactory: _eventTimestamp,
@@ -523,21 +525,27 @@ HoldemStateSnapshot _typedSnapshotAfterEvent() {
   );
 }
 
-EventEnvelope _event() => EventEnvelope(
-  eventId: 'evt_1',
-  eventType: 'HoldemActionApplied',
-  eventVersion: '1.0',
-  protocolVersion: '1.0.0',
-  eventSeq: 1,
-  tableId: 'table_001',
-  sessionId: 'session_001',
-  handId: null,
-  emittedAt: _eventTimestamp(),
-  actorRef: 'peer_local',
-  payload: const <String, Object?>{},
-  prevEventHash: genesisEventHash,
-  eventHash: 'hash_1',
-);
+EventEnvelope _event() {
+  final event = EventEnvelope(
+    eventId: 'evt_1',
+    eventType: 'HoldemActionApplied',
+    eventVersion: '1.0',
+    protocolVersion: '1.0.0',
+    eventSeq: 1,
+    tableId: 'table_001',
+    sessionId: 'session_001',
+    handId: null,
+    emittedAt: _eventTimestamp(),
+    actorRef: 'peer_local',
+    payload: const <String, Object?>{},
+    prevEventHash: genesisEventHash,
+    eventHash: '',
+  );
+  return EventEnvelope.fromJson(<String, Object?>{
+    ...event.toJson(),
+    'event_hash': computeCanonicalEventHash(event),
+  });
+}
 
 String _eventId(String eventType, int eventSeq) => 'evt_${eventType}_$eventSeq';
 

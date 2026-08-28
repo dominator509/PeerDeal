@@ -34,6 +34,17 @@ void main() {
     },
   );
 
+  test('fails closed when session authentication is unavailable', () async {
+    final source = _Source(_input(withAuthenticator: false));
+
+    await expectLater(
+      AppHoldemProductionSessionBootstrap(
+        source: source,
+      ).createForInvite(_invite()),
+      throwsStateError,
+    );
+  });
+
   test('loads context-aware source with verified peer and seat', () async {
     final sessionContext = JoinFlowSessionContext(
       invite: _invite(),
@@ -266,7 +277,10 @@ class _ContextSource extends _Source
   }
 }
 
-AppHoldemProductionSessionInput _input({String tableId = 'table_001'}) {
+AppHoldemProductionSessionInput _input({
+  String tableId = 'table_001',
+  bool withAuthenticator = true,
+}) {
   final tableState = TableState.initial(
     tableId: tableId,
     sessionId: 'session_001',
@@ -322,6 +336,13 @@ AppHoldemProductionSessionInput _input({String tableId = 'table_001'}) {
     peerId: 'peer_remote',
     localPeerId: 'peer_local',
     localSeat: 1,
+    sessionAuthenticator: withAuthenticator ? _authenticator() : null,
+  );
+}
+
+HmacSha256SessionMessageAuthenticator _authenticator() {
+  return HmacSha256SessionMessageAuthenticator(
+    key: List<int>.generate(32, (index) => index),
   );
 }
 

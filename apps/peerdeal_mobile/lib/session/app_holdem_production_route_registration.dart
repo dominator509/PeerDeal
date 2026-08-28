@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../transport/app_table_session_transport_source.dart';
 import '../transport/native_transport_session_factory.dart';
@@ -19,6 +20,7 @@ class AppHoldemProductionRouteRegistration {
     required this.runtime,
     required this.peerId,
     required this.localPeerId,
+    required this.sessionAuthenticator,
     required this.surfaceBuilder,
     this.nativeSessionFactory,
     this.snapshotCoordinator,
@@ -36,6 +38,7 @@ class AppHoldemProductionRouteRegistration {
     required AppHoldemTableSessionRuntime runtime,
     required String peerId,
     required String localPeerId,
+    required SessionMessageAuthenticator sessionAuthenticator,
     required int localSeat,
     NativeTransportSessionFactory? nativeSessionFactory,
     Duration pollInterval = const Duration(seconds: 1),
@@ -47,6 +50,7 @@ class AppHoldemProductionRouteRegistration {
          runtime: runtime,
          peerId: peerId,
          localPeerId: localPeerId,
+         sessionAuthenticator: sessionAuthenticator,
          surfaceBuilder: (_, routeContext) => AppHoldemProductionTableSurface(
            routeContext: routeContext,
            localPeerId: localPeerId,
@@ -63,6 +67,7 @@ class AppHoldemProductionRouteRegistration {
   final AppHoldemTableSessionRuntime runtime;
   final String peerId;
   final String localPeerId;
+  final SessionMessageAuthenticator sessionAuthenticator;
   final AppHoldemTableSessionSurfaceBuilder surfaceBuilder;
   final NativeTransportSessionFactory? nativeSessionFactory;
   final AppHoldemProductionSessionSnapshotCoordinator? snapshotCoordinator;
@@ -74,6 +79,7 @@ class AppHoldemProductionRouteRegistration {
       runtime: runtime,
       peerId: peerId,
       localPeerId: localPeerId,
+      sessionAuthenticator: sessionAuthenticator,
       surfaceBuilder: surfaceBuilder,
       nativeSessionFactory: nativeSessionFactory,
       snapshotCoordinator: snapshotCoordinator,

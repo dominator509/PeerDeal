@@ -64,7 +64,11 @@ void main() {
     final append = first.store!.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+        _event(
+          seq: 1,
+          prevHash: genesisEventHash,
+          hash: _eventHash(),
+        ),
       ],
     );
 
@@ -75,7 +79,7 @@ void main() {
     expect(first.warnings, isEmpty);
     expect(append.isSuccess, isTrue);
     expect(second.isAvailable, isTrue);
-    expect(window.events.single.eventHash, 'hash_1');
+    expect(window.events.single.eventHash, _eventHash());
   });
 
   test(
@@ -99,7 +103,11 @@ void main() {
       final append = result.store!.appendEvents(
         scope: scope,
         events: <EventEnvelope>[
-          _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+          _event(
+            seq: 1,
+            prevHash: genesisEventHash,
+            hash: _eventHash(),
+          ),
         ],
       );
 
@@ -159,7 +167,11 @@ void main() {
     final append = result.store!.appendEvents(
       scope: scope,
       events: <EventEnvelope>[
-        _event(seq: 1, prevHash: genesisEventHash, hash: 'hash_1'),
+        _event(
+          seq: 1,
+          prevHash: genesisEventHash,
+          hash: _eventHash(),
+        ),
       ],
     );
 
@@ -307,6 +319,10 @@ EventEnvelope _event({
     eventHash: hash,
   );
 }
+
+String _eventHash() => computeCanonicalEventHash(
+  _event(seq: 1, prevHash: genesisEventHash, hash: ''),
+);
 
 class _FakeAppStorageDirectoryBridge implements AppStorageDirectoryBridge {
   const _FakeAppStorageDirectoryBridge(this.path);
