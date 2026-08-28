@@ -47,7 +47,8 @@ immutable sync/recovery collections, and T177 immutable replay collections,
 and T318 shared production table failure-surface hardening, T319 production
 table operational UI hierarchy hardening, and T320 transport replay-scope
 admission serialization, T321 cross-platform transport sequence bounds, and
-T322 cross-platform transport payload bounds
+T322 cross-platform transport payload bounds, and T323 native transport
+contract bound parity
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -96,6 +97,13 @@ the 60 KiB limit implemented by both Android and Windows hosts. Channel model
 validation and encoding now fail closed before a payload can be accepted by
 Dart and rejected by either native host. Device and native runtime validation
 remain separate gates.
+
+The T323 hardening adds a repository gate for the duplicated native transport
+limits. It compares the canonical Dart payload, identity, batch, and signed
+sequence bounds with the Android and Windows host declarations, and runs both
+the checker and its negative-path tests through Melos and CI. This prevents
+future cross-platform contract drift without changing runtime behavior or
+package ownership.
 
 ## What Changed
 

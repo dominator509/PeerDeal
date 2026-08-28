@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-28 - Codex - Add Native Contract Bound Parity Gate
+
+Summary:
+- Added a standard-library checker that compares the canonical Dart native
+  transport payload, identity, batch, and signed sequence bounds with the
+  Android and Windows host declarations.
+- Added negative-path checker tests and wired both the checker and tests into
+  Melos and GitHub Actions.
+
+Files:
+- `scripts/check_native_contract_bounds.py`
+- `scripts/test_check_native_contract_bounds.py`
+- `pubspec.yaml`, `.github/workflows/ci.yml`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`.
+
+Verification:
+- Native contract checker and five checker tests passed.
+- Boundary check, source-text check, and `git diff --check` passed.
+
+Remaining:
+- Android/Windows device and cross-network reachability, operator release
+  signing, other-platform native implementations, durable product persistence,
+  and final UX validation remain external or integration-owned.
+
 ### 2026-08-28 - Codex - Add Transport Replay Admission Guard
 
 Summary:

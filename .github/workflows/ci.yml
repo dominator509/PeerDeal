@@ -61,6 +61,12 @@ jobs:
       - name: Source text checker tests
         run: dart run melos run source-text:test
 
+      - name: Native contract bound check
+        run: dart run melos run native-contract-check
+
+      - name: Native contract bound checker tests
+        run: dart run melos run native-contract-check:test
+
       - name: Analyze
         run: dart run melos run analyze
 

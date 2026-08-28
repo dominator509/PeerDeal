@@ -46,11 +46,17 @@ melos:
     source-text:test:
       run: python scripts/test_check_source_text.py
       description: Run source text checker tests.
+    native-contract-check:
+      run: python scripts/check_native_contract_bounds.py
+      description: Verify Dart and native transport contract bounds stay aligned.
+    native-contract-check:test:
+      run: python scripts/test_check_native_contract_bounds.py
+      description: Run native transport contract bound checker tests.
     analyze:
       run: melos exec -- "dart analyze ."
       description: Analyze Dart packages.
     test:
-      run: melos run boundary-check:test && melos run dependency-audit:test && melos run source-text:test && melos run source-text && melos run test:dart && melos run test:flutter
+      run: melos run boundary-check:test && melos run dependency-audit:test && melos run source-text:test && melos run source-text && melos run native-contract-check:test && melos run native-contract-check && melos run test:dart && melos run test:flutter
       description: Run script, Dart, and Flutter tests.
     test:dart:
       run: melos exec --no-flutter --dir-exists=test -- "dart test"

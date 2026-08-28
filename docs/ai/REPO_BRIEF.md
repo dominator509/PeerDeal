@@ -58,6 +58,7 @@ dart run melos run boundary-check
 dart run melos run source-text
 dart run melos run dependency-audit
 dart run melos run test
+dart run melos run native-contract-check
 ```
 
 Focused package iteration:

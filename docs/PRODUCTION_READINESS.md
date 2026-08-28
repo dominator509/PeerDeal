@@ -126,6 +126,11 @@ the gates below are satisfied.
 - The shared native transport payload ceiling now matches the 60 KiB Android
   and Windows host/wire limit, so Dart cannot encode a frame either host must
   reject. Flutter widget and native runtime/build validation remain open.
+- Native transport contract-bound parity is now a repository gate: CI compares
+  the canonical Dart payload, identity, batch, and signed sequence limits with
+  both Android and Windows host declarations and runs negative-path checker
+  tests. This prevents future cross-platform bound drift without claiming
+  device or cross-network validation.
 
 ## Covered hardening slices
 - Windows local-network and app-support method-channel handlers now reject

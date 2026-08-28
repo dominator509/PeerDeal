@@ -36,6 +36,10 @@ Generated: 2026-08-10
   toggles `FLAG_SECURE` through the app-owned blocking action.
 - `apps/peerdeal_desktop/windows/` now registers the generic capture channel and
   applies `SetWindowDisplayAffinity` through the app-owned blocking action.
+- Native transport contract bounds now have a repository checker that compares
+  the canonical Dart payload, identity, batch, and signed sequence limits with
+  both Android and Windows host declarations; Melos and CI run the checker and
+  its negative-path tests.
 - Mirrored app capture coordinators serialize native blocking/release, downgrade
   to visual obscuring when blocking fails, and receipt routes release blocking
   on disposal.
