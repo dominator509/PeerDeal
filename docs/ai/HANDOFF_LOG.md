@@ -2,6 +2,31 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-28 - Codex - Add Transport Replay Admission Guard
+
+Summary:
+- Added bounded sequence-window replay protection to the network validating
+  receive boundary, keyed by complete session/sender/recipient scope.
+- Duplicate and stale frames fail before handler dispatch; unique frames inside
+  the window remain admissible, and accepted sequences are recorded only after
+  successful handling so downstream failures remain retryable.
+
+Files:
+- `packages/peerdeal_network/lib/src/contracts/transport_frame_replay_guard.dart`
+- `packages/peerdeal_network/lib/src/models/transport_frame_replay_result.dart`
+- `packages/peerdeal_network/lib/src/services/sliding_window_transport_frame_replay_guard.dart`
+- `packages/peerdeal_network/lib/src/services/validating_transport_frame_receiver.dart`
+- Focused replay-guard tests and network/readiness documentation.
+
+Verification:
+- Full `peerdeal_network` suite passed: 73 tests.
+- Network analyzer passed after explicit type cleanup.
+
+Remaining:
+- Native queue-level deduplication, key/session authorization policy,
+  real-device reachability, product persistence, release signing, and final UX
+  remain separate integration or operator gates.
+
 ### 2026-08-28 - Codex - Add Production Session Message Authentication
 
 Summary:

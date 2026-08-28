@@ -343,6 +343,13 @@ only through the validating sender boundary, and inbound frames should reach
 session handlers only through the validating receiver boundary. Malformed frames
 are rejected before adapter/handler code runs, and adapter/handler failures
 become explicit failed transport results.
+The validating transport receiver applies a bounded
+`SlidingWindowTransportFrameReplayGuard` by default. The guard keys state by
+session/sender/recipient, rejects duplicate or stale sequence values before
+handler dispatch, allows unique values inside the configured window, and
+records a sequence only after the handler accepts the frame. A handler failure
+therefore remains retryable; a new scope fails closed when the guard reaches
+its scope limit.
 Transport frame session and peer identities must be exact nonblank strings;
 blank or padded identities fail validation before sender/receiver boundaries
 call platform sinks or session handlers.

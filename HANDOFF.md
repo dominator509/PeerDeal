@@ -54,9 +54,10 @@ The protocol now exposes a bounded, versioned HMAC-SHA256 session-message
 contract. Mirrored production Hold'em routes authenticate canonical event bytes
 with transport session, sender, recipient, and sequence scope and fail closed
 when the app does not provide an authenticator or verification fails. Native
-transport remains generic; key provisioning, session authorization, rotation,
-real-device/network validation, product session/database wiring, and final UX
-remain outside this software slice.
+transport remains generic; the network validating receiver now rejects bounded
+duplicate and stale frame sequences before handler dispatch. Key provisioning,
+session authorization, rotation, real-device/network validation, product
+session/database wiring, and final UX remain outside this software slice.
 
 ## What Changed
 

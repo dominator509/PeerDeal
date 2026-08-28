@@ -11,7 +11,9 @@ before native local-identity provisioning or route exposure.
 The protocol-owned session message contract now provides versioned HMAC-SHA256
 authentication over canonical event bytes plus transport session, peer, and
 sequence scope. The mirrored production Hold'em route requires that contract
-and bootstrap fails closed when its authenticator is unavailable; key
+and bootstrap fails closed when its authenticator is unavailable. The network
+receive boundary also rejects bounded duplicate and stale frame sequences
+before handler dispatch and records them only after successful handling; key
 provisioning, session authorization, rotation, and real-device validation
 remain product/operator gates.
 
@@ -3181,6 +3183,15 @@ peer scopes, preventing unrelated multicast traffic from evicting a live
 bounded queue. Transport authentication, replay protection, real-device
 reachability, product session authorization, and durable persistence remain
 separate product or operator contracts.
+
+The T179 follow-up closes the generic transport replay-admission gap. The
+network validating receiver now uses a bounded sequence window keyed by the
+complete session/sender/recipient scope, rejects duplicate and stale frames
+before session handlers, permits unique out-of-order frames within the window,
+and records only after successful handler completion so failed handling remains
+retryable. Scope exhaustion fails closed without evicting established replay
+state. This protects the existing native queue and session contracts without
+moving authentication, game truth, or platform policy into the network layer.
 
 The governance follow-up closes state-transition and seat-binding gaps in the
 mode policy layer. Seat acceptance, assignment, and expiry now require the

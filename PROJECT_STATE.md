@@ -1864,6 +1864,20 @@ Remaining:
   session/database wiring, other-platform hosts, release signing, and final
   UX remain open.
 
+## T179 Transport Replay Admission Guard
+
+- `peerdeal_network` now applies bounded replay protection in the validating
+  receive boundary, keyed by session, sender, recipient, and sequence scope.
+- Duplicate and stale sequences are rejected before session-handler dispatch;
+  unique out-of-order frames inside the configured window remain admissible,
+  and accepted sequences are recorded only after handler success so retries
+  remain possible after downstream failure.
+- The default guard fails closed when its bounded scope limit is exhausted and
+  does not evict established replay state. Network package tests (73) and
+  analyzer pass. Native queue deduplication, authentication key policy,
+  real-device reachability, product session authorization, and durable
+  persistence remain separate gates.
+
 ## Required Gates
 
 Run after each retrofit step:

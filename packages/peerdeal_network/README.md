@@ -62,8 +62,12 @@ score, and recover network paths without owning game truth.
 - The validating transport sender rejects invalid frames before calling a sink
   and converts sink exceptions into explicit failed send results.
 - The validating transport receiver rejects invalid frames before calling a
-  session handler and converts handler exceptions into explicit failed receive
-  results.
+  session handler, converts handler exceptions into explicit failed receive
+  results, and applies bounded replay protection before handler dispatch.
+- `SlidingWindowTransportFrameReplayGuard` keys sequence windows by complete
+  session/sender/recipient scope, rejects duplicate or stale sequences, allows
+  unique frames inside its bounded window, and records a frame only after the
+  handler accepts it.
 - The network-owned discovery endpoint parser validates the existing
   `peer-id` and `peer-id@host[:port]` forms, bounds and deduplicates locations,
   drops malformed or sensitive values, and projects host/port metadata onto

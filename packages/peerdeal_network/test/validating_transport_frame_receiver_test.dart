@@ -61,6 +61,45 @@ void main() {
     expect(result.reasonCode, 'ERR_TRANSPORT_FRAME_RECEIVE_FAILED');
     expect(result.warnings, ['transport_frame_handler_failed']);
   });
+
+  test(
+    'rejects a previously accepted frame before the handler sees it',
+    () async {
+      final handler = _RecordingTransportFrameHandler();
+      final receiver = ValidatingTransportFrameReceiver(handler: handler);
+      final frame = _frame();
+
+      expect((await receiver.receive(frame)).accepted, isTrue);
+      final replay = await receiver.receive(frame);
+
+      expect(replay.accepted, isFalse);
+      expect(replay.reasonCode, 'ERR_TRANSPORT_FRAME_REPLAYED');
+      expect(handler.frames, [frame]);
+    },
+  );
+
+  test('does not consume a frame when the handler fails', () async {
+    final handler = _FailOnceTransportFrameHandler();
+    final receiver = ValidatingTransportFrameReceiver(handler: handler);
+    final frame = _frame();
+
+    final first = await receiver.receive(frame);
+    final second = await receiver.receive(frame);
+
+    expect(first.reasonCode, 'ERR_TRANSPORT_FRAME_RECEIVE_FAILED');
+    expect(second.accepted, isTrue);
+    expect(handler.successfulFrames, [frame]);
+  });
+}
+
+TransportFrame _frame() {
+  return TransportFrame(
+    sessionId: 'session_1',
+    fromPeerId: 'peer_a',
+    toPeerId: 'peer_b',
+    sequence: 1,
+    payload: <int>[1, 2, 3],
+  );
 }
 
 class _RecordingTransportFrameHandler implements TransportFrameHandler {
@@ -76,5 +115,19 @@ class _ThrowingTransportFrameHandler implements TransportFrameHandler {
   @override
   Future<void> handleFrame(TransportFrame frame) async {
     throw StateError('session handler unavailable');
+  }
+}
+
+class _FailOnceTransportFrameHandler implements TransportFrameHandler {
+  bool _failed = false;
+  final List<TransportFrame> successfulFrames = <TransportFrame>[];
+
+  @override
+  Future<void> handleFrame(TransportFrame frame) async {
+    if (!_failed) {
+      _failed = true;
+      throw StateError('session handler unavailable');
+    }
+    successfulFrames.add(frame);
   }
 }
