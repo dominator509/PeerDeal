@@ -52,3 +52,6 @@ payload interpretation and must preserve the invite-scoped state contract.
 - Replay validates snapshot-envelope identity through the shared protocol
   predicate before projection, and direct snapshot-suffix planning rejects
   unsafe identities or negative bases before filtering events.
+- Package fixtures cover hand-scoped replay, snapshot-plus-suffix replay,
+  anchor mismatch, and protocol mismatch; the replay test suite discovers and
+  decodes every JSON fixture.

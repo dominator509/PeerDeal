@@ -1,0 +1,39 @@
+{
+  "table_id": "table_1",
+  "session_id": "session_1",
+  "protocol_version": "1.0.0",
+  "scope": "session",
+  "snapshot": {
+    "snapshot_id": "snap_1",
+    "snapshot_type": "TableSnapshot",
+    "snapshot_version": "1.0",
+    "protocol_version": "1.0.0",
+    "table_id": "table_1",
+    "session_id": "session_1",
+    "snapshot_base_event_seq": 1,
+    "snapshot_hash": "685ee9ceac52428920c0a756d42208063cf0d0b0210e5e4caaf866183bce4111",
+    "payload": {
+      "phase": "LIVE_ACTIVE"
+    }
+  },
+  "expected_anchor": null,
+  "events": [
+    {
+      "event_id": "evt_suffix_2",
+      "event_type": "HandStarted",
+      "event_version": "1.0",
+      "protocol_version": "1.0.0",
+      "event_seq": 2,
+      "table_id": "table_1",
+      "session_id": "session_1",
+      "hand_id": "hand_1",
+      "emitted_at": "2026-04-25T00:00:05Z",
+      "actor_ref": "system",
+      "payload": {
+        "phase": "LIVE_ACTIVE"
+      },
+      "prev_event_hash": "hash_hand_1",
+      "event_hash": "hash_suffix_2"
+    }
+  ]
+}

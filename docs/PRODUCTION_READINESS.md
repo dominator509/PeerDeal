@@ -147,6 +147,9 @@ the gates below are satisfied.
 - Mode governance fixtures now include an invalid duplicate-participant state;
   the suite discovers every mode JSON fixture and requires invalid contexts to
   fail through the existing `DefaultGovernanceEngine` validation result.
+- Replay fixtures now cover hand-scoped replay, snapshot-plus-suffix replay,
+  anchor mismatch, and protocol mismatch; the suite discovers every replay JSON
+  fixture and decodes it through the typed `ReplayRequest` boundary.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

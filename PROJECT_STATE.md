@@ -1962,6 +1962,14 @@ Remaining:
   policy engine.
 - No mode policy, state model, protocol, app, or package boundary changed.
 
+## Recent T328 Changes
+
+- Replay fixtures now cover hand-scoped replay, snapshot-plus-suffix replay,
+  anchor mismatch, and protocol mismatch.
+- The replay test suite discovers every JSON fixture and decodes each through
+  the typed `ReplayRequest` boundary before exercising the scenario assertions.
+- No replay engine, protocol, projector, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

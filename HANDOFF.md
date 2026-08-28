@@ -50,7 +50,8 @@ admission serialization, T321 cross-platform transport sequence bounds,
 T322 cross-platform transport payload bounds, T323 native transport contract
 bound parity, T324 rejected protocol fixture enforcement, T325 wired
 Hold'em opening-hand fixture persistence coverage, and T326 Hold'em fixture
-breadth enforcement
+breadth enforcement, T327 mode fixture breadth enforcement, and T328 replay
+fixture breadth enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -126,6 +127,11 @@ The T327 mode hardening adds a duplicate-participant governance fixture and a
 directory-driven gate over every mode JSON fixture. Valid fixtures must remain
 usable by the policy engine, while `invalid_` fixtures must return the existing
 `ERR_GOVERNANCE_CONTEXT_INVALID` result without changing mode semantics.
+
+The T328 replay hardening adds hand-scoped, snapshot-plus-suffix,
+anchor-mismatch, and protocol-mismatch fixtures. The replay test suite now
+loads every JSON fixture through a typed `ReplayRequest` decoder and asserts
+the expected success or fail-closed boundary without changing replay behavior.
 
 ## What Changed
 

@@ -15120,6 +15120,41 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - Replay Fixture Breadth Gate
+
+Summary:
+- Added hand-scoped, snapshot-plus-suffix, anchor-mismatch, and
+  protocol-mismatch replay fixtures.
+- Added a typed test-only fixture decoder for replay requests, snapshots, and
+  expected anchors.
+- Added a directory-driven test requiring every replay JSON fixture to decode
+  before the scenario assertions run.
+
+Files changed:
+- `packages/peerdeal_replay/test/fixture_loader.dart`
+- `packages/peerdeal_replay/test/basic_replay_engine_test.dart`
+- `packages/peerdeal_replay/test/fixtures/basic_session_replay.json`
+- `packages/peerdeal_replay/test/fixtures/hand_scoped_replay.json`
+- `packages/peerdeal_replay/test/fixtures/snapshot_suffix_replay.json`
+- `packages/peerdeal_replay/test/fixtures/anchor_mismatch_replay.json`
+- `packages/peerdeal_replay/test/fixtures/protocol_mismatch_replay.json`
+- `packages/peerdeal_replay/test/fixtures/starter_fixture_notes.md`
+- `packages/peerdeal_replay/README.md`, `HANDOFF.md`, `HANDOFF_QUEUE.md`,
+  `PROJECT_STATE.md`, `docs/PRODUCTION_READINESS.md`, and this log.
+
+Verification:
+- Direct `peerdeal_replay` analysis passed.
+- Replay fixture JSON parsing passed.
+- Focused replay Dart test startup stalled without output and was stopped; no
+  test failure was emitted.
+
+Risks:
+- This closes the documented local replay-fixture gap only. Product projectors,
+  durable persistence, native/device validation, and release operations remain
+  separate gates.
+
+---
+
 ### 2026-08-28 - Codex - T318 Production Route Failure Surface
 
 Summary:

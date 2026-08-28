@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_replay/peerdeal_replay.dart';
@@ -70,6 +72,71 @@ void main() {
     ]);
     expect(result.finalAppliedEventSeq, 2);
     expect(result.reconstructedAnchor, isNotNull);
+  });
+
+  test('loads and replays every structured replay fixture', () {
+    final fixtures =
+        Directory('test/fixtures')
+            .listSync()
+            .whereType<File>()
+            .where((file) => file.path.endsWith('.json'))
+            .toList()
+          ..sort((left, right) => left.path.compareTo(right.path));
+
+    expect(fixtures, isNotEmpty);
+    for (final fixture in fixtures) {
+      final loaded = loadReplayFixture(fixture.path);
+      expect(loaded.request.events, isNotEmpty, reason: fixture.path);
+    }
+  });
+
+  test('replays the hand-scoped fixture', () {
+    final fixture = loadReplayFixture('test/fixtures/hand_scoped_replay.json');
+    final result = engine.replay(fixture.request);
+
+    expect(result.isSuccess, isTrue);
+    expect(result.finalAppliedEventSeq, 1);
+    expect(result.state!.appliedEventTypes, ['HandStarted']);
+  });
+
+  test('replays the snapshot-plus-suffix fixture', () {
+    final fixture = loadReplayFixture(
+      'test/fixtures/snapshot_suffix_replay.json',
+    );
+    final result = engine.replay(fixture.request);
+
+    expect(result.isSuccess, isTrue);
+    expect(result.finalAppliedEventSeq, 2);
+    expect(
+      result.warnings,
+      contains('Replay used snapshot + suffix planning path.'),
+    );
+    expect(result.state!.appliedEventTypes, ['Snapshot:snap_1', 'HandStarted']);
+  });
+
+  test('rejects the anchor-mismatch fixture', () {
+    final fixture = loadReplayFixture(
+      'test/fixtures/anchor_mismatch_replay.json',
+    );
+    final result = engine.replay(fixture.request);
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNotNull);
+    expect(result.mismatches.single.code, 'ERR_REPLAY_ANCHOR_MISMATCH');
+  });
+
+  test('rejects the protocol-mismatch fixture before projection', () {
+    final fixture = loadReplayFixture(
+      'test/fixtures/protocol_mismatch_replay.json',
+    );
+    final result = engine.replay(fixture.request);
+
+    expect(result.isSuccess, isFalse);
+    expect(result.state, isNull);
+    expect(
+      result.mismatches.single.code,
+      'ERR_REPLAY_EVENT_PROTOCOL_INCOMPATIBLE',
+    );
   });
 
   test(
