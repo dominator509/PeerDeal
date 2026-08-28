@@ -1,9 +1,46 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:peerdeal_variants/peerdeal_variants.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test(
+    'loads the opening-hand fixture through strict persisted state parsing',
+    () {
+      final fixture = Map<String, Object?>.from(
+        jsonDecode(
+          File('test/fixtures/holdem_opening_hand.json').readAsStringSync(),
+        ) as Map,
+      );
+
+      expect(fixture['variant_id'], 'holdem_nlhe');
+      expect(fixture['mode_type'], 'open_table');
+
+      final state = HoldemHandState.fromJson(fixture);
+
+      expect(state.handId, 'hand_001');
+      expect(state.phase, HoldemHandPhase.bettingPreflop);
+      expect(state.bettingRound, HoldemBettingRound.preflop);
+      expect(state.currentActorSeat, 2);
+      expect(state.buttonSeat, 1);
+      expect(state.smallBlindSeat, 2);
+      expect(state.bigBlindSeat, 3);
+      expect(state.currentBetToCall, 100);
+      expect(state.minimumRaiseAmount, 100);
+      expect(state.pot, 150);
+      expect(state.seats.map((seat) => seat.seat).toList(), <int>[1, 2, 3]);
+      expect(
+        state.seats.map((seat) => seat.committedThisHand).toList(),
+        <int>[0, 50, 100],
+      );
+      expect(state.boardCards, isEmpty);
+      expect(state.actedSeatsThisRound, isEmpty);
+      expect(state.lastAggressorSeat, isNull);
+      expect(state.lastActionSummary, isNull);
+    },
+  );
+
   test('round-trips HoldemHandState through JSON without losing fields', () {
     final state = HoldemHandState(
       handId: 'hand_001',

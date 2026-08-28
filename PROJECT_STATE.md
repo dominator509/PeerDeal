@@ -1935,6 +1935,16 @@ Remaining:
 - Direct package analysis and source checks pass. Flutter widget and native
   runtime/build validation remain external.
 
+## Recent T325 Changes
+
+- The existing `holdem_opening_hand.json` fixture now includes the current
+  `HoldemHandState` persistence fields, including betting round, hand
+  commitments, acted seats, pot, and nullable action metadata.
+- Variant persistence coverage now loads that fixture through
+  `HoldemHandState.fromJson` and asserts its opening-hand state, so this
+  fixture cannot silently drift from the typed parser.
+- No Hold'em rule, core truth, protocol, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

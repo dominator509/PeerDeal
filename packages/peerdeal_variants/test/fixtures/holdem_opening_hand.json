@@ -3,6 +3,7 @@
   "variant_id": "holdem_nlhe",
   "mode_type": "open_table",
   "phase": "betting_preflop",
+  "betting_round": "preflop",
   "current_actor_seat": 2,
   "button_seat": 1,
   "small_blind_seat": 2,
@@ -16,7 +17,8 @@
       "in_hand": true,
       "folded": false,
       "all_in": false,
-      "committed_this_round": 0
+      "committed_this_round": 0,
+      "committed_this_hand": 0
     },
     {
       "seat": 2,
@@ -24,7 +26,8 @@
       "in_hand": true,
       "folded": false,
       "all_in": false,
-      "committed_this_round": 50
+      "committed_this_round": 50,
+      "committed_this_hand": 50
     },
     {
       "seat": 3,
@@ -32,8 +35,13 @@
       "in_hand": true,
       "folded": false,
       "all_in": false,
-      "committed_this_round": 100
+      "committed_this_round": 100,
+      "committed_this_hand": 100
     }
   ],
-  "board_cards": []
+  "board_cards": [],
+  "acted_seats_this_round": [],
+  "pot": 150,
+  "last_aggressor_seat": null,
+  "last_action_summary": null
 }

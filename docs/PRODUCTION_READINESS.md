@@ -137,6 +137,10 @@ the gates below are satisfied.
   accepted artifacts.
 
 ## Covered hardening slices
+- The existing Hold'em opening-hand fixture now matches the strict persisted
+  `HoldemHandState` shape and is loaded through the typed parser in variant
+  persistence tests. This closes local fixture/parser drift without claiming
+  full production engine, device, or product-session validation.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

@@ -15033,6 +15033,39 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - Fixture and Contract Gates
+
+Summary:
+- T323 added native transport bound parity checks across the canonical Dart
+  limits and Android/Windows host declarations.
+- T324 added generic rejection coverage for every `invalid_` and
+  `unsupported_` protocol fixture through its catalog/schema family.
+- T325 updated the existing Hold'em opening-hand fixture to the current strict
+  persisted-state shape and added a test that loads it through
+  `HoldemHandState.fromJson`.
+
+Files changed:
+- `scripts/check_native_contract_bounds.py`, CI wiring, and native transport
+  contract tests for T323.
+- `packages/peerdeal_protocol/test/peerdeal_protocol_test.dart` for T324.
+- `packages/peerdeal_variants/test/fixtures/holdem_opening_hand.json` and
+  `packages/peerdeal_variants/test/holdem_hand_state_persistence_test.dart`
+  for T325.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and this stable AI handoff log.
+
+Verification:
+- Direct `peerdeal_variants` analysis passed.
+- Fixture JSON parsing passed.
+- The focused Flutter test runner stalled without output and was stopped;
+  no test failure was emitted. Full repository gates remain required.
+
+Risks:
+- Full variant fixture breadth, native/device runtime validation, production
+  persistence, and product session wiring remain separate gates.
+
+---
+
 ### 2026-08-28 - Codex - T318 Production Route Failure Surface
 
 Summary:

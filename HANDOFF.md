@@ -48,7 +48,8 @@ and T318 shared production table failure-surface hardening, T319 production
 table operational UI hierarchy hardening, and T320 transport replay-scope
 admission serialization, T321 cross-platform transport sequence bounds,
 T322 cross-platform transport payload bounds, T323 native transport contract
-bound parity, and T324 rejected protocol fixture enforcement
+bound parity, T324 rejected protocol fixture enforcement, and T325 wired
+Hold'em opening-hand fixture persistence coverage
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -109,6 +110,11 @@ The T324 protocol hardening adds a generic rejected-fixture assertion. Every
 `invalid_` and `unsupported_` JSON fixture now runs through its existing
 catalog/schema family and must fail closed, so adding a rejected fixture without
 matching rejection behavior cannot pass the protocol suite.
+
+The T325 variant hardening updates the existing Hold'em opening-hand fixture to
+the current strict persisted-state shape and loads it through
+`HoldemHandState.fromJson` in package tests. This closes the unwired fixture
+path without moving rules or persistence policy across package boundaries.
 
 ## What Changed
 
