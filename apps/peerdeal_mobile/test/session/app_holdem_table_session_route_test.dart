@@ -492,6 +492,31 @@ void main() {
     expect(find.text('unavailable'), findsOneWidget);
     expect(runtime.coreState.eventSequence, 1);
   });
+
+  testWidgets('renders a shared fail-closed surface when the builder throws', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AppHoldemTableSessionRoute(
+          runtime: _runtime(),
+          peerId: 'peer_remote',
+          localPeerId: 'peer_local',
+          sessionAuthenticator: _authenticator(),
+          surfaceBuilder: (context, routeContext) {
+            throw StateError('do not expose this failure');
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text("Hold'em table"), findsOneWidget);
+    expect(find.text('Production table unavailable'), findsOneWidget);
+    expect(find.text('Unavailable'), findsNWidgets(2));
+    expect(find.text('do not expose this failure'), findsNothing);
+  });
 }
 
 Widget _productionSurfaceRoute({

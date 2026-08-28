@@ -14986,6 +14986,31 @@ Risks:
 
 ---
 
+### 2026-08-28 - Codex - T318 Production Route Failure Surface
+
+Summary:
+- Mirrored `AppHoldemTableSessionRoute` owners now keep injected production
+  surface-builder failures inside the shared app-shell scaffold/status state.
+- The fallback exposes bounded unavailable state/action text and never projects
+  the caught exception into the UI.
+
+Files changed:
+- Mirrored app route files and focused route tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`,
+  `docs/PRODUCTION_READINESS.md`, and stable AI context docs.
+
+Verification:
+- Focused mobile route suite: 14 tests passed.
+- Focused desktop route suite: 14 tests passed.
+- Mobile and desktop analyzers, boundary check, source-text check, formatting,
+  and `git diff --check` passed.
+
+Risks:
+- Final visual/device and non-demo product-flow validation remain separate
+  external gates; this change does not alter session, transport, or game truth.
+
+---
+
 ### 2026-08-20 - Codex - T294 Source-Backed Production Hardening
 
 Summary:

@@ -105,6 +105,10 @@ the gates below are satisfied.
   and device/network transport validation remain open. The default app-owned production Hold'em surface now
   renders bounded runtime state, gates local actions on transport readiness, and
   publishes canonical projections; final product UX validation remains open.
+- Mirrored production table routes now keep injected surface-builder failures
+  inside the shared scaffold/status unavailable state without exposing raw
+  exception text. Focused mobile and desktop route coverage passes; final
+  visual/device and non-demo product-flow validation remain open.
 - App UI is not production-polished.
 
 ## Covered hardening slices

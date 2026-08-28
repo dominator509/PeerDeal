@@ -1878,6 +1878,16 @@ Remaining:
   real-device reachability, product session authorization, and durable
   persistence remain separate gates.
 
+## T318 Production Route Failure Surface
+
+- Mirrored `AppHoldemTableSessionRoute` owners now render the shared
+  `PeerDealAppScaffold` and error status when an injected production surface
+  throws during build, instead of dropping to an unstructured bare widget.
+- The fallback exposes only bounded state/action text and does not project the
+  caught exception into the UI. Focused mobile and desktop route suites cover
+  the fail-closed surface; final visual, device, and product-flow validation
+  remain external.
+
 ## Required Gates
 
 Run after each retrofit step:

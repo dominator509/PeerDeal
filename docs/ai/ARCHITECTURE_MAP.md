@@ -79,6 +79,8 @@ Local Hold'em producer flow:
 5. The route context can create `AppHoldemProjectionTransportPublisher`, which
    canonical-encodes accepted projection events into validated `TransportFrame`
    payloads and reports partial sends for retry without replaying rules.
+   Surface-builder failures are caught at this app boundary and render the
+   shared scaffold/status unavailable state without exposing exception text.
 6. `AppHoldemProductionRouteRegistration` merges the route into the app shell's
    validated production map and native-readiness gate; the product caller still
    supplies the validated session/state source and final surface builder.

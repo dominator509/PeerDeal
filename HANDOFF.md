@@ -43,7 +43,8 @@ immutable app-session diagnostics, T170 immutable startup diagnostics, T171
 immutable local-identity diagnostics, T172 immutable readiness/transport
 diagnostics, T173 immutable app-boundary collections, T174 immutable
 native-bridge collections, T175 immutable network collections, T176
-immutable sync/recovery collections, and T177 immutable replay collections
+immutable sync/recovery collections, and T177 immutable replay collections,
+and T318 shared production table failure-surface hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -58,6 +59,12 @@ transport remains generic; the network validating receiver now rejects bounded
 duplicate and stale frame sequences before handler dispatch. Key provisioning,
 session authorization, rotation, real-device/network validation, product
 session/database wiring, and final UX remain outside this software slice.
+
+The T318 route hardening now keeps a supplied production table surface failure
+inside the shared app-shell scaffold. Builder exceptions are not rendered or
+returned to the user, and mirrored mobile and desktop route tests cover the
+bounded unavailable state. Final visual, device, and non-demo product-flow
+validation remain separate gates.
 
 ## What Changed
 

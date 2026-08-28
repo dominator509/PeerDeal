@@ -563,6 +563,10 @@ can create an `AppHoldemProjectionTransportPublisher` when transport is
 available. The publisher canonical-encodes accepted projection events into
 validated `TransportFrame`s and returns complete, rejected, or partial-send
 results without rerunning variant rules.
+If the injected surface builder throws, the route catches the failure and
+renders the shared scaffold/status unavailable state without projecting the
+exception text; this is a presentation fail-closed path, not a recovery or
+game-state mutation path.
 
 `AppHoldemProductionRouteRegistration` is the mirrored app-shell registration
 contract. It binds a validated Hold'em runtime, peer identity, surface builder,

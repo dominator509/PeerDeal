@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
+import 'package:peerdeal_ui_kit/peerdeal_ui_kit.dart';
 
 import '../transport/app_table_session_transport_provisioner.dart';
 import '../transport/app_table_session_transport_source.dart';
@@ -234,6 +235,21 @@ class _AppHoldemTableSessionRouteUnavailable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Production table route unavailable'));
+    return PeerDealAppScaffold(
+      title: "Hold'em table",
+      subtitle: 'Production table unavailable',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const PeerDealStatusPill(label: 'Unavailable', severity: 'error'),
+          const SizedBox(height: 12),
+          const PeerDealInfoRow(label: 'State', value: 'Unavailable'),
+          const PeerDealInfoRow(
+            label: 'Action',
+            value: 'Return to the previous route and try again',
+          ),
+        ],
+      ),
+    );
   }
 }

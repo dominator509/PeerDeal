@@ -206,6 +206,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-20-196` | Recovery snapshot ingress accepted unsafe envelope identity or negative base sequence | 4 | T315 | RESOLVED | Shared protocol snapshot identity validation and sync persistence, conflict-detection, and application checks now fail closed before mutation, planning, or projection; payload-hash, catalog, scope, and recovery ownership remain unchanged. |
 | `LEGACY-GAP-2026-08-20-197` | Snapshot-backed sync filtered non-positive events as covered by the snapshot base | 4 | T316 | RESOLVED | `BasicConflictDetector` and `BasicSnapshotApplier` now reject non-positive event sequences before snapshot-suffix filtering; full-window and replay sequence contracts remain unchanged. |
 | `LEGACY-GAP-2026-08-20-198` | Replay accepted unsafe snapshot identity or direct negative-base suffix input | 4 | T317 | RESOLVED | `BasicReplayEngine` and `SnapshotSuffixReplayer` now apply shared snapshot identity and non-negative-base checks before projection or filtering; replay and sync package ownership remain unchanged. |
+| `LEGACY-GAP-2026-08-28-199` | Production table route builder failure bypassed the shared app-shell failure surface | 4 | T318 | RESOLVED | Mirrored `AppHoldemTableSessionRoute` owners now render the shared scaffold/status unavailable state without exposing the caught exception; focused mobile and desktop route tests pass. Final visual/device and non-demo product-flow validation remain deferred. |
 
 ## Status Definitions
 
