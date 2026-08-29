@@ -62,7 +62,8 @@ sequence-bound parity, T338 app/native transport default-bound alignment,
 T339 app/native transport default-bound checker enforcement, and T340 direct
 native transport adapter payload enforcement, and T341 app/native operational
 peer-scope normalization, and T342 mirrored app production-session
-peer-identity normalization
+peer-identity normalization, and T343 accepted session-context identity
+binding
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -294,6 +295,17 @@ table scopes retain their existing safe-text contract.
 - Both app packages analyze cleanly; repository boundary, source-text,
   native-contract, unit, formatting, and diff checks pass. The focused Flutter
   runner remained silent during a bounded attempt.
+
+## Recent T343 Changes
+
+- Mirrored context-aware production-session bootstrap now requires the hydrated
+  remote peer and local seat to match the accepted `JoinFlowSessionContext`
+  before route composition.
+- Added regressions for remote-peer and local-seat drift while preserving the
+  invite-only bootstrap path.
+- Both app packages analyze cleanly; repository boundary, source-text,
+  native-contract, checker-unit, formatting, and diff checks pass. The focused
+  Flutter runner remained silent during a bounded attempt.
 
 ## What Changed
 

@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Bind Accepted Session Context Identity
+
+Summary:
+- Mirrored context-aware production-session bootstrap now requires hydrated
+  `peerId` and `localSeat` to match the accepted `JoinFlowSessionContext`.
+- Added peer-drift and seat-drift regressions while keeping invite-only loads
+  compatible.
+
+Files:
+- Mirrored mobile and desktop production-session bootstrap implementations and
+  focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct analysis of both app packages: passed.
+- Repository boundary, source-text, native-contract, checker-unit, formatting,
+  and diff checks: passed.
+- Focused Flutter test attempt: stopped after the local runner produced no
+  output during a bounded attempt; no Flutter test pass is claimed.
+
+Risks:
+- Real Android/Windows secure-key, transport, device reachability, release
+  signing, and product persistence/route integration remain separate gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Mirrored App Production Peer-Identity Normalization
 
 Summary:

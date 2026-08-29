@@ -2104,6 +2104,17 @@ Remaining:
   Flutter runner produced no output during a bounded attempt and was stopped;
   no Flutter test pass is claimed.
 
+## Recent T343 Changes
+
+- Context-aware production-session bootstrap now binds hydrated remote peer and
+  local seat to the accepted `JoinFlowSessionContext` before composition.
+- Added mirrored regressions for peer and seat drift; invite-only bootstrap
+  remains unchanged.
+- Direct analysis, formatting, repository boundary/source/native-contract
+  checks, checker unit tests, and `git diff --check` passed. The focused
+  Flutter runner produced no output during a bounded attempt and was stopped;
+  no Flutter test pass is claimed.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -3439,6 +3439,13 @@ session/table/invite scopes retain their existing safe-text validation. Both
 app packages analyze cleanly and repository static gates pass; focused Flutter
 execution remains limited by the local runner's silent startup behavior.
 
+The T343 follow-up closes the context-to-hydrated-input binding gap. Context-aware
+production-session bootstrap now requires the hydrated remote peer and local
+seat to match the accepted `JoinFlowSessionContext` before route composition;
+invite-only loads remain compatible. Both app packages analyze cleanly and
+repository static gates pass; focused Flutter execution remains limited by the
+local runner's silent startup behavior.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

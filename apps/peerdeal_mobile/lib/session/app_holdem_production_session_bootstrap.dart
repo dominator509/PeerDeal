@@ -153,7 +153,12 @@ class AppHoldemProductionSessionBootstrap {
       ),
       cancellation: cancellation,
     );
-    _validateInput(sessionContext.invite, input);
+    _validateInput(
+      sessionContext.invite,
+      input,
+      expectedRemotePeerId: sessionContext.remotePeerId,
+      expectedLocalSeat: sessionContext.localSeat,
+    );
 
     return _createComposition(input);
   }
@@ -285,8 +290,10 @@ class AppHoldemProductionSessionBootstrap {
 
   static void _validateInput(
     ResolvedInvite invite,
-    AppHoldemProductionSessionInput input,
-  ) {
+    AppHoldemProductionSessionInput input, {
+    String? expectedRemotePeerId,
+    int? expectedLocalSeat,
+  }) {
     final tableState = input.initialTableState;
     final cursor = input.initialCursor;
     if (tableState.tableId != invite.tableId ||
@@ -305,6 +312,16 @@ class AppHoldemProductionSessionBootstrap {
     }
     _validatePeerIdentity(input.peerId, 'input.peerId');
     _validatePeerIdentity(input.localPeerId, 'input.localPeerId');
+    if (expectedRemotePeerId != null && input.peerId != expectedRemotePeerId) {
+      throw StateError(
+        'Hydrated Holdem remote peer does not match the accepted session context.',
+      );
+    }
+    if (expectedLocalSeat != null && input.localSeat != expectedLocalSeat) {
+      throw StateError(
+        'Hydrated Holdem local seat does not match the accepted session context.',
+      );
+    }
   }
 
   static void _validatePeerIdentity(String value, String name) {

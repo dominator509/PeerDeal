@@ -51,7 +51,9 @@ void main() {
       remotePeerId: 'peer_selected',
       localSeat: 3,
     );
-    final source = _ContextSource(_input());
+    final source = _ContextSource(
+      _input(peerId: 'peer_selected', localSeat: 3),
+    );
 
     final composition = await AppHoldemProductionSessionBootstrap(
       source: source,
@@ -62,12 +64,44 @@ void main() {
     expect(composition.route.path, '/holdem-live');
   });
 
+  test('rejects hydrated remote peer that differs from context', () async {
+    final sessionContext = JoinFlowSessionContext(
+      invite: _invite(),
+      remotePeerId: 'peer_selected',
+      localSeat: 1,
+    );
+    final source = _ContextSource(_input());
+
+    await expectLater(
+      AppHoldemProductionSessionBootstrap(
+        source: source,
+        contextSource: source,
+      ).createForSessionContext(sessionContext),
+      throwsStateError,
+    );
+    expect(source.loadedContext, same(sessionContext));
+  });
+
+  test('rejects hydrated local seat that differs from context', () async {
+    final sessionContext = JoinFlowSessionContext(
+      invite: _invite(),
+      remotePeerId: 'peer_remote',
+      localSeat: 3,
+    );
+    final source = _ContextSource(_input());
+
+    await expectLater(
+      AppHoldemProductionSessionBootstrap(
+        source: source,
+        contextSource: source,
+      ).createForSessionContext(sessionContext),
+      throwsStateError,
+    );
+    expect(source.loadedContext, same(sessionContext));
+  });
+
   test('rejects reserved context peer before source loading', () async {
-    for (final peerId in <String>[
-      'none',
-      'unresolved',
-      'peer::reserved',
-    ]) {
+    for (final peerId in <String>['none', 'unresolved', 'peer::reserved']) {
       final source = _ContextSource(_input());
 
       await expectLater(
@@ -307,6 +341,7 @@ AppHoldemProductionSessionInput _input({
   bool withAuthenticator = true,
   String peerId = 'peer_remote',
   String localPeerId = 'peer_local',
+  int localSeat = 1,
 }) {
   final tableState = TableState.initial(
     tableId: tableId,
@@ -333,6 +368,14 @@ AppHoldemProductionSessionInput _input({
           folded: false,
           allIn: false,
         ),
+        if (localSeat != 1)
+          HoldemSeatState(
+            seat: localSeat,
+            stack: 1000,
+            inHand: true,
+            folded: false,
+            allIn: false,
+          ),
       ],
     ),
     initialCursor: HoldemEventCursor(
@@ -362,7 +405,7 @@ AppHoldemProductionSessionInput _input({
     navigationLabel: 'Live Holdem',
     peerId: peerId,
     localPeerId: localPeerId,
-    localSeat: 1,
+    localSeat: localSeat,
     sessionAuthenticator: withAuthenticator ? _authenticator() : null,
   );
 }
