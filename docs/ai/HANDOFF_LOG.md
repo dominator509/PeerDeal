@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Privacy Retention Fixture Boundary
+
+Summary:
+- Wired the existing strict-ephemeral and timed-sandbox JSON fixtures through
+  a typed test-only `RetentionPolicy` decoder.
+- Added a directory-driven fixture test asserting restore eligibility, derived
+  export/wipe behavior, and the exact timed wipe boundary.
+
+Files:
+- `packages/peerdeal_privacy/test/fixture_loader.dart`
+- `packages/peerdeal_privacy/test/fixture_retention_policy_test.dart`
+- `packages/peerdeal_privacy/README.md`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct `peerdeal_privacy` analysis: passed.
+- Focused Dart test runner stalled without output in the local runner and was
+  stopped; no focused test pass is claimed.
+
+Risks:
+- This closes local privacy fixture/parser drift only. Platform storage,
+  product retention coordination, device validation, and release signing remain
+  separate integration or operator-owned gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Receipt Fixture Authorization Boundary
 
 Summary:

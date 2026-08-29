@@ -2004,6 +2004,14 @@ Remaining:
   wrong-user restore rejection, and wiped-receipt rejection.
 - No receipt authorizer, crypto, protocol, app, or package boundary changed.
 
+## Recent T333 Changes
+
+- Privacy fixtures now cover strict-ephemeral and timed-sandbox policies through
+  a typed test-only `RetentionPolicy` decoder.
+- The fixture suite discovers every policy fixture and asserts restore
+  eligibility, derived wipe/export behavior, and the exact timed wipe boundary.
+- No retention engine, receipt, protocol, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

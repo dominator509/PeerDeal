@@ -54,7 +54,8 @@ breadth enforcement, T327 mode fixture breadth enforcement, and T328 replay
 fixture breadth enforcement, and T329 sync recovery fixture breadth
 enforcement, and T330 wizard fixture boundary enforcement, and T331 crypto
 verification fixture boundary enforcement, and T332 receipt fixture
-authorization boundary enforcement
+authorization boundary enforcement, and T333 privacy fixture policy boundary
+enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -159,6 +160,12 @@ authorization fixtures through typed test-only receipt and authorization
 decoders. The fixture suite now asserts matching access, wrong-user rejection,
 and wiped-receipt rejection through the existing authorizer boundary without
 changing receipt semantics or package ownership.
+
+The T333 privacy hardening wires the existing strict-ephemeral and timed-sandbox
+policy fixtures through a typed test-only `RetentionPolicy` decoder. The fixture
+suite now asserts restore eligibility, derived export/wipe behavior, and the
+exact timed wipe boundary without changing retention policy or package
+ownership.
 
 ## What Changed
 

@@ -18,3 +18,8 @@ Starter package for PeerDeal privacy policy, retention, wipe, metadata minimizat
 - capture engine implementation
 - transport/routing behavior
 - UI rendering
+
+## Fixture coverage
+- Compact strict-ephemeral and timed-sandbox policy fixtures are decoded
+  through a typed test-only loader and exercised through the retention engine's
+  restore and wipe-decision boundary.

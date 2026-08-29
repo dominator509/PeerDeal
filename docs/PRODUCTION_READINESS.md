@@ -164,6 +164,9 @@ the gates below are satisfied.
 - Receipt fixtures now cover live, wiped, and wrong-user authorization inputs;
   the suite discovers every receipt fixture and routes each through typed
   decoding and the existing fail-closed authorizer boundary.
+- Privacy fixtures now cover strict-ephemeral and timed-sandbox policies; the
+  suite discovers every policy fixture and routes each through typed decoding
+  and the existing retention engine's restore and wipe decisions.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a
