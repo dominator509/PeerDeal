@@ -2182,6 +2182,15 @@ Remaining:
   pass; Flutter analysis and focused Flutter execution remain unverified
   because both runners were silent during bounded attempts.
 
+## Recent T350 Changes
+
+- Mirrored `AppNativeReadinessLoader` defaults now reference the locked native
+  transport payload ceiling instead of the self-rejecting 64 KiB value.
+- The native contract checker now enforces the readiness defaults, and mirrored
+  readiness coverage exercises the full native payload ceiling. Repository
+  deterministic gates pass; focused Flutter execution remains unverified
+  because both runners were silent during bounded attempts.
+
 ## Required Gates
 
 Run after each retrofit step:

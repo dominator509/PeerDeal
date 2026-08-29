@@ -29,6 +29,12 @@ SOURCE_PATHS = {
     "desktop_app": pathlib.Path(
         "apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart"
     ),
+    "mobile_readiness": pathlib.Path(
+        "apps/peerdeal_mobile/lib/native_readiness/app_native_readiness_loader.dart"
+    ),
+    "desktop_readiness": pathlib.Path(
+        "apps/peerdeal_desktop/lib/native_readiness/app_native_readiness_loader.dart"
+    ),
 }
 
 
@@ -71,6 +77,32 @@ class NativeTransportSessionFactory {
   NativeTransportSessionFactory({
     int maxPayloadBytes = NativeBridgePayloadLimits.maxTransportPayloadBytes,
   });
+}
+""",
+        "mobile_readiness": """
+class AppNativeReadinessLoader {
+  AppNativeReadinessLoader({
+    int nativeTransportMaxPayloadBytes =
+        NativeBridgePayloadLimits.maxTransportPayloadBytes,
+  });
+
+  factory AppNativeReadinessLoader.methodChannel({
+    int nativeTransportMaxPayloadBytes =
+        NativeBridgePayloadLimits.maxTransportPayloadBytes,
+  }) => AppNativeReadinessLoader();
+}
+""",
+        "desktop_readiness": """
+class AppNativeReadinessLoader {
+  AppNativeReadinessLoader({
+    int nativeTransportMaxPayloadBytes =
+        NativeBridgePayloadLimits.maxTransportPayloadBytes,
+  });
+
+  factory AppNativeReadinessLoader.methodChannel({
+    int nativeTransportMaxPayloadBytes =
+        NativeBridgePayloadLimits.maxTransportPayloadBytes,
+  }) => AppNativeReadinessLoader();
 }
 """,
     }
@@ -178,6 +210,31 @@ class NativeContractBoundsCheckTest(unittest.TestCase):
             self.assertEqual(1, len(failures))
             self.assertIn("native_transport_session_factory.dart", failures[0])
             self.assertIn("must reference", failures[0])
+
+    def test_rejects_readiness_payload_default_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_contract_sources(root)
+            mobile_path = root / SOURCE_PATHS["mobile_readiness"]
+            mobile_path.write_text(
+                mobile_path.read_text(encoding="utf-8").replace(
+                    "NativeBridgePayloadLimits.maxTransportPayloadBytes",
+                    "60 * 1024",
+                ),
+                encoding="utf-8",
+            )
+
+            failures = check_native_contract_bounds(root)
+
+            self.assertEqual(2, len(failures))
+            self.assertTrue(
+                all(
+                    "app_native_readiness_loader.dart" in failure
+                    and "nativeTransportMaxPayloadBytes" in failure
+                    and "must reference" in failure
+                    for failure in failures
+                )
+            )
 
     def test_rejects_missing_source(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

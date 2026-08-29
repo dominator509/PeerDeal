@@ -67,7 +67,8 @@ and T344 invite variant identity preservation and Holdem variant admission,
 and T345 persisted-source and configuration-factory variant admission, and
 T346 cancellation-before-native-dispatch hardening, and T347 cancellation-safe
 app recovery factory loading, T348 cancellation-safe local identity
-provisioning, and T349 cancellation-safe receipt key provisioning
+provisioning, T349 cancellation-safe receipt key provisioning, and T350
+native-readiness payload contract alignment
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -374,6 +375,15 @@ table scopes retain their existing safe-text contract.
   material. Mirrored regressions cover pre-cancelled storage, late load/save/
   delete results, and generation cancellation. Repository deterministic gates
   pass; Flutter analysis and focused Flutter execution remain unverified
+  because both runners were silent during bounded attempts.
+
+## Recent T350 Changes
+
+- Mirrored `AppNativeReadinessLoader` defaults now reference the locked native
+  transport payload ceiling instead of the self-rejecting 64 KiB value.
+- The native contract checker now enforces the readiness defaults, and mirrored
+  readiness coverage exercises the full native payload ceiling. Repository
+  deterministic gates pass; focused Flutter execution remains unverified
   because both runners were silent during bounded attempts.
 
 ## What Changed

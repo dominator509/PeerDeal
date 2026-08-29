@@ -43,7 +43,7 @@ void main() {
     ]);
   });
 
-  test('reports ready when all native capabilities are available', () async {
+  test('uses the native payload ceiling for default readiness', () async {
     final secureStorage = _FakeSecureKeyStorageBridge(
       snapshot: SecureKeyStorageSnapshot(available: true, keys: []),
     );
@@ -68,7 +68,8 @@ void main() {
           available: true,
           sendSupported: true,
           receiveSupported: true,
-          maxPayloadBytes: 1024,
+          maxPayloadBytes:
+              NativeBridgePayloadLimits.maxTransportPayloadBytes,
           notes: 'ready',
         ),
       ),

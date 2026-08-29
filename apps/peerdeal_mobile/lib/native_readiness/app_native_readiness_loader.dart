@@ -1,7 +1,6 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 
 const _defaultSecureKeyNamespace = 'peerdeal.receipts';
-const _defaultNativeTransportMaxPayloadBytes = 64 * 1024;
 const _maximumWarningCount = 4;
 const _maximumWarningLength = 160;
 
@@ -42,7 +41,8 @@ class AppNativeReadinessLoader {
     required NativeTransportBridge nativeTransportBridge,
     required SecureKeyStorageBridge secureKeyStorageBridge,
     String secureKeyNamespace = _defaultSecureKeyNamespace,
-    int nativeTransportMaxPayloadBytes = _defaultNativeTransportMaxPayloadBytes,
+    int nativeTransportMaxPayloadBytes =
+        NativeBridgePayloadLimits.maxTransportPayloadBytes,
   }) : _captureProtectionBridge = captureProtectionBridge,
        _localNetworkBridge = localNetworkBridge,
        _nativeTransportBridge = nativeTransportBridge,
@@ -52,7 +52,8 @@ class AppNativeReadinessLoader {
 
   factory AppNativeReadinessLoader.methodChannel({
     String secureKeyNamespace = _defaultSecureKeyNamespace,
-    int nativeTransportMaxPayloadBytes = _defaultNativeTransportMaxPayloadBytes,
+    int nativeTransportMaxPayloadBytes =
+        NativeBridgePayloadLimits.maxTransportPayloadBytes,
   }) {
     return AppNativeReadinessLoader(
       captureProtectionBridge: MethodChannelCaptureProtectionBridge(),

@@ -3501,6 +3501,14 @@ regressions are covered. Repository deterministic gates pass; Flutter analysis
 and focused Flutter execution remain unverified because both runners were
 silent during bounded attempts.
 
+The T350 follow-up closes a native-readiness contract drift. Mirrored
+`AppNativeReadinessLoader` defaults now reference the locked native transport
+payload ceiling instead of the self-rejecting 64 KiB value. The native contract
+checker enforces both readiness defaults, and mirrored readiness coverage
+exercises the full 60 KiB ceiling. Repository deterministic gates pass;
+focused Flutter execution remains unverified because both runners were silent
+during bounded attempts.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

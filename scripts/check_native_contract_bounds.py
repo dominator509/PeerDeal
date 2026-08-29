@@ -76,11 +76,30 @@ SOURCE_FILES = {
         "transport",
         "native_transport_session_factory.dart",
     ),
+    "mobile_readiness": (
+        "apps",
+        "peerdeal_mobile",
+        "lib",
+        "native_readiness",
+        "app_native_readiness_loader.dart",
+    ),
+    "desktop_readiness": (
+        "apps",
+        "peerdeal_desktop",
+        "lib",
+        "native_readiness",
+        "app_native_readiness_loader.dart",
+    ),
 }
 
 APP_PAYLOAD_DEFAULTS = {
     "mobile_app": "NativeBridgePayloadLimits.maxTransportPayloadBytes",
     "desktop_app": "NativeBridgePayloadLimits.maxTransportPayloadBytes",
+}
+
+APP_READINESS_PAYLOAD_DEFAULTS = {
+    "mobile_readiness": "NativeBridgePayloadLimits.maxTransportPayloadBytes",
+    "desktop_readiness": "NativeBridgePayloadLimits.maxTransportPayloadBytes",
 }
 
 SEQUENCE_GUARDS = {
@@ -107,9 +126,16 @@ def _declaration_expression(text: str, platform: str, symbol: str) -> str | None
 
 
 def _constructor_default_expression(text: str, parameter: str) -> str | None:
+    expressions = _constructor_default_expressions(text, parameter)
+    return expressions[0] if expressions else None
+
+
+def _constructor_default_expressions(text: str, parameter: str) -> list[str]:
     pattern = rf"^\s*int\s+{re.escape(parameter)}\s*=\s*([^,]+),"
-    match = re.search(pattern, text, flags=re.MULTILINE)
-    return match.group(1).strip() if match else None
+    return [
+        match.group(1).strip()
+        for match in re.finditer(pattern, text, flags=re.MULTILINE)
+    ]
 
 
 def _evaluate_integer(expression: str) -> int | None:
@@ -264,6 +290,24 @@ def check_native_contract_bounds(root: pathlib.Path) -> list[str]:
                 f"{relative_path}: maxPayloadBytes default {expression!r} must "
                 f"reference {expected_expression}."
             )
+
+    for platform, expected_expression in APP_READINESS_PAYLOAD_DEFAULTS.items():
+        relative_path = _source_path(root, platform).relative_to(root).as_posix()
+        expressions = _constructor_default_expressions(
+            source_text[platform], "nativeTransportMaxPayloadBytes"
+        )
+        if not expressions:
+            failures.append(
+                f"{relative_path}: missing native readiness default for "
+                "nativeTransportMaxPayloadBytes."
+            )
+        else:
+            for expression in expressions:
+                if expression != expected_expression:
+                    failures.append(
+                        f"{relative_path}: nativeTransportMaxPayloadBytes default "
+                        f"{expression!r} must reference {expected_expression}."
+                    )
 
     return failures
 

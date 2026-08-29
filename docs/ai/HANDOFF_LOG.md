@@ -23,6 +23,24 @@ Next reviewer:
 Continue with the documented real-device/native-platform and product-owned
 session-source integration gates without changing locked package boundaries.
 
+### 2026-08-29 - Codex - Align Native Readiness Payload Defaults
+
+Summary:
+- Mirrored `AppNativeReadinessLoader` defaults now reference the locked native
+  transport payload ceiling instead of the self-rejecting 64 KiB value.
+- The native contract checker enforces both readiness defaults, and mirrored
+  readiness coverage exercises the full native payload ceiling.
+
+Verification:
+- Repository boundary, source-text, native-contract, checker-unit, and diff
+  gates passed.
+- Focused Flutter execution remained unverified because both runners were
+  silent during bounded attempts; no Flutter pass is claimed.
+
+Next reviewer:
+Continue with the documented real-device/native-platform and product-owned
+session-source integration gates without changing locked package boundaries.
+
 ### 2026-08-29 - Codex - Make Local Identity Provisioning Cancellation-Safe
 
 Summary:
