@@ -32,7 +32,7 @@ class MethodChannelCaptureProtectionBridge
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
-        _channel.invokeMapMethod<String, Object?>('getCapability'),
+        () => _channel.invokeMapMethod<String, Object?>('getCapability'),
         cancellation: cancellation,
       );
     } on _CaptureProtectionCallCancelled {
@@ -68,7 +68,7 @@ class MethodChannelCaptureProtectionBridge
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
-        _channel.invokeMapMethod<String, Object?>(
+        () => _channel.invokeMapMethod<String, Object?>(
           CaptureProtectionChannelContract.setBlockingMethod,
           CaptureProtectionChannelContract.encodeBlockingRequest(
             enabled: enabled,
@@ -102,7 +102,7 @@ class MethodChannelCaptureProtectionBridge
   }
 
   Future<T> _invokeWithDeadline<T>(
-    Future<T> operation, {
+    Future<T> Function() operation, {
     Future<void>? cancellation,
   }) {
     final completer = Completer<T>();
@@ -144,14 +144,23 @@ class MethodChannelCaptureProtectionBridge
         ),
       );
     }
-    unawaited(
-      operation.then<void>(
-        completeValue,
-        onError: (Object error, StackTrace stackTrace) {
-          completeError(error, stackTrace);
-        },
-      ),
-    );
+    void startOperation() {
+      if (completed) return;
+      try {
+        unawaited(
+          operation().then<void>(
+            completeValue,
+            onError: (Object error, StackTrace stackTrace) {
+              completeError(error, stackTrace);
+            },
+          ),
+        );
+      } on Object catch (error, stackTrace) {
+        completeError(error, stackTrace);
+      }
+    }
+
+    scheduleMicrotask(startOperation);
     return completer.future;
   }
 

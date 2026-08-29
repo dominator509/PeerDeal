@@ -2,6 +2,25 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Suppress Pre-cancelled Native Dispatch
+
+Summary:
+- Mirrored generic method-channel bridges now register cancellation before
+  lazily dispatching native secure-key, transport, local-network,
+  capture-protection, and app-storage calls.
+- Added dispatch-level regressions proving pre-cancelled requests do not reach
+  native handlers.
+
+Verification:
+- Direct analysis of `peerdeal_native_bridges`: passed.
+- Repository boundary, source-text, and native-contract checks: passed.
+- Focused Flutter test attempts remained silent during bounded runs; no
+  Flutter test pass is claimed.
+
+Next reviewer:
+Continue with the documented real-device/native-platform and product-owned
+session-source integration gates without changing locked package boundaries.
+
 ### 2026-08-29 - Codex - Enforce Persisted Holdem Variant Admission
 
 Summary:

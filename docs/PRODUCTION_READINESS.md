@@ -3465,6 +3465,14 @@ updated; direct app analysis and repository static gates pass, while focused
 Flutter execution remains limited by the local runner's silent startup
 behavior.
 
+The T346 follow-up closes the pre-cancelled native-dispatch gap. Generic
+method-channel bridges now register cancellation before lazily starting secure
+key, transport, local-network, capture-protection, or app-storage calls, and
+focused regressions verify that pre-cancelled requests never reach native
+handlers. Direct package analysis and repository static gates pass; focused
+Flutter execution remains limited by the local runner's silent startup
+behavior.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -31,7 +31,7 @@ class MethodChannelLocalNetworkBridge
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
-        _channel.invokeMapMethod<String, Object?>('getCapability'),
+        () => _channel.invokeMapMethod<String, Object?>('getCapability'),
         cancellation: cancellation,
       );
     } on _LocalNetworkCallCancelled {
@@ -69,7 +69,7 @@ class MethodChannelLocalNetworkBridge
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
-        _channel.invokeMapMethod<String, Object?>('discoverPeers'),
+        () => _channel.invokeMapMethod<String, Object?>('discoverPeers'),
         cancellation: cancellation,
       );
     } on _LocalNetworkCallCancelled {
@@ -108,7 +108,7 @@ class MethodChannelLocalNetworkBridge
   }
 
   Future<T> _invokeWithDeadline<T>(
-    Future<T> operation, {
+    Future<T> Function() operation, {
     Future<void>? cancellation,
   }) {
     final completer = Completer<T>();
@@ -157,14 +157,23 @@ class MethodChannelLocalNetworkBridge
         ),
       );
     }
-    unawaited(
-      operation.then<void>(
-        completeValue,
-        onError: (Object error, StackTrace stackTrace) {
-          completeError(error, stackTrace);
-        },
-      ),
-    );
+    void startOperation() {
+      if (completed) return;
+      try {
+        unawaited(
+          operation().then<void>(
+            completeValue,
+            onError: (Object error, StackTrace stackTrace) {
+              completeError(error, stackTrace);
+            },
+          ),
+        );
+      } on Object catch (error, stackTrace) {
+        completeError(error, stackTrace);
+      }
+    }
+
+    scheduleMicrotask(startOperation);
     return completer.future;
   }
 

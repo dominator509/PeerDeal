@@ -64,7 +64,8 @@ native transport adapter payload enforcement, and T341 app/native operational
 peer-scope normalization, and T342 mirrored app production-session
 peer-identity normalization, T343 accepted session-context identity binding,
 and T344 invite variant identity preservation and Holdem variant admission,
-and T345 persisted-source and configuration-factory variant admission
+and T345 persisted-source and configuration-factory variant admission, and
+T346 cancellation-before-native-dispatch hardening
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -330,6 +331,15 @@ table scopes retain their existing safe-text contract.
   boundary/source/native-contract checks, checker unit tests, and
   `git diff --check` pass; the focused Flutter runner remains limited by its
   silent startup behavior.
+
+## Recent T346 Changes
+
+- Mirrored generic method-channel bridges now register cancellation before
+  lazily dispatching native secure-key, transport, local-network,
+  capture-protection, and app-storage calls.
+- Added dispatch-level regressions proving pre-cancelled calls do not reach the
+  native handler. Direct package analysis and repository static gates pass;
+  focused Flutter execution remains limited by its silent startup behavior.
 
 ## What Changed
 

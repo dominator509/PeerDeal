@@ -2140,6 +2140,15 @@ Remaining:
   `git diff --check` pass. The focused Flutter runner produced no output during
   a bounded attempt and was not claimed as passing.
 
+## Recent T346 Changes
+
+- Mirrored generic method-channel bridges now register cancellation before
+  lazily dispatching native secure-key, transport, local-network,
+  capture-protection, and app-storage calls.
+- Dispatch-level regressions prove pre-cancelled calls do not reach native
+  handlers. Direct package analysis and repository static gates pass; focused
+  Flutter execution remains limited by its silent startup behavior.
+
 ## Required Gates
 
 Run after each retrofit step:

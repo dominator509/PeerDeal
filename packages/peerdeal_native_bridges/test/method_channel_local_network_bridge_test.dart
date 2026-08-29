@@ -232,12 +232,23 @@ void main() {
   test(
     'cancellation wins over an immediately completing capability lookup',
     () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            log.add(call);
+            return <String, Object?>{
+              'discoverySupported': true,
+              'permissionPromptSupported': true,
+              'broadcastSupported': true,
+              'notes': 'should-not-be-read',
+            };
+          });
       final capability = await MethodChannelLocalNetworkBridge(
         channel: channel,
       ).getCapability(cancellation: Future<void>.value());
 
       expect(capability.discoverySupported, isFalse);
       expect(capability.warning, 'Local network call cancelled.');
+      expect(log, isEmpty);
     },
   );
 

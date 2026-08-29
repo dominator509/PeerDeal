@@ -28,7 +28,7 @@ class MethodChannelAppStorageDirectoryBridge
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
-        _channel.invokeMapMethod<String, Object?>(
+        () => _channel.invokeMapMethod<String, Object?>(
           AppStorageDirectoryChannelContract.getAppSupportDirectoryMethod,
         ),
         cancellation: cancellation,
@@ -66,7 +66,7 @@ class MethodChannelAppStorageDirectoryBridge
   }
 
   Future<T> _invokeWithDeadline<T>(
-    Future<T> operation, {
+    Future<T> Function() operation, {
     Future<void>? cancellation,
   }) {
     final completer = Completer<T>();
@@ -111,14 +111,23 @@ class MethodChannelAppStorageDirectoryBridge
         ),
       );
     }
-    unawaited(
-      operation.then<void>(
-        completeValue,
-        onError: (Object error, StackTrace stackTrace) {
-          completeError(error, stackTrace);
-        },
-      ),
-    );
+    void startOperation() {
+      if (completed) return;
+      try {
+        unawaited(
+          operation().then<void>(
+            completeValue,
+            onError: (Object error, StackTrace stackTrace) {
+              completeError(error, stackTrace);
+            },
+          ),
+        );
+      } on Object catch (error, stackTrace) {
+        completeError(error, stackTrace);
+      }
+    }
+
+    scheduleMicrotask(startOperation);
     return completer.future;
   }
 }

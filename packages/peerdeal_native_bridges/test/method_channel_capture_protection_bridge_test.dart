@@ -181,6 +181,7 @@ void main() {
     () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (call) async {
+            log.add(call);
             return <String, Object?>{
               'blockingSupported': true,
               'obscuringSupported': true,
@@ -195,6 +196,7 @@ void main() {
       expect(capability.blockingSupported, isFalse);
       expect(capability.obscuringSupported, isFalse);
       expect(capability.warning, 'Capture protection call cancelled.');
+      expect(log, isEmpty);
     },
   );
 

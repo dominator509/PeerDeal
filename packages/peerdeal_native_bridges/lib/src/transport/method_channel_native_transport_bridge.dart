@@ -32,7 +32,7 @@ class MethodChannelNativeTransportBridge
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
-        _channel.invokeMapMethod<String, Object?>(
+        () => _channel.invokeMapMethod<String, Object?>(
           NativeTransportChannelContract.getCapabilityMethod,
         ),
         cancellation: cancellation,
@@ -79,7 +79,7 @@ class MethodChannelNativeTransportBridge
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
-        _channel.invokeMapMethod<String, Object?>(
+        () => _channel.invokeMapMethod<String, Object?>(
           NativeTransportChannelContract.sendFrameMethod,
           <String, Object?>{
             'frame': NativeTransportChannelContract.encodeFrame(frame),
@@ -127,7 +127,7 @@ class MethodChannelNativeTransportBridge
     final Map<String, Object?>? result;
     try {
       result = await _invokeWithDeadline(
-        _channel.invokeMapMethod<String, Object?>(
+        () => _channel.invokeMapMethod<String, Object?>(
           NativeTransportChannelContract.receiveFramesMethod,
           <String, Object?>{'sessionId': sessionId, 'peerId': peerId},
         ),
@@ -175,7 +175,7 @@ class MethodChannelNativeTransportBridge
   }
 
   Future<T> _invokeWithDeadline<T>(
-    Future<T> operation, {
+    Future<T> Function() operation, {
     Future<void>? cancellation,
   }) {
     final completer = Completer<T>();
@@ -224,14 +224,23 @@ class MethodChannelNativeTransportBridge
         ),
       );
     }
-    unawaited(
-      operation.then<void>(
-        completeValue,
-        onError: (Object error, StackTrace stackTrace) {
-          completeError(error, stackTrace);
-        },
-      ),
-    );
+    void startOperation() {
+      if (completed) return;
+      try {
+        unawaited(
+          operation().then<void>(
+            completeValue,
+            onError: (Object error, StackTrace stackTrace) {
+              completeError(error, stackTrace);
+            },
+          ),
+        );
+      } on Object catch (error, stackTrace) {
+        completeError(error, stackTrace);
+      }
+    }
+
+    scheduleMicrotask(startOperation);
     return completer.future;
   }
 

@@ -112,8 +112,10 @@ void main() {
   test(
     'cancellation wins over an immediately completing platform lookup',
     () async {
+      var invocationCount = 0;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (call) async {
+            invocationCount++;
             return <String, Object?>{
               'available': true,
               'directoryPath': r'C:\Users\peerdeal\AppData\Local',
@@ -129,6 +131,7 @@ void main() {
         snapshot.warning,
         'Native app storage directory lookup cancelled.',
       );
+      expect(invocationCount, 0);
     },
   );
 }

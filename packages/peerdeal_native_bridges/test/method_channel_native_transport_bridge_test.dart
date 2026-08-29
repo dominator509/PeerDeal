@@ -134,6 +134,7 @@ void main() {
 
       expect(capability.available, isFalse);
       expect(capability.warning, 'Native transport call cancelled.');
+      expect(log, isEmpty);
     },
   );
 

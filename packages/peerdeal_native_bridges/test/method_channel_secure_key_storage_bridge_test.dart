@@ -121,6 +121,7 @@ void main() {
     () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, (call) async {
+            log.add(call);
             return <String, Object?>{'available': true, 'keys': <Object?>[]};
           });
 
@@ -134,6 +135,7 @@ void main() {
 
       expect(snapshot.available, isFalse);
       expect(snapshot.warning, 'Secure key storage call cancelled.');
+      expect(log, isEmpty);
     },
   );
 
