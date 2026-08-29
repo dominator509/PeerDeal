@@ -62,6 +62,9 @@ class CaptureSurfaceCoordinator {
     final nativeCapability = await _loadNativeCapability(
       cancellation: cancellation,
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledPlan(surface);
+    }
     var decision = _policyResolver.resolve(
       surface: surface,
       capability: CapturePlatformCapability(
@@ -72,6 +75,9 @@ class CaptureSurfaceCoordinator {
     );
 
     if (decision.asksNativeBridgeToBlock && _actionBridge != null) {
+      if (await _isCancellationRequested(cancellation)) {
+        return _cancelledPlan(surface);
+      }
       final action = await _queueBlocking(true, cancellation: cancellation);
       if (action == null || !action.isSuccess || !action.blockingEnabled) {
         decision = CapturePolicyDecision(
@@ -90,6 +96,19 @@ class CaptureSurfaceCoordinator {
       surface: surface,
       decision: decision,
       nativeNotes: _safeNotes(nativeCapability.notes),
+    );
+  }
+
+  CaptureSurfacePlan _cancelledPlan(CaptureSurface surface) {
+    return CaptureSurfacePlan(
+      surface: surface,
+      decision: _policyResolver.resolve(
+        surface: surface,
+        capability: const CapturePlatformCapability.none(
+          warning: 'Capture surface resolution cancelled.',
+        ),
+      ),
+      nativeNotes: 'unavailable',
     );
   }
 
@@ -135,6 +154,11 @@ class CaptureSurfaceCoordinator {
     Future<void>? cancellation,
   }) async {
     try {
+      if (enabled && await _isCancellationRequested(cancellation)) {
+        return const CaptureProtectionActionResult.failure(
+          warning: 'Native capture blocking could not be applied.',
+        );
+      }
       if (_actionBridge is CancellableCaptureProtectionActionBridge) {
         return await (_actionBridge as CancellableCaptureProtectionActionBridge)
             .setBlocking(enabled: enabled, cancellation: cancellation);
@@ -175,4 +199,15 @@ class CaptureSurfaceCoordinator {
     }
     return normalized.substring(0, maxLength);
   }
+}
+
+Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  var requested = false;
+  cancellation.then<void>(
+    (_) => requested = true,
+    onError: (Object _, StackTrace _) => requested = true,
+  );
+  await Future<void>.value();
+  return requested;
 }

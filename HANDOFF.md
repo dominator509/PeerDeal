@@ -68,8 +68,9 @@ and T345 persisted-source and configuration-factory variant admission, and
 T346 cancellation-before-native-dispatch hardening, and T347 cancellation-safe
 app recovery factory loading, T348 cancellation-safe local identity
 provisioning, T349 cancellation-safe receipt key provisioning, and T350
-native-readiness payload contract alignment, and T351 app-native transport
-cancellation forwarding are implemented on branch
+native-readiness payload contract alignment, T351 app-native transport
+cancellation forwarding, and T352 capture cancellation hardening are
+implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -385,6 +386,20 @@ table scopes retain their existing safe-text contract.
   readiness coverage exercises the full native payload ceiling. Repository
   deterministic gates pass; focused Flutter execution remains unverified
   because both runners were silent during bounded attempts.
+
+## Recent T352 Changes
+
+- Mirrored app capture surface coordinators now check route cancellation after
+  legacy capability lookup and before queued native blocking dispatch. Cancelled
+  sensitive surfaces fail closed to visual obscuring without starting stale host
+  blocking.
+- Existing release behavior remains uncancelled so cancellation cannot strand
+  host capture blocking. Mirrored regressions cover a late legacy capability
+  result and a queued action cancelled before dispatch.
+- Focused mobile and desktop capture suites pass 11 tests each. Full repository
+  analysis, boundary/source/native-contract checks, Dart tests, Flutter tests,
+  and diff checks pass. The live dependency audit reports 9 resolvable upgrades
+  under the separate dependency policy.
 
 ## Recent T351 Changes
 

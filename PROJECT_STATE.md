@@ -2191,6 +2191,20 @@ Remaining:
   deterministic gates pass; focused Flutter execution remains unverified
   because both runners were silent during bounded attempts.
 
+## Recent T352 Changes
+
+- Mirrored app capture surface coordinators now check route cancellation after
+  legacy capability lookup and before queued native blocking dispatch. Cancelled
+  sensitive surfaces fail closed to visual obscuring without starting stale host
+  blocking.
+- Existing release behavior remains uncancelled so cancellation cannot strand
+  host capture blocking. Mirrored regressions cover a late legacy capability
+  result and a queued action cancelled before dispatch.
+- Focused mobile and desktop capture suites pass 11 tests each. Full repository
+  analysis, boundary/source/native-contract checks, Dart tests, Flutter tests,
+  and diff checks pass. The live dependency audit reports 9 resolvable upgrades
+  under the separate dependency policy.
+
 ## Recent T351 Changes
 
 - Mirrored app native transport session factories and frame adapters now forward

@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Close Capture Cancellation Race
+
+Summary:
+- Mirrored app capture coordinators now re-check route cancellation after
+  legacy capability lookup and before queued native blocking dispatch.
+- Cancelled sensitive surfaces fail closed to visual obscuring without starting
+  stale host blocking; release remains uncancelled so host blocking can clear.
+- Regression coverage verifies both a late legacy capability result and a
+  queued enable cancelled before dispatch.
+
+Verification:
+- Focused mobile and desktop capture suites: 11 tests passed each.
+- Full analysis, boundary/source/native-contract, Dart, Flutter, and diff gates
+  passed.
+- The live dependency audit reports 9 resolvable upgrades; no dependency change
+  is included in this focused hardening task.
+
+Next reviewer:
+Continue with documented device/native-platform, cross-device network,
+product session-source, and release-signing gates without changing locked
+boundaries.
+
 ### 2026-08-29 - Codex - Forward App Native Transport Cancellation
 
 Summary:

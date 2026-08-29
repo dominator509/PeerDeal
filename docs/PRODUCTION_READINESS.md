@@ -3519,6 +3519,15 @@ full repository analysis, static checks, Dart tests, Flutter tests, direct
 dependency resolution, and diff checks pass. The live dependency audit reports
 9 resolvable upgrades; those remain a separate dependency-policy task.
 
+The T352 follow-up closes a legacy capture-coordination cancellation race.
+Mirrored app capture coordinators now discard a legacy capability result when
+route cancellation wins and check cancellation again before a queued native
+blocking enable starts. Cancelled sensitive surfaces remain visually obscured,
+and release remains available to clear host blocking. No native channel
+payload, package boundary, or capture contract changed. Mirrored capture
+regressions pass 11 tests each, and the full repository analysis, static
+checks, Dart tests, Flutter tests, and diff checks pass.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

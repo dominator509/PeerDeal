@@ -141,6 +141,68 @@ void main() {
     },
   );
 
+  test(
+    'does not apply legacy native blocking after capability cancellation',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _DeferredCaptureProtectionBridge();
+      final actionBridge = _RecordingCaptureProtectionActionBridge();
+      final coordinator = CaptureSurfaceCoordinator(
+        bridge: bridge,
+        actionBridge: actionBridge,
+      );
+
+      final resolution = coordinator.resolve(
+        CaptureSurface.receiptDetail,
+        cancellation: cancellation.future,
+      );
+      cancellation.complete();
+      bridge.complete();
+
+      final plan = await resolution;
+
+      expect(actionBridge.enabledCalls, isEmpty);
+      expect(plan.shouldRequestNativeBlocking, isFalse);
+      expect(plan.shouldObscure, isTrue);
+      expect(plan.nativeNotes, 'unavailable');
+    },
+  );
+
+  test(
+    'does not start a queued legacy blocking action after cancellation',
+    () async {
+      final firstAction = _DeferredCaptureProtectionActionBridge();
+      final coordinator = CaptureSurfaceCoordinator(
+        bridge: _FakeCaptureProtectionBridge(
+          capability: const CaptureProtectionCapability(
+            blockingSupported: true,
+            obscuringSupported: true,
+            notes: 'screen-protection-supported',
+          ),
+        ),
+        actionBridge: firstAction,
+      );
+
+      final firstResolution = coordinator.resolve(CaptureSurface.receiptDetail);
+      await Future<void>.delayed(Duration.zero);
+      final cancellation = Completer<void>();
+      final secondResolution = coordinator.resolve(
+        CaptureSurface.receiptDetail,
+        cancellation: cancellation.future,
+      );
+      cancellation.complete();
+      firstAction.complete();
+
+      await firstResolution;
+      final secondPlan = await secondResolution;
+
+      expect(firstAction.enabledCalls, [true]);
+      expect(secondPlan.shouldRequestNativeBlocking, isFalse);
+      expect(secondPlan.shouldObscure, isTrue);
+      expect(firstAction.enabledCalls, isNot(contains(false)));
+    },
+  );
+
   test('fails closed when native capability lookup throws', () async {
     final coordinator = CaptureSurfaceCoordinator(
       bridge: const _ThrowingCaptureProtectionBridge(),
@@ -240,6 +302,30 @@ class _RecordingCaptureProtectionActionBridge
       isSuccess: true,
       blockingEnabled: enabled,
     );
+  }
+}
+
+class _DeferredCaptureProtectionActionBridge
+    implements CaptureProtectionActionBridge {
+  final Completer<CaptureProtectionActionResult> _completer =
+      Completer<CaptureProtectionActionResult>();
+  final List<bool> enabledCalls = <bool>[];
+
+  void complete() {
+    _completer.complete(
+      const CaptureProtectionActionResult(
+        isSuccess: true,
+        blockingEnabled: true,
+      ),
+    );
+  }
+
+  @override
+  Future<CaptureProtectionActionResult> setBlocking({
+    required bool enabled,
+  }) {
+    enabledCalls.add(enabled);
+    return _completer.future;
   }
 }
 
