@@ -392,6 +392,13 @@ class AppPersistedHoldemProductionSessionSource
     Future<void>? cancellation,
   }) async {
     await _throwIfCancelled(cancellation);
+    if (invite.variantId != holdemNlheVariantId) {
+      throw ArgumentError.value(
+        invite.variantId,
+        'invite.variantId',
+        'Holdem production sessions require variant_id=holdem_nlhe.',
+      );
+    }
     AppHoldemProductionSessionInput buildInput(HoldemStateSnapshot snapshot) {
       final contextInputFactory = _contextInputFactory;
       if (sessionContext != null && contextInputFactory != null) {

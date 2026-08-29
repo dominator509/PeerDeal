@@ -130,6 +130,30 @@ void main() {
     expect(result.configuration!.routeRegistration.path, '/holdem-seat-2');
   });
 
+  test(
+    'rejects unsupported context variants before recovery-store access',
+    () async {
+      var recoveryRootRequested = false;
+      final factory = _configurationFactory(
+        rootDirectoryFactory: () {
+          recoveryRootRequested = true;
+          return Directory.systemTemp;
+        },
+      );
+
+      final result = await factory.create(
+        sessionContext: _unsupportedSessionContext(),
+      );
+
+      expect(result.isAvailable, isFalse);
+      expect(
+        result.warnings,
+        contains('Holdem production session variant is unsupported.'),
+      );
+      expect(recoveryRootRequested, isFalse);
+    },
+  );
+
   test('fails closed for an invalid recovery event limit', () async {
     final result = await _create(maxRecoveryEvents: 0);
 
@@ -309,6 +333,23 @@ JoinFlowSessionContext _sessionContext() => JoinFlowSessionContext(
   remotePeerId: 'peer_context_remote',
   localSeat: 2,
 );
+
+JoinFlowSessionContext _unsupportedSessionContext() =>
+    const JoinFlowSessionContext(
+      invite: ResolvedInvite(
+        inviteId: 'invite_001',
+        tableId: 'table_001',
+        sessionId: 'session_001',
+        modeType: 'open_table',
+        variantId: 'other_variant',
+        protocolVersion: '1.0.0',
+        requiresReceiptAck: false,
+        requiresRetentionAck: false,
+        requiresCaptureAck: false,
+      ),
+      remotePeerId: 'peer_context_remote',
+      localSeat: 2,
+    );
 
 HoldemHandState _handState() => HoldemHandState(
   handId: 'hand_001',

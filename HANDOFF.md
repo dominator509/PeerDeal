@@ -63,7 +63,8 @@ T339 app/native transport default-bound checker enforcement, and T340 direct
 native transport adapter payload enforcement, and T341 app/native operational
 peer-scope normalization, and T342 mirrored app production-session
 peer-identity normalization, T343 accepted session-context identity binding,
-and T344 invite variant identity preservation and Holdem variant admission
+and T344 invite variant identity preservation and Holdem variant admission,
+and T345 persisted-source and configuration-factory variant admission
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -318,6 +319,17 @@ table scopes retain their existing safe-text contract.
   coverage. Direct app analysis, repository boundary/source/native-contract
   checks, checker unit tests, and `git diff --check` pass; the focused Flutter
   runner remained silent during a bounded attempt.
+
+## Recent T345 Changes
+
+- Mirrored persisted Holdem sources now reject unsupported invite variants
+  before reading recovery state.
+- Mirrored configuration factories reject unsupported context variants before
+  recovery-root creation, avoiding unnecessary persistence or identity work.
+- Added side-effect-ordering regressions. Direct app analysis, repository
+  boundary/source/native-contract checks, checker unit tests, and
+  `git diff --check` pass; the focused Flutter runner remains limited by its
+  silent startup behavior.
 
 ## What Changed
 

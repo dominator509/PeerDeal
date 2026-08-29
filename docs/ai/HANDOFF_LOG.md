@@ -2,6 +2,27 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Enforce Persisted Holdem Variant Admission
+
+Summary:
+- Mirrored persisted Holdem sources reject unsupported invite variants before
+  recovery-state access.
+- Mirrored configuration factories reject unsupported accepted context
+  variants before recovery-root creation, avoiding unnecessary persistence or
+  identity work.
+- Added side-effect-ordering regressions.
+
+Verification:
+- Direct analysis of both app packages: passed.
+- Repository boundary, source-text, native-contract, checker-unit, formatting,
+  and diff checks: passed.
+- Existing Flutter and Melos runner attempts remain limited by silent startup;
+  no pass is claimed for those runners.
+
+Next reviewer:
+Continue with the documented real-device/native-platform and product-owned
+session-source integration gates without changing locked package boundaries.
+
 ### 2026-08-29 - Codex - Preserve Invite Variant Identity
 
 Summary:

@@ -2128,6 +2128,18 @@ Remaining:
   runner produced no output during a bounded attempt and was stopped; no
   Flutter test pass is claimed.
 
+## Recent T345 Changes
+
+- Mirrored persisted Holdem sources now reject unsupported invite variants
+  before reading recovery state.
+- Mirrored configuration factories reject unsupported context variants before
+  recovery-root creation, preventing unnecessary persistence or local identity
+  work.
+- Side-effect-ordering regressions are added. Direct app analysis, repository
+  boundary/source/native-contract checks, checker unit tests, and
+  `git diff --check` pass. The focused Flutter runner produced no output during
+  a bounded attempt and was not claimed as passing.
+
 ## Required Gates
 
 Run after each retrofit step:

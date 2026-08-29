@@ -96,6 +96,18 @@ void main() {
   });
 
   test(
+    'rejects an unsupported invite variant before persisted-state access',
+    () async {
+      final source = _source(InMemoryRecoveryPersistenceStore());
+
+      await expectLater(
+        source.load(_invite(variantId: 'other_variant')),
+        throwsArgumentError,
+      );
+    },
+  );
+
+  test(
     'builds a stable production configuration from persisted identity',
     () async {
       final store = InMemoryRecoveryPersistenceStore();
@@ -1247,12 +1259,12 @@ String _eventId(String eventType, int eventSeq) => 'evt_${eventType}_$eventSeq';
 
 String _eventTimestamp() => '2026-08-10T00:00:00Z';
 
-ResolvedInvite _invite() => const ResolvedInvite(
+ResolvedInvite _invite({String variantId = 'holdem_nlhe'}) => ResolvedInvite(
   inviteId: 'invite_001',
   tableId: 'table_001',
   sessionId: 'session_001',
   modeType: 'open_table',
-  variantId: 'holdem_nlhe',
+  variantId: variantId,
   protocolVersion: '1.0.0',
   requiresReceiptAck: false,
   requiresRetentionAck: false,

@@ -3456,6 +3456,15 @@ analysis, repository static gates, checker unit tests, and `git diff --check`
 pass; focused Flutter execution remains limited by the local runner's silent
 startup behavior.
 
+The T345 follow-up closes the remaining persisted Holdem variant-admission
+bypass. Mirrored persisted sources reject unsupported invite variants before
+recovery-state access, and configuration factories reject unsupported accepted
+context variants before recovery-root creation, preventing unnecessary
+persistence or local-identity work. Side-effect-ordering regressions are
+updated; direct app analysis and repository static gates pass, while focused
+Flutter execution remains limited by the local runner's silent startup
+behavior.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

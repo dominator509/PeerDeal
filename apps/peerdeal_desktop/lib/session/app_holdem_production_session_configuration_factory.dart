@@ -209,6 +209,12 @@ class AppHoldemProductionSessionConfigurationFactory {
     Future<void>? cancellation,
   }) async {
     await _throwIfCancelled(cancellation);
+    if (sessionContext != null &&
+        sessionContext.invite.variantId != holdemNlheVariantId) {
+      return AppHoldemProductionSessionConfigurationLoadResult.unavailable(
+        warnings: <String>['Holdem production session variant is unsupported.'],
+      );
+    }
     final persistence = _recoveryStoreFactory.create();
     final store = persistence.store;
     if (store == null) {
