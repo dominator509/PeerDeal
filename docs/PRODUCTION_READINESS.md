@@ -150,6 +150,10 @@ the gates below are satisfied.
 - Replay fixtures now cover hand-scoped replay, snapshot-plus-suffix replay,
   anchor mismatch, and protocol mismatch; the suite discovers every replay JSON
   fixture and decodes it through the typed `ReplayRequest` boundary.
+- Sync recovery fixtures now cover a valid snapshot-plus-suffix window and an
+  unsupported snapshot protocol safe-close outcome; the suite discovers every
+  sync recovery JSON fixture and decodes it through the typed `RecoveryRequest`
+  boundary.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

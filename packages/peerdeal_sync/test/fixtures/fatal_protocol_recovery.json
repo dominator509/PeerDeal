@@ -1,0 +1,13 @@
+{
+  "protocol_version": "1.0.0",
+  "snapshot": {
+    "snapshot_id": "snap_unsupported_protocol",
+    "protocol_version": "2.0.0",
+    "table_id": "table_1",
+    "session_id": "session_1",
+    "snapshot_base_event_seq": 8,
+    "snapshot_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "payload": {}
+  },
+  "suffix_events": []
+}

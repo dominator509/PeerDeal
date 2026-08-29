@@ -86,3 +86,7 @@ This starter is meant to sit on top of `peerdeal_protocol` and `peerdeal_core`, 
 - Recovery stores expose an idempotent, scope-validated `wipe` operation;
   the JSON store removes the durable window and matching interrupted-write
   temporary files without touching other recovery scopes.
+- Recovery test fixtures are decoded through a typed loader, and a
+  directory-driven test requires every JSON fixture to cover the coordinator
+  path. Current fixtures cover a valid snapshot-plus-suffix window and an
+  unsupported snapshot protocol safe-close outcome.

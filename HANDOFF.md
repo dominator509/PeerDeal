@@ -51,7 +51,8 @@ T322 cross-platform transport payload bounds, T323 native transport contract
 bound parity, T324 rejected protocol fixture enforcement, T325 wired
 Hold'em opening-hand fixture persistence coverage, and T326 Hold'em fixture
 breadth enforcement, T327 mode fixture breadth enforcement, and T328 replay
-fixture breadth enforcement
+fixture breadth enforcement, and T329 sync recovery fixture breadth
+enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -132,6 +133,12 @@ The T328 replay hardening adds hand-scoped, snapshot-plus-suffix,
 anchor-mismatch, and protocol-mismatch fixtures. The replay test suite now
 loads every JSON fixture through a typed `ReplayRequest` decoder and asserts
 the expected success or fail-closed boundary without changing replay behavior.
+
+The T329 sync hardening wires the existing snapshot recovery fixture through a
+typed test-only `RecoveryRequest` decoder, adds a valid snapshot-plus-suffix
+fixture assertion and an unsupported-protocol safe-close fixture assertion,
+and requires every sync recovery JSON fixture to load through the decoder.
+Sync recovery behavior and package ownership remain unchanged.
 
 ## What Changed
 

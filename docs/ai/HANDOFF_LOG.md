@@ -2,6 +2,43 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-28 - Codex - Sync Recovery Fixture Breadth
+
+Summary:
+- Wired the existing sync snapshot recovery JSON through a typed test-only
+  `RecoveryRequest` fixture decoder.
+- Added valid snapshot-plus-suffix and unsupported-protocol safe-close fixture
+  assertions, plus a directory-driven test requiring every sync recovery JSON
+  fixture to decode.
+- Corrected the valid fixture to use the canonical SHA-256 hash of its payload.
+
+Files:
+- `packages/peerdeal_sync/test/fixture_loader.dart`
+- `packages/peerdeal_sync/test/basic_sync_coordinator_test.dart`
+- `packages/peerdeal_sync/test/fixtures/basic_snapshot_recovery.json`
+- `packages/peerdeal_sync/test/fixtures/fatal_protocol_recovery.json`
+- `packages/peerdeal_sync/test/fixtures/starter_fixture_notes.md`
+- `packages/peerdeal_sync/README.md`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct `peerdeal_sync` analysis: passed.
+- Fixture JSON parsing, snapshot payload hash verification,
+  package-boundary, source-text, native-contract, and checker unit tests:
+  passed.
+- Focused Dart/Flutter test runners stalled without output in the local
+  runner and were stopped; no focused test pass is claimed.
+
+Risks:
+- This closes local sync fixture/parser drift only. Production persistence,
+  product session wiring, native/device validation, and cross-network recovery
+  remain separate integration or operator-owned gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-28 - Codex - Enforce Rejected Protocol Fixtures
 
 Summary:

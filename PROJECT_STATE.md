@@ -1970,6 +1970,15 @@ Remaining:
   the typed `ReplayRequest` boundary before exercising the scenario assertions.
 - No replay engine, protocol, projector, app, or package boundary changed.
 
+## Recent T329 Changes
+
+- Sync recovery fixtures now include a valid snapshot-plus-suffix window and an
+  unsupported snapshot protocol safe-close case.
+- The sync coordinator suite discovers every JSON fixture and decodes each
+  through a typed `RecoveryRequest` boundary before exercising recovery
+  assertions.
+- No sync engine, protocol, projector, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

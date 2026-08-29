@@ -5,7 +5,7 @@
     "table_id": "table_1",
     "session_id": "session_1",
     "snapshot_base_event_seq": 8,
-    "snapshot_hash": "snap_hash_1",
+      "snapshot_hash": "aea7683036fa6150c561626f6d8295b7df5459b7d9a5355893607aeeb8ece98d",
     "payload": {
       "phase": "PAUSED_RECOVERY"
     }
@@ -28,5 +28,7 @@
       "prev_event_hash": "hash_8",
       "event_hash": "hash_9"
     }
-  ]
+  ],
+  "expected_final_event_seq": 9,
+  "expected_final_event_hash": "hash_9"
 }

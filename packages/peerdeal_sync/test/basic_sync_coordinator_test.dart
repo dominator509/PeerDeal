@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
@@ -89,6 +91,63 @@ void main() {
     expect(result.safeCloseRecommended, isTrue);
     expect(result.reconciliation.recommendedAction, 'safe_close');
     expect(result.conflicts.single.code, 'ERR_EMPTY_RECOVERY_WINDOW');
+  });
+
+  test('loads every recovery JSON fixture through the typed decoder', () {
+    final fixtureFiles = Directory('test/fixtures')
+        .listSync()
+        .whereType<File>()
+        .where((file) => file.path.toLowerCase().endsWith('.json'))
+        .toList(growable: false);
+
+    expect(fixtureFiles, isNotEmpty);
+    for (final file in fixtureFiles) {
+      final fixture = loadRecoveryFixture(file.path);
+      expect(fixture.snapshot.tableId, isNotEmpty, reason: file.path);
+      expect(fixture.toRequest().snapshot, isNotNull, reason: file.path);
+    }
+  });
+
+  test('recovers the fixture-backed snapshot and suffix window', () {
+    final fixture = loadRecoveryFixture(
+      'test/fixtures/basic_snapshot_recovery.json',
+    );
+    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      ),
+    );
+
+    final result = coordinator.recover(fixture.toRequest());
+
+    expect(result.isSuccess, isTrue);
+    expect(result.safeCloseRecommended, isFalse);
+    expect(result.finalAppliedEventSeq, 9);
+    expect(result.reconciliation.canResume, isTrue);
+    expect(result.state!.appliedEventTypes, [
+      'SnapshotApplied',
+      'RecoveryPauseEnded',
+    ]);
+  });
+
+  test('safe-closes the fixture-backed unsupported protocol window', () {
+    final fixture = loadRecoveryFixture(
+      'test/fixtures/fatal_protocol_recovery.json',
+    );
+    final coordinator = BasicSyncCoordinator<FakeSnapshotProjection>(
+      conflictDetector: _testDetector(),
+      snapshotApplier: _testApplier<FakeSnapshotProjection>(
+        projector: FakeSnapshotProjector(),
+      ),
+    );
+
+    final result = coordinator.recover(fixture.toRequest());
+
+    expect(result.isSuccess, isFalse);
+    expect(result.safeCloseRecommended, isTrue);
+    expect(result.reconciliation.recommendedAction, 'safe_close');
+    expect(result.conflicts.single.code, 'ERR_SNAPSHOT_PROTOCOL_INCOMPATIBLE');
   });
 
   test(
