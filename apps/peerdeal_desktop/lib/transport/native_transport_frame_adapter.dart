@@ -71,7 +71,7 @@ class NativeTransportFrameDrain {
       );
     }
 
-    if (!_isValidReceiveScope(sessionId) || !_isValidReceiveScope(peerId)) {
+    if (!_isValidSessionScope(sessionId) || !_isValidPeerScope(peerId)) {
       return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive scope is invalid.'],
       );
@@ -169,11 +169,15 @@ class NativeTransportFrameDrain {
     return 'Native transport reported a platform warning.';
   }
 
-  static bool _isValidReceiveScope(String value) {
+  static bool _isValidSessionScope(String value) {
     return NativeBridgePayloadLimits.isSafeUtf8Text(
       value,
       NativeBridgePayloadLimits.maxTransportIdentityBytes,
     );
+  }
+
+  static bool _isValidPeerScope(String value) {
+    return NetworkInputLimits.isOperationalPeerIdentity(value);
   }
 }
 

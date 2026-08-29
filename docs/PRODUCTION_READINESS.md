@@ -3419,6 +3419,16 @@ bridge before conversion or handler dispatch. Both app packages analyze
 cleanly; focused Flutter execution remains limited by the local runner's
 silent startup behavior.
 
+The T341 follow-up closes the reserved peer-scope admission gap at the
+mirrored app/native receive and session provisioning boundaries. Direct drains,
+app table session sources, and app table session provisioners now apply the
+existing `NetworkInputLimits.isOperationalPeerIdentity` predicate to peer
+scopes, while session IDs retain the native safe-text rule. Reserved
+`none`, `unresolved`, and `peer::reserved` values fail closed before bridge
+receive lookup or session provisioning. Both app packages analyze cleanly and
+repository static gates pass; focused Flutter execution remains limited by the
+local runner's silent startup behavior.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

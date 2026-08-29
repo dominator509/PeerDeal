@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Operational App/Native Peer Scope Normalization
+
+Summary:
+- Mirrored direct native transport receive drains now reject reserved peer
+  scopes before bridge receive lookup.
+- Mirrored app table session sources and provisioners reuse the existing
+  operational-peer predicate while session IDs retain safe-text validation.
+- Reserved `none`, `unresolved`, and `peer::reserved` regressions are covered.
+
+Files:
+- Mirrored mobile and desktop native transport adapters, session sources,
+  provisioners, and focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct analysis of both app packages: passed.
+- Dart formatting and repository boundary, source-text, native-contract, and
+  diff checks: passed.
+- Focused Flutter test attempt: stopped after the local runner produced no
+  output during a bounded attempt; no Flutter test pass is claimed.
+
+Risks:
+- Real Android/Windows transport, device reachability, and product transport
+  provisioning remain separate integration gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Direct Native Adapter Payload Enforcement
 
 Summary:

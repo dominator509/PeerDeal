@@ -294,6 +294,9 @@ void main() {
         <String>['session_${String.fromCharCode(1)}', 'peer_b'],
         <String>['session_1', 'peer_${String.fromCharCode(0x85)}'],
         <String>['x' * 257, 'peer_b'],
+        <String>['session_1', 'none'],
+        <String>['session_1', 'unresolved'],
+        <String>['session_1', 'peer::reserved'],
       ];
 
       for (final scopes in invalidScopes) {

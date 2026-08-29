@@ -93,6 +93,9 @@ void main() {
       for (final peerId in <String>[
         'peer_${String.fromCharCode(0x85)}',
         'x' * 257,
+        'none',
+        'unresolved',
+        'peer::reserved',
       ]) {
         final result = await AppTableSessionTransportProvisioner(
           runtime: _runtime(),

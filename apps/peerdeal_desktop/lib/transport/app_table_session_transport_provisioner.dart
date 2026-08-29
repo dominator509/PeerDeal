@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 import '../session/app_holdem_table_session_runtime.dart';
@@ -159,10 +159,7 @@ class AppTableSessionTransportProvisioner {
   }
 
   static bool _isValidIdentity(String value) {
-    return NativeBridgePayloadLimits.isSafeUtf8Text(
-      value,
-      NativeBridgePayloadLimits.maxTransportIdentityBytes,
-    );
+    return NetworkInputLimits.isOperationalPeerIdentity(value);
   }
 
   static bool _isValidPollInterval(Duration value) {

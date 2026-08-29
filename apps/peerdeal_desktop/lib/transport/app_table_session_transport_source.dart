@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 
 import 'native_transport_frame_adapter.dart';
 
@@ -342,7 +343,7 @@ class AppTableSessionTransportSource {
   }
 
   String? get _configurationError {
-    if (!_isValidScope(_sessionId) || !_isValidScope(_peerId)) {
+    if (!_isValidSessionScope(_sessionId) || !_isValidPeerScope(_peerId)) {
       return 'Native transport source scope is invalid.';
     }
     if (_pollInterval < _minimumPollInterval ||
@@ -352,11 +353,15 @@ class AppTableSessionTransportSource {
     return null;
   }
 
-  static bool _isValidScope(String value) {
+  static bool _isValidSessionScope(String value) {
     return NativeBridgePayloadLimits.isSafeUtf8Text(
       value,
       NativeBridgePayloadLimits.maxTransportIdentityBytes,
     );
+  }
+
+  static bool _isValidPeerScope(String value) {
+    return NetworkInputLimits.isOperationalPeerIdentity(value);
   }
 }
 

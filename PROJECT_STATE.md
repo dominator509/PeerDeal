@@ -2080,6 +2080,18 @@ Remaining:
   produced no output during a bounded attempt and was stopped; no Flutter test
   pass is claimed.
 
+## Recent T341 Changes
+
+- Mirrored direct native receive drains now require an operational peer identity
+  before bridge receive lookup; reserved `none`, `unresolved`, and
+  `peer::reserved` scopes fail closed.
+- Mirrored app table session sources and provisioners use the same existing
+  operational-peer predicate while keeping the native safe-text contract for
+  session IDs.
+- Added invalid-scope regressions. Direct analysis of both app packages and
+  repository static gates passed; the focused Flutter runner produced no output
+  during a bounded attempt and was stopped, so no Flutter test pass is claimed.
+
 ## Required Gates
 
 Run after each retrofit step:

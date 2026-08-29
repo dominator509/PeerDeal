@@ -60,7 +60,8 @@ T335 core event-sequence fixture hash-chain enforcement, T336 operational
 network peer-identity boundary normalization, T337 network/native transport
 sequence-bound parity, T338 app/native transport default-bound alignment,
 T339 app/native transport default-bound checker enforcement, and T340 direct
-native transport adapter payload enforcement
+native transport adapter payload enforcement, and T341 app/native operational
+peer-scope normalization
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -209,6 +210,13 @@ to direct transport sinks and receive drains as well as factory-created
 sessions. Oversized frames from a custom native bridge are rejected before
 handler dispatch, preserving the generic network receiver contract.
 
+The T341 app-shell hardening applies the existing
+`NetworkInputLimits.isOperationalPeerIdentity` predicate to peer scopes at the
+direct native receive drain and app table session source/provisioner boundaries.
+Reserved `none`, `unresolved`, and `peer::reserved` scopes now fail closed
+before bridge receive lookup or session provisioning; generic session IDs
+retain the existing native safe-text contract.
+
 ## Recent T336 Changes
 
 - Network operational peer identities now share one reserved-aware predicate;
@@ -255,6 +263,18 @@ handler dispatch, preserving the generic network receiver contract.
   payloads before converting or dispatching them to a session handler.
 - Both app packages analyze cleanly; the focused Flutter runner remained
   silent and was stopped after a bounded attempt.
+
+## Recent T341 Changes
+
+- Mirrored direct receive drains now require an operational peer identity before
+  invoking a native bridge receive lookup.
+- Mirrored app table session sources and provisioners apply the same existing
+  operational-peer predicate while retaining safe-text validation for session
+  IDs.
+- Added invalid-scope regressions for `none`, `unresolved`, and
+  `peer::reserved`; both app packages analyze cleanly and repository static
+  gates pass. The focused Flutter runner remained silent during a bounded
+  attempt.
 
 ## What Changed
 
