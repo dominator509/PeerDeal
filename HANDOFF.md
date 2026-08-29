@@ -58,8 +58,9 @@ authorization boundary enforcement, and T333 privacy fixture policy boundary
 enforcement, and T334 core pot fixture settlement boundary enforcement, and
 T335 core event-sequence fixture hash-chain enforcement, T336 operational
 network peer-identity boundary normalization, T337 network/native transport
-sequence-bound parity, T338 app/native transport default-bound alignment, and
-T339 app/native transport default-bound checker enforcement
+sequence-bound parity, T338 app/native transport default-bound alignment,
+T339 app/native transport default-bound checker enforcement, and T340 direct
+native transport adapter payload enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -203,6 +204,11 @@ to require both app-shell factory defaults to reference the canonical native
 payload limit. Its negative-path test prevents a future literal or stale
 default from bypassing the cross-layer drift gate.
 
+The T340 app-shell hardening applies the existing native 60 KiB payload limit
+to direct transport sinks and receive drains as well as factory-created
+sessions. Oversized frames from a custom native bridge are rejected before
+handler dispatch, preserving the generic network receiver contract.
+
 ## Recent T336 Changes
 
 - Network operational peer identities now share one reserved-aware predicate;
@@ -240,6 +246,15 @@ default from bypassing the cross-layer drift gate.
 - Added negative-path coverage for app-default drift; the live checker and its
   7-test unit suite pass.
 - No runtime contract or package boundary changed.
+
+## Recent T340 Changes
+
+- Mirrored direct `NativeTransportFrameSink` defaults now use the native 60 KiB
+  payload ceiling.
+- Mirrored `NativeTransportFrameDrain` instances reject oversized native
+  payloads before converting or dispatching them to a session handler.
+- Both app packages analyze cleanly; the focused Flutter runner remained
+  silent and was stopped after a bounded attempt.
 
 ## What Changed
 

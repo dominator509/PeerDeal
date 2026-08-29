@@ -9,7 +9,9 @@ const _maximumWarningLength = 160;
 class NativeTransportFrameSink implements TransportFrameSink {
   const NativeTransportFrameSink({
     required NativeTransportBridge bridge,
-    TransportFrameValidator validator = const BasicTransportFrameValidator(),
+    TransportFrameValidator validator = const BasicTransportFrameValidator(
+      maxPayloadBytes: NativeBridgePayloadLimits.maxTransportPayloadBytes,
+    ),
   }) : _bridge = bridge,
        _validator = validator;
 
@@ -111,6 +113,16 @@ class NativeTransportFrameDrain {
 
     final results = <TransportFrameReceiveResult>[];
     for (final frame in snapshot.frames.take(_maxFramesPerDrain)) {
+      if (frame.payloadBytes.length >
+          NativeBridgePayloadLimits.maxTransportPayloadBytes) {
+        results.add(
+          TransportFrameReceiveResult.rejected(
+            reasonCode: 'ERR_TRANSPORT_FRAME_REJECTED',
+            warnings: const <String>['ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE'],
+          ),
+        );
+        continue;
+      }
       try {
         final result = await _awaitOrCancel(
           _receiver!.receive(_fromNativeFrame(frame)),

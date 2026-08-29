@@ -2070,6 +2070,16 @@ Remaining:
   and its 7-test unit suite pass.
 - Runtime behavior and package ownership remain unchanged.
 
+## Recent T340 Changes
+
+- Mirrored direct native transport sinks now validate against the existing
+  60 KiB native payload ceiling by default.
+- Mirrored native transport drains reject oversized custom-bridge frames before
+  network receiver or session-handler dispatch.
+- Direct analysis of both app packages passed. The focused Flutter runner
+  produced no output during a bounded attempt and was stopped; no Flutter test
+  pass is claimed.
+
 ## Required Gates
 
 Run after each retrofit step:

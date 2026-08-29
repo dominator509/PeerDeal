@@ -142,6 +142,29 @@ void main() {
     },
   );
 
+  test('sink rejects payloads above the native transport ceiling', () async {
+    final bridge = _FakeNativeTransportBridge();
+    final sink = NativeTransportFrameSink(bridge: bridge);
+
+    await expectLater(
+      sink.sendFrame(
+        TransportFrame(
+          sessionId: 'session_1',
+          fromPeerId: 'peer_a',
+          toPeerId: 'peer_b',
+          sequence: 1,
+          payload: List<int>.filled(
+            NativeBridgePayloadLimits.maxTransportPayloadBytes + 1,
+            1,
+          ),
+        ),
+      ),
+      throwsStateError,
+    );
+
+    expect(bridge.sentFrames, isEmpty);
+  });
+
   test('converts native send failure into network send rejection', () async {
     final bridge = _FakeNativeTransportBridge(sendWarning: 'socket closed');
     final sender = ValidatingTransportFrameSender(
@@ -240,6 +263,38 @@ void main() {
     expect(result.available, isTrue);
     expect(result.results.single.accepted, isFalse);
     expect(result.results.single.reasonCode, 'ERR_TRANSPORT_FRAME_REJECTED');
+    expect(handler.frames, isEmpty);
+  });
+
+  test('rejects oversized native frames before handler dispatch', () async {
+    final handler = _RecordingTransportFrameHandler();
+    final drain = NativeTransportFrameDrain(
+      bridge: _FakeNativeTransportBridge(
+        receiveFrames: <NativeTransportFrame>[
+          NativeTransportFrame(
+            sessionId: 'session_1',
+            senderPeerId: 'peer_a',
+            recipientPeerId: 'peer_b',
+            sequence: 1,
+            payloadBytes: List<int>.filled(
+              NativeBridgePayloadLimits.maxTransportPayloadBytes + 1,
+              1,
+            ),
+          ),
+        ],
+      ),
+      receiver: ValidatingTransportFrameReceiver(handler: handler),
+    );
+
+    final result = await drain.drain(sessionId: 'session_1', peerId: 'peer_b');
+
+    expect(result.available, isTrue);
+    expect(result.results.single.accepted, isFalse);
+    expect(result.results.single.reasonCode, 'ERR_TRANSPORT_FRAME_REJECTED');
+    expect(
+      result.results.single.warnings,
+      contains('ERR_TRANSPORT_FRAME_PAYLOAD_TOO_LARGE'),
+    );
     expect(handler.frames, isEmpty);
   });
 

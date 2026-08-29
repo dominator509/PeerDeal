@@ -2,6 +2,37 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Direct Native Adapter Payload Enforcement
+
+Summary:
+- Mirrored direct native transport sinks now use the existing 60 KiB native
+  payload ceiling as their default network validator limit.
+- Mirrored receive drains reject oversized frames from custom native bridges
+  before conversion or session-handler dispatch.
+
+Files:
+- `apps/peerdeal_mobile/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_frame_adapter.dart`
+- `apps/peerdeal_mobile/test/transport/native_transport_frame_adapter_test.dart`
+- `apps/peerdeal_desktop/test/transport/native_transport_frame_adapter_test.dart`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct analysis of both app packages: passed.
+- Dart formatting: passed.
+- Focused Flutter test attempt: stopped after the local runner produced no
+  output during a bounded attempt; no Flutter test pass is claimed.
+- `git diff --check`: passed.
+
+Risks:
+- Real Android/Windows transport, device reachability, and product transport
+  provisioning remain separate integration gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - App Transport Default Drift Gate
 
 Summary:

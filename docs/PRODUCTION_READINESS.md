@@ -3412,6 +3412,13 @@ reference `NativeBridgePayloadLimits.maxTransportPayloadBytes`, and its
 negative-path suite rejects a stale or literal app default. The live checker and
 7 checker tests pass; no runtime or package-boundary behavior changed.
 
+The T340 follow-up closes the remaining direct app-adapter payload gap.
+`NativeTransportFrameSink` defaults to the native 60 KiB ceiling, and
+`NativeTransportFrameDrain` rejects oversized frames returned by a custom
+bridge before conversion or handler dispatch. Both app packages analyze
+cleanly; focused Flutter execution remains limited by the local runner's
+silent startup behavior.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
