@@ -3491,6 +3491,16 @@ generation-cancellation regressions are covered. Repository deterministic gates
 pass; Flutter analysis and focused Flutter execution remain unverified because
 both runners were silent during bounded attempts.
 
+The T349 follow-up closes the matching receipt-key cancellation gap. Mirrored
+receipt key loaders and writers check cancellation before invoking legacy
+secure-key bridges and after results return for load, save, and delete. Receipt
+key provisioning fails closed before key generation, after mutation, conflict
+reload, and verification boundaries, and before returning key material.
+Pre-cancelled storage, late load/save/delete results, and generation-cancellation
+regressions are covered. Repository deterministic gates pass; Flutter analysis
+and focused Flutter execution remain unverified because both runners were
+silent during bounded attempts.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

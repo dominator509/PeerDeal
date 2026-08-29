@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_mobile/demo_slice/controllers/native_receipt_key_ring_writer.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
@@ -40,6 +42,49 @@ void main() {
       expect(bridge.savedKeys.single.key.purpose, 'receipt_encryption');
       expect(bridge.savedKeys.single.key.algorithm, 'external');
       expect(bridge.savedKeys.single.key.active, isFalse);
+    },
+  );
+
+  test(
+    'does not invoke a legacy receipt save after pre-cancellation',
+    () async {
+      final cancellation = Completer<void>()..complete();
+      final bridge = _RecordingSecureKeyStorageBridge();
+
+      final result = await NativeReceiptKeyRingWriter(bridge: bridge)
+          .saveSigningKey(
+            const ReceiptSigningKey(
+              keyId: 'receipt_signing_cancelled',
+              secret: 's',
+            ),
+            active: true,
+            cancellation: cancellation.future,
+          );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Secure receipt key mutation cancelled.');
+      expect(bridge.savedKeys, isEmpty);
+    },
+  );
+
+  test(
+    'discards a legacy receipt save result when cancellation wins',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _CancellingLegacySecureKeyStorageBridge(
+        onSave: cancellation,
+      );
+
+      final result = await NativeReceiptKeyRingWriter(bridge: bridge)
+          .saveSigningKey(
+            const ReceiptSigningKey(keyId: 'receipt_signing_late', secret: 's'),
+            active: true,
+            cancellation: cancellation.future,
+          );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Secure receipt key mutation cancelled.');
+      expect(bridge.savedKeys, hasLength(1));
     },
   );
 
@@ -263,6 +308,40 @@ void main() {
     expect(bridge.deletedKeys.single.keyId, 'receipt_signing_1');
   });
 
+  test(
+    'does not invoke a legacy receipt delete after pre-cancellation',
+    () async {
+      final cancellation = Completer<void>()..complete();
+      final bridge = _RecordingSecureKeyStorageBridge();
+
+      final result = await NativeReceiptKeyRingWriter(
+        bridge: bridge,
+      ).deleteKey('receipt_signing_1', cancellation: cancellation.future);
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Secure receipt key mutation cancelled.');
+      expect(bridge.deletedKeys, isEmpty);
+    },
+  );
+
+  test(
+    'discards a legacy receipt delete result when cancellation wins',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _CancellingLegacySecureKeyStorageBridge(
+        onDelete: cancellation,
+      );
+
+      final result = await NativeReceiptKeyRingWriter(
+        bridge: bridge,
+      ).deleteKey('receipt_signing_1', cancellation: cancellation.future);
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Secure receipt key mutation cancelled.');
+      expect(bridge.deletedKeys, hasLength(1));
+    },
+  );
+
   test('fails closed before native delete for invalid key ids', () async {
     final bridge = _RecordingSecureKeyStorageBridge();
     final writer = NativeReceiptKeyRingWriter(bridge: bridge);
@@ -423,6 +502,36 @@ class _RecordingSecureKeyStorageBridge
   }) async {
     deletedKeys.add(_DeletedKey(namespace: namespace, keyId: keyId));
     return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+}
+
+class _CancellingLegacySecureKeyStorageBridge
+    extends _RecordingSecureKeyStorageBridge {
+  _CancellingLegacySecureKeyStorageBridge({
+    super.saveResult,
+    this.onSave,
+    this.onDelete,
+  });
+
+  final Completer<void>? onSave;
+  final Completer<void>? onDelete;
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKey({
+    required String namespace,
+    required SecureKeyRecord key,
+  }) async {
+    onSave?.complete();
+    return super.saveKey(namespace: namespace, key: key);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> deleteKey({
+    required String namespace,
+    required String keyId,
+  }) async {
+    onDelete?.complete();
+    return super.deleteKey(namespace: namespace, keyId: keyId);
   }
 }
 

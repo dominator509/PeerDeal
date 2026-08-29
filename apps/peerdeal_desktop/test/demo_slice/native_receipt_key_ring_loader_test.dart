@@ -525,6 +525,66 @@ void main() {
     expect(result.warnings, isEmpty);
     expect(bridge.cancellation, same(cancellation.future));
   });
+
+  test(
+    'does not invoke a legacy receipt load after pre-cancellation',
+    () async {
+      final cancellation = Completer<void>()..complete();
+      final bridge = _FakeSecureKeyStorageBridge(
+        snapshot: const SecureKeyStorageSnapshot(
+          available: true,
+          keys: <SecureKeyRecord>[],
+        ),
+      );
+
+      final result = await NativeReceiptKeyRingLoader(
+        bridge: bridge,
+      ).loadCancellable(cancellation: cancellation.future);
+
+      expect(result.keyRing.activeSigningKey(), isNull);
+      expect(result.keyRing.activeEncryptionKey(), isNull);
+      expect(result.warnings, <String>['Secure receipt key load cancelled.']);
+      expect(bridge.namespace, isNull);
+    },
+  );
+
+  test(
+    'discards a legacy receipt load result when cancellation wins',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _CancellingLegacySecureKeyStorageBridge(
+        cancellation: cancellation,
+        snapshot: SecureKeyStorageSnapshot(
+          available: true,
+          keys: const <SecureKeyRecord>[
+            SecureKeyRecord(
+              keyId: 'receipt_signing_late',
+              purpose: 'receipt_signing',
+              algorithm: 'hmac-sha256',
+              secret: 'signing_late',
+              active: true,
+            ),
+            SecureKeyRecord(
+              keyId: 'receipt_encryption_late',
+              purpose: 'receipt_encryption',
+              algorithm: 'external',
+              secret: 'encryption_late',
+              active: true,
+            ),
+          ],
+        ),
+      );
+
+      final result = await NativeReceiptKeyRingLoader(
+        bridge: bridge,
+      ).loadCancellable(cancellation: cancellation.future);
+
+      expect(result.keyRing.activeSigningKey(), isNull);
+      expect(result.keyRing.activeEncryptionKey(), isNull);
+      expect(result.warnings, <String>['Secure receipt key load cancelled.']);
+      expect(bridge.calls, 1);
+    },
+  );
 }
 
 class _FakeSecureKeyStorageBridge implements SecureKeyStorageBridge {
@@ -548,6 +608,26 @@ class _ThrowingSecureKeyStorageBridge implements SecureKeyStorageBridge {
     required String namespace,
   }) async {
     throw StateError('secure storage unavailable');
+  }
+}
+
+class _CancellingLegacySecureKeyStorageBridge
+    extends _FakeSecureKeyStorageBridge {
+  _CancellingLegacySecureKeyStorageBridge({
+    required this.cancellation,
+    required super.snapshot,
+  });
+
+  final Completer<void> cancellation;
+  int calls = 0;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    calls++;
+    cancellation.complete();
+    return super.loadKeyRing(namespace: namespace);
   }
 }
 

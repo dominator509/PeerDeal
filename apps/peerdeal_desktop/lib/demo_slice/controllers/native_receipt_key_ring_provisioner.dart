@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -103,9 +104,15 @@ class NativeReceiptKeyRingProvisioner {
     required bool ownsInFlight,
   }) async {
     try {
+      if (await _isCancellationRequested(cancellation)) {
+        return _cancelledProvisionResult();
+      }
       final loadResult = cancellation == null
           ? await _loader.load()
           : await _loader.loadCancellable(cancellation: cancellation);
+      if (await _isCancellationRequested(cancellation)) {
+        return _cancelledProvisionResult();
+      }
       if (loadResult.warnings.isNotEmpty) {
         return ReceiptKeyRingProvisionResult(
           keyRing: loadResult.keyRing,
@@ -119,6 +126,9 @@ class NativeReceiptKeyRingProvisioner {
       final warnings = <String>[];
 
       if (keyRing.activeSigningKey() == null) {
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult(keysCreated: keysCreated);
+        }
         final ReceiptSigningKey key;
         try {
           key = ReceiptSigningKey(
@@ -133,17 +143,26 @@ class NativeReceiptKeyRingProvisioner {
             ],
           );
         }
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult(keysCreated: keysCreated);
+        }
         final result = await _writer.saveSigningKey(
           key,
           active: true,
           expectedRevision: revision,
           cancellation: cancellation,
         );
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult(keysCreated: keysCreated);
+        }
         if (!result.isSuccess) {
           if (result.isConflict) {
             final latest = cancellation == null
                 ? await _loader.load()
                 : await _loader.loadCancellable(cancellation: cancellation);
+            if (await _isCancellationRequested(cancellation)) {
+              return _cancelledProvisionResult(keysCreated: keysCreated);
+            }
             if (latest.warnings.isEmpty &&
                 latest.keyRing.activeSigningKey() != null) {
               keyRing = latest.keyRing;
@@ -171,6 +190,9 @@ class NativeReceiptKeyRingProvisioner {
       }
 
       if (warnings.isEmpty && keyRing.activeEncryptionKey() == null) {
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult(keysCreated: keysCreated);
+        }
         final ReceiptEncryptionKey key;
         try {
           key = ReceiptEncryptionKey(
@@ -186,17 +208,26 @@ class NativeReceiptKeyRingProvisioner {
             keysCreated: keysCreated,
           );
         }
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult(keysCreated: keysCreated);
+        }
         final result = await _writer.saveEncryptionKey(
           key,
           active: true,
           expectedRevision: revision,
           cancellation: cancellation,
         );
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult(keysCreated: keysCreated);
+        }
         if (!result.isSuccess) {
           if (result.isConflict) {
             final latest = cancellation == null
                 ? await _loader.load()
                 : await _loader.loadCancellable(cancellation: cancellation);
+            if (await _isCancellationRequested(cancellation)) {
+              return _cancelledProvisionResult(keysCreated: keysCreated);
+            }
             if (latest.warnings.isEmpty &&
                 latest.keyRing.activeEncryptionKey() != null) {
               keyRing = latest.keyRing;
@@ -224,9 +255,15 @@ class NativeReceiptKeyRingProvisioner {
       }
 
       if (warnings.isEmpty && keysCreated > 0) {
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult(keysCreated: keysCreated);
+        }
         final verified = cancellation == null
             ? await _loader.load()
             : await _loader.loadCancellable(cancellation: cancellation);
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult(keysCreated: keysCreated);
+        }
         if (verified.warnings.isNotEmpty ||
             !_activeKeysMatch(keyRing, verified.keyRing)) {
           return ReceiptKeyRingProvisionResult(
@@ -240,6 +277,10 @@ class NativeReceiptKeyRingProvisioner {
         keyRing = verified.keyRing;
       }
 
+      if (await _isCancellationRequested(cancellation)) {
+        return _cancelledProvisionResult(keysCreated: keysCreated);
+      }
+
       return ReceiptKeyRingProvisionResult(
         keyRing: keyRing,
         warnings: warnings,
@@ -248,6 +289,16 @@ class NativeReceiptKeyRingProvisioner {
     } finally {
       if (ownsInFlight) _inFlight = null;
     }
+  }
+
+  ReceiptKeyRingProvisionResult _cancelledProvisionResult({
+    int keysCreated = 0,
+  }) {
+    return ReceiptKeyRingProvisionResult(
+      keyRing: ReceiptKeyRingSnapshot(),
+      warnings: const <String>['Secure receipt key provisioning cancelled.'],
+      keysCreated: keysCreated,
+    );
   }
 
   bool _activeKeysMatch(
@@ -274,4 +325,15 @@ class NativeReceiptKeyRingProvisioner {
     final millis = DateTime.now().toUtc().millisecondsSinceEpoch;
     return '${purpose}_$millis';
   }
+}
+
+Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  var requested = false;
+  cancellation.then<void>(
+    (_) => requested = true,
+    onError: (Object _, StackTrace _) => requested = true,
+  );
+  await Future<void>.value();
+  return requested;
 }

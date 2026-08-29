@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
@@ -84,6 +86,9 @@ class NativeReceiptKeyRingWriter {
     int? expectedRevision,
     Future<void>? cancellation,
   }) async {
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledWriteResult();
+    }
     if (!_isValidNamespace(namespace)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Secure receipt key namespace is invalid.',
@@ -138,6 +143,10 @@ class NativeReceiptKeyRingWriter {
       );
     }
 
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledWriteResult();
+    }
+
     return _fromNativeMutation(
       result,
       expectedRevision: usesConditionalMutation ? expectedRevision : null,
@@ -149,6 +158,9 @@ class NativeReceiptKeyRingWriter {
     int? expectedRevision,
     Future<void>? cancellation,
   }) async {
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledWriteResult();
+    }
     if (!_isValidNamespace(namespace)) {
       return const ReceiptKeyRingWriteResult.failure(
         warning: 'Secure receipt key namespace is invalid.',
@@ -201,6 +213,10 @@ class NativeReceiptKeyRingWriter {
       );
     }
 
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledWriteResult();
+    }
+
     return _fromNativeMutation(
       result,
       expectedRevision: usesConditionalMutation ? expectedRevision : null,
@@ -227,6 +243,12 @@ class NativeReceiptKeyRingWriter {
       ),
       revision: result.revision,
       isConflict: result.isConflict,
+    );
+  }
+
+  ReceiptKeyRingWriteResult _cancelledWriteResult() {
+    return const ReceiptKeyRingWriteResult.failure(
+      warning: 'Secure receipt key mutation cancelled.',
     );
   }
 
@@ -275,4 +297,15 @@ class NativeReceiptKeyRingWriter {
     }
     return 'Secure receipt key storage reported a platform warning.';
   }
+}
+
+Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  var requested = false;
+  cancellation.then<void>(
+    (_) => requested = true,
+    onError: (Object _, StackTrace _) => requested = true,
+  );
+  await Future<void>.value();
+  return requested;
 }

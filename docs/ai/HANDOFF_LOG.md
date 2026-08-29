@@ -2,6 +2,27 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Make Receipt Key Provisioning Cancellation-Safe
+
+Summary:
+- Mirrored receipt key loaders and writers now check cancellation before
+  invoking legacy secure-key bridges and after results return for load, save,
+  and delete operations.
+- Receipt key provisioning fails closed before generation, after mutation,
+  conflict reload, and verification boundaries, and before returning key
+  material; mirrored regressions cover pre-cancelled storage, late results,
+  and generation cancellation.
+
+Verification:
+- Repository boundary, source-text, native-contract, checker-unit, and diff
+  gates passed.
+- Flutter analysis and focused Flutter execution remained unverified because
+  both runners were silent during bounded attempts; no Flutter pass is claimed.
+
+Next reviewer:
+Continue with the documented real-device/native-platform and product-owned
+session-source integration gates without changing locked package boundaries.
+
 ### 2026-08-29 - Codex - Make Local Identity Provisioning Cancellation-Safe
 
 Summary:

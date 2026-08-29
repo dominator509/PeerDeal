@@ -79,6 +79,108 @@ void main() {
     );
   });
 
+  test('does not invoke receipt key storage after pre-cancellation', () async {
+    final cancellation = Completer<void>()..complete();
+    final bridge = _ProvisioningBridge();
+
+    final result = await _provisioner(
+      bridge,
+    ).ensureActiveKeys(cancellation: cancellation.future);
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key provisioning cancelled.',
+    ]);
+    expect(result.keyRing.activeSigningKey(), isNull);
+    expect(result.keyRing.activeEncryptionKey(), isNull);
+    expect(bridge.loadCalls, 0);
+    expect(bridge.savedKeys, isEmpty);
+  });
+
+  test('discards a late receipt key load after cancellation', () async {
+    final cancellation = Completer<void>();
+    final bridge = _CancellingProvisioningBridge(
+      onLoad: cancellation,
+      snapshot: SecureKeyStorageSnapshot(
+        available: true,
+        keys: const <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'receipt_signing_existing',
+            purpose: 'receipt_signing',
+            algorithm: 'hmac-sha256',
+            secret: 'signing',
+            active: true,
+          ),
+          SecureKeyRecord(
+            keyId: 'receipt_encryption_existing',
+            purpose: 'receipt_encryption',
+            algorithm: 'external',
+            secret: 'encryption',
+            active: true,
+          ),
+        ],
+      ),
+    );
+
+    final result = await _provisioner(
+      bridge,
+    ).ensureActiveKeys(cancellation: cancellation.future);
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key provisioning cancelled.',
+    ]);
+    expect(result.keyRing.activeSigningKey(), isNull);
+    expect(result.keyRing.activeEncryptionKey(), isNull);
+    expect(bridge.loadCalls, 1);
+    expect(bridge.savedKeys, isEmpty);
+  });
+
+  test(
+    'does not save generated receipt keys after factory cancellation',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _ProvisioningBridge();
+      final provisioner = NativeReceiptKeyRingProvisioner(
+        loader: NativeReceiptKeyRingLoader(bridge: bridge),
+        writer: NativeReceiptKeyRingWriter(bridge: bridge),
+        secretFactory: () {
+          cancellation.complete();
+          return 'secret_late';
+        },
+        keyIdFactory: (purpose) => '${purpose}_test',
+      );
+
+      final result = await provisioner.ensureActiveKeys(
+        cancellation: cancellation.future,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warnings, <String>[
+        'Secure receipt key provisioning cancelled.',
+      ]);
+      expect(result.keysCreated, 0);
+      expect(bridge.savedKeys, isEmpty);
+    },
+  );
+
+  test('does not report a receipt key write after save cancellation', () async {
+    final cancellation = Completer<void>();
+    final bridge = _CancellingProvisioningBridge(onSave: cancellation);
+
+    final result = await _provisioner(
+      bridge,
+    ).ensureActiveKeys(cancellation: cancellation.future);
+
+    expect(result.isSuccess, isFalse);
+    expect(result.warnings, <String>[
+      'Secure receipt key provisioning cancelled.',
+    ]);
+    expect(result.keysCreated, 0);
+    expect(result.keyRing.activeSigningKey(), isNull);
+    expect(bridge.savedKeys, hasLength(1));
+  });
+
   test('creates missing active signing and encryption keys', () async {
     final bridge = _ProvisioningBridge();
     final provisioner = _provisioner(bridge);
@@ -348,6 +450,35 @@ class _ProvisioningBridge implements SecureKeyStorageMutationBridge {
     required String keyId,
   }) async {
     return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+}
+
+class _CancellingProvisioningBridge extends _ProvisioningBridge {
+  _CancellingProvisioningBridge({
+    super.snapshot,
+    super.saveResult,
+    this.onLoad,
+    this.onSave,
+  });
+
+  final Completer<void>? onLoad;
+  final Completer<void>? onSave;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    onLoad?.complete();
+    return super.loadKeyRing(namespace: namespace);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKey({
+    required String namespace,
+    required SecureKeyRecord key,
+  }) async {
+    onSave?.complete();
+    return super.saveKey(namespace: namespace, key: key);
   }
 }
 

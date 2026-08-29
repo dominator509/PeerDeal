@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
@@ -85,6 +87,9 @@ class NativeReceiptKeyRingLoader
   }
 
   Future<ReceiptKeyRingLoadResult> _load({Future<void>? cancellation}) async {
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledLoadResult();
+    }
     if (!_isValidNamespace(namespace)) {
       return ReceiptKeyRingLoadResult(
         keyRing: ReceiptKeyRingSnapshot(),
@@ -124,6 +129,10 @@ class NativeReceiptKeyRingLoader
         keyRing: ReceiptKeyRingSnapshot(),
         warnings: <String>['Secure receipt key storage could not be loaded.'],
       );
+    }
+
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledLoadResult();
     }
 
     if (!snapshot.available) {
@@ -207,6 +216,13 @@ class NativeReceiptKeyRingLoader
         decryptionKeys: _rotatedEncryptionKeys(encryptionRecords),
       ),
       revision: snapshot.revision,
+    );
+  }
+
+  ReceiptKeyRingLoadResult _cancelledLoadResult() {
+    return ReceiptKeyRingLoadResult(
+      keyRing: ReceiptKeyRingSnapshot(),
+      warnings: <String>['Secure receipt key load cancelled.'],
     );
   }
 
@@ -313,4 +329,15 @@ class NativeReceiptKeyRingLoader
     }
     return 'Secure receipt key storage reported a platform warning.';
   }
+}
+
+Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  var requested = false;
+  cancellation.then<void>(
+    (_) => requested = true,
+    onError: (Object _, StackTrace _) => requested = true,
+  );
+  await Future<void>.value();
+  return requested;
 }
