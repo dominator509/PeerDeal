@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Receipt Fixture Authorization Boundary
+
+Summary:
+- Wired the existing live, wiped, and wrong-user authorization JSON fixtures
+  through typed test-only receipt and authorization decoders.
+- Added a directory-driven fixture test asserting matching access, wrong-user
+  restore rejection, and wiped-receipt rejection through `DefaultReceiptAuthorizer`.
+
+Files:
+- `packages/peerdeal_receipts/test/fixture_loader.dart`
+- `packages/peerdeal_receipts/test/fixture_receipt_authorization_test.dart`
+- `packages/peerdeal_receipts/README.md`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct `peerdeal_receipts` analysis: passed.
+- Focused Dart test runner stalled without output in the local runner and was
+  stopped; no focused test pass is claimed.
+
+Risks:
+- This closes local receipt fixture/parser drift only. Native secure storage,
+  product receipt/session wiring, device validation, and release signing remain
+  separate integration or operator-owned gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Crypto Verification Fixture Boundary Enforcement
 
 Summary:

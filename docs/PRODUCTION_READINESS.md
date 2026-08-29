@@ -161,6 +161,9 @@ the gates below are satisfied.
 - Crypto verification fixtures now cover verified-hand, partial-session, and
   wiped-request outcomes; the suite discovers every request fixture and routes
   each through typed decoding and the existing fail-closed verification engine.
+- Receipt fixtures now cover live, wiped, and wrong-user authorization inputs;
+  the suite discovers every receipt fixture and routes each through typed
+  decoding and the existing fail-closed authorizer boundary.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

@@ -53,7 +53,8 @@ Hold'em opening-hand fixture persistence coverage, and T326 Hold'em fixture
 breadth enforcement, T327 mode fixture breadth enforcement, and T328 replay
 fixture breadth enforcement, and T329 sync recovery fixture breadth
 enforcement, and T330 wizard fixture boundary enforcement, and T331 crypto
-verification fixture boundary enforcement
+verification fixture boundary enforcement, and T332 receipt fixture
+authorization boundary enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -152,6 +153,12 @@ and wiped-request JSON fixtures through a typed test-only `VerificationRequest`
 decoder. The verification suite now requires every request fixture to load and
 asserts the existing verified, partial, and wiped engine outcomes without
 changing cryptographic policy or package ownership.
+
+The T332 receipt hardening wires the existing live, wiped, and wrong-user
+authorization fixtures through typed test-only receipt and authorization
+decoders. The fixture suite now asserts matching access, wrong-user rejection,
+and wiped-receipt rejection through the existing authorizer boundary without
+changing receipt semantics or package ownership.
 
 ## What Changed
 

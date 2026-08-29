@@ -55,6 +55,9 @@ Starter scaffold for PeerDeal receipt packaging, authorization, and wipe-aware r
   cipher adapters throw.
 - `HmacSha256ReceiptSigner.verify` fails closed when verification key lookup
   throws.
+- Receipt and authorization fixtures are decoded through typed test-only
+  loaders; the fixture suite covers matching access, wrong-user restore, and
+  wiped-receipt rejection through the existing authorizer boundary.
 
 ## Starter status
 This scaffold is aligned to the locked PeerDeal receipt, retention, and privacy direction and is intended

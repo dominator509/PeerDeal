@@ -1996,6 +1996,14 @@ Remaining:
   existing verified, partial, and wiped engine outcomes.
 - No crypto verifier, protocol, receipt, app, or package boundary changed.
 
+## Recent T332 Changes
+
+- Receipt fixtures now cover live, wiped, and wrong-user authorization inputs
+  through typed test-only receipt and authorization decoders.
+- The fixture suite discovers every receipt fixture and asserts matching access,
+  wrong-user restore rejection, and wiped-receipt rejection.
+- No receipt authorizer, crypto, protocol, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:
