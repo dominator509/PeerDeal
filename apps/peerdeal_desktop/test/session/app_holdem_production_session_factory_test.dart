@@ -50,6 +50,9 @@ void main() {
   test('rejects unsafe identity and runtime composition inputs', () {
     expect(() => _create(peerId: 'peer_local'), throwsArgumentError);
     for (final peerId in <String>[
+      'none',
+      'unresolved',
+      'peer::reserved',
       'peer_${String.fromCharCode(0x85)}',
       'x' * 257,
     ]) {

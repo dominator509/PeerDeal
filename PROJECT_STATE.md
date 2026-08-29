@@ -2092,6 +2092,18 @@ Remaining:
   repository static gates passed; the focused Flutter runner produced no output
   during a bounded attempt and was stopped, so no Flutter test pass is claimed.
 
+## Recent T342 Changes
+
+- Mirrored app production-session bootstrap/factory, persisted route policy,
+  projection publisher, and local peer identity load/save now use the existing
+  operational peer-identity predicate.
+- Reserved `none`, `unresolved`, and `peer::reserved` values fail closed at
+  context, route, runtime, factory, projection, and native identity boundaries.
+- Direct analysis, formatting, repository boundary/source/native-contract
+  checks, checker unit tests, and `git diff --check` passed. The focused
+  Flutter runner produced no output during a bounded attempt and was stopped;
+  no Flutter test pass is claimed.
+
 ## Required Gates
 
 Run after each retrofit step:

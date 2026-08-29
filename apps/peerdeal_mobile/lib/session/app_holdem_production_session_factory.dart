@@ -1,5 +1,6 @@
 import 'package:peerdeal_core/peerdeal_core.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
@@ -159,7 +160,13 @@ class AppHoldemProductionSessionFactory {
   }
 
   static void _validatePeerIdentity(String value, String name) {
-    _validateTransportIdentity(value, name);
+    if (!NetworkInputLimits.isOperationalPeerIdentity(value)) {
+      throw ArgumentError.value(
+        value,
+        name,
+        'Peer identity must be operational and control-free.',
+      );
+    }
   }
 
   static void _validateTransportIdentity(String value, String name) {

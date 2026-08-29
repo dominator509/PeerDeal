@@ -1,4 +1,5 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 
 const _maximumWarningCount = 4;
 const _maximumWarningLength = 160;
@@ -169,10 +170,7 @@ class NativeLocalPeerIdentityLoader {
 
   bool _isValidPeerId(String value) =>
       value.length <= maxPeerIdLength &&
-      NativeBridgePayloadLimits.isSafeUtf8Text(
-        value,
-        NativeBridgePayloadLimits.maxTransportIdentityBytes,
-      );
+      NetworkInputLimits.isOperationalPeerIdentity(value);
 
   static bool _isValidNamespace(String value) =>
       _isValidLabel(value) && !value.contains('::');

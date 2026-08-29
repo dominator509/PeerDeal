@@ -1,4 +1,5 @@
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 
 import 'native_local_peer_identity_loader.dart';
 
@@ -128,10 +129,7 @@ class NativeLocalPeerIdentityWriter {
   bool _isValidPeerId(String value) =>
       maxPeerIdLength > 0 &&
       value.length <= maxPeerIdLength &&
-      NativeBridgePayloadLimits.isSafeUtf8Text(
-        value,
-        NativeBridgePayloadLimits.maxTransportIdentityBytes,
-      );
+      NetworkInputLimits.isOperationalPeerIdentity(value);
 
   bool _isValidRevision(int? value) =>
       value == null ||

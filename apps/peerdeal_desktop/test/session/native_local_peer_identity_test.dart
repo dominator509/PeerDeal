@@ -245,6 +245,9 @@ void main() {
 
   test('rejects C1 and byte-oversized persisted peer identities', () async {
     for (final peerId in <String>[
+      'none',
+      'unresolved',
+      'peer::reserved',
       'peer_${String.fromCharCode(0x85)}',
       'x' * 257,
     ]) {
@@ -271,6 +274,9 @@ void main() {
 
   test('rejects C1 and byte-oversized identities before native save', () async {
     for (final peerId in <String>[
+      'none',
+      'unresolved',
+      'peer::reserved',
       'peer_${String.fromCharCode(0x85)}',
       'x' * 257,
     ]) {

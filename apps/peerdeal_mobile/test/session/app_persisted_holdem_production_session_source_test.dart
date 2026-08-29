@@ -389,6 +389,9 @@ void main() {
 
   test('rejects an unsafe dynamic peer override before input construction', () {
     for (final peerId in <String>[
+      'none',
+      'unresolved',
+      'peer::reserved',
       ' peer_selected',
       'peer_${String.fromCharCode(0x85)}',
       'x' * 257,
@@ -399,6 +402,26 @@ void main() {
           localPeerId: 'peer_local',
           remotePeerId: peerId,
         ),
+        throwsArgumentError,
+      );
+      expect(
+        () => _routePolicy().buildInput(
+          snapshot: _typedSnapshot(),
+          localPeerId: peerId,
+        ),
+        throwsArgumentError,
+      );
+    }
+  });
+
+  test('rejects reserved route-policy peer identities', () {
+    for (final peerId in <String>[
+      'none',
+      'unresolved',
+      'peer::reserved',
+    ]) {
+      expect(
+        () => _routePolicy(remotePeerId: peerId).validate(),
         throwsArgumentError,
       );
     }
@@ -950,11 +973,12 @@ HmacSha256SessionMessageAuthenticator _authenticator() {
 AppPersistedHoldemProductionSessionRoutePolicy _routePolicy({
   String path = '/holdem-live',
   String navigationLabel = 'Live Holdem',
+  String remotePeerId = 'peer_remote',
 }) {
   return AppPersistedHoldemProductionSessionRoutePolicy(
     path: path,
     navigationLabel: navigationLabel,
-    remotePeerId: 'peer_remote',
+    remotePeerId: remotePeerId,
     localSeat: 1,
     sessionAuthenticator: _authenticator(),
     closeEventAdapterFactory: (scope) => _closeAdapter(

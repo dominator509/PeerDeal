@@ -1,4 +1,4 @@
-import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
@@ -101,6 +101,7 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
     final selectedRemotePeerId = remotePeerId ?? this.remotePeerId;
     final selectedLocalSeat = localSeat ?? this.localSeat;
     _validatePeerId(selectedRemotePeerId, 'remotePeerId');
+    _validatePeerId(localPeerId, 'localPeerId');
     _validateLocalSeat(selectedLocalSeat, 'localSeat');
 
     return AppHoldemProductionSessionInput(
@@ -125,10 +126,7 @@ class AppPersistedHoldemProductionSessionRoutePolicy {
   }
 
   static void _validatePeerId(String peerId, String fieldName) {
-    if (!NativeBridgePayloadLimits.isSafeUtf8Text(
-      peerId,
-      NativeBridgePayloadLimits.maxTransportIdentityBytes,
-    )) {
+    if (!NetworkInputLimits.isOperationalPeerIdentity(peerId)) {
       throw ArgumentError.value(
         peerId,
         fieldName,

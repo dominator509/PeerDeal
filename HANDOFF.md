@@ -61,7 +61,8 @@ network peer-identity boundary normalization, T337 network/native transport
 sequence-bound parity, T338 app/native transport default-bound alignment,
 T339 app/native transport default-bound checker enforcement, and T340 direct
 native transport adapter payload enforcement, and T341 app/native operational
-peer-scope normalization
+peer-scope normalization, and T342 mirrored app production-session
+peer-identity normalization
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -217,6 +218,13 @@ Reserved `none`, `unresolved`, and `peer::reserved` scopes now fail closed
 before bridge receive lookup or session provisioning; generic session IDs
 retain the existing native safe-text contract.
 
+The T342 app-shell hardening extends the same operational peer-identity rule to
+production-session bootstrap and factory inputs, persisted route policy,
+projection transport publication, and local peer identity load/save. Reserved
+peer values now fail closed before context handoff, route composition,
+projection send, or native identity persistence while generic session and
+table scopes retain their existing safe-text contract.
+
 ## Recent T336 Changes
 
 - Network operational peer identities now share one reserved-aware predicate;
@@ -275,6 +283,17 @@ retain the existing native safe-text contract.
   `peer::reserved`; both app packages analyze cleanly and repository static
   gates pass. The focused Flutter runner remained silent during a bounded
   attempt.
+
+## Recent T342 Changes
+
+- Mirrored app production-session bootstrap/factory, persisted route policy,
+  projection publisher, and local identity loader/writer now use the existing
+  operational peer-identity predicate.
+- Added regressions for reserved `none`, `unresolved`, and `peer::reserved`
+  values across context, route, runtime, factory, and local identity paths.
+- Both app packages analyze cleanly; repository boundary, source-text,
+  native-contract, unit, formatting, and diff checks pass. The focused Flutter
+  runner remained silent during a bounded attempt.
 
 ## What Changed
 

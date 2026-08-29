@@ -134,6 +134,9 @@ void main() {
     () async {
       final projection = _runtime(_preflopState()).startHand();
       for (final peers in <List<String>>[
+        <String>['none', 'peer_remote'],
+        <String>['peer_local', 'unresolved'],
+        <String>['peer::reserved', 'peer_remote'],
         <String>['peer_${String.fromCharCode(0x85)}', 'peer_remote'],
         <String>['peer_local', 'x' * 257],
       ]) {

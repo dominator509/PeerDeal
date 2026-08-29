@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 import 'package:peerdeal_variants/peerdeal_variants.dart';
@@ -128,7 +129,7 @@ class AppHoldemProductionSessionBootstrap {
       );
     }
     _validateInvite(sessionContext.invite);
-    _validateIdentity(
+    _validatePeerIdentity(
       sessionContext.remotePeerId,
       'sessionContext.remotePeerId',
     );
@@ -300,6 +301,18 @@ class AppHoldemProductionSessionBootstrap {
         cursor.protocolVersion != invite.protocolVersion) {
       throw StateError(
         'Hydrated Holdem cursor does not match the resolved invite scope.',
+      );
+    }
+    _validatePeerIdentity(input.peerId, 'input.peerId');
+    _validatePeerIdentity(input.localPeerId, 'input.localPeerId');
+  }
+
+  static void _validatePeerIdentity(String value, String name) {
+    if (!NetworkInputLimits.isOperationalPeerIdentity(value)) {
+      throw ArgumentError.value(
+        value,
+        name,
+        'Production peer identity must be operational and control-free.',
       );
     }
   }

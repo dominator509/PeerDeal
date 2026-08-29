@@ -62,6 +62,31 @@ void main() {
     expect(composition.route.path, '/holdem-live');
   });
 
+  test('rejects reserved context peer before source loading', () async {
+    for (final peerId in <String>[
+      'none',
+      'unresolved',
+      'peer::reserved',
+    ]) {
+      final source = _ContextSource(_input());
+
+      await expectLater(
+        AppHoldemProductionSessionBootstrap(
+          source: source,
+          contextSource: source,
+        ).createForSessionContext(
+          JoinFlowSessionContext(
+            invite: _invite(),
+            remotePeerId: peerId,
+            localSeat: 1,
+          ),
+        ),
+        throwsArgumentError,
+      );
+      expect(source.loadedContext, isNull);
+    }
+  });
+
   test(
     'rejects hydrated state that does not match the resolved invite',
     () async {
@@ -280,6 +305,8 @@ class _ContextSource extends _Source
 AppHoldemProductionSessionInput _input({
   String tableId = 'table_001',
   bool withAuthenticator = true,
+  String peerId = 'peer_remote',
+  String localPeerId = 'peer_local',
 }) {
   final tableState = TableState.initial(
     tableId: tableId,
@@ -333,8 +360,8 @@ AppHoldemProductionSessionInput _input({
     ),
     path: '/holdem-live',
     navigationLabel: 'Live Holdem',
-    peerId: 'peer_remote',
-    localPeerId: 'peer_local',
+    peerId: peerId,
+    localPeerId: localPeerId,
     localSeat: 1,
     sessionAuthenticator: withAuthenticator ? _authenticator() : null,
   );

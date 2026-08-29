@@ -2,6 +2,38 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Mirrored App Production Peer-Identity Normalization
+
+Summary:
+- Mirrored app production-session bootstrap/factory, persisted route policy,
+  projection publisher, and native local identity loader/writer now enforce
+  the existing operational peer-identity predicate.
+- Reserved `none`, `unresolved`, and `peer::reserved` values fail closed across
+  context, route, runtime, projection, and native identity persistence paths.
+- Generic session, table, and invite scopes retain their existing safe-text
+  validation behavior.
+
+Files:
+- Mirrored mobile and desktop session sources, factories, bootstrap paths,
+  projection publisher, local identity load/save paths, and focused tests.
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct analysis of both app packages: passed.
+- Dart formatting and repository boundary, source-text, native-contract,
+  checker-unit, and diff checks: passed.
+- Focused Flutter test attempt: stopped after the local runner produced no
+  output during a bounded attempt; no Flutter test pass is claimed.
+
+Risks:
+- Real Android/Windows secure-key, transport, device reachability, release
+  signing, and product persistence/route integration remain separate gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Operational App/Native Peer Scope Normalization
 
 Summary:

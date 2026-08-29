@@ -3429,6 +3429,16 @@ receive lookup or session provisioning. Both app packages analyze cleanly and
 repository static gates pass; focused Flutter execution remains limited by the
 local runner's silent startup behavior.
 
+The T342 follow-up closes the remaining mirrored app production peer-identity
+admission gaps. Production-session bootstrap/factory inputs, persisted route
+policy, projection publication, and native local identity load/save now use the
+same existing operational peer-identity predicate. Reserved `none`,
+`unresolved`, and `peer::reserved` values fail closed before context handoff,
+route composition, projection send, or native identity persistence; generic
+session/table/invite scopes retain their existing safe-text validation. Both
+app packages analyze cleanly and repository static gates pass; focused Flutter
+execution remains limited by the local runner's silent startup behavior.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
