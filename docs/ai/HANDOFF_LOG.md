@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Forward App Native Transport Cancellation
+
+Summary:
+- Mirrored app native transport session factories and frame adapters now forward
+  the existing cancellation future to compatible bridges for capability, send,
+  and receive operations.
+- Pre-cancelled calls fail closed before native dispatch; legacy in-flight calls
+  retain existing host-owned settlement and Dart late-result suppression.
+- The receipt provisioning fast path avoids an unnecessary uncancelled async
+  yield, and Hold'em controls remain reachable in narrow viewports.
+
+Verification:
+- Focused mobile and desktop transport suites: 45 tests passed each.
+- Full analysis, boundary, source-text, native-contract, Dart, Flutter, direct
+  dependency-resolution, and diff gates passed.
+- The live dependency audit reports 9 resolvable upgrades; no dependency change
+  is included in this focused hardening task.
+
+Next reviewer:
+Continue with documented device/native-platform, cross-device network, product
+session-source, and release-signing gates without changing locked boundaries.
+
 ### 2026-08-29 - Codex - Make Receipt Key Provisioning Cancellation-Safe
 
 Summary:

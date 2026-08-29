@@ -40,7 +40,11 @@ the newest resolvable lint/tooling baseline, with compatible transitive lockfile
 refreshes.
 `flutter pub outdated` may still report newer `meta`, `test`, and transitive
 versions when they are not mutually compatible with the current Flutter/Dart
-toolchain.
+toolchain. A direct 2026-08-29 audit reports 23 outdated packages, 9
+resolvable upgrades, and 14 newer versions below the current resolution. The
+9 resolvable upgrades are intentionally outside unrelated production-hardening
+work; handle them in a dedicated dependency change after reviewing affected
+tooling and lockfile impact.
 
 If the audit command reports advisory metadata warnings from pub.dev while
 still exiting successfully, treat the version table as useful and rerun the

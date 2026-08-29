@@ -2191,6 +2191,22 @@ Remaining:
   deterministic gates pass; focused Flutter execution remains unverified
   because both runners were silent during bounded attempts.
 
+## Recent T351 Changes
+
+- Mirrored app native transport session factories and frame adapters now forward
+  the existing cancellation future to compatible native bridges for capability,
+  send, and receive operations, and fail closed before pre-cancelled dispatch.
+- Legacy bridge calls retain the existing Dart wait-boundary suppression for
+  late results. Mirrored focused mobile and desktop transport suites pass 45
+  tests each.
+- The mirrored receipt provisioning fast path no longer yields before an
+  uncancelled native load, and Hold'em controls now appear before detail
+  sections so active actions remain reachable in narrow viewports.
+- Full repository analysis, boundary/source/native-contract checks, Dart tests,
+  Flutter tests, direct dependency resolution, and diff checks pass. The live
+  dependency audit reports 9 resolvable upgrades and is tracked separately
+  under the dependency policy; no dependency change is included here.
+
 ## Required Gates
 
 Run after each retrofit step:

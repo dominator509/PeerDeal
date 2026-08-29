@@ -241,6 +241,60 @@ void main() {
     expect(handler.frames, isEmpty);
   });
 
+  test('forwards cancellation to a cancellable native send', () async {
+    final cancellation = Completer<void>();
+    final bridge = _CancellableNativeTransportBridge();
+    final sink = NativeTransportFrameSink(
+      bridge: bridge,
+      cancellation: cancellation.future,
+    );
+
+    await sink.sendFrame(_frame());
+
+    expect(bridge.sendCancellation, same(cancellation.future));
+  });
+
+  test('forwards cancellation to a cancellable native receive', () async {
+    final cancellation = Completer<void>();
+    final bridge = _CancellableNativeTransportBridge();
+    final drain = NativeTransportFrameDrain(
+      bridge: bridge,
+      receiver: ValidatingTransportFrameReceiver(
+        handler: _RecordingTransportFrameHandler(),
+      ),
+    );
+
+    final result = await drain.drain(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      cancellation: cancellation.future,
+    );
+
+    expect(result.available, isTrue);
+    expect(bridge.receiveCancellation, same(cancellation.future));
+  });
+
+  test('does not invoke a cancellable native receive after cancellation', () async {
+    final cancellation = Completer<void>()..complete();
+    final bridge = _CancellableNativeTransportBridge();
+    final drain = NativeTransportFrameDrain(
+      bridge: bridge,
+      receiver: ValidatingTransportFrameReceiver(
+        handler: _RecordingTransportFrameHandler(),
+      ),
+    );
+
+    final result = await drain.drain(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+      cancellation: cancellation.future,
+    );
+
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport receive cancelled.']);
+    expect(bridge.receiveLookups, 0);
+  });
+
   test('rejects invalid native frames through network receiver', () async {
     final handler = _RecordingTransportFrameHandler();
     final drain = NativeTransportFrameDrain(
@@ -549,6 +603,49 @@ class _BlockingReceiveBridge implements NativeTransportBridge {
   Future<NativeTransportSendResult> sendFrame(
     NativeTransportFrame frame,
   ) async {
+    return const NativeTransportSendResult(isSuccess: true);
+  }
+}
+
+class _CancellableNativeTransportBridge
+    implements NativeTransportBridge, CancellableNativeTransportBridge {
+  Future<void>? sendCancellation;
+  Future<void>? receiveCancellation;
+  int receiveLookups = 0;
+
+  @override
+  Future<NativeTransportCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
+    return const NativeTransportCapability(
+      available: true,
+      sendSupported: true,
+      receiveSupported: true,
+      maxPayloadBytes: 4096,
+      notes: 'test',
+    );
+  }
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+    Future<void>? cancellation,
+  }) async {
+    receiveLookups += 1;
+    receiveCancellation = cancellation;
+    return NativeTransportReceiveSnapshot(
+      available: true,
+      frames: <NativeTransportFrame>[],
+    );
+  }
+
+  @override
+  Future<NativeTransportSendResult> sendFrame(
+    NativeTransportFrame frame, {
+    Future<void>? cancellation,
+  }) async {
+    sendCancellation = cancellation;
     return const NativeTransportSendResult(isSuccess: true);
   }
 }

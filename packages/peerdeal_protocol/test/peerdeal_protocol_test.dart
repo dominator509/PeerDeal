@@ -52,11 +52,17 @@ ProtocolCompatibilityResult catalogResultForFixture(
   if (path.contains(
     '${Platform.pathSeparator}gamefiles${Platform.pathSeparator}',
   )) {
+    if (GameFileSchema().validate(decoded).isNotEmpty) {
+      return const ProtocolCompatibilityResult.unsupportedArtifact();
+    }
     return catalog.checkGameFileJson(decoded);
   }
   if (path.contains(
     '${Platform.pathSeparator}invites${Platform.pathSeparator}',
   )) {
+    if (InvitePayloadSchema().validate(decoded).isNotEmpty) {
+      return const ProtocolCompatibilityResult.unsupportedArtifact();
+    }
     return catalog.checkInvitePayloadJson(decoded);
   }
 

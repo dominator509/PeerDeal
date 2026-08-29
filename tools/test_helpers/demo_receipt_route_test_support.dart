@@ -1,8 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+// These helpers are analyzed from the workspace root, whose package graph
+// intentionally owns the shared test-only package references.
+// ignore: depend_on_referenced_packages
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
+// ignore: depend_on_referenced_packages
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
+// ignore: depend_on_referenced_packages
 import 'package:peerdeal_sync/peerdeal_sync.dart';
 
 Map<String, Object?> demoFixtureJson(String fixtureName) {

@@ -87,7 +87,7 @@ class NativeReceiptKeyRingLoader
   }
 
   Future<ReceiptKeyRingLoadResult> _load({Future<void>? cancellation}) async {
-    if (await _isCancellationRequested(cancellation)) {
+    if (cancellation != null && await _isCancellationRequested(cancellation)) {
       return _cancelledLoadResult();
     }
     if (!_isValidNamespace(namespace)) {

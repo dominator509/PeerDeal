@@ -104,7 +104,8 @@ class NativeReceiptKeyRingProvisioner {
     required bool ownsInFlight,
   }) async {
     try {
-      if (await _isCancellationRequested(cancellation)) {
+      if (cancellation != null &&
+          await _isCancellationRequested(cancellation)) {
         return _cancelledProvisionResult();
       }
       final loadResult = cancellation == null

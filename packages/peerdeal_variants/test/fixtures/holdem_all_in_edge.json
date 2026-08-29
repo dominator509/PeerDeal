@@ -2,7 +2,7 @@
   "hand_id": "hand_all_in_edge",
   "variant_id": "holdem_nlhe",
   "mode_type": "open_table",
-  "phase": "hand_complete",
+  "phase": "handComplete",
   "betting_round": "river",
   "current_actor_seat": 1,
   "button_seat": 1,

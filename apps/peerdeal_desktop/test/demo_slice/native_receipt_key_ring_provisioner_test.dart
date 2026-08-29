@@ -454,12 +454,7 @@ class _ProvisioningBridge implements SecureKeyStorageMutationBridge {
 }
 
 class _CancellingProvisioningBridge extends _ProvisioningBridge {
-  _CancellingProvisioningBridge({
-    super.snapshot,
-    super.saveResult,
-    this.onLoad,
-    this.onSave,
-  });
+  _CancellingProvisioningBridge({super.snapshot, this.onLoad, this.onSave});
 
   final Completer<void>? onLoad;
   final Completer<void>? onSave;

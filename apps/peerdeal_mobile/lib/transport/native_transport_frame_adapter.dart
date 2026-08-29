@@ -9,17 +9,23 @@ const _maximumWarningLength = 160;
 class NativeTransportFrameSink implements TransportFrameSink {
   const NativeTransportFrameSink({
     required NativeTransportBridge bridge,
+    Future<void>? cancellation,
     TransportFrameValidator validator = const BasicTransportFrameValidator(
       maxPayloadBytes: NativeBridgePayloadLimits.maxTransportPayloadBytes,
     ),
   }) : _bridge = bridge,
+       _cancellation = cancellation,
        _validator = validator;
 
   final NativeTransportBridge _bridge;
+  final Future<void>? _cancellation;
   final TransportFrameValidator _validator;
 
   @override
   Future<void> sendFrame(TransportFrame frame) async {
+    if (await _isCancellationSignaled(_cancellation)) {
+      throw StateError('Native transport send cancelled.');
+    }
     if (!_validator.validate(frame).isValid) {
       throw StateError('Native transport frame rejected.');
     }
@@ -28,10 +34,27 @@ class NativeTransportFrameSink implements TransportFrameSink {
     if (!nativeFrame.isUsable) {
       throw StateError('Native transport frame rejected.');
     }
-    final result = await _bridge.sendFrame(nativeFrame);
+    final result = await _awaitOrCancel(
+      _sendNativeFrame(nativeFrame),
+      _cancellation,
+    );
+    if (result == null) {
+      throw StateError('Native transport send cancelled.');
+    }
     if (!result.isSuccess) {
       throw StateError('Native transport send failed.');
     }
+  }
+
+  Future<NativeTransportSendResult> _sendNativeFrame(
+    NativeTransportFrame frame,
+  ) {
+    final bridge = _bridge;
+    if (bridge is CancellableNativeTransportBridge) {
+      final cancellableBridge = bridge as CancellableNativeTransportBridge;
+      return cancellableBridge.sendFrame(frame, cancellation: _cancellation);
+    }
+    return bridge.sendFrame(frame);
   }
 }
 
@@ -40,15 +63,18 @@ class NativeTransportFrameDrain {
     required NativeTransportBridge bridge,
     required TransportFrameReceiver receiver,
     int maxFramesPerDrain = 64,
+    Future<void>? cancellation,
   }) : _bridge = bridge,
        _receiver = receiver,
        _maxFramesPerDrain = maxFramesPerDrain,
+       _cancellation = cancellation,
        _unavailableWarnings = null;
 
   NativeTransportFrameDrain.unavailable({required List<String> warnings})
     : _bridge = null,
       _receiver = null,
       _maxFramesPerDrain = 0,
+      _cancellation = null,
       _unavailableWarnings = _safeNativeTransportWarnings(
         warnings,
         fallback: 'Native transport warning unavailable.',
@@ -57,6 +83,7 @@ class NativeTransportFrameDrain {
   final NativeTransportBridge? _bridge;
   final TransportFrameReceiver? _receiver;
   final int _maxFramesPerDrain;
+  final Future<void>? _cancellation;
   final List<String>? _unavailableWarnings;
 
   Future<NativeTransportFrameDrainResult> drain({
@@ -83,18 +110,39 @@ class NativeTransportFrameDrain {
       );
     }
 
+    final effectiveCancellation = cancellation ?? _cancellation;
+    if (await _isCancellationSignaled(effectiveCancellation)) {
+      return NativeTransportFrameDrainResult.unavailable(
+        warnings: <String>['Native transport receive cancelled.'],
+      );
+    }
+
     final NativeTransportReceiveSnapshot? snapshot;
     try {
       snapshot = await _awaitOrCancel(
-        _bridge!.receiveFrames(sessionId: sessionId, peerId: peerId),
-        cancellation,
+        _receiveNativeFrames(
+          sessionId: sessionId,
+          peerId: peerId,
+          cancellation: effectiveCancellation,
+        ),
+        effectiveCancellation,
       );
     } on Object {
+      if (await _isCancellationSignaled(effectiveCancellation)) {
+        return NativeTransportFrameDrainResult.unavailable(
+          warnings: <String>['Native transport receive cancelled.'],
+        );
+      }
       return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive failed.'],
       );
     }
     if (snapshot == null) {
+      return NativeTransportFrameDrainResult.unavailable(
+        warnings: <String>['Native transport receive cancelled.'],
+      );
+    }
+    if (await _isCancellationSignaled(effectiveCancellation)) {
       return NativeTransportFrameDrainResult.unavailable(
         warnings: <String>['Native transport receive cancelled.'],
       );
@@ -113,6 +161,11 @@ class NativeTransportFrameDrain {
 
     final results = <TransportFrameReceiveResult>[];
     for (final frame in snapshot.frames.take(_maxFramesPerDrain)) {
+      if (await _isCancellationSignaled(effectiveCancellation)) {
+        return NativeTransportFrameDrainResult.unavailable(
+          warnings: <String>['Native transport receive cancelled.'],
+        );
+      }
       if (frame.payloadBytes.length >
           NativeBridgePayloadLimits.maxTransportPayloadBytes) {
         results.add(
@@ -126,7 +179,7 @@ class NativeTransportFrameDrain {
       try {
         final result = await _awaitOrCancel(
           _receiver!.receive(_fromNativeFrame(frame)),
-          cancellation,
+          effectiveCancellation,
         );
         if (result == null) {
           return NativeTransportFrameDrainResult.unavailable(
@@ -135,6 +188,11 @@ class NativeTransportFrameDrain {
         }
         results.add(result);
       } on Object {
+        if (await _isCancellationSignaled(effectiveCancellation)) {
+          return NativeTransportFrameDrainResult.unavailable(
+            warnings: <String>['Native transport receive cancelled.'],
+          );
+        }
         results.add(
           TransportFrameReceiveResult.rejected(
             reasonCode: 'ERR_NATIVE_TRANSPORT_FRAME_RECEIVE_FAILED',
@@ -157,6 +215,23 @@ class NativeTransportFrameDrain {
           'Native transport receive batch limit reached.',
       ],
     );
+  }
+
+  Future<NativeTransportReceiveSnapshot> _receiveNativeFrames({
+    required String sessionId,
+    required String peerId,
+    required Future<void>? cancellation,
+  }) {
+    final bridge = _bridge!;
+    if (bridge is CancellableNativeTransportBridge) {
+      final cancellableBridge = bridge as CancellableNativeTransportBridge;
+      return cancellableBridge.receiveFrames(
+        sessionId: sessionId,
+        peerId: peerId,
+        cancellation: cancellation,
+      );
+    }
+    return bridge.receiveFrames(sessionId: sessionId, peerId: peerId);
   }
 
   static String _safeNativeWarning(
@@ -210,6 +285,17 @@ Future<T?> _awaitOrCancel<T>(Future<T> operation, Future<void>? cancellation) {
     ),
   );
   return result.future;
+}
+
+Future<bool> _isCancellationSignaled(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  return Future.any<bool>(<Future<bool>>[
+    cancellation.then<bool>(
+      (_) => true,
+      onError: (Object error, StackTrace stackTrace) => true,
+    ),
+    Future<bool>.value(false),
+  ]);
 }
 
 class NativeTransportFrameDrainResult {

@@ -531,7 +531,7 @@ void main() {
     () async {
       final cancellation = Completer<void>()..complete();
       final bridge = _FakeSecureKeyStorageBridge(
-        snapshot: const SecureKeyStorageSnapshot(
+        snapshot: SecureKeyStorageSnapshot(
           available: true,
           keys: <SecureKeyRecord>[],
         ),

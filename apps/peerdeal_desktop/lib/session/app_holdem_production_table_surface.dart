@@ -109,6 +109,10 @@ class _AppHoldemProductionTableSurfaceState
           ),
           const SizedBox(height: 16),
           _buildSection(
+            title: 'Controls',
+            children: <Widget>[_buildActionArea(hand, transportReady, canAct)],
+          ),
+          _buildSection(
             title: 'Session',
             children: <Widget>[
               PeerDealInfoRow(
@@ -164,10 +168,6 @@ class _AppHoldemProductionTableSurfaceState
               if (_statusMessage != null)
                 PeerDealInfoRow(label: 'Status', value: _statusMessage!),
             ],
-          ),
-          _buildSection(
-            title: 'Controls',
-            children: <Widget>[_buildActionArea(hand, transportReady, canAct)],
           ),
         ],
       ),

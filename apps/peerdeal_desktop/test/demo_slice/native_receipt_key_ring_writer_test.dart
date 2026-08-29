@@ -507,11 +507,7 @@ class _RecordingSecureKeyStorageBridge
 
 class _CancellingLegacySecureKeyStorageBridge
     extends _RecordingSecureKeyStorageBridge {
-  _CancellingLegacySecureKeyStorageBridge({
-    super.saveResult,
-    this.onSave,
-    this.onDelete,
-  });
+  _CancellingLegacySecureKeyStorageBridge({this.onSave, this.onDelete});
 
   final Completer<void>? onSave;
   final Completer<void>? onDelete;

@@ -2,7 +2,7 @@
   "hand_id": "hand_001",
   "variant_id": "holdem_nlhe",
   "mode_type": "open_table",
-  "phase": "betting_preflop",
+  "phase": "bettingPreflop",
   "betting_round": "preflop",
   "current_actor_seat": 2,
   "button_seat": 1,

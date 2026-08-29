@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_mobile/transport/native_transport_session_factory.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
@@ -178,6 +180,43 @@ void main() {
     expect(result.warnings, [
       'Native transport capability could not be loaded.',
     ]);
+  });
+
+  test('pre-cancelled load does not invoke the native capability bridge', () async {
+    final cancellation = Completer<void>()..complete();
+    final bridge = _FakeNativeTransportBridge();
+    final result = await NativeTransportSessionFactory(
+      bridge: bridge,
+      cancellation: cancellation.future,
+    ).loadSession(handler: _RecordingTransportFrameHandler());
+
+    expect(result.available, isFalse);
+    expect(result.warnings, ['Native transport session load cancelled.']);
+    expect(bridge.capabilityLookups, 0);
+  });
+
+  test('forwards factory cancellation to a compatible native bridge', () async {
+    final cancellation = Completer<void>();
+    final bridge = _CancellableNativeTransportBridge();
+    final result = await NativeTransportSessionFactory(
+      bridge: bridge,
+      cancellation: cancellation.future,
+    ).loadSession(handler: _RecordingTransportFrameHandler());
+
+    expect(result.available, isTrue);
+    expect(bridge.capabilityCancellation, same(cancellation.future));
+
+    final session = result.session!;
+    final send = await session.sender.send(_frame());
+    final receive = await session.drain.drain(
+      sessionId: 'session_1',
+      peerId: 'peer_b',
+    );
+
+    expect(send.sent, isTrue);
+    expect(receive.available, isTrue);
+    expect(bridge.sendCancellation, same(cancellation.future));
+    expect(bridge.receiveCancellation, same(cancellation.future));
   });
 
   test(
@@ -538,6 +577,49 @@ class _ThrowingCapabilityTransportBridge implements NativeTransportBridge {
     NativeTransportFrame frame,
   ) async {
     return const NativeTransportSendResult.failure(warning: 'unavailable');
+  }
+}
+
+class _CancellableNativeTransportBridge
+    implements NativeTransportBridge, CancellableNativeTransportBridge {
+  Future<void>? capabilityCancellation;
+  Future<void>? sendCancellation;
+  Future<void>? receiveCancellation;
+
+  @override
+  Future<NativeTransportCapability> getCapability({
+    Future<void>? cancellation,
+  }) async {
+    capabilityCancellation = cancellation;
+    return const NativeTransportCapability(
+      available: true,
+      sendSupported: true,
+      receiveSupported: true,
+      maxPayloadBytes: 4096,
+      notes: 'test',
+    );
+  }
+
+  @override
+  Future<NativeTransportReceiveSnapshot> receiveFrames({
+    required String sessionId,
+    required String peerId,
+    Future<void>? cancellation,
+  }) async {
+    receiveCancellation = cancellation;
+    return NativeTransportReceiveSnapshot(
+      available: true,
+      frames: <NativeTransportFrame>[],
+    );
+  }
+
+  @override
+  Future<NativeTransportSendResult> sendFrame(
+    NativeTransportFrame frame, {
+    Future<void>? cancellation,
+  }) async {
+    sendCancellation = cancellation;
+    return const NativeTransportSendResult(isSuccess: true);
   }
 }
 

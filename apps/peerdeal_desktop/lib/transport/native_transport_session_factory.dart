@@ -33,14 +33,29 @@ class NativeTransportSessionFactory {
         warnings: <String>['App transport payload limit is invalid.'],
       );
     }
+    if (await _isCancellationSignaled(_cancellation)) {
+      return NativeTransportSessionLoadResult.unavailable(
+        warnings: <String>['Native transport session load cancelled.'],
+      );
+    }
 
     final bridge = _resolvedBridge;
     final NativeTransportCapability capability;
     try {
-      capability = await bridge.getCapability();
+      capability = await _getCapability(bridge);
     } on Object {
+      if (await _isCancellationSignaled(_cancellation)) {
+        return NativeTransportSessionLoadResult.unavailable(
+          warnings: <String>['Native transport session load cancelled.'],
+        );
+      }
       return NativeTransportSessionLoadResult.unavailable(
         warnings: <String>['Native transport capability could not be loaded.'],
+      );
+    }
+    if (await _isCancellationSignaled(_cancellation)) {
+      return NativeTransportSessionLoadResult.unavailable(
+        warnings: <String>['Native transport session load cancelled.'],
       );
     }
 
@@ -118,6 +133,7 @@ class NativeTransportSessionFactory {
     return ValidatingTransportFrameSender(
       sink: NativeTransportFrameSink(
         bridge: bridge,
+        cancellation: _cancellation,
         validator: validator ?? _validator,
       ),
       validator: validator ?? _validator,
@@ -140,6 +156,7 @@ class NativeTransportSessionFactory {
         handler: handler,
         validator: validator ?? _validator,
       ),
+      cancellation: _cancellation,
     );
   }
 
@@ -153,6 +170,16 @@ class NativeTransportSessionFactory {
   NativeTransportBridge get _resolvedBridge {
     return _bridge ??
         MethodChannelNativeTransportBridge(cancellation: _cancellation);
+  }
+
+  Future<NativeTransportCapability> _getCapability(
+    NativeTransportBridge bridge,
+  ) {
+    if (bridge is CancellableNativeTransportBridge) {
+      final cancellableBridge = bridge as CancellableNativeTransportBridge;
+      return cancellableBridge.getCapability(cancellation: _cancellation);
+    }
+    return bridge.getCapability();
   }
 
   static String _safeNativeWarning(
@@ -191,6 +218,17 @@ class NativeTransportSessionFactory {
     return value >= 1 &&
         value <= NativeBridgePayloadLimits.maxTransportPayloadBytes;
   }
+}
+
+Future<bool> _isCancellationSignaled(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  return Future.any<bool>(<Future<bool>>[
+    cancellation.then<bool>(
+      (_) => true,
+      onError: (Object error, StackTrace stackTrace) => true,
+    ),
+    Future<bool>.value(false),
+  ]);
 }
 
 class _PayloadBoundTransportFrameValidator implements TransportFrameValidator {

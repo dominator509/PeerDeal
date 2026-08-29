@@ -3509,6 +3509,16 @@ exercises the full 60 KiB ceiling. Repository deterministic gates pass;
 focused Flutter execution remains unverified because both runners were silent
 during bounded attempts.
 
+The T351 follow-up closes an app/native cancellation forwarding gap. Mirrored
+session factories now pass the existing cancellation signal through compatible
+native capability, send, and receive bridges; app frame sinks and drains fail
+closed before pre-cancelled dispatch and suppress late legacy results at the
+existing Dart boundary. No native channel payload or package boundary changed.
+The mirrored mobile and desktop transport suites pass 45 tests each, and the
+full repository analysis, static checks, Dart tests, Flutter tests, direct
+dependency resolution, and diff checks pass. The live dependency audit reports
+9 resolvable upgrades; those remain a separate dependency-policy task.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
