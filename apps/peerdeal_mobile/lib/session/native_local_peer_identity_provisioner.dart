@@ -111,7 +111,13 @@ class NativeLocalPeerIdentityProvisioner {
   Future<AppLocalPeerIdentityProvisionResult> _ensureIdentity({
     Future<void>? cancellation,
   }) async {
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledProvisionResult();
+    }
     final loaded = await _loader.load(cancellation: cancellation);
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledProvisionResult();
+    }
     if (loaded.warnings.isNotEmpty) {
       return AppLocalPeerIdentityProvisionResult(warnings: loaded.warnings);
     }
@@ -128,15 +134,25 @@ class NativeLocalPeerIdentityProvisioner {
       );
     }
 
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledProvisionResult();
+    }
+
     final identity = AppLocalPeerIdentity(peerId: peerId);
     final saved = await _writer.save(
       identity,
       expectedRevision: loaded.revision,
       cancellation: cancellation,
     );
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledProvisionResult();
+    }
     if (!saved.isSuccess) {
       if (saved.isConflict) {
         final competing = await _loader.load(cancellation: cancellation);
+        if (await _isCancellationRequested(cancellation)) {
+          return _cancelledProvisionResult();
+        }
         if (competing.isAvailable) {
           return AppLocalPeerIdentityProvisionResult(
             identity: competing.identity,
@@ -148,6 +164,9 @@ class NativeLocalPeerIdentityProvisioner {
       );
     }
     final verified = await _loader.load(cancellation: cancellation);
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledProvisionResult();
+    }
     if (verified.warnings.isNotEmpty ||
         verified.identity?.peerId != identity.peerId) {
       return AppLocalPeerIdentityProvisionResult(
@@ -156,9 +175,18 @@ class NativeLocalPeerIdentityProvisioner {
         ],
       );
     }
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledProvisionResult();
+    }
     return AppLocalPeerIdentityProvisionResult(
       identity: identity,
       created: true,
+    );
+  }
+
+  AppLocalPeerIdentityProvisionResult _cancelledProvisionResult() {
+    return AppLocalPeerIdentityProvisionResult(
+      warnings: <String>['Local peer identity provisioning cancelled.'],
     );
   }
 
@@ -167,4 +195,15 @@ class NativeLocalPeerIdentityProvisioner {
     final bytes = List<int>.generate(24, (_) => random.nextInt(256));
     return 'peer_${base64UrlEncode(bytes).replaceAll('=', '')}';
   }
+}
+
+Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  var requested = false;
+  cancellation.then<void>(
+    (_) => requested = true,
+    onError: (Object _, StackTrace _) => requested = true,
+  );
+  await Future<void>.value();
+  return requested;
 }

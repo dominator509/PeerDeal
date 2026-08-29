@@ -292,6 +292,83 @@ void main() {
   });
 
   test(
+    'does not invoke a legacy identity load after pre-cancellation',
+    () async {
+      final cancellation = Completer<void>()..complete();
+      final bridge = _MemorySecureKeyBridge();
+
+      final result = await NativeLocalPeerIdentityLoader(
+        bridge: bridge,
+      ).load(cancellation: cancellation.future);
+
+      expect(result.isAvailable, isFalse);
+      expect(result.warnings, <String>['Local peer identity load cancelled.']);
+      expect(bridge.loadCalls, 0);
+    },
+  );
+
+  test(
+    'discards a legacy identity load result when cancellation wins',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _CancellingLegacySecureKeyBridge(
+        onLoad: cancellation,
+        keys: const <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'local_peer_id',
+            purpose: 'peer_identity',
+            algorithm: 'opaque-peer-id',
+            secret: 'peer_late',
+            active: true,
+          ),
+        ],
+      );
+
+      final result = await NativeLocalPeerIdentityLoader(
+        bridge: bridge,
+      ).load(cancellation: cancellation.future);
+
+      expect(result.isAvailable, isFalse);
+      expect(result.warnings, <String>['Local peer identity load cancelled.']);
+      expect(bridge.loadCalls, 1);
+    },
+  );
+
+  test(
+    'does not invoke a legacy identity save after pre-cancellation',
+    () async {
+      final cancellation = Completer<void>()..complete();
+      final bridge = _MemorySecureKeyBridge();
+
+      final result = await NativeLocalPeerIdentityWriter(bridge: bridge).save(
+        const AppLocalPeerIdentity(peerId: 'peer_cancelled'),
+        cancellation: cancellation.future,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Local peer identity save cancelled.');
+      expect(bridge.savedKeys, isEmpty);
+    },
+  );
+
+  test(
+    'discards a legacy identity save result when cancellation wins',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _CancellingLegacySecureKeyBridge(onSave: cancellation);
+
+      final result = await NativeLocalPeerIdentityWriter(bridge: bridge).save(
+        const AppLocalPeerIdentity(peerId: 'peer_late'),
+        cancellation: cancellation.future,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warning, 'Local peer identity save cancelled.');
+      expect(bridge.savedKeys, hasLength(1));
+    },
+  );
+
+  test(
     'rejects negative identity revisions before and after native save',
     () async {
       final invalidExpectedBridge = _MemorySecureKeyBridge();
@@ -369,6 +446,65 @@ void main() {
     expect(bridge.loadCalls, 3);
     expect(bridge.savedKeys, hasLength(1));
   });
+
+  test(
+    'does not generate or save an identity after pre-cancellation',
+    () async {
+      final cancellation = Completer<void>()..complete();
+      final bridge = _MemorySecureKeyBridge();
+      var generated = 0;
+      final provisioner = NativeLocalPeerIdentityProvisioner(
+        loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+        writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+        identityFactory: () {
+          generated++;
+          return 'peer_cancelled';
+        },
+      );
+
+      final result = await provisioner.ensureIdentity(
+        cancellation: cancellation.future,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warnings, <String>[
+        'Local peer identity provisioning cancelled.',
+      ]);
+      expect(generated, 0);
+      expect(bridge.loadCalls, 0);
+      expect(bridge.savedKeys, isEmpty);
+    },
+  );
+
+  test(
+    'does not save an identity when generation loses to cancellation',
+    () async {
+      final cancellation = Completer<void>();
+      final bridge = _MemorySecureKeyBridge();
+      var generated = 0;
+      final provisioner = NativeLocalPeerIdentityProvisioner(
+        loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+        writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+        identityFactory: () {
+          generated++;
+          cancellation.complete();
+          return 'peer_late';
+        },
+      );
+
+      final result = await provisioner.ensureIdentity(
+        cancellation: cancellation.future,
+      );
+
+      expect(result.isSuccess, isFalse);
+      expect(result.warnings, <String>[
+        'Local peer identity provisioning cancelled.',
+      ]);
+      expect(generated, 1);
+      expect(bridge.loadCalls, 1);
+      expect(bridge.savedKeys, isEmpty);
+    },
+  );
 
   test(
     'uses a conditional native mutation when a storage revision is present',
@@ -560,6 +696,30 @@ class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {
   }) async {
     keys.removeWhere((record) => record.keyId == keyId);
     return const SecureKeyStorageMutationResult(isSuccess: true);
+  }
+}
+
+class _CancellingLegacySecureKeyBridge extends _MemorySecureKeyBridge {
+  _CancellingLegacySecureKeyBridge({super.keys, this.onLoad, this.onSave});
+
+  final Completer<void>? onLoad;
+  final Completer<void>? onSave;
+
+  @override
+  Future<SecureKeyStorageSnapshot> loadKeyRing({
+    required String namespace,
+  }) async {
+    onLoad?.complete();
+    return super.loadKeyRing(namespace: namespace);
+  }
+
+  @override
+  Future<SecureKeyStorageMutationResult> saveKey({
+    required String namespace,
+    required SecureKeyRecord key,
+  }) async {
+    onSave?.complete();
+    return super.saveKey(namespace: namespace, key: key);
   }
 }
 

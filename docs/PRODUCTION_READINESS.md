@@ -3482,6 +3482,15 @@ Repository boundary, source-text, native-contract, checker-unit, and diff gates
 pass; Flutter analysis and focused Flutter execution remain unverified because
 both runners were silent during bounded attempts.
 
+The T348 follow-up closes the matching local-identity cancellation gap.
+Mirrored identity loaders and writers check cancellation before invoking legacy
+secure-key bridges and after results return. Provisioning also fails closed
+before identity generation, after each storage boundary, and before returning
+a newly persisted identity. Pre-cancelled load/save, late legacy-result, and
+generation-cancellation regressions are covered. Repository deterministic gates
+pass; Flutter analysis and focused Flutter execution remain unverified because
+both runners were silent during bounded attempts.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

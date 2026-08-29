@@ -2,6 +2,25 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Make Local Identity Provisioning Cancellation-Safe
+
+Summary:
+- Mirrored local identity loaders and writers now check cancellation before
+  invoking legacy secure-key bridges and after results return.
+- Provisioning fails closed before generation, after storage boundaries, and
+  before returning a newly persisted identity; mirrored regressions cover the
+  pre-cancelled, late-result, and generation-cancellation paths.
+
+Verification:
+- Repository boundary, source-text, native-contract, checker-unit, and diff
+  gates passed.
+- Flutter analysis and focused Flutter execution remained unverified because
+  both runners were silent during bounded attempts; no Flutter pass is claimed.
+
+Next reviewer:
+Continue with the documented real-device/native-platform and product-owned
+session-source integration gates without changing locked package boundaries.
+
 ### 2026-08-29 - Codex - Make App Recovery Factory Cancellation-Safe
 
 Summary:

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 
@@ -78,6 +80,9 @@ class NativeLocalPeerIdentityLoader {
   Future<AppLocalPeerIdentityLoadResult> load({
     Future<void>? cancellation,
   }) async {
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledLoadResult();
+    }
     if (!_isValidNamespace(namespace) ||
         !_isValidKeyId(keyId) ||
         !_isValidLabel(purpose) ||
@@ -101,6 +106,10 @@ class NativeLocalPeerIdentityLoader {
       return AppLocalPeerIdentityLoadResult(
         warnings: <String>['Local peer identity storage could not be loaded.'],
       );
+    }
+
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledLoadResult();
     }
 
     if (!snapshot.available) {
@@ -168,6 +177,12 @@ class NativeLocalPeerIdentityLoader {
     );
   }
 
+  AppLocalPeerIdentityLoadResult _cancelledLoadResult() {
+    return AppLocalPeerIdentityLoadResult(
+      warnings: <String>['Local peer identity load cancelled.'],
+    );
+  }
+
   bool _isValidPeerId(String value) =>
       value.length <= maxPeerIdLength &&
       NetworkInputLimits.isOperationalPeerIdentity(value);
@@ -184,4 +199,15 @@ class NativeLocalPeerIdentityLoader {
       !value.codeUnits.any(
         (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
       );
+}
+
+Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  var requested = false;
+  cancellation.then<void>(
+    (_) => requested = true,
+    onError: (Object _, StackTrace _) => requested = true,
+  );
+  await Future<void>.value();
+  return requested;
 }

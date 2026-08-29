@@ -2159,6 +2159,17 @@ Remaining:
   gates pass; Flutter analysis and focused Flutter execution remain unverified
   because both runners were silent during bounded attempts.
 
+## Recent T348 Changes
+
+- Mirrored local identity loaders and writers now check cancellation before
+  invoking legacy secure-key bridges and after results return.
+- Local identity provisioning now fails closed before generation, after each
+  storage boundary, and before returning a newly persisted identity. Mirrored
+  regressions cover pre-cancelled loads/saves, late legacy results, and
+  generation cancellation. Repository deterministic gates pass; Flutter
+  analysis and focused Flutter execution remain unverified because both
+  runners were silent during bounded attempts.
+
 ## Required Gates
 
 Run after each retrofit step:

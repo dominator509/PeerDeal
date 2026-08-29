@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
 import 'package:peerdeal_network/peerdeal_network.dart';
 
@@ -50,6 +52,9 @@ class NativeLocalPeerIdentityWriter {
     int? expectedRevision,
     Future<void>? cancellation,
   }) async {
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledWriteResult();
+    }
     if (!_isValidNamespace(namespace) ||
         !_isValidKeyId(keyId) ||
         !_isValidLabel(purpose) ||
@@ -109,6 +114,10 @@ class NativeLocalPeerIdentityWriter {
       );
     }
 
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledWriteResult();
+    }
+
     if (!_isValidRevision(result.revision) ||
         (usesConditionalMutation &&
             _isRevisionBeforeExpected(result.revision, expectedRevision))) {
@@ -123,6 +132,12 @@ class NativeLocalPeerIdentityWriter {
       warning: 'Local peer identity save failed.',
       revision: result.revision,
       isConflict: result.isConflict,
+    );
+  }
+
+  AppLocalPeerIdentityWriteResult _cancelledWriteResult() {
+    return const AppLocalPeerIdentityWriteResult.failure(
+      warning: 'Local peer identity save cancelled.',
     );
   }
 
@@ -154,4 +169,15 @@ class NativeLocalPeerIdentityWriter {
       !value.codeUnits.any(
         (unit) => unit < 0x20 || (unit >= 0x7f && unit <= 0x9f),
       );
+}
+
+Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  var requested = false;
+  cancellation.then<void>(
+    (_) => requested = true,
+    onError: (Object _, StackTrace _) => requested = true,
+  );
+  await Future<void>.value();
+  return requested;
 }

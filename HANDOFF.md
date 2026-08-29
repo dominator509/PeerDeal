@@ -66,7 +66,8 @@ peer-identity normalization, T343 accepted session-context identity binding,
 and T344 invite variant identity preservation and Holdem variant admission,
 and T345 persisted-source and configuration-factory variant admission, and
 T346 cancellation-before-native-dispatch hardening, and T347 cancellation-safe
-app recovery factory loading
+app recovery factory loading, and T348 cancellation-safe local identity
+provisioning
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -351,6 +352,17 @@ table scopes retain their existing safe-text contract.
   repository boundary, source-text, native-contract, checker-unit, and diff
   gates pass; Flutter analysis and focused Flutter execution remain
   unverified because both runners were silent during bounded attempts.
+
+## Recent T348 Changes
+
+- Mirrored local identity loaders and writers now check cancellation before
+  invoking legacy secure-key bridges and after results return.
+- Local identity provisioning now fails closed before generation, after each
+  storage boundary, and before returning a newly persisted identity. Mirrored
+  regressions cover pre-cancelled loads/saves, late legacy results, and
+  generation cancellation. Repository deterministic gates pass; Flutter
+  analysis and focused Flutter execution remain unverified because both
+  runners were silent during bounded attempts.
 
 ## What Changed
 
