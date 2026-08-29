@@ -228,6 +228,34 @@ void main() {
     },
   );
 
+  test('does not invoke a legacy bridge after pre-cancellation', () async {
+    final cancellation = Completer<void>()..complete();
+    final bridge = _CountingAppStorageDirectoryBridge();
+
+    final factory =
+        await AppRecoveryPersistenceStoreFactory.fromNativeAppSupport(
+          bridge: bridge,
+          cancellation: cancellation.future,
+        );
+
+    expect(factory, isNull);
+    expect(bridge.calls, 0);
+  });
+
+  test('discards a legacy bridge result when cancellation wins', () async {
+    final cancellation = Completer<void>();
+    final bridge = _CancellingAppStorageDirectoryBridge(cancellation);
+
+    final factory =
+        await AppRecoveryPersistenceStoreFactory.fromNativeAppSupport(
+          bridge: bridge,
+          cancellation: cancellation.future,
+        );
+
+    expect(factory, isNull);
+    expect(bridge.calls, 1);
+  });
+
   test('fails closed when app cannot provide recovery root', () {
     final factory = AppRecoveryPersistenceStoreFactory(
       rootDirectoryFactory: () => throw StateError('root unavailable'),
@@ -356,5 +384,36 @@ class _CancellableAppStorageDirectoryBridge
     this.cancellation = cancellation;
     await cancellation;
     return const AppStorageDirectorySnapshot.unavailable();
+  }
+}
+
+class _CountingAppStorageDirectoryBridge implements AppStorageDirectoryBridge {
+  int calls = 0;
+
+  @override
+  Future<AppStorageDirectorySnapshot> getAppSupportDirectory() async {
+    calls++;
+    return AppStorageDirectorySnapshot(
+      available: true,
+      directoryPath: r'C:\support',
+    );
+  }
+}
+
+class _CancellingAppStorageDirectoryBridge
+    implements AppStorageDirectoryBridge {
+  _CancellingAppStorageDirectoryBridge(this.cancellation);
+
+  final Completer<void> cancellation;
+  int calls = 0;
+
+  @override
+  Future<AppStorageDirectorySnapshot> getAppSupportDirectory() async {
+    calls++;
+    cancellation.complete();
+    return AppStorageDirectorySnapshot(
+      available: true,
+      directoryPath: r'C:\support',
+    );
   }
 }

@@ -65,7 +65,8 @@ peer-scope normalization, and T342 mirrored app production-session
 peer-identity normalization, T343 accepted session-context identity binding,
 and T344 invite variant identity preservation and Holdem variant admission,
 and T345 persisted-source and configuration-factory variant admission, and
-T346 cancellation-before-native-dispatch hardening
+T346 cancellation-before-native-dispatch hardening, and T347 cancellation-safe
+app recovery factory loading
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -340,6 +341,16 @@ table scopes retain their existing safe-text contract.
 - Added dispatch-level regressions proving pre-cancelled calls do not reach the
   native handler. Direct package analysis and repository static gates pass;
   focused Flutter execution remains limited by its silent startup behavior.
+
+## Recent T347 Changes
+
+- Mirrored app recovery persistence factories now check cancellation before
+  invoking legacy or non-cancellable native app-support bridges and after the
+  lookup completes, preventing stale recovery factory creation.
+- Added pre-cancelled no-invocation and cancellation-wins regressions. The
+  repository boundary, source-text, native-contract, checker-unit, and diff
+  gates pass; Flutter analysis and focused Flutter execution remain
+  unverified because both runners were silent during bounded attempts.
 
 ## What Changed
 

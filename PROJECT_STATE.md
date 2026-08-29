@@ -2149,6 +2149,16 @@ Remaining:
   handlers. Direct package analysis and repository static gates pass; focused
   Flutter execution remains limited by its silent startup behavior.
 
+## Recent T347 Changes
+
+- Mirrored app recovery persistence factories now check cancellation before
+  invoking legacy or non-cancellable native app-support bridges and after the
+  lookup completes, preventing stale recovery factory creation.
+- Pre-cancelled no-invocation and cancellation-wins regressions are covered.
+  Repository boundary, source-text, native-contract, checker-unit, and diff
+  gates pass; Flutter analysis and focused Flutter execution remain unverified
+  because both runners were silent during bounded attempts.
+
 ## Required Gates
 
 Run after each retrofit step:

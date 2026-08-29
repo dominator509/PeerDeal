@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -77,6 +78,8 @@ class AppRecoveryPersistenceStoreFactory {
     AppStorageDirectoryBridge? bridge,
     Future<void>? cancellation,
   }) async {
+    if (await _isCancellationRequested(cancellation)) return null;
+
     final AppStorageDirectorySnapshot snapshot;
     try {
       final directoryBridge =
@@ -91,6 +94,8 @@ class AppRecoveryPersistenceStoreFactory {
     } on Object {
       return null;
     }
+
+    if (await _isCancellationRequested(cancellation)) return null;
 
     final appSupportPath = snapshot.directoryPath;
     if (!snapshot.available ||
@@ -143,4 +148,15 @@ class AppRecoveryPersistenceStoreFactory {
           NativeBridgePayloadLimits.maxAppStoragePathBytes,
         );
   }
+}
+
+Future<bool> _isCancellationRequested(Future<void>? cancellation) async {
+  if (cancellation == null) return false;
+  var requested = false;
+  cancellation.then<void>(
+    (_) => requested = true,
+    onError: (Object _, StackTrace _) => requested = true,
+  );
+  await Future<void>.value();
+  return requested;
 }

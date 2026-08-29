@@ -2,6 +2,24 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Make App Recovery Factory Cancellation-Safe
+
+Summary:
+- Mirrored app recovery persistence factories now check cancellation before
+  invoking legacy or non-cancellable native app-support bridges and after the
+  lookup completes, preventing stale recovery factory creation.
+- Added pre-cancelled no-invocation and cancellation-wins regressions.
+
+Verification:
+- Repository boundary, source-text, native-contract, checker-unit, and diff
+  gates passed.
+- Flutter analysis and focused Flutter execution remained unverified because
+  both runners were silent during bounded attempts; no Flutter pass is claimed.
+
+Next reviewer:
+Continue with the documented real-device/native-platform and product-owned
+session-source integration gates without changing locked package boundaries.
+
 ### 2026-08-29 - Codex - Suppress Pre-cancelled Native Dispatch
 
 Summary:

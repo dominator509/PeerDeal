@@ -3473,6 +3473,15 @@ handlers. Direct package analysis and repository static gates pass; focused
 Flutter execution remains limited by the local runner's silent startup
 behavior.
 
+The T347 follow-up closes the app-owned legacy-bridge cancellation gap.
+Mirrored app recovery persistence factories now check cancellation before
+invoking a non-cancellable native app-support bridge and again after its result
+arrives, so a late available path cannot create a stale recovery factory.
+Pre-cancelled no-invocation and cancellation-wins regressions are covered.
+Repository boundary, source-text, native-contract, checker-unit, and diff gates
+pass; Flutter analysis and focused Flutter execution remain unverified because
+both runners were silent during bounded attempts.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including
