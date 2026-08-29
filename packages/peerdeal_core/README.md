@@ -39,6 +39,8 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
   64 commitments, 64 winning slice-map entries, and 64 winners per slice
 - pot settlement rejects negative commitments, unsafe or duplicate commitment
   seat IDs, and unsafe or duplicate winner IDs before side-pot construction
+- checked-in side-pot scenarios are decoded through a typed test-only fixture
+  loader and exercised through `SidePotBuilder` and `PotEngine`
 - public table-state metadata and pot-settlement result collections are
   defensively copied and recursively frozen at construction
 - baseline reducer guards remain immutable through `CoreReducer()`; custom

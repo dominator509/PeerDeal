@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Core Pot Fixture Settlement Boundary
+
+Summary:
+- Wired the existing side-pot and folded-dead-money JSON fixtures through a
+  typed test-only pot decoder.
+- Added a directory-driven fixture test asserting deterministic side-pot slices
+  and balanced uncontested settlement through the existing core engines.
+
+Files:
+- `packages/peerdeal_core/test/fixture_loader.dart`
+- `packages/peerdeal_core/test/fixture_pot_settlement_test.dart`
+- `packages/peerdeal_core/README.md`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct `peerdeal_core` analysis: passed.
+- Focused Dart test runner attempted with `--no-pub`, then stopped after the
+  known pub.dev advisory network stall; no focused test pass is claimed.
+
+Risks:
+- This closes local core pot fixture/parser drift only. Product ledger wiring,
+  device validation, durable persistence, and release signing remain separate
+  integration or operator-owned gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Privacy Retention Fixture Boundary
 
 Summary:

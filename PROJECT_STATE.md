@@ -2012,6 +2012,14 @@ Remaining:
   eligibility, derived wipe/export behavior, and the exact timed wipe boundary.
 - No retention engine, receipt, protocol, app, or package boundary changed.
 
+## Recent T334 Changes
+
+- Core pot fixtures now cover side-pot slices and folded dead money through a
+  typed test-only decoder.
+- The fixture suite discovers every pot JSON fixture and exercises deterministic
+  `SidePotBuilder` slices plus balanced `PotEngine` settlement.
+- No pot engine, ledger, protocol, variant, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

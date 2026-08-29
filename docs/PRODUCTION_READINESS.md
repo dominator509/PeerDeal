@@ -167,6 +167,9 @@ the gates below are satisfied.
 - Privacy fixtures now cover strict-ephemeral and timed-sandbox policies; the
   suite discovers every policy fixture and routes each through typed decoding
   and the existing retention engine's restore and wipe decisions.
+- Core pot fixtures now cover side-pot slices and folded dead money; the suite
+  discovers every pot fixture and routes each through typed decoding plus the
+  existing `SidePotBuilder` and `PotEngine` settlement boundaries.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

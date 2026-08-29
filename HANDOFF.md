@@ -55,7 +55,7 @@ fixture breadth enforcement, and T329 sync recovery fixture breadth
 enforcement, and T330 wizard fixture boundary enforcement, and T331 crypto
 verification fixture boundary enforcement, and T332 receipt fixture
 authorization boundary enforcement, and T333 privacy fixture policy boundary
-enforcement
+enforcement, and T334 core pot fixture settlement boundary enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -166,6 +166,11 @@ policy fixtures through a typed test-only `RetentionPolicy` decoder. The fixture
 suite now asserts restore eligibility, derived export/wipe behavior, and the
 exact timed wipe boundary without changing retention policy or package
 ownership.
+
+The T334 core hardening wires the existing side-pot scenarios through a typed
+test-only pot fixture decoder. The fixture suite now asserts deterministic
+side-pot slices and balanced uncontested settlement through `SidePotBuilder`
+and `PotEngine` without changing core settlement behavior or package ownership.
 
 ## What Changed
 
