@@ -62,6 +62,25 @@ SOURCE_FILES = {
         "runner",
         "windows_native_transport.cpp",
     ),
+    "mobile_app": (
+        "apps",
+        "peerdeal_mobile",
+        "lib",
+        "transport",
+        "native_transport_session_factory.dart",
+    ),
+    "desktop_app": (
+        "apps",
+        "peerdeal_desktop",
+        "lib",
+        "transport",
+        "native_transport_session_factory.dart",
+    ),
+}
+
+APP_PAYLOAD_DEFAULTS = {
+    "mobile_app": "NativeBridgePayloadLimits.maxTransportPayloadBytes",
+    "desktop_app": "NativeBridgePayloadLimits.maxTransportPayloadBytes",
 }
 
 SEQUENCE_GUARDS = {
@@ -83,6 +102,12 @@ def _declaration_expression(text: str, platform: str, symbol: str) -> str | None
         pattern = rf"^\s*private\s+const\s+val\s+{escaped_symbol}\s*=\s*([^\r\n]+)"
     else:
         pattern = rf"^\s*constexpr\s+[^;=]+\s+{escaped_symbol}\s*=\s*([^;]+);"
+    match = re.search(pattern, text, flags=re.MULTILINE)
+    return match.group(1).strip() if match else None
+
+
+def _constructor_default_expression(text: str, parameter: str) -> str | None:
+    pattern = rf"^\s*int\s+{re.escape(parameter)}\s*=\s*([^,]+),"
     match = re.search(pattern, text, flags=re.MULTILINE)
     return match.group(1).strip() if match else None
 
@@ -222,6 +247,22 @@ def check_native_contract_bounds(root: pathlib.Path) -> list[str]:
             relative_path = _source_path(root, platform).relative_to(root).as_posix()
             failures.append(
                 f"{relative_path}: missing signed 32-bit sequence guard {guard}."
+            )
+
+    for platform, expected_expression in APP_PAYLOAD_DEFAULTS.items():
+        relative_path = _source_path(root, platform).relative_to(root).as_posix()
+        expression = _constructor_default_expression(
+            source_text[platform], "maxPayloadBytes"
+        )
+        if expression is None:
+            failures.append(
+                f"{relative_path}: missing native transport default for "
+                "maxPayloadBytes."
+            )
+        elif expression != expected_expression:
+            failures.append(
+                f"{relative_path}: maxPayloadBytes default {expression!r} must "
+                f"reference {expected_expression}."
             )
 
     return failures

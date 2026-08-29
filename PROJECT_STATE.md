@@ -2061,6 +2061,15 @@ Remaining:
   produced no output during a bounded attempt and was stopped; no Flutter test
   pass is claimed.
 
+## Recent T339 Changes
+
+- Extended `scripts/check_native_contract_bounds.py` to load both mirrored app
+  native transport factories and require their default `maxPayloadBytes` to
+  reference the canonical native 60 KiB limit.
+- Added negative-path checker coverage for app-default drift; the live checker
+  and its 7-test unit suite pass.
+- Runtime behavior and package ownership remain unchanged.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -3406,6 +3406,12 @@ Both app packages analyze cleanly. Focused Flutter execution remains limited
 by the local runner's silent startup behavior; native/device validation and
 product transport wiring remain separate gates.
 
+The T339 follow-up closes the corresponding regression-gate gap. The existing
+native contract checker now requires both mirrored app factory defaults to
+reference `NativeBridgePayloadLimits.maxTransportPayloadBytes`, and its
+negative-path suite rejects a stale or literal app default. The live checker and
+7 checker tests pass; no runtime or package-boundary behavior changed.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

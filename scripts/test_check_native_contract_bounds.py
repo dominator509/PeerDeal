@@ -23,6 +23,12 @@ SOURCE_PATHS = {
     "windows": pathlib.Path(
         "apps/peerdeal_desktop/windows/runner/windows_native_transport.cpp"
     ),
+    "mobile_app": pathlib.Path(
+        "apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart"
+    ),
+    "desktop_app": pathlib.Path(
+        "apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart"
+    ),
 }
 
 
@@ -52,6 +58,20 @@ constexpr std::size_t kMaxPayloadBytes = 60 * 1024;
 constexpr std::size_t kMaxIdBytes = 256;
 constexpr std::size_t kMaxBatchSize = 64;
 auto sequence_limit = std::numeric_limits<int32_t>::max();
+""",
+        "mobile_app": """
+class NativeTransportSessionFactory {
+  NativeTransportSessionFactory({
+    int maxPayloadBytes = NativeBridgePayloadLimits.maxTransportPayloadBytes,
+  });
+}
+""",
+        "desktop_app": """
+class NativeTransportSessionFactory {
+  NativeTransportSessionFactory({
+    int maxPayloadBytes = NativeBridgePayloadLimits.maxTransportPayloadBytes,
+  });
+}
 """,
     }
     for platform, path in SOURCE_PATHS.items():
@@ -139,6 +159,25 @@ class NativeContractBoundsCheckTest(unittest.TestCase):
             self.assertIn("network_input_limits.dart", failures[0])
             self.assertIn("maxTransportSequence=2147483646", failures[0])
             self.assertIn("signed 32-bit ceiling 2147483647", failures[0])
+
+    def test_rejects_app_payload_default_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_contract_sources(root)
+            mobile_path = root / SOURCE_PATHS["mobile_app"]
+            mobile_path.write_text(
+                mobile_path.read_text(encoding="utf-8").replace(
+                    "NativeBridgePayloadLimits.maxTransportPayloadBytes",
+                    "60 * 1024",
+                ),
+                encoding="utf-8",
+            )
+
+            failures = check_native_contract_bounds(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("native_transport_session_factory.dart", failures[0])
+            self.assertIn("must reference", failures[0])
 
     def test_rejects_missing_source(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -58,7 +58,8 @@ authorization boundary enforcement, and T333 privacy fixture policy boundary
 enforcement, and T334 core pot fixture settlement boundary enforcement, and
 T335 core event-sequence fixture hash-chain enforcement, T336 operational
 network peer-identity boundary normalization, T337 network/native transport
-sequence-bound parity, and T338 app/native transport default-bound alignment
+sequence-bound parity, T338 app/native transport default-bound alignment, and
+T339 app/native transport default-bound checker enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -197,6 +198,11 @@ transport session payload limit with the existing native 60 KiB contract. The
 previous 64 KiB default was rejected by the factory's own fail-closed
 configuration gate, making default transport provisioning unavailable.
 
+The T339 contract hardening extends the existing native transport bound checker
+to require both app-shell factory defaults to reference the canonical native
+payload limit. Its negative-path test prevents a future literal or stale
+default from bypassing the cross-layer drift gate.
+
 ## Recent T336 Changes
 
 - Network operational peer identities now share one reserved-aware predicate;
@@ -225,6 +231,15 @@ configuration gate, making default transport provisioning unavailable.
   payload-limit gate.
 - Mirrored app package analysis passes; the focused Flutter runner remained
   silent and was stopped after a bounded attempt.
+
+## Recent T339 Changes
+
+- The native transport bound checker now loads both mirrored app factory files
+  and requires their `maxPayloadBytes` defaults to reference
+  `NativeBridgePayloadLimits.maxTransportPayloadBytes`.
+- Added negative-path coverage for app-default drift; the live checker and its
+  7-test unit suite pass.
+- No runtime contract or package boundary changed.
 
 ## What Changed
 

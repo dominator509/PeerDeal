@@ -2,6 +2,33 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - App Transport Default Drift Gate
+
+Summary:
+- Extended the existing native transport bound checker to load both mirrored
+  app factory sources.
+- The checker now requires each constructor default to reference
+  `NativeBridgePayloadLimits.maxTransportPayloadBytes` and rejects drift.
+
+Files:
+- `scripts/check_native_contract_bounds.py`
+- `scripts/test_check_native_contract_bounds.py`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Native contract-bound check: passed.
+- Checker unit suite: passed (7 tests).
+- No runtime or package-boundary behavior changed.
+
+Risks:
+- Real Android/Windows transport, device reachability, and product transport
+  provisioning remain separate integration gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - App/Native Transport Default Bound Alignment
 
 Summary:
