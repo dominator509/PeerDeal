@@ -154,6 +154,10 @@ the gates below are satisfied.
   unsupported snapshot protocol safe-close outcome; the suite discovers every
   sync recovery JSON fixture and decodes it through the typed `RecoveryRequest`
   boundary.
+- Wizard fixtures now cover simple, advanced, conversational, and preset-stack
+  inputs; the suite discovers every setup-intent fixture and routes each
+  through typed decoding and resolver validation before accepting a build-ready
+  plan.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

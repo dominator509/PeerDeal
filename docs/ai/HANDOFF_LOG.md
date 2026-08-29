@@ -2,6 +2,38 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Wizard Fixture Boundary Enforcement
+
+Summary:
+- Wired the existing simple, advanced, conversational, and preset-stack JSON
+  fixtures through typed test-only decoders.
+- Added a directory-driven resolver gate requiring every setup-intent fixture
+  to produce a build-ready validated plan.
+- Added assertions for deterministic preset priority and advisory helper
+  application without changing wizard behavior.
+
+Files:
+- `packages/peerdeal_wizard/test/fixture_loader.dart`
+- `packages/peerdeal_wizard/test/setup_equivalence_test.dart`
+- `packages/peerdeal_wizard/test/fixtures/starter_fixture_notes.md`
+- `packages/peerdeal_wizard/README.md`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct `peerdeal_wizard` analysis: passed.
+- Focused Dart test runner stalled without output in the local runner and was
+  stopped; no focused test pass is claimed.
+
+Risks:
+- This closes local wizard fixture/parser drift only. Full app setup flow,
+  product session wiring, native/device validation, and release signing remain
+  separate integration or operator-owned gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-28 - Codex - Sync Recovery Fixture Breadth
 
 Summary:

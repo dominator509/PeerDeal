@@ -57,3 +57,6 @@ are present.
 - Direct Game File compilation also rejects unsafe or oversized validation
   diagnostics and never returns their original text through the compile result
   or compiled Game File.
+- Test fixtures for simple, advanced, conversational, and preset-stack inputs
+  are decoded through typed test-only loaders and routed through resolver
+  validation, preserving deterministic priority and helper-advisory behavior.

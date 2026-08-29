@@ -1979,6 +1979,15 @@ Remaining:
   assertions.
 - No sync engine, protocol, projector, app, or package boundary changed.
 
+## Recent T330 Changes
+
+- Wizard fixtures now cover simple, advanced, conversational, and preset-stack
+  inputs through typed test-only decoders.
+- The resolver suite discovers every setup-intent fixture and requires a
+  build-ready validated plan, deterministic preset priority, and advisory
+  helper behavior.
+- No wizard resolver, compiler, protocol, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

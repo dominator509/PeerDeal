@@ -52,7 +52,7 @@ bound parity, T324 rejected protocol fixture enforcement, T325 wired
 Hold'em opening-hand fixture persistence coverage, and T326 Hold'em fixture
 breadth enforcement, T327 mode fixture breadth enforcement, and T328 replay
 fixture breadth enforcement, and T329 sync recovery fixture breadth
-enforcement
+enforcement, and T330 wizard fixture boundary enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -139,6 +139,12 @@ typed test-only `RecoveryRequest` decoder, adds a valid snapshot-plus-suffix
 fixture assertion and an unsupported-protocol safe-close fixture assertion,
 and requires every sync recovery JSON fixture to load through the decoder.
 Sync recovery behavior and package ownership remain unchanged.
+
+The T330 wizard hardening wires the existing simple, advanced, conversational,
+and preset-stack JSON fixtures through typed test-only decoders. Resolver tests
+now require every setup-intent fixture to produce a build-ready validated plan,
+preserve deterministic preset priority, and keep helper suggestions advisory.
+Wizard behavior and package ownership remain unchanged.
 
 ## What Changed
 
