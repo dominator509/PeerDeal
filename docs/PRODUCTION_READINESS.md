@@ -170,6 +170,8 @@ the gates below are satisfied.
 - Core pot fixtures now cover side-pot slices and folded dead money; the suite
   discovers every pot fixture and routes each through typed decoding plus the
   existing `SidePotBuilder` and `PotEngine` settlement boundaries.
+- The root core event-sequence fixture now uses canonical event hashes and a
+  contiguous chain; typed fixture coverage replays it through `CoreReducer`.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

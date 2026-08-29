@@ -41,6 +41,8 @@ Use `lib/peerdeal_core.dart` only. Do not import `lib/src/` from sibling package
   seat IDs, and unsafe or duplicate winner IDs before side-pot construction
 - checked-in side-pot scenarios are decoded through a typed test-only fixture
   loader and exercised through `SidePotBuilder` and `PotEngine`
+- the checked-in core event sequence fixture is decoded with contiguous
+  sequence/hash-chain checks and replayed through the default reducer
 - public table-state metadata and pot-settlement result collections are
   defensively copied and recursively frozen at construction
 - baseline reducer guards remain immutable through `CoreReducer()`; custom

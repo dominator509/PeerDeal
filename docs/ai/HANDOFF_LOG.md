@@ -2,6 +2,37 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Core Event Sequence Fixture Hash Chain
+
+Summary:
+- Repaired the existing root core event fixture with canonical content hashes
+  and a contiguous `prev_event_hash` chain.
+- Added a typed test-only sequence decoder and reducer replay test covering the
+  root core event fixture directory.
+
+Files:
+- `packages/peerdeal_core/fixtures/open_table_open_sequence.json`
+- `packages/peerdeal_core/test/fixture_loader.dart`
+- `packages/peerdeal_core/test/fixture_core_event_sequence_test.dart`
+- `packages/peerdeal_core/README.md`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct `peerdeal_core` analysis: passed.
+- Independent JSON parse and canonical event-hash-chain check: passed.
+- Focused Flutter test runner stalled without output and was terminated; no
+  focused test pass is claimed.
+
+Risks:
+- This closes stale local core fixture drift only. Product ledger wiring,
+  device validation, durable persistence, and release signing remain separate
+  integration or operator-owned gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Core Pot Fixture Settlement Boundary
 
 Summary:

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:peerdeal_core/peerdeal_core.dart';
+import 'package:peerdeal_protocol/peerdeal_protocol.dart';
 
 Map<String, dynamic> loadJsonFixture(String name) {
   final file = File('test/fixtures/$name');
@@ -34,6 +35,44 @@ class PotFixtureSlice {
   final int sliceIndex;
   final int amount;
   final List<String> contestedBySeatIds;
+}
+
+class CoreEventSequenceFixture {
+  const CoreEventSequenceFixture({required this.name, required this.events});
+
+  final String name;
+  final List<EventEnvelope> events;
+}
+
+CoreEventSequenceFixture loadCoreEventSequenceFixture(String name) {
+  final file = _resolveCoreFixture(name);
+  final decoded = jsonDecode(file.readAsStringSync());
+  if (decoded is! List) {
+    throw const FormatException('Core event fixture must be an array.');
+  }
+
+  final events = <EventEnvelope>[];
+  String? previousHash;
+  for (var index = 0; index < decoded.length; index += 1) {
+    final event = EventEnvelope.fromJson(_asObject(decoded[index], 'event'));
+    if (event.eventSeq != index + 1 ||
+        (index == 0
+            ? event.prevEventHash != 'GENESIS'
+            : event.prevEventHash != previousHash)) {
+      throw const FormatException(
+        'Core event fixture sequence or hash chain is invalid.',
+      );
+    }
+    events.add(event);
+    previousHash = event.eventHash;
+  }
+  if (events.isEmpty) {
+    throw const FormatException('Core event fixture must not be empty.');
+  }
+  return CoreEventSequenceFixture(
+    name: name,
+    events: List<EventEnvelope>.unmodifiable(events),
+  );
 }
 
 PotFixture loadPotFixture(String name) {
@@ -133,6 +172,12 @@ File _resolvePotFixture(String name) {
   final packageLocal = File('fixtures/pots/$name');
   if (packageLocal.existsSync()) return packageLocal;
   return File('packages/peerdeal_core/fixtures/pots/$name');
+}
+
+File _resolveCoreFixture(String name) {
+  final packageLocal = File('fixtures/$name');
+  if (packageLocal.existsSync()) return packageLocal;
+  return File('packages/peerdeal_core/fixtures/$name');
 }
 
 Map<String, Object?> _asObject(Object? value, String label) {

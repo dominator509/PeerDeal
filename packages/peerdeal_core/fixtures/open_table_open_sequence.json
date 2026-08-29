@@ -15,7 +15,7 @@
       "mode_type": "open_table"
     },
     "prev_event_hash": "GENESIS",
-    "event_hash": "hash_placeholder"
+    "event_hash": "c5cebcbd27fa59bd493391922331338b5d4bf53a27af27e75557474e7c051e77"
   },
   {
     "event_id": "evt_002",
@@ -31,7 +31,7 @@
     "payload": {
       "participant_id": "player_001"
     },
-    "prev_event_hash": "GENESIS",
-    "event_hash": "hash_placeholder"
+    "prev_event_hash": "c5cebcbd27fa59bd493391922331338b5d4bf53a27af27e75557474e7c051e77",
+    "event_hash": "99db9d4f2d5ef2ae01742ea5737e70da7536b411c127988f35f001b65440e107"
   }
 ]

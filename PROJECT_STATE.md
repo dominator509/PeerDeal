@@ -2020,6 +2020,14 @@ Remaining:
   `SidePotBuilder` slices plus balanced `PotEngine` settlement.
 - No pot engine, ledger, protocol, variant, app, or package boundary changed.
 
+## Recent T335 Changes
+
+- The root core event-sequence fixture now contains canonical event hashes and a
+  contiguous hash chain instead of placeholders.
+- A typed test-only loader validates every root core event fixture's sequence
+  and chain, and the fixture replays through the default `CoreReducer`.
+- No reducer, protocol, variant, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:
