@@ -353,6 +353,11 @@ its scope limit.
 Transport frame session and peer identities must be exact nonblank strings;
 blank or padded identities fail validation before sender/receiver boundaries
 call platform sinks or session handlers.
+The validating receiver also bounds active plus queued unique frame admission
+to 128 frames by default (configurable up to 4,096). A new frame is rejected
+with `ERR_TRANSPORT_FRAME_RECEIVE_QUEUE_LIMIT` when that bound is full; the
+existing in-flight duplicate result remains higher precedence, and completed
+or failed handling releases its admission slot.
 Transport frame payload entries must be byte values from 0 through 255;
 out-of-range entries fail with `ERR_TRANSPORT_FRAME_PAYLOAD_BYTE_INVALID`
 before a transport sink or platform adapter is called.

@@ -66,7 +66,10 @@ score, and recover network paths without owning game truth.
   and converts sink exceptions into explicit failed send results.
 - The validating transport receiver rejects invalid frames before calling a
   session handler, converts handler exceptions into explicit failed receive
-  results, and applies bounded replay protection before handler dispatch.
+  results, applies bounded replay protection before handler dispatch, and
+  rejects new unique frames when its active-plus-queued receive admission
+  reaches the bounded in-flight limit (128 by default, configurable up to
+  the existing 4,096-frame replay-window ceiling).
 - `SlidingWindowTransportFrameReplayGuard` keys sequence windows by complete
   session/sender/recipient scope, rejects duplicate or stale sequences, allows
   unique frames inside its bounded window, and records a frame only after the

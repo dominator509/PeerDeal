@@ -120,6 +120,46 @@ void main() {
     expect(secondResult.reasonCode, 'ERR_TRANSPORT_FRAME_REPLAY_SCOPE_LIMIT');
     expect(handler.frames, [firstFrame]);
   });
+
+  test('rejects new frames when the in-flight receive queue is full', () async {
+    final handler = _BlockingFirstTransportFrameHandler();
+    final receiver = ValidatingTransportFrameReceiver(
+      handler: handler,
+      maxInFlightFrames: 1,
+    );
+    final firstFrame = _frame(sequence: 1);
+    final secondFrame = _frame(sequence: 2);
+
+    final first = receiver.receive(firstFrame);
+    await handler.firstFrameStarted.future;
+    final second = await receiver.receive(secondFrame);
+
+    expect(second.accepted, isFalse);
+    expect(second.reasonCode, 'ERR_TRANSPORT_FRAME_RECEIVE_QUEUE_LIMIT');
+    expect(second.warnings, ['transport_frame_receive_queue_limit']);
+    expect(handler.frames, [firstFrame]);
+
+    handler.releaseFirstFrame();
+    expect((await first).accepted, isTrue);
+  });
+
+  test('rejects invalid in-flight receive queue limits', () {
+    expect(
+      () => ValidatingTransportFrameReceiver(
+        handler: _RecordingTransportFrameHandler(),
+        maxInFlightFrames: 0,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => ValidatingTransportFrameReceiver(
+        handler: _RecordingTransportFrameHandler(),
+        maxInFlightFrames:
+            ValidatingTransportFrameReceiver.maximumInFlightFrames + 1,
+      ),
+      throwsArgumentError,
+    );
+  });
 }
 
 TransportFrame _frame({

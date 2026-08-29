@@ -2,6 +2,26 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Bound Transport Receive Admission
+
+Summary:
+- The network-owned validating transport receiver now bounds active plus
+  queued unique frames at 128 by default, with caller limits validated up to
+  the existing 4,096-frame replay-window ceiling.
+- In-flight duplicate rejection retains precedence, and completed or failed
+  admitted receive operations release their admission slots. No protocol, native
+  channel, or package boundary changed.
+
+Verification:
+- Focused network receiver suite: 8 tests passed.
+- Direct `peerdeal_network` analysis: no issues found.
+- Full repository gates remain to be run before publication.
+
+Next reviewer:
+Continue with documented device/native-platform, cross-device network,
+product session-source, and release-signing gates without changing locked
+boundaries.
+
 ### 2026-08-29 - Codex - Close Capture Cancellation Race
 
 Summary:

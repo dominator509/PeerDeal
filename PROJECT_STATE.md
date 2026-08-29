@@ -2191,6 +2191,15 @@ Remaining:
   deterministic gates pass; focused Flutter execution remains unverified
   because both runners were silent during bounded attempts.
 
+## Recent T353 Changes
+
+- The network-owned validating transport receiver now bounds active plus
+  queued unique frames at 128 by default, with caller limits validated up to
+  the existing 4,096-frame replay-window ceiling.
+- In-flight duplicate rejection retains precedence, and completed or failed
+  admitted receive operations release their admission slots. The focused network
+  receiver suite passes 8 tests and direct package analysis reports no issues.
+
 ## Recent T352 Changes
 
 - Mirrored app capture surface coordinators now check route cancellation after

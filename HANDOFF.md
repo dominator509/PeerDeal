@@ -69,8 +69,8 @@ T346 cancellation-before-native-dispatch hardening, and T347 cancellation-safe
 app recovery factory loading, T348 cancellation-safe local identity
 provisioning, T349 cancellation-safe receipt key provisioning, and T350
 native-readiness payload contract alignment, T351 app-native transport
-cancellation forwarding, and T352 capture cancellation hardening are
-implemented on branch
+cancellation forwarding, T352 capture cancellation hardening, and T353 bounded
+network receive admission are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -386,6 +386,15 @@ table scopes retain their existing safe-text contract.
   readiness coverage exercises the full native payload ceiling. Repository
   deterministic gates pass; focused Flutter execution remains unverified
   because both runners were silent during bounded attempts.
+
+## Recent T353 Changes
+
+- The network-owned validating transport receiver now bounds active plus
+  queued unique frames at 128 by default, with caller limits validated up to
+  the existing 4,096-frame replay-window ceiling.
+- In-flight duplicate rejection retains precedence, and completed or failed
+  admitted receive operations release their admission slots. The focused network
+  receiver suite passes 8 tests and direct package analysis reports no issues.
 
 ## Recent T352 Changes
 

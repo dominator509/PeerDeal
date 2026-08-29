@@ -15,13 +15,23 @@ class ValidatingTransportFrameReceiver implements TransportFrameReceiver {
     required TransportFrameHandler handler,
     TransportFrameValidator validator = const BasicTransportFrameValidator(),
     TransportFrameReplayGuard? replayGuard,
+    int maxInFlightFrames = defaultMaxInFlightFrames,
   }) : _handler = handler,
        _validator = validator,
-       _replayGuard = replayGuard ?? SlidingWindowTransportFrameReplayGuard();
+       _replayGuard = replayGuard ?? SlidingWindowTransportFrameReplayGuard(),
+       _maxInFlightFrames = _validatePositiveLimit(
+         maxInFlightFrames,
+         'maxInFlightFrames',
+       );
+
+  static const defaultMaxInFlightFrames = 128;
+  static const maximumInFlightFrames =
+      SlidingWindowTransportFrameReplayGuard.maximumSequenceWindow;
 
   final TransportFrameHandler _handler;
   final TransportFrameValidator _validator;
   final TransportFrameReplayGuard _replayGuard;
+  final int _maxInFlightFrames;
   final Set<_TransportFrameReplayKey> _inFlight = <_TransportFrameReplayKey>{};
   final Set<_TransportFrameReplayScope> _knownScopes =
       <_TransportFrameReplayScope>{};
@@ -40,12 +50,19 @@ class ValidatingTransportFrameReceiver implements TransportFrameReceiver {
     }
 
     final replayKey = _TransportFrameReplayKey.from(frame);
-    if (!_inFlight.add(replayKey)) {
+    if (_inFlight.contains(replayKey)) {
       return TransportFrameReceiveResult.rejected(
         reasonCode: 'ERR_TRANSPORT_FRAME_REPLAY_IN_FLIGHT',
         warnings: const <String>['transport_frame_replay_in_flight'],
       );
     }
+    if (_inFlight.length >= _maxInFlightFrames) {
+      return TransportFrameReceiveResult.rejected(
+        reasonCode: 'ERR_TRANSPORT_FRAME_RECEIVE_QUEUE_LIMIT',
+        warnings: const <String>['transport_frame_receive_queue_limit'],
+      );
+    }
+    _inFlight.add(replayKey);
 
     final scope = _TransportFrameReplayScope.from(frame);
     final wasKnown = _knownScopes.contains(scope);
@@ -143,6 +160,17 @@ class ValidatingTransportFrameReceiver implements TransportFrameReceiver {
       onError: (Object error, StackTrace stackTrace) {},
     );
     return _TransportFrameReceiveQueueEntry(result: current, tail: tail);
+  }
+
+  static int _validatePositiveLimit(int value, String fieldName) {
+    if (value < 1 || value > maximumInFlightFrames) {
+      throw ArgumentError.value(
+        value,
+        fieldName,
+        'Transport receive in-flight limit is invalid.',
+      );
+    }
+    return value;
   }
 }
 

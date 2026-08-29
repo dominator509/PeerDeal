@@ -117,8 +117,9 @@ the gates below are satisfied.
   admission and per-scope receive lifecycles before handler dispatch and replay
   recording. This prevents a concurrent new scope from invoking the handler
   before a bounded scope-limit failure and preserves handler-failure retry
-  behavior. Device/network reachability and product transport wiring remain
-  open.
+  behavior. It also bounds active plus queued unique frame admission to 128 by
+  default, failing closed before queue growth when the limit is full. Device/
+  network reachability and product transport wiring remain open.
 - Generic native transport models and channel decoding now enforce the shared
   signed 32-bit sequence ceiling required by Android and the host-private wire
   envelope; Windows host argument decoding applies the same ceiling. Flutter
@@ -3527,6 +3528,15 @@ and release remains available to clear host blocking. No native channel
 payload, package boundary, or capture contract changed. Mirrored capture
 regressions pass 11 tests each, and the full repository analysis, static
 checks, Dart tests, Flutter tests, and diff checks pass.
+
+The T353 follow-up closes an unbounded network receive-admission gap. The
+network-owned validating receiver now bounds active plus queued unique frames
+at 128 by default, with a validated caller limit up to the existing 4,096
+replay-window ceiling. Duplicate in-flight frames retain their existing
+precedence, and every admitted operation releases its slot on completion or
+failure. The
+focused receiver suite and direct package analysis pass; native/device and
+cross-device reachability remain separate gates.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
