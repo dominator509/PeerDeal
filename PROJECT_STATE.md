@@ -1988,6 +1988,14 @@ Remaining:
   helper behavior.
 - No wizard resolver, compiler, protocol, app, or package boundary changed.
 
+## Recent T331 Changes
+
+- Crypto fixtures now cover verified-hand, partial-session, and wiped-request
+  inputs through a typed test-only `VerificationRequest` decoder.
+- The verification suite discovers every request fixture and asserts the
+  existing verified, partial, and wiped engine outcomes.
+- No crypto verifier, protocol, receipt, app, or package boundary changed.
+
 ## Required Gates
 
 Run after each retrofit step:

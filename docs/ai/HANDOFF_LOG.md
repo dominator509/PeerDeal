@@ -2,6 +2,35 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Crypto Verification Fixture Boundary Enforcement
+
+Summary:
+- Wired the existing verified-hand, partial-session, and wiped-request JSON
+  fixtures through a typed test-only `VerificationRequest` decoder.
+- Added a directory-driven test requiring every request fixture to decode and
+  asserting the existing verified, partial, and wiped engine outcomes.
+
+Files:
+- `packages/peerdeal_crypto/test/fixture_loader.dart`
+- `packages/peerdeal_crypto/test/fixture_verification_test.dart`
+- `packages/peerdeal_crypto/README.md`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct `peerdeal_crypto` analysis: passed.
+- Focused Dart test runner stalled without output in the local runner and was
+  stopped; no focused test pass is claimed.
+
+Risks:
+- This closes local crypto fixture/parser drift only. Real provider proof
+  verification, product receipt/session wiring, native/device validation, and
+  release signing remain separate integration or operator-owned gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Wizard Fixture Boundary Enforcement
 
 Summary:

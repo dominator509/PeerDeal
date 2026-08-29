@@ -12,6 +12,9 @@ Starter package for PeerDeal fair-deal provider normalization and fairness / ver
 - baseline verification service with fail-closed request and proof-boundary
   validation; provider proof bundles are not considered verified unless an
   injected `DealProofVerifier` confirms them
+- Verification request fixtures are decoded through a typed test-only loader;
+  the fixture suite covers verified hand, partial session, and wiped outcomes
+  through the existing engine boundary.
 
 ## Must not own
 - UI rendering

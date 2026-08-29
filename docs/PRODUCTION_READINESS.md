@@ -158,6 +158,9 @@ the gates below are satisfied.
   inputs; the suite discovers every setup-intent fixture and routes each
   through typed decoding and resolver validation before accepting a build-ready
   plan.
+- Crypto verification fixtures now cover verified-hand, partial-session, and
+  wiped-request outcomes; the suite discovers every request fixture and routes
+  each through typed decoding and the existing fail-closed verification engine.
 - Windows local-network and app-support method-channel handlers now reject
   unknown methods before native enumeration and convert native handler failures
   into stable unavailable payloads. Windows transport capability now reports a

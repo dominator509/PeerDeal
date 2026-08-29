@@ -52,7 +52,8 @@ bound parity, T324 rejected protocol fixture enforcement, T325 wired
 Hold'em opening-hand fixture persistence coverage, and T326 Hold'em fixture
 breadth enforcement, T327 mode fixture breadth enforcement, and T328 replay
 fixture breadth enforcement, and T329 sync recovery fixture breadth
-enforcement, and T330 wizard fixture boundary enforcement
+enforcement, and T330 wizard fixture boundary enforcement, and T331 crypto
+verification fixture boundary enforcement
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -145,6 +146,12 @@ and preset-stack JSON fixtures through typed test-only decoders. Resolver tests
 now require every setup-intent fixture to produce a build-ready validated plan,
 preserve deterministic preset priority, and keep helper suggestions advisory.
 Wizard behavior and package ownership remain unchanged.
+
+The T331 crypto hardening wires the existing verified-hand, partial-session,
+and wiped-request JSON fixtures through a typed test-only `VerificationRequest`
+decoder. The verification suite now requires every request fixture to load and
+asserts the existing verified, partial, and wiped engine outcomes without
+changing cryptographic policy or package ownership.
 
 ## What Changed
 
