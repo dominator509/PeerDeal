@@ -95,6 +95,19 @@ void main() {
     );
     expect(() => guard.record(invalid), throwsArgumentError);
   });
+
+  test('rejects sequences above the native signed 32-bit ceiling', () {
+    final guard = SlidingWindowTransportFrameReplayGuard();
+    final invalid = _frame(
+      sequence: NetworkInputLimits.maxTransportSequence + 1,
+    );
+
+    expect(
+      guard.check(invalid).disposition,
+      TransportFrameReplayDisposition.invalid,
+    );
+    expect(() => guard.record(invalid), throwsArgumentError);
+  });
 }
 
 TransportFrame _frame({

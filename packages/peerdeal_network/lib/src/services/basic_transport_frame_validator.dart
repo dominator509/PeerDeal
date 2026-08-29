@@ -38,7 +38,8 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
     if (frame.fromPeerId == frame.toPeerId) {
       warnings.add('ERR_TRANSPORT_FRAME_SELF_SEND');
     }
-    if (frame.sequence < 1) {
+    if (frame.sequence < 1 ||
+        frame.sequence > NetworkInputLimits.maxTransportSequence) {
       warnings.add('ERR_TRANSPORT_FRAME_SEQUENCE_INVALID');
     }
     if (frame.payload.isEmpty) {

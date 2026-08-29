@@ -3390,6 +3390,14 @@ session/table scope identities retain the existing safe-text rule. Complete
 network package tests and direct analysis pass; native/device reachability and
 product transport wiring remain separate production gates.
 
+The T337 follow-up closes the network/native transport sequence parity gap.
+`peerdeal_network` frame validation and replay protection now reject values
+above the existing signed 32-bit ceiling (`0x7fffffff`), matching the generic
+native bridge and Android/Windows host envelope. The native contract-bound
+checker now verifies this network declaration as well as the existing host
+declarations. Complete network tests, direct analysis, and checker tests pass;
+device reachability and product transport wiring remain separate gates.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

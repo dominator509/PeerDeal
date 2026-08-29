@@ -58,10 +58,10 @@ score, and recover network paths without owning game truth.
 - Confidence classification degrades or requires recovery when peers lag the
   event index.
 - Transport frame validation fails closed on missing session/peer identities,
-  self-send frames, invalid sequence numbers, empty payloads, and oversized
-  payloads. It also rejects payload entries outside the 0-through-255 byte
-  range and C0/C1 control-bearing identities before live transport
-  implementations see the frame.
+  self-send frames, sequence numbers outside the shared signed 32-bit ceiling,
+  empty payloads, and oversized payloads. It also rejects payload entries
+  outside the 0-through-255 byte range and C0/C1 control-bearing identities
+  before live transport implementations see the frame.
 - The validating transport sender rejects invalid frames before calling a sink
   and converts sink exceptions into explicit failed send results.
 - The validating transport receiver rejects invalid frames before calling a

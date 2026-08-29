@@ -2040,6 +2040,16 @@ Remaining:
 - Complete `peerdeal_network` test suite: passed (79 tests); direct package
   analysis: passed.
 
+## Recent T337 Changes
+
+- Applied the existing signed 32-bit transport sequence ceiling to network
+  frame validation and replay protection, matching the native bridge and
+  Android/Windows host envelope.
+- Extended the native contract-bound checker and its tests to detect drift
+  between the network and native sequence declarations.
+- Complete `peerdeal_network` test suite: passed (81 tests); direct package
+  analysis, checker tests, and native contract-bound check: passed.
+
 ## Required Gates
 
 Run after each retrofit step:

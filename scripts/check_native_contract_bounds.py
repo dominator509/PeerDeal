@@ -34,6 +34,14 @@ SOURCE_FILES = {
         "src",
         "native_bridge_payload_limits.dart",
     ),
+    "network": (
+        "packages",
+        "peerdeal_network",
+        "lib",
+        "src",
+        "models",
+        "network_input_limits.dart",
+    ),
     "android": (
         "apps",
         "peerdeal_mobile",
@@ -69,7 +77,7 @@ def _source_path(root: pathlib.Path, platform: str) -> pathlib.Path:
 
 def _declaration_expression(text: str, platform: str, symbol: str) -> str | None:
     escaped_symbol = re.escape(symbol)
-    if platform == "dart":
+    if platform in ("dart", "network"):
         pattern = rf"^\s*static\s+const\s+{escaped_symbol}\s*=\s*([^;]+);"
     elif platform == "android":
         pattern = rf"^\s*private\s+const\s+val\s+{escaped_symbol}\s*=\s*([^\r\n]+)"
@@ -188,6 +196,24 @@ def check_native_contract_bounds(root: pathlib.Path) -> list[str]:
             failures.append(
                 f"{dart_sequence_path.relative_to(root).as_posix()}: "
                 f"maxTransportSequence={dart_sequence_value} does not match "
+                f"the signed 32-bit ceiling {SEQUENCE_LIMIT}."
+            )
+
+    network_sequence_path = _source_path(root, "network")
+    network_sequence_expression = _declaration_expression(
+        source_text["network"], "network", "maxTransportSequence"
+    )
+    if network_sequence_expression is None:
+        failures.append(
+            f"{network_sequence_path.relative_to(root).as_posix()}: missing "
+            "declaration for maxTransportSequence."
+        )
+    else:
+        network_sequence_value = _evaluate_integer(network_sequence_expression)
+        if network_sequence_value != SEQUENCE_LIMIT:
+            failures.append(
+                f"{network_sequence_path.relative_to(root).as_posix()}: "
+                f"maxTransportSequence={network_sequence_value} does not match "
                 f"the signed 32-bit ceiling {SEQUENCE_LIMIT}."
             )
 

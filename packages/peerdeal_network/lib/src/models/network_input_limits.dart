@@ -5,6 +5,7 @@ abstract final class NetworkInputLimits {
   static const defaultMaxCandidates = 32;
   static const defaultMaxPeerMetrics = 64;
   static const maxPeerIdentityBytes = 256;
+  static const maxTransportSequence = 0x7fffffff;
 
   static bool isSafePeerIdentity(String value) {
     if (value.isEmpty || value.trim() != value) return false;

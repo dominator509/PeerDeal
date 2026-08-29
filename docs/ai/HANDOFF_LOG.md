@@ -2,6 +2,37 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Network/Native Transport Sequence Parity
+
+Summary:
+- Applied the existing signed 32-bit transport sequence ceiling to network
+  frame validation and replay protection.
+- Extended the native contract-bound checker to compare the network sequence
+  declaration with the native bridge and host contract.
+
+Files:
+- `packages/peerdeal_network/lib/src/models/network_input_limits.dart`
+- `packages/peerdeal_network/lib/src/services/basic_transport_frame_validator.dart`
+- `packages/peerdeal_network/lib/src/services/sliding_window_transport_frame_replay_guard.dart`
+- `packages/peerdeal_network/test/`
+- `scripts/check_native_contract_bounds.py`
+- `scripts/test_check_native_contract_bounds.py`
+- `packages/peerdeal_network/README.md`, `HANDOFF.md`, `HANDOFF_QUEUE.md`,
+  `PROJECT_STATE.md`, and `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Complete `peerdeal_network` suite: passed (81 tests).
+- Direct package analysis: passed.
+- Native contract-bound checker and unit tests: passed.
+
+Risks:
+- Native/device reachability, other-platform transport, durable product
+  persistence, and release signing remain separate production gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Operational Network Peer-Identity Boundary
 
 Summary:

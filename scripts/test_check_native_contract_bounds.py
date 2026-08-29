@@ -13,6 +13,9 @@ SOURCE_PATHS = {
     "dart": pathlib.Path(
         "packages/peerdeal_native_bridges/lib/src/native_bridge_payload_limits.dart"
     ),
+    "network": pathlib.Path(
+        "packages/peerdeal_network/lib/src/models/network_input_limits.dart"
+    ),
     "android": pathlib.Path(
         "apps/peerdeal_mobile/android/app/src/main/kotlin/"
         "com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt"
@@ -30,6 +33,11 @@ class NativeBridgePayloadLimits {
   static const maxTransportFrames = 64;
   static const maxTransportPayloadBytes = 60 * 1024;
   static const maxTransportIdentityBytes = 256;
+  static const maxTransportSequence = 0x7fffffff;
+}
+""",
+        "network": """
+class NetworkInputLimits {
   static const maxTransportSequence = 0x7fffffff;
 }
 """,
@@ -110,6 +118,25 @@ class NativeContractBoundsCheckTest(unittest.TestCase):
             failures = check_native_contract_bounds(root)
 
             self.assertEqual(1, len(failures))
+            self.assertIn("maxTransportSequence=2147483646", failures[0])
+            self.assertIn("signed 32-bit ceiling 2147483647", failures[0])
+
+    def test_rejects_network_sequence_limit_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_contract_sources(root)
+            network_path = root / SOURCE_PATHS["network"]
+            network_path.write_text(
+                network_path.read_text(encoding="utf-8").replace(
+                    "0x7fffffff", "0x7ffffffe"
+                ),
+                encoding="utf-8",
+            )
+
+            failures = check_native_contract_bounds(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("network_input_limits.dart", failures[0])
             self.assertIn("maxTransportSequence=2147483646", failures[0])
             self.assertIn("signed 32-bit ceiling 2147483647", failures[0])
 

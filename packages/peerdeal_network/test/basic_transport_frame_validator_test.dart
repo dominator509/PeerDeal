@@ -172,4 +172,22 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test(
+    'rejects transport sequences above the native signed 32-bit ceiling',
+    () {
+      final result = const BasicTransportFrameValidator().validate(
+        TransportFrame(
+          sessionId: 'session_1',
+          fromPeerId: 'peer_a',
+          toPeerId: 'peer_b',
+          sequence: NetworkInputLimits.maxTransportSequence + 1,
+          payload: <int>[1],
+        ),
+      );
+
+      expect(result.isValid, isFalse);
+      expect(result.warnings, contains('ERR_TRANSPORT_FRAME_SEQUENCE_INVALID'));
+    },
+  );
 }

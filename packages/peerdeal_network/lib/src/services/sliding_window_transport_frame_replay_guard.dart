@@ -107,7 +107,8 @@ class SlidingWindowTransportFrameReplayGuard
         NetworkInputLimits.isOperationalPeerIdentity(frame.fromPeerId) &&
         NetworkInputLimits.isOperationalPeerIdentity(frame.toPeerId) &&
         frame.fromPeerId != frame.toPeerId &&
-        frame.sequence > 0;
+        frame.sequence >= 1 &&
+        frame.sequence <= NetworkInputLimits.maxTransportSequence;
   }
 
   static int _validatePositiveLimit(int value, String fieldName) {

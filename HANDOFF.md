@@ -56,8 +56,9 @@ enforcement, and T330 wizard fixture boundary enforcement, and T331 crypto
 verification fixture boundary enforcement, and T332 receipt fixture
 authorization boundary enforcement, and T333 privacy fixture policy boundary
 enforcement, and T334 core pot fixture settlement boundary enforcement, and
-T335 core event-sequence fixture hash-chain enforcement, and T336 operational
-network peer-identity boundary normalization
+T335 core event-sequence fixture hash-chain enforcement, T336 operational
+network peer-identity boundary normalization, and T337 network/native transport
+sequence-bound parity
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -185,6 +186,12 @@ endpoint parsing, transport validation, replay protection, and direct
 confidence classification. Generic session/table scope IDs retain the broader
 safe-text rule; no routing policy or package boundary changed.
 
+The T337 network hardening applies the existing signed 32-bit transport
+sequence ceiling to network frame validation and replay protection, and extends
+the native contract checker to compare the network declaration with the native
+bridge contract. Payload, authentication, and package ownership remain
+unchanged.
+
 ## Recent T336 Changes
 
 - Network operational peer identities now share one reserved-aware predicate;
@@ -194,6 +201,15 @@ safe-text rule; no routing policy or package boundary changed.
   election, endpoint, transport, replay, and confidence coverage.
 - No network routing policy, native bridge, protocol, app, or package boundary
   changed.
+
+## Recent T337 Changes
+
+- Network frame validation and replay protection now reject sequence values
+  above `0x7fffffff`, matching the native bridge and Android/Windows hosts.
+- The native contract-bound checker now detects drift between the network and
+  native sequence declarations, with negative-path unit coverage.
+- Complete `peerdeal_network` tests, direct package analysis, checker tests,
+  and the native contract-bound check pass.
 
 ## What Changed
 
