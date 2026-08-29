@@ -2,6 +2,36 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Operational Network Peer-Identity Boundary
+
+Summary:
+- Centralized the existing operational peer-identity rule in
+  `NetworkInputLimits`.
+- Applied it across bootstrap, path selection, primary election, endpoint
+  parsing, transport validation, replay protection, and direct confidence
+  classification.
+- Generic session/table scope IDs retain the broader safe-text predicate.
+
+Files:
+- `packages/peerdeal_network/lib/src/models/network_input_limits.dart`
+- `packages/peerdeal_network/lib/src/services/`
+- `packages/peerdeal_network/test/`
+- `packages/peerdeal_network/README.md`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Complete `peerdeal_network` suite: passed (79 tests).
+- Direct package analysis: passed.
+
+Risks:
+- Native/device reachability, other-platform transport, durable product
+  persistence, and release signing remain separate production gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Core Event Sequence Fixture Hash Chain
 
 Summary:

@@ -2,6 +2,27 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('returns unsafe for non-operational peer identities', () {
+    const classifier = DefaultConfidenceClassifier();
+
+    for (final peerId in ['none', 'unresolved', 'peer::reserved']) {
+      final result = classifier.classify([
+        PeerMetricSnapshot(
+          peerId: peerId,
+          routeClass: NetworkRouteClass.remoteDirect,
+          avgLatencyMs: 20,
+          ackLagMs: 30,
+          disconnectsInWindow: 0,
+          reachabilityCount: 1,
+          eventIndexLag: 0,
+          anchorAligned: true,
+        ),
+      ]);
+
+      expect(result, NetworkConfidence.unsafe, reason: peerId);
+    }
+  });
+
   test('returns unsafe when the peer-metric window exceeds its limit', () {
     const classifier = DefaultConfidenceClassifier(maxSnapshots: 2);
     final result = classifier.classify(

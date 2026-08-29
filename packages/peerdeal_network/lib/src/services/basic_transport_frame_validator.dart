@@ -27,12 +27,12 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
     }
     if (frame.fromPeerId.trim().isEmpty) {
       warnings.add('ERR_TRANSPORT_FRAME_SENDER_REQUIRED');
-    } else if (!_isSafeIdentity(frame.fromPeerId)) {
+    } else if (!_isOperationalPeerId(frame.fromPeerId)) {
       warnings.add('ERR_TRANSPORT_FRAME_SENDER_MALFORMED');
     }
     if (frame.toPeerId.trim().isEmpty) {
       warnings.add('ERR_TRANSPORT_FRAME_RECIPIENT_REQUIRED');
-    } else if (!_isSafeIdentity(frame.toPeerId)) {
+    } else if (!_isOperationalPeerId(frame.toPeerId)) {
       warnings.add('ERR_TRANSPORT_FRAME_RECIPIENT_MALFORMED');
     }
     if (frame.fromPeerId == frame.toPeerId) {
@@ -63,5 +63,9 @@ class BasicTransportFrameValidator implements TransportFrameValidator {
 
   bool _isSafeIdentity(String value) {
     return NetworkInputLimits.isSafePeerIdentity(value);
+  }
+
+  bool _isOperationalPeerId(String value) {
+    return NetworkInputLimits.isOperationalPeerIdentity(value);
   }
 }

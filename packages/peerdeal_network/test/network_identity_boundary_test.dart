@@ -2,6 +2,100 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('operational peer identity rejects reserved route sentinels', () {
+    for (final peerId in ['none', 'unresolved', 'peer::reserved']) {
+      expect(
+        NetworkInputLimits.isOperationalPeerIdentity(peerId),
+        isFalse,
+        reason: peerId,
+      );
+    }
+    expect(
+      NetworkInputLimits.isOperationalPeerIdentity('session::scope'),
+      isFalse,
+    );
+    expect(NetworkInputLimits.isSafePeerIdentity('session::scope'), isTrue);
+  });
+
+  test('routing boundaries reject reserved peer sentinels', () async {
+    final bootstrap = await const BasicBootstrapCandidateProvider()
+        .resolveCandidates(
+          BootstrapResolutionRequest(
+            sessionId: 'session_1',
+            tableId: 'table_1',
+            preferLan: true,
+            relayAllowed: true,
+            peerIds: const ['none', 'unresolved', 'peer::reserved', 'peer_ok'],
+          ),
+        );
+    expect(bootstrap.map((candidate) => candidate.peerId), ['peer_ok']);
+
+    final path = const BasicSessionPathSelector().selectPath(
+      candidates: const [
+        BootstrapCandidate(
+          peerId: 'none',
+          routeClass: NetworkRouteClass.lanDirect,
+          reachable: true,
+          priority: 20,
+        ),
+        BootstrapCandidate(
+          peerId: 'peer_ok',
+          routeClass: NetworkRouteClass.remoteDirect,
+          reachable: true,
+          priority: 10,
+        ),
+      ],
+      preferLan: true,
+      relayAllowed: true,
+      electedPrimaryPeerId: 'unresolved',
+    );
+    expect(path.primaryPeerId, 'peer_ok');
+    expect(path.routeClass, NetworkRouteClass.remoteDirect);
+
+    final decision =
+        const DefaultPrimaryPeerElectionService(
+          confidenceClassifier: DefaultConfidenceClassifier(),
+        ).elect(
+          snapshots: const [
+            PeerMetricSnapshot(
+              peerId: 'none',
+              routeClass: NetworkRouteClass.lanDirect,
+              avgLatencyMs: 1,
+              ackLagMs: 1,
+              disconnectsInWindow: 0,
+              reachabilityCount: 4,
+              eventIndexLag: 0,
+              anchorAligned: true,
+            ),
+            PeerMetricSnapshot(
+              peerId: 'peer_ok',
+              routeClass: NetworkRouteClass.remoteDirect,
+              avgLatencyMs: 20,
+              ackLagMs: 30,
+              disconnectsInWindow: 0,
+              reachabilityCount: 2,
+              eventIndexLag: 0,
+              anchorAligned: true,
+            ),
+          ],
+          baselineEventIndex: 1,
+          expectedAnchorHash: 'anchor_1',
+          currentPrimaryPeerId: 'unresolved',
+        );
+    expect(decision.primaryPeerId, 'peer_ok');
+    expect(decision.rankings.map((ranking) => ranking.peerId), ['peer_ok']);
+  });
+
+  test('endpoint parser rejects reserved peer sentinels', () {
+    for (final value in [
+      'none@host',
+      'unresolved@host',
+      'peer::reserved@host',
+    ]) {
+      expect(DiscoveredPeerEndpointParser.parse(value), isNull, reason: value);
+    }
+  });
+
   final oversizedPeerId = List<String>.filled(257, 'p').join();
 
   test('network identity predicate requires bounded strict UTF-8 text', () {
@@ -55,35 +149,36 @@ void main() {
   });
 
   test('primary election ignores unsafe metric identities', () {
-    final decision = const DefaultPrimaryPeerElectionService(
-      confidenceClassifier: DefaultConfidenceClassifier(),
-    ).elect(
-      snapshots: <PeerMetricSnapshot>[
-        PeerMetricSnapshot(
-          peerId: 'peer_\u0085',
-          routeClass: NetworkRouteClass.remoteDirect,
-          avgLatencyMs: 1,
-          ackLagMs: 1,
-          disconnectsInWindow: 0,
-          reachabilityCount: 99,
-          eventIndexLag: 0,
-          anchorAligned: true,
-        ),
-        PeerMetricSnapshot(
-          peerId: 'peer_valid',
-          routeClass: NetworkRouteClass.remoteDirect,
-          avgLatencyMs: 100,
-          ackLagMs: 150,
-          disconnectsInWindow: 0,
-          reachabilityCount: 4,
-          eventIndexLag: 0,
-          anchorAligned: true,
-        ),
-      ],
-      baselineEventIndex: 1,
-      expectedAnchorHash: 'anchor_1',
-      currentPrimaryPeerId: oversizedPeerId,
-    );
+    final decision =
+        const DefaultPrimaryPeerElectionService(
+          confidenceClassifier: DefaultConfidenceClassifier(),
+        ).elect(
+          snapshots: <PeerMetricSnapshot>[
+            PeerMetricSnapshot(
+              peerId: 'peer_\u0085',
+              routeClass: NetworkRouteClass.remoteDirect,
+              avgLatencyMs: 1,
+              ackLagMs: 1,
+              disconnectsInWindow: 0,
+              reachabilityCount: 99,
+              eventIndexLag: 0,
+              anchorAligned: true,
+            ),
+            PeerMetricSnapshot(
+              peerId: 'peer_valid',
+              routeClass: NetworkRouteClass.remoteDirect,
+              avgLatencyMs: 100,
+              ackLagMs: 150,
+              disconnectsInWindow: 0,
+              reachabilityCount: 4,
+              eventIndexLag: 0,
+              anchorAligned: true,
+            ),
+          ],
+          baselineEventIndex: 1,
+          expectedAnchorHash: 'anchor_1',
+          currentPrimaryPeerId: oversizedPeerId,
+        );
 
     expect(decision.primaryPeerId, 'peer_valid');
   });
@@ -130,10 +225,7 @@ void main() {
 
   test('endpoint parser rejects C1 and oversized peer identities', () {
     expect(DiscoveredPeerEndpointParser.parse('peer_\u0085@host'), isNull);
-    expect(
-      DiscoveredPeerEndpointParser.parse('$oversizedPeerId@host'),
-      isNull,
-    );
+    expect(DiscoveredPeerEndpointParser.parse('$oversizedPeerId@host'), isNull);
   });
 
   test('transport frame validation rejects oversized identities', () {

@@ -45,6 +45,9 @@ score, and recover network paths without owning game truth.
   peer id.
 - Session path selection ignores malformed candidate peer ids and malformed
   elected-primary overrides before returning path descriptors.
+- All actionable peer-id ingress now rejects the existing `none`, `unresolved`,
+  and `::`-containing sentinels while retaining those values for generic
+  session/table scope validation where appropriate.
 - Primary peer election fails closed when every peer is anchor-mismatched.
 - Primary peer election drops malformed peer metric identities and ignores
   malformed current-primary overrides before scoring or transfer decisions.

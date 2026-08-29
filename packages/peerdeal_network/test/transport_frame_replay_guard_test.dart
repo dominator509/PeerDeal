@@ -2,6 +2,17 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('rejects reserved peer sentinels as replay scope identities', () {
+    final guard = SlidingWindowTransportFrameReplayGuard();
+    final invalid = _frame(sequence: 1, senderPeerId: 'none');
+
+    expect(
+      guard.check(invalid).reasonCode,
+      'ERR_TRANSPORT_FRAME_REPLAY_INPUT_INVALID',
+    );
+    expect(() => guard.record(invalid), throwsArgumentError);
+  });
+
   test('rejects sequence reuse after an accepted frame', () {
     final guard = SlidingWindowTransportFrameReplayGuard();
     final frame = _frame(sequence: 1);

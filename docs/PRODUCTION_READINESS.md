@@ -3381,6 +3381,15 @@ Direct uncontested settlement projection now rejects negative winner seat
 numbers before side-pot construction, matching the existing Hold'em seat
 identity invariant.
 
+The T336 follow-up closes the inconsistent operational peer-identity boundary
+in `peerdeal_network`. Bootstrap, path selection, primary election, endpoint
+parsing, transport validation, replay protection, and direct confidence
+classification now reject the existing reserved peer sentinels `none`,
+`unresolved`, and `::`-containing values through one shared predicate. Generic
+session/table scope identities retain the existing safe-text rule. Complete
+network package tests and direct analysis pass; native/device reachability and
+product transport wiring remain separate production gates.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

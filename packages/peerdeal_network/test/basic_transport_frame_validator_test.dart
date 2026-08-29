@@ -2,6 +2,25 @@ import 'package:peerdeal_network/peerdeal_network.dart';
 import 'package:test/test.dart';
 
 void main() {
+  test('rejects reserved peer sentinels while retaining session scope', () {
+    final result = const BasicTransportFrameValidator().validate(
+      TransportFrame(
+        sessionId: 'none',
+        fromPeerId: 'none',
+        toPeerId: 'peer_b',
+        sequence: 1,
+        payload: <int>[1],
+      ),
+    );
+
+    expect(result.isValid, isFalse);
+    expect(result.warnings, contains('ERR_TRANSPORT_FRAME_SENDER_MALFORMED'));
+    expect(
+      result.warnings,
+      isNot(contains('ERR_TRANSPORT_FRAME_SESSION_MALFORMED')),
+    );
+  });
+
   test('accepts a sendable transport frame', () {
     const validator = BasicTransportFrameValidator();
 

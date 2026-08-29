@@ -37,9 +37,6 @@ class BasicRelayFallbackService implements RelayFallbackService {
   }
 
   bool _isOperationalPeerId(String peerId) {
-    if (!NetworkInputLimits.isSafePeerIdentity(peerId)) return false;
-    if (peerId == 'none' || peerId == 'unresolved') return false;
-    if (peerId.contains('::')) return false;
-    return true;
+    return NetworkInputLimits.isOperationalPeerIdentity(peerId);
   }
 }

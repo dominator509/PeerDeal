@@ -105,7 +105,9 @@ class DiscoveredPeerEndpointParser {
     if (normalized.isEmpty || _looksSensitive(normalized)) return '';
     const maxLength = 96;
     if (normalized.length > maxLength) return '';
-    return NetworkInputLimits.isSafePeerIdentity(normalized) ? normalized : '';
+    return NetworkInputLimits.isOperationalPeerIdentity(normalized)
+        ? normalized
+        : '';
   }
 
   static _HostPort? _parseHostPort(String value) {

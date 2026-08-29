@@ -117,7 +117,7 @@ class BasicSessionPathSelector implements SessionPathSelector {
   }
 
   static bool _isValidPeerId(String peerId) {
-    return NetworkInputLimits.isSafePeerIdentity(peerId);
+    return NetworkInputLimits.isOperationalPeerIdentity(peerId);
   }
 
   static BootstrapCandidate? _firstWhere(

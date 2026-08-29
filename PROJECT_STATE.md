@@ -2028,6 +2028,18 @@ Remaining:
   and chain, and the fixture replays through the default `CoreReducer`.
 - No reducer, protocol, variant, app, or package boundary changed.
 
+## Recent T336 Changes
+
+- Centralized the existing operational peer-identity rule in
+  `NetworkInputLimits` and applied it across network bootstrap, path selection,
+  election, endpoint parsing, transport validation, replay protection, and
+  confidence classification.
+- Generic session/table scope identities continue to use the existing safe
+  identity predicate; reserved peer sentinels cannot become actionable route
+  or transport identities.
+- Complete `peerdeal_network` test suite: passed (79 tests); direct package
+  analysis: passed.
+
 ## Required Gates
 
 Run after each retrofit step:

@@ -53,11 +53,12 @@ class BasicBootstrapCandidateProvider implements BootstrapCandidateProvider {
   }
 
   bool _isValidPeerId(String peerId) {
-    return NetworkInputLimits.isSafePeerIdentity(peerId);
+    return NetworkInputLimits.isOperationalPeerIdentity(peerId);
   }
 
   bool _isValidScope(String sessionId, String tableId) {
-    return _isValidPeerId(sessionId) && _isValidPeerId(tableId);
+    return NetworkInputLimits.isSafePeerIdentity(sessionId) &&
+        NetworkInputLimits.isSafePeerIdentity(tableId);
   }
 }
 

@@ -165,7 +165,7 @@ class DefaultPrimaryPeerElectionService implements PrimaryPeerElectionService {
   }
 
   bool _isValidPeerId(String peerId) {
-    return NetworkInputLimits.isSafePeerIdentity(peerId);
+    return NetworkInputLimits.isOperationalPeerIdentity(peerId);
   }
 }
 

@@ -18,6 +18,9 @@ class DefaultConfidenceClassifier implements ConfidenceClassifier {
       if (items.length >= maxSnapshots) {
         return NetworkConfidence.unsafe;
       }
+      if (!NetworkInputLimits.isOperationalPeerIdentity(snapshot.peerId)) {
+        return NetworkConfidence.unsafe;
+      }
       if (!snapshot.hasValidMeasurements) {
         return NetworkConfidence.unsafe;
       }

@@ -56,7 +56,8 @@ enforcement, and T330 wizard fixture boundary enforcement, and T331 crypto
 verification fixture boundary enforcement, and T332 receipt fixture
 authorization boundary enforcement, and T333 privacy fixture policy boundary
 enforcement, and T334 core pot fixture settlement boundary enforcement, and
-T335 core event-sequence fixture hash-chain enforcement
+T335 core event-sequence fixture hash-chain enforcement, and T336 operational
+network peer-identity boundary normalization
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -177,6 +178,22 @@ The T335 core hardening repairs the existing root event-sequence fixture with
 canonical content hashes and a contiguous hash chain. A typed test-only loader
 now validates the sequence and replays it through the default `CoreReducer`
 without changing reducer behavior or package ownership.
+
+The T336 network hardening centralizes the existing operational peer-identity
+rule and applies it consistently to bootstrap, path selection, election,
+endpoint parsing, transport validation, replay protection, and direct
+confidence classification. Generic session/table scope IDs retain the broader
+safe-text rule; no routing policy or package boundary changed.
+
+## Recent T336 Changes
+
+- Network operational peer identities now share one reserved-aware predicate;
+  `none`, `unresolved`, and `::`-containing values cannot become actionable
+  peers or transport scope members.
+- Complete `peerdeal_network` tests pass, including bootstrap, routing,
+  election, endpoint, transport, replay, and confidence coverage.
+- No network routing policy, native bridge, protocol, app, or package boundary
+  changed.
 
 ## What Changed
 

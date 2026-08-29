@@ -104,8 +104,8 @@ class SlidingWindowTransportFrameReplayGuard
 
   bool _isValidFrame(TransportFrame frame) {
     return NetworkInputLimits.isSafePeerIdentity(frame.sessionId) &&
-        NetworkInputLimits.isSafePeerIdentity(frame.fromPeerId) &&
-        NetworkInputLimits.isSafePeerIdentity(frame.toPeerId) &&
+        NetworkInputLimits.isOperationalPeerIdentity(frame.fromPeerId) &&
+        NetworkInputLimits.isOperationalPeerIdentity(frame.toPeerId) &&
         frame.fromPeerId != frame.toPeerId &&
         frame.sequence > 0;
   }
