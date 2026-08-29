@@ -2115,6 +2115,19 @@ Remaining:
   Flutter runner produced no output during a bounded attempt and was stopped;
   no Flutter test pass is claimed.
 
+## Recent T344 Changes
+
+- Mirrored `ResolvedInvite` contracts now retain the required protocol
+  `variant_id` through accepted join/session handoff.
+- Generic join safety correlates the complete invite identity, including mode,
+  variant, and protocol version; Holdem production bootstrap rejects every
+  variant other than `holdem_nlhe` before source loading.
+- All in-repo invite constructors and mirrored unsupported-variant regressions
+  are updated. Direct app analysis, repository boundary/source/native-contract
+  checks, checker unit tests, and `git diff --check` pass. The focused Flutter
+  runner produced no output during a bounded attempt and was stopped; no
+  Flutter test pass is claimed.
+
 ## Required Gates
 
 Run after each retrofit step:

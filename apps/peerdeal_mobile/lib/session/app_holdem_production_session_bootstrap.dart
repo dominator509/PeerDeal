@@ -285,6 +285,14 @@ class AppHoldemProductionSessionBootstrap {
     _validateIdentity(invite.tableId, 'invite.tableId');
     _validateIdentity(invite.sessionId, 'invite.sessionId');
     _validateIdentity(invite.modeType, 'invite.modeType');
+    _validateIdentity(invite.variantId, 'invite.variantId');
+    if (invite.variantId != holdemNlheVariantId) {
+      throw ArgumentError.value(
+        invite.variantId,
+        'invite.variantId',
+        'Holdem production sessions require variant_id=holdem_nlhe.',
+      );
+    }
     _validateIdentity(invite.protocolVersion, 'invite.protocolVersion');
   }
 

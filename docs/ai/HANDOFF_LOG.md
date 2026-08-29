@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Preserve Invite Variant Identity
+
+Summary:
+- Mirrored `ResolvedInvite` contracts now preserve the required protocol
+  `variant_id` through accepted join/session handoff.
+- Generic join safety correlates the complete invite identity, and Holdem
+  production bootstrap rejects unsupported variants before source loading.
+- Updated all in-repo invite constructors and added unsupported-variant
+  regressions.
+
+Verification:
+- Direct analysis of both app packages: passed.
+- Repository boundary, source-text, native-contract, checker-unit, and diff
+  checks: passed.
+- Focused Flutter test attempt: stopped after the local runner produced no
+  output during a bounded attempt; no Flutter test pass is claimed.
+
+Next reviewer:
+Continue with the documented real-device/native-platform and product-owned
+session-source integration gates without changing the locked package
+boundaries.
+
 ### 2026-08-29 - Codex - Bind Accepted Session Context Identity
 
 Summary:

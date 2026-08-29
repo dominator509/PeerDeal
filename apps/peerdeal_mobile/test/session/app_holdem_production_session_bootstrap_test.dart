@@ -145,6 +145,7 @@ void main() {
           tableId: 'table_001',
           sessionId: 'session_001',
           modeType: 'open_table',
+          variantId: 'holdem_nlhe',
           protocolVersion: '1.0.0',
           requiresReceiptAck: true,
           requiresRetentionAck: true,
@@ -168,6 +169,7 @@ void main() {
             tableId: 'table_001',
             sessionId: 'session_001',
             modeType: 'open_table',
+            variantId: 'holdem_nlhe',
             protocolVersion: '1.0.0',
             requiresReceiptAck: true,
             requiresRetentionAck: true,
@@ -196,6 +198,7 @@ void main() {
               tableId: 'table_001',
               sessionId: 'session_001',
               modeType: 'open_table',
+              variantId: 'holdem_nlhe',
               protocolVersion: '1.0.0',
               requiresReceiptAck: true,
               requiresRetentionAck: true,
@@ -224,6 +227,28 @@ void main() {
     );
     expect(source.loadedCancellation, isNotNull);
     await expectLater(source.loadedCancellation!, completes);
+  });
+
+  test('rejects an unsupported invite variant before source loading', () async {
+    final source = _Source(_input());
+
+    await expectLater(
+      AppHoldemProductionSessionBootstrap(source: source).createForInvite(
+        const ResolvedInvite(
+          inviteId: 'inv_001',
+          tableId: 'table_001',
+          sessionId: 'session_001',
+          modeType: 'open_table',
+          variantId: 'other_variant',
+          protocolVersion: '1.0.0',
+          requiresReceiptAck: false,
+          requiresRetentionAck: false,
+          requiresCaptureAck: false,
+        ),
+      ),
+      throwsArgumentError,
+    );
+    expect(source.loadedInvite, isNull);
   });
 
   test(
@@ -291,6 +316,7 @@ ResolvedInvite _invite() {
     tableId: 'table_001',
     sessionId: 'session_001',
     modeType: 'open_table',
+    variantId: 'holdem_nlhe',
     protocolVersion: '1.0.0',
     requiresReceiptAck: true,
     requiresRetentionAck: true,

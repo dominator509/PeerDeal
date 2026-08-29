@@ -201,6 +201,7 @@ ResolvedInvite _invite() {
     tableId: 'table_001',
     sessionId: 'session_001',
     modeType: 'open_table',
+    variantId: 'holdem_nlhe',
     protocolVersion: '1.0.0',
     requiresReceiptAck: true,
     requiresRetentionAck: true,

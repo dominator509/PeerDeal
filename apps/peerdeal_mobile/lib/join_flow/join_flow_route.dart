@@ -360,6 +360,9 @@ JoinFlowSessionContext? _safeSessionContext(JoinFlowOutcome outcome) {
   if (context.invite.inviteId != invite.inviteId ||
       context.invite.tableId != invite.tableId ||
       context.invite.sessionId != invite.sessionId ||
+      context.invite.modeType != invite.modeType ||
+      context.invite.variantId != invite.variantId ||
+      context.invite.protocolVersion != invite.protocolVersion ||
       !_isSafeJoinIdentity(context.remotePeerId) ||
       context.localSeat < 1 ||
       (bootstrapCandidate != null &&
@@ -389,6 +392,7 @@ ResolvedInvite? _safeResolvedInvite(JoinFlowOutcome outcome) {
       !_isSafeJoinIdentity(invite.tableId) ||
       !_isSafeJoinIdentity(invite.sessionId) ||
       !_isSafeJoinIdentity(invite.modeType) ||
+      !_isSafeJoinIdentity(invite.variantId) ||
       !_isSafeJoinIdentity(invite.protocolVersion)) {
     return null;
   }

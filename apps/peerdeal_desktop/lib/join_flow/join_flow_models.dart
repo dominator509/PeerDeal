@@ -49,6 +49,7 @@ class ResolvedInvite {
     required this.tableId,
     required this.sessionId,
     required this.modeType,
+    required this.variantId,
     required this.protocolVersion,
     required this.requiresReceiptAck,
     required this.requiresRetentionAck,
@@ -59,6 +60,7 @@ class ResolvedInvite {
   final String tableId;
   final String sessionId;
   final String modeType;
+  final String variantId;
   final String protocolVersion;
   final bool requiresReceiptAck;
   final bool requiresRetentionAck;

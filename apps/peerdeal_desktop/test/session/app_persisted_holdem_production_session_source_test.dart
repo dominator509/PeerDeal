@@ -1252,6 +1252,7 @@ ResolvedInvite _invite() => const ResolvedInvite(
   tableId: 'table_001',
   sessionId: 'session_001',
   modeType: 'open_table',
+  variantId: 'holdem_nlhe',
   protocolVersion: '1.0.0',
   requiresReceiptAck: false,
   requiresRetentionAck: false,

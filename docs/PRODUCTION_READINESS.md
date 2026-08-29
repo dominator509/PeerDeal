@@ -3446,6 +3446,16 @@ invite-only loads remain compatible. Both app packages analyze cleanly and
 repository static gates pass; focused Flutter execution remains limited by the
 local runner's silent startup behavior.
 
+The T344 follow-up closes the invite variant-preservation gap. Mirrored
+`ResolvedInvite` contracts now retain the required protocol `variant_id` through
+accepted join/session handoff; generic join safety correlates mode, variant, and
+protocol identity, and Holdem production bootstrap rejects variants other than
+the existing `holdem_nlhe` before source loading. All in-repo invite
+constructors and unsupported-variant regressions are updated. Direct app
+analysis, repository static gates, checker unit tests, and `git diff --check`
+pass; focused Flutter execution remains limited by the local runner's silent
+startup behavior.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

@@ -35,6 +35,7 @@ class FakeInviteResolver implements InviteResolver {
       tableId: 'tbl_001',
       sessionId: 'sess_001',
       modeType: 'open_table',
+      variantId: 'holdem_nlhe',
       protocolVersion: protocolVersion,
       requiresReceiptAck: true,
       requiresRetentionAck: true,

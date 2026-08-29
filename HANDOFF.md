@@ -62,8 +62,8 @@ sequence-bound parity, T338 app/native transport default-bound alignment,
 T339 app/native transport default-bound checker enforcement, and T340 direct
 native transport adapter payload enforcement, and T341 app/native operational
 peer-scope normalization, and T342 mirrored app production-session
-peer-identity normalization, and T343 accepted session-context identity
-binding
+peer-identity normalization, T343 accepted session-context identity binding,
+and T344 invite variant identity preservation and Holdem variant admission
 are implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -306,6 +306,18 @@ table scopes retain their existing safe-text contract.
 - Both app packages analyze cleanly; repository boundary, source-text,
   native-contract, checker-unit, formatting, and diff checks pass. The focused
   Flutter runner remained silent during a bounded attempt.
+
+## Recent T344 Changes
+
+- Mirrored `ResolvedInvite` contracts now preserve the required protocol
+  `variant_id` through accepted join outcomes and session contexts.
+- Generic join safety now rejects malformed or mismatched variant identity;
+  Holdem production bootstrap fails closed unless the invite variant is the
+  existing `holdem_nlhe` variant.
+- Updated every in-repo invite construction and added mirrored rejection
+  coverage. Direct app analysis, repository boundary/source/native-contract
+  checks, checker unit tests, and `git diff --check` pass; the focused Flutter
+  runner remained silent during a bounded attempt.
 
 ## What Changed
 
