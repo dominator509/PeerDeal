@@ -2050,6 +2050,17 @@ Remaining:
 - Complete `peerdeal_network` test suite: passed (81 tests); direct package
   analysis, checker tests, and native contract-bound check: passed.
 
+## Recent T338 Changes
+
+- Mirrored mobile and desktop native transport session factories now default to
+  `NativeBridgePayloadLimits.maxTransportPayloadBytes` (60 KiB), matching the
+  existing native bridge and Android/Windows host contract.
+- This removes the prior self-rejecting 64 KiB default while preserving the
+  existing fail-closed validation for explicit invalid or oversized limits.
+- Direct analysis of both app packages passed. The focused Flutter runner
+  produced no output during a bounded attempt and was stopped; no Flutter test
+  pass is claimed.
+
 ## Required Gates
 
 Run after each retrofit step:

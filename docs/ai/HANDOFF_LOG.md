@@ -2,6 +2,34 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - App/Native Transport Default Bound Alignment
+
+Summary:
+- Corrected the mirrored mobile and desktop native transport factory default
+  from 64 KiB to the existing `NativeBridgePayloadLimits` 60 KiB ceiling.
+- This removes a self-rejecting default that made default sender, drain, and
+  provisioner construction unavailable before native capability use.
+
+Files:
+- `apps/peerdeal_mobile/lib/transport/native_transport_session_factory.dart`
+- `apps/peerdeal_desktop/lib/transport/native_transport_session_factory.dart`
+- `HANDOFF.md`, `HANDOFF_QUEUE.md`, `PROJECT_STATE.md`, and
+  `docs/PRODUCTION_READINESS.md`
+
+Verification:
+- Direct analysis of both app packages: passed.
+- Focused Flutter test attempt: stopped after the local runner produced no
+  output during a bounded attempt; no Flutter test pass is claimed.
+- `git diff --check`: passed.
+
+Risks:
+- Real Android/Windows transport, device reachability, and product transport
+  provisioning remain separate integration gates.
+
+Next reviewer:
+Continue with the next codable production-readiness gap without changing the
+locked PeerDeal package boundaries.
+
 ### 2026-08-29 - Codex - Network/Native Transport Sequence Parity
 
 Summary:

@@ -3398,6 +3398,14 @@ checker now verifies this network declaration as well as the existing host
 declarations. Complete network tests, direct analysis, and checker tests pass;
 device reachability and product transport wiring remain separate gates.
 
+The T338 follow-up closes a mirrored app-shell default mismatch. Mobile and
+desktop `NativeTransportSessionFactory` now default to the existing native
+60 KiB payload ceiling; the former 64 KiB default was rejected by the factory's
+own fail-closed configuration gate and disabled default transport provisioning.
+Both app packages analyze cleanly. Focused Flutter execution remains limited
+by the local runner's silent startup behavior; native/device validation and
+product transport wiring remain separate gates.
+
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
    cross-device Android/Windows multicast reachability, including

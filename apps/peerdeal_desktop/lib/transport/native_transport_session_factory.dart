@@ -10,7 +10,7 @@ const _maximumWarningLength = 160;
 class NativeTransportSessionFactory {
   NativeTransportSessionFactory({
     NativeTransportBridge? bridge,
-    int maxPayloadBytes = 64 * 1024,
+    int maxPayloadBytes = NativeBridgePayloadLimits.maxTransportPayloadBytes,
     TransportFrameValidator? validator,
     Future<void>? cancellation,
   }) : _bridge = bridge,
