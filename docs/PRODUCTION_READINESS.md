@@ -1182,13 +1182,14 @@ the gates below are satisfied.
 - No `.zip` project archive is present in this repository snapshot; all
   checked-in markdown files were reviewed directly from source.
 - Native capture blocking on other platforms, Android/Windows runtime and
-  device/network reachability validation, real local-network discovery,
-  other-platform secure storage, production database persistence, operator
-  release signing, and final production app UI validation remain open because
-  they require device/OS integration, product design validation, or owner-controlled
-  release inputs. Android and Windows bounded native transport implementations
-  are now coded and both host builds pass; host socket availability is not
-  proof of cross-device reachability or production endpoint provisioning.
+  device/network reachability validation, cross-device local-network discovery
+  reachability, other-platform secure storage, production database persistence,
+  operator release signing, and final production app UI validation remain open
+  because they require device/OS integration, product design validation, or
+  owner-controlled release inputs. Android and Windows bounded local discovery
+  and transport implementations are now coded and both host builds pass; host
+  socket availability is not proof of cross-device reachability or production
+  endpoint provisioning.
   The Dart contracts,
   shared app-shell UI primitives, app-owned receipt key
   provisioning/read/write mapping, file-backed recovery persistence seam,
@@ -3544,6 +3545,17 @@ transitive package updates and no application, package-boundary, analyzer, or
 lint changes. Full repository analysis, static checks, serialized Dart and
 Flutter tests, diff checks, and the post-refresh dependency audit pass; 14
 newer package versions remain blocked by current constraints or toolchain.
+
+The T355 follow-up closes the codeable Android/Windows local-network discovery
+gap without moving session policy into native code. `peerdeal_network` now owns
+the bounded versioned `PDD1` query/advertisement envelope; the generic native
+bridge adds additive `announcePeer`; and both hosts implement bounded multicast
+responders/scanners on the locked discovery address and port. The app-owned
+local-identity provisioners announce only after secure-key read-back
+verification, and announcement failure remains optional and fail-closed. Pure
+protocol, bridge, mirrored identity, Android debug build, and Windows debug
+build checks pass. Cross-device multicast/firewall behavior, runtime device
+validation, and operator release signing remain external gates.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate

@@ -36,6 +36,7 @@ export 'src/services/default_confidence_classifier.dart';
 export 'src/services/default_primary_peer_election_service.dart';
 export 'src/services/default_transfer_policy.dart';
 export 'src/services/discovered_peer_endpoint_parser.dart';
+export 'src/services/lan_discovery_protocol.dart';
 export 'src/services/primary_peer_election_service.dart';
 export 'src/services/transfer_policy.dart';
 export 'src/services/validating_transport_frame_receiver.dart';

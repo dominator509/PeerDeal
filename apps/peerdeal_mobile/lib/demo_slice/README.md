@@ -82,6 +82,13 @@ source -> validated session route.
 Invite-only callbacks remain supported for integrations that do not expose
 the typed session source yet.
 
+The production local-identity sequence is app-owned: secure native key lookup
+and read-back verification -> optional `announcePeer` on the generic native
+local-network bridge -> session/bootstrap handoff. The native bridge receives
+only the verified peer identity and transport port; it does not derive session
+or route state. Announcement failure remains non-fatal because multicast
+reachability is an environment concern.
+
 ## Recovery Persistence Flow
 
 Mounted table routes should receive recovery persistence through

@@ -26,6 +26,52 @@ TRANSPORT_LIMITS = {
     },
 }
 
+DISCOVERY_LIMITS = {
+    "multicastPort": {
+        "canonical": ("discovery_dart", "multicastPort"),
+        "android_local_network": "DISCOVERY_PORT",
+        "windows_local_network": "kDiscoveryPort",
+    },
+    "defaultTransportPort": {
+        "canonical": ("discovery_dart", "defaultTransportPort"),
+        "android_local_network": "DEFAULT_ADVERTISED_PORT",
+        "windows_local_network": "kDefaultAdvertisedPort",
+    },
+    "headerBytes": {
+        "canonical": ("discovery_dart", "_headerBytes"),
+        "android_local_network": "HEADER_BYTES",
+        "windows_local_network": "kHeaderBytes",
+    },
+    "maxIdentityBytes": {
+        "canonical": ("network", "maxPeerIdentityBytes"),
+        "android_local_network": "MAX_ID_BYTES",
+        "windows_local_network": "kMaxIdentityBytes",
+    },
+    "version": {
+        "canonical": ("discovery_dart", "_version"),
+        "android_local_network": "VERSION",
+        "windows_local_network": "kVersion",
+    },
+    "queryKind": {
+        "canonical": ("discovery_dart", "_queryKind"),
+        "android_local_network": "QUERY_KIND",
+        "windows_local_network": "kQueryKind",
+    },
+    "advertisementKind": {
+        "canonical": ("discovery_dart", "_advertisementKind"),
+        "android_local_network": "ADVERTISEMENT_KIND",
+        "windows_local_network": "kAdvertisementKind",
+    },
+}
+
+DISCOVERY_STRINGS = {
+    "multicastAddress": {
+        "canonical": ("discovery_dart", "multicastAddress"),
+        "android_local_network": "DISCOVERY_ADDRESS",
+        "windows_local_network": "kDiscoveryAddress",
+    },
+}
+
 SOURCE_FILES = {
     "dart": (
         "packages",
@@ -41,6 +87,14 @@ SOURCE_FILES = {
         "src",
         "models",
         "network_input_limits.dart",
+    ),
+    "discovery_dart": (
+        "packages",
+        "peerdeal_network",
+        "lib",
+        "src",
+        "services",
+        "lan_discovery_protocol.dart",
     ),
     "android": (
         "apps",
@@ -90,6 +144,26 @@ SOURCE_FILES = {
         "native_readiness",
         "app_native_readiness_loader.dart",
     ),
+    "android_local_network": (
+        "apps",
+        "peerdeal_mobile",
+        "android",
+        "app",
+        "src",
+        "main",
+        "kotlin",
+        "com",
+        "peerdeal",
+        "peerdeal_mobile",
+        "LocalNetworkHandler.kt",
+    ),
+    "windows_local_network": (
+        "apps",
+        "peerdeal_desktop",
+        "windows",
+        "runner",
+        "windows_local_network.cpp",
+    ),
 }
 
 APP_PAYLOAD_DEFAULTS = {
@@ -115,14 +189,22 @@ def _source_path(root: pathlib.Path, platform: str) -> pathlib.Path:
 
 def _declaration_expression(text: str, platform: str, symbol: str) -> str | None:
     escaped_symbol = re.escape(symbol)
-    if platform in ("dart", "network"):
+    if platform in ("dart", "network", "discovery_dart"):
         pattern = rf"^\s*static\s+const\s+{escaped_symbol}\s*=\s*([^;]+);"
-    elif platform == "android":
+    elif platform in ("android", "android_local_network"):
         pattern = rf"^\s*private\s+const\s+val\s+{escaped_symbol}\s*=\s*([^\r\n]+)"
     else:
         pattern = rf"^\s*constexpr\s+[^;=]+\s+{escaped_symbol}\s*=\s*([^;]+);"
     match = re.search(pattern, text, flags=re.MULTILINE)
     return match.group(1).strip() if match else None
+
+
+def _evaluate_string(expression: str) -> str | None:
+    try:
+        value = ast.literal_eval(expression)
+    except (SyntaxError, ValueError):
+        return None
+    return value if isinstance(value, str) else None
 
 
 def _constructor_default_expression(text: str, parameter: str) -> str | None:
@@ -230,6 +312,86 @@ def check_native_contract_bounds(root: pathlib.Path) -> list[str]:
                 failures.append(
                     f"{relative_path}: {symbol}={value} does not match "
                     f"Dart {canonical_name}={dart_value}."
+                )
+
+    for canonical_name, symbols in DISCOVERY_LIMITS.items():
+        canonical_platform, canonical_symbol = symbols["canonical"]
+        canonical_path = _source_path(root, canonical_platform)
+        canonical_expression = _declaration_expression(
+            source_text[canonical_platform], canonical_platform, canonical_symbol
+        )
+        if canonical_expression is None:
+            failures.append(
+                f"{canonical_path.relative_to(root).as_posix()}: missing "
+                f"declaration for {canonical_symbol}."
+            )
+            continue
+        canonical_value = _evaluate_integer(canonical_expression)
+        if canonical_value is None:
+            failures.append(
+                f"{canonical_path.relative_to(root).as_posix()}: "
+                f"{canonical_symbol} is not a supported integer expression."
+            )
+            continue
+        for platform in ("android_local_network", "windows_local_network"):
+            symbol = symbols[platform]
+            path = _source_path(root, platform)
+            expression = _declaration_expression(
+                source_text[platform], platform, symbol
+            )
+            if expression is None:
+                failures.append(
+                    f"{path.relative_to(root).as_posix()}: missing declaration "
+                    f"for {symbol}."
+                )
+                continue
+            value = _evaluate_integer(expression)
+            if value is None:
+                failures.append(
+                    f"{path.relative_to(root).as_posix()}: {symbol} is not a "
+                    "supported integer expression."
+                )
+            elif value != canonical_value:
+                failures.append(
+                    f"{path.relative_to(root).as_posix()}: {symbol}={value} "
+                    f"does not match {canonical_symbol}={canonical_value}."
+                )
+
+    for canonical_name, symbols in DISCOVERY_STRINGS.items():
+        canonical_platform, canonical_symbol = symbols["canonical"]
+        canonical_path = _source_path(root, canonical_platform)
+        canonical_expression = _declaration_expression(
+            source_text[canonical_platform], canonical_platform, canonical_symbol
+        )
+        canonical_value = (
+            _evaluate_string(canonical_expression)
+            if canonical_expression is not None
+            else None
+        )
+        if canonical_value is None:
+            failures.append(
+                f"{canonical_path.relative_to(root).as_posix()}: missing or "
+                f"invalid string declaration for {canonical_symbol}."
+            )
+            continue
+        for platform in ("android_local_network", "windows_local_network"):
+            symbol = symbols[platform]
+            path = _source_path(root, platform)
+            expression = _declaration_expression(
+                source_text[platform], platform, symbol
+            )
+            value = (
+                _evaluate_string(expression) if expression is not None else None
+            )
+            if value is None:
+                failures.append(
+                    f"{path.relative_to(root).as_posix()}: missing or invalid "
+                    f"string declaration for {symbol}."
+                )
+            elif value != canonical_value:
+                failures.append(
+                    f"{path.relative_to(root).as_posix()}: {symbol}={value!r} "
+                    f"does not match {canonical_symbol}={canonical_value!r}."
                 )
 
     dart_sequence_path = _source_path(root, "dart")

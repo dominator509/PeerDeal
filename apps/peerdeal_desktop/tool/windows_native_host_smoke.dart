@@ -75,10 +75,16 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
   final localNetwork = MethodChannelLocalNetworkBridge();
   final localNetworkCapability = await localNetwork.getCapability();
   _require(
-    localNetworkCapability.notes == 'windows-network-interface-ready',
+    localNetworkCapability.notes == 'windows-udp-multicast-discovery',
     'local network interface capability unavailable',
   );
   _pass('local_network.capability');
+  final announcement = await localNetwork.announcePeer(
+    peerId: 'peer_windows_host_smoke',
+    port: LocalNetworkChannelContract.defaultAdvertisedPort,
+  );
+  _require(announcement.published, 'local network announcement failed');
+  _pass('local_network.announce');
   final discovery = await localNetwork.discoverPeers();
   _require(
     discovery.permissionGranted && discovery.foundEndpoints.isEmpty,
@@ -127,7 +133,7 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
         },
       );
   _require(
-    invalidReceiveResult?['available'] == false &&
+    invalidReceiveResult?['success'] == false &&
         invalidReceiveResult?['warning'] ==
             'Native transport receive request is invalid.',
     'native transport initialized for an invalid receive scope',

@@ -13,6 +13,10 @@
       "foundEndpoints": ["peer_a@192.168.1.10"],
       "interfaceHints": ["wifi"],
       "warning": null
+    },
+    "announcePeer": {
+      "published": true,
+      "warning": null
     }
   }
 }

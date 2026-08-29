@@ -7,6 +7,18 @@ class LocalNetworkChannelContract {
   static const channelName = 'peerdeal/native_bridges/local_network';
   static const getCapabilityMethod = 'getCapability';
   static const discoverPeersMethod = 'discoverPeers';
+  static const announcePeerMethod = 'announcePeer';
+  static const defaultAdvertisedPort = 40442;
+
+  static Map<String, Object?> encodePeerAnnouncement({
+    required String peerId,
+    required int port,
+  }) {
+    if (!_isOperationalPeerId(peerId) || port < 1 || port > 65535) {
+      return const <String, Object?>{};
+    }
+    return <String, Object?>{'peerId': peerId, 'port': port};
+  }
 
   static LocalNetworkCapability decodeCapability(
     Map<String, Object?>? payload,
@@ -61,7 +73,37 @@ class LocalNetworkChannelContract {
     );
   }
 
+  static LocalNetworkAnnouncementResult decodeAnnouncementResult(
+    Map<String, Object?>? payload,
+  ) {
+    if (payload == null) {
+      return const LocalNetworkAnnouncementResult.unavailable(
+        warning: 'Local network announcement is unavailable.',
+      );
+    }
+    final published = _boolValue(payload['published']);
+    return LocalNetworkAnnouncementResult(
+      published: published,
+      warning:
+          _boundedStringValue(
+            payload['warning'],
+            NativeBridgePayloadLimits.maxDiagnosticBytes,
+          ) ??
+          (published ? null : 'Local network announcement failed.'),
+    );
+  }
+
   static bool _boolValue(Object? value) => value is bool ? value : false;
+
+  static bool _isOperationalPeerId(String value) {
+    return NativeBridgePayloadLimits.isSafeUtf8Text(
+          value,
+          NativeBridgePayloadLimits.maxTransportIdentityBytes,
+        ) &&
+        value != 'none' &&
+        value != 'unresolved' &&
+        !value.contains('::');
+  }
 
   static String? _boundedStringValue(Object? value, int maxBytes) {
     if (value is! String ||

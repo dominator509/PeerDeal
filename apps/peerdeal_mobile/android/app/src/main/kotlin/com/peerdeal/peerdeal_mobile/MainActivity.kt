@@ -41,7 +41,7 @@ class MainActivity : FlutterActivity() {
             NativeTransportHandler.CHANNEL_NAME,
         ).setMethodCallHandler(transportHandler)
 
-        val localNetworkHandler = LocalNetworkHandler()
+        val localNetworkHandler = LocalNetworkHandler(this)
         this.localNetworkHandler = localNetworkHandler
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -76,6 +76,7 @@ class MainActivity : FlutterActivity() {
         appStorageDirectoryHandler = null
         nativeTransportHandler?.close()
         nativeTransportHandler = null
+        localNetworkHandler?.close()
         localNetworkHandler = null
         super.cleanUpFlutterEngine(flutterEngine)
     }

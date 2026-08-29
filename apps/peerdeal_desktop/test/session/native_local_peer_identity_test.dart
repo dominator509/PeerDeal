@@ -92,6 +92,36 @@ void main() {
     expect(bridge.loadCalls, 1);
   });
 
+  test(
+    'announces a verified local identity through the optional network seam',
+    () async {
+      final bridge = _MemorySecureKeyBridge(
+        keys: const <SecureKeyRecord>[
+          SecureKeyRecord(
+            keyId: 'local_peer_id',
+            purpose: 'peer_identity',
+            algorithm: 'opaque-peer-id',
+            secret: 'peer_existing',
+            active: true,
+          ),
+        ],
+      );
+      final announcer = _RecordingLocalNetworkPeerAnnouncer();
+      final provisioner = NativeLocalPeerIdentityProvisioner(
+        loader: NativeLocalPeerIdentityLoader(bridge: bridge),
+        writer: NativeLocalPeerIdentityWriter(bridge: bridge),
+        networkAnnouncer: announcer,
+      );
+
+      final result = await provisioner.ensureIdentity();
+
+      expect(result.isSuccess, isTrue);
+      expect(announcer.peerId, 'peer_existing');
+      expect(announcer.port, LocalNetworkChannelContract.defaultAdvertisedPort);
+      expect(announcer.calls, 1);
+    },
+  );
+
   test('reports a missing identity without inventing one', () async {
     final bridge = _MemorySecureKeyBridge();
 
@@ -628,6 +658,23 @@ void main() {
     expect(bridge.loadCancellation, same(cancellation.future));
     expect(bridge.saveCancellation, same(cancellation.future));
   });
+}
+
+class _RecordingLocalNetworkPeerAnnouncer implements LocalNetworkPeerAnnouncer {
+  String? peerId;
+  int? port;
+  int calls = 0;
+
+  @override
+  Future<LocalNetworkAnnouncementResult> announcePeer({
+    required String peerId,
+    required int port,
+  }) async {
+    calls += 1;
+    this.peerId = peerId;
+    this.port = port;
+    return const LocalNetworkAnnouncementResult(published: true);
+  }
 }
 
 class _MemorySecureKeyBridge implements SecureKeyStorageMutationBridge {

@@ -30,6 +30,9 @@ void main() {
               'warning': null,
             };
           }
+          if (call.method == LocalNetworkChannelContract.announcePeerMethod) {
+            return {'published': true, 'warning': null};
+          }
           return null;
         });
   });
@@ -58,6 +61,31 @@ void main() {
     expect(snapshot.interfaceHints, ['wifi']);
     expect(snapshot.warning, isNull);
     expect(log.single.method, 'discoverPeers');
+  });
+
+  test('announces a peer over the method channel', () async {
+    final bridge = MethodChannelLocalNetworkBridge(channel: channel);
+    final announcement = await bridge.announcePeer(
+      peerId: 'peer_a',
+      port: 40442,
+    );
+
+    expect(announcement.published, isTrue);
+    expect(announcement.warning, isNull);
+    expect(log.single.method, 'announcePeer');
+    expect(log.single.arguments, {'peerId': 'peer_a', 'port': 40442});
+  });
+
+  test('rejects invalid peer announcements before native dispatch', () async {
+    final bridge = MethodChannelLocalNetworkBridge(channel: channel);
+    final announcement = await bridge.announcePeer(peerId: 'none', port: 40442);
+
+    expect(announcement.published, isFalse);
+    expect(
+      announcement.warning,
+      'Local network announcement request is invalid.',
+    );
+    expect(log, isEmpty);
   });
 
   test('returns unavailable capability when platform lookup throws', () async {

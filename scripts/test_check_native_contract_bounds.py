@@ -16,6 +16,9 @@ SOURCE_PATHS = {
     "network": pathlib.Path(
         "packages/peerdeal_network/lib/src/models/network_input_limits.dart"
     ),
+    "discovery_dart": pathlib.Path(
+        "packages/peerdeal_network/lib/src/services/lan_discovery_protocol.dart"
+    ),
     "android": pathlib.Path(
         "apps/peerdeal_mobile/android/app/src/main/kotlin/"
         "com/peerdeal/peerdeal_mobile/NativeTransportHandler.kt"
@@ -35,6 +38,13 @@ SOURCE_PATHS = {
     "desktop_readiness": pathlib.Path(
         "apps/peerdeal_desktop/lib/native_readiness/app_native_readiness_loader.dart"
     ),
+    "android_local_network": pathlib.Path(
+        "apps/peerdeal_mobile/android/app/src/main/kotlin/"
+        "com/peerdeal/peerdeal_mobile/LocalNetworkHandler.kt"
+    ),
+    "windows_local_network": pathlib.Path(
+        "apps/peerdeal_desktop/windows/runner/windows_local_network.cpp"
+    ),
 }
 
 
@@ -50,7 +60,19 @@ class NativeBridgePayloadLimits {
 """,
         "network": """
 class NetworkInputLimits {
+  static const maxPeerIdentityBytes = 256;
   static const maxTransportSequence = 0x7fffffff;
+}
+""",
+        "discovery_dart": """
+class LanDiscoveryProtocol {
+  static const multicastAddress = '239.255.42.100';
+  static const multicastPort = 40443;
+  static const defaultTransportPort = 40442;
+  static const _headerBytes = 10;
+  static const _version = 1;
+  static const _queryKind = 1;
+  static const _advertisementKind = 2;
 }
 """,
         "android": """
@@ -104,6 +126,26 @@ class AppNativeReadinessLoader {
         NativeBridgePayloadLimits.maxTransportPayloadBytes,
   }) => AppNativeReadinessLoader();
 }
+""",
+        "android_local_network": """
+private const val DISCOVERY_ADDRESS = "239.255.42.100"
+private const val DISCOVERY_PORT = 40443
+private const val DEFAULT_ADVERTISED_PORT = 40442
+private const val HEADER_BYTES = 10
+private const val MAX_ID_BYTES = 256
+private const val VERSION = 1
+private const val QUERY_KIND = 1
+private const val ADVERTISEMENT_KIND = 2
+""",
+        "windows_local_network": """
+constexpr const char* kDiscoveryAddress = "239.255.42.100";
+constexpr unsigned short kDiscoveryPort = 40443;
+constexpr unsigned short kDefaultAdvertisedPort = 40442;
+constexpr std::size_t kHeaderBytes = 10;
+constexpr std::size_t kMaxIdentityBytes = 256;
+constexpr uint8_t kVersion = 1;
+constexpr uint8_t kQueryKind = 1;
+constexpr uint8_t kAdvertisementKind = 2;
 """,
     }
     for platform, path in SOURCE_PATHS.items():
@@ -246,6 +288,42 @@ class NativeContractBoundsCheckTest(unittest.TestCase):
 
             self.assertEqual(1, len(failures))
             self.assertIn("native contract source is missing", failures[0])
+
+    def test_rejects_discovery_port_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_contract_sources(root)
+            android_path = root / SOURCE_PATHS["android_local_network"]
+            android_path.write_text(
+                android_path.read_text(encoding="utf-8").replace(
+                    "DISCOVERY_PORT = 40443", "DISCOVERY_PORT = 40444"
+                ),
+                encoding="utf-8",
+            )
+
+            failures = check_native_contract_bounds(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("DISCOVERY_PORT=40444", failures[0])
+            self.assertIn("multicastPort=40443", failures[0])
+
+    def test_rejects_discovery_address_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = pathlib.Path(temp_dir)
+            write_contract_sources(root)
+            windows_path = root / SOURCE_PATHS["windows_local_network"]
+            windows_path.write_text(
+                windows_path.read_text(encoding="utf-8").replace(
+                    "239.255.42.100", "239.255.42.101"
+                ),
+                encoding="utf-8",
+            )
+
+            failures = check_native_contract_bounds(root)
+
+            self.assertEqual(1, len(failures))
+            self.assertIn("kDiscoveryAddress='239.255.42.101'", failures[0])
+            self.assertIn("multicastAddress='239.255.42.100'", failures[0])
 
 
 if __name__ == "__main__":

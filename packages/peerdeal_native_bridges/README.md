@@ -44,15 +44,20 @@ to observe local device capabilities.
   results.
 - Callers may provide a cancellation signal; cancellation completes the bridge
   operation fail closed and cancels its local deadline timer.
-- Local-network method-channel capability and discovery calls use the same
-  bounded five-second default deadline and stable fail-closed timeout results.
-  App-owned bootstrap loaders may provide cancellation for route lifecycle
-  teardown; discovery and routing policy remain outside this package.
+- Local-network method-channel capability, discovery, and peer-announcement
+  calls use the same bounded five-second default deadline and stable fail-closed
+  timeout results. App-owned bootstrap loaders may provide cancellation for
+  route lifecycle teardown; discovery and routing policy remain outside this
+  package.
 - Android and Windows app hosts register the generic local-network channel and
-  report bounded active-interface capability facts and generic interface hints.
-  They return `discoverySupported: false` with no fabricated endpoints until a
-  protocol-owned discovery advertisement and endpoint-provisioning contract
-  exist.
+  implement bounded UDP multicast discovery behind the generic contract.
+  `announcePeer` accepts only an already-validated operational peer identity
+  and transport port. Hosts advertise the identity through the protocol-owned
+  `PDD1` envelope and return only `peer@host:port` endpoint values.
+- Local discovery carries no session, authentication, route, or table state.
+  The app-owned identity provisioner invokes announcement only after secure
+  identity verification, and discovery remains optional when the host, network,
+  or firewall cannot provide multicast reachability.
 - Native bridge warnings are normalized for app-layer safe-surface and network
   routing policy.
 - Channel names, method names, fixture payloads, and decode behavior are locked
@@ -81,7 +86,7 @@ to observe local device capabilities.
 - Capture protection channel: `peerdeal/native_bridges/capture_protection`
   with `getCapability` and `setBlocking`.
 - Local network channel: `peerdeal/native_bridges/local_network` with
-  `getCapability` and `discoverPeers`.
+  `getCapability`, `discoverPeers`, and additive `announcePeer`.
 - Secure key storage channel: `peerdeal/native_bridges/secure_key_storage` with
   `loadKeyRing`, `saveKey`, `deleteKey`, and additive revision-aware
   `saveKeyIfRevision`/`deleteKeyIfRevision` operations. The generic snapshot

@@ -39,3 +39,13 @@ class LocalNetworkDiscoverySnapshot {
   final List<String> interfaceHints;
   final String? warning;
 }
+
+class LocalNetworkAnnouncementResult {
+  const LocalNetworkAnnouncementResult({required this.published, this.warning});
+
+  const LocalNetworkAnnouncementResult.unavailable({this.warning})
+    : published = false;
+
+  final bool published;
+  final String? warning;
+}

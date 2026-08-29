@@ -1,13 +1,24 @@
 # Project State
 
-Generated: 2026-08-10
+Generated: 2026-08-29
 
 ## Current Retrofit Position
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T4 native host hardening following the T1 retrofit baseline and CI/dependency alignment
-- Scope: Additive Android and Windows secure-key and capture host implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
+- Current tier: T355 local-network discovery hardening following the T1 retrofit baseline and CI/dependency alignment
+- Scope: Additive Android and Windows native implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
+
+## Current T355 Changes
+
+- `peerdeal_network` owns the bounded versioned `PDD1` local discovery
+  query/advertisement envelope.
+- The generic local-network bridge exposes additive `announcePeer`; Android and
+  Windows implement bounded multicast responder/scanner hosts.
+- App-owned local identity provisioners announce only after secure-key read-back
+  verification. Cross-device multicast reachability, runtime device behavior,
+  release signing, other-platform hosts, product database/state inputs, and
+  final UI validation remain explicit external or integration-owned gates.
 
 ## T1 Artifacts
 

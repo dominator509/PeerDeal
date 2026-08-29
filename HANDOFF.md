@@ -70,7 +70,8 @@ app recovery factory loading, T348 cancellation-safe local identity
 provisioning, T349 cancellation-safe receipt key provisioning, and T350
 native-readiness payload contract alignment, T351 app-native transport
 cancellation forwarding, T352 capture cancellation hardening, T353 bounded
-network receive admission, and T354 compatible dependency refresh are
+network receive admission, T354 compatible dependency refresh, and T355
+bounded Android/Windows local network discovery are
 implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -408,6 +409,28 @@ table scopes retain their existing safe-text contract.
   Dart/Flutter test, diff, and post-refresh dependency-audit gates pass.
 - The audit now reports 0 actionable upgrades; 14 newer versions remain below
   latest because current constraints or the Flutter/Dart toolchain block them.
+
+## Recent T355 Changes
+
+- Added the bounded versioned `PDD1` local discovery protocol to
+  `peerdeal_network`, with strict UTF-8, identity, port, packet, and kind
+  validation.
+- Added the additive generic `announcePeer` local-network bridge operation.
+  Android and Windows now run bounded multicast responders and scanners and
+  return only validated `peer@host:port` endpoint values.
+- Mirrored app-owned local identity provisioners announce only after secure-key
+  read-back verification. Announcement failure is optional and does not make a
+  verified local identity unusable.
+- Focused protocol, bridge, and mirrored identity suites pass; Android debug
+  APK and Windows debug host builds pass. The native contract checker now also
+  enforces discovery address, port, header, identity, version, and packet-kind
+  parity across Dart, Android, and Windows.
+
+Remaining:
+- Cross-device multicast/firewall reachability, runtime device/profile
+  validation, operator-owned release signing, other-platform native hosts,
+  production database/state wiring, and final product UI validation remain
+  external or integration-owned.
 
 ## Recent T352 Changes
 

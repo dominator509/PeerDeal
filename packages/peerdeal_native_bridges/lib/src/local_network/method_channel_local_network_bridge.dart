@@ -9,7 +9,11 @@ import 'local_network_bridge_models.dart';
 const _localNetworkCallTimeout = Duration(seconds: 5);
 
 class MethodChannelLocalNetworkBridge
-    implements LocalNetworkBridge, CancellableLocalNetworkBridge {
+    implements
+        LocalNetworkBridge,
+        CancellableLocalNetworkBridge,
+        LocalNetworkPeerAnnouncer,
+        CancellableLocalNetworkPeerAnnouncer {
   MethodChannelLocalNetworkBridge({
     MethodChannel? channel,
     Duration timeout = _localNetworkCallTimeout,
@@ -98,6 +102,59 @@ class MethodChannelLocalNetworkBridge
     }
 
     return LocalNetworkChannelContract.decodeDiscoverySnapshot(result);
+  }
+
+  @override
+  Future<LocalNetworkAnnouncementResult> announcePeer({
+    required String peerId,
+    required int port,
+    Future<void>? cancellation,
+  }) async {
+    final arguments = LocalNetworkChannelContract.encodePeerAnnouncement(
+      peerId: peerId,
+      port: port,
+    );
+    if (arguments.isEmpty) {
+      return const LocalNetworkAnnouncementResult.unavailable(
+        warning: 'Local network announcement request is invalid.',
+      );
+    }
+
+    final Map<String, Object?>? result;
+    try {
+      result = await _invokeWithDeadline(
+        () => _channel.invokeMapMethod<String, Object?>(
+          LocalNetworkChannelContract.announcePeerMethod,
+          arguments,
+        ),
+        cancellation: cancellation,
+      );
+    } on _LocalNetworkCallCancelled {
+      return const LocalNetworkAnnouncementResult.unavailable(
+        warning: 'Local network call cancelled.',
+      );
+    } on TimeoutException {
+      return const LocalNetworkAnnouncementResult.unavailable(
+        warning: 'Local network call timed out.',
+      );
+    } on MissingPluginException catch (error) {
+      return LocalNetworkAnnouncementResult.unavailable(
+        warning: _warning('Local network plugin is unavailable', error),
+      );
+    } on PlatformException catch (error) {
+      return LocalNetworkAnnouncementResult.unavailable(
+        warning: _warning('Local network announcement failed', error),
+      );
+    } on Object catch (error) {
+      return LocalNetworkAnnouncementResult.unavailable(
+        warning: _warning(
+          'Local network announcement payload decode failed',
+          error,
+        ),
+      );
+    }
+
+    return LocalNetworkChannelContract.decodeAnnouncementResult(result);
   }
 
   static Duration _validateTimeout(Duration timeout) {

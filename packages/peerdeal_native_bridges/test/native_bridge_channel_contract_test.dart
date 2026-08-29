@@ -291,6 +291,9 @@ void main() {
     final discoveryPayload =
         methods[LocalNetworkChannelContract.discoverPeersMethod]
             as Map<String, Object?>;
+    final announcementPayload =
+        methods[LocalNetworkChannelContract.announcePeerMethod]
+            as Map<String, Object?>;
 
     expect(fixture['channel'], LocalNetworkChannelContract.channelName);
 
@@ -299,6 +302,9 @@ void main() {
     );
     final snapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(
       discoveryPayload,
+    );
+    final announcement = LocalNetworkChannelContract.decodeAnnouncementResult(
+      announcementPayload,
     );
 
     expect(capability.discoverySupported, isTrue);
@@ -311,11 +317,17 @@ void main() {
     expect(snapshot.foundEndpoints, ['peer_a@192.168.1.10']);
     expect(snapshot.interfaceHints, ['wifi']);
     expect(snapshot.warning, isNull);
+
+    expect(announcement.published, isTrue);
+    expect(announcement.warning, isNull);
   });
 
   test('local network channel contract fails closed on null payloads', () {
     final capability = LocalNetworkChannelContract.decodeCapability(null);
     final snapshot = LocalNetworkChannelContract.decodeDiscoverySnapshot(null);
+    final announcement = LocalNetworkChannelContract.decodeAnnouncementResult(
+      null,
+    );
 
     expect(capability.discoverySupported, isFalse);
     expect(capability.permissionPromptSupported, isFalse);
@@ -327,6 +339,8 @@ void main() {
     expect(snapshot.foundEndpoints, isEmpty);
     expect(snapshot.interfaceHints, isEmpty);
     expect(snapshot.warning, contains('unavailable'));
+    expect(announcement.published, isFalse);
+    expect(announcement.warning, contains('unavailable'));
   });
 
   test('local network channel contract tolerates malformed fields', () {

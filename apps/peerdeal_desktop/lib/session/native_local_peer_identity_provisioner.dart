@@ -58,12 +58,18 @@ class NativeLocalPeerIdentityProvisioner {
     required NativeLocalPeerIdentityLoader loader,
     required NativeLocalPeerIdentityWriter writer,
     AppLocalPeerIdentityFactory? identityFactory,
+    LocalNetworkPeerAnnouncer? networkAnnouncer,
+    int announcedPort = LocalNetworkChannelContract.defaultAdvertisedPort,
   }) : _loader = loader,
        _writer = writer,
-       _identityFactory = identityFactory ?? _securePeerId;
+       _identityFactory = identityFactory ?? _securePeerId,
+       _networkAnnouncer = networkAnnouncer,
+       _announcedPort = _validateAnnouncedPort(announcedPort);
 
   factory NativeLocalPeerIdentityProvisioner.methodChannel({
     String namespace = NativeLocalPeerIdentityLoader.defaultNamespace,
+    LocalNetworkPeerAnnouncer? networkAnnouncer,
+    int announcedPort = LocalNetworkChannelContract.defaultAdvertisedPort,
   }) {
     final bridge = MethodChannelSecureKeyStorageBridge();
     return NativeLocalPeerIdentityProvisioner(
@@ -75,12 +81,16 @@ class NativeLocalPeerIdentityProvisioner {
         bridge: bridge,
         namespace: namespace,
       ),
+      networkAnnouncer: networkAnnouncer ?? MethodChannelLocalNetworkBridge(),
+      announcedPort: announcedPort,
     );
   }
 
   final NativeLocalPeerIdentityLoader _loader;
   final NativeLocalPeerIdentityWriter _writer;
   final AppLocalPeerIdentityFactory _identityFactory;
+  final LocalNetworkPeerAnnouncer? _networkAnnouncer;
+  final int _announcedPort;
   Future<AppLocalPeerIdentityProvisionResult>? _inFlight;
 
   Future<AppLocalPeerIdentityProvisionResult> ensureIdentity({
@@ -122,7 +132,10 @@ class NativeLocalPeerIdentityProvisioner {
       return AppLocalPeerIdentityProvisionResult(warnings: loaded.warnings);
     }
     if (loaded.identity != null) {
-      return AppLocalPeerIdentityProvisionResult(identity: loaded.identity);
+      return _withAnnouncement(
+        identity: loaded.identity!,
+        cancellation: cancellation,
+      );
     }
 
     final String peerId;
@@ -154,8 +167,9 @@ class NativeLocalPeerIdentityProvisioner {
           return _cancelledProvisionResult();
         }
         if (competing.isAvailable) {
-          return AppLocalPeerIdentityProvisionResult(
-            identity: competing.identity,
+          return _withAnnouncement(
+            identity: competing.identity!,
+            cancellation: cancellation,
           );
         }
       }
@@ -178,10 +192,51 @@ class NativeLocalPeerIdentityProvisioner {
     if (await _isCancellationRequested(cancellation)) {
       return _cancelledProvisionResult();
     }
-    return AppLocalPeerIdentityProvisionResult(
+    return _withAnnouncement(
       identity: identity,
       created: true,
+      cancellation: cancellation,
     );
+  }
+
+  Future<AppLocalPeerIdentityProvisionResult> _withAnnouncement({
+    required AppLocalPeerIdentity identity,
+    required Future<void>? cancellation,
+    bool created = false,
+  }) async {
+    await _announce(identity.peerId, cancellation: cancellation);
+    if (await _isCancellationRequested(cancellation)) {
+      return _cancelledProvisionResult();
+    }
+    return AppLocalPeerIdentityProvisionResult(
+      identity: identity,
+      created: created,
+    );
+  }
+
+  Future<void> _announce(
+    String peerId, {
+    required Future<void>? cancellation,
+  }) async {
+    final announcer = _networkAnnouncer;
+    if (announcer == null || await _isCancellationRequested(cancellation)) {
+      return;
+    }
+    try {
+      if (announcer is CancellableLocalNetworkPeerAnnouncer) {
+        final cancellableAnnouncer =
+            announcer as CancellableLocalNetworkPeerAnnouncer;
+        await cancellableAnnouncer.announcePeer(
+          peerId: peerId,
+          port: _announcedPort,
+          cancellation: cancellation,
+        );
+      } else {
+        await announcer.announcePeer(peerId: peerId, port: _announcedPort);
+      }
+    } on Object {
+      // Local discovery is optional; the verified identity remains usable.
+    }
   }
 
   AppLocalPeerIdentityProvisionResult _cancelledProvisionResult() {
@@ -194,6 +249,13 @@ class NativeLocalPeerIdentityProvisioner {
     final random = Random.secure();
     final bytes = List<int>.generate(24, (_) => random.nextInt(256));
     return 'peer_${base64UrlEncode(bytes).replaceAll('=', '')}';
+  }
+
+  static int _validateAnnouncedPort(int port) {
+    if (port < 1 || port > 65535) {
+      throw ArgumentError.value(port, 'announcedPort', 'must be a valid port');
+    }
+    return port;
   }
 }
 
