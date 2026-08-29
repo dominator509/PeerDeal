@@ -14,7 +14,7 @@ truth. Every hand/session must be reconstructable from ordered protocol events.
 | --- | --- |
 | Language | Dart SDK `^3.11.5` |
 | UI | Flutter mobile and desktop app shells |
-| Workspace | Dart pub workspace plus Melos `^8.5.0` |
+| Workspace | Dart pub workspace plus Melos `^8.6.0` |
 | Lints | `package:lints/recommended.yaml` and package analysis options |
 | Scripts | Python checks for boundaries, source text, and dependencies |
 | CI | GitHub Actions on Flutter stable |

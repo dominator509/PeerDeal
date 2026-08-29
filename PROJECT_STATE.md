@@ -22,8 +22,8 @@ Generated: 2026-08-10
 
 ## Recent T4 Changes
 
-- `.github/workflows/ci.yml` invokes the repository-pinned Melos 8.5.0.
-- `pubspec.yaml` and `pubspec.lock` align the workspace on Melos 8.5.0.
+- `.github/workflows/ci.yml` invokes the repository-pinned Melos 8.6.0.
+- `pubspec.yaml` and `pubspec.lock` align the workspace on Melos 8.6.0.
 - Compatible transitive lock refresh raises `mustache_template` to 2.0.5.
 - `apps/peerdeal_mobile/android/` now provides the generated Android host and
   registers the generic secure-key method channel.
@@ -2199,6 +2199,18 @@ Remaining:
 - In-flight duplicate rejection retains precedence, and completed or failed
   admitted receive operations release their admission slots. The focused network
   receiver suite passes 8 tests and direct package analysis reports no issues.
+
+## Recent T354 Changes
+
+- The dedicated dependency refresh advances the root Melos dev dependency from
+  8.5.0 to 8.6.0 and refreshes exactly eight compatible transitive packages:
+  `glob`, `io`, `mime`, `pool`, `process`, `pub_semver`, `pubspec_parse`, and
+  `yaml`.
+- No application behavior, package boundary, analyzer rule, or lint rule
+  changed. Full analyzer, boundary/source/native-contract, serialized
+  Dart/Flutter test, diff, and post-refresh dependency-audit gates pass.
+- The audit now reports 0 actionable upgrades; 14 newer versions remain below
+  latest because current constraints or the Flutter/Dart toolchain block them.
 
 ## Recent T352 Changes
 

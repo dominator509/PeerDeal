@@ -69,8 +69,9 @@ T346 cancellation-before-native-dispatch hardening, and T347 cancellation-safe
 app recovery factory loading, T348 cancellation-safe local identity
 provisioning, T349 cancellation-safe receipt key provisioning, and T350
 native-readiness payload contract alignment, T351 app-native transport
-cancellation forwarding, T352 capture cancellation hardening, and T353 bounded
-network receive admission are implemented on branch
+cancellation forwarding, T352 capture cancellation hardening, T353 bounded
+network receive admission, and T354 compatible dependency refresh are
+implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
 
@@ -395,6 +396,18 @@ table scopes retain their existing safe-text contract.
 - In-flight duplicate rejection retains precedence, and completed or failed
   admitted receive operations release their admission slots. The focused network
   receiver suite passes 8 tests and direct package analysis reports no issues.
+
+## Recent T354 Changes
+
+- The dedicated dependency refresh advances the root Melos dev dependency from
+  8.5.0 to 8.6.0 and refreshes exactly eight compatible transitive packages:
+  `glob`, `io`, `mime`, `pool`, `process`, `pub_semver`, `pubspec_parse`, and
+  `yaml`.
+- No application behavior, package boundary, analyzer rule, or lint rule
+  changed. Full analyzer, boundary/source/native-contract, serialized
+  Dart/Flutter test, diff, and post-refresh dependency-audit gates pass.
+- The audit now reports 0 actionable upgrades; 14 newer versions remain below
+  latest because current constraints or the Flutter/Dart toolchain block them.
 
 ## Recent T352 Changes
 

@@ -35,16 +35,15 @@ A dependency PR must include:
 - rollback notes when the upgrade affects shared tooling
 
 ## Current baseline note
-As of the 2026-08-28 dependency cleanup, the workspace uses Melos 8.5.0 and
-the newest resolvable lint/tooling baseline, with compatible transitive lockfile
-refreshes.
-`flutter pub outdated` may still report newer `meta`, `test`, and transitive
-versions when they are not mutually compatible with the current Flutter/Dart
-toolchain. A direct 2026-08-29 audit reports 23 outdated packages, 9
-resolvable upgrades, and 14 newer versions below the current resolution. The
-9 resolvable upgrades are intentionally outside unrelated production-hardening
-work; handle them in a dedicated dependency change after reviewing affected
-tooling and lockfile impact.
+As of the 2026-08-29 dedicated dependency refresh, the workspace uses Melos
+8.6.0 and the newest resolvable lint/tooling baseline. The root `melos` dev
+dependency moved from 8.5.0 to 8.6.0, and the lockfile refreshed exactly eight
+compatible transitive packages: `glob`, `io`, `mime`, `pool`, `process`,
+`pub_semver`, `pubspec_parse`, and `yaml`.
+No analyzer or lint rules changed. The post-refresh audit reports 0 actionable
+upgrades and 14 newer package versions below latest because current constraints
+or the Flutter/Dart toolchain do not permit them; `meta` and `test` remain
+toolchain-blocked.
 
 If the audit command reports advisory metadata warnings from pub.dev while
 still exiting successfully, treat the version table as useful and rerun the

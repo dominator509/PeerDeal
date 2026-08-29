@@ -24,7 +24,7 @@ workspace:
   - packages/peerdeal_testkit
 
 dev_dependencies:
-  melos: ^8.5.0
+  melos: ^8.6.0
 
 melos:
   scripts:

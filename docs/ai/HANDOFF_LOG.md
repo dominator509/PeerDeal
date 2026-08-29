@@ -2,6 +2,28 @@
 
 Use this for concise agent handoffs only.
 
+### 2026-08-29 - Codex - Refresh Compatible Dependencies
+
+Summary:
+- The dedicated dependency refresh advances the root Melos dev dependency from
+  8.5.0 to 8.6.0.
+- The lockfile refresh updates exactly eight compatible transitive packages:
+  `glob`, `io`, `mime`, `pool`, `process`, `pub_semver`, `pubspec_parse`, and
+  `yaml`.
+- No application behavior, package boundary, analyzer rule, or lint rule
+  changed.
+
+Verification:
+- Full analyzer, boundary/source/native-contract, serialized Dart/Flutter test,
+  diff, and post-refresh dependency-audit gates pass.
+- The audit reports 0 actionable upgrades; 14 newer versions remain below
+  latest because current constraints or the Flutter/Dart toolchain block them.
+
+Next reviewer:
+Continue with documented device/native-platform, cross-device network,
+product session-source, and release-signing gates without changing locked
+boundaries.
+
 ### 2026-08-29 - Codex - Bound Transport Receive Admission
 
 Summary:

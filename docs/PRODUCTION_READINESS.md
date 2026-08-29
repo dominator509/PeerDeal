@@ -371,7 +371,7 @@ the gates below are satisfied.
   becoming an unbounded CPU retry loop without changing the generic transport
   channel contract. Real-device and cross-device reachability validation remain
   external.
-- The workspace and CI now use Melos 8.5.0, and dependency audit reports zero actionable upgrades; newer `meta` and `test` versions remain toolchain-blocked.
+- The workspace and CI now use Melos 8.6.0, and the post-refresh dependency audit reports zero actionable upgrades; 14 newer versions remain below latest because current constraints or the Flutter/Dart toolchain block them.
 - The v1 scaffold protocol catalog is locked across command, event, snapshot,
   Game File, invite payload, and public result-code identities, with accepted
   fixture parity and fail-closed unsupported-version checks.
@@ -3537,6 +3537,13 @@ precedence, and every admitted operation releases its slot on completion or
 failure. The
 focused receiver suite and direct package analysis pass; native/device and
 cross-device reachability remain separate gates.
+
+The T354 follow-up completes the dedicated compatible dependency refresh. The
+root Melos constraint and lockfile now use 8.6.0, with exactly eight compatible
+transitive package updates and no application, package-boundary, analyzer, or
+lint changes. Full repository analysis, static checks, serialized Dart and
+Flutter tests, diff checks, and the post-refresh dependency audit pass; 14
+newer package versions remain blocked by current constraints or toolchain.
 
 ## Next production hardening order
 1. Validate Android secure-key/capture behavior on a real device and validate
