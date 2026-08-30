@@ -3563,6 +3563,13 @@ coverage passes. Concrete product state/source,
 durable persistence, real-device and cross-device validation, other-platform
 hosts, operator release signing, and final UI remain separate gates.
 
+The T357 follow-up closes the repository-local Android release-artifact CI gap.
+After the existing missing-credentials fail-closed check, CI creates a
+short-lived runner-local PKCS12 key and builds a signed release APK through the
+existing four-value signing contract. The key is not production credential
+material and is not published; operator-owned signing, real-device installation,
+and release distribution evidence remain separate gates.
+
 The T355 follow-up closes the codeable Android/Windows local-network discovery
 gap without moving session policy into native code. `peerdeal_network` now owns
 the bounded versioned `PDD1` query/advertisement envelope; the generic native

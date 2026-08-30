@@ -429,6 +429,15 @@ Remaining:
   cross-device validation, other-platform hosts, operator release signing, and
   final product UI validation remain external or integration-owned.
 
+## Recent T357 Changes
+
+- Android CI now generates a short-lived runner-local PKCS12 key and builds a
+  signed release APK after verifying that missing signing values fail closed.
+- The ephemeral CI key does not replace operator-owned release signing; real
+  device installation, key custody, and release distribution evidence remain
+  open.
+- No application, native bridge, or package boundary changed.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

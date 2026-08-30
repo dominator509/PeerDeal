@@ -6,7 +6,7 @@ Generated: 2026-08-29
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T356 release-entrypoint hardening following the T1 retrofit baseline and CI/dependency alignment
+- Current tier: T357 release-artifact CI hardening following the T1 retrofit baseline and CI/dependency alignment
 - Scope: Additive Android and Windows native implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
 
 ## Current T356 Changes
@@ -21,6 +21,15 @@ Generated: 2026-08-29
 - Debug/test callers retain the existing demo default. Product state/source,
   durable persistence, device/network validation, release signing, and final UI
   validation remain separate gates.
+
+## Current T357 Changes
+
+- Android CI now creates a short-lived, runner-local PKCS12 signing key and builds
+  a signed release APK after the existing missing-credentials fail-closed check.
+- The CI key is never a production credential or artifact; operator-owned release
+  signing and real device installation remain separate release gates.
+- The release build exercises the existing four-value signing contract without
+  changing the app, native bridge, or package boundaries.
 
 ## Current T355 Changes
 
