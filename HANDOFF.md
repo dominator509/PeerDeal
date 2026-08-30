@@ -438,6 +438,16 @@ Remaining:
   open.
 - No application, native bridge, or package boundary changed.
 
+## Recent T358 Changes
+
+- Windows CI now builds and executes the native host smoke target in both Debug
+  and Release configurations, using the existing explicit executable-path
+  parameter for the Release binary.
+- The Release smoke covers the existing native registration surface after
+  release compilation; operator profile/device and distribution validation stay
+  open.
+- No application, native bridge, or package boundary changed.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

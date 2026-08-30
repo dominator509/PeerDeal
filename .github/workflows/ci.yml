@@ -180,7 +180,16 @@ jobs:
         working-directory: apps/peerdeal_desktop
         run: flutter build windows --release --no-pub
 
-      - name: Run Windows native host runtime smoke
+      - name: Build Windows release native host runtime smoke
+        working-directory: apps/peerdeal_desktop
+        run: flutter build windows --release --no-pub -t tool/windows_native_host_smoke.dart
+
+      - name: Run Windows debug native host runtime smoke
         working-directory: apps/peerdeal_desktop
         shell: pwsh
         run: ./tool/run_windows_native_host_smoke.ps1
+
+      - name: Run Windows release native host runtime smoke
+        working-directory: apps/peerdeal_desktop
+        shell: pwsh
+        run: ./tool/run_windows_native_host_smoke.ps1 -ExecutablePath .\build\windows\x64\runner\Release\peerdeal_desktop.exe

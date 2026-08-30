@@ -3570,6 +3570,13 @@ existing four-value signing contract. The key is not production credential
 material and is not published; operator-owned signing, real-device installation,
 and release distribution evidence remain separate gates.
 
+The T358 follow-up closes the Windows release-host smoke coverage gap. CI now
+builds and executes the existing native host smoke target in both Debug and
+Release configurations, passing the Release executable through the existing
+script parameter. This validates native registration after release compilation;
+operator profile/device behavior and distribution validation remain separate
+gates.
+
 The T355 follow-up closes the codeable Android/Windows local-network discovery
 gap without moving session policy into native code. `peerdeal_network` now owns
 the bounded versioned `PDD1` query/advertisement envelope; the generic native

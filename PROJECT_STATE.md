@@ -6,7 +6,7 @@ Generated: 2026-08-29
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T357 release-artifact CI hardening following the T1 retrofit baseline and CI/dependency alignment
+- Current tier: T358 release-host smoke hardening following the T1 retrofit baseline and CI/dependency alignment
 - Scope: Additive Android and Windows native implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
 
 ## Current T356 Changes
@@ -30,6 +30,16 @@ Generated: 2026-08-29
   signing and real device installation remain separate release gates.
 - The release build exercises the existing four-value signing contract without
   changing the app, native bridge, or package boundaries.
+
+## Current T358 Changes
+
+- Windows CI now builds and executes the native host smoke target in both Debug
+  and Release configurations; the Release run uses the existing explicit
+  executable-path parameter.
+- The release host smoke exercises app storage, capture, local-network,
+  transport, and secure-key registration after release compilation. It does not
+  replace operator profile/device or distribution validation.
+- No application, native bridge, or package boundary changed.
 
 ## Current T355 Changes
 
