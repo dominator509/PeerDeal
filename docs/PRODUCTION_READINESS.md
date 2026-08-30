@@ -3577,6 +3577,13 @@ script parameter. This validates native registration after release compilation;
 operator profile/device behavior and distribution validation remain separate
 gates.
 
+The T359 follow-up closes the remaining repository-local Android artifact
+verification gap. After the ephemeral signing build, CI invokes the installed
+Android SDK `apksigner` and requires a verified v2 or v3 signature with exactly
+one signer. Missing artifacts, unavailable tooling, failed verification, or
+unexpected signer output fail closed; operator-owned signing identity, device
+installation, and distribution remain separate gates.
+
 The T355 follow-up closes the codeable Android/Windows local-network discovery
 gap without moving session policy into native code. `peerdeal_network` now owns
 the bounded versioned `PDD1` query/advertisement envelope; the generic native

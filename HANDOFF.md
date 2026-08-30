@@ -448,6 +448,15 @@ Remaining:
   open.
 - No application, native bridge, or package boundary changed.
 
+## Recent T359 Changes
+
+- Android CI now invokes the installed SDK `apksigner` against the generated
+  release APK after the ephemeral signing build.
+- The verification gate requires a valid v2 or v3 signature and exactly one
+  signer, and fails closed when the APK or verifier is unavailable.
+- Operator-owned signing identity, device installation, and distribution
+  validation remain open; no application or package boundary changed.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

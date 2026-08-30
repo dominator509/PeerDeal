@@ -6,7 +6,7 @@ Generated: 2026-08-29
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T358 release-host smoke hardening following the T1 retrofit baseline and CI/dependency alignment
+- Current tier: T359 Android release-signature verification hardening following the T1 retrofit baseline and CI/dependency alignment
 - Scope: Additive Android and Windows native implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
 
 ## Current T356 Changes
@@ -40,6 +40,15 @@ Generated: 2026-08-29
   transport, and secure-key registration after release compilation. It does not
   replace operator profile/device or distribution validation.
 - No application, native bridge, or package boundary changed.
+
+## Current T359 Changes
+
+- Android CI now verifies the built release APK with the installed Android SDK
+  `apksigner` after the ephemeral signing build.
+- The gate requires a verified v2 or v3 signature and exactly one signer; it
+  fails closed when the artifact, SDK tool, or verification result is missing.
+- Operator-owned signing identity, device installation, and distribution remain
+  separate release gates.
 
 ## Current T355 Changes
 
