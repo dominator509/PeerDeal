@@ -410,6 +410,23 @@ table scopes retain their existing safe-text contract.
 - The audit now reports 0 actionable upgrades; 14 newer versions remain below
   latest because current constraints or the Flutter/Dart toolchain block them.
 
+## Recent T356 Changes
+
+- Both production app entrypoints now pass the existing app-shell release policy
+  with demo mode disabled when `kReleaseMode` is true. The shell mounts only its
+  home fallback plus injected production routes, so a release build cannot
+  expose fixture-backed demo navigation or scenarios by default.
+- When no product routes are supplied, the default home reports unavailable
+  production routes instead of presenting demo state. Debug/test callers retain
+  the existing demo default and production route injection remains app-owned.
+- Mirrored app-shell tests cover the disabled-demo fallback and all focused
+  app-shell tests pass.
+
+Remaining:
+- Concrete product state/source and durable database wiring, real-device and
+  cross-device validation, other-platform hosts, operator release signing, and
+  final product UI validation remain external or integration-owned.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

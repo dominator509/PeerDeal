@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_receipts/peerdeal_receipts.dart';
 
@@ -74,6 +75,7 @@ Future<void> main() async {
       NativeReceiptExportArtifactFactory.methodChannel();
   runApp(
     PeerDealMobileApp(
+      allowDemo: !kReleaseMode,
       recoveryPersistenceStoreFactory: recoveryPersistenceStoreFactory,
       nativeReadinessLoader: AppNativeReadinessLoader.methodChannel(),
       receiptArtifactVerifierFactory:
@@ -113,6 +115,7 @@ class PeerDealMobileRuntime {
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
+    this.allowDemo = !kReleaseMode,
     this.homeSurfaceBuilder,
     this.nativeReadinessLoader,
     Set<String>? nativeReadinessRequiredRoutePaths,
@@ -170,6 +173,9 @@ class PeerDealMobileRuntime {
   final Set<String>? enabledDemoRoutePaths;
   final PeerDealAppRouteMap? productionRoutes;
   final List<PeerDealAppNavigationEntry>? productionNavigation;
+
+  /// Allows fixture-backed demo routes. Production entrypoints disable this.
+  final bool allowDemo;
   final PeerDealHomeSurfaceBuilder? homeSurfaceBuilder;
   final AppNativeReadinessLoader? nativeReadinessLoader;
   final Set<String>? nativeReadinessRequiredRoutePaths;
@@ -207,6 +213,7 @@ class PeerDealMobileRuntime {
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
+    bool? allowDemo,
     PeerDealHomeSurfaceBuilder? homeSurfaceBuilder,
     AppNativeReadinessLoader? nativeReadinessLoader,
     Set<String>? nativeReadinessRequiredRoutePaths,
@@ -265,6 +272,7 @@ class PeerDealMobileRuntime {
           enabledDemoRoutePaths ?? this.enabledDemoRoutePaths,
       productionRoutes: productionRoutes ?? this.productionRoutes,
       productionNavigation: productionNavigation ?? this.productionNavigation,
+      allowDemo: allowDemo ?? this.allowDemo,
       homeSurfaceBuilder: homeSurfaceBuilder ?? this.homeSurfaceBuilder,
       nativeReadinessLoader:
           nativeReadinessLoader ?? this.nativeReadinessLoader,
@@ -311,6 +319,7 @@ class PeerDealMobileApp extends StatefulWidget {
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
+    bool? allowDemo,
     PeerDealHomeSurfaceBuilder? homeSurfaceBuilder,
     AppNativeReadinessLoader? nativeReadinessLoader,
     Set<String>? nativeReadinessRequiredRoutePaths,
@@ -347,6 +356,7 @@ class PeerDealMobileApp extends StatefulWidget {
        _enabledDemoRoutePaths = enabledDemoRoutePaths,
        _productionRoutes = productionRoutes,
        _productionNavigation = productionNavigation,
+       _allowDemo = allowDemo,
        _homeSurfaceBuilder = homeSurfaceBuilder,
        _nativeReadinessLoader = nativeReadinessLoader,
        _nativeReadinessRequiredRoutePaths = nativeReadinessRequiredRoutePaths,
@@ -384,6 +394,7 @@ class PeerDealMobileApp extends StatefulWidget {
   final Set<String>? _enabledDemoRoutePaths;
   final PeerDealAppRouteMap? _productionRoutes;
   final List<PeerDealAppNavigationEntry>? _productionNavigation;
+  final bool? _allowDemo;
   final PeerDealHomeSurfaceBuilder? _homeSurfaceBuilder;
   final AppNativeReadinessLoader? _nativeReadinessLoader;
   final Set<String>? _nativeReadinessRequiredRoutePaths;
@@ -448,6 +459,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
       enabledDemoRoutePaths: widget._enabledDemoRoutePaths,
       productionRoutes: widget._productionRoutes,
       productionNavigation: widget._productionNavigation,
+      allowDemo: widget._allowDemo,
       homeSurfaceBuilder: widget._homeSurfaceBuilder,
       nativeReadinessLoader: widget._nativeReadinessLoader,
       nativeReadinessRequiredRoutePaths:
@@ -466,15 +478,17 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
 
   @override
   Widget build(BuildContext context) {
-    final enabledMountedRoutes = DemoSliceRoutes.enabledMountedRoutes(
-      _runtime.enabledDemoRoutePaths,
-    );
+    final enabledMountedRoutes = _runtime.allowDemo
+        ? DemoSliceRoutes.enabledMountedRoutes(_runtime.enabledDemoRoutePaths)
+        : const <DemoSliceRouteDefinition>[DemoSliceRoutes.homeRoute];
     final enabledRoutePaths = enabledMountedRoutes
         .map((route) => route.path)
         .toSet();
-    final demoNavigation = DemoSliceRoutes.enabledPrimaryNavigation(
-      _runtime.enabledDemoRoutePaths,
-    );
+    final demoNavigation = _runtime.allowDemo
+        ? DemoSliceRoutes.enabledPrimaryNavigation(
+            _runtime.enabledDemoRoutePaths,
+          )
+        : const <DemoSliceRouteDefinition>[];
     final nativeReadinessRequiredRoutePaths =
         _validatedNativeReadinessRequiredRoutes(
           _combinedNativeReadinessRequiredRoutes(),
@@ -686,7 +700,9 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
     required bool hasProductionNavigation,
     required AppNativeReadinessSnapshot? nativeReadiness,
   }) {
-    final productionOnly = demoNavigation.isEmpty && hasProductionNavigation;
+    final productionOnly =
+        !_runtime.allowDemo ||
+        (demoNavigation.isEmpty && hasProductionNavigation);
     return DemoHomeScreen(
       controller: _controller,
       title: productionOnly ? 'PeerDeal' : 'PeerDeal demo',
@@ -694,7 +710,7 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
           ? 'Production app routes'
           : 'Fixture-backed app orchestration',
       showDemoScenarios: !productionOnly,
-      hasProductionNavigation: hasProductionNavigation,
+      hasProductionNavigation: hasProductionNavigation || !_runtime.allowDemo,
       demoNavigationActions: demoNavigation
           .map(
             (route) => DemoHomeNavigationAction(
@@ -787,6 +803,9 @@ class _PeerDealMobileAppState extends State<PeerDealMobileApp> {
   }
 
   List<PeerDealAppNavigationEntry> _demoHomeNavigationEntries() {
+    if (!_runtime.allowDemo) {
+      return const <PeerDealAppNavigationEntry>[];
+    }
     return List<PeerDealAppNavigationEntry>.unmodifiable(
       DemoSliceRoutes.enabledPrimaryNavigation(
         _runtime.enabledDemoRoutePaths,

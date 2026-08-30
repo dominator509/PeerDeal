@@ -1181,6 +1181,11 @@ the gates below are satisfied.
 ## Current environment handoff gaps
 - No `.zip` project archive is present in this repository snapshot; all
   checked-in markdown files were reviewed directly from source.
+- Both production app entrypoints now disable fixture-backed demo mode in
+  release builds. When no product routes are injected, the app reports
+  unavailable production routes instead of exposing fixture scenarios. This is
+  a fail-closed shell guard, not concrete product state/source or persistence
+  wiring.
 - Native capture blocking on other platforms, Android/Windows runtime and
   device/network reachability validation, cross-device local-network discovery
   reachability, other-platform secure storage, production database persistence,
@@ -3545,6 +3550,16 @@ transitive package updates and no application, package-boundary, analyzer, or
 lint changes. Full repository analysis, static checks, serialized Dart and
 Flutter tests, diff checks, and the post-refresh dependency audit pass; 14
 newer package versions remain blocked by current constraints or toolchain.
+
+The T356 follow-up closes a release-entrypoint fail-open gap without changing
+the PeerDeal package boundaries. Both production app entrypoints now disable
+fixture-backed demo routes when `kReleaseMode` is true. The existing app shell
+mounts only its home fallback and injected production routes; when no product
+route is configured it reports unavailable production routes instead of
+rendering fixture scenarios. Debug/test callers retain the existing demo
+default, and mirrored app-shell coverage passes. Concrete product state/source,
+durable persistence, real-device and cross-device validation, other-platform
+hosts, operator release signing, and final UI remain separate gates.
 
 The T355 follow-up closes the codeable Android/Windows local-network discovery
 gap without moving session policy into native code. `peerdeal_network` now owns

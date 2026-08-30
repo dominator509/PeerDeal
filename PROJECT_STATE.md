@@ -6,8 +6,19 @@ Generated: 2026-08-29
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T355 local-network discovery hardening following the T1 retrofit baseline and CI/dependency alignment
+- Current tier: T356 release-entrypoint hardening following the T1 retrofit baseline and CI/dependency alignment
 - Scope: Additive Android and Windows native implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
+
+## Current T356 Changes
+
+- Both production app entrypoints disable fixture-backed demo mode in release
+  builds through the existing app-shell policy.
+- The app shell mounts only its home fallback and injected production routes in
+  that mode; with no product routes configured it reports unavailable production
+  routes instead of rendering fixture scenarios.
+- Debug/test callers retain the existing demo default. Product state/source,
+  durable persistence, device/network validation, release signing, and final UI
+  validation remain separate gates.
 
 ## Current T355 Changes
 

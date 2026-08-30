@@ -1754,6 +1754,20 @@ void main() {
     );
   });
 
+  testWidgets(
+    'fails closed when demo mode is disabled without product routes',
+    (tester) async {
+      await tester.pumpWidget(const PeerDealMobileApp(allowDemo: false));
+
+      expect(find.text('PeerDeal'), findsOneWidget);
+      expect(find.text('PeerDeal demo'), findsNothing);
+      expect(find.textContaining('Active scenario:'), findsNothing);
+      expect(find.text('Demo'), findsNothing);
+      expect(find.text('Production'), findsOneWidget);
+      expect(find.text('Routes unavailable'), findsOneWidget);
+    },
+  );
+
   testWidgets('uses app-owned home surface builder', (tester) async {
     var homePaths = const <String>[];
 
