@@ -416,6 +416,8 @@ table scopes retain their existing safe-text contract.
   with demo mode disabled when `kReleaseMode` is true. The shell mounts only its
   home fallback plus injected production routes, so a release build cannot
   expose fixture-backed demo navigation or scenarios by default.
+- The runtime-level `allowDemo` override is now clamped off in release builds,
+  so injected app construction cannot re-enable fixture-backed routes.
 - When no product routes are supplied, the default home reports unavailable
   production routes instead of presenting demo state. Debug/test callers retain
   the existing demo default and production route injection remains app-owned.

@@ -115,12 +115,13 @@ class PeerDealDesktopRuntime {
     Set<String>? enabledDemoRoutePaths,
     PeerDealAppRouteMap? productionRoutes,
     List<PeerDealAppNavigationEntry>? productionNavigation,
-    this.allowDemo = !kReleaseMode,
+    bool allowDemo = !kReleaseMode,
     this.homeSurfaceBuilder,
     this.nativeReadinessLoader,
     Set<String>? nativeReadinessRequiredRoutePaths,
     this.initialRoute,
-  }) : joinFlowEnabledModes = joinFlowEnabledModes == null
+  }) : allowDemo = kReleaseMode ? false : allowDemo,
+       joinFlowEnabledModes = joinFlowEnabledModes == null
            ? null
            : Set<JoinFlowDemoMode>.unmodifiable(joinFlowEnabledModes),
        setupFlowEnabledModes = setupFlowEnabledModes == null
@@ -174,7 +175,7 @@ class PeerDealDesktopRuntime {
   final PeerDealAppRouteMap? productionRoutes;
   final List<PeerDealAppNavigationEntry>? productionNavigation;
 
-  /// Allows fixture-backed demo routes. Production entrypoints disable this.
+  /// Allows fixture-backed demo routes in non-release builds only.
   final bool allowDemo;
   final PeerDealHomeSurfaceBuilder? homeSurfaceBuilder;
   final AppNativeReadinessLoader? nativeReadinessLoader;

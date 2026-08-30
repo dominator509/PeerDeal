@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:peerdeal_mobile/demo_slice/controllers/demo_receipt_artifact_verifier.dart';
@@ -1767,6 +1768,10 @@ void main() {
       expect(find.text('Routes unavailable'), findsOneWidget);
     },
   );
+
+  test('runtime cannot enable fixture routes in release builds', () {
+    expect(PeerDealMobileRuntime(allowDemo: true).allowDemo, !kReleaseMode);
+  });
 
   testWidgets('uses app-owned home surface builder', (tester) async {
     var homePaths = const <String>[];

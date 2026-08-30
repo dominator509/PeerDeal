@@ -13,6 +13,8 @@ Generated: 2026-08-29
 
 - Both production app entrypoints disable fixture-backed demo mode in release
   builds through the existing app-shell policy.
+- The runtime-level demo override is also clamped off in release builds, closing
+  the injection path that could otherwise re-enable fixture routes.
 - The app shell mounts only its home fallback and injected production routes in
   that mode; with no product routes configured it reports unavailable production
   routes instead of rendering fixture scenarios.

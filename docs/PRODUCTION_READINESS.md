@@ -3557,7 +3557,9 @@ fixture-backed demo routes when `kReleaseMode` is true. The existing app shell
 mounts only its home fallback and injected production routes; when no product
 route is configured it reports unavailable production routes instead of
 rendering fixture scenarios. Debug/test callers retain the existing demo
-default, and mirrored app-shell coverage passes. Concrete product state/source,
+default, while the runtime-level override is clamped off in release builds so
+injected construction cannot re-enable fixture routes, and mirrored app-shell
+coverage passes. Concrete product state/source,
 durable persistence, real-device and cross-device validation, other-platform
 hosts, operator release signing, and final UI remain separate gates.
 
