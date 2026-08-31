@@ -84,6 +84,13 @@ Generated: 2026-08-29
   closing after `sdkmanager` finishes.
 - SDK installation itself and subsequent emulator execution remain strict.
 
+## Current T364 Changes
+
+- The Android SDK license-input command temporarily disables inherited shell
+  `pipefail` and restores it before SDK package installation.
+- This removes the observed `yes` producer false failure while keeping the
+  emulator setup fail-closed.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery

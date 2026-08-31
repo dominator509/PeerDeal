@@ -495,6 +495,13 @@ Remaining:
   producer shutdown as a CI failure.
 - Direct SDK installation and all later emulator commands remain fail-closed.
 
+## Recent T364 Changes
+
+- Explicitly disabled shell `pipefail` only while `yes` supplies Android SDK
+  license input, then restored it before package installation.
+- This addresses the runner's inherited `yes: standard output: Broken pipe`
+  failure without weakening the remaining emulator gate.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to
