@@ -245,11 +245,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          avd_home="$RUNNER_TEMP/peerdeal-android-avd"
+          mkdir -p "$avd_home"
+          export ANDROID_AVD_HOME="$avd_home"
+          echo "ANDROID_AVD_HOME=$avd_home" >> "$GITHUB_ENV"
           echo "no" | avdmanager create avd \
             --force \
             --name peerdeal-api-35 \
             --package "system-images;android-35;google_apis;x86_64" \
             --device "pixel_2"
+          if [ ! -f "$avd_home/peerdeal-api-35.ini" ]; then
+            echo "Android emulator AVD was not created in the configured directory."
+            exit 1
+          fi
 
       - name: Run Android native host smoke
         working-directory: apps/peerdeal_mobile

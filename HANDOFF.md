@@ -502,6 +502,12 @@ Remaining:
 - This addresses the runner's inherited `yes: standard output: Broken pipe`
   failure without weakening the remaining emulator gate.
 
+## Recent T365 Changes
+
+- Pinned Android AVD creation and emulator execution to the same runner-temp
+  `ANDROID_AVD_HOME`, with a fail-closed check that the named AVD was created.
+- This addresses the hosted emulator's concrete unknown-AVD failure.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

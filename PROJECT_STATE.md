@@ -91,6 +91,13 @@ Generated: 2026-08-29
 - This removes the observed `yes` producer false failure while keeping the
   emulator setup fail-closed.
 
+## Current T365 Changes
+
+- Android CI now sets one runner-temp `ANDROID_AVD_HOME` for both AVD creation
+  and emulator launch and verifies the AVD file exists before launch.
+- This fixes the observed hosted unknown-AVD failure without changing app code
+  or package boundaries.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery

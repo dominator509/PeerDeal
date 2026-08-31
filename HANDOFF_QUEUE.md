@@ -257,6 +257,7 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-29-244` | `.github/workflows/ci.yml` Android license-input pipeline | 4 | T363 | RESOLVED | Removed `pipefail` from the `yes | sdkmanager --licenses` step so normal producer shutdown does not fail the job after successful license processing. Direct SDK installation and emulator execution remain fail-closed. |
 
 | `LEGACY-GAP-2026-08-29-245` | `.github/workflows/ci.yml` inherited shell pipefail | 4 | T364 | RESOLVED | The Android SDK license-input pipeline now disables inherited shell `pipefail` only for `yes | sdkmanager --licenses`, restores it before installation, and avoids the observed producer Broken pipe failure without weakening later emulator commands. |
+| `LEGACY-GAP-2026-08-29-246` | `.github/workflows/ci.yml` Android AVD location | 4 | T365 | RESOLVED | Android CI now pins `ANDROID_AVD_HOME` for both AVD creation and emulator launch and verifies the named AVD file exists before launch. This fixes the observed hosted unknown-AVD failure without changing application code or package boundaries. |
 
 ## Status Definitions
 
