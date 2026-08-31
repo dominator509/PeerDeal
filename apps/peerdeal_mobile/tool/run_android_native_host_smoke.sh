@@ -22,13 +22,13 @@ adb shell monkey -p com.peerdeal.peerdeal_mobile 1 >/dev/null
 
 for ((attempt = 1; attempt <= timeout_seconds; attempt++)); do
   log="$(adb logcat -d -v brief)"
-  if grep -Fq 'PEERDEAL_NATIVE_HOST_SMOKE_PASS' <<<"$log"; then
-    grep -F 'PEERDEAL_NATIVE_HOST_SMOKE_' <<<"$log"
-    exit 0
-  fi
   if grep -Fq 'PEERDEAL_NATIVE_HOST_SMOKE_FAIL' <<<"$log"; then
     printf '%s\n' "$log"
     exit 1
+  fi
+  if grep -Fq 'PEERDEAL_NATIVE_HOST_SMOKE_PASS' <<<"$log"; then
+    grep -F 'PEERDEAL_NATIVE_HOST_SMOKE_' <<<"$log"
+    exit 0
   fi
   sleep 1
 done

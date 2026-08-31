@@ -111,6 +111,13 @@ Generated: 2026-08-29
   logger, which exposes pass/fail markers through `adb logcat`.
 - The focused smoke target analyzes cleanly and its Android debug APK builds.
 
+## Current T368 Changes
+
+- Android smoke now gives failure markers precedence over pass markers before
+  returning success.
+- Hosted Run 149 exposed a native local-network announcement failure that the
+  previous marker-order bug incorrectly accepted.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery

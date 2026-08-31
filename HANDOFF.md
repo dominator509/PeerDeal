@@ -522,6 +522,13 @@ Remaining:
 - The hosted emulator reached the APK but timed out because Dart IO stdout was
   not present in the logcat stream; the smoke APK still builds and analyzes.
 
+## Recent T368 Changes
+
+- Android smoke now checks failure markers before pass markers, so a failed
+  checkpoint cannot be hidden by an earlier successful checkpoint.
+- Run 149 exposed the existing native local-network announcement failure after
+  the marker path became observable; the next run is the authoritative result.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to
