@@ -6,7 +6,7 @@ Generated: 2026-08-29
 
 - Branch: `retrofit/baseline-v1`
 - Backup tag: `pre-retrofit-20260613T075234Z`
-- Current tier: T359 Android release-signature verification hardening following the T1 retrofit baseline and CI/dependency alignment
+- Current tier: T360 Android native-host emulator runtime hardening following the T1 retrofit baseline and CI/dependency alignment
 - Scope: Additive Android and Windows native implementations behind existing app/package boundaries; no protocol, reducer, package-boundary, or architecture rewrite.
 
 ## Current T356 Changes
@@ -49,6 +49,25 @@ Generated: 2026-08-29
   fails closed when the artifact, SDK tool, or verification result is missing.
 - Operator-owned signing identity, device installation, and distribution remain
   separate release gates.
+
+## Current T360 Changes
+
+- Added `tool/android_native_host_smoke.dart` to exercise the existing Android
+  method-channel host registrations from a Flutter target.
+- The smoke requires app-private storage, capture blocking/release, secure-key
+  persistence/CAS/read-back/cleanup, and raw invalid transport rejection. It
+  exercises local-network and transport runtime paths when the emulator reports
+  usable multicast, and verifies their explicit unavailable states otherwise.
+- CI creates an API 35 emulator, installs the smoke APK, and requires its pass
+  marker. Real-device behavior, cross-device reachability, firewall behavior,
+  and operator-owned release validation remain separate gates.
+
+## Current T361 Changes
+
+- Melos scripts now invoke nested workspace commands through `dart run melos`,
+  keeping CI independent of a globally installed `melos` executable.
+- This closes the observed GitHub bootstrap analyzer failure without changing
+  package boundaries or test coverage.
 
 ## Current T355 Changes
 

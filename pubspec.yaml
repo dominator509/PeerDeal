@@ -53,14 +53,14 @@ melos:
       run: python scripts/test_check_native_contract_bounds.py
       description: Run native transport contract bound checker tests.
     analyze:
-      run: melos exec -- "dart analyze ."
+      run: dart run melos exec -- "dart analyze ."
       description: Analyze Dart packages.
     test:
-      run: melos run boundary-check:test && melos run dependency-audit:test && melos run source-text:test && melos run source-text && melos run native-contract-check:test && melos run native-contract-check && melos run test:dart && melos run test:flutter
+      run: dart run melos run boundary-check:test && dart run melos run dependency-audit:test && dart run melos run source-text:test && dart run melos run source-text && dart run melos run native-contract-check:test && dart run melos run native-contract-check && dart run melos run test:dart && dart run melos run test:flutter
       description: Run script, Dart, and Flutter tests.
     test:dart:
-      run: melos exec --no-flutter --dir-exists=test -- "dart test"
+      run: dart run melos exec --no-flutter --dir-exists=test -- "dart test"
       description: Run tests for non-Flutter Dart packages.
     test:flutter:
-      run: melos exec --flutter --dir-exists=test --concurrency=1 -- "flutter test --no-pub"
+      run: dart run melos exec --flutter --dir-exists=test --concurrency=1 -- "flutter test --no-pub"
       description: Run tests for bootstrapped Flutter packages serially.

@@ -91,7 +91,7 @@ the gates below are satisfied.
   endpoint provisioning. The app
   shells prefer explicit `PEERDEAL_RECOVERY_ROOT` and otherwise use native
   app-support storage, but runtime persistence/capture validation beyond the
-  passing Windows host smoke, Android release signing, real-device/profile
+  passing Windows host smoke and Android emulator smoke, real-device/profile
   validation, production database persistence, and other-platform storage
   remain open.
 - App shells now mount demo, receipt, safe-surface, and join-flow routes and
@@ -122,11 +122,13 @@ the gates below are satisfied.
   network reachability and product transport wiring remain open.
 - Generic native transport models and channel decoding now enforce the shared
   signed 32-bit sequence ceiling required by Android and the host-private wire
-  envelope; Windows host argument decoding applies the same ceiling. Flutter
-  widget and native runtime/build validation remain open.
+  envelope; Windows host argument decoding applies the same ceiling. The
+  Android emulator smoke exercises host registration and raw rejection; real-
+  device and cross-device runtime validation remain open.
 - The shared native transport payload ceiling now matches the 60 KiB Android
   and Windows host/wire limit, so Dart cannot encode a frame either host must
-  reject. Flutter widget and native runtime/build validation remain open.
+  reject. The Android emulator smoke exercises the host registration and raw
+  rejection path; real-device and cross-device runtime validation remain open.
 - Native transport contract-bound parity is now a repository gate: CI compares
   the canonical Dart payload, identity, batch, and signed sequence limits with
   both Android and Windows host declarations and runs negative-path checker
@@ -3583,6 +3585,15 @@ Android SDK `apksigner` and requires a verified v2 or v3 signature with exactly
 one signer. Missing artifacts, unavailable tooling, failed verification, or
 unexpected signer output fail closed; operator-owned signing identity, device
 installation, and distribution remain separate gates.
+
+The T360 follow-up closes the repository-local Android host runtime-smoke gap.
+CI builds a Flutter-targeted smoke APK and runs it on an API 35 emulator. The
+smoke requires app-private storage, capture blocking/release, secure-key
+persistence/CAS/read-back/cleanup, and raw invalid transport rejection; it
+exercises local-network and transport paths when multicast is usable and
+verifies explicit unavailable capability states otherwise. Real-device
+persistence/capture, multicast reachability, firewall behavior, cross-device
+validation, and operator-owned release evidence remain separate gates.
 
 The T355 follow-up closes the codeable Android/Windows local-network discovery
 gap without moving session policy into native code. `peerdeal_network` now owns

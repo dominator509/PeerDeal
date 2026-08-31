@@ -67,9 +67,20 @@ Setup flow:
   decoding and registers the generic local-network capability channel with
   bounded interface facts; peer discovery, device reachability, and
   other-platform transport remain platform/product gaps.
+- `tool/android_native_host_smoke.dart` is a Flutter-targeted runtime check for
+  the existing Android method-channel registrations. It exercises app-private
+  storage, `FLAG_SECURE` capture blocking/release, secure-key save/read-back/CAS
+  and cleanup, raw transport rejection, and the available/unavailable network
+  capability paths without introducing a second application runtime.
+- CI builds that target and runs it on an API 35 Android emulator through
+  `tool/run_android_native_host_smoke.sh`. The emulator gate validates host
+  registration and bounded runtime behavior; real-device persistence, capture,
+  multicast reachability, firewall behavior, and cross-device validation remain
+  separate gates.
 - Android capture blocking is implemented at the host level, but runtime/device
-  validation, local-network discovery, transport, production platform recovery
-  persistence, and the remaining other-platform hooks are still open. The app
+  validation beyond the emulator smoke, local-network discovery and transport
+  reachability, production platform recovery persistence, and the remaining
+  other-platform hooks are still open. The app
   shell exposes a deterministic retention coordinator that invokes recovery
   persistence wipe after a caller supplies a closed-session time and policy.
   `AppRecoverySessionCloseCoordinator` binds that policy and scope to one app

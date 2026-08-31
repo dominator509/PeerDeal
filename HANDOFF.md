@@ -70,8 +70,10 @@ app recovery factory loading, T348 cancellation-safe local identity
 provisioning, T349 cancellation-safe receipt key provisioning, and T350
 native-readiness payload contract alignment, T351 app-native transport
 cancellation forwarding, T352 capture cancellation hardening, T353 bounded
-network receive admission, T354 compatible dependency refresh, and T355
-bounded Android/Windows local network discovery are
+network receive admission, T354 compatible dependency refresh, T355 bounded
+Android/Windows local network discovery, T356 release-entrypoint demo
+suppression, T357 signed Android release assembly, T358 Windows release host
+smoke, and T359 Android release-signature verification are
 implemented on branch
 `retrofit/baseline-v1` from backup tag
 `pre-retrofit-20260613T075234Z`.
@@ -456,6 +458,27 @@ Remaining:
   signer, and fails closed when the APK or verifier is unavailable.
 - Operator-owned signing identity, device installation, and distribution
   validation remain open; no application or package boundary changed.
+
+## Recent T360 Changes
+
+- Added a Flutter-targeted Android native-host smoke target that exercises the
+  existing app-storage, capture, secure-key, local-network, and transport
+  method channels.
+- CI builds the target and runs it on an API 35 emulator, requiring secure-key,
+  capture, storage, and invalid transport paths to pass while accepting only
+  the native network capability's explicit unavailable state when multicast is
+  not usable in the emulator.
+- Real-device persistence/capture behavior, multicast reachability, firewall
+  behavior, cross-device validation, and operator release evidence remain
+  separate gates; package boundaries are unchanged.
+
+## Recent T361 Changes
+
+- Replaced bare nested `melos` script calls with `dart run melos` so the CI
+  runner resolves the workspace-pinned Melos executable without relying on a
+  global PATH entry.
+- The GitHub failure was isolated to the bootstrap job's analyzer step;
+  Android and Windows build/smoke jobs were already passing on that run.
 
 ## Recent T355 Changes
 
