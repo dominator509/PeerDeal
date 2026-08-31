@@ -508,6 +508,13 @@ Remaining:
   `ANDROID_AVD_HOME`, with a fail-closed check that the named AVD was created.
 - This addresses the hosted emulator's concrete unknown-AVD failure.
 
+## Recent T366 Changes
+
+- Added an ephemeral GitHub runner KVM permission check and enablement step
+  before launching the x86_64 Android emulator.
+- This addresses the hosted runner's concrete `/dev/kvm` permission failure;
+  unavailable acceleration now fails with an explicit diagnostic.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

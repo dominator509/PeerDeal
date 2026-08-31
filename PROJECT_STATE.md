@@ -98,6 +98,13 @@ Generated: 2026-08-29
 - This fixes the observed hosted unknown-AVD failure without changing app code
   or package boundaries.
 
+## Current T366 Changes
+
+- Android CI now requires `/dev/kvm`, grants the ephemeral runner access, and
+  verifies read/write access before launching the x86_64 emulator.
+- This fixes the observed hosted acceleration permission failure without
+  changing application code or package boundaries.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery

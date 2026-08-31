@@ -259,6 +259,20 @@ jobs:
             exit 1
           fi
 
+      - name: Enable Android emulator acceleration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -e /dev/kvm ]; then
+            echo "Android emulator KVM device is unavailable."
+            exit 1
+          fi
+          sudo chmod 666 /dev/kvm
+          if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
+            echo "Android emulator KVM device is not accessible to the runner."
+            exit 1
+          fi
+
       - name: Run Android native host smoke
         working-directory: apps/peerdeal_mobile
         shell: bash
