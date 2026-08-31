@@ -515,6 +515,13 @@ Remaining:
 - This addresses the hosted runner's concrete `/dev/kvm` permission failure;
   unavailable acceleration now fails with an explicit diagnostic.
 
+## Recent T367 Changes
+
+- Android native-host smoke checkpoints now use Flutter's synchronous diagnostic
+  logger so they are visible to the existing `adb logcat` runner gate.
+- The hosted emulator reached the APK but timed out because Dart IO stdout was
+  not present in the logcat stream; the smoke APK still builds and analyzes.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

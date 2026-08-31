@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:peerdeal_native_bridges/peerdeal_native_bridges.dart';
@@ -17,8 +18,8 @@ Future<void> main() async {
     await _runSmoke(onCaptureEnabled: () => captureWasEnabled = true);
   } on Object catch (error, stackTrace) {
     failure = error;
-    stderr.writeln('PEERDEAL_NATIVE_HOST_SMOKE_FAIL $error');
-    stderr.writeln(stackTrace);
+    _log('PEERDEAL_NATIVE_HOST_SMOKE_FAIL $error');
+    _log(stackTrace.toString());
   } finally {
     if (captureWasEnabled) {
       try {
@@ -32,18 +33,16 @@ Future<void> main() async {
         _pass('capture.release');
       } on Object catch (error, stackTrace) {
         failure ??= error;
-        stderr.writeln('PEERDEAL_NATIVE_HOST_SMOKE_CLEANUP_FAIL $error');
-        stderr.writeln(stackTrace);
+        _log('PEERDEAL_NATIVE_HOST_SMOKE_CLEANUP_FAIL $error');
+        _log(stackTrace.toString());
       }
     }
   }
 
   if (failure != null) {
-    await stderr.flush();
     exit(1);
   }
-  stdout.writeln('PEERDEAL_NATIVE_HOST_SMOKE_PASS');
-  await stdout.flush();
+  _log('PEERDEAL_NATIVE_HOST_SMOKE_PASS');
   exit(0);
 }
 
@@ -299,11 +298,15 @@ Future<void> _runSmoke({required void Function() onCaptureEnabled}) async {
 }
 
 void _pass(String checkpoint) {
-  stdout.writeln('PEERDEAL_NATIVE_HOST_SMOKE_PASS $checkpoint');
+  _log('PEERDEAL_NATIVE_HOST_SMOKE_PASS $checkpoint');
 }
 
 void _warn(String checkpoint, String message) {
-  stdout.writeln('PEERDEAL_NATIVE_HOST_SMOKE_WARN $checkpoint $message');
+  _log('PEERDEAL_NATIVE_HOST_SMOKE_WARN $checkpoint $message');
+}
+
+void _log(String message) {
+  debugPrintSynchronously(message);
 }
 
 void _require(bool condition, String message) {

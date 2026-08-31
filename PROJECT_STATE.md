@@ -105,6 +105,12 @@ Generated: 2026-08-29
 - This fixes the observed hosted acceleration permission failure without
   changing application code or package boundaries.
 
+## Current T367 Changes
+
+- Android native-host smoke checkpoints now use Flutter's synchronous diagnostic
+  logger, which exposes pass/fail markers through `adb logcat`.
+- The focused smoke target analyzes cleanly and its Android debug APK builds.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery
