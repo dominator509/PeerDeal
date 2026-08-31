@@ -77,6 +77,13 @@ Generated: 2026-08-29
 - This fixes the observed hosted `sdkmanager` PATH failure without changing
   application code or package boundaries.
 
+## Current T363 Changes
+
+- The Android SDK installation step no longer applies `pipefail` to the
+  license-input pipeline, avoiding a false failure from the `yes` producer
+  closing after `sdkmanager` finishes.
+- SDK installation itself and subsequent emulator execution remain strict.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery

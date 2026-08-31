@@ -254,6 +254,8 @@ Backup tag: `pre-retrofit-20260613T075234Z`
 | `LEGACY-GAP-2026-08-29-243` | `.github/workflows/ci.yml` Android SDK tool discovery | 4 | T362 | RESOLVED | GitHub Android emulator smoke now locates the installed SDK `sdkmanager` explicitly and exports its command-line tools, emulator, and platform-tools directories. This fixes the observed hosted `sdkmanager: command not found` failure without changing application code or package boundaries. |
 | `LEGACY-GAP-2026-08-29-236` | `packages/peerdeal_network/`, `packages/peerdeal_native_bridges/`, Android and Windows local-network hosts, mirrored app identity provisioners | 4 | T355 | RESOLVED | Added the bounded versioned `PDD1` multicast query/advertisement protocol, additive generic `announcePeer` bridge contract, and Android/Windows responder/scanner implementations. Verified identities are announced from the app-owned provisioners; focused protocol/bridge/identity tests and both host debug builds pass. Cross-device multicast/firewall reachability, runtime device behavior, and release signing remain external gates. |
 
+| `LEGACY-GAP-2026-08-29-244` | `.github/workflows/ci.yml` Android license-input pipeline | 4 | T363 | RESOLVED | Removed `pipefail` from the `yes | sdkmanager --licenses` step so normal producer shutdown does not fail the job after successful license processing. Direct SDK installation and emulator execution remain fail-closed. |
+
 ## Status Definitions
 
 - RESOLVED: Closed by this additive retrofit baseline.

@@ -213,7 +213,7 @@ jobs:
       - name: Install Android emulator image
         shell: bash
         run: |
-          set -euo pipefail
+          set -eu
           sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
           if [ -z "$sdk_root" ] || [ ! -d "$sdk_root" ]; then
             echo "Android SDK root is unavailable."

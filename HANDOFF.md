@@ -488,6 +488,13 @@ Remaining:
 - This addresses the hosted run's concrete `sdkmanager: command not found`
   failure; no application or package boundary changed.
 
+## Recent T363 Changes
+
+- Preserved the Android SDK locator while allowing the standard `yes |
+  sdkmanager --licenses` pipeline to complete without treating its expected
+  producer shutdown as a CI failure.
+- Direct SDK installation and all later emulator commands remain fail-closed.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to
