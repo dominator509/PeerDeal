@@ -537,6 +537,14 @@ Remaining:
 - Run 150 confirmed the prior broad pass match was still accepting the first
   `app_storage.lookup` checkpoint, so no full-smoke pass is claimed yet.
 
+## Recent T370 Changes
+
+- Android secure-key envelope encryption now lets Android Keystore generate the
+  GCM IV and stores the provider-returned IV in the existing envelope.
+- Run 151 reached the full native smoke path and isolated the prior failure to
+  the first encrypted secure-key save; decryption and revision behavior remain
+  on the existing generic contract.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

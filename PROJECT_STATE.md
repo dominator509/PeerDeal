@@ -125,6 +125,13 @@ Generated: 2026-08-29
 - Run 150 confirmed that the prior broad pass match accepted the first
   checkpoint before the complete native smoke finished.
 
+## Current T370 Changes
+
+- Android secure-key envelope encryption now uses the Android Keystore-generated
+  GCM IV instead of supplying an external IV to the Keystore cipher.
+- This fixes the hosted secure-key save failure while preserving the existing
+  encrypted envelope and generic method-channel contract.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery

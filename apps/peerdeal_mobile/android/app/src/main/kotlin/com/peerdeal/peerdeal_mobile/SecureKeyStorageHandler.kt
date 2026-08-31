@@ -16,7 +16,6 @@ import java.nio.channels.FileLock
 import java.nio.channels.OverlappingFileLockException
 import java.security.KeyStore
 import java.security.MessageDigest
-import java.security.SecureRandom
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 import javax.crypto.Cipher
@@ -54,7 +53,6 @@ internal class SecureKeyStorageHandler(context: Context) :
         private const val MAX_PLAINTEXT_BYTES = 512 * 1024
         private const val MAX_ENCODED_BYTES = 768 * 1024
         private const val GCM_TAG_BITS = 128
-        private const val GCM_NONCE_BYTES = 12
         private const val STORAGE_LOCK_WAIT_NANOS = 5_000_000_000L
         private const val STORAGE_LOCK_RETRY_MILLIS = 10L
 
@@ -88,7 +86,6 @@ internal class SecureKeyStorageHandler(context: Context) :
     private val worker = Executors.newSingleThreadExecutor { runnable ->
         Thread(runnable, "peerdeal-secure-key-storage").apply { isDaemon = true }
     }
-    private val secureRandom = SecureRandom()
     @Volatile
     private var closed = false
 
@@ -379,10 +376,12 @@ internal class SecureKeyStorageHandler(context: Context) :
         if (plaintext.size > MAX_PLAINTEXT_BYTES) return false
 
         val masterKey = loadOrCreateMasterKey(namespace) ?: return false
-        val iv = ByteArray(GCM_NONCE_BYTES)
-        secureRandom.nextBytes(iv)
         val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        cipher.init(Cipher.ENCRYPT_MODE, masterKey, GCMParameterSpec(GCM_TAG_BITS, iv))
+        // Android Keystore requires the provider to generate a fresh IV for
+        // encryption when randomized encryption is enabled.
+        cipher.init(Cipher.ENCRYPT_MODE, masterKey)
+        val iv = cipher.iv
+        if (iv.size !in 12..16) return false
         cipher.updateAAD(namespace.toByteArray(StandardCharsets.UTF_8))
         val ciphertext = cipher.doFinal(plaintext)
         val envelope = JSONObject()
