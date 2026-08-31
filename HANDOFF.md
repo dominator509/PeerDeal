@@ -480,6 +480,14 @@ Remaining:
 - The GitHub failure was isolated to the bootstrap job's analyzer step;
   Android and Windows build/smoke jobs were already passing on that run.
 
+## Recent T362 Changes
+
+- Corrected the Android emulator CI step to locate the installed SDK
+  `sdkmanager` and export its command-line tools, emulator, and platform-tools
+  directories before image installation and smoke execution.
+- This addresses the hosted run's concrete `sdkmanager: command not found`
+  failure; no application or package boundary changed.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

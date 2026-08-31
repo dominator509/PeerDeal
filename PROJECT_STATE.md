@@ -69,6 +69,14 @@ Generated: 2026-08-29
 - This closes the observed GitHub bootstrap analyzer failure without changing
   package boundaries or test coverage.
 
+## Current T362 Changes
+
+- The Android emulator CI step now discovers `sdkmanager` from the configured
+  Android SDK and exports the command-line tools, emulator, and platform-tools
+  directories for the remaining smoke steps.
+- This fixes the observed hosted `sdkmanager` PATH failure without changing
+  application code or package boundaries.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery
