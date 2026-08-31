@@ -529,6 +529,14 @@ Remaining:
 - Run 149 exposed the existing native local-network announcement failure after
   the marker path became observable; the next run is the authoritative result.
 
+## Recent T369 Changes
+
+- Android smoke now requires the terminal pass marker with no checkpoint suffix;
+  an early checkpoint can no longer make the job green before the full target
+  completes.
+- Run 150 confirmed the prior broad pass match was still accepting the first
+  `app_storage.lookup` checkpoint, so no full-smoke pass is claimed yet.
+
 ## Recent T355 Changes
 
 - Added the bounded versioned `PDD1` local discovery protocol to

@@ -118,6 +118,13 @@ Generated: 2026-08-29
 - Hosted Run 149 exposed a native local-network announcement failure that the
   previous marker-order bug incorrectly accepted.
 
+## Current T369 Changes
+
+- Android smoke now requires the terminal pass marker without a checkpoint
+  suffix, preventing early partial success.
+- Run 150 confirmed that the prior broad pass match accepted the first
+  checkpoint before the complete native smoke finished.
+
 ## Current T355 Changes
 
 - `peerdeal_network` owns the bounded versioned `PDD1` local discovery

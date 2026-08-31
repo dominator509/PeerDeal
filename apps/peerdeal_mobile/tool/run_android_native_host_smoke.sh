@@ -26,7 +26,7 @@ for ((attempt = 1; attempt <= timeout_seconds; attempt++)); do
     printf '%s\n' "$log"
     exit 1
   fi
-  if grep -Fq 'PEERDEAL_NATIVE_HOST_SMOKE_PASS' <<<"$log"; then
+  if grep -Eq 'PEERDEAL_NATIVE_HOST_SMOKE_PASS[[:space:]]*$' <<<"$log"; then
     grep -F 'PEERDEAL_NATIVE_HOST_SMOKE_' <<<"$log"
     exit 0
   fi
